@@ -112,6 +112,7 @@ public final class KeyMakerProvider
         ekd.setObjectReference(nve);
         ekd.setKeyLockType(KeyLockType.USER_ID);
         ekd.setUserID(nve.getUserID());
+        ekd.setGlobalID(nve.getGlobalID());
         dataStore.insert(ekd);
       }
     } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException e) {
