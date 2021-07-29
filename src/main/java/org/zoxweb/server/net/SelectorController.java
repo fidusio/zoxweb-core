@@ -46,7 +46,7 @@ public class SelectorController
 	
 	/**
 	 * Create a Selector Controller
-	 * @param selector
+	 * @param selector the selector object
 	 */
 	public SelectorController(Selector selector)
 	{
@@ -64,10 +64,10 @@ public class SelectorController
 	 * <li> unlock the select lock
 	 * <li> return the selection key
 	 * </ol>
-	 * @param ch
-	 * @param ops
+	 * @param ch selectable channel
+	 * @param ops channel ops
 	 * @return SelectionKey
-	 * @throws IOException
+	 * @throws IOException is case of error
 	 */
 	public SelectionKey register(AbstractSelectableChannel ch, int ops) throws IOException
 	{
@@ -87,15 +87,15 @@ public class SelectorController
 	 * <li> unlock the select lock
 	 * <li> return the selection key
 	 * </ol>
-	 * @param niocc
-	 * @param ch
-	 * @param ops
-	 * @param attachement
-	 * @param blocking
-	 * @return SelectionKey
-	 * @throws IOException
+	 * @param niocc nio channel cleaner
+	 * @param ch selectable channel
+	 * @param ops channel ops
+	 * @param attachment attachment object
+	 * @param blocking true if blocking
+	 * @return SelectionKey registered selection key with the selector
+	 * @throws IOException is case of error
 	 */
-	public SelectionKey register(NIOChannelCleaner niocc, AbstractSelectableChannel ch, int ops, Object attachement, boolean blocking) throws IOException
+	public SelectionKey register(NIOChannelCleaner niocc, AbstractSelectableChannel ch, int ops, Object attachment, boolean blocking) throws IOException
 	{
 		SelectionKey ret;
 		try
@@ -107,7 +107,7 @@ public class SelectorController
 			// invoke the main lock
 			selectLock.lock();
 			SharedUtil.getWrappedValue(ch).configureBlocking(blocking);
-			ret = SharedUtil.getWrappedValue(ch).register(selector, ops, attachement);
+			ret = SharedUtil.getWrappedValue(ch).register(selector, ops, attachment);
 			if (niocc != null)
 			{
 				niocc.add(ret);
@@ -127,7 +127,7 @@ public class SelectorController
 	/**
 	 * Blocking select
 	 * @return number of selection match
-	 * @throws IOException
+	 * @throws IOException is case of error
 	 */
 	public int select() throws IOException
 	{
@@ -136,9 +136,9 @@ public class SelectorController
 	
 	/**
 	 * 
-	 * @param timeout
+	 * @param timeout selection timeout
 	 * @return number of selected keys
-	 * @throws IOException
+	 * @throws IOException in case of error
 	 */
 	public int select(long timeout) throws IOException
 	{

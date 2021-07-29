@@ -24,24 +24,21 @@ import org.zoxweb.shared.util.NVGenericMap;
 public interface  ProtocolSessionFactory<P extends ProtocolSessionProcessor>
 extends GetName
 {
-	
-	
-	
 	/**
-	 * Create a new instance of the undelying protocol
-	 * @return 
+	 * Create a new instance of the underlying protocol
+	 * @return  new instance of session protocol
 	 */
 	P newInstance();
 	/**
 	 * True if the factory is of blocking type
-	 * @return
+	 * @return blocking status
 	 */
 	boolean isBlocking();
-	//public int getBacklog();
+
 	
 	/**
 	 * Get the SSL session factory
-	 * @return
+	 * @return SSL sesstion factory
 	 */
 	SSLSessionDataFactory getIncomingSSLSessionDataFactory();
 	
@@ -53,12 +50,12 @@ extends GetName
 	
 	/**
 	 * Set the filer rule manager for incoming connections
-	 * @return
+	 * @return filter manager
 	 */
 	InetFilterRulesManager getIncomingInetFilterRulesManager();
 	/**
 	 * Set the incoming filter rule manager.
-	 * @param incomingIFRM
+	 * @param incomingIFRM input filter manager
 	 */
 	void setIncomingInetFilterRulesManager(InetFilterRulesManager incomingIFRM);
 	

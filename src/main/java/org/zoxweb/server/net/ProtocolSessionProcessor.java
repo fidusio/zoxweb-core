@@ -31,7 +31,7 @@ public abstract class ProtocolSessionProcessor
 	implements GetName, GetDescription, Closeable, Runnable
 {
 
-	protected volatile boolean selectable = true;
+	private volatile boolean selectable = true;
 	private volatile SelectorController selectorController;
 	private volatile InetFilterRulesManager outgoingInetFilterRulesManager;
 	private volatile int defaultReadBufferSize = ByteBufferUtil.DEFAULT_BUFFER_SIZE;

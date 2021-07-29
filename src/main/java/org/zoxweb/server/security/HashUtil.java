@@ -155,4 +155,8 @@ public class HashUtil {
     return hashSequence(algorithm, SharedStringUtil.getBytesArray(seqs));
   }
 
+  public static MessageDigest createMessageDigest(String algorithm) throws NoSuchAlgorithmException {
+    return MessageDigest.getInstance(algorithm);
+  }
+
 }

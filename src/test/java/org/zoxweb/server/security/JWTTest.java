@@ -3,6 +3,8 @@ package org.zoxweb.server.security;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 //import org.junit.Assert;
 //import org.junit.Before;
 //import org.junit.Test;
@@ -14,8 +16,10 @@ import org.zoxweb.shared.security.JWT;
 import org.zoxweb.shared.security.JWTHeader;
 import org.zoxweb.shared.security.JWTPayload;
 import org.zoxweb.shared.security.SecurityConsts.JWTAlgorithm;
+import org.zoxweb.shared.util.BytesValue;
 import org.zoxweb.shared.util.NVPair;
 import org.zoxweb.shared.util.SharedBase64.Base64Type;
+import org.zoxweb.shared.util.SharedStringUtil;
 
 public class JWTTest {
 
@@ -363,5 +367,23 @@ public class JWTTest {
 //		//payload.setRandom(new byte[] {0,1,2,3});
 //		payload.setSubjectID("support@xlogistx.io");
 //	}
+
+  @Test
+  public void sequenceHashTest() throws NoSuchAlgorithmException, CloneNotSupportedException {
+    MessageDigest md = HashUtil.createMessageDigest("sha-256");
+
+
+    int sum = 0;
+    for (int i=0; i < 10; i++)
+    {
+      md.update(BytesValue.INT.toBytes(i));
+
+      MessageDigest md2 = (MessageDigest)md.clone();
+      System.out.println(SharedStringUtil.bytesToHex(md2.digest()));
+      System.out.println(SharedStringUtil.bytesToHex(HashUtil.createMessageDigest("sha-256").digest(BytesValue.INT.toBytes(i))));
+      System.out.println(md == md2);
+    }
+  }
+
 
 }
