@@ -43,24 +43,24 @@ public class  ChannelRelayTunnel
 	private final boolean autoCloseDestination;
 	//private ByteBuffer bBuffer = null;
 	private Closeable closeInterface = null;
-	private SourceOrigin origin = null;
+	//private SourceOrigin origin = null;
 	
 	
 	
-	public ChannelRelayTunnel(SourceOrigin origin, int bufferSize, SocketChannel readSource, 
+	public ChannelRelayTunnel(int bufferSize, SocketChannel readSource,
 			  				  SocketChannel writeDestination, SelectionKey writeChannelSK, boolean autoCloseDestination,
 			  				  SelectorController sc)
 	{
-		this(origin, bufferSize, readSource, writeDestination, writeChannelSK, autoCloseDestination, sc, null);
+		this(bufferSize, readSource, writeDestination, writeChannelSK, autoCloseDestination, sc, null);
 	}
 	
 	
 	
-	public ChannelRelayTunnel(SourceOrigin origin, int bufferSize, SocketChannel readSource, 
+	public ChannelRelayTunnel(int bufferSize, SocketChannel readSource,
 							  SocketChannel writeDestination, SelectionKey writeChannelSK,boolean autoCloseDestination,
 							  SelectorController sc, Closeable closeInterface)
 	{
-		this.origin = origin;
+		//this.origin = origin;
 		bBuffer = ByteBufferUtil.allocateByteBuffer(BufferType.HEAP, bufferSize);
 		this.readSource = readSource;
 		this.writeDestination = writeDestination;
@@ -84,10 +84,10 @@ public class  ChannelRelayTunnel
 		return "NIO Channel Relay Tunnel";
 	}
 	
-	public SourceOrigin getSourceOrigin()
-	{
-		return origin;
-	}
+//	public SourceOrigin getSourceOrigin()
+//	{
+//		return origin;
+//	}
 	
 	
 	public void close() throws IOException 
@@ -112,7 +112,7 @@ public class  ChannelRelayTunnel
 	}
 	
 	
-	public synchronized  void readData(SelectionKey key)
+	public synchronized  void accept(SelectionKey key)
 	{
 		
 		try

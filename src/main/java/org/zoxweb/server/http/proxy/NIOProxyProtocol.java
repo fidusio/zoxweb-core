@@ -209,7 +209,7 @@ public class NIOProxyProtocol
 	}
 
 	@Override
-	protected void readData(SelectionKey key) 
+	public void accept(SelectionKey key)
 	{
 		try
     	{
@@ -408,7 +408,7 @@ public class NIOProxyProtocol
 					{
 						// try to read any pending data
 						// very very nasty bug
-						channelRelay.readData(remoteChannelSK);
+						channelRelay.accept(remoteChannelSK);
 						channelRelay.waitThenStopReading();
 					}
 					else
@@ -455,7 +455,7 @@ public class NIOProxyProtocol
     			remoteChannelSK = getSelectorController().register(NIOChannelCleaner.DEFAULT,
     													  		   remoteChannel,
     													  		   SelectionKey.OP_READ,
-    													  		   new ChannelRelayTunnel(SourceOrigin.REMOTE, getReadBufferSize(), remoteChannel, clientChannel, clientChannelSK, true, getSelectorController()),
+    													  		   new ChannelRelayTunnel(getReadBufferSize(), remoteChannel, clientChannel, clientChannelSK, true, getSelectorController()),
     													  		   false);
     			requestInfo = null;
     			
@@ -482,7 +482,7 @@ public class NIOProxyProtocol
 					//IOUtil.close(remoteChannel);
 					if (channelRelay != null)
 					{
-						channelRelay.readData(remoteChannelSK);
+						channelRelay.accept(remoteChannelSK);
 						channelRelay.waitThenStopReading();
 						if(debug)
 							log.info("THIS IS  supposed to happen RELAY STOP:" +lastRemoteAddress + "," + requestInfo.remoteAddress);
@@ -552,7 +552,7 @@ public class NIOProxyProtocol
 				
 				if(remoteChannelSK == null || !remoteChannelSK.isValid())
 				{
-					channelRelay = new ChannelRelayTunnel(SourceOrigin.REMOTE, getReadBufferSize(), remoteChannel, clientChannel, clientChannelSK, true, getSelectorController());
+					channelRelay = new ChannelRelayTunnel(getReadBufferSize(), remoteChannel, clientChannel, clientChannelSK, true, getSelectorController());
 					remoteChannelSK = getSelectorController().register(NIOChannelCleaner.DEFAULT, remoteChannel, SelectionKey.OP_READ, channelRelay, false);
 				}
 				

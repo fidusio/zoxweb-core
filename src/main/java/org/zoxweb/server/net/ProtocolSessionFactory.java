@@ -29,6 +29,7 @@ extends GetName
 	 * @return  new instance of session protocol
 	 */
 	P newInstance();
+
 	/**
 	 * True if the factory is of blocking type
 	 * @return blocking status
@@ -37,22 +38,23 @@ extends GetName
 
 	
 	/**
-	 * Get the SSL session factory
-	 * @return SSL sesstion factory
+	 * Get the SSL session factory null if not encrypted
+	 * @return SSL session factory
 	 */
 	SSLSessionDataFactory getIncomingSSLSessionDataFactory();
 	
 	/**
 	 * Set the SSL session factory for incoming connection
-	 * @param sslSessionDataFactory
+	 * @param sslSessionDataFactory for encrypted connections
 	 */
 	void setIncomingSSLSessionDataFactory(SSLSessionDataFactory sslSessionDataFactory);
 	
 	/**
 	 * Set the filer rule manager for incoming connections
-	 * @return filter manager
+	 * @return incoming filter manager
 	 */
 	InetFilterRulesManager getIncomingInetFilterRulesManager();
+
 	/**
 	 * Set the incoming filter rule manager.
 	 * @param incomingIFRM input filter manager
@@ -61,31 +63,30 @@ extends GetName
 	
 	/**
 	 * Get the outgoing connection rule manager if applicable
-	 * @return
+	 * @return outgoing filter
 	 */
 	InetFilterRulesManager getOutgoingInetFilterRulesManager();
 	/**
 	 * Set the outgoing connection rule manager if applicable
-	 * @param incomingIFRM
+	 * @param outgoingIFRM outgoing filter
 	 */
-	void setOutgoingInetFilterRulesManager(InetFilterRulesManager incomingIFRM);
+	void setOutgoingInetFilterRulesManager(InetFilterRulesManager outgoingIFRM);
 	
 	/**
-	 * Get the logger
-	 * @return
+	 * Get the custom logger
+	 * @return custom logger
 	 */
 	Logger getLogger();
-	
+
 	/**
-	 * Set the logger
-	 * @param logger
+	 * Set the logger custom logger
+	 * @param logger to be set
 	 */
 	void setLogger(Logger logger);
-	
-	
+
 	/**
-	 * Get the generic properties
-	 * @return
+	 * Get the session configuration
+	 * @return session properties
 	 */
 	NVGenericMap getSessionProperties();
 	

@@ -56,8 +56,7 @@ public class NIOSocket
 	private final SelectorController selectorController;
 	private final Executor tsp;
 	private AtomicLong connectionCount = new AtomicLong();
-//	private final InetFilterRulesManager ifrm;
-//	private final InetFilterRulesManager outgoingIFRM;
+
 	private long totalDuration = 0;
 	private long dispatchCounter = 0;
 	private long selectedCountTotal = 0;
@@ -66,8 +65,7 @@ public class NIOSocket
 	private final long startTime = System.currentTimeMillis();
 	private EventListenerManager<BaseEventObject<?>,?> eventListenerManager = null;
 	
-	//private PrintWriter pw = null;
-	//private Logger log=logger;
+
 	
 	
 	
@@ -200,7 +198,7 @@ public class NIOSocket
 								    	}
 								    	else
 								    	{
-								    		currentPSP.readData(key);
+								    		currentPSP.accept(key);
 								    	}
 							    	}
 							    } 

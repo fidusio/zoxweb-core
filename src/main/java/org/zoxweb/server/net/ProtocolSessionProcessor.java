@@ -18,17 +18,19 @@ package org.zoxweb.server.net;
 import java.io.Closeable;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
+import java.util.function.Consumer;
 
 import org.zoxweb.server.io.ByteBufferUtil;
 
 import org.zoxweb.server.net.security.SSLSessionData;
+
 
 import org.zoxweb.shared.util.GetDescription;
 import org.zoxweb.shared.util.GetName;
 import org.zoxweb.shared.util.NVGenericMap;
 
 public abstract class ProtocolSessionProcessor
-	implements GetName, GetDescription, Closeable, Runnable
+	implements GetName, GetDescription, Closeable, Runnable, Consumer<SelectionKey>
 {
 
 	private volatile boolean selectable = true;
@@ -83,12 +85,13 @@ public abstract class ProtocolSessionProcessor
 		attachment = null;
 		return ret;
 	}
+
 	
 	public void run()
 	{
 		try
 		{
-			readData(detach());
+			accept(detach());
 		}
 		catch(Exception e)
 		{
@@ -100,7 +103,7 @@ public abstract class ProtocolSessionProcessor
 	}
 	
 	
-	protected abstract void readData(SelectionKey sk);
+	//protected abstract void accept(SelectionKey sk);
 
 
 	/**

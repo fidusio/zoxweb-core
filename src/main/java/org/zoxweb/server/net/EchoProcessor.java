@@ -130,7 +130,7 @@ public class EchoProcessor
 	
 
 	@Override
-	protected void readData(SelectionKey key) 
+	public void accept(SelectionKey key)
 	{
     	try
     	{

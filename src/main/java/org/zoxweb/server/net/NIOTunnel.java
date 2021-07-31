@@ -144,7 +144,7 @@ public class NIOTunnel
 	}
 
 	@Override
-	protected void readData(SelectionKey key) 
+	public void accept(SelectionKey key)
 	{
 		try
     	{
@@ -155,7 +155,7 @@ public class NIOTunnel
 				clientChannelSK = key;
 				
 				remoteChannel = SocketChannel.open((new InetSocketAddress(remoteAddress.getInetAddress(), remoteAddress.getPort())));
-				relay = new ChannelRelayTunnel(SourceOrigin.REMOTE, getReadBufferSize(), remoteChannel, clientChannel, clientChannelSK,  true,  getSelectorController());
+				relay = new ChannelRelayTunnel(getReadBufferSize(), remoteChannel, clientChannel, clientChannelSK,  true,  getSelectorController());
 				relay.setOutputSSLSessionData(sslSessionData);
 				getSelectorController().register(NIOChannelCleaner.DEFAULT, remoteChannel, SelectionKey.OP_READ, relay, false);
 			}
