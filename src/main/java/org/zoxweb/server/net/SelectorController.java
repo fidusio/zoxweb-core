@@ -32,15 +32,8 @@ import org.zoxweb.shared.util.SharedUtil;
  */
 public class SelectorController 
 {
-
-	//private static final transient Logger log = Logger.getLogger(SelectorController.class.getName());
-	
 	private final Selector selector;
-
-
-
 	private final Lock selectLock = new ReentrantLock();
-	
 	private final Lock lock = new ReentrantLock();
 	
 	
