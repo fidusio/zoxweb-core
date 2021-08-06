@@ -228,19 +228,7 @@ public interface BytesValue<V>
 	
 	public static final BytesValue<Float> FLOAT = new BytesValue<Float>()
 	{
-		public byte[] toBytes(Float in)
-		{
-//			int val = Float.floatToIntBits(in);
-//			byte buffer[] = new byte[Float.SIZE/Byte.SIZE];
-//			
-//			for (int i = buffer.length; i > 0; i--)
-//			{
-//				buffer[i-1] = (byte)val;
-//				val = val >> 8;
-//			}
-//
-//			return buffer;	
-			
+		public byte[] toBytes(Float in) {
 			return toBytes(null, 0, in);
 		}
 
@@ -250,8 +238,7 @@ public interface BytesValue<V>
 		 * @param length
 		 * @return float value
 		 */
-		public Float toValue(byte bytes[], int offset, int length)
-		{
+		public Float toValue(byte bytes[], int offset, int length) {
 			int value = 0;
 
 			for (int i = offset; i < length; i++)
@@ -269,23 +256,7 @@ public interface BytesValue<V>
 
 		@Override
 		public byte[] toBytes(byte[] retBuffer, int retStartIndex, Float ...ins) {
-			// TODO Auto-generated method stub
-//			int val = Float.floatToIntBits(in);
-//			int size = Float.SIZE/Byte.SIZE;
-//			if (retBuffer == null)
-//			{
-//				retBuffer = new byte[size];
-//			}
-//
-//			for (int i = retStartIndex + size; i > retStartIndex; i--)
-//			{
-//				retBuffer[i-1] = (byte)val;
-//				val = val >> 8;
-//			}
-//
-//			return retBuffer;
-//			
-//			
+
 			int size = Float.SIZE/Byte.SIZE;
 			if (retBuffer == null)
 			{

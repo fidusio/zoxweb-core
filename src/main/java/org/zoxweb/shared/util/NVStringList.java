@@ -20,12 +20,23 @@ extends NVBase<List<String>>
 	
 	/**
 	 * This constructor instantiates NVLongList based on name value.
-	 * @param name
-	 * @param value
+	 * @param name of the list
+	 * @param value list values
 	 */
 	public NVStringList(String name, List<String> value)
 	{
 		super(name, value);
+	}
+
+	/**
+	 * Construct String list with name and string arrays
+	 * @param name of string ling
+	 * @param values values to be set
+	 */
+	public NVStringList(String name, String ...values)
+	{
+		this(name);
+		setValues( values);
 	}
 	
 	/**
