@@ -61,7 +61,7 @@
     <javax-cache.version>1.1.1</javax-cache.version>
     <javax-mail.version>1.6.5</javax-mail.version>
     <jsoup.version>1.14.1</jsoup.version>
-    <snakeyaml.version>1.26</snakeyaml.version>
+    <snakeyaml.version>1.29</snakeyaml.version>
     <junit.version>5.6.2</junit.version>
     <exec-maven.version>3.0.0</exec-maven.version>
 

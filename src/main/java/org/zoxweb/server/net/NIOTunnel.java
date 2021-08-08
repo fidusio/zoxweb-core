@@ -27,17 +27,11 @@ import javax.net.ssl.SSLContext;
 import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.server.io.IOUtil;
 
-
-import org.zoxweb.server.net.NIOSocket;
-
-
-import org.zoxweb.server.net.ProtocolSessionProcessor;
-
 import org.zoxweb.server.net.security.SSLSessionData;
 import org.zoxweb.server.net.security.SSLSessionDataFactory;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.shared.net.InetSocketAddressDAO;
-import org.zoxweb.shared.util.Const.SourceOrigin;
+
 
 public class NIOTunnel
     extends ProtocolSessionProcessor

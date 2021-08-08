@@ -26,7 +26,7 @@ import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.net.security.SSLSessionData;
 import org.zoxweb.server.io.ByteBufferUtil.BufferType;
-import org.zoxweb.shared.util.Const.SourceOrigin;
+
 
 public class  ChannelRelayTunnel
 	extends ProtocolSessionProcessor
