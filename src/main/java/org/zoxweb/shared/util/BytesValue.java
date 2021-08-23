@@ -46,6 +46,7 @@ public interface BytesValue<V>
      * @return
      */
 	V toValue(byte[] bytes, int offset, int length);
+	V toValue(byte[] bytes, int offset);
 
 
 
@@ -92,22 +93,29 @@ public interface BytesValue<V>
 			return retBuffer;
 		}
 
-		public Short toValue(byte buffer[], int offset, int length)
+		public Short toValue(byte[] bytes, int offset, int length)
 		{
-			int value = 0;
-
-			for (int i = offset; i < length; i++)
-			{
-				value = (value << 8) | (buffer[i] & 0xff);
-			}
-
-			return (short)value;
+//			int value = 0;
+//			length += offset;
+//			for (int i = offset; i < length; i++)
+//			{
+//				value = (value << 8) | (buffer[i] & 0xff);
+//			}
+//
+//			return (short)value;
+			return LONG.toValue(bytes, offset, length).shortValue();
+		}
+		public Short toValue(byte[] bytes, int offset)
+		{
+			return LONG.toValue(bytes, offset, Short.BYTES).shortValue();
 		}
 
 		@Override
 		public Short toValue(byte[] bytes)
 		{
-			return toValue(bytes, 0, bytes.length);
+			return LONG.toValue(bytes, 0, Short.BYTES).shortValue();
+//			int i = (bytes[0] & 0xFF) << 8 | (short) (bytes[1] & 0xFF);
+//			return (short)i;
 		}
 	};
 
@@ -119,22 +127,26 @@ public interface BytesValue<V>
 			return toBytes(null, 0, in);
 		}
 		
-		public Integer toValue(byte buffer[], int offset, int length)
+		public Integer toValue(byte bytes[], int offset, int length)
 		{
-			int value = 0;
+//			int value = 0;
+//			length += offset;
+//			for (int i = offset; i < length; i++)
+//			{
+//				value = (value << 8) | (buffer[i] & 0xff);
+//			}
+			return LONG.toValue(bytes, offset, length).intValue();
+		}
 
-			for (int i = offset; i < length; i++)
-			{
-				value = (value << 8) | (buffer[i] & 0xff);
-			}
-
-			return value;
+		public Integer toValue(byte[] bytes, int offset)
+		{
+			return LONG.toValue(bytes, offset, Integer.BYTES).intValue();
 		}
 
 		@Override
 		public Integer toValue(byte[] bytes) 
 		{
-			return toValue(bytes, 0, bytes.length);
+			return LONG.toValue(bytes, 0, Integer.BYTES).intValue();
 		}
 
 		@Override
@@ -195,8 +207,11 @@ public interface BytesValue<V>
 
 			return retBuffer;
 		}
-		
-		
+
+		public Long toValue(byte[] buffer, int offset)
+		{
+			return toValue(buffer, offset, Long.BYTES);
+		}
 		
 
 		/**
@@ -208,7 +223,7 @@ public interface BytesValue<V>
 		public Long toValue(byte[] bytes, int offset, int length)
 		{
 			long value = 0;
-
+			length += offset;
 			for (int i = offset; i < length; i++)
 			{
 				value = (value << 8) | (bytes[i] & 0xff);
@@ -220,7 +235,20 @@ public interface BytesValue<V>
 		@Override
 		public Long toValue(byte[] bytes)
 		{
-			return toValue(bytes, 0, bytes.length);
+
+			//return toValue(bytes, 0, bytes.length);
+//			long ret = (bytes[0] & 0xFF) | (bytes[1] & 0xFF)  << 8 | (bytes[2] & 0xFF)  << 8 | (bytes[3] & 0xFF) << 8|
+//					   (bytes[4] & 0xFF) << 8 | (bytes[5] & 0xFF) << 8 | (bytes[6] & 0xFF)  << 8 | (bytes[7] & 0xFF) << 8;
+			long ret = bytes[0] & 0xFF;
+			ret  = ret << 8 | (bytes[1] & 0xFF);
+			ret  = ret << 8 | (bytes[2] & 0xFF);
+			ret  = ret << 8 | (bytes[3] & 0xFF);
+			ret  = ret << 8 | (bytes[4] & 0xFF);
+			ret  = ret << 8 | (bytes[5] & 0xFF);
+			ret  = ret << 8 | (bytes[6] & 0xFF);
+			ret  = ret << 8 | (bytes[7] & 0xFF);
+
+			return ret;
 		}
 
 	};
@@ -240,13 +268,18 @@ public interface BytesValue<V>
 		 */
 		public Float toValue(byte bytes[], int offset, int length) {
 			int value = 0;
-
+			length += offset;
 			for (int i = offset; i < length; i++)
 			{
 				 value = (value << 8) + (bytes[i] & 0xff);
 			}
 
 			return Float.intBitsToFloat(value);
+		}
+
+		public Float toValue(byte[] buffer, int offset)
+		{
+			return toValue(buffer, offset, Float.BYTES);
 		}
 		
 		public Float toValue(byte[] bytes)
@@ -341,12 +374,18 @@ public interface BytesValue<V>
 
 			return retBuffer;
 		}
-	
+
+
+		public Double toValue(byte[] buffer, int offset)
+		{
+			return toValue(buffer, offset, Double.BYTES);
+		}
 	
 		public Double toValue(byte bytes[], int offset, int length)
 		{
 			long value = 0;
 
+			length += offset;
 			for (int i = offset; i < length; i++)
 			{
 				 value = (value << 8) + (bytes[i] & 0xff);
@@ -388,6 +427,11 @@ public interface BytesValue<V>
 		@Override
 		public String toValue(byte[] bytes) {
 			return SharedStringUtil.toString(bytes);
+		}
+		public String toValue(byte[] buffer, int offset)
+		{
+			throw new IllegalArgumentException("Not supported");
+
 		}
 
 		@Override
