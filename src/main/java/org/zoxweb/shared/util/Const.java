@@ -295,7 +295,7 @@ public class Const {
     public static long parse(String str) {
       str = str.toUpperCase();
       long multiplier = 1;
-      SizeInBytes values[] = SizeInBytes.values();
+      SizeInBytes[] values = SizeInBytes.values();
 
       for (int i = values.length - 1; i >= 0; i--) {
         SizeInBytes bs = values[i];
@@ -335,7 +335,7 @@ public class Const {
 
     public static String toString(long bytes)
     {
-      SizeInBytes sibs[] = values();
+      SizeInBytes[] sibs = values();
       for (int i = sibs.length -1; i >= 0; i--)
       {
         if (sibs[i].convertBytes(bytes) > 0)
@@ -423,7 +423,7 @@ public class Const {
     WEEK(DAY.MILLIS * 7, "weeks", "week");
 
     public final long MILLIS;
-    private final String tokens[];
+    private final String[] tokens;
 
     TimeInMillis(long duration, String... tokens) {
       this.MILLIS = duration;
@@ -446,7 +446,7 @@ public class Const {
       {
 
       }
-      String hhmmss[] = time.split(":");
+      String[] hhmmss = time.split(":");
       if (hhmmss.length > 0 && hhmmss.length <= 3) {
         int millis = 0;
         int ss = 0;
@@ -458,7 +458,7 @@ public class Const {
             String tok = hhmmss[index];
             switch (i) {
               case 0:
-                String millisToken[] = tok.split("\\.");
+                String[] millisToken = tok.split("\\.");
                 if (millisToken.length == 2) {
                   millis = Integer.parseInt(millisToken[1]);
                   if (millis < 0 || millis > 999) {
@@ -513,7 +513,7 @@ public class Const {
         throw new IllegalArgumentException("Invalid time token " + time);
       }
 
-      String valueMatch[] = time.split(tokenMatch);
+      String[] valueMatch = time.split(tokenMatch);
 
       if (valueMatch.length != 1) {
         throw new IllegalArgumentException("Invalid time token " + time);
@@ -731,13 +731,13 @@ public class Const {
 
 
     public static byte[] bytesToBytes(byte b) {
-      byte ret[] = new byte[1];
+      byte[] ret = new byte[1];
       ret[0] = b;
       return ret;
     }
 
     public static byte[] shortToBytes(short val) {
-      byte ret[] = new byte[SHORT.SIZE];
+      byte[] ret = new byte[SHORT.SIZE];
 
       for (int i = 0; i < ret.length; i++) {
         ret[i] = (byte) (val >> (8 * (ret.length - 1 - i)));
@@ -747,7 +747,7 @@ public class Const {
     }
 
     public static byte[] intToBytes(int val) {
-      byte ret[] = new byte[INT.SIZE];
+      byte[] ret = new byte[INT.SIZE];
 
       for (int i = 0; i < ret.length; i++) {
         ret[i] = (byte) (val >> (8 * (ret.length - 1 - i)));
@@ -758,7 +758,7 @@ public class Const {
 
     public static byte[] longToBytes(long val) {
 
-      byte ret[] = new byte[LONG.SIZE];
+      byte[] ret = new byte[LONG.SIZE];
 
       for (int i = 0; i < ret.length; i++) {
         ret[i] = (byte) (val >> (8 * (ret.length - 1 - i)));
@@ -846,7 +846,7 @@ public class Const {
 
 
     public static GNVTypeName toGNVTypeName(String name, char sep) {
-      String tokens[] = name.split("\\" + sep);
+      String[] tokens = name.split("\\" + sep);
       if (tokens.length > 1) {
         GNVType type = SharedUtil.lookupEnum(tokens[0], GNVType.values());
         if (type != null) {
@@ -1087,7 +1087,7 @@ public class Const {
 
   public enum Bidi {
     LTR,
-    RTL;
+    RTL,
   }
 
   /**
@@ -1228,7 +1228,7 @@ public class Const {
    * This character array contains the numbers and letter representations for hexadecimal values.
    * This array is used to convert between string characters and hexadecimal byte and vice versa.
    */
-  public final static char HEX_TOKENS[] =
+  public final static char[] HEX_TOKENS =
       {
           '0',
           '1',
@@ -1251,7 +1251,7 @@ public class Const {
   /**
    * This array contains a list of char values.
    */
-  public static final CharSequence HTML_FILTERS[] =
+  public static final CharSequence[] HTML_FILTERS =
       {
           "<pre>",
           "<PRE>",
