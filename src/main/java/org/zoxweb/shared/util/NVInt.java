@@ -41,5 +41,8 @@ public class NVInt
 	{
 		super(name, val);
 	}
-
+	public NVInt(GetName name, int val)
+	{
+		super(name, val);
+	}
 }

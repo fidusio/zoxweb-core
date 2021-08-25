@@ -40,5 +40,9 @@ public class NVDouble
 	{
 		super(name, value);
 	}
+	public NVDouble(GetName name, double value)
+	{
+		super(name, value);
+	}
 
 }

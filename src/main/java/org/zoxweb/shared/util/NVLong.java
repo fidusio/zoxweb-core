@@ -41,4 +41,8 @@ public class NVLong
 	{
 		super(name, value);
 	}
+	public NVLong(GetName name, long value)
+	{
+		super(name, value);
+	}
 }

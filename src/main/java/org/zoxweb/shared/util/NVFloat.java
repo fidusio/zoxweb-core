@@ -41,4 +41,8 @@ public class NVFloat
 	{
 		super(name, value);
 	}
+	public NVFloat(GetName name, float value)
+	{
+		super(name, value);
+	}
 }

@@ -40,5 +40,9 @@ public class NVEnum
 	{
 		super(name, value);
 	}
+	public NVEnum(GetName name, Enum<?> value)
+	{
+		super(name, value);
+	}
 	
 }

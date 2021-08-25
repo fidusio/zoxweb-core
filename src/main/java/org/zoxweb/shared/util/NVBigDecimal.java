@@ -43,5 +43,9 @@ public class NVBigDecimal
     {
 		super(name, value);
 	}
+	public NVBigDecimal(GetName name, BigDecimal value)
+	{
+		super(name, value);
+	}
 
 }

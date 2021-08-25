@@ -42,5 +42,9 @@ public class NVBoolean
     {
 		super(name, value);
 	}
+	public NVBoolean(GetName name, boolean value)
+	{
+		super(name, value);
+	}
 
 }

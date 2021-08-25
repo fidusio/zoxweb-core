@@ -383,7 +383,7 @@ final public class GSONUtil
 		return sw.toString();
 	}
 	
-	public static byte[] toObjectHash(String mdAlgo, Object obj) throws NoSuchAlgorithmException, UnsupportedEncodingException
+	public static byte[] toObjectHash(String mdAlgo, Object obj) throws NoSuchAlgorithmException
 	{
 		return toJSONHash(mdAlgo, create(false).toJson(obj));
 	}
@@ -770,7 +770,7 @@ final public class GSONUtil
 				}
 				else if (nvc instanceof NVConfigEntity)
 				{
-					NVEntity tempNVE = (NVEntity)nve.lookupValue(nvc);
+					NVEntity tempNVE = nve.lookupValue(nvc);
 					// we need to write the class type if the current object is derived from nvc.getClass()
 					// this is we important to accurately rebuild the object
 					
@@ -874,7 +874,7 @@ final public class GSONUtil
 	private static JsonWriter toJSONGenericMap(JsonWriter writer, NVGenericMap nvgm,  boolean printNull, boolean printClassType) throws IOException
 	{
 		writer.beginObject();
-		GetNameValue<?> values[] = nvgm.values();
+		GetNameValue<?>[] values = nvgm.values();
 		for (GetNameValue<?> gnv : values)
 		{
 			toJSONGenericMap(writer, gnv, printNull, printClassType);
@@ -892,12 +892,11 @@ final public class GSONUtil
 		{
 			return writer;
 		}
-		String name = null;
-
+//		String name = null;
 //			if (printClassType)
 //				name = GNVType.toName(gnv, ':');
 //			else
-		name = gnv.getName();
+		String name = gnv.getName();
 
 		if (gnv instanceof NVBoolean)
 		{
@@ -1594,7 +1593,7 @@ final public class GSONUtil
 	public static <V extends NVEntity> V fromJSON(String json, Class<? extends NVEntity> clazz, Base64Type b64Type) 
         throws AccessException, APIException
     {
-		JsonElement je = new JsonParser().parse(json);
+		JsonElement je = JsonParser.parseString(json);
 		
 		if (je instanceof JsonObject)
 		{

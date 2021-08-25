@@ -44,6 +44,10 @@ public class NVBlob
     {
 		super(name, value);
 	}
+	public NVBlob(GetName name, byte[] value)
+	{
+		super(name, value);
+	}
 
 	
 	

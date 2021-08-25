@@ -369,6 +369,15 @@ public class Const {
     DAY,
   }
 
+  /**
+   * This enum is used to describe the string to be expected or converted to
+   */
+  public enum StringType {
+    UPPER,// to upper case
+    LOWER,// to lower case
+    AS_IS,// as is
+  }
+
 
 
 

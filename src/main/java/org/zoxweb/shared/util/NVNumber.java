@@ -12,4 +12,8 @@ public class NVNumber
     {
         super(name, value);
     }
+    public NVNumber(GetName name, Number value)
+    {
+        super(name, value);
+    }
 }
