@@ -319,6 +319,16 @@ public class ParamUtil {
              
         }
 
+        public String[] namelessValues(String ...toAppend)
+        {
+            List<String> ret = new ArrayList<String>();
+            SharedUtil.addTo(ret, toAppend);
+            for (int i=0 ; i < namelessCount(); i++){
+                ret.add(stringValue((i)));
+            }
+            return ret.toArray(new String[0]);
+        }
+
         @Override
         public String toString() {
             return "ParamMap{" +

@@ -525,10 +525,37 @@ public class CryptoUtil {
     return ks.getKey(alias, aliasPassword != null ? aliasPassword.toCharArray() : null);
   }
 
-  public static SSLContext initSSLContext(String keyStoreFilename, String keyStoreType,
-      final char[] keyStorePassword,
-      final char[] crtPassword, String trustStoreFilename, final char[] trustStorePassword)
+  public static SSLContext initSSLContext(String keyStoreFilename,
+                                          String keyStoreType,
+                                          final char[] keyStorePassword,
+                                          final char[] crtPassword,
+                                          String trustStoreFilename,
+                                          final char[] trustStorePassword)
       throws GeneralSecurityException, IOException {
+
+    return initSSLContext(new File(keyStoreFilename), keyStoreType,keyStorePassword, crtPassword, new File(trustStoreFilename), trustStorePassword);
+//    FileInputStream ksfis = null;
+//    FileInputStream tsfis = null;
+//
+//    try {
+//      ksfis = new FileInputStream(keyStoreFilename);
+//      tsfis = trustStoreFilename != null ? new FileInputStream(trustStoreFilename) : null;
+//      return initSSLContext(ksfis, keyStoreType, keyStorePassword, crtPassword, tsfis,
+//          trustStorePassword);
+//    } finally {
+//      IOUtil.close(ksfis);
+//      IOUtil.close(tsfis);
+//    }
+
+  }
+
+  public static SSLContext initSSLContext(File keyStoreFilename,
+                                          String keyStoreType,
+                                          final char[] keyStorePassword,
+                                          final char[] crtPassword,
+                                          File trustStoreFilename,
+                                          final char[] trustStorePassword)
+          throws GeneralSecurityException, IOException {
     FileInputStream ksfis = null;
     FileInputStream tsfis = null;
 
@@ -536,7 +563,7 @@ public class CryptoUtil {
       ksfis = new FileInputStream(keyStoreFilename);
       tsfis = trustStoreFilename != null ? new FileInputStream(trustStoreFilename) : null;
       return initSSLContext(ksfis, keyStoreType, keyStorePassword, crtPassword, tsfis,
-          trustStorePassword);
+              trustStorePassword);
     } finally {
       IOUtil.close(ksfis);
       IOUtil.close(tsfis);

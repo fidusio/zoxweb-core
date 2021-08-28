@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.zoxweb.shared.data.ParamInfo;
 
+import java.util.Arrays;
+
 
 public class ParamUtilTest {
 
@@ -66,5 +68,23 @@ public class ParamUtilTest {
         ParamUtil.ParamMap result = ParamUtil.parse("-","https://localhost", "-URI", "context", "-content", "hello", "5", "-uri", "/hello");
 
         Assertions.assertThrows(IllegalArgumentException.class, ()->System.out.println(result.intValue("-c")));
+    }
+    @Test
+    public void testMultiInput()
+    {
+        String[] params = {
+          "-i2c command ping aref",
+          "-ws congig.json -i2c command cpu aref"
+        };
+
+        for(String param : params)
+        {
+            ParamUtil.ParamMap result = ParamUtil.parse("-", param.split(" "));
+            System.out.println(result.namelessCount()  + " " + result);
+            String i2c = result.stringValue("-i2c");
+            System.out.println(Arrays.toString(result.namelessValues(i2c)));
+
+
+        }
     }
 }
