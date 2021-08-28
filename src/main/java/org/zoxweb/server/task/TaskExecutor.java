@@ -27,8 +27,8 @@ public interface TaskExecutor
 		extends EventListener {
 
 	/**
-	 * This method is called by the TaskProcesser ExecutorThead to execute a task
-	 * This method must not throw any exception and in case it want to share an response
+	 * This method is called by the TaskProcessor ExecutorThread to execute a task
+	 * This method must not throw any exception and in case it want to share a response
 	 * the TaskEvent.setExecutionResult() can be used 
 	 * @param event task event to be executed
 	 */

@@ -27,6 +27,8 @@ import org.zoxweb.shared.util.Const;
 import org.zoxweb.shared.util.ParamUtil;
 
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
 
@@ -73,22 +75,30 @@ public class HTTPCallTool implements Runnable
             ParamUtil.ParamMap params = ParamUtil.parse("-", args);
             //int index = 0;
             int repeat = params.intValue("-r", 1);
-            String url = params.stringValue("0");
-            String uri = params.stringValue("-uri", true);
+            List<String> urls = params.lookup("-url");
+            //String uri = params.stringValue("-uri", true);
             HTTPMethod httpMethod = HTTPMethod.lookup(params.stringValue("-m", "GET"));
             String contentFilename = params.stringValue("-c", true);
             String content = contentFilename != null ? IOUtil.inputStreamToString(contentFilename) : null;
-            HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit(url, uri, httpMethod);
             boolean printResult = params.booleanValue("-pr", true);
-            hmci.setContentType(HTTPMimeType.APPLICATION_JSON);
-            hmci.setSecureCheckEnabled(false);
-            if(content != null)
-                hmci.setContent(content);
-            System.out.println(GSONUtil.toJSON((HTTPMessageConfig)hmci, true, false, false));
+            List<HTTPMessageConfigInterface> hmcis = new ArrayList<>();
+            for(String url : urls) {
+                HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit(url, null, httpMethod);
+
+                hmci.setContentType(HTTPMimeType.APPLICATION_JSON);
+                hmci.setSecureCheckEnabled(false);
+                if (content != null)
+                    hmci.setContent(content);
+                System.out.println(GSONUtil.toJSON((HTTPMessageConfig) hmci, true, false, false));
+                hmcis.add(hmci);
+            }
             long ts = System.currentTimeMillis();
+            int messages = 0;
             for(int i = 0; i < repeat; i++)
             {
-                TaskUtil.getDefaultTaskScheduler().queue(0, new HTTPCallTool(hmci, printResult));
+                for(HTTPMessageConfigInterface hmci : hmcis) {
+                    TaskUtil.getDefaultTaskScheduler().queue(0, new HTTPCallTool(hmci, printResult));
+                }
             }
 
 
@@ -106,7 +116,7 @@ public class HTTPCallTool implements Runnable
         catch(Exception e)
         {
             e.printStackTrace();
-            System.err.println("usage: url <-uri uri-value> <-r repeat-count> <-m http method default get> <-c content file name> <-pr true(print result)");
+            System.err.println("usage: -url url-value  <-r repeat-count> <-m http method default get> <-c content file name> <-pr true(print result)");
         }
     }
 

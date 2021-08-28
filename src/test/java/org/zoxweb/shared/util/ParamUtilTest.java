@@ -74,7 +74,7 @@ public class ParamUtilTest {
     {
         String[] params = {
           "-i2c command ping aref",
-          "-ws congig.json -i2c command cpu aref"
+          "-ws congig.json -i2c command cpu aref -url https://google.com -url http://zoxweb.com"
         };
 
         for(String param : params)

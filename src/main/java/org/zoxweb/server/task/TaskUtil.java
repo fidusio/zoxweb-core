@@ -106,7 +106,7 @@ public class TaskUtil
 					 {
 					 		threadCount = minTPThreadCount;
 					 }
-					 TASK_PROCESSOR = new TaskProcessor("DE",maxTasks, threadCount, Thread.NORM_PRIORITY, true);
+					 TASK_PROCESSOR = new TaskProcessor("DE",maxTasks, threadCount, Thread.NORM_PRIORITY, false);
 				}
 			} finally {
 				LOCK.unlock();
