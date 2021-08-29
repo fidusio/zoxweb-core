@@ -15,14 +15,7 @@
  */
 package org.zoxweb.server.io;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.Externalizable;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutput;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.util.Arrays;
 
 import org.zoxweb.shared.util.SharedStringUtil;
@@ -440,6 +433,45 @@ public class UByteArrayOutputStream
 	public byte[] getInternalBuffer()
 	{
 		return buf;
+	}
+
+	/**
+	 * Write entire inner content to output stream based ong block size
+	 * @param os to write the data to
+	 * @param blockSize to sent per write
+	 * @return data send
+	 * @throws IOException is case error
+	 */
+	public synchronized int writeTo(OutputStream os, int blockSize) throws IOException {
+		return writeTo(os, blockSize, size());
+	}
+	/**
+	 * Write inner content to output steam based on block size and max bytes to write
+	 * @param os to write the data to
+	 * @param blockSize to sent per write
+	 * @param maxBytes to be sent
+	 * @return data send
+	 * @throws IOException is case error
+	 */
+	public synchronized int writeTo(OutputStream os, int blockSize, int maxBytes) throws IOException {
+		SharedUtil.checkIfNulls("Null outputStream", os);
+		if (blockSize < 1 || size() == 0 || maxBytes < 1 || maxBytes > size())
+			throw new IllegalArgumentException("Invalid block size: " + blockSize + " size: " + size());
+		if (blockSize > maxBytes)
+			blockSize = maxBytes;
+
+		int offset = 0;
+		do
+		{
+			os.write(getInternalBuffer(), offset, blockSize);
+			offset+=blockSize;
+			if(offset + blockSize > size())
+			{
+				blockSize = size() - offset;
+			}
+		}
+		while(offset != maxBytes);
+		return maxBytes;
 	}
 
 	/**
