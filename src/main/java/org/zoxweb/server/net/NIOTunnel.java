@@ -15,6 +15,11 @@
  */
 package org.zoxweb.server.net;
 
+import org.zoxweb.server.io.ByteBufferUtil;
+import org.zoxweb.server.io.IOUtil;
+import org.zoxweb.server.task.TaskUtil;
+import org.zoxweb.shared.net.InetSocketAddressDAO;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
@@ -22,60 +27,44 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.util.logging.Logger;
 
-import javax.net.ssl.SSLContext;
-
-import org.zoxweb.server.io.ByteBufferUtil;
-import org.zoxweb.server.io.IOUtil;
-
-import org.zoxweb.server.net.security.SSLSessionData;
-import org.zoxweb.server.net.security.SSLSessionDataFactory;
-import org.zoxweb.server.task.TaskUtil;
-import org.zoxweb.shared.net.InetSocketAddressDAO;
-
 
 public class NIOTunnel
-    extends ProtocolSessionProcessor
+    extends ProtocolProcessor
 {
     private static final transient Logger log = Logger.getLogger(NIOTunnel.class.getName());
 
 	private static boolean debug = false;
-	
-	
+
+
 	public static class NIOTunnelFactory
 	    extends ProtocolSessionFactoryBase<NIOTunnel>
 	{
-		
+
 		private InetSocketAddressDAO remoteAddress;
-		
+
 		public NIOTunnelFactory()
 		{
-			
+
 		}
-		
-		public NIOTunnelFactory(InetSocketAddressDAO remoteAddress, SSLContext sslContext)
-		{
-			this(remoteAddress, new SSLSessionDataFactory(sslContext, null));	
-		}
-		
-		
-		public NIOTunnelFactory(InetSocketAddressDAO remoteAddress, SSLSessionDataFactory sslUtil)
+
+
+		public NIOTunnelFactory(InetSocketAddressDAO remoteAddress)
 		{
 			this.remoteAddress = remoteAddress;
-			this.incomingSSLSessionFactory = sslUtil;	
 		}
-		
+
 		public void setRemoteAddress(InetSocketAddressDAO rAddress)
 		{
 			remoteAddress = rAddress;
 		}
-		
+
 		public InetSocketAddressDAO getRemoteAddress()
 		{
 			return remoteAddress;
 		}
 
 		@Override
-		public NIOTunnel newInstance() 
+		public NIOTunnel newInstance()
 		{
 			return new NIOTunnel(remoteAddress);
 		}
@@ -83,36 +72,30 @@ public class NIOTunnel
 		@Override
 		public String getName() {
 			// TODO Auto-generated method stub
-			return "TunnelFactory";
+			return "NIOTunnelFactory";
+		}
+		public void init()
+		{
+			setRemoteAddress(new InetSocketAddressDAO(getProperties().getValue("remote_host")));
+
 		}
 
-
-//		@Override
-//		public boolean isBlocking() {
-//			return false;
-//		}
-//
-//		@Override
-//		public SSLUtil getSSLUtil() {
-//			return sslUtil;
-//		}
-		
 	}
-	
 
-	private SocketChannel remoteChannel = null;
-	
-	private SocketChannel clientChannel = null;
-	private SelectionKey  clientChannelSK = null;
-	
-	private ChannelRelayTunnel relay = null;
-	
+
+	private volatile SocketChannel destinationChannel = null;
+	private volatile SelectionKey  destinationSK = null;
+	private volatile SocketChannel sourceChannel = null;
+	private volatile SelectionKey  sourceSK = null;
+	private volatile ByteBuffer dBuffer;
+
+
 	final private InetSocketAddressDAO remoteAddress;
 
 	public NIOTunnel(InetSocketAddressDAO remoteAddress)
 	{
 		this.remoteAddress = remoteAddress;
-		bBuffer = ByteBuffer.allocate(getReadBufferSize());
+		sBuffer = ByteBuffer.allocate(getReadBufferSize());
 	}
 	
 	@Override
@@ -130,46 +113,62 @@ public class NIOTunnel
 	@Override
 	public void close() throws IOException
     {
-		getSelectorController().cancelSelectionKey(clientChannelSK);
-		IOUtil.close(remoteChannel);
-		IOUtil.close(clientChannel);
-		postOp();
+
+		IOUtil.close(destinationChannel);
+		IOUtil.close(sourceChannel);
+		ByteBufferUtil.cache(sBuffer);
+		ByteBufferUtil.cache(dBuffer);
 		log.info("closed:" + remoteAddress);
 	}
+
 
 	@Override
 	public void accept(SelectionKey key)
 	{
 		try
     	{
-			SSLSessionData sslSessionData = ((ProtocolSessionProcessor)key.attachment()).getInputSSLSessionData();
-			if(clientChannel == null)
+
+			if(sourceChannel == null)
 			{
-				clientChannel = (SocketChannel)key.channel();
-				clientChannelSK = key;
-				
-				remoteChannel = SocketChannel.open((new InetSocketAddress(remoteAddress.getInetAddress(), remoteAddress.getPort())));
-				relay = new ChannelRelayTunnel(getReadBufferSize(), remoteChannel, clientChannel, clientChannelSK,  true,  getSelectorController());
-				relay.setOutputSSLSessionData(sslSessionData);
-				getSelectorController().register(NIOChannelCleaner.DEFAULT, remoteChannel, SelectionKey.OP_READ, relay, false);
+				synchronized (this) {
+					if(sourceChannel == null) {
+						sourceChannel = (SocketChannel) key.channel();
+						sourceSK = key;
+						destinationChannel = SocketChannel.open((new InetSocketAddress(remoteAddress.getInetAddress(), remoteAddress.getPort())));
+						//relay = new ChannelRelayTunnel(getReadBufferSize(), destinationChannel, sourceChannel, sourceSK,  true,  getSelectorController());
+						dBuffer = ByteBuffer.allocate(getReadBufferSize());
+						destinationSK = getSelectorController().register(NIOChannelCleaner.DEFAULT, destinationChannel, SelectionKey.OP_READ, this, false);
+					}
+				}
+
 			}
 
+			SocketChannel readChannel;
+			SocketChannel writeChannel;
+			ByteBuffer currentBB;
+
+			if (key.channel() == sourceChannel)
+			{
+				readChannel = sourceChannel;
+				writeChannel = destinationChannel;
+				currentBB = sBuffer;
+			}
+			else
+			{
+				readChannel = destinationChannel;
+				writeChannel = sourceChannel;
+				currentBB = dBuffer;
+			}
 			int read = 0 ;
     		do
             {
-    			if (sslSessionData != null)
     			{
-    				// ssl mode
-    				read = sslSessionData.read(((SocketChannel)key.channel()), bBuffer, true);
-    			}
-    			else
-    			{
-    				bBuffer.clear();
-    				read = ((SocketChannel)key.channel()).read(bBuffer);
+    				currentBB.clear();
+    				read = readChannel.read(currentBB);
     			}
     			if (read > 0)
     			{
-    				ByteBufferUtil.write(remoteChannel, bBuffer);
+    				ByteBufferUtil.write(writeChannel, currentBB);
     			}
     		}
     		while(read > 0);
@@ -177,9 +176,7 @@ public class NIOTunnel
     		if (read == -1)
     		{
     			if (debug) log.info("+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+Read:" + read);
-    			
-    			getSelectorController().cancelSelectionKey(key);
-    			IOUtil.close(relay);	
+
     			close();
     				
     			if (debug) log.info(key + ":" + key.isValid()+ " " + Thread.currentThread() + " " + TaskUtil.getDefaultTaskProcessor().availableExecutorThreads());		
@@ -192,11 +189,6 @@ public class NIOTunnel
     		if (debug) log.info(System.currentTimeMillis() + ":Connection end " + key + ":" + key.isValid()+ " " + Thread.currentThread() + " " + TaskUtil.getDefaultTaskProcessor().availableExecutorThreads());
     		
     	}
-		finally
-		{
-			//setSeletectable(true);
-		}
-
 	}
 	
 	@SuppressWarnings("resource")
@@ -210,7 +202,7 @@ public class NIOTunnel
 			TaskUtil.setThreadMultiplier(4);
 			
 			
-			new NIOSocket(new InetSocketAddress(port), 128, new NIOTunnelFactory(remoteAddress, (SSLSessionDataFactory)null), TaskUtil.getDefaultTaskProcessor());
+			new NIOSocket(new InetSocketAddress(port), 128, new NIOTunnelFactory(remoteAddress), TaskUtil.getDefaultTaskProcessor());
 		}
 		catch(Exception e)
 		{
