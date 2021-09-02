@@ -49,6 +49,8 @@ public interface KVMapStore<K,V>
 	 */
 	long dataSize();
 
+	long averageDataSize();
+
 	long defaultExpirationPeriod();
 	
 }

@@ -16,34 +16,31 @@
 package org.zoxweb.server.net;
 
 import java.io.Closeable;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
+import java.nio.channels.spi.AbstractSelectableChannel;
 import java.util.function.Consumer;
 
 import org.zoxweb.server.io.ByteBufferUtil;
-
-import org.zoxweb.server.net.security.SSLSessionData;
 
 
 import org.zoxweb.shared.util.GetDescription;
 import org.zoxweb.shared.util.GetName;
 import org.zoxweb.shared.util.NVGenericMap;
 
-public abstract class ProtocolSessionProcessor
-	implements GetName, GetDescription, Closeable, Runnable, Consumer<SelectionKey>
+public abstract class ProtocolProcessor
+	implements GetName, GetDescription, Closeable, Consumer<SelectionKey>
 {
 
-	private volatile boolean selectable = true;
+	//private volatile boolean selectable = true;
 	private volatile SelectorController selectorController;
 	private volatile InetFilterRulesManager outgoingInetFilterRulesManager;
 	private volatile int defaultReadBufferSize = ByteBufferUtil.DEFAULT_BUFFER_SIZE;
-	protected volatile ByteBuffer bBuffer = null;
-	private volatile SSLSessionData outputSSLSessionData;
-	private volatile SSLSessionData inputSSLSessionData;
-	private volatile SelectionKey attachment;
+	protected volatile ByteBuffer sBuffer = null;
 	private volatile NVGenericMap properties = null;
 	
-	protected ProtocolSessionProcessor()
+	protected ProtocolProcessor()
 	{
 		
 	}
@@ -60,50 +57,17 @@ public abstract class ProtocolSessionProcessor
 		defaultReadBufferSize = size;
 	}
 	
-	public boolean isSelectable()
-	{
-		return selectable;
-	}
-	
-	
-	protected void setSelectable(boolean stat)
-	{
-		selectable = stat;
-	}
-	
-	
+//	public boolean isSelectable()
+//	{
+//		return selectable;
+//	}
+//
+//
+//	protected void setSelectable(boolean stat)
+//	{
+//		selectable = stat;
+//	}
 
-	
-	public synchronized void attach(SelectionKey sk)
-	{
-		attachment = sk;
-	}
-	
-	protected synchronized SelectionKey detach()
-	{
-		SelectionKey ret = attachment;
-		attachment = null;
-		return ret;
-	}
-
-	
-	public void run()
-	{
-		try
-		{
-			accept(detach());
-		}
-		catch(Exception e)
-		{
-			
-		}
-		// very crucial be set to true after the processRead call
-		//selectable = true;
-		setSelectable(true);
-	}
-	
-	
-	//protected abstract void accept(SelectionKey sk);
 
 
 	/**
@@ -123,14 +87,10 @@ public abstract class ProtocolSessionProcessor
 		this.selectorController = selectorController;
 	}
 	
-	
-	public synchronized void postOp()
-	{
-		if (bBuffer != null)
-		{
-			ByteBufferUtil.cache(bBuffer);
-			//bBuffer = null;
-		}
+
+
+	protected void acceptConnection(NIOChannelCleaner ncc, AbstractSelectableChannel asc, boolean isBlocking) throws IOException {
+		selectorController.register(ncc,  asc, SelectionKey.OP_READ, this, isBlocking);
 	}
 
 	public InetFilterRulesManager getOutgoingInetFilterRulesManager() 
@@ -145,35 +105,6 @@ public abstract class ProtocolSessionProcessor
 	}
 
 
-
-
-	public SSLSessionData getOutputSSLSessionData()
-	{
-		return outputSSLSessionData;
-	}
-
-
-
-	public void setOutputSSLSessionData(SSLSessionData outputSSLSessionData)
-	{
-		this.outputSSLSessionData = outputSSLSessionData;
-	}
-
-
-
-	public SSLSessionData getInputSSLSessionData()
-	{
-		return inputSSLSessionData;
-	}
-
-
-
-	public void setInputSSLSessionData(SSLSessionData inputSSLSessionData)
-	{
-		this.inputSSLSessionData = inputSSLSessionData;
-	}
-
-	
 	public void setProperties(NVGenericMap prop)
 	{
 		properties = prop;

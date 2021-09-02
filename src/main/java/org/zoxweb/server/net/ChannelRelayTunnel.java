@@ -24,12 +24,11 @@ import java.util.logging.Logger;
 
 import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.server.io.IOUtil;
-import org.zoxweb.server.net.security.SSLSessionData;
 import org.zoxweb.server.io.ByteBufferUtil.BufferType;
 
 
 public class  ChannelRelayTunnel
-	extends ProtocolSessionProcessor
+	extends ProtocolProcessor
 {
 
 	private static boolean debug = false;
@@ -61,7 +60,7 @@ public class  ChannelRelayTunnel
 							  SelectorController sc, Closeable closeInterface)
 	{
 		//this.origin = origin;
-		bBuffer = ByteBufferUtil.allocateByteBuffer(BufferType.HEAP, bufferSize);
+		sBuffer = ByteBufferUtil.allocateByteBuffer(BufferType.HEAP, bufferSize);
 		this.readSource = readSource;
 		this.writeDestination = writeDestination;
 		this.writeChannelSK = writeChannelSK;
@@ -107,7 +106,7 @@ public class  ChannelRelayTunnel
 			{
 				IOUtil.close(writeDestination);
 			}
-			postOp();
+
 		}
 	}
 	
@@ -123,22 +122,22 @@ public class  ChannelRelayTunnel
 			int read;
 			do
 			{
-				bBuffer.clear();
-				read = ((SocketChannel)currentSK.channel()).read(bBuffer);
+				sBuffer.clear();
+				read = ((SocketChannel)currentSK.channel()).read(sBuffer);
 				
-				SSLSessionData outputSSLSessionData = getOutputSSLSessionData();
+//				SSLSessionData outputSSLSessionData = getOutputSSLSessionData();
 				if (read > 0)
 				{
-					if (outputSSLSessionData != null)
+//					if (outputSSLSessionData != null)
+//					{
+//						outputSSLSessionData.write(writeDestination, bBuffer, true);
+//						if (debug) log.info("Wrote Encrypted DATA !!!!!");
+//
+//					}
+//					else
 					{
-						outputSSLSessionData.write(writeDestination, bBuffer, true);
-						if (debug) log.info("Wrote Encrypted DATA !!!!!");
-						
-					}
-					else
-					{
-						ByteBufferUtil.write(writeDestination, bBuffer);
-						if (debug) log.info(ByteBufferUtil.toString(bBuffer));
+						ByteBufferUtil.write(writeDestination, sBuffer);
+						if (debug) log.info(ByteBufferUtil.toString(sBuffer));
 					}
 				}
 			}while(read > 0);
@@ -162,10 +161,10 @@ public class  ChannelRelayTunnel
 	
 	
 	
-	public synchronized void waitThenStopReading()
+	public synchronized void waitThenStopReading(SelectionKey sk)
 	{
-		
-		while(!isSelectable())
+		SKAttachment ska = (SKAttachment) sk.attachment();
+		while(!ska.isSelectable() && sk.channel().isOpen())
 		{
 			try 
 			{

@@ -24,14 +24,13 @@ import java.util.logging.Logger;
 
 
 import org.zoxweb.server.io.IOUtil;
-import org.zoxweb.server.net.security.SSLSessionDataFactory;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.shared.util.NVGenericMap;
 
 import java.nio.channels.SocketChannel;
 
 public class EchoProcessor 
-    extends ProtocolSessionProcessor
+    extends ProtocolProcessor
 {
 	
 	private static final transient Logger log = Logger.getLogger(EchoProcessor.class.getName());
@@ -51,11 +50,11 @@ public class EchoProcessor
 				{
 					return false;
 				}
-				@Override
-				public SSLSessionDataFactory getIncomingSSLSessionDataFactory() {
-					// TODO Auto-generated method stub
-					return null;
-				}
+//				@Override
+//				public SSLSessionDataFactory getIncomingSSLSessionDataFactory() {
+//					// TODO Auto-generated method stub
+//					return null;
+//				}
 				@Override
 				public InetFilterRulesManager getIncomingInetFilterRulesManager() {
 					// TODO Auto-generated method stub
@@ -76,11 +75,11 @@ public class EchoProcessor
 					// TODO Auto-generated method stub
 					
 				}
-				@Override
-				public void setIncomingSSLSessionDataFactory(SSLSessionDataFactory sslSessionDataFactory) {
-					// TODO Auto-generated method stub
-					
-				}
+//				@Override
+//				public void setIncomingSSLSessionDataFactory(SSLSessionDataFactory sslSessionDataFactory) {
+//					// TODO Auto-generated method stub
+//
+//				}
 				@Override
 				public Logger getLogger() {
 					// TODO Auto-generated method stub
@@ -93,7 +92,7 @@ public class EchoProcessor
 				}
 				
 				@Override
-				public NVGenericMap getSessionProperties() {
+				public NVGenericMap getProperties() {
 					// TODO Auto-generated method stub
 					return null;
 				}
@@ -102,7 +101,10 @@ public class EchoProcessor
 					// TODO Auto-generated method stub
 					return "EchoFactory";
 				}
-				
+				public void init()
+				{
+
+				}
 				
 				
 		
@@ -171,7 +173,7 @@ public class EchoProcessor
     		IOUtil.close(key.channel());
     	}
     	
-    	setSelectable(true);
+
 		
 	}
 	

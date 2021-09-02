@@ -84,6 +84,7 @@ public class SecureNetworkTunnel
 			{
 				Socket sIn = ss.accept();
 				Socket sRemote = new Socket(remoteSocketAddress.getInetAddress(), remoteSocketAddress.getPort());
+				//sIn.setSoTimeout(1000);
 				new NetworkTunnel(sIn, sRemote);
 			}
 		}
@@ -138,7 +139,7 @@ public class SecureNetworkTunnel
 					
 						ssc.bind(new InetSocketAddress(port));
 						System.out.println("Adding:" + ssc + " " + remoteAddress);
-						nios.addServerSocket(ssc, new NIOTunnelFactory(remoteAddress, sslc));
+						nios.addServerSocket(ssc, new NIOTunnelFactory(remoteAddress));
 						//					
 					}
 					catch(Exception e)

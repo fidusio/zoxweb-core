@@ -173,7 +173,12 @@ implements KVMapStore<String, JWT>
 
 	@Override
 	public long dataSize() {
-		return 0;
+		return cache.dataSize();
+	}
+
+	@Override
+	public long averageDataSize() {
+		return cache.averageDataSize();
 	}
 
 

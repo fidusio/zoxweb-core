@@ -18,28 +18,22 @@ package org.zoxweb.server.net;
 
 import java.util.logging.Logger;
 
-import org.zoxweb.server.net.security.SSLSessionDataFactory;
 import org.zoxweb.shared.util.NVGenericMap;
 
 
-public abstract class ProtocolSessionFactoryBase<P extends ProtocolSessionProcessor>
+public abstract class ProtocolSessionFactoryBase<P extends ProtocolProcessor>
 	implements ProtocolSessionFactory<P>
 {
 
 	private volatile InetFilterRulesManager incomingInetFilterRulesManager;
 	private volatile InetFilterRulesManager outgoingInetFilterRulesManager;
-	protected volatile SSLSessionDataFactory incomingSSLSessionFactory = null;
+
 	private volatile Logger logger;
 	private volatile NVGenericMap properties = new NVGenericMap();
 	
 
 	
-//	protected ProtocolSessionFactoryBase(InetFilterRulesManager incoming, InetFilterRulesManager outgoing, SSLUtil sslUtil)
-//	{
-//		setIncomingInetFilterRulesManager(incoming);
-//		setOutgoingInetFilterRulesManager(outgoing);
-//		this.sslUtil = sslUtil;
-//	}
+
 	
 	
 	public Logger getLogger() {
@@ -56,17 +50,7 @@ public abstract class ProtocolSessionFactoryBase<P extends ProtocolSessionProces
 		return false;
 	}
 
-	@Override
-	public SSLSessionDataFactory getIncomingSSLSessionDataFactory() {
-		// TODO Auto-generated method stub
-		return incomingSSLSessionFactory;
-	}
-	
-	
-	public void setIncomingSSLSessionDataFactory(SSLSessionDataFactory sslsdf) {
-		// TODO Auto-generated method stub
-		incomingSSLSessionFactory = sslsdf;
-	}
+
 
 	@Override
 	public InetFilterRulesManager getIncomingInetFilterRulesManager() {
@@ -92,9 +76,8 @@ public abstract class ProtocolSessionFactoryBase<P extends ProtocolSessionProces
 		// TODO Auto-generated method stub
 		outgoingInetFilterRulesManager = incomingIFRM;
 	}
-	
-	
-	public NVGenericMap getSessionProperties()
+
+	public NVGenericMap getProperties()
 	{
 		return properties;
 	}

@@ -63,7 +63,7 @@ public class SSLSessionDataFactory
 	{
 		SSLEngine sslEngine = sslContext.createSSLEngine();
 		sslEngine.setUseClientMode(client);
-		sslEngine.setWantClientAuth(true);
+		//slEngine.setWantClientAuth(true);
 		SSLSessionData ret = new SSLSessionData(sslEngine, executor);
 		
 		return ret;

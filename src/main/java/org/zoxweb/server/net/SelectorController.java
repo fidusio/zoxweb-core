@@ -100,7 +100,7 @@ public class SelectorController
 			// invoke the main lock
 			selectLock.lock();
 			SharedUtil.getWrappedValue(ch).configureBlocking(blocking);
-			ret = SharedUtil.getWrappedValue(ch).register(selector, ops, attachment);
+			ret = SharedUtil.getWrappedValue(ch).register(selector, ops, new SKAttachment(attachment));
 			if (niocc != null)
 			{
 				niocc.add(ret);
@@ -164,6 +164,7 @@ public class SelectorController
 				// invoke the main lock
 				selectLock.lock();
 				sk.cancel();
+
 				
 			}
 			finally

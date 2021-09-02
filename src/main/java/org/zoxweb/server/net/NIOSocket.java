@@ -31,8 +31,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
 
 import org.zoxweb.server.io.IOUtil;
-import org.zoxweb.server.net.security.SSLSessionDataFactory;
-import org.zoxweb.server.task.TaskUtil;
+
+import org.zoxweb.server.task.TaskProcessor;
 import org.zoxweb.shared.data.events.BaseEventObject;
 import org.zoxweb.shared.data.events.EventListenerManager;
 import org.zoxweb.shared.data.events.InetSocketAddressEvent;
@@ -54,7 +54,7 @@ public class NIOSocket
 	private static boolean debug = false;
 	private boolean live = true;
 	private final SelectorController selectorController;
-	private final Executor tsp;
+	private final Executor executor;
 	private AtomicLong connectionCount = new AtomicLong();
 
 	private long totalDuration = 0;
@@ -80,7 +80,7 @@ public class NIOSocket
 	{
 		//SharedUtil.checkIfNulls("Null value", psf, sa);
 		selectorController = new SelectorController(Selector.open());
-		this.tsp = tsp;
+		this.executor = tsp;
 		if (sa != null)
 			addServerSocket(sa, backlog, psf);
 		
@@ -163,14 +163,11 @@ public class NIOSocket
 				int selectedCount = 0;
 				if (selectorController.getSelector().isOpen())
 				{
-					//log.info("total keys:" + selector.keys().size());
-					//log.info("PreSelect:" + selectorController.getSelector().keys().size() + "," +TaskUtil.getDefaultTaskProcessor().availableExecutorThreads());
+
 					selectedCount = selectorController.select();
 					long detla = System.nanoTime();
 					if (selectedCount > 0)
 					{
-						//log.info("PostSelect:" + selectorController.getSelector().keys().size() + "," + selectedCount + "," +TaskUtil.getDefaultTaskProcessor().availableExecutorThreads() + "," + totalConnections());
-						//log.info("Selected count:"+selectedCount);
 						Set<SelectionKey> selectedKeys = selectorController.getSelector().selectedKeys();
 						Iterator<SelectionKey> keyIterator = selectedKeys.iterator();
 						selectedCountTotal += selectedCount;
@@ -183,22 +180,36 @@ public class NIOSocket
 						    {	    	
 						    	if (key.isValid() && SharedUtil.getWrappedValue(key.channel()).isOpen() && key.isReadable())
 							    {
-							    	ProtocolSessionProcessor currentPSP = (ProtocolSessionProcessor)key.attachment();
-							    	if (currentPSP != null && currentPSP.isSelectable())
+							    	SKAttachment ska = (SKAttachment) key.attachment();
+							    	ProtocolProcessor currentPP = (ProtocolProcessor)ska.attachment();
+							    	if (currentPP != null && ska.isSelectable())
 							    	{
 							    		// very very crucial setup prior to processing
-							    		currentPSP.setSelectable(false);
-							    		currentPSP.attach(key);
+										ska.setSelectable(false);
+
 							    		// a channel is ready for reading
-								    	if (tsp != null)
+								    	if (executor != null)
 								    	{
-								    		
-								    		//tsp.queueTask(new TaskEvent(this, currentPSP, key));
-								    		tsp.execute(currentPSP);
+
+								    		executor.execute(()->{
+								    			try {
+													currentPP.accept(key);
+												}
+								    			catch (Exception e){}
+								    			// very crucial setup
+								    			ska.setSelectable(true);
+											});
+
 								    	}
 								    	else
 								    	{
-								    		currentPSP.accept(key);
+
+											try {
+												currentPP.accept(key);
+											}
+											catch (Exception e){}
+											// very crucial setup
+											ska.setSelectable(true);
 								    	}
 							    	}
 							    } 
@@ -221,11 +232,7 @@ public class NIOSocket
 							    				attackTimestamp = System.currentTimeMillis();
 							    			}
 							    			
-//							    			Logger log = psf.getLogger();
-//							    			if(log == null)
-//							    			{
-//							    				log = logger;
-//							    			}
+//
 							    			InetSocketAddress isa = (InetSocketAddress) ((ServerSocketChannel)key.channel()).getLocalAddress();
 							    			
 							    			
@@ -267,30 +274,30 @@ public class NIOSocket
 							    	}
 							    	else
 							    	{
-							    			    		
-							    		//ProtocolSessionFactory<?> psf = (ProtocolSessionFactory<?>) key.attachment();
-							    		// connection allowed lets set it up
-							    		
-								    	ProtocolSessionProcessor psp = psf.newInstance();
+							    		// create a protocol instance
+								    	ProtocolProcessor psp = psf.newInstance();
 								    	
 								    	psp.setSelectorController(selectorController);
 								    	psp.setOutgoingInetFilterRulesManager(psf.getOutgoingInetFilterRulesManager());
-								    	
-								    	
-								    	// secure socket
-								    	SSLSessionDataFactory sslUtil = psf.getIncomingSSLSessionDataFactory();
-								    	if (sslUtil != null)
-								    	{
-								    		if (debug) logger.info("we have ssl socket");
-								    		psp.setInputSSLSessionData(sslUtil.create(false));
-								    		
-								    	}
-								    	
-								    	
-								    	selectorController.register(NIOChannelCleaner.DEFAULT, sc, SelectionKey.OP_READ, psp, psf.isBlocking());
-								    	
+
+										// if we have an executor
+										// accept the new connection
+
+										if (executor != null) {
+											executor.execute(() -> {
+												try {
+													psp.acceptConnection(NIOChannelCleaner.DEFAULT, sc, psf.isBlocking());
+												} catch (IOException e) {
+													e.printStackTrace();
+													IOUtil.close(psp);
+												}
+											});
+										}
+										else
+										{
+											psp.acceptConnection(NIOChannelCleaner.DEFAULT, sc, psf.isBlocking());
+										}
 								    	connectionCount.incrementAndGet();
-								    	//log.info("Connected:" + sc.getRemoteAddress() + " " + connectionCount.get());
 								    
 							    	}
 	
@@ -313,9 +320,18 @@ public class NIOSocket
 						    
 						    try
 						    {
+						    	// key clean up
 						    	if (!key.isValid()|| !SharedUtil.getWrappedValue(key.channel()).isOpen())
 						    	{
-						    		selectorController.cancelSelectionKey(key);
+									key.cancel();
+									SharedUtil.getWrappedValue(key.channel()).close();
+									TaskProcessor tp = executor instanceof TaskProcessor ? (TaskProcessor)executor : null;
+
+									logger.info("Connection closed Average dispatch processing " + TimeInMillis.nanosToString(averageProcessingTime()) +
+											" total time:" + TimeInMillis.nanosToString(totalDuration) +
+											" total dispatches:" + dispatchCounter + " total select calls:" + selectedCountTotal +
+											" last select count:" + selectedCount + " total select keys:" +selectorController.getSelector().keys().size() +
+											(tp != null ? " available workers:" +  tp.availableExecutorThreads() + "," + tp.pendingTasks() : "") );
 						    	}
 						    }
 						    catch(Exception e)
@@ -332,15 +348,17 @@ public class NIOSocket
 					
 				}
 				
-				
+				// stats
 				if(getStatLogCounter() > 0 && (dispatchCounter%getStatLogCounter() == 0 || (System.currentTimeMillis() - snapTime) > getStatLogCounter()))
 				{
 					snapTime = System.currentTimeMillis();
-					logger.info("Average dispatch processing " + TimeInMillis.nanosToString(averageProcessingTime()) + 
-							 " total time:" + TimeInMillis.nanosToString(totalDuration) +
-							 " total dispatches:" + dispatchCounter + " total selectors:" + selectedCountTotal + 
-							 " last select count:" + selectedCount + " total keys:" +selectorController.getSelector().keys().size() + 
-							 " available workers:" + TaskUtil.getDefaultTaskProcessor().availableExecutorThreads() + "," + TaskUtil.getDefaultTaskProcessor().pendingTasks())
+					TaskProcessor tp = executor instanceof TaskProcessor ? (TaskProcessor)executor : null;
+
+					logger.info("Average dispatch processing " + TimeInMillis.nanosToString(averageProcessingTime()) +
+							" total time:" + TimeInMillis.nanosToString(totalDuration) +
+							" total dispatches:" + dispatchCounter + " total select calls:" + selectedCountTotal +
+							" last select count:" + selectedCount + " total select keys:" +selectorController.getSelector().keys().size() +
+							(tp != null ? " available workers:" +  tp.availableExecutorThreads() + "," + tp.pendingTasks() : ""));
 					;
 				}
 			}

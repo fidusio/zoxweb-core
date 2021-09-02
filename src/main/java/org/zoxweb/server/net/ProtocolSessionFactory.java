@@ -17,12 +17,12 @@ package org.zoxweb.server.net;
 
 import java.util.logging.Logger;
 
-import org.zoxweb.server.net.security.SSLSessionDataFactory;
-import org.zoxweb.shared.util.GetName;
-import org.zoxweb.shared.util.NVGenericMap;
 
-public interface  ProtocolSessionFactory<P extends ProtocolSessionProcessor>
-extends GetName
+import org.zoxweb.shared.util.GetNVProperties;
+import org.zoxweb.shared.util.GetName;
+
+public interface  ProtocolSessionFactory<P extends ProtocolProcessor>
+extends GetName, GetNVProperties
 {
 	/**
 	 * Create a new instance of the underlying protocol
@@ -35,19 +35,6 @@ extends GetName
 	 * @return blocking status
 	 */
 	boolean isBlocking();
-
-	
-	/**
-	 * Get the SSL session factory null if not encrypted
-	 * @return SSL session factory
-	 */
-	SSLSessionDataFactory getIncomingSSLSessionDataFactory();
-	
-	/**
-	 * Set the SSL session factory for incoming connection
-	 * @param sslSessionDataFactory for encrypted connections
-	 */
-	void setIncomingSSLSessionDataFactory(SSLSessionDataFactory sslSessionDataFactory);
 	
 	/**
 	 * Set the filer rule manager for incoming connections
@@ -84,10 +71,10 @@ extends GetName
 	 */
 	void setLogger(Logger logger);
 
+
 	/**
-	 * Get the session configuration
-	 * @return session properties
+	 *
 	 */
-	NVGenericMap getSessionProperties();
+	void init();
 	
 }

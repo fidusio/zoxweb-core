@@ -108,11 +108,13 @@ extends AppCreatorDefault<NIOSocket, ConfigDAO>
 					}
 					ProtocolSessionFactory<?> psf = (ProtocolSessionFactory<?>) config.attachment();
 					
-					if (psf.getIncomingSSLSessionDataFactory() != null && psf instanceof NIOTunnelFactory)
+					if (psf instanceof NIOTunnelFactory && psf.getProperties().getValue("ssl_engine") != null)
 					{
+						ConfigDAO sslContent =(ConfigDAO)psf.getProperties().getValue("ssl_engine");
+						SSLContext sslContext = (SSLContext) sslContent.attachment();
 						log.info("Creating secure network tunnel:" + port+ "," + ((NIOTunnelFactory)psf).getRemoteAddress() );
 						// secure temporary fix since the NIO Secure Socket still not fully operational
-						services.add(new SecureNetworkTunnel(psf.getIncomingSSLSessionDataFactory().getSSLContext().getServerSocketFactory(), 
+						services.add(new SecureNetworkTunnel(sslContext.getServerSocketFactory(),
 											    port, backlog, 
 											    ((NIOTunnelFactory)psf).getRemoteAddress()));
 					}
@@ -153,26 +155,29 @@ extends AppCreatorDefault<NIOSocket, ConfigDAO>
 				{
 					try 
 					{
-						Object toAttach = Class.forName(config.getBeanClassName()).getDeclaredConstructor().newInstance();
+						Class clazz =  Class.forName(config.getBeanClassName());
+						log.info("Class: " + clazz);
 						
-						if (toAttach instanceof SSLSessionDataFactory)
+						if (clazz.isAssignableFrom(SSLContext.class))
 						{
+							log.info("We have SSLContext");
 							String ksPassword = config.getProperties().getValue("keystore_password");
 							String aliasPassword = config.getProperties().getValue("keystore_password");
 							String trustStorePassword = config.getProperties().getValue("truststore_password");
-							SSLContext sslc = CryptoUtil.initSSLContext((String)config.getProperties().getValue("keystore_file"), 
+							String trustFile = config.getProperties().getValue("truststore_file");
+							SSLContext sslc = CryptoUtil.initSSLContext(IOUtil.locateFile(config.getProperties().getValue("keystore_file")),
 																		(String)config.getProperties().getValue("keystore_type"), 
 																		ksPassword.toCharArray(),  
-																		aliasPassword != null ?  aliasPassword.toCharArray() : null, 
-																		(String)config.getProperties().getValue("truststore_file"),
+																		aliasPassword != null ?  aliasPassword.toCharArray() : null,
+																		trustFile != null ? IOUtil.locateFile(trustFile) : null,
 																		trustStorePassword != null ?  trustStorePassword.toCharArray() : null);
-							((SSLSessionDataFactory)toAttach).setSSLContext(sslc);
-							
-							((SSLSessionDataFactory)toAttach).setExecutor(TaskUtil.getDefaultTaskProcessor());
+							config.attach(sslc);
 						}
-							
-							
-						config.attach(toAttach);
+						else {
+
+							Object toAttach = clazz.getDeclaredConstructor().newInstance();
+							config.attach(toAttach);
+						}
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -193,19 +198,30 @@ extends AppCreatorDefault<NIOSocket, ConfigDAO>
 					NIOTunnelFactory nioTF = (NIOTunnelFactory) config.attachment();
 					try 
 					{
-						String remote_host = config.getProperties().getValue("remote_host");
 						String ssl_engine = config.getProperties().getValue("ssl_engine");
-						nioTF.setRemoteAddress(new InetSocketAddressDAO(remote_host));
-						if (ssl_engine != null)
+						NVPair rh = (NVPair) config.getProperties().get("remote_host");
+						nioTF.getProperties().add(rh);
+						if(ssl_engine != null)
 						{
-							ConfigDAO factory = (ConfigDAO)configDAO.getContent().get(ssl_engine);
-							if (factory != null)
-								nioTF.setIncomingSSLSessionDataFactory((SSLSessionDataFactory) factory.attachment());
+							ConfigDAO sslContent = (ConfigDAO)configDAO.getContent().get(ssl_engine);
+							if(sslContent != null) {
+								log.info("" + sslContent);
+								nioTF.getProperties().add("ssl_engine", sslContent);
+							}
 						}
+
+//						if (ssl_engine != null)
+//						{
+//							ConfigDAO factory = (ConfigDAO)configDAO.getContent().get(ssl_engine);
+//							if (factory != null)
+//								nioTF.setIncomingSSLSessionDataFactory((SSLSessionDataFactory) factory.attachment());
+//						}
 
 						if(!SharedStringUtil.isEmpty(config.getProperties().getValue("log_file")))
 							nioTF.setLogger(LoggerUtil.loggerToFile(NIOTunnel.class.getName()+".proxy", config.getProperties().getValue("log_file")));
-						
+
+
+						nioTF.init();
 						
 					}
 					catch(Exception e)

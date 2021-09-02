@@ -17,6 +17,7 @@ package org.zoxweb.server.http.proxy;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.util.logging.Logger;
@@ -33,19 +34,18 @@ import org.zoxweb.server.net.NIOChannelCleaner;
 import org.zoxweb.server.net.NIOSocket;
 import org.zoxweb.server.net.NetUtil;
 import org.zoxweb.server.net.ProtocolSessionFactoryBase;
-import org.zoxweb.server.net.ProtocolSessionProcessor;
+import org.zoxweb.server.net.ProtocolProcessor;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.shared.http.*;
 import org.zoxweb.shared.net.InetSocketAddressDAO;
 import org.zoxweb.shared.protocol.ProtocolDelimiter;
 import org.zoxweb.shared.security.SecurityStatus;
-import org.zoxweb.shared.util.Const.SourceOrigin;
 import org.zoxweb.shared.util.NVBoolean;
 import org.zoxweb.shared.util.NVPair;
 import org.zoxweb.shared.util.SharedStringUtil;
 
 public class NIOProxyProtocol 
-	extends ProtocolSessionProcessor
+	extends ProtocolProcessor
 {
 
 	private static boolean debug = false;
@@ -135,7 +135,7 @@ public class NIOProxyProtocol
 
 		public NIOProxyProtocolFactory()
 		{
-			getSessionProperties().add(new NVBoolean(NIOProxyProtocol.AUTHENTICATION, false));
+			getProperties().add(new NVBoolean(NIOProxyProtocol.AUTHENTICATION, false));
 		}
 		
 		@Override
@@ -143,7 +143,7 @@ public class NIOProxyProtocol
 		{
 			NIOProxyProtocol ret = new NIOProxyProtocol();
 			ret.setOutgoingInetFilterRulesManager(getOutgoingInetFilterRulesManager());
-			ret.setProperties(getSessionProperties());
+			ret.setProperties(getProperties());
 			
 			return ret;
 		}
@@ -154,6 +154,7 @@ public class NIOProxyProtocol
 			return "NIOProxyFactory";
 		}
 
+		public void init(){}
 		
 		
 	}
@@ -174,7 +175,7 @@ public class NIOProxyProtocol
 
 	private NIOProxyProtocol()
 	{
-		bBuffer =  ByteBufferUtil.allocateByteBuffer(BufferType.HEAP, getReadBufferSize());
+		sBuffer =  ByteBufferUtil.allocateByteBuffer(BufferType.HEAP, getReadBufferSize());
 	}
 	
 	
@@ -194,18 +195,18 @@ public class NIOProxyProtocol
 	public void close() throws IOException
 	{
 		IOUtil.close(clientChannel);
-		//if (relayConnection)
+
+		if (channelRelay != null)
 		{
-			if (channelRelay != null)
-			{
-				IOUtil.close(channelRelay);
-			}
-			else
-			{
-				IOUtil.close(remoteChannel);
-			}
+			IOUtil.close(channelRelay);
 		}
-		postOp();
+		else
+		{
+			IOUtil.close(remoteChannel);
+		}
+		ByteBufferUtil.cache(sBuffer);
+
+
 	}
 
 	@Override
@@ -223,19 +224,19 @@ public class NIOProxyProtocol
 			int read = 0;
     		do
     		{
-    			bBuffer.clear();
+    			sBuffer.clear();
     			
-    			read = ((SocketChannel)key.channel()).read(bBuffer);
+    			read = ((SocketChannel)key.channel()).read(sBuffer);
     			if (read > 0)
     			{
     				if (relayConnection)
     				{
-    					ByteBufferUtil.write(remoteChannel, bBuffer);
+    					ByteBufferUtil.write(remoteChannel, sBuffer);
     					//log.info(ByteBufferUtil.toString(bBuffer));
     				}
     				else
     				{
-    					ByteBufferUtil.write(requestBuffer, bBuffer);
+    					ByteBufferUtil.write(requestBuffer, sBuffer);
     					//log.info(new String(requestBuffer.getInternalBuffer(), 0, requestBuffer.size()));
     					tryToConnectRemote(requestBuffer, read);
     				}	
@@ -409,7 +410,7 @@ public class NIOProxyProtocol
 						// try to read any pending data
 						// very very nasty bug
 						channelRelay.accept(remoteChannelSK);
-						channelRelay.waitThenStopReading();
+						channelRelay.waitThenStopReading(remoteChannelSK);
 					}
 					else
 						getSelectorController().cancelSelectionKey(remoteChannelSK);
@@ -483,7 +484,7 @@ public class NIOProxyProtocol
 					if (channelRelay != null)
 					{
 						channelRelay.accept(remoteChannelSK);
-						channelRelay.waitThenStopReading();
+						channelRelay.waitThenStopReading(remoteChannelSK);
 						if(debug)
 							log.info("THIS IS  supposed to happen RELAY STOP:" +lastRemoteAddress + "," + requestInfo.remoteAddress);
 					}

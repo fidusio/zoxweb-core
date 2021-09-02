@@ -22,6 +22,7 @@ import java.net.Socket;
 import java.util.logging.Logger;
 
 import org.zoxweb.server.io.IOUtil;
+
 import org.zoxweb.shared.util.IsClosed;
 
 public class NetworkTunnel
@@ -31,9 +32,9 @@ public class NetworkTunnel
 	
 	
 	private static transient final Logger log = Logger.getLogger(NetworkTunnel.class.getName());
-	public static boolean debug = false;
+	public static boolean debug = true;
 	
-	
+
 	static class StreamRelay
 		implements Runnable, IsClosed
 	{
@@ -49,10 +50,11 @@ public class NetworkTunnel
 		
 		private void start()
 		{
+			//TaskUtil.getDefaultTaskScheduler().queue(0,this);
 			new Thread(this).start();
 		}
 		@Override
-		public synchronized  void close() throws IOException 
+		public  void close() throws IOException
 		{
 			if (!closedStat)
 			{
@@ -76,7 +78,7 @@ public class NetworkTunnel
 		public void run() 
 		{
 			if(debug) log.info("started");
-			byte[] buffer = new byte[4096];
+			byte[] buffer = new byte[2048];
 			int read = 0;
 
 			while(!isClosed() && read != -1)
@@ -92,10 +94,13 @@ public class NetworkTunnel
 				}
 				catch(IOException e)
 				{
+					//IOUtil.close(this);
 					break;
 				}
 			}
+
 			IOUtil.close(this);
+
 		}
 		@Override
 		public boolean isClosed() 

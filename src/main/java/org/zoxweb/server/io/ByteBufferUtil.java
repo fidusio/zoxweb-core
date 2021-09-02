@@ -158,7 +158,12 @@ public class ByteBufferUtil
 			cache(bb);
 		}
 	}
-	
+
+	public  static ByteBuffer allocateByteBuffer(int capacity)
+	{
+		return SINGLETON.toByteBuffer0(BufferType.HEAP, null, 0, capacity, false);
+	}
+
 	public static ByteBuffer allocateByteBuffer(BufferType bType, int capacity)
 	{
 		return SINGLETON.toByteBuffer0(bType, null, 0, capacity, false);
@@ -201,7 +206,10 @@ public class ByteBufferUtil
 	
 	public static void cache(ByteBuffer bb)
 	{
-		SINGLETON.cache0(bb);
+		if(bb != null) {
+
+			SINGLETON.cache0(bb);
+		}
 	}
 	
 }

@@ -124,6 +124,17 @@ implements KVMapStore<K,V>
 	}
 
 	@Override
+	public long averageDataSize()
+	{
+		int size = size();
+		if(size > 0) {
+			return dataSize.get() / size;
+		}
+
+		return 0;
+	}
+
+	@Override
 	public long defaultExpirationPeriod() {
 		return 0;
 	}

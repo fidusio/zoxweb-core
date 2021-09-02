@@ -114,11 +114,7 @@ public class NIOChannelCleaner
 				try
 				{
 					IOUtil.close(sk.channel());
-					if (sk.attachment() != null && sk.attachment() instanceof ProtocolSessionProcessor)
-					{
-						((ProtocolSessionProcessor)sk.attachment()).postOp();
-						//IOUtil.close((AutoCloseable)sk.attachment());
-					}
+
 						
 					if (remove(sk) != null)
 					{
