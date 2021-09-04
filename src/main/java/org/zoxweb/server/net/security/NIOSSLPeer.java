@@ -47,6 +47,7 @@ public abstract class NIOSSLPeer {
 	 * Class' logger.
 	 */
 	protected  final Logger log = Logger.getLogger(NIOSSLPeer.class.getName());
+    protected static boolean debug = false;
 
     /**
      * Will contain this peer's application data in plaintext, that will be later encrypted
@@ -126,7 +127,7 @@ public abstract class NIOSSLPeer {
      */
     protected boolean doHandshake(SocketChannel socketChannel, SSLEngine engine) throws IOException {
 
-        log.info("About to do handshake..." + Thread.currentThread());
+        if (debug) log.info("About to do handshake..." + Thread.currentThread());
 
         SSLEngineResult result;
         HandshakeStatus handshakeStatus;
@@ -136,19 +137,21 @@ public abstract class NIOSSLPeer {
         // than 16KB long the capacity of these fields should also be smaller. Here we initialize these two local buffers
         // to be used for the handshake, while keeping client's buffers at the same size.
         int appBufferSize = engine.getSession().getApplicationBufferSize();
-        log.info("appBufferSize: " + appBufferSize);
-        ByteBuffer myAppData = ByteBufferUtil.allocateByteBuffer(appBufferSize);
-        ByteBuffer peerAppData = ByteBufferUtil.allocateByteBuffer(appBufferSize);
+        if (debug) log.info("appBufferSize: " + appBufferSize);
+        ByteBuffer myAppData = ByteBufferUtil.allocateByteBuffer(2*appBufferSize);
+        ByteBuffer peerAppData = ByteBufferUtil.allocateByteBuffer(2* appBufferSize);
         myNetData.clear();
         peerNetData.clear();
 
         handshakeStatus = engine.getHandshakeStatus();
+        if (debug) log.info("First handshake: " + handshakeStatus);
 
         int loopCount = 0;
         while (handshakeStatus != SSLEngineResult.HandshakeStatus.FINISHED && handshakeStatus != SSLEngineResult.HandshakeStatus.NOT_HANDSHAKING) {
-            log.info("loopCount: [" + loopCount + "] Handshake status: " + handshakeStatus);
-            log.info("loopCount: [" + loopCount++ + "] sslEngine: " + engine);
-            switch (handshakeStatus) {
+            if (debug) log.info(Thread.currentThread() +" loopCount: [" + loopCount + "] Handshake status: " + handshakeStatus);
+            if (debug) log.info(Thread.currentThread() +" loopCount: [" + loopCount++ + "] sslEngine: " + engine);
+            switch (handshakeStatus)
+            {
             case NEED_UNWRAP:
                 if (socketChannel.read(peerNetData) < 0) {
                     if (engine.isInboundDone() && engine.isOutboundDone()) {
@@ -157,7 +160,7 @@ public abstract class NIOSSLPeer {
                     try {
                         engine.closeInbound();
                     } catch (SSLException e) {
-                        log.info("This engine was forced to close inbound, without having received the proper SSL/TLS close notification message from the peer, due to end of stream.");
+                        if (debug) log.info("This engine was forced to close inbound, without having received the proper SSL/TLS close notification message from the peer, due to end of stream.");
                     }
                     engine.closeOutbound();
                     // After closeOutbound the engine will be set to WRAP state, in order to try to send a close message to the client.
@@ -171,11 +174,12 @@ public abstract class NIOSSLPeer {
                     handshakeStatus = result.getHandshakeStatus();
                 } catch (SSLException sslException) {
                     sslException.printStackTrace();
-                    log.info("A problem was encountered while processing the data that caused the SSLEngine to abort. Will try to properly close connection...");
+                    if (debug) log.info("A problem was encountered while processing the data that caused the SSLEngine to abort. Will try to properly close connection...");
                     engine.closeOutbound();
                     handshakeStatus = engine.getHandshakeStatus();
                     break;
                 }
+                if (debug) log.info("after unwrap :" + handshakeStatus + " result: " + result);
                 switch (result.getStatus()) {
                 case OK:
                     break;
@@ -205,17 +209,14 @@ public abstract class NIOSSLPeer {
                     result = engine.wrap(myAppData, myNetData);
                     handshakeStatus = result.getHandshakeStatus();
                 } catch (SSLException sslException) {
-                    log.info("A problem was encountered while processing the data that caused the SSLEngine to abort. Will try to properly close connection...");
+                    if (debug) log.info("A problem was encountered while processing the data that caused the SSLEngine to abort. Will try to properly close connection...");
                     engine.closeOutbound();
                     handshakeStatus = engine.getHandshakeStatus();
                     break;
                 }
                 switch (result.getStatus()) {
                 case OK :
-                    myNetData.flip();
-                    while (myNetData.hasRemaining()) {
-                        socketChannel.write(myNetData);
-                    }
+                    ByteBufferUtil.write(socketChannel, myNetData);
                     break;
                 case BUFFER_OVERFLOW:
                     // Will occur if there is not enough space in myNetData buffer to write all the data that would be generated by the method wrap.
@@ -227,14 +228,12 @@ public abstract class NIOSSLPeer {
                     throw new SSLException("Buffer underflow occured after a wrap. I don't think we should ever get here.");
                 case CLOSED:
                     try {
-                        myNetData.flip();
-                        while (myNetData.hasRemaining()) {
-                            socketChannel.write(myNetData);
-                        }
+
+                        ByteBufferUtil.write(socketChannel, myNetData);
                         // At this point the handshake status will probably be NEED_UNWRAP so we make sure that peerNetData is clear to read.
                         peerNetData.clear();
                     } catch (Exception e) {
-                        log.info("Failed to send server's CLOSE message due to socket channel's failure.");
+                        if (debug) log.info("Failed to send server's CLOSE message due to socket channel's failure.");
                         handshakeStatus = engine.getHandshakeStatus();
                     }
                     break;
@@ -245,7 +244,7 @@ public abstract class NIOSSLPeer {
             case NEED_TASK:
                 Runnable task;
                 while ((task = engine.getDelegatedTask()) != null) {
-                    log.info("NEED_TASK: " + task);
+                    if (debug) log.info("NEED_TASK: " + task);
                     //executor.execute(task);
                     task.run();
                 }
@@ -261,7 +260,7 @@ public abstract class NIOSSLPeer {
         }
 
 
-        log.info(Thread.currentThread()  +" Returning true ***********************************************************");
+        if (debug) log.info(Thread.currentThread()  +" Returning true ***********************************************************");
         return true;
 
     }

@@ -28,10 +28,12 @@ import javax.net.ssl.SSLEngine;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
+import java.nio.channels.Channel;
 import java.nio.channels.SelectionKey;
-import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.channels.spi.AbstractSelectableChannel;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Logger;
 
 
@@ -43,65 +45,69 @@ public class SSLNIOTunnel
 	private static boolean debug = true;
 
 
-	public static class SSLNIOTunnelFactory
-	    extends ProtocolSessionFactoryBase<SSLNIOTunnel>
-	{
+//	public static class SSLNIOTunnelFactory
+//	    extends ProtocolSessionFactoryBase<SSLNIOTunnel>
+//	{
+//
+//		private InetSocketAddressDAO remoteAddress;
+//		private SSLContext sslContext;
+//
+//		public SSLNIOTunnelFactory()
+//		{
+//
+//		}
+//
+//
+//		public SSLNIOTunnelFactory(SSLContext sslContext, InetSocketAddressDAO remoteAddress)
+//		{
+//			this.remoteAddress = remoteAddress;
+//			this.sslContext = sslContext;
+//		}
+//
+//		public SSLContext getSSLContext()
+//		{
+//			return sslContext;
+//		}
+//		public void setRemoteAddress(InetSocketAddressDAO rAddress)
+//		{
+//			remoteAddress = rAddress;
+//		}
+//
+//		public InetSocketAddressDAO getRemoteAddress()
+//		{
+//			return remoteAddress;
+//		}
+//
+//		@Override
+//		public SSLNIOTunnel newInstance()
+//		{
+//			return new SSLNIOTunnel(sslContext, remoteAddress);
+//		}
+//
+//		@Override
+//		public String getName() {
+//			// TODO Auto-generated method stub
+//			return "NIOTunnelFactory";
+//		}
+//
+//		public void init()
+//		{
+//			setRemoteAddress(new InetSocketAddressDAO(getProperties().getValue("remote_host")));
+//			sslContext = (SSLContext) ((ConfigDAO)getProperties().getValue("ssl_engine")).attachment();
+//		}
+//
+//	}
 
-		private InetSocketAddressDAO remoteAddress;
-		private SSLContext sslContext;
-
-		public SSLNIOTunnelFactory()
-		{
-
-		}
-
-
-		public SSLNIOTunnelFactory(SSLContext sslContext, InetSocketAddressDAO remoteAddress)
-		{
-			this.remoteAddress = remoteAddress;
-			this.sslContext = sslContext;
-		}
-
-		public SSLContext getSSLContext()
-		{
-			return sslContext;
-		}
-		public void setRemoteAddress(InetSocketAddressDAO rAddress)
-		{
-			remoteAddress = rAddress;
-		}
-
-		public InetSocketAddressDAO getRemoteAddress()
-		{
-			return remoteAddress;
-		}
-
-		@Override
-		public SSLNIOTunnel newInstance()
-		{
-			return new SSLNIOTunnel(sslContext, remoteAddress);
-		}
-
-		@Override
-		public String getName() {
-			// TODO Auto-generated method stub
-			return "NIOTunnelFactory";
-		}
-
-		public void init()
-		{
-			setRemoteAddress(new InetSocketAddressDAO(getProperties().getValue("remote_host")));
-			sslContext = (SSLContext) ((ConfigDAO)getProperties().getValue("ssl_engine")).attachment();
-		}
-
-	}
-
-
+	private SelectionKey sslSourceSK = null;
 	private SocketChannel destinationChannel = null;
-	private SocketChannel sourceChannel = null;
-	private ByteBuffer dBuffer = null;
+	private SocketChannel sslSourceChannel = null;
+	private ByteBuffer destinationBB = null;
+	private ByteBuffer sourceBB;
 	private SSLEngine sslEngine = null;
 	private NIOSSLServer niosslServer = null;
+
+	private Lock lock = new ReentrantLock();
+
 	//private SelectionKey  clientChannelSK = null;
 	//private ChannelRelayTunnel relay = null;
 	private SSLContext sslContext;
@@ -132,7 +138,7 @@ public class SSLNIOTunnel
     {
 		//getSelectorController().cancelSelectionKey(clientChannelSK);
 		IOUtil.close(destinationChannel);
-		IOUtil.close(sourceChannel);
+		IOUtil.close(sslSourceChannel);
 
 		//postOp();
 		log.info("closed:" + remoteAddress);
@@ -147,26 +153,52 @@ public class SSLNIOTunnel
 		try
     	{
 			// first call
-			if(sourceChannel == null)
+			if(sslSourceChannel == null)
 			{
-				synchronized (this) {
-					if(sourceChannel == null) {
-						log.info("First call for "  + key);
-						sourceChannel = (SocketChannel) key.channel();
-						destinationChannel = SocketChannel.open((new InetSocketAddress(remoteAddress.getInetAddress(), remoteAddress.getPort())));
-						getSelectorController().register(NIOChannelCleaner.DEFAULT, destinationChannel, SelectionKey.OP_READ, this, false);
+				boolean lockStatus = lock.tryLock();
 
+				if(lockStatus)
+				{
+					try {
+						if (sslSourceChannel == null) {
+							log.info("First call for " + key);
+							sslSourceChannel = (SocketChannel) key.channel();
+
+
+
+
+							sslEngine.beginHandshake();
+							if (sslSourceChannel.isOpen() && niosslServer.doHandshake(sslSourceChannel, sslEngine)) {
+
+								// we stop nio socket from reading it
+
+								destinationChannel = SocketChannel.open((new InetSocketAddress(remoteAddress.getInetAddress(), remoteAddress.getPort())));
+								getSelectorController().register(NIOChannelCleaner.DEFAULT, destinationChannel, SelectionKey.OP_READ, this, false);
+								//getSelectorController().register(NIOChannelCleaner.DEFAULT, sslSourceChannel, SelectionKey.OP_READ, this, false);
+								log.info("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^**********************XMAS TREE******************************^^^^^^^^^^^^^^^^^^^^^");
+							} else {
+								close();
+							}
+
+							return;
+						}
 					}
+					finally {
+						lock.unlock();
+					}
+				}
+				else {
+					return;
 				}
 			}
 
 
 			int read = 0 ;
-			if(key.channel() == sourceChannel)
+			if(key.channel() == sslSourceChannel)
 			{
 				// reading encrypted data
 				if (debug) log.info("incoming data on secure channel " + key);
-				ByteBuffer temp = niosslServer.read((SocketChannel) key.channel(), sslEngine, sBuffer);
+				ByteBuffer temp = niosslServer.read((SocketChannel) key.channel(), sslEngine, sourceBB);
 				if(temp == null) {
 					close();
 					return;
@@ -184,15 +216,15 @@ public class SSLNIOTunnel
 				do
 				{
 
-					dBuffer.clear();
+					destinationBB.clear();
 
 					// modify if currentSourceChannel == sourceChannel
-					read = ((SocketChannel) key.channel()).read(dBuffer);
+					read = ((SocketChannel) key.channel()).read(destinationBB);
 					if (debug) log.info("byte read: " + read);
 					if (read > 0)
 					{
 						// modify currentDestinationChannel == sourceChannel
-						niosslServer.write(sourceChannel, sslEngine, dBuffer);
+						niosslServer.write(sslSourceChannel, sslEngine, destinationBB);
 					}
 				}
 				while(read > 0);
@@ -206,7 +238,8 @@ public class SSLNIOTunnel
     		{
     			if (debug) log.info("+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+Read:" + read);
     			
-    			getSelectorController().cancelSelectionKey(key);
+    			//getSelectorController().cancelSelectionKey(key);
+
     			close();
     				
     			if (debug) log.info(key + ":" + key.isValid()+ " " + Thread.currentThread() + " " + TaskUtil.getDefaultTaskProcessor().availableExecutorThreads());		
@@ -226,20 +259,27 @@ public class SSLNIOTunnel
 		// must be modified do the handshake
 
 
-
+		asc.configureBlocking(false);
 		sslEngine = sslContext.createSSLEngine();
 		sslEngine.setUseClientMode(false);
-		sslEngine.beginHandshake();
+
 
 		niosslServer = new NIOSSLServer(TaskUtil.getDefaultTaskProcessor(), sslContext);
-		if (niosslServer.doHandshake((SocketChannel) asc, sslEngine)) {
-			sBuffer = ByteBuffer.allocate(2*niosslServer.appDataBufferSize());
-			dBuffer = ByteBuffer.allocate(2*niosslServer.appDataBufferSize());
-			getSelectorController().register(ncc,  asc, SelectionKey.OP_READ, this, isBlocking);
-		} else {
-			asc.close();
-			log.info("Connection closed due to handshake failure.");
-		}
+		sourceBB = ByteBuffer.allocate(2*niosslServer.appDataBufferSize());
+		destinationBB = ByteBuffer.allocate(2*niosslServer.appDataBufferSize());
+		getSelectorController().register(ncc,  asc, SelectionKey.OP_READ, this, isBlocking);
+
+
+
+//		sslEngine.beginHandshake();
+//		if (niosslServer.doHandshake((SocketChannel) asc, sslEngine)) {
+//			sourceBB = ByteBuffer.allocate(2*niosslServer.appDataBufferSize());
+//			destinationBB = ByteBuffer.allocate(2*niosslServer.appDataBufferSize());
+//
+//		} else {
+//			asc.close();
+//			log.info("Connection closed due to handshake failure.");
+//		}
 
 	}
 
@@ -265,6 +305,25 @@ public class SSLNIOTunnel
 			TaskUtil.getDefaultTaskScheduler().close();
 			TaskUtil.getDefaultTaskProcessor().close();
 		}
+	}
+
+
+	public boolean isChannelReadyToRead(Channel channel)
+	{
+		if(channel == destinationChannel)
+			return true;
+
+		if(channel == sslSourceChannel)
+		{
+			boolean lockStatus = lock.tryLock();
+			if(lockStatus)
+			{
+				lock.unlock();
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 }

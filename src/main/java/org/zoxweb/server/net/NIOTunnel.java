@@ -87,7 +87,8 @@ public class NIOTunnel
 	private volatile SelectionKey  destinationSK = null;
 	private volatile SocketChannel sourceChannel = null;
 	private volatile SelectionKey  sourceSK = null;
-	private volatile ByteBuffer dBuffer;
+	private volatile ByteBuffer destinationBB;
+	private volatile ByteBuffer sourceBB;
 
 
 	final private InetSocketAddressDAO remoteAddress;
@@ -95,7 +96,6 @@ public class NIOTunnel
 	public NIOTunnel(InetSocketAddressDAO remoteAddress)
 	{
 		this.remoteAddress = remoteAddress;
-		sBuffer = ByteBuffer.allocate(getReadBufferSize());
 	}
 	
 	@Override
@@ -116,8 +116,8 @@ public class NIOTunnel
 
 		IOUtil.close(destinationChannel);
 		IOUtil.close(sourceChannel);
-		ByteBufferUtil.cache(sBuffer);
-		ByteBufferUtil.cache(dBuffer);
+		ByteBufferUtil.cache(sourceBB);
+		ByteBufferUtil.cache(destinationBB);
 		log.info("closed:" + remoteAddress);
 	}
 
@@ -136,7 +136,8 @@ public class NIOTunnel
 						sourceSK = key;
 						destinationChannel = SocketChannel.open((new InetSocketAddress(remoteAddress.getInetAddress(), remoteAddress.getPort())));
 						//relay = new ChannelRelayTunnel(getReadBufferSize(), destinationChannel, sourceChannel, sourceSK,  true,  getSelectorController());
-						dBuffer = ByteBuffer.allocate(getReadBufferSize());
+						destinationBB = ByteBuffer.allocate(getReadBufferSize());
+						sourceBB = ByteBuffer.allocate(getReadBufferSize());
 						destinationSK = getSelectorController().register(NIOChannelCleaner.DEFAULT, destinationChannel, SelectionKey.OP_READ, this, false);
 					}
 				}
@@ -151,13 +152,13 @@ public class NIOTunnel
 			{
 				readChannel = sourceChannel;
 				writeChannel = destinationChannel;
-				currentBB = sBuffer;
+				currentBB = sourceBB;
 			}
 			else
 			{
 				readChannel = destinationChannel;
 				writeChannel = sourceChannel;
-				currentBB = dBuffer;
+				currentBB = destinationBB;
 			}
 			int read = 0 ;
     		do

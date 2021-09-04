@@ -116,6 +116,35 @@ public class SelectorController
 		return ret;
 	}
 
+
+	public SelectionKey register(NIOChannelCleaner niocc, AbstractSelectableChannel ch, int ops, Object attachment) throws IOException
+	{
+		SelectionKey ret;
+		try
+		{
+			// block the select lock just in case
+			lock.lock();
+			// wakeup the selector
+			selector.wakeup();
+			// invoke the main lock
+			selectLock.lock();
+			//SharedUtil.getWrappedValue(ch).configureBlocking(blocking);
+			ret = SharedUtil.getWrappedValue(ch).register(selector, ops, new SKAttachment(attachment));
+			if (niocc != null)
+			{
+				niocc.add(ret);
+			}
+		}
+		finally
+		{
+			lock.unlock();
+			selectLock.unlock();
+
+		}
+
+		return ret;
+	}
+
 	
 	/**
 	 * Blocking select

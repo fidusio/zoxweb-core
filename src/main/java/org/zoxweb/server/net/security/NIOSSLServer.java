@@ -1,5 +1,6 @@
 package org.zoxweb.server.net.security;
 
+import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.server.net.SelectorController;
 
 import java.io.IOException;
@@ -49,9 +50,9 @@ public class NIOSSLServer extends NIOSSLPeer {
 
         SSLSession dummySession = context.createSSLEngine().getSession();
         //myAppData = ByteBuffer.allocate(dummySession.getApplicationBufferSize());
-        myNetData = ByteBuffer.allocate(dummySession.getPacketBufferSize());
+        myNetData = ByteBuffer.allocate(2*dummySession.getPacketBufferSize());
         //peerAppData = ByteBuffer.allocate(dummySession.getApplicationBufferSize());
-        peerNetData = ByteBuffer.allocate(dummySession.getPacketBufferSize());
+        peerNetData = ByteBuffer.allocate(2*dummySession.getPacketBufferSize());
 
         appDataBufferSize = dummySession.getApplicationBufferSize();
         dummySession.invalidate();
@@ -118,7 +119,7 @@ public class NIOSSLServer extends NIOSSLPeer {
      * @param key - the key dedicated to the {@link ServerSocketChannel} used by the server to listen to new connection requests.
      * @throws Exception
      */
-    public void acceptConnection(SelectionKey key) throws Exception {
+//    public void acceptConnection(SelectionKey key) throws Exception {
 
 //    	log.info("New connection request!");
 //        // this needs to retrofitted
@@ -137,7 +138,8 @@ public class NIOSSLServer extends NIOSSLPeer {
 //        }
 //
 //        return engine;
-    }
+//        }
+
 
     /**
      * Will be called by the selector when the specific socket channel has data to be read.
@@ -217,20 +219,17 @@ public class NIOSSLServer extends NIOSSLPeer {
             SSLEngineResult result = engine.wrap(myAppData, myNetData);
             switch (result.getStatus()) {
             case OK:
-                myNetData.flip();
-                while (myNetData.hasRemaining()) {
-                    socketChannel.write(myNetData);
-                }
-//                log.info("Message sent to the client: " + message);
+                ByteBufferUtil.write(socketChannel, myNetData);
+                log.info("Message sent to the client");
                 break;
             case BUFFER_OVERFLOW:
                 myNetData = enlargePacketBuffer(engine, myNetData);
                 break;
             case BUFFER_UNDERFLOW:
-                throw new SSLException("Buffer underflow occured after a wrap. I don't think we should ever get here.");
+                throw new SSLException("Buffer underflow occur after a wrap. I don't think we should ever get here.");
             case CLOSED:
                 closeConnection(socketChannel, engine);
-                return;
+                throw new IOException("SSL connection closed.");
             default:
                 throw new IllegalStateException("Invalid SSL status: " + result.getStatus());
             }

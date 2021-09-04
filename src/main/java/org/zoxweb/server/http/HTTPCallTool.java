@@ -23,6 +23,9 @@ import org.zoxweb.shared.http.HTTPMessageConfigInterface;
 import org.zoxweb.shared.http.HTTPMethod;
 import org.zoxweb.shared.http.HTTPMimeType;
 import org.zoxweb.shared.http.HTTPResponseData;
+import org.zoxweb.shared.net.InetAddressDAO;
+import org.zoxweb.shared.net.InetSocketAddressDAO;
+import org.zoxweb.shared.net.ProxyType;
 import org.zoxweb.shared.util.Const;
 import org.zoxweb.shared.util.ParamUtil;
 
@@ -81,9 +84,14 @@ public class HTTPCallTool implements Runnable
             String contentFilename = params.stringValue("-c", true);
             String content = contentFilename != null ? IOUtil.inputStreamToString(contentFilename) : null;
             boolean printResult = params.booleanValue("-pr", true);
+            String proxy = params.stringValue("-p", true);
+            log.info("proxy: " + proxy);
+            InetSocketAddressDAO proxyAddress = proxy != null ? InetSocketAddressDAO.parse(proxy, ProxyType.HTTP) : null;
+
             List<HTTPMessageConfigInterface> hmcis = new ArrayList<>();
             for(String url : urls) {
                 HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit(url, null, httpMethod);
+                hmci.setProxyAddress(proxyAddress);
 
                 hmci.setContentType(HTTPMimeType.APPLICATION_JSON);
                 hmci.setSecureCheckEnabled(false);

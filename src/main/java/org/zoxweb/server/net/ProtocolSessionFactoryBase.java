@@ -30,6 +30,7 @@ public abstract class ProtocolSessionFactoryBase<P extends ProtocolProcessor>
 
 	private volatile Logger logger;
 	private volatile NVGenericMap properties = new NVGenericMap();
+	private volatile boolean blocking = false;
 	
 
 	
@@ -47,7 +48,12 @@ public abstract class ProtocolSessionFactoryBase<P extends ProtocolProcessor>
 	@Override
 	public boolean isBlocking() {
 		// TODO Auto-generated method stub
-		return false;
+		return blocking;
+	}
+	@Override
+	public void setBlocking(boolean blocking)
+	{
+		this.blocking = blocking;
 	}
 
 

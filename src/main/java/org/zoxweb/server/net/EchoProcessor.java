@@ -50,7 +50,13 @@ public class EchoProcessor
 				{
 					return false;
 				}
-//				@Override
+
+				@Override
+				public void setBlocking(boolean blocking) {
+
+				}
+
+				//				@Override
 //				public SSLSessionDataFactory getIncomingSSLSessionDataFactory() {
 //					// TODO Auto-generated method stub
 //					return null;

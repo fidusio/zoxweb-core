@@ -533,7 +533,7 @@ public class CryptoUtil {
                                           final char[] trustStorePassword)
       throws GeneralSecurityException, IOException {
 
-    return initSSLContext(new File(keyStoreFilename), keyStoreType,keyStorePassword, crtPassword, new File(trustStoreFilename), trustStorePassword);
+    return initSSLContext(new File(keyStoreFilename), keyStoreType,keyStorePassword, crtPassword,trustStoreFilename != null ? new File(trustStoreFilename) : null, trustStorePassword);
 //    FileInputStream ksfis = null;
 //    FileInputStream tsfis = null;
 //

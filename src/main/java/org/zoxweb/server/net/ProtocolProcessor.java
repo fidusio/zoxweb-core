@@ -17,7 +17,7 @@ package org.zoxweb.server.net;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.nio.ByteBuffer;
+import java.nio.channels.Channel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.spi.AbstractSelectableChannel;
 import java.util.function.Consumer;
@@ -33,11 +33,11 @@ public abstract class ProtocolProcessor
 	implements GetName, GetDescription, Closeable, Consumer<SelectionKey>
 {
 
-	//private volatile boolean selectable = true;
+
 	private volatile SelectorController selectorController;
 	private volatile InetFilterRulesManager outgoingInetFilterRulesManager;
 	private volatile int defaultReadBufferSize = ByteBufferUtil.DEFAULT_BUFFER_SIZE;
-	protected volatile ByteBuffer sBuffer = null;
+
 	private volatile NVGenericMap properties = null;
 	
 	protected ProtocolProcessor()
@@ -57,17 +57,6 @@ public abstract class ProtocolProcessor
 		defaultReadBufferSize = size;
 	}
 	
-//	public boolean isSelectable()
-//	{
-//		return selectable;
-//	}
-//
-//
-//	protected void setSelectable(boolean stat)
-//	{
-//		selectable = stat;
-//	}
-
 
 
 	/**
@@ -104,6 +93,7 @@ public abstract class ProtocolProcessor
 		this.outgoingInetFilterRulesManager = inetFilterRulesManager;
 	}
 
+	public boolean isChannelReadyToRead(Channel channel){return true;}
 
 	public void setProperties(NVGenericMap prop)
 	{

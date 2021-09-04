@@ -44,7 +44,7 @@ public class InetSocketAddressDAO
 		String[] params = addressPort.split(":");
 		setInetAddress(params[0]);
 
-		if (params.length>1) {
+		if (params.length > 1) {
             setPort(Integer.parseInt(params[1]));
         } else {
             setPort(-1);
@@ -160,6 +160,15 @@ public class InetSocketAddressDAO
 	public String toString()
     {
 		return SharedUtil.toCanonicalID(':',getInetAddress(), getPort());
+	}
+
+	public static InetSocketAddressDAO parse(String addressPortProxyType, ProxyType pt)
+	{
+		if (addressPortProxyType.toUpperCase().indexOf(pt.name()) == -1)
+		{
+			addressPortProxyType = addressPortProxyType + ":" + pt;
+		}
+		return new InetSocketAddressDAO(addressPortProxyType);
 	}
 	
 }

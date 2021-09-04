@@ -17,6 +17,7 @@ package org.zoxweb.server.net;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.channels.ByteChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
@@ -43,6 +44,7 @@ public class  ChannelRelayTunnel
 	//private ByteBuffer bBuffer = null;
 	private Closeable closeInterface = null;
 	//private SourceOrigin origin = null;
+	private ByteBuffer sBuffer;
 	
 	
 	

@@ -35,6 +35,8 @@ extends GetName, GetNVProperties
 	 * @return blocking status
 	 */
 	boolean isBlocking();
+
+	void setBlocking(boolean blocking);
 	
 	/**
 	 * Set the filer rule manager for incoming connections

@@ -31,15 +31,12 @@ import org.zoxweb.server.http.proxy.NIOProxyProtocol.NIOProxyProtocolFactory;
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.logging.LoggerUtil;
 import org.zoxweb.server.net.NIOTunnel.NIOTunnelFactory;
-import org.zoxweb.server.net.security.IPBlockerListener;
-import org.zoxweb.server.net.security.SSLSessionDataFactory;
-import org.zoxweb.server.net.security.SecureNetworkTunnel;
+import org.zoxweb.server.net.security.*;
 import org.zoxweb.server.security.CryptoUtil;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.app.AppCreatorDefault;
 import org.zoxweb.shared.data.ConfigDAO;
-import org.zoxweb.shared.net.InetSocketAddressDAO;
 import org.zoxweb.shared.security.IPBlockerConfig;
 import org.zoxweb.shared.util.*;
 
@@ -193,9 +190,9 @@ extends AppCreatorDefault<NIOSocket, ConfigDAO>
 			if (nve instanceof ConfigDAO)
 			{
 				ConfigDAO config = (ConfigDAO)nve;
-				if (config.attachment() instanceof NIOTunnelFactory)
+				if (config.attachment() instanceof NIOTunnelFactory || config.attachment() instanceof SSLNIOTunnelFactory)
 				{
-					NIOTunnelFactory nioTF = (NIOTunnelFactory) config.attachment();
+					ProtocolSessionFactoryBase nioTF = (ProtocolSessionFactoryBase) config.attachment();
 					try 
 					{
 						String ssl_engine = config.getProperties().getValue("ssl_engine");

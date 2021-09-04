@@ -168,14 +168,13 @@ public class NIOProxyProtocol
 	private SelectionKey  clientChannelSK = null;
 	private ChannelRelayTunnel channelRelay = null;
 	private RequestInfo requestInfo = null;
+	private ByteBuffer sourceBB = null;
 
-	//private int changeConnection = 0;
-	//protected Set<SelectionKey> remoteSet = null;//new HashSet<SelectionKey>();
 	private boolean relayConnection = false;
 
 	private NIOProxyProtocol()
 	{
-		sBuffer =  ByteBufferUtil.allocateByteBuffer(BufferType.HEAP, getReadBufferSize());
+		sourceBB =  ByteBufferUtil.allocateByteBuffer(BufferType.HEAP, getReadBufferSize());
 	}
 	
 	
@@ -204,7 +203,7 @@ public class NIOProxyProtocol
 		{
 			IOUtil.close(remoteChannel);
 		}
-		ByteBufferUtil.cache(sBuffer);
+		ByteBufferUtil.cache(sourceBB);
 
 
 	}
@@ -224,19 +223,19 @@ public class NIOProxyProtocol
 			int read = 0;
     		do
     		{
-    			sBuffer.clear();
+    			sourceBB.clear();
     			
-    			read = ((SocketChannel)key.channel()).read(sBuffer);
+    			read = ((SocketChannel)key.channel()).read(sourceBB);
     			if (read > 0)
     			{
     				if (relayConnection)
     				{
-    					ByteBufferUtil.write(remoteChannel, sBuffer);
+    					ByteBufferUtil.write(remoteChannel, sourceBB);
     					//log.info(ByteBufferUtil.toString(bBuffer));
     				}
     				else
     				{
-    					ByteBufferUtil.write(requestBuffer, sBuffer);
+    					ByteBufferUtil.write(requestBuffer, sourceBB);
     					//log.info(new String(requestBuffer.getInternalBuffer(), 0, requestBuffer.size()));
     					tryToConnectRemote(requestBuffer, read);
     				}	
@@ -280,9 +279,6 @@ public class NIOProxyProtocol
     		IOUtil.close(this);
     		
     	}
-    	
-    	//setSeletectable(true);
-
 	}
 
 	

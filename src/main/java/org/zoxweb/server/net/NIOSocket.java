@@ -24,6 +24,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.nio.channels.spi.AbstractSelectableChannel;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.Executor;
@@ -33,12 +34,14 @@ import java.util.logging.Logger;
 import org.zoxweb.server.io.IOUtil;
 
 import org.zoxweb.server.task.TaskProcessor;
+import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.shared.data.events.BaseEventObject;
 import org.zoxweb.shared.data.events.EventListenerManager;
 import org.zoxweb.shared.data.events.InetSocketAddressEvent;
 import org.zoxweb.shared.net.InetSocketAddressDAO;
 import org.zoxweb.shared.net.SharedNetUtil;
 import org.zoxweb.shared.security.SecurityStatus;
+
 import org.zoxweb.shared.util.Const.TimeInMillis;
 import org.zoxweb.shared.util.DaemonController;
 import org.zoxweb.shared.util.SharedUtil;
@@ -61,6 +64,8 @@ public class NIOSocket
 	private long dispatchCounter = 0;
 	private long selectedCountTotal = 0;
 	private long statLogCounter = 0;
+	private int selectedCount = 0;
+	//private int currentTotalKeys = 0;
 	private AtomicLong attackTotalCount = new AtomicLong();
 	private final long startTime = System.currentTimeMillis();
 	private EventListenerManager<BaseEventObject<?>,?> eventListenerManager = null;
@@ -154,16 +159,17 @@ public class NIOSocket
 	{	
 		long snapTime = System.currentTimeMillis();
 		long attackTimestamp = 0;
-		
-		
+
+//
 		while(live)
 		{
 			try 
 			{
-				int selectedCount = 0;
+				selectedCount = 0;
 				if (selectorController.getSelector().isOpen())
 				{
 
+					//currentTotalKeys = selectorController.getSelector().keys().size();
 					selectedCount = selectorController.select();
 					long detla = System.nanoTime();
 					if (selectedCount > 0)
@@ -190,14 +196,22 @@ public class NIOSocket
 							    		// a channel is ready for reading
 								    	if (executor != null)
 								    	{
-
+//											TaskUtil.getDefaultTaskScheduler().queue(0,()->{
+//												try {
+//													currentPP.accept(key);
+//												}
+//												catch (Exception e){}
+//												// very crucial setup
+//												ska.setSelectable(true);
+//											})
 								    		executor.execute(()->{
 								    			try {
 													currentPP.accept(key);
 												}
 								    			catch (Exception e){}
 								    			// very crucial setup
-								    			ska.setSelectable(true);
+												if(currentPP.isChannelReadyToRead(key.channel()))
+								    				ska.setSelectable(true);
 											});
 
 								    	}
@@ -218,10 +232,13 @@ public class NIOSocket
 							        // a connection was accepted by a ServerSocketChannel.
 							    	
 							    	SocketChannel sc = ((ServerSocketChannel)key.channel()).accept();
-							    	if (debug) logger.info("Accepted:" + sc);
+
 							    	ProtocolSessionFactory<?> psf = (ProtocolSessionFactory<?>) key.attachment();
-							    	
+									if (debug)
+										logger.info("Accepted: " + sc + " psf:" + psf);
 							    	// check if the incoming connection is allowed
+
+
 							    	if (NetUtil.checkSecurityStatus(psf.getIncomingInetFilterRulesManager(), sc.getRemoteAddress(), null) !=  SecurityStatus.ALLOW)
 							    	{
 							    		try
@@ -283,17 +300,17 @@ public class NIOSocket
 										// if we have an executor
 										// accept the new connection
 
-										if (executor != null) {
-											executor.execute(() -> {
-												try {
-													psp.acceptConnection(NIOChannelCleaner.DEFAULT, sc, psf.isBlocking());
-												} catch (IOException e) {
-													e.printStackTrace();
-													IOUtil.close(psp);
-												}
-											});
-										}
-										else
+//										if (executor != null) {
+//											executor.execute(() -> {
+//												try {
+//													psp.acceptConnection(NIOChannelCleaner.DEFAULT, sc, psf.isBlocking());
+//												} catch (IOException e) {
+//													e.printStackTrace();
+//													IOUtil.close(psp);
+//												}
+//											});
+//										}
+//										else
 										{
 											psp.acceptConnection(NIOChannelCleaner.DEFAULT, sc, psf.isBlocking());
 										}
@@ -329,8 +346,8 @@ public class NIOSocket
 
 									logger.info("Connection closed Average dispatch processing " + TimeInMillis.nanosToString(averageProcessingTime()) +
 											" total time:" + TimeInMillis.nanosToString(totalDuration) +
-											" total dispatches:" + dispatchCounter + " total select calls:" + selectedCountTotal +
-											" last select count:" + selectedCount + " total select keys:" +selectorController.getSelector().keys().size() +
+											" total dispatches: " + dispatchCounter + " total select-calls: " + selectedCountTotal +
+											" last select-count: " + selectedCount + " total selector-keys: " + selectorController.getSelector().keys().size() +
 											(tp != null ? " available workers:" +  tp.availableExecutorThreads() + "," + tp.pendingTasks() : "") );
 						    	}
 						    }
@@ -347,6 +364,8 @@ public class NIOSocket
 					}
 					
 				}
+
+
 				
 				// stats
 				if(getStatLogCounter() > 0 && (dispatchCounter%getStatLogCounter() == 0 || (System.currentTimeMillis() - snapTime) > getStatLogCounter()))
