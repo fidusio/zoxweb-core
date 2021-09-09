@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
-import java.security.SecureRandom;
 import java.util.concurrent.Executor;
 
 import javax.net.ssl.SSLContext;
@@ -67,9 +66,9 @@ public class NIOSSLClient extends NIOSSLPeer {
 
         SSLSession session = engine.getSession();
         //myAppData = ByteBuffer.allocate(1024);
-        myNetData = ByteBuffer.allocate(session.getPacketBufferSize());
+        outNetData = ByteBuffer.allocate(session.getPacketBufferSize());
         //peerAppData = ByteBuffer.allocate(1024);
-        peerNetData = ByteBuffer.allocate(session.getPacketBufferSize());
+        inNetData = ByteBuffer.allocate(session.getPacketBufferSize());
     }
 
     /**
@@ -120,18 +119,18 @@ public class NIOSSLClient extends NIOSSLPeer {
         while (myAppData.hasRemaining()) {
             // The loop has a meaning for (outgoing) messages larger than 16KB.
             // Every wrap call will remove 16KB from the original message and send it to the remote peer.
-            myNetData.clear();
-            SSLEngineResult result = engine.wrap(myAppData, myNetData);
+            outNetData.clear();
+            SSLEngineResult result = engine.wrap(myAppData, outNetData);
             switch (result.getStatus()) {
             case OK:
-                myNetData.flip();
-                while (myNetData.hasRemaining()) {
-                    socketChannel.write(myNetData);
+                outNetData.flip();
+                while (outNetData.hasRemaining()) {
+                    socketChannel.write(outNetData);
                 }
 
                 break;
             case BUFFER_OVERFLOW:
-                myNetData = enlargePacketBuffer(engine, myNetData);
+                outNetData = enlargePacketBuffer(engine, outNetData);
                 break;
             case BUFFER_UNDERFLOW:
                 throw new SSLException("Buffer underflow occured after a wrap. I don't think we should ever get here.");
@@ -171,16 +170,16 @@ public class NIOSSLClient extends NIOSSLPeer {
 
         log.info("About to read from the server...");
 
-        peerNetData.clear();
+        inNetData.clear();
         int waitToReadMillis = 50;
         boolean exitReadLoop = false;
         while (!exitReadLoop) {
-            int bytesRead = socketChannel.read(peerNetData);
+            int bytesRead = socketChannel.read(inNetData);
             if (bytesRead > 0) {
-                peerNetData.flip();
-                while (peerNetData.hasRemaining()) {
+                inNetData.flip();
+                while (inNetData.hasRemaining()) {
                     peerAppData.clear();
-                    SSLEngineResult result = engine.unwrap(peerNetData, peerAppData);
+                    SSLEngineResult result = engine.unwrap(inNetData, peerAppData);
                     switch (result.getStatus()) {
                     case OK:
                         //peerAppData.flip();
@@ -192,7 +191,7 @@ public class NIOSSLClient extends NIOSSLPeer {
                         peerAppData = enlargeApplicationBuffer(engine, peerAppData);
                         break;
                     case BUFFER_UNDERFLOW:
-                        peerNetData = handleBufferUnderflow(engine, peerNetData);
+                        inNetData = handleBufferUnderflow(engine, inNetData);
                         break;
                     case CLOSED:
                         closeConnection(socketChannel, engine);

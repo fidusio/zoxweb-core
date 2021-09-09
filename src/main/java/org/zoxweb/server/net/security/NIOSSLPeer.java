@@ -46,7 +46,7 @@ public abstract class NIOSSLPeer {
 	/**
 	 * Class' logger.
 	 */
-	protected  final Logger log = Logger.getLogger(NIOSSLPeer.class.getName());
+	protected static  final Logger log = Logger.getLogger(NIOSSLPeer.class.getName());
     protected static boolean debug = false;
 
     /**
@@ -64,7 +64,7 @@ public abstract class NIOSSLPeer {
      * which returns the size up to which, SSL/TLS packets will be generated from the engine under a session.
      * All SSLEngine network buffers should be sized at least this large to avoid insufficient space problems when performing wrap and unwrap calls.
      */
-    protected ByteBuffer myNetData;
+    protected ByteBuffer outNetData;
 
     /**
      * Will contain the other peer's (decrypted) application data. It must be large enough to hold the application data
@@ -79,7 +79,7 @@ public abstract class NIOSSLPeer {
      * If the {@link SSLEngine#unwrap(ByteBuffer, ByteBuffer)} detects large inbound packets, the buffer sizes returned by SSLSession will be updated dynamically, so the this peer
      * should check for overflow conditions and enlarge the buffer using the session's (updated) buffer size.
      */
-    protected ByteBuffer peerNetData;
+    protected ByteBuffer inNetData;
 
 
 
@@ -125,7 +125,9 @@ public abstract class NIOSSLPeer {
      * @return True if the connection handshake was successful or false if an error occurred.
      * @throws IOException - if an error occurs during read/write to the socket channel.
      */
-    protected boolean doHandshake(SocketChannel socketChannel, SSLEngine engine) throws IOException {
+    public boolean doHandshake(SocketChannel socketChannel, SSLEngine engine) throws IOException {
+
+
 
         if (debug) log.info("About to do handshake..." + Thread.currentThread());
 
@@ -140,8 +142,8 @@ public abstract class NIOSSLPeer {
         if (debug) log.info("appBufferSize: " + appBufferSize);
         ByteBuffer myAppData = ByteBufferUtil.allocateByteBuffer(2*appBufferSize);
         ByteBuffer peerAppData = ByteBufferUtil.allocateByteBuffer(2* appBufferSize);
-        myNetData.clear();
-        peerNetData.clear();
+        outNetData.clear();
+        inNetData.clear();
 
         handshakeStatus = engine.getHandshakeStatus();
         if (debug) log.info("First handshake: " + handshakeStatus);
@@ -153,7 +155,7 @@ public abstract class NIOSSLPeer {
             switch (handshakeStatus)
             {
             case NEED_UNWRAP:
-                if (socketChannel.read(peerNetData) < 0) {
+                if (socketChannel.read(inNetData) < 0) {
                     if (engine.isInboundDone() && engine.isOutboundDone()) {
                         return false;
                     }
@@ -167,10 +169,10 @@ public abstract class NIOSSLPeer {
                     handshakeStatus = engine.getHandshakeStatus();
                     break;
                 }
-                peerNetData.flip();
+                inNetData.flip();
                 try {
-                    result = engine.unwrap(peerNetData, peerAppData);
-                    peerNetData.compact();
+                    result = engine.unwrap(inNetData, peerAppData);
+                    inNetData.compact();
                     handshakeStatus = result.getHandshakeStatus();
                 } catch (SSLException sslException) {
                     sslException.printStackTrace();
@@ -189,7 +191,7 @@ public abstract class NIOSSLPeer {
                     break;
                 case BUFFER_UNDERFLOW:
                     // Will occur either when no data was read from the peer or when the peerNetData buffer was too small to hold all peer's data.
-                    peerNetData = handleBufferUnderflow(engine, peerNetData);
+                    inNetData = handleBufferUnderflow(engine, inNetData);
                     break;
                 case CLOSED:
                     if (engine.isOutboundDone()) {
@@ -204,9 +206,9 @@ public abstract class NIOSSLPeer {
                 }
                 break;
             case NEED_WRAP:
-                myNetData.clear();
+                outNetData.clear();
                 try {
-                    result = engine.wrap(myAppData, myNetData);
+                    result = engine.wrap(myAppData, outNetData);
                     handshakeStatus = result.getHandshakeStatus();
                 } catch (SSLException sslException) {
                     if (debug) log.info("A problem was encountered while processing the data that caused the SSLEngine to abort. Will try to properly close connection...");
@@ -216,22 +218,22 @@ public abstract class NIOSSLPeer {
                 }
                 switch (result.getStatus()) {
                 case OK :
-                    ByteBufferUtil.write(socketChannel, myNetData);
+                    ByteBufferUtil.write(socketChannel, outNetData);
                     break;
                 case BUFFER_OVERFLOW:
                     // Will occur if there is not enough space in myNetData buffer to write all the data that would be generated by the method wrap.
                     // Since myNetData is set to session's packet size we should not get to this point because SSLEngine is supposed
                     // to produce messages smaller or equal to that, but a general handling would be the following:
-                    myNetData = enlargePacketBuffer(engine, myNetData);
+                    outNetData = enlargePacketBuffer(engine, outNetData);
                     break;
                 case BUFFER_UNDERFLOW:
                     throw new SSLException("Buffer underflow occured after a wrap. I don't think we should ever get here.");
                 case CLOSED:
                     try {
 
-                        ByteBufferUtil.write(socketChannel, myNetData);
+                        ByteBufferUtil.write(socketChannel, outNetData);
                         // At this point the handshake status will probably be NEED_UNWRAP so we make sure that peerNetData is clear to read.
-                        peerNetData.clear();
+                        inNetData.clear();
                     } catch (Exception e) {
                         if (debug) log.info("Failed to send server's CLOSE message due to socket channel's failure.");
                         handshakeStatus = engine.getHandshakeStatus();
@@ -303,14 +305,17 @@ public abstract class NIOSSLPeer {
      * @throws Exception
      */
     protected static ByteBuffer handleBufferUnderflow(SSLEngine engine, ByteBuffer buffer) {
-        if (engine.getSession().getPacketBufferSize() < buffer.limit()) {
-            return buffer;
-        } else {
-            ByteBuffer replaceBuffer = enlargePacketBuffer(engine, buffer);
+
+        ByteBuffer ret = buffer;
+        if(engine.getSession().getPacketBufferSize() > buffer.capacity())
+        {
+            ret = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.DIRECT, engine.getSession().getPacketBufferSize());
             buffer.flip();
-            replaceBuffer.put(buffer);
-            return replaceBuffer;
+            ret.put(buffer);
+            log.info("Log underflow executed <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
         }
+
+        return ret;
     }
 
     /**

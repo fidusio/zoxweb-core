@@ -1,18 +1,11 @@
 package org.zoxweb.server.net.security;
 
 import org.zoxweb.server.io.ByteBufferUtil;
-import org.zoxweb.server.net.SelectorController;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.nio.channels.spi.SelectorProvider;
-import java.security.SecureRandom;
-import java.util.Iterator;
 import java.util.concurrent.Executor;
 
 import javax.net.ssl.SSLContext;
@@ -50,9 +43,15 @@ public class NIOSSLServer extends NIOSSLPeer {
 
         SSLSession dummySession = context.createSSLEngine().getSession();
         //myAppData = ByteBuffer.allocate(dummySession.getApplicationBufferSize());
-        myNetData = ByteBuffer.allocate(2*dummySession.getPacketBufferSize());
         //peerAppData = ByteBuffer.allocate(dummySession.getApplicationBufferSize());
-        peerNetData = ByteBuffer.allocate(2*dummySession.getPacketBufferSize());
+
+
+
+
+        inNetData = ByteBuffer.allocate(dummySession.getPacketBufferSize());
+        outNetData = ByteBuffer.allocate(dummySession.getPacketBufferSize());
+//        inNetData = ByteBuffer.allocate(4096*2);
+//        outNetData = ByteBuffer.allocate(4096*2);
 
         appDataBufferSize = dummySession.getApplicationBufferSize();
         dummySession.invalidate();
@@ -151,33 +150,43 @@ public class NIOSSLServer extends NIOSSLPeer {
      * @throws IOException if an I/O error occurs to the socket channel.
      */
     @Override
-    protected ByteBuffer read(SocketChannel socketChannel, SSLEngine engine, ByteBuffer peerAppData) throws IOException {
+    public ByteBuffer read(SocketChannel socketChannel, SSLEngine engine, ByteBuffer peerAppData) throws IOException {
 
         log.info("About to read from a client...");
 
-        peerNetData.clear();
-        int bytesRead = socketChannel.read(peerNetData);
-        if (bytesRead > 0) {
-            peerNetData.flip();
-            peerAppData.clear();
-            while (peerNetData.hasRemaining()) {
+        inNetData.clear();
 
-                SSLEngineResult result = engine.unwrap(peerNetData, peerAppData);
-                log.info("unwrap result: " + result);
+        int bytesRead = socketChannel.read(inNetData);
+        if (bytesRead > 0) {
+            inNetData.flip();
+            peerAppData.clear();
+            while (inNetData.hasRemaining()) {
+
+                SSLEngineResult result = engine.unwrap(inNetData, peerAppData);
+                log.info(Thread.currentThread()+ " READ-UNWRAP result: " + result  + " hasRemaining: " + inNetData.hasRemaining() + " " + peerAppData.position());
                 switch (result.getStatus()) {
                 case OK:
-                    //peerAppData.flip();
-                    return peerAppData;
+                    log.info(Thread.currentThread() + " READ-OK: " + result + " peerAppData pos: " + peerAppData.position());
+                    break;
 
                 case BUFFER_OVERFLOW:
                     peerAppData = enlargeApplicationBuffer(engine, peerAppData);
                     break;
                 case BUFFER_UNDERFLOW:
-                    peerNetData = handleBufferUnderflow(engine, peerNetData);
+                    inNetData = handleBufferUnderflow(engine, inNetData);
                     break;
                 case CLOSED:
                     log.info("Client wants to close connection...");
-                    closeConnection(socketChannel, engine);
+                    if(result.getHandshakeStatus() == SSLEngineResult.HandshakeStatus.NEED_WRAP)
+                    {
+                        //peerAppData.flip();
+                        outNetData.clear();
+                        result = engine.wrap(ByteBufferUtil.DUMMY, outNetData);
+                        log.info(Thread.currentThread() + " READ-CLOSED-NEED_WRAP: " + result);
+                        ByteBufferUtil.write(socketChannel, outNetData);
+                    }
+                    //closeConnection(socketChannel, engine);
+
                     log.info("Goodbye client!");
                     return null;
                 default:
@@ -186,6 +195,8 @@ public class NIOSSLServer extends NIOSSLPeer {
             }
 
             //write(socketChannel, engine, "Hello! I am your server!");
+
+            return peerAppData;
 
         } else if (bytesRead < 0) {
             log.info("Received end of stream. Will try to close connection with client...");
@@ -205,7 +216,7 @@ public class NIOSSLServer extends NIOSSLPeer {
      * @throws IOException if an I/O error occurs to the socket channel.
      */
     @Override
-    protected void write(SocketChannel socketChannel, SSLEngine engine, ByteBuffer myAppData) throws IOException {
+    public void write(SocketChannel socketChannel, SSLEngine engine, ByteBuffer myAppData) throws IOException {
 
         log.info("About to write to a client...");
 
@@ -215,19 +226,21 @@ public class NIOSSLServer extends NIOSSLPeer {
         while (myAppData.hasRemaining()) {
             // The loop has a meaning for (outgoing) messages larger than 16KB.
             // Every wrap call will remove 16KB from the original message and send it to the remote peer.
-            myNetData.clear();
-            SSLEngineResult result = engine.wrap(myAppData, myNetData);
+            outNetData.clear();
+            SSLEngineResult result = engine.wrap(myAppData, outNetData);
+            log.info(Thread.currentThread()+ " WRITE-WRAP result: " + result  + " hasRemaining: " + myAppData.hasRemaining() + " " + outNetData.position());
             switch (result.getStatus()) {
             case OK:
-                ByteBufferUtil.write(socketChannel, myNetData);
-                log.info("Message sent to the client");
+                ByteBufferUtil.write(socketChannel, outNetData);
+                log.info(Thread.currentThread() + " WRITE-OK: " + result);
                 break;
             case BUFFER_OVERFLOW:
-                myNetData = enlargePacketBuffer(engine, myNetData);
+                outNetData = enlargePacketBuffer(engine, outNetData);
                 break;
             case BUFFER_UNDERFLOW:
                 throw new SSLException("Buffer underflow occur after a wrap. I don't think we should ever get here.");
             case CLOSED:
+                log.info(Thread.currentThread() +" WRITE-CLOSED: " + result);
                 closeConnection(socketChannel, engine);
                 throw new IOException("SSL connection closed.");
             default:
@@ -237,7 +250,7 @@ public class NIOSSLServer extends NIOSSLPeer {
     }
 
     /**
-     * Determines if the the server is active or not.
+     * Determines if the  server is active or not.
      *
      * @return if the server is active or not.
      */

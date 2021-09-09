@@ -77,7 +77,11 @@ public class NIOTunnel
 		public void init()
 		{
 			setRemoteAddress(new InetSocketAddressDAO(getProperties().getValue("remote_host")));
+		}
 
+		@Override
+		public NIOChannelCleaner getNIOChannelCleaner() {
+			return NIOChannelCleaner.DEFAULT;
 		}
 
 	}

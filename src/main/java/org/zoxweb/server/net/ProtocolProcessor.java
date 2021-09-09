@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.nio.channels.Channel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.spi.AbstractSelectableChannel;
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 import org.zoxweb.server.io.ByteBufferUtil;
@@ -39,6 +40,7 @@ public abstract class ProtocolProcessor
 	private volatile int defaultReadBufferSize = ByteBufferUtil.DEFAULT_BUFFER_SIZE;
 
 	private volatile NVGenericMap properties = null;
+	protected volatile Executor executor;
 	
 	protected ProtocolProcessor()
 	{
@@ -93,7 +95,7 @@ public abstract class ProtocolProcessor
 		this.outgoingInetFilterRulesManager = inetFilterRulesManager;
 	}
 
-	public boolean isChannelReadyToRead(Channel channel){return true;}
+	public boolean channelReadState(Channel channel){return true;}
 
 	public void setProperties(NVGenericMap prop)
 	{
@@ -103,6 +105,15 @@ public abstract class ProtocolProcessor
 	public NVGenericMap getProperties()
 	{
 		return properties;
+	}
+	public void setExecutor(Executor exec)
+	{
+		this.executor = exec;
+	}
+
+	public Executor getExecutor()
+	{
+		return executor;
 	}
 
 }

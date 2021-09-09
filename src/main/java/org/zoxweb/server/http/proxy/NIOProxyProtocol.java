@@ -155,6 +155,11 @@ public class NIOProxyProtocol
 		}
 
 		public void init(){}
+
+		@Override
+		public NIOChannelCleaner getNIOChannelCleaner() {
+			return NIOChannelCleaner.DEFAULT;
+		}
 		
 		
 	}

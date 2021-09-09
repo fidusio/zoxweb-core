@@ -19,12 +19,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.InetSocketAddress;
-import java.nio.channels.DatagramChannel;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
-import java.nio.channels.ServerSocketChannel;
-import java.nio.channels.SocketChannel;
-import java.nio.channels.spi.AbstractSelectableChannel;
+import java.nio.channels.*;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.Executor;
@@ -34,7 +29,6 @@ import java.util.logging.Logger;
 import org.zoxweb.server.io.IOUtil;
 
 import org.zoxweb.server.task.TaskProcessor;
-import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.shared.data.events.BaseEventObject;
 import org.zoxweb.shared.data.events.EventListenerManager;
 import org.zoxweb.shared.data.events.InetSocketAddressEvent;
@@ -84,6 +78,8 @@ public class NIOSocket
 	public NIOSocket(InetSocketAddress sa, int backlog, ProtocolSessionFactory<?> psf, Executor tsp) throws IOException
 	{
 		//SharedUtil.checkIfNulls("Null value", psf, sa);
+
+		logger.info("Executor: " + tsp);
 		selectorController = new SelectorController(Selector.open());
 		this.executor = tsp;
 		if (sa != null)
@@ -170,7 +166,7 @@ public class NIOSocket
 				{
 
 					//currentTotalKeys = selectorController.getSelector().keys().size();
-					selectedCount = selectorController.select();
+					selectedCount = selectorController.select(250);
 					long detla = System.nanoTime();
 					if (selectedCount > 0)
 					{
@@ -188,7 +184,8 @@ public class NIOSocket
 							    {
 							    	SKAttachment ska = (SKAttachment) key.attachment();
 							    	ProtocolProcessor currentPP = (ProtocolProcessor)ska.attachment();
-							    	if (currentPP != null && ska.isSelectable())
+									//logger.info(ska.attachment() + " ska is selectable: " + ska.isSelectable() + " for reading " );
+							    	if (ska.isSelectable() && currentPP != null)
 							    	{
 							    		// very very crucial setup prior to processing
 										ska.setSelectable(false);
@@ -208,9 +205,12 @@ public class NIOSocket
 								    			try {
 													currentPP.accept(key);
 												}
-								    			catch (Exception e){}
+								    			catch (Exception e){
+								    				e.printStackTrace();
+												}
+
 								    			// very crucial setup
-												if(currentPP.isChannelReadyToRead(key.channel()))
+												//if(currentPP.channelReadState(key.channel()))
 								    				ska.setSelectable(true);
 											});
 
@@ -295,24 +295,25 @@ public class NIOSocket
 								    	ProtocolProcessor psp = psf.newInstance();
 								    	
 								    	psp.setSelectorController(selectorController);
+								    	psp.setExecutor(executor);
 								    	psp.setOutgoingInetFilterRulesManager(psf.getOutgoingInetFilterRulesManager());
 
 										// if we have an executor
 										// accept the new connection
 
-//										if (executor != null) {
-//											executor.execute(() -> {
-//												try {
-//													psp.acceptConnection(NIOChannelCleaner.DEFAULT, sc, psf.isBlocking());
-//												} catch (IOException e) {
-//													e.printStackTrace();
-//													IOUtil.close(psp);
-//												}
-//											});
-//										}
-//										else
+										if (executor != null) {
+											executor.execute(() -> {
+												try {
+													psp.acceptConnection(psf.getNIOChannelCleaner(), sc, psf.isBlocking());
+												} catch (IOException e) {
+													e.printStackTrace();
+													IOUtil.close(psp);
+												}
+											});
+										}
+										else
 										{
-											psp.acceptConnection(NIOChannelCleaner.DEFAULT, sc, psf.isBlocking());
+											psp.acceptConnection(psf.getNIOChannelCleaner(), sc, psf.isBlocking());
 										}
 								    	connectionCount.incrementAndGet();
 								    

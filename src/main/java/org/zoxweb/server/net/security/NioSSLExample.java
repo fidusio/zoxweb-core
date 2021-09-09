@@ -17,7 +17,7 @@ public class NioSSLExample
 {
    public static void main(String[] args) throws Exception
    {
-      InetSocketAddress address = new InetSocketAddress("xlogistx.io", 443);
+      InetSocketAddress address = new InetSocketAddress("localhost", 9443);
       Selector selector = Selector.open();
       SocketChannel channel = SocketChannel.open();
       channel.connect(address);

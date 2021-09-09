@@ -78,5 +78,8 @@ extends GetName, GetNVProperties
 	 *
 	 */
 	void init();
+
+
+	NIOChannelCleaner getNIOChannelCleaner();
 	
 }

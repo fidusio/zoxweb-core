@@ -74,9 +74,9 @@ public class SharedUtil
 	@SuppressWarnings("unchecked")
 	public static <T> T getWrappedValue(T v)
     {
-		if (v instanceof GetWrappedValue)
+		if (v instanceof WrappedValue)
 		{
-			return (T) ((GetWrappedValue<?>)v).getWrappedValue();
+			return (T) ((WrappedValue<?>)v).unwrap();
 		}
 		
 		return v;

@@ -39,6 +39,9 @@ public class ByteBufferUtil
 
 	public static final int DEFAULT_BUFFER_SIZE = 4096;
 	public static final int CACHE_LIMIT = 256;
+
+
+	public static final ByteBuffer DUMMY = allocateByteBuffer(0);
 	
 	private ByteBufferUtil()
 	{	
@@ -98,9 +101,7 @@ public class ByteBufferUtil
 			case HEAP:
 				bb = ByteBuffer.allocate(length-offset);
 				break;
-			
 			}
-			bb = ByteBuffer.allocate(length-offset);
 			//log.info("["+ (counter++) + "]must create new buffer:" + bb.capacity() + " " + bb.getClass().getName());
 		}
 

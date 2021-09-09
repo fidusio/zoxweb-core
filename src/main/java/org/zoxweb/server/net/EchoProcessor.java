@@ -55,6 +55,10 @@ public class EchoProcessor
 				public void setBlocking(boolean blocking) {
 
 				}
+				@Override
+				public NIOChannelCleaner getNIOChannelCleaner() {
+					return NIOChannelCleaner.DEFAULT;
+				}
 
 				//				@Override
 //				public SSLSessionDataFactory getIncomingSSLSessionDataFactory() {

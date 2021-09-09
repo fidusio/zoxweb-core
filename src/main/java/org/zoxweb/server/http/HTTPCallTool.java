@@ -52,12 +52,12 @@ public class HTTPCallTool implements Runnable
 
     public void run()
     {
+        HTTPResponseData rd = null;
         try
         {
             HTTPCall hc = new HTTPCall(hmci);
-            HTTPResponseData rd = hc.sendRequest();
-            if(printResult)
-                log.info("" + rd);
+            rd = hc.sendRequest();
+
 
         }
         catch(Exception e)
@@ -66,6 +66,8 @@ public class HTTPCallTool implements Runnable
             failCounter.incrementAndGet();
         }
         counter.incrementAndGet();
+        if(printResult)
+            log.info("Total: " + counter + " Fail: " + failCounter + " response: " + rd.getStatus() + " length: " + rd.getData().length);
     }
 
     public static void main(String ...args)
@@ -107,6 +109,7 @@ public class HTTPCallTool implements Runnable
                 for(HTTPMessageConfigInterface hmci : hmcis) {
                     TaskUtil.getDefaultTaskScheduler().queue(0, new HTTPCallTool(hmci, printResult));
                 }
+
             }
 
 

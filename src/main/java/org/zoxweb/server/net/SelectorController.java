@@ -16,6 +16,8 @@
 package org.zoxweb.server.net;
 
 import java.io.IOException;
+import java.nio.channels.Channel;
+import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 
@@ -65,6 +67,33 @@ public class SelectorController
 	public SelectionKey register(AbstractSelectableChannel ch, int ops) throws IOException
 	{
 		return register(null, ch, ops, null, false);
+	}
+
+
+
+
+	public boolean enableSelectionKeyReading(AbstractSelectableChannel channel)
+	{
+		SelectionKey sk = channel.keyFor(getSelector());
+
+		if(sk != null && sk.isValid() && sk.attachment() instanceof SKAttachment) {
+			((SKAttachment<?>) sk.attachment()).setSelectable(true);
+			try {
+				// block the select lock just in case
+				lock.lock();
+				// wakeup the selector
+				selector.wakeup();
+				// invoke the main lock
+				selectLock.lock();
+			} finally {
+				lock.unlock();
+				selectLock.unlock();
+
+			}
+			return  true;
+		}
+		return false;
+
 	}
 	
 	
@@ -181,7 +210,7 @@ public class SelectorController
 	
 	public void cancelSelectionKey(SelectionKey sk)
 	{
-		
+
 		if (sk != null)
 		{
 			try
@@ -194,7 +223,7 @@ public class SelectorController
 				selectLock.lock();
 				sk.cancel();
 
-				
+
 			}
 			finally
 			{
@@ -202,7 +231,14 @@ public class SelectorController
 				selectLock.unlock();
 			}
 		}
-		
+
+	}
+
+	public void cancelSelectionKey(SelectableChannel ch)
+	{
+		if(ch != null){
+			cancelSelectionKey(ch.keyFor(getSelector()));
+		}
 	}
 	
 	

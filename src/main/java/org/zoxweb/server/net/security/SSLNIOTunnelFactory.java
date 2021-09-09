@@ -1,5 +1,6 @@
 package org.zoxweb.server.net.security;
 
+import org.zoxweb.server.net.NIOChannelCleaner;
 import org.zoxweb.server.net.ProtocolSessionFactoryBase;
 import org.zoxweb.shared.data.ConfigDAO;
 import org.zoxweb.shared.net.InetSocketAddressDAO;
@@ -55,6 +56,11 @@ public class SSLNIOTunnelFactory
     {
         setRemoteAddress(new InetSocketAddressDAO(getProperties().getValue("remote_host")));
         sslContext = (SSLContext) ((ConfigDAO)getProperties().getValue("ssl_engine")).attachment();
+    }
+
+    @Override
+    public NIOChannelCleaner getNIOChannelCleaner() {
+        return NIOChannelCleaner.DEFAULT;
     }
 
 }

@@ -20,7 +20,6 @@ import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.net.*;
 import org.zoxweb.server.security.CryptoUtil;
 import org.zoxweb.server.task.TaskUtil;
-import org.zoxweb.shared.data.ConfigDAO;
 import org.zoxweb.shared.net.InetSocketAddressDAO;
 
 import javax.net.ssl.SSLContext;
@@ -168,8 +167,7 @@ public class SSLNIOTunnel
 
 
 							sslEngine.beginHandshake();
-							if (sslSourceChannel.isOpen() && niosslServer.doHandshake(sslSourceChannel, sslEngine)) {
-
+							if(sslSourceChannel.isOpen() && CryptoUtil.doSSLHandshake("NIOSSL", sslEngine, niosslServer.inNetData, niosslServer.outNetData,  sslSourceChannel, true)){
 								// we stop nio socket from reading it
 
 								destinationChannel = SocketChannel.open((new InetSocketAddress(remoteAddress.getInetAddress(), remoteAddress.getPort())));
@@ -179,6 +177,18 @@ public class SSLNIOTunnel
 							} else {
 								close();
 							}
+
+//							if (sslSourceChannel.isOpen() && niosslServer.doHandshake(sslSourceChannel, sslEngine)) {
+//
+//								// we stop nio socket from reading it
+//
+//								destinationChannel = SocketChannel.open((new InetSocketAddress(remoteAddress.getInetAddress(), remoteAddress.getPort())));
+//								getSelectorController().register(NIOChannelCleaner.DEFAULT, destinationChannel, SelectionKey.OP_READ, this, false);
+//								//getSelectorController().register(NIOChannelCleaner.DEFAULT, sslSourceChannel, SelectionKey.OP_READ, this, false);
+//								log.info("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^**********************XMAS TREE******************************^^^^^^^^^^^^^^^^^^^^^");
+//							} else {
+//								close();
+//							}
 
 							return;
 						}
@@ -265,8 +275,8 @@ public class SSLNIOTunnel
 
 
 		niosslServer = new NIOSSLServer(TaskUtil.getDefaultTaskProcessor(), sslContext);
-		sourceBB = ByteBuffer.allocate(2*niosslServer.appDataBufferSize());
-		destinationBB = ByteBuffer.allocate(2*niosslServer.appDataBufferSize());
+		sourceBB = ByteBuffer.allocate(niosslServer.appDataBufferSize());
+		destinationBB = ByteBuffer.allocate(niosslServer.appDataBufferSize());
 		getSelectorController().register(ncc,  asc, SelectionKey.OP_READ, this, isBlocking);
 
 
@@ -308,7 +318,7 @@ public class SSLNIOTunnel
 	}
 
 
-	public boolean isChannelReadyToRead(Channel channel)
+	public boolean channelReadState(Channel channel)
 	{
 		if(channel == destinationChannel)
 			return true;
