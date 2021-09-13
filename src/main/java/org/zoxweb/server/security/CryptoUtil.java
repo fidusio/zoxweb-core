@@ -543,8 +543,7 @@ public class CryptoUtil {
     try {
       ksfis = new FileInputStream(keyStoreFilename);
       tsfis = trustStoreFilename != null ? new FileInputStream(trustStoreFilename) : null;
-      return initSSLContext(ksfis, keyStoreType, keyStorePassword, crtPassword, tsfis,
-              trustStorePassword);
+      return initSSLContext(ksfis, keyStoreType, keyStorePassword, crtPassword, tsfis,trustStorePassword);
     } finally {
       IOUtil.close(ksfis);
       IOUtil.close(tsfis);
@@ -573,9 +572,9 @@ public class CryptoUtil {
       tmf.init(ts != null ? ts : ks);
     }
 
-    SSLContext sc = SSLContext.getInstance("TLS");
-    sc.init(kmf.getKeyManagers(), null, null);
-    return sc;
+    SSLContext sslContext = SSLContext.getInstance("TLS");
+    sslContext.init(kmf.getKeyManagers(), null, null);
+    return sslContext;
   }
 
   public static void updateKeyPasswordInKeyStore(final InputStream keyStoreIS,

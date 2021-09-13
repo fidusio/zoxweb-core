@@ -17,21 +17,7 @@ import javax.net.ssl.SSLSession;
 
 public class NIOSSLServer extends NIOSSLPeer {
 	
-	/**
-	 * Declares if the server is active to serve and create new connections.
-	 */
-	//private boolean active;
-	
-    /**
-     * The context will be initialized with a specific SSL/TLS protocol and will then be used
-     * to create {@link SSLEngine} classes for each new connection that arrives to the server.
-     */
-   // private SSLContext context;
 
-    /**
-     * A part of Java NIO that will be used to serve all connections to the server in one thread.
-     */
-    //private SelectorController selector;
 
 
     private int appDataBufferSize;
@@ -181,7 +167,7 @@ public class NIOSSLServer extends NIOSSLPeer {
                     {
                         //peerAppData.flip();
                         outNetData.clear();
-                        result = engine.wrap(ByteBufferUtil.DUMMY, outNetData);
+                        result = engine.wrap(ByteBufferUtil.EMPTY, outNetData);
                         log.info(Thread.currentThread() + " READ-CLOSED-NEED_WRAP: " + result);
                         ByteBufferUtil.write(socketChannel, outNetData);
                     }

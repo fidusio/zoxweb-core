@@ -29,6 +29,7 @@ import java.util.logging.Logger;
 import org.zoxweb.server.io.IOUtil;
 
 import org.zoxweb.server.task.TaskProcessor;
+import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.shared.data.events.BaseEventObject;
 import org.zoxweb.shared.data.events.EventListenerManager;
 import org.zoxweb.shared.data.events.InetSocketAddressEvent;
@@ -48,7 +49,7 @@ public class NIOSocket
     implements Runnable, DaemonController, Closeable
 {
 	private static final transient Logger logger = Logger.getLogger(NIOSocket.class.getName());
-	private static boolean debug = false;
+	public static boolean debug = false;
 	private boolean live = true;
 	private final SelectorController selectorController;
 	private final Executor executor;
@@ -75,19 +76,15 @@ public class NIOSocket
 	
 	
 	
-	public NIOSocket(InetSocketAddress sa, int backlog, ProtocolSessionFactory<?> psf, Executor tsp) throws IOException
+	public NIOSocket(InetSocketAddress sa, int backlog, ProtocolSessionFactory<?> psf, Executor exec) throws IOException
 	{
-		//SharedUtil.checkIfNulls("Null value", psf, sa);
-
-		logger.info("Executor: " + tsp);
+		logger.info("Executor: " + exec);
 		selectorController = new SelectorController(Selector.open());
-		this.executor = tsp;
+		this.executor = exec;
 		if (sa != null)
 			addServerSocket(sa, backlog, psf);
-		
 
-		
-		new Thread(this).start();
+		TaskUtil.startRun(this);
 	}
 	
 	public SelectionKey addServerSocket(InetSocketAddress sa, int backlog, ProtocolSessionFactory<?> psf) throws IOException
@@ -103,8 +100,7 @@ public class NIOSocket
 	{
 		SharedUtil.checkIfNulls("Null values", ssc, psf);
 		
-		SelectionKey sk = selectorController.register(ssc, SelectionKey.OP_ACCEPT);
-		sk.attach(psf);
+		SelectionKey sk = selectorController.register(ssc, SelectionKey.OP_ACCEPT, psf);
 		logger.info(ssc + " added");
 		
 		return sk;
@@ -122,8 +118,7 @@ public class NIOSocket
 	public SelectionKey addDatagramChannel(DatagramChannel dc,  ProtocolSessionFactory<?> psf) throws IOException
 	{
 		SharedUtil.checkIfNulls("Null values", dc, psf);
-		SelectionKey sk = selectorController.register(dc, SelectionKey.OP_ACCEPT);
-		sk.attach(psf);
+		SelectionKey sk = selectorController.register(dc, SelectionKey.OP_ACCEPT, psf);
 		logger.info(dc + " added");
 		
 		return sk;
@@ -166,7 +161,7 @@ public class NIOSocket
 				{
 
 					//currentTotalKeys = selectorController.getSelector().keys().size();
-					selectedCount = selectorController.select(250);
+					selectedCount = selectorController.select();
 					long detla = System.nanoTime();
 					if (selectedCount > 0)
 					{
@@ -178,13 +173,13 @@ public class NIOSocket
 						{	    
 						    SelectionKey key = keyIterator.next();
 						    keyIterator.remove();
+							SKAttachment ska = (SKAttachment) key.attachment();
 						    try
 						    {	    	
 						    	if (key.isValid() && SharedUtil.getWrappedValue(key.channel()).isOpen() && key.isReadable())
 							    {
-							    	SKAttachment ska = (SKAttachment) key.attachment();
 							    	ProtocolProcessor currentPP = (ProtocolProcessor)ska.attachment();
-									//logger.info(ska.attachment() + " ska is selectable: " + ska.isSelectable() + " for reading " );
+									if(debug) logger.info(ska.attachment() + " ska is selectable: " + ska.isSelectable() + " for reading " );
 							    	if (ska.isSelectable() && currentPP != null)
 							    	{
 							    		// very very crucial setup prior to processing
@@ -193,14 +188,6 @@ public class NIOSocket
 							    		// a channel is ready for reading
 								    	if (executor != null)
 								    	{
-//											TaskUtil.getDefaultTaskScheduler().queue(0,()->{
-//												try {
-//													currentPP.accept(key);
-//												}
-//												catch (Exception e){}
-//												// very crucial setup
-//												ska.setSelectable(true);
-//											})
 								    		executor.execute(()->{
 								    			try {
 													currentPP.accept(key);
@@ -208,16 +195,11 @@ public class NIOSocket
 								    			catch (Exception e){
 								    				e.printStackTrace();
 												}
-
 								    			// very crucial setup
-												//if(currentPP.channelReadState(key.channel()))
-								    				ska.setSelectable(true);
+												ska.setSelectable(true);
 											});
-
 								    	}
-								    	else
-								    	{
-
+								    	else {
 											try {
 												currentPP.accept(key);
 											}
@@ -233,7 +215,7 @@ public class NIOSocket
 							    	
 							    	SocketChannel sc = ((ServerSocketChannel)key.channel()).accept();
 
-							    	ProtocolSessionFactory<?> psf = (ProtocolSessionFactory<?>) key.attachment();
+							    	ProtocolSessionFactory<?> psf = (ProtocolSessionFactory<?>) ska.attachment();
 									if (debug)
 										logger.info("Accepted: " + sc + " psf:" + psf);
 							    	// check if the incoming connection is allowed

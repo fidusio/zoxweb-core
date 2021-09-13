@@ -212,9 +212,14 @@ public class TaskUtil
 		long timestamp = System.currentTimeMillis();
 		tsp.close();
 		tp.close();
-
-
 		return timestamp;
+	}
+
+
+	public static Thread startRun(Runnable run) {
+		Thread ret = new Thread(run);
+		ret.start();
+		return ret;
 	}
 
 

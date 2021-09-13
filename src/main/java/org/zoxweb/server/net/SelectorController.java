@@ -69,6 +69,11 @@ public class SelectorController
 		return register(null, ch, ops, null, false);
 	}
 
+	public SelectionKey register(AbstractSelectableChannel ch, int ops, Object attachement) throws IOException
+	{
+		return register(null, ch, ops, attachement, false);
+	}
+
 
 
 
@@ -129,6 +134,8 @@ public class SelectorController
 			// invoke the main lock
 			selectLock.lock();
 			SharedUtil.getWrappedValue(ch).configureBlocking(blocking);
+
+
 			ret = SharedUtil.getWrappedValue(ch).register(selector, ops, new SKAttachment(attachment));
 			if (niocc != null)
 			{

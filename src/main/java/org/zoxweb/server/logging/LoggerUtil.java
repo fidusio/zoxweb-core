@@ -38,7 +38,7 @@ public final class LoggerUtil
 	public static final SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSZ");
 	public static final String PRODUCTION_FORMAT = "%1$tY-%1$tm-%1$td %1$tH:%1$tM:%1$tS %4$-6s : %2$s %5$s%6$s%n";
 	public static final String DEFAULT_FORMAT = "%1$s %4$-6s : %2$s-%5$s%6$s%n";
-	public static final String DEFAULT_FORMAT_INTERNAL = "[%1$s][%2$s::%3$s][%4$s]: %5$s %n";
+	public static final String DEFAULT_FORMAT_INTERNAL = "[%1$s][%2$s::%3$s][%4$s]:%5$s: %6$s %n";
 
 
 	private LoggerUtil()
@@ -117,6 +117,7 @@ public final class LoggerUtil
             lr.getSourceClassName(),
             lr.getSourceMethodName(),
             lr.getLevel().getLocalizedName(),
+            Thread.currentThread(),
             lr.getMessage()
         );
       }

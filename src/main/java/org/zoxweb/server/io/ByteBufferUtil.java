@@ -41,7 +41,7 @@ public class ByteBufferUtil
 	public static final int CACHE_LIMIT = 256;
 
 
-	public static final ByteBuffer DUMMY = allocateByteBuffer(0);
+	public static final ByteBuffer EMPTY = allocateByteBuffer(0);
 	
 	private ByteBufferUtil()
 	{	
@@ -175,14 +175,20 @@ public class ByteBufferUtil
 		return SINGLETON.toByteBuffer0(bType, buffer, offset, length, copy);
 	}
 
-	public static void write(ByteChannel bc, ByteBuffer bb) throws IOException
+	public static int write(ByteChannel bc, ByteBuffer bb) throws IOException
 	{
 		bb.flip();
-
+		int totalWritten = 0;
 		while(bb.hasRemaining())
 		{
-			bc.write(bb);
+			int written = bc.write(bb);
+			if (written == -1)
+				return -1;
+
+			totalWritten += written;
 		}
+
+		return totalWritten;
 	}
 	
 	public static String toString(ByteBuffer bb) throws IOException
