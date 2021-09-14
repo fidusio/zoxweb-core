@@ -84,7 +84,7 @@ public class NIOSocket
 		if (sa != null)
 			addServerSocket(sa, backlog, psf);
 
-		TaskUtil.startRun(this);
+		TaskUtil.startRun("NIO-SOCKET", this);
 	}
 	
 	public SelectionKey addServerSocket(InetSocketAddress sa, int backlog, ProtocolSessionFactory<?> psf) throws IOException

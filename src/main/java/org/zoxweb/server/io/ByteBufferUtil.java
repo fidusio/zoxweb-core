@@ -187,7 +187,23 @@ public class ByteBufferUtil
 
 			totalWritten += written;
 		}
+		return totalWritten;
+	}
 
+
+	public static int smartWrite(ByteChannel bc, ByteBuffer bb) throws IOException
+	{
+		bb.flip();
+		int totalWritten = 0;
+		while(bb.hasRemaining())
+		{
+			int written = bc.write(bb);
+			if (written == -1)
+				return -1;
+
+			totalWritten += written;
+		}
+		bb.compact();
 		return totalWritten;
 	}
 	

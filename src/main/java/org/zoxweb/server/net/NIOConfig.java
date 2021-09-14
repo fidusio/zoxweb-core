@@ -190,7 +190,7 @@ extends AppCreatorDefault<NIOSocket, ConfigDAO>
 			if (nve instanceof ConfigDAO)
 			{
 				ConfigDAO config = (ConfigDAO)nve;
-				if (config.attachment() instanceof NIOTunnelFactory || config.attachment() instanceof SSLNIOTunnelFactory)
+				if (config.attachment() instanceof NIOTunnelFactory)
 				{
 					ProtocolSessionFactoryBase nioTF = (ProtocolSessionFactoryBase) config.attachment();
 					try 

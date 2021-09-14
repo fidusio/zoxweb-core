@@ -216,8 +216,10 @@ public class TaskUtil
 	}
 
 
-	public static Thread startRun(Runnable run) {
+	public static Thread startRun(String name, Runnable run) {
 		Thread ret = new Thread(run);
+		if(name != null)
+			ret.setName(name);
 		ret.start();
 		return ret;
 	}

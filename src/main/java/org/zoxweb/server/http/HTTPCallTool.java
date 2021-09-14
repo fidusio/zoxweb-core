@@ -75,7 +75,7 @@ public class HTTPCallTool implements Runnable
         try
         {
             TaskUtil.setMaxTasksQueue(2048);
-            TaskUtil.setThreadMultiplier(8);
+            TaskUtil.setThreadMultiplier(4);
 
             ParamUtil.ParamMap params = ParamUtil.parse("-", args);
             //int index = 0;
