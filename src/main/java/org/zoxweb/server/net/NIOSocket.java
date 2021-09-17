@@ -183,7 +183,7 @@ public class NIOSocket
 							    	if (ska.isSelectable() && currentPP != null)
 							    	{
 							    		// very very crucial setup prior to processing
-										ska.setSelectable(false);
+										ska.setSelectable(key,false);
 
 							    		// a channel is ready for reading
 								    	if (executor != null)
@@ -196,7 +196,8 @@ public class NIOSocket
 								    				e.printStackTrace();
 												}
 								    			// very crucial setup
-												ska.setSelectable(true);
+
+												ska.setSelectable(key, true);
 											});
 								    	}
 								    	else {
@@ -205,7 +206,8 @@ public class NIOSocket
 											}
 											catch (Exception e){}
 											// very crucial setup
-											ska.setSelectable(true);
+
+												ska.setSelectable(key,true);
 								    	}
 							    	}
 							    } 

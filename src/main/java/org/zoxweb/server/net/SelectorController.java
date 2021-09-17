@@ -77,29 +77,29 @@ public class SelectorController
 
 
 
-	public boolean enableSelectionKeyReading(AbstractSelectableChannel channel)
-	{
-		SelectionKey sk = channel.keyFor(getSelector());
-
-		if(sk != null && sk.isValid() && sk.attachment() instanceof SKAttachment) {
-			((SKAttachment<?>) sk.attachment()).setSelectable(true);
-			try {
-				// block the select lock just in case
-				lock.lock();
-				// wakeup the selector
-				selector.wakeup();
-				// invoke the main lock
-				selectLock.lock();
-			} finally {
-				lock.unlock();
-				selectLock.unlock();
-
-			}
-			return  true;
-		}
-		return false;
-
-	}
+//	public boolean enableSelectionKeyReading(AbstractSelectableChannel channel)
+//	{
+//		SelectionKey sk = channel.keyFor(getSelector());
+//
+//		if(sk != null && sk.isValid() && sk.attachment() instanceof SKAttachment) {
+//			((SKAttachment<?>) sk.attachment()).setSelectable(true);
+//			try {
+//				// block the select lock just in case
+//				lock.lock();
+//				// wakeup the selector
+//				selector.wakeup();
+//				// invoke the main lock
+//				selectLock.lock();
+//			} finally {
+//				lock.unlock();
+//				selectLock.unlock();
+//
+//			}
+//			return  true;
+//		}
+//		return false;
+//
+//	}
 	
 	
 
