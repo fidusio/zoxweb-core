@@ -2160,7 +2160,15 @@ public class SharedUtil
 		}
 		return ret;
 	}
-	
+
+
+	public static String enumName(Enum<?> en)
+	{
+		checkIfNulls("enum can't be null", en);
+		if (en instanceof GetName)
+			return ((GetName) en).getName();
+		return en.name();
+	}
 	
 	public static NVGenericMap updateGetNVGenericMap(GetNVProperties toUpdate, NVGenericMap value)
 	{
