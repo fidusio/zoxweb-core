@@ -74,8 +74,10 @@ public class HTTPCallTool implements Runnable
     {
         try
         {
+            TaskUtil.setThreadMultiplier(8);
             TaskUtil.setMaxTasksQueue(2048);
-            TaskUtil.setThreadMultiplier(4);
+            System.setProperty("http.maxConnections", "100");
+
 
             ParamUtil.ParamMap params = ParamUtil.parse("-", args);
             //int index = 0;
@@ -87,6 +89,8 @@ public class HTTPCallTool implements Runnable
             String content = contentFilename != null ? IOUtil.inputStreamToString(contentFilename) : null;
             boolean printResult = params.booleanValue("-pr", true);
             String proxy = params.stringValue("-p", true);
+            int cap = params.intValue("-cap", 0);
+
             log.info("proxy: " + proxy);
             InetSocketAddressDAO proxyAddress = proxy != null ? InetSocketAddressDAO.parse(proxy, ProxyType.HTTP) : null;
 
@@ -106,8 +110,14 @@ public class HTTPCallTool implements Runnable
             int messages = 0;
             for(int i = 0; i < repeat; i++)
             {
+//                while(TaskUtil.getDefaultTaskProcessor().availableExecutorThreads() < 10)
+//                {
+//                    TaskUtil.sleep(50);
+//                    log.info("After sleep:" + TaskUtil.getDefaultTaskProcessor().availableExecutorThreads());
+//                }
                 for(HTTPMessageConfigInterface hmci : hmcis) {
                     TaskUtil.getDefaultTaskScheduler().queue(0, new HTTPCallTool(hmci, printResult));
+//                    log.info("PendingTask: " +TaskUtil.getDefaultTaskScheduler().pendingTasks() );
                 }
 
             }
@@ -122,6 +132,7 @@ public class HTTPCallTool implements Runnable
             float rate = ((float)counter.get()/(float)ts)*1000;
 
             log.info("It took:" + Const.TimeInMillis.toString(ts) + " to send:" + counter.get() + " failed:" + failCounter+ " rate:" + rate + " per/second");
+            log.info(""+System.getProperties());
 
         }
         catch(Exception e)

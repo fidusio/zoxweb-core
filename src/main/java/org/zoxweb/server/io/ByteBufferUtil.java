@@ -195,13 +195,15 @@ public class ByteBufferUtil
 	{
 		bb.flip();
 		int totalWritten = 0;
-		while(bb.hasRemaining())
-		{
-			int written = bc.write(bb);
-			if (written == -1)
-				return -1;
+		synchronized (bc){
+			while(bb.hasRemaining())
+			{
+				int written = bc.write(bb);
+				if (written == -1)
+					return -1;
 
-			totalWritten += written;
+				totalWritten += written;
+			}
 		}
 		bb.compact();
 		return totalWritten;
