@@ -76,7 +76,7 @@ public class HTTPCallTool implements Runnable
         {
             TaskUtil.setThreadMultiplier(8);
             TaskUtil.setMaxTasksQueue(2048);
-            System.setProperty("http.maxConnections", "100");
+            //System.setProperty("http.maxConnections", "100");
 
 
             ParamUtil.ParamMap params = ParamUtil.parse("-", args);
@@ -132,7 +132,7 @@ public class HTTPCallTool implements Runnable
             float rate = ((float)counter.get()/(float)ts)*1000;
 
             log.info("It took:" + Const.TimeInMillis.toString(ts) + " to send:" + counter.get() + " failed:" + failCounter+ " rate:" + rate + " per/second");
-            log.info(""+System.getProperties());
+            //log.info(""+System.getProperties());
 
         }
         catch(Exception e)

@@ -664,11 +664,34 @@ public final class SharedStringUtil
 	 */
 	public static String[] parseString(String str, String regex, CharSequence... filters)
     {
+		return parseString(str, regex, false, filters);
+	}
+
+	/**
+	 * Parses specified string based on regex and filter.
+	 * @param str to parse
+	 * @param regex reg expression
+	 * @param noEmpty if true empty string are filtered
+	 * @param filters filter to the str
+	 * @return parsed strings
+	 */
+	public static String[] parseString(String str, String regex, boolean noEmpty, CharSequence... filters)
+	{
 		if (filters != null)
 		{
 			str = filterString (str, filters);
 		}
-		return str.split(regex);	
+		String[] results = str.split(regex);
+		if(!noEmpty)
+			return results;
+
+		List<String> ret = new ArrayList<String>();
+		for(String tmp : results)
+		{
+			if(!isEmpty(tmp))
+				ret.add(tmp);
+		}
+		return ret.toArray(new String[0]);
 	}
 	
 	public static String[] parseStringLenient(String str, String regex, CharSequence... filters)

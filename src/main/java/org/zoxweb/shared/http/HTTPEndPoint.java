@@ -4,6 +4,8 @@ import org.zoxweb.shared.data.DataConst;
 import org.zoxweb.shared.security.SecurityProfile;
 import org.zoxweb.shared.util.*;
 
+import java.util.Arrays;
+
 
 public class HTTPEndPoint
 extends SecurityProfile
@@ -83,9 +85,31 @@ extends SecurityProfile
         ((NVStringList)lookup(Param.PATHS)).setValues(paths);
     }
 
-    public boolean isPathSupported(String path)
+//    public boolean isPathSupported(String path)
+//    {
+//        return ((NVStringList)lookup(Param.PATHS)).contains(path);
+//    }
+
+    public boolean isPathSupported(String uri)
     {
-        return ((NVStringList)lookup(Param.PATHS)).contains(path);
+        NVStringList toParse =  ((NVStringList)lookup(Param.PATHS));
+        String[] uriTokens = SharedStringUtil.parseString(uri, "/", true);//uri.split("/");
+        for(String path: toParse.getValues())
+        {
+            String[] pathTokens = SharedStringUtil.parseString(path, "/", true);//path.split("/");
+            for(int i = 0; i < pathTokens.length; i++)
+            {
+                if(pathTokens[i].startsWith("{") || uriTokens.length == i) {
+                    return true;
+                }
+
+                if (!(uriTokens.length > i && uriTokens[i].equalsIgnoreCase(pathTokens[i]))) {
+                    break;
+                }
+
+            }
+        }
+        return false;
     }
 
     public HTTPMethod[] getMethods()
