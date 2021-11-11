@@ -216,6 +216,20 @@ public final class SharedStringUtil
 
 		return false;
 	}
+
+	public static String removeCharFromEnd(char toRemove, String str)
+	{
+		int indexToRemove = -1;
+		for (int i = str.length() - 1; i >= 0; i--)
+		{
+			if (str.charAt(i) != toRemove)
+				break;
+			indexToRemove = i;
+		}
+		if(indexToRemove != -1)
+			return str.substring(0, indexToRemove);
+		return str;
+	}
 	
 	/**
 	 * Reverses the given token(s).

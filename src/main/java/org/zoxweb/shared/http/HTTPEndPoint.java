@@ -92,21 +92,33 @@ extends SecurityProfile
 
     public boolean isPathSupported(String uri)
     {
-        NVStringList toParse =  ((NVStringList)lookup(Param.PATHS));
+        uri = SharedStringUtil.removeCharFromEnd('/', uri);
+
+        //NVStringList toParse =  ((NVStringList)lookup(Param.PATHS));
         String[] uriTokens = SharedStringUtil.parseString(uri, "/", true);//uri.split("/");
-        for(String path: toParse.getValues())
+        for(String path: getPaths())
         {
+            path = SharedStringUtil.removeCharFromEnd('/', path);
+            if(uri.equalsIgnoreCase(path)){
+                return true;
+            }
+
             String[] pathTokens = SharedStringUtil.parseString(path, "/", true);//path.split("/");
+            System.out.println(Arrays.toString(uriTokens) + ":" + Arrays.toString(pathTokens));
             for(int i = 0; i < pathTokens.length; i++)
             {
-                if(pathTokens[i].startsWith("{") || uriTokens.length == i) {
+                boolean optional = pathTokens[i].startsWith("{");
+                if(!optional && uriTokens.length == i)
+                    break;
+
+                if(optional || uriTokens.length == i ) {
                     return true;
                 }
+
 
                 if (!(uriTokens.length > i && uriTokens[i].equalsIgnoreCase(pathTokens[i]))) {
                     break;
                 }
-
             }
         }
         return false;
