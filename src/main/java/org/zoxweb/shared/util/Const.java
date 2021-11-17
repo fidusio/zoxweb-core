@@ -134,6 +134,11 @@ public class Const {
 
       return ret.value;
     }
+
+    public static boolean lookupValue(int val)
+    {
+      return val != 0;
+    }
   }
 
   public enum SourceOrigin {
