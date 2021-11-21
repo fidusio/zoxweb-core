@@ -22,6 +22,8 @@ import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 
+import java.security.cert.X509Certificate;
+import java.security.interfaces.RSAPublicKey;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.concurrent.locks.Lock;
@@ -1190,6 +1192,30 @@ public class CryptoUtil {
     } finally {
       IOUtil.close(socket);
     }
+  }
+
+  public static NVGenericMap publicKeyToNVGM(PublicKey pk)
+  {
+
+    NVGenericMap ret = new NVGenericMap();
+    System.out.println(pk);
+    ret.add("algorithm", pk.getAlgorithm());
+    ret.add("format", pk.getFormat());
+
+    ret.add(new NVInt("key_size", pk.getEncoded().length*8));
+    ret.add("key", SharedStringUtil.bytesToHex(pk.getEncoded()));
+    return ret;
+  }
+
+  public static NVGenericMap certificateToNVGM(X509Certificate cert)
+  {
+    NVGenericMap ret = SharedUtil.toNVGenericMap(cert.getSubjectX500Principal().getName(), "=",",", true);
+    ret.add("type", cert.getType());
+    NVGenericMap nvmg = publicKeyToNVGM(cert.getPublicKey());
+    nvmg.setName("public_key");
+    ret.add(nvmg);
+
+    return ret;
   }
 
   public static void main(String... args) {

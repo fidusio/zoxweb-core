@@ -66,8 +66,10 @@ public class HTTPCallTool implements Runnable
             failCounter.incrementAndGet();
         }
         counter.incrementAndGet();
-        if(printResult)
+        if(printResult) {
             log.info("Total: " + counter + " Fail: " + failCounter + " response: " + rd.getStatus() + " length: " + rd.getData().length);
+            log.info(new String(rd.getData()));
+        }
     }
 
     public static void main(String ...args)
@@ -103,7 +105,7 @@ public class HTTPCallTool implements Runnable
                 hmci.setSecureCheckEnabled(false);
                 if (content != null)
                     hmci.setContent(content);
-                System.out.println(GSONUtil.toJSON((HTTPMessageConfig) hmci, true, false, false));
+                log.info(GSONUtil.toJSON((HTTPMessageConfig) hmci, true, false, false));
                 hmcis.add(hmci);
             }
             long ts = System.currentTimeMillis();
@@ -138,7 +140,7 @@ public class HTTPCallTool implements Runnable
         catch(Exception e)
         {
             e.printStackTrace();
-            System.err.println("usage: -url url-value  <-r repeat-count> <-m http method default get> <-c content file name> <-pr true(print result)");
+            System.err.println("usage: -url url-value  [-r repeat-count] [-m http method default get] [-c content file name] [-pr true(print result)]");
         }
     }
 

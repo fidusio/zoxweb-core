@@ -24,12 +24,15 @@ public class CertificatesTest {
         Certificate[] certs = CryptoUtil.getRemoteCertificates(host);
         for (Certificate cert : certs) {
           if (cert instanceof X509Certificate) {
+            System.out.println("<===============================================================================================");
             X509Certificate xCert = (X509Certificate) cert;
             System.out.println(xCert.getSubjectX500Principal().getName());
             //X500Name xname = new X500Name(xCert.getSubjectX500Principal().getName());
-            NVGenericMap nvg = SharedUtil.toNVGenericMap(xCert.getSubjectX500Principal().getName(), "=",",", true);
-            System.out.println("CN: " + nvg.get("cn").getValue());
+//            NVGenericMap nvg = SharedUtil.toNVGenericMap(xCert.getSubjectX500Principal().getName(), "=",",", true);
+            NVGenericMap nvg = CryptoUtil.certificateToNVGM(xCert);
+            //System.out.println("CN: " + nvg.get("cn").getValue());
             System.out.println(GSONUtil.toJSONGenericMap(nvg,false, false, false));
+            System.out.println("===============================================================================================>");
           }
         }
       } catch (Exception e) {
