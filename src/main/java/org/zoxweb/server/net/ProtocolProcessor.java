@@ -81,7 +81,7 @@ public abstract class ProtocolProcessor
 
 
 	protected void acceptConnection(NIOChannelCleaner ncc, AbstractSelectableChannel asc, boolean isBlocking) throws IOException {
-		selectorController.register(ncc,  asc, SelectionKey.OP_READ, this, isBlocking);
+		SelectionKey sk = selectorController.register(ncc,  asc, SelectionKey.OP_READ, this, new DefaultSKController(), isBlocking);
 	}
 
 	public InetFilterRulesManager getOutgoingInetFilterRulesManager() 
@@ -95,7 +95,7 @@ public abstract class ProtocolProcessor
 		this.outgoingInetFilterRulesManager = inetFilterRulesManager;
 	}
 
-	public boolean channelReadState(Channel channel){return true;}
+//	public boolean channelReadState(Channel channel){return true;}
 
 	public void setProperties(NVGenericMap prop)
 	{

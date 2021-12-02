@@ -179,11 +179,11 @@ public class NIOSocket
 						    	if (key.isValid() && SharedUtil.getWrappedValue(key.channel()).isOpen() && key.isReadable())
 							    {
 							    	ProtocolProcessor currentPP = (ProtocolProcessor)ska.attachment();
-									if(debug) logger.info(ska.attachment() + " ska is selectable: " + ska.isSelectable() + " for reading " );
-							    	if (ska.isSelectable() && currentPP != null)
+									if(debug) logger.info(ska.attachment() + " ska is selectable: " + ska.getSKController().isSelectable(key) + " for reading " );
+							    	if (ska.getSKController().isSelectable(key) && currentPP != null)
 							    	{
 							    		// very very crucial setup prior to processing
-										ska.setSelectable(key,false);
+										ska.getSKController().setSelectable(key,false);
 
 							    		// a channel is ready for reading
 								    	if (executor != null)
@@ -197,7 +197,7 @@ public class NIOSocket
 												}
 								    			// very crucial setup
 
-												ska.setSelectable(key, true);
+												ska.getSKController().setSelectable(key, true);
 											});
 								    	}
 								    	else {
@@ -207,7 +207,7 @@ public class NIOSocket
 											catch (Exception e){}
 											// very crucial setup
 
-												ska.setSelectable(key,true);
+												ska.getSKController().setSelectable(key,true);
 								    	}
 							    	}
 							    } 
@@ -329,11 +329,11 @@ public class NIOSocket
 									SharedUtil.getWrappedValue(key.channel()).close();
 									TaskProcessor tp = executor instanceof TaskProcessor ? (TaskProcessor)executor : null;
 
-									logger.info("Connection closed Average dispatch processing " + TimeInMillis.nanosToString(averageProcessingTime()) +
-											" total time:" + TimeInMillis.nanosToString(totalDuration) +
-											" total dispatches: " + dispatchCounter + " total select-calls: " + selectedCountTotal +
-											" last select-count: " + selectedCount + " total selector-keys: " + selectorController.getSelector().keys().size() +
-											(tp != null ? " available workers:" +  tp.availableExecutorThreads() + "," + tp.pendingTasks() : "") );
+//									logger.info("Connection closed Average dispatch processing " + TimeInMillis.nanosToString(averageProcessingTime()) +
+//											" total time:" + TimeInMillis.nanosToString(totalDuration) +
+//											" total dispatches: " + dispatchCounter + " total select-calls: " + selectedCountTotal +
+//											" last select-count: " + selectedCount + " total selector-keys: " + selectorController.getSelector().keys().size() +
+//											(tp != null ? " available workers:" +  tp.availableExecutorThreads() + "," + tp.pendingTasks() : "") );
 						    	}
 						    }
 						    catch(Exception e)

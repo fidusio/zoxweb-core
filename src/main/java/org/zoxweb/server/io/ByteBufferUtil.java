@@ -21,6 +21,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.ByteChannel;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.locks.Lock;
 
 import org.zoxweb.shared.util.SharedUtil;
 import org.zoxweb.shared.util.SimpleQueue;
@@ -191,21 +192,34 @@ public class ByteBufferUtil
 	}
 
 
-	public static int smartWrite(ByteChannel bc, ByteBuffer bb) throws IOException
-	{
-		bb.flip();
-		int totalWritten = 0;
-		synchronized (bc){
-			while(bb.hasRemaining())
-			{
-				int written = bc.write(bb);
-				if (written == -1)
-					return -1;
+//	public static int smartWrite(ByteChannel bc, ByteBuffer bb) throws IOException{
+//		return smartWrite(null, bc, bb);
+//	}
 
-				totalWritten += written;
+
+	public static int smartWrite(Lock lock, ByteChannel bc, ByteBuffer bb) throws IOException
+	{
+		int totalWritten = 0;
+		if(lock != null)
+			lock.lock();
+		try {
+			bb.flip();
+
+			synchronized (bc) {
+				while (bb.hasRemaining()) {
+					int written = bc.write(bb);
+					if (written == -1)
+						return -1;
+
+					totalWritten += written;
+				}
 			}
+			bb.compact();
 		}
-		bb.compact();
+		finally {
+			if(lock != null)
+				lock.unlock();
+		}
 		return totalWritten;
 	}
 	

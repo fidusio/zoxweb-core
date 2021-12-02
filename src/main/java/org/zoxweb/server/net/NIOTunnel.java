@@ -142,7 +142,7 @@ public class NIOTunnel
 						//relay = new ChannelRelayTunnel(getReadBufferSize(), destinationChannel, sourceChannel, sourceSK,  true,  getSelectorController());
 						destinationBB = ByteBuffer.allocate(getReadBufferSize());
 						sourceBB = ByteBuffer.allocate(getReadBufferSize());
-						destinationSK = getSelectorController().register(NIOChannelCleaner.DEFAULT, destinationChannel, SelectionKey.OP_READ, this, false);
+						destinationSK = getSelectorController().register(NIOChannelCleaner.DEFAULT, destinationChannel, SelectionKey.OP_READ, this, new DefaultSKController(),false);
 					}
 				}
 

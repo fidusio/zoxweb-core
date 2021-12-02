@@ -66,12 +66,12 @@ public class SelectorController
 	 */
 	public SelectionKey register(AbstractSelectableChannel ch, int ops) throws IOException
 	{
-		return register(null, ch, ops, null, false);
+		return register(null, ch, ops, null, null, false);
 	}
 
 	public SelectionKey register(AbstractSelectableChannel ch, int ops, Object attachement) throws IOException
 	{
-		return register(null, ch, ops, attachement, false);
+		return register(null, ch, ops, attachement, null, false);
 	}
 
 
@@ -122,7 +122,12 @@ public class SelectorController
 	 * @return SelectionKey registered selection key with the selector
 	 * @throws IOException is case of error
 	 */
-	public SelectionKey register(NIOChannelCleaner niocc, AbstractSelectableChannel ch, int ops, Object attachment, boolean blocking) throws IOException
+	public SelectionKey register(NIOChannelCleaner niocc,
+								 AbstractSelectableChannel ch,
+								 int ops,
+								 Object attachment,
+								 SKController skController,
+								 boolean blocking) throws IOException
 	{
 		SelectionKey ret;
 		try
@@ -136,7 +141,7 @@ public class SelectorController
 			SharedUtil.getWrappedValue(ch).configureBlocking(blocking);
 
 
-			ret = SharedUtil.getWrappedValue(ch).register(selector, ops, new SKAttachment(attachment));
+			ret = SharedUtil.getWrappedValue(ch).register(selector, ops, new SKAttachment(attachment, skController));
 			if (niocc != null)
 			{
 				niocc.add(ret);
@@ -153,7 +158,7 @@ public class SelectorController
 	}
 
 
-	public SelectionKey register(NIOChannelCleaner niocc, AbstractSelectableChannel ch, int ops, Object attachment) throws IOException
+	public SelectionKey register(NIOChannelCleaner niocc, AbstractSelectableChannel ch, int ops, Object attachment, SKController skController) throws IOException
 	{
 		SelectionKey ret;
 		try
@@ -165,7 +170,7 @@ public class SelectorController
 			// invoke the main lock
 			selectLock.lock();
 			//SharedUtil.getWrappedValue(ch).configureBlocking(blocking);
-			ret = SharedUtil.getWrappedValue(ch).register(selector, ops, new SKAttachment(attachment));
+			ret = SharedUtil.getWrappedValue(ch).register(selector, ops, new SKAttachment(attachment, skController));
 			if (niocc != null)
 			{
 				niocc.add(ret);

@@ -28,13 +28,7 @@ import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.io.UByteArrayOutputStream;
 import org.zoxweb.server.logging.LoggerUtil;
 import org.zoxweb.server.io.ByteBufferUtil.BufferType;
-import org.zoxweb.server.net.ChannelRelayTunnel;
-import org.zoxweb.server.net.InetFilterRulesManager;
-import org.zoxweb.server.net.NIOChannelCleaner;
-import org.zoxweb.server.net.NIOSocket;
-import org.zoxweb.server.net.NetUtil;
-import org.zoxweb.server.net.ProtocolSessionFactoryBase;
-import org.zoxweb.server.net.ProtocolProcessor;
+import org.zoxweb.server.net.*;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.shared.http.*;
 import org.zoxweb.shared.net.InetSocketAddressDAO;
@@ -458,7 +452,7 @@ public class NIOProxyProtocol
     													  		   remoteChannel,
     													  		   SelectionKey.OP_READ,
     													  		   new ChannelRelayTunnel(getReadBufferSize(), remoteChannel, clientChannel, clientChannelSK, true, getSelectorController()),
-    													  		   false);
+    													  		   new DefaultSKController(), false);
     			requestInfo = null;
     			
 			}
@@ -555,7 +549,7 @@ public class NIOProxyProtocol
 				if(remoteChannelSK == null || !remoteChannelSK.isValid())
 				{
 					channelRelay = new ChannelRelayTunnel(getReadBufferSize(), remoteChannel, clientChannel, clientChannelSK, true, getSelectorController());
-					remoteChannelSK = getSelectorController().register(NIOChannelCleaner.DEFAULT, remoteChannel, SelectionKey.OP_READ, channelRelay, false);
+					remoteChannelSK = getSelectorController().register(NIOChannelCleaner.DEFAULT, remoteChannel, SelectionKey.OP_READ, channelRelay, new DefaultSKController(), false);
 				}
 				
 				

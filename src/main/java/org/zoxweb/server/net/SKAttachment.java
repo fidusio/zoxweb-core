@@ -4,25 +4,25 @@ import java.nio.channels.SelectionKey;
 
 public class SKAttachment<V>
 {
-    private volatile boolean status = true;
-    private V attachment = null;
-    private volatile  SKController skController = null;
-    public SKAttachment(V attachment)
+//    private volatile boolean status = true;
+    private volatile V attachment = null;
+    private final  SKController skController;
+    public SKAttachment(V attachment, SKController skController)
     {
         attach(attachment);
+        this.skController = skController;
     }
 
-    public boolean isSelectable()
-    {
-        return status;
-    }
-    public void setSelectable(SelectionKey sk, boolean stat)
-    {
-        if(stat &&  skController != null)
-            status = skController.enableSelectionKey(sk, stat);
-        else
-            status = stat;
-    }
+//    public boolean isSelectable()
+//    {
+//        return skController != null ? skController.isSelectable() : false;
+//    }
+//    public void setSelectable(SelectionKey sk, boolean stat)
+//    {
+//        if(skController != null)
+//            skController.enableSelectionKey(sk, stat);
+//
+//    }
 
     public void attach(V obj)
     {
@@ -38,8 +38,8 @@ public class SKAttachment<V>
     {
         return skController;
     }
-    public void setSKController(SKController skController)
-    {
-        this.skController = skController;
-    }
+//    public void setSKController(SKController skController)
+//    {
+//        this.skController = skController;
+//    }
 }
