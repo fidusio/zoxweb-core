@@ -205,7 +205,8 @@ public class ByteBufferUtil
 		try {
 			bb.flip();
 
-			synchronized (bc) {
+			//synchronized (bc)
+			{
 				while (bb.hasRemaining()) {
 					int written = bc.write(bb);
 					if (written == -1)
@@ -243,11 +244,11 @@ public class ByteBufferUtil
 		}
 	}
 	
-	public static void cache(ByteBuffer bb)
+	public static void cache(ByteBuffer ...buffers)
 	{
-		if(bb != null) {
-
-			SINGLETON.cache0(bb);
+		if(buffers != null) {
+			for(ByteBuffer bb: buffers)
+				SINGLETON.cache0(bb);
 		}
 	}
 	
