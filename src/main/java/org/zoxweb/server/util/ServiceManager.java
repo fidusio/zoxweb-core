@@ -112,8 +112,9 @@ public class ServiceManager
 			try
 			{
 				File file = ApplicationConfigManager.SINGLETON.locateFile(acd, filename);
-				ConfigDAO configDAO = GSONUtil.fromJSON(IOUtil.inputStreamToString(new FileInputStream(file), true));
-				log.info("" + configDAO);
+				String configDAOContent = IOUtil.inputStreamToString(file);
+				ConfigDAO configDAO = GSONUtil.fromJSON(configDAOContent);
+				log.info("NIO_CONFIG:\n" + configDAOContent);
 				NIOConfig nioConfig = new NIOConfig(configDAO);
 				NIOSocket nioSocket = nioConfig.createApp();
 				if(ipBlocker != null)

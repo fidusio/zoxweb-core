@@ -32,7 +32,7 @@ public class NetworkTunnel
 	
 	
 	private static transient final Logger log = Logger.getLogger(NetworkTunnel.class.getName());
-	public static boolean debug = true;
+	public static boolean debug = false;
 	
 
 	static class StreamRelay
