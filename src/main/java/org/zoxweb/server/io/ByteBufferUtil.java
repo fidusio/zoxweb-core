@@ -196,14 +196,17 @@ public class ByteBufferUtil
 //		return smartWrite(null, bc, bb);
 //	}
 
-
-	public static int smartWrite(Lock lock, ByteChannel bc, ByteBuffer bb) throws IOException
+	public static int smartWrite(Lock lock, ByteChannel bc, ByteBuffer bb) throws IOException {
+		return smartWrite(lock, bc, bb, true);
+	}
+	public static int smartWrite(Lock lock, ByteChannel bc, ByteBuffer bb, boolean flip) throws IOException
 	{
 		int totalWritten = 0;
 		if(lock != null)
 			lock.lock();
 		try {
-			bb.flip();
+			if(flip)
+				bb.flip();
 
 			//synchronized (bc)
 			{

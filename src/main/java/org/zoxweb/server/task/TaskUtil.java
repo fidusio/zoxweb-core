@@ -15,6 +15,7 @@
  */
 package org.zoxweb.server.task;
 
+import java.util.concurrent.Executor;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Logger;
@@ -224,6 +225,13 @@ public class TaskUtil
 		return ret;
 	}
 
+
+	public static int availableThreads(Executor executor)
+	{
+		if(executor != null && executor instanceof TaskProcessor)
+			return ((TaskProcessor)executor).availableExecutorThreads();
+		return -1;
+	}
 
 
 
