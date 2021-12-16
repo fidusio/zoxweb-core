@@ -28,7 +28,7 @@ import java.util.logging.Logger;
 
 import org.zoxweb.server.io.IOUtil;
 
-import org.zoxweb.server.task.TaskProcessor;
+//import org.zoxweb.server.task.TaskProcessor;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.shared.data.events.BaseEventObject;
 import org.zoxweb.shared.data.events.EventListenerManager;
@@ -327,13 +327,13 @@ public class NIOSocket
 						    	{
 									key.cancel();
 									SharedUtil.getWrappedValue(key.channel()).close();
-									TaskProcessor tp = executor instanceof TaskProcessor ? (TaskProcessor)executor : null;
+
 
 //									logger.info("Connection closed Average dispatch processing " + TimeInMillis.nanosToString(averageProcessingTime()) +
 //											" total time:" + TimeInMillis.nanosToString(totalDuration) +
 //											" total dispatches: " + dispatchCounter + " total select-calls: " + selectedCountTotal +
 //											" last select-count: " + selectedCount + " total selector-keys: " + selectorController.getSelector().keys().size() +
-//											(tp != null ? " available workers:" +  tp.availableExecutorThreads() + "," + tp.pendingTasks() : "") );
+//											" available workers:" +  TaskUtil.availableThreads(executor) + "," + TaskUtil.pendingTasks(executor));
 						    	}
 						    }
 						    catch(Exception e)
@@ -356,13 +356,13 @@ public class NIOSocket
 				if(getStatLogCounter() > 0 && (dispatchCounter%getStatLogCounter() == 0 || (System.currentTimeMillis() - snapTime) > getStatLogCounter()))
 				{
 					snapTime = System.currentTimeMillis();
-					TaskProcessor tp = executor instanceof TaskProcessor ? (TaskProcessor)executor : null;
+
 
 					logger.info("Average dispatch processing " + TimeInMillis.nanosToString(averageProcessingTime()) +
 							" total time:" + TimeInMillis.nanosToString(totalDuration) +
 							" total dispatches:" + dispatchCounter + " total select calls:" + selectedCountTotal +
 							" last select count:" + selectedCount + " total select keys:" +selectorController.getSelector().keys().size() +
-							(tp != null ? " available workers:" +  tp.availableExecutorThreads() + "," + tp.pendingTasks() : ""));
+						   " available workers:" +  TaskUtil.availableThreads(executor) + "," + TaskUtil.pendingTasks(executor));
 					;
 				}
 			}

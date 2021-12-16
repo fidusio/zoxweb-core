@@ -233,6 +233,12 @@ public class TaskUtil
 		return -1;
 	}
 
+	public static int pendingTasks(Executor executor)
+	{
+		if(executor != null && executor instanceof TaskProcessor)
+			return ((TaskProcessor)executor).pendingTasks();
+		return -1;
+	}
 
 
 

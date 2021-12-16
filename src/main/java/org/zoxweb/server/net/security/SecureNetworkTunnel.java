@@ -85,6 +85,7 @@ public class SecureNetworkTunnel
 				Socket sIn = ss.accept();
 				Socket sRemote = new Socket(remoteSocketAddress.getInetAddress(), remoteSocketAddress.getPort());
 				//sIn.setSoTimeout(1000);
+				//log.info(ss.getClass().getName() + " " +sIn.getClass().getName());
 				new NetworkTunnel(sIn, sRemote);
 			}
 		}
