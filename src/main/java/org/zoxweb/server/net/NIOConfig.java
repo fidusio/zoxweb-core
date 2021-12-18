@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.nio.channels.ServerSocketChannel;
+import java.security.Provider;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -163,7 +164,16 @@ extends AppCreatorDefault<NIOSocket, ConfigDAO>
 							String aliasPassword = config.getProperties().getValue("alias_password");
 							String trustStorePassword = config.getProperties().getValue("truststore_password");
 							String trustFile = config.getProperties().getValue("truststore_file");
-							SSLContext sslc = CryptoUtil.initSSLContext(IOUtil.locateFile(config.getProperties().getValue("keystore_file")),
+							String providerName = config.getProperties().getValue("provider");
+							String protocol = config.getProperties().getValue("protocol");
+
+							Provider provider = null;
+							if(providerName != null)
+							{
+								Class pClass = Class.forName(providerName);
+								provider = (Provider) pClass.getDeclaredConstructor().newInstance();
+							}
+							SSLContext sslc = CryptoUtil.initSSLContext(protocol, provider, IOUtil.locateFile(config.getProperties().getValue("keystore_file")),
 																		(String)config.getProperties().getValue("keystore_type"), 
 																		ksPassword.toCharArray(),  
 																		aliasPassword != null ?  aliasPassword.toCharArray() : null,

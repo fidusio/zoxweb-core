@@ -71,7 +71,7 @@ public class BufferTest
 				ByteBuffer bb =  ByteBufferUtil.allocateByteBuffer(BufferType.HEAP, buffer, 0, buffer.length, true);
 				bufferOutput.reset();
 				long delta = System.nanoTime();
-				ByteBufferUtil.write(bufferOutput, bb);
+				ByteBufferUtil.write(bb, bufferOutput, true);
 				delta = System.nanoTime() - delta;
 				
 				System.out.println("fastwrite:" + bufferOutput.size() +" it took:" + Const.TimeInMillis.nanosToString(delta));
@@ -80,7 +80,7 @@ public class BufferTest
 				bufferOutput.reset();
 				
 				delta = System.currentTimeMillis();
-				ByteBufferUtil.write(bufferOutput, bb);
+				ByteBufferUtil.write(bb, bufferOutput, true);
 				delta = System.currentTimeMillis() - delta;
 				
 				System.out.println(bufferOutput.size() + " millis " + delta);

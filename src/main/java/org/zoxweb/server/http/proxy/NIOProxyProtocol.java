@@ -234,7 +234,7 @@ public class NIOProxyProtocol
     				}
     				else
     				{
-    					ByteBufferUtil.write(requestBuffer, sourceBB);
+    					ByteBufferUtil.write(sourceBB, requestBuffer, true);
     					//log.info(new String(requestBuffer.getInternalBuffer(), 0, requestBuffer.size()));
     					tryToConnectRemote(requestBuffer, read);
     				}	

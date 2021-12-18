@@ -524,7 +524,7 @@ public class CryptoUtil {
                                           final char[] trustStorePassword)
       throws GeneralSecurityException, IOException {
 
-    return initSSLContext(new File(keyStoreFilename),
+    return initSSLContext("TLS", null, new File(keyStoreFilename),
             keyStoreType,
             keyStorePassword,
             crtPassword,
@@ -532,7 +532,8 @@ public class CryptoUtil {
 
   }
 
-  public static SSLContext initSSLContext(File keyStoreFilename,
+
+  public static SSLContext initSSLContext(String protocol, Provider provider, File keyStoreFilename,
                                           String keyStoreType,
                                           final char[] keyStorePassword,
                                           final char[] crtPassword,
@@ -545,7 +546,7 @@ public class CryptoUtil {
     try {
       ksfis = new FileInputStream(keyStoreFilename);
       tsfis = trustStoreFilename != null ? new FileInputStream(trustStoreFilename) : null;
-      return initSSLContext(ksfis, keyStoreType, keyStorePassword, crtPassword, tsfis,trustStorePassword);
+      return initSSLContext(protocol, provider, ksfis, keyStoreType, keyStorePassword, crtPassword, tsfis,trustStorePassword);
     } finally {
       IOUtil.close(ksfis);
       IOUtil.close(tsfis);
@@ -553,7 +554,7 @@ public class CryptoUtil {
 
   }
 
-  public static SSLContext initSSLContext(final InputStream keyStoreIS, String keyStoreType,
+  public static SSLContext initSSLContext(final String protocol, final Provider provider, final InputStream keyStoreIS, String keyStoreType,
       final char[] keyStorePassword, final char[] crtPassword,
       final InputStream trustStoreIS, final char[] trustStorePassword)
       throws GeneralSecurityException, IOException {
@@ -574,8 +575,8 @@ public class CryptoUtil {
       tmf.init(ts != null ? ts : ks);
     }
 
-    SSLContext sslContext = SSLContext.getInstance("TLS");
-    sslContext.init(kmf.getKeyManagers(), null, null);
+    SSLContext sslContext = provider != null ? SSLContext.getInstance(protocol != null ? protocol : "TLS", provider) : SSLContext.getInstance("TLS");
+    sslContext.init(kmf.getKeyManagers(), null, defaultSecureRandom());
     return sslContext;
   }
 

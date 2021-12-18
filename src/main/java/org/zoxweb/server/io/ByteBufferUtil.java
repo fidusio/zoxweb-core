@@ -230,20 +230,32 @@ public class ByteBufferUtil
 	public static String toString(ByteBuffer bb) throws IOException
 	{
 		UByteArrayOutputStream ubaos = new UByteArrayOutputStream();
-		write(ubaos, bb);
+		write(bb, ubaos, true);
 
 		return ubaos.toString();
 	}
 	
 
 
-	public static void write(UByteArrayOutputStream ubaos, ByteBuffer bb) throws IOException
+	public static void write(ByteBuffer bbSrc, UByteArrayOutputStream ubaosDst, boolean flip) throws IOException
 	{
-		bb.flip();
+		if(flip)
+			bbSrc.flip();
 
-		for (int i = 0; i < bb.limit(); i++)
+		for (int i = 0; i < bbSrc.limit(); i++)
 		{
-			ubaos.write(bb.get());
+			ubaosDst.write(bbSrc.get());
+		}
+		if(flip)
+			bbSrc.compact();
+	}
+
+
+	public static void write(UByteArrayOutputStream baosSrc, ByteBuffer bbrDst) throws IOException
+	{
+		for (int i = 0; i < baosSrc.size(); i++)
+		{
+			bbrDst.put(baosSrc.byteAt(i));
 		}
 	}
 	
