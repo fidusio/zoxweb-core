@@ -23,7 +23,7 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 
 import java.security.cert.X509Certificate;
-import java.security.interfaces.RSAPublicKey;
+
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.concurrent.locks.Lock;
@@ -959,80 +959,6 @@ public class CryptoUtil {
 
 
 
-  public static boolean doSSLHandshake(String name,
-                                    SSLEngine engine,
-                                    ByteBuffer netIn,
-                                    ByteBuffer netOut,
-                                    SocketChannel sslChannel, boolean debug) throws IOException {
-    long ts = System.currentTimeMillis();
-    SSLEngineResult result;
-    SSLEngineResult.HandshakeStatus status;
-    boolean readData = true;
-    ByteBuffer dummy = ByteBufferUtil.allocateByteBuffer(0);
-    if (debug) log.info("START Handshake " + engine.getHandshakeStatus());
-    loop: while ((status = engine.getHandshakeStatus()) != SSLEngineResult.HandshakeStatus.NOT_HANDSHAKING) {
-      if (debug) log.info("Before switch SSLServerEngine status " + status);
-      switch (status) {
-        case FINISHED:
-          netIn.clear();
-          netOut.clear();
-          ByteBufferUtil.cache(dummy);
-          if (debug) log.info(status + " FINISHED");
-          break loop;
-        case NEED_WRAP:
-          result = engine.wrap(dummy, netOut); //at handshake stage, data in appOut won't be processed hence dummy buffer
-          if (result.bytesProduced() > 0) {
-            if (debug) log.info("Before writing data : " + netOut);
-            ByteBufferUtil.write(sslChannel, netOut);
-            netOut.clear();
-          }
-          if (debug) log.info(status + " END : " + result);
-          break;
-        case NEED_TASK:
-          Runnable task = engine.getDelegatedTask(); //these are the tasks like key generation that tend to take longer time to complete
-          if (task != null) {
-            task.run();  //it can be run at a different thread.
-          }
-//          else {
-//            status = SSLEngineResult.HandshakeStatus.NEED_WRAP;
-//          }
-          break;
-        case NEED_UNWRAP:
-
-          if (readData) {
-            int byteRead = sslChannel.read(netIn);
-            if (debug) log.info("BYTE_READ from socket:" + byteRead);
-            netIn.flip();
-
-          }
-          result = engine.unwrap(netIn, dummy); //at handshake stage, no data produced in appIn hence using dummy buffer
-          if (debug) log.info("[-> Read status : " +readData + " : " + result);
-
-
-          if (netIn.remaining() == 0) {
-            netIn.clear();
-            readData = true;
-          } else { //if there are data left in the buffer
-            readData = false;
-//                    netIn.position(netIn.limit());
-//                    netIn.limit(netIn.capacity());
-          }
-          if (debug) log.info("Read status : " +readData + " : " + result +" <-]") ;
-
-      }
-    }
-    ts = System.currentTimeMillis() - ts;
-    log.info("END handshake took: " + Const.TimeInMillis.toString(ts));
-    if (debug) log.info(name + "handshake completes");
-    SSLSession sess = engine.getSession();
-    if (debug) log.info(name + "connected using protocol " + sess.getProtocol());
-    if (debug) log.info(name + "connected using " + sess.getCipherSuite());
-    //System.out.println(name + "peer principal " + sess.getPeerPrincipal());
-
-    //reset(netIn, netOut, dummy, dummy);
-
-    return true;
-  }
 
 
 
