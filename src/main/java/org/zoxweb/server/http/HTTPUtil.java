@@ -131,17 +131,17 @@ public class HTTPUtil
 			if (header.getKey() != null)
 			{
 				ubaos.write(header.getKey()+": ");
-				boolean firstPast = false;
+				boolean firstPass = false;
 				for (String value : header.getValue())
 				{
-					if (firstPast)
+					if (firstPass)
 					{
 						ubaos.write(",");
 					}
 
 					ubaos.write(value);
 					
-					firstPast = true;
+					firstPass = true;
 				}
 
 				ubaos.write(ProtocolDelimiter.CRLF.getValue().getBytes());
