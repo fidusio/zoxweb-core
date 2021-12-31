@@ -44,7 +44,7 @@ public enum HTTPMimeType
 	IMAGE_PNG("image/png", "png"),
 	IMAGE_SVG("image/svg+xml", "svg"),
 	IMAGE_ICON("image/x-icon", "ico"),
-	IMAGE_TIF("image/tiff", "tiff", "tif");
+	IMAGE_TIF("image/tiff", "tiff", "tif"),
 	;
 
 	private final String value;
@@ -65,13 +65,32 @@ public enum HTTPMimeType
 	{
 		return value;
 	}
+	public String format(GetNameValue<String> ...gnvs)
+	{
+		StringBuilder ret = new StringBuilder(value);
+		for (GetNameValue<String> gnv : gnvs)
+		{
+			if(gnv != null && gnv.getValue() != null)
+			{
+				ret.append("; ");
+				if(gnv.getName() != null)
+				{
+					ret.append(gnv.getName());
+					ret.append('=');
+				}
+				ret.append(gnv.getValue());
+			}
+		}
+
+		return ret.toString();
+	}
 	
 	public static HTTPMimeType lookup(String str)
 	{
 		return (HTTPMimeType) SharedUtil.matchingEnumContent(HTTPMimeType.values(), str);
 	}
 	
-	public static HTTPMimeType lookupByExtenstion(String str)
+	public static HTTPMimeType lookupByExtension(String str)
 	{
 		str = SharedStringUtil.trimOrNull(str);
 		

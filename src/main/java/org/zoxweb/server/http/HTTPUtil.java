@@ -35,6 +35,7 @@ import org.jsoup.parser.Parser;
 import org.jsoup.select.Elements;
 
 import org.zoxweb.server.io.UByteArrayOutputStream;
+import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.server.util.ReflectionUtil;
 import org.zoxweb.shared.http.*;
 import org.zoxweb.shared.http.HTTPEncoder;
@@ -48,29 +49,50 @@ import org.zoxweb.shared.util.*;
  */
 public class HTTPUtil 
 {
-
 	private static final Lock LOCK = new ReentrantLock();
-	private static AtomicBoolean extraMethodAdded =  new AtomicBoolean();
+	private static final AtomicBoolean extraMethodAdded =  new AtomicBoolean();
 
 	/**
 	 * The constructor is declared private to prevent instantiation.
 	 */
 	private HTTPUtil()
 	{
-		
+
 	}
 
 	/**
 	 * Checks if given text is HTML.
-	 * @param txt
-	 * @return
+	 * @param txt check if the txt is html
+	 * @return status
 	 */
 	public static boolean isHTML(String txt)
 	{
-		String text = Jsoup.parse(txt).text();	
+		String text = Jsoup.parse(txt).text();
 		return !text.equals(txt);
 	}
-	
+
+	public static HTTPMessageConfigInterface formatResponse(NVEntity nve)
+			throws IOException
+	{
+		HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit(null, null, (HTTPMethod) null);
+		hmci.setHTTPStatusCode(HTTPStatusCode.OK);
+		hmci.setContentType(HTTPMimeType.APPLICATION_JSON.format(HTTPConst.CHARSET_UTF_8));
+
+		hmci.setContent(GSONUtil.toJSON(nve,false, false, true));
+		return hmci;
+	}
+
+	public static HTTPMessageConfigInterface formatResponse(NVGenericMap nvgm)
+			throws IOException
+	{
+		HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit(null, null, (HTTPMethod) null);
+		hmci.setHTTPStatusCode(HTTPStatusCode.OK);
+		hmci.setContentType(HTTPMimeType.APPLICATION_JSON.format(HTTPConst.CHARSET_UTF_8));
+		hmci.setContent(GSONUtil.toJSONGenericMap(nvgm,false, false, true));
+		return hmci;
+	}
+
+
 	public static UByteArrayOutputStream formatResponse(HTTPMessageConfigInterface hcc, UByteArrayOutputStream ubaos)
 	{
 		if (ubaos == null)
@@ -81,7 +103,7 @@ public class HTTPUtil
 		{
 			ubaos.reset();
 		}
-	
+
 		// write the first line
 		ubaos.write(HTTPVersion.HTTP_1_1.getValue() + " " + hcc.getHTTPStatusCode().CODE + " " +hcc.getHTTPStatusCode().REASON + ProtocolDelimiter.CRLF.getValue());
 		// write headers
@@ -101,10 +123,10 @@ public class HTTPUtil
 		{
 			ubaos.write(hcc.getContent());
 		}
-		
+
 		return ubaos;
 	}
-	
+
 	public static UByteArrayOutputStream formatResponse(HTTPResponseData rd, UByteArrayOutputStream ubaos)
 	{
 		if (ubaos == null)
@@ -115,12 +137,12 @@ public class HTTPUtil
 		{
 			ubaos.reset();
 		}
-	
+
 		HTTPStatusCode hsc = HTTPStatusCode.statusByCode(rd.getStatus());
 		// write the first line
 		ubaos.write(HTTPVersion.HTTP_1_1.getValue() + " " + hsc.CODE + " " +hsc.REASON + ProtocolDelimiter.CRLF.getValue());
 		// write headers
-		
+
 		Set<Map.Entry<String, List<String>>> set = rd.getResponseHeaders().entrySet();
 		Iterator<Map.Entry<String, List<String>>> params= set.iterator();
 
@@ -140,7 +162,7 @@ public class HTTPUtil
 					}
 
 					ubaos.write(value);
-					
+
 					firstPass = true;
 				}
 
@@ -157,7 +179,7 @@ public class HTTPUtil
 
 	public  static UByteArrayOutputStream formatRequest(HTTPMessageConfigInterface hcc, boolean parseURI, UByteArrayOutputStream ubaos, String ...headersToRemove)
 	{
-	
+
 		//InetSocketAddressDAO  isad = HTTPUtil.parseHost(hcc.getURI());
 		if (parseURI)
 		{
@@ -171,16 +193,16 @@ public class HTTPUtil
 				hcc.getHeaderParameters().remove(header);
 			}
 		}
-		
+
 		if (ubaos == null)
 		{
 			ubaos = new UByteArrayOutputStream();
 		}
 		else
-		{		
+		{
 			ubaos.reset();
 		}
-		
+
 		// first line http request
 		ubaos.write(hcc.getMethod().getName() + " " + hcc.getURI() + " " + hcc.getHTTPVersion().getValue() + ProtocolDelimiter.CRLF.getValue());
 		// headers
@@ -195,16 +217,16 @@ public class HTTPUtil
 		}
 		// header termination
 		ubaos.write(ProtocolDelimiter.CRLF.getBytes());
-		
+
 		// content if available
 		if (hcc.getContent() != null && hcc.getContent().length > 0)
 		{
 			ubaos.write(hcc.getContent());
 		}
-		
+
 		return ubaos;
 	}
-	
+
 	public static void addHTTPMethods() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
 	{
 		if (!extraMethodAdded.get())
@@ -215,7 +237,7 @@ public class HTTPUtil
 
 				if (!extraMethodAdded.get())
 				{
-					
+
 					ReflectionUtil.updateFinalStatic(HttpURLConnection.class, "methods", HTTPMethod.toMethodNames());
 //					new String[]
 //							{
@@ -234,10 +256,10 @@ public class HTTPUtil
 //		Field field = httpUrlConnection.getDeclaredField("methods");
 //		System.out.println("" + field);
 //		field.setAccessible( true);
-//		
+//
 //		String methods[] = (String[]) field.get((Object) null);
 //////		ArrayList<String> strList = new ArrayList<String>();
-////		
+////
 ////		for ( int i = 0; i < methods.length; i++)
 ////		{
 ////			//strList.add(methods[i]);
@@ -253,31 +275,31 @@ public class HTTPUtil
 //////		System.out.println(" list " + strList);
 //////		//field.set(null, methods);
 //////		setFinalStatic( field, methods);
-//		
-//		
+//
+//
 //		methods = (String[]) field.get((Object) null);
-//		 
+//
 //		for ( int i = 0; i < methods.length; i++)
 //		{
 //			System.out.println( methods[i]);
 //		}
 	}
-	
-	
+
+
 	@SuppressWarnings("unchecked")
 	public static String formatParameters(List<GetNameValue<String>> params, String charset, boolean urlEncode, HTTPEncoder hpf) throws UnsupportedEncodingException
 	{
 		return formatParameters((GetNameValue<String>[])params.toArray(new GetNameValue<?>[params.size()]), charset, urlEncode, hpf);
 	}
-	
-	
+
+
 	public static String formatParameters(GetNameValue<String>[] params, String charset, boolean urlEncode, HTTPEncoder hpf) throws UnsupportedEncodingException
 	{
 		if (SharedStringUtil.isEmpty(charset))
 		{
 			charset = SharedStringUtil.UTF_8;
 		}
-		
+
 		StringBuilder sb = new StringBuilder();
 
 		if (params != null)
@@ -288,7 +310,7 @@ public class HTTPUtil
 				{
 					sb.append(hpf.getValue());
 				}
-				
+
 				if (nvp != null && nvp.getName() != null)
 				{
 					if (hpf == HTTPEncoder.URL_ENCODED)
@@ -312,28 +334,28 @@ public class HTTPUtil
 						sb.append(urlEncode ? URLEncoder.encode(nvp.getValue(), valueCharset) : nvp.getValue());
 					}
 				}
-				
-				
+
+
 			}
 		}
 
 		return sb.toString();
 	}
-	
-	
+
+
 	public static String formatParameters(ArrayValues<GetNameValue<String>> params, String charset, boolean urlEncode, HTTPEncoder hpf) throws UnsupportedEncodingException
-	{	
+	{
 		return formatParameters(params.values(), charset, urlEncode, hpf);
 	}
-	
-	
+
+
 	public static UByteArrayOutputStream  formatBinaryParameters(ArrayValues<GetNameValue<?>> params, String charset, boolean urlEncode) throws UnsupportedEncodingException
 	{
 		if (SharedStringUtil.isEmpty(charset))
 		{
 			charset = SharedStringUtil.UTF_8;
 		}
-		
+
 		UByteArrayOutputStream ret = new UByteArrayOutputStream();
 
 		if (params != null)
@@ -344,12 +366,12 @@ public class HTTPUtil
 				{
 					ret.write('&');
 				}
-				
+
 				if (nvp != null && nvp.getName() != null)
 				{
 					ret.write(urlEncode ? URLEncoder.encode(nvp.getName(), charset) : nvp.getName());
 					ret.write('=');
-					
+
 					if (nvp.getValue() != null)
 					{
 						String valueCharset = charset;
@@ -371,17 +393,17 @@ public class HTTPUtil
 						{
 							ret.write((byte[])nvp.getValue());
 						}
-						
+
 					}
 				}
-				
-				
+
+
 			}
 		}
 		return ret;
 	}
-	
-	public static String formatParametersNoEncoding( List<GetNameValue<String>> params) 
+
+	public static String formatParametersNoEncoding( List<GetNameValue<String>> params)
 	{
 		StringBuilder sb = new StringBuilder();
 
@@ -407,8 +429,8 @@ public class HTTPUtil
 		}
 		return sb.toString();
 	}
-	
-//	public static String formatParametersNoEncoding( ArrayValues<GetNameValue<String>> params) 
+
+//	public static String formatParametersNoEncoding( ArrayValues<GetNameValue<String>> params)
 //	{
 //		StringBuilder sb = new StringBuilder();
 //		if ( params != null)
@@ -418,7 +440,7 @@ public class HTTPUtil
 //				if ( sb.length() > 0)
 //				{
 //					sb.append('&');
-//				}			
+//				}
 //				if ( nvp != null && nvp.getName() != null)
 //				{
 //					sb.append( nvp.getName());
@@ -430,21 +452,21 @@ public class HTTPUtil
 //		}
 //		return sb.toString();
 //	}
-	
-	
+
+
 	public static List<GetNameValue<String>> parseQuery(URL url)
 	{
 		return parseQuery(url.getQuery());
 	}
-	
-	
+
+
 	public static List<GetNameValue<String>> parseQuery(String query)
 	{
 		if (query == null)
 		{
 			return null;
 		}
-		
+
 		String allParams[] = query.split("&");
 		ArrayList<GetNameValue<String>> ret = new ArrayList<GetNameValue<String>>();
 
@@ -456,7 +478,7 @@ public class HTTPUtil
 				ret.add(nvp);
 			}
 		}
-		
+
 		return ret;
 	}
 
@@ -540,7 +562,7 @@ public class HTTPUtil
 //		return nvgm;
 //	}
 
-	
+
 	public static String parseHostURL(URL url)
 	{
 		StringBuilder ret = new StringBuilder();
@@ -556,8 +578,8 @@ public class HTTPUtil
 
 		return ret.toString();
 	}
-	
-	
+
+
 	public static String parseURI(URL url, boolean includeParam)
 	{
 		StringBuilder ret = new StringBuilder();
@@ -571,8 +593,8 @@ public class HTTPUtil
 
 		return ret.toString();
 	}
-	
-	
+
+
 	public static String parseURI(String url)
 	{
 		int index = url.indexOf(ProtocolDelimiter.COLON_PATH.getValue());
@@ -595,11 +617,11 @@ public class HTTPUtil
 		{
 			hostEnd = index;
 		}
-		
+
 		String ret = url.substring(hostEnd);
 		if (SharedStringUtil.isEmpty(ret))
 			return "/";
-		
+
 		return ret;
 	}
 	public static InetSocketAddressDAO parseHost(String url)
@@ -618,15 +640,15 @@ public class HTTPUtil
 		{
 			hostStart = index + ProtocolDelimiter.COLON_PATH.getValue().getBytes().length;
 		}
-		
+
 		// check if there is a user:password@
 		index = url.indexOf('@');
 		if (index != -1 && url.indexOf('/', hostStart) > index)
 		{
 			hostStart = index + 1;
 		}
-		
-		
+
+
 		int hostEnd;
 		index = url.indexOf('/', hostStart);
 		if (index == -1)
@@ -637,9 +659,9 @@ public class HTTPUtil
 		{
 			hostEnd = index;
 		}
-		
+
 		InetSocketAddressDAO ret = new InetSocketAddressDAO(url.substring(hostStart, hostEnd));
-		
+
 		if (ret.getPort() == -1)
 		// detect scheme type
 		{
@@ -660,8 +682,8 @@ public class HTTPUtil
 
 		return ret;
 	}
-	
-	
+
+
 	public static HTTPMessageConfig parseURL(URL fullURL)
 	{
 		String url = parseHostURL(fullURL);
@@ -671,11 +693,11 @@ public class HTTPUtil
 		hcc.setURI(uri);
 		hcc.setParameters(parseQuery(fullURL));
 		hcc.setMethod(HTTPMethod.GET);
-		
-		
+
+
 		return hcc;
 	}
-	
+
 
 	public static String formatFullURL(HTTPMessageConfig hcc)
 			throws UnsupportedEncodingException
@@ -687,11 +709,11 @@ public class HTTPUtil
 		{
 			urlURI += "?" + encodedContentParams;
 		}
-		
+
 		return urlURI;
 	}
 
-	
+
 	public static void removeParams(List<GetNameValue<String>> list, List<String> params)
 	{
 		if ( list != null && params != null)
@@ -704,12 +726,12 @@ public class HTTPUtil
 				{
 					list.remove( gnvs);
 				}
-				
+
 			}
 		}
 	}
 
-	
+
 	public static String extractRequestCookie(HTTPResponseData rd)
 	{
 		List<String> cookies = SharedUtil.lookupMap(rd.getResponseHeaders(), "Set-Cookie", true);
@@ -728,19 +750,19 @@ public class HTTPUtil
 					{
 						sb.append( "; ");
 					}
-					
+
 					sb.append(httpCookie.getName() + (httpCookie.getValue() != null ? "="+httpCookie.getValue() : ""));
 					//httpCookie.setVersion(version);
 					//sb.append(httpCookie);
 				}
 			}
-			
+
 			return sb.toString() ;
 		}
 
 		return null;
 	}
-	
+
 	public static GetNameValue<String> extractHeaderCookie(HTTPResponseData rd)
 	{
 		List<String> cookies = SharedUtil.lookupMap(rd.getResponseHeaders(), "Set-Cookie", true);
@@ -759,19 +781,19 @@ public class HTTPUtil
 					{
 						sb.append( "; ");
 					}
-					
+
 					sb.append(httpCookie.getName() + (httpCookie.getValue() != null ? "="+httpCookie.getValue() : ""));
 					//httpCookie.setVersion(version);
 					//sb.append(httpCookie);
 				}
 			}
-			
+
 			return  new NVPair(HTTPHeaderName.COOKIE, sb.toString());
 		}
 
 		return null;
 	}
-	
+
 	public static NVPair extractCookie(Map<String, List<String>> rd, int version)
 	{
 		List<String> cookies = SharedUtil.lookupMap(rd, "Set-Cookie", true);
@@ -790,27 +812,27 @@ public class HTTPUtil
 					{
 						sb.append( "; ");
 					}
-					
+
 					sb.append(httpCookie.getName() + (httpCookie.getValue() != null ? "="+httpCookie.getValue() : ""));
 					//httpCookie.setVersion(version);
 					//sb.append(httpCookie);
 				}
 			}
-			
+
 			return new NVPair("Cookie", sb.toString()) ;
 		}
 
 		return null;
 	}
 
-	
+
 	public static List<HttpCookie> extractCookies(HTTPResponseData rd)
 	{
 		List<HttpCookie> ret = new ArrayList<HttpCookie>();
 		List<String> cookies = SharedUtil.lookupMap(rd.getResponseHeaders(), "Set-Cookie", true);
 
 		if (cookies!= null && cookies.size() > 0)
-		{	
+		{
 			for (String cookie : cookies)
 			{
 				List<HttpCookie> httpCookies = HttpCookie.parse( cookie);
@@ -820,16 +842,16 @@ public class HTTPUtil
 
 		return ret;
 	}
-	
-	
+
+
 	public static HttpCookie lookupCookieByName(HTTPResponseData rd, String name)
 	{
 		if (name != null)
 		{
-			List<String> cookies = SharedUtil.lookupMap(rd.getResponseHeaders(), "Set-Cookie", true);	
-			
+			List<String> cookies = SharedUtil.lookupMap(rd.getResponseHeaders(), "Set-Cookie", true);
+
 			if (cookies!= null && cookies.size() > 0)
-			{	
+			{
 				for (String cookie : cookies)
 				{
 					List<HttpCookie> httpCookies = HttpCookie.parse( cookie);
@@ -838,7 +860,7 @@ public class HTTPUtil
 						if (name.equalsIgnoreCase(httpCookie.getName()))
 							return httpCookie;
 					}
-					
+
 				}
 			}
 		}
@@ -850,7 +872,7 @@ public class HTTPUtil
 	{
 		List<HTTPMessageConfigInterface> retList = new ArrayList<HTTPMessageConfigInterface>();
 		Document doc = 	Jsoup.parse( new String(rd.getData(), SharedStringUtil.UTF_8), "", Parser.xmlParser());
-		
+
 		Elements elements = doc.select("form");
 
 		for (Element element : elements)
@@ -865,23 +887,23 @@ public class HTTPUtil
 			{
 				encoding = HTTPMimeType.APPLICATION_WWW_URL_ENC;
 			}
-			
-			
-			
+
+
+
 			Elements formInputs = element.getAllElements();
 			//System.out.println(SharedUtil.toCanonicalID('#', formName, formID, formAction, formMethod, formEncoding));
 			//System.out.println("Inputs:" + formInputs);
-			
-			
+
+
 			// extract cookie if it exists
 			String reqCookie = extractRequestCookie(rd);
-			
+
 			//ArrayList<GetNameValue<String>> params = new ArrayList<GetNameValue<String>>();
 			HTTPMessageConfig ret = new HTTPMessageConfig();
 
 			for (Element ele : formInputs)
 			{
-				
+
 				String name = ele.attr("name");
 				String value = ele.attr("value");
 				if (!SharedStringUtil.isEmpty(name))
@@ -889,7 +911,7 @@ public class HTTPUtil
 					//System.out.println( name + ":" + value);
 					switch( encoding)
 					{
-					
+
 					case MULTIPART_FORM_DATA:
 						ret.getParameters().add( new HTTPMultiPartParameter(name, value));
 						break;
@@ -899,11 +921,11 @@ public class HTTPUtil
 						break;
 					default:
 						break;
-					
+
 					}
 				}
 			}
-		
+
 			if (encoding == HTTPMimeType.MULTIPART_FORM_DATA)
 			{
 				ret.setMultiPartEncoding( true);
@@ -921,20 +943,20 @@ public class HTTPUtil
 			{
 				ret.setURI( formAction);
 			}
-			
+
 			ret.setMethod((HTTPMethod) SharedUtil.lookupEnum(formMethod, HTTPMethod.values()));
-		
-			
+
+
 			if (reqCookie != null)
 				ret.setCookie(reqCookie);
-			
+
 			retList.add(ret);
-			
+
 		}
-		
+
 		return retList;
 	}
-	
+
 	public static MessageStatus checkRequestStatus(HTTPMessageConfigInterface hmci)
 	{
 		if (hmci != null)
@@ -947,17 +969,17 @@ public class HTTPUtil
 				{
 					return MessageStatus.COMPLETE;
 				}
-				
+
 				if (hmci.getContentLength() < 1 && (hmci.getContent() == null || hmci.getContent().length == 0))
 				{
 					return MessageStatus.COMPLETE;
 				}
-				
+
 //				if (hmci.getContentLength() >= 0 && hmci.getContent() != null && hmci.getContent().length != hmci.getContentLength())
 //				{
 //					return MessageStatus.PARTIAL;
 //				}
-				
+
 				if (hmci.getContentLength() > 0 && (hmci.getContent() == null || (hmci.getContent().length != hmci.getContentLength())))
 				{
 					return MessageStatus.PARTIAL;
@@ -967,19 +989,19 @@ public class HTTPUtil
 
 		return MessageStatus.INVALID;
 	}
-	
-	
+
+
 	public static boolean isContentComplete(HTTPMessageConfigInterface hcc)
 	{
 		int contentLength = hcc.getContentLength();
 		byte content[] = hcc.getContent();
-		
+
 
 		if (content != null && content.length == contentLength)
 		{
 			return true;
 		}
-		
+
 		if (contentLength < 1 && (content == null || content.length == 0))
 		{
 			return true;
@@ -993,7 +1015,7 @@ public class HTTPUtil
 	{
 		// locate the end of headers
 		int endOfHeadersIndex = ubaos.indexOf(ProtocolDelimiter.CRLFCRLF.getBytes());
-		
+
 		if (endOfHeadersIndex > 0 && (hmci == null || hmci.getHeaderParameters().size() == 0))
 		{
 			// find the termination
@@ -1001,7 +1023,7 @@ public class HTTPUtil
 			for(int i=0; i < endOfHeadersIndex;)
 			{
 				int endOfCurrentLine = ubaos.indexOf(i, ProtocolDelimiter.CRLF.getBytes(), 0, ProtocolDelimiter.CRLF.getBytes().length);
-				
+
 				if (endOfCurrentLine != -1 )
 				{
 					lineCounter++;
@@ -1015,12 +1037,12 @@ public class HTTPUtil
 						{
 							throw new IllegalArgumentException("Missing method");
 						}
-						
+
 						if (rl.getHTTPVersion() == null)
 						{
 							throw new IllegalArgumentException("Missing http version");
 						}
-						
+
 						if (hmci == null)
 						{
 							hmci = new HTTPMessageConfig();
@@ -1037,9 +1059,9 @@ public class HTTPUtil
 				}
 
 				i=endOfCurrentLine+ProtocolDelimiter.CRLF.getBytes().length;
-			}	
+			}
 		}
-		
+
 		if (!headerOnly && hmci != null && endOfHeadersIndex !=-1)
 		{
 			byte[] content = Arrays.copyOfRange(ubaos.getInternalBuffer(), endOfHeadersIndex + ProtocolDelimiter.CRLFCRLF.getBytes().length , ubaos.size());
@@ -1049,8 +1071,8 @@ public class HTTPUtil
 				hmci.setContent(content);
 			}
 		}
-		
+
 		return hmci;
 	}
-	
+
 }
