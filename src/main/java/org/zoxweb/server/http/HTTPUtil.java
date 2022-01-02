@@ -71,22 +71,22 @@ public class HTTPUtil
 		return !text.equals(txt);
 	}
 
-	public static HTTPMessageConfigInterface formatResponse(NVEntity nve)
+	public static HTTPMessageConfigInterface formatResponse(NVEntity nve, HTTPStatusCode statusCode)
 			throws IOException
 	{
 		HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit(null, null, (HTTPMethod) null);
-		hmci.setHTTPStatusCode(HTTPStatusCode.OK);
+		hmci.setHTTPStatusCode(statusCode);
 		hmci.setContentType(HTTPMimeType.APPLICATION_JSON.format(HTTPConst.CHARSET_UTF_8));
 
 		hmci.setContent(GSONUtil.toJSON(nve,false, false, true));
 		return hmci;
 	}
 
-	public static HTTPMessageConfigInterface formatResponse(NVGenericMap nvgm)
+	public static HTTPMessageConfigInterface formatResponse(NVGenericMap nvgm, HTTPStatusCode statusCode)
 			throws IOException
 	{
 		HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit(null, null, (HTTPMethod) null);
-		hmci.setHTTPStatusCode(HTTPStatusCode.OK);
+		hmci.setHTTPStatusCode(statusCode);
 		hmci.setContentType(HTTPMimeType.APPLICATION_JSON.format(HTTPConst.CHARSET_UTF_8));
 		hmci.setContent(GSONUtil.toJSONGenericMap(nvgm,false, false, true));
 		return hmci;
@@ -104,8 +104,11 @@ public class HTTPUtil
 			ubaos.reset();
 		}
 
+		HTTPVersion hv = hcc.getHTTPVersion();
+		if(hv == null)
+			hv = HTTPVersion.HTTP_1_1;
 		// write the first line
-		ubaos.write(HTTPVersion.HTTP_1_1.getValue() + " " + hcc.getHTTPStatusCode().CODE + " " +hcc.getHTTPStatusCode().REASON + ProtocolDelimiter.CRLF.getValue());
+		ubaos.write(hv.getValue() + " " + hcc.getHTTPStatusCode().CODE + " " +hcc.getHTTPStatusCode().REASON + ProtocolDelimiter.CRLF.getValue());
 		// write headers
 		if (hcc.getContent() != null && hcc.getContent().length > 0)
 		{

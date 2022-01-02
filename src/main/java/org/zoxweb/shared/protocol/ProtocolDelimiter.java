@@ -16,6 +16,7 @@
 package org.zoxweb.shared.protocol;
 
 import org.zoxweb.shared.util.GetNameValue;
+import org.zoxweb.shared.util.SharedStringUtil;
 
 /**
  * Punctuation marks.
@@ -41,7 +42,7 @@ public enum ProtocolDelimiter
 	ProtocolDelimiter(String val)
     {
 		value = val;
-		bytes = value.getBytes();
+		bytes = SharedStringUtil.getBytes(value);
 	}
 
     /**
