@@ -9,7 +9,7 @@ public abstract class SessionCallback<C, P, S> implements TaskCallback<P,S> {
     private C config;
 
     public final C getConfig(){return config;}
-    public final void setConfig(C config){this.config = config;}
+    public void setConfig(C config){this.config = config;}
     @Override
     public void exception(Exception e) {
         log.info("" + e);
