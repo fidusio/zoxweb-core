@@ -92,6 +92,8 @@ public class HTTPCallTool implements Runnable
             boolean printResult = params.booleanValue("-pr", true);
             String proxy = params.stringValue("-p", true);
             int cap = params.intValue("-cap", 0);
+            String user = params.stringValue("-user", true);
+            String password = params.stringValue("-password", true);
 
             log.info("proxy: " + proxy);
             InetSocketAddressDAO proxyAddress = proxy != null ? InetSocketAddressDAO.parse(proxy, ProxyType.HTTP) : null;
@@ -100,6 +102,8 @@ public class HTTPCallTool implements Runnable
             for(String url : urls) {
                 HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit(url, null, httpMethod);
                 hmci.setProxyAddress(proxyAddress);
+                hmci.setUser(user);
+                hmci.setPassword(password);
 
                 hmci.setContentType(HTTPMimeType.APPLICATION_JSON);
                 hmci.setSecureCheckEnabled(false);
