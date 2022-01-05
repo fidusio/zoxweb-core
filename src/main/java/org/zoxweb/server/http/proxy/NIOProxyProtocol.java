@@ -167,13 +167,13 @@ public class NIOProxyProtocol
 	private SelectionKey  clientChannelSK = null;
 	private ChannelRelayTunnel channelRelay = null;
 	private RequestInfo requestInfo = null;
-	private ByteBuffer sourceBB = null;
+	private ByteBuffer sourceBB;
 
 	private boolean relayConnection = false;
 
 	private NIOProxyProtocol()
 	{
-		sourceBB =  ByteBufferUtil.allocateByteBuffer(BufferType.HEAP, getReadBufferSize());
+		sourceBB =  ByteBufferUtil.allocateByteBuffer(BufferType.DIRECT);
 	}
 	
 	
@@ -192,19 +192,17 @@ public class NIOProxyProtocol
 	@Override
 	public void close() throws IOException
 	{
-		IOUtil.close(clientChannel);
-
-		if (channelRelay != null)
+		if(!isClosed.getAndSet(true))
 		{
-			IOUtil.close(channelRelay);
-		}
-		else
-		{
-			IOUtil.close(remoteChannel);
-		}
-		ByteBufferUtil.cache(sourceBB);
+			IOUtil.close(clientChannel);
 
-
+			if (channelRelay != null) {
+				IOUtil.close(channelRelay);
+			} else {
+				IOUtil.close(remoteChannel);
+			}
+			ByteBufferUtil.cache(sourceBB);
+		}
 	}
 
 	@Override
@@ -451,7 +449,7 @@ public class NIOProxyProtocol
     			remoteChannelSK = getSelectorController().register(NIOChannelCleaner.DEFAULT,
     													  		   remoteChannel,
     													  		   SelectionKey.OP_READ,
-    													  		   new ChannelRelayTunnel(getReadBufferSize(), remoteChannel, clientChannel, clientChannelSK, true, getSelectorController()),
+    													  		   new ChannelRelayTunnel(ByteBufferUtil.DEFAULT_BUFFER_SIZE, remoteChannel, clientChannel, clientChannelSK, true, getSelectorController()),
     													  		   new DefaultSKController(), false);
     			requestInfo = null;
     			
@@ -548,7 +546,7 @@ public class NIOProxyProtocol
 				
 				if(remoteChannelSK == null || !remoteChannelSK.isValid())
 				{
-					channelRelay = new ChannelRelayTunnel(getReadBufferSize(), remoteChannel, clientChannel, clientChannelSK, true, getSelectorController());
+					channelRelay = new ChannelRelayTunnel(ByteBufferUtil.DEFAULT_BUFFER_SIZE, remoteChannel, clientChannel, clientChannelSK, true, getSelectorController());
 					remoteChannelSK = getSelectorController().register(NIOChannelCleaner.DEFAULT, remoteChannel, SelectionKey.OP_READ, channelRelay, new DefaultSKController(), false);
 				}
 				

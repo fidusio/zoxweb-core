@@ -36,7 +36,7 @@ public class ByteBufferUtil
 	
 	private static final ByteBufferUtil SINGLETON = new ByteBufferUtil();
 
-	volatile private Map<Integer, SimpleQueue<ByteBuffer>> cachedBuffers = new HashMap<Integer, SimpleQueue<ByteBuffer>>();
+	final private Map<Integer, SimpleQueue<ByteBuffer>> cachedBuffers = new HashMap<Integer, SimpleQueue<ByteBuffer>>();
 	volatile private int count;
 	volatile private int availableCapacity;
 
@@ -177,7 +177,10 @@ public class ByteBufferUtil
 	{
 		return SINGLETON.toByteBuffer0(BufferType.HEAP, null, 0, capacity, false);
 	}
-
+	public static ByteBuffer allocateByteBuffer(BufferType bType)
+	{
+		return SINGLETON.toByteBuffer0(bType, null, 0, DEFAULT_BUFFER_SIZE, false);
+	}
 	public static ByteBuffer allocateByteBuffer(BufferType bType, int capacity)
 	{
 		return SINGLETON.toByteBuffer0(bType, null, 0, capacity, false);

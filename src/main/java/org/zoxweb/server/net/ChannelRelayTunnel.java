@@ -38,12 +38,10 @@ public class  ChannelRelayTunnel
 	private ByteChannel readSource;
 	private ByteChannel writeDestination;
 	private SelectionKey currentSK = null;
-	@SuppressWarnings("unused")
 	private SelectionKey writeChannelSK;
 	private final boolean autoCloseDestination;
-	//private ByteBuffer bBuffer = null;
 	private Closeable closeInterface = null;
-	//private SourceOrigin origin = null;
+
 	private ByteBuffer sBuffer;
 	
 	
@@ -62,7 +60,7 @@ public class  ChannelRelayTunnel
 							  SelectorController sc, Closeable closeInterface)
 	{
 		//this.origin = origin;
-		sBuffer = ByteBufferUtil.allocateByteBuffer(BufferType.HEAP, bufferSize);
+		sBuffer = ByteBufferUtil.allocateByteBuffer(BufferType.DIRECT, bufferSize);
 		this.readSource = readSource;
 		this.writeDestination = writeDestination;
 		this.writeChannelSK = writeChannelSK;
@@ -84,36 +82,28 @@ public class  ChannelRelayTunnel
 		// TODO Auto-generated method stub
 		return "NIO Channel Relay Tunnel";
 	}
-	
-//	public SourceOrigin getSourceOrigin()
-//	{
-//		return origin;
-//	}
-	
-	
+
 	public void close() throws IOException 
 	{
-		
-		// TODO Auto-generated method stub
-		if (closeInterface != null)
+		if(!isClosed.getAndSet(true))
 		{
-			IOUtil.close(closeInterface);
-		}
-		else
-		{
-			IOUtil.close(readSource);
-			getSelectorController().cancelSelectionKey(currentSK);
-			
-			if (autoCloseDestination)
-			{
-				IOUtil.close(writeDestination);
-			}
+			// TODO Auto-generated method stub
+			if (closeInterface != null) {
+				IOUtil.close(closeInterface);
+			} else {
+				IOUtil.close(readSource);
+				getSelectorController().cancelSelectionKey(currentSK);
 
+				if (autoCloseDestination) {
+					IOUtil.close(writeDestination);
+				}
+				ByteBufferUtil.cache(sBuffer);
+			}
 		}
 	}
 	
 	
-	public synchronized  void accept(SelectionKey key)
+	public synchronized void accept(SelectionKey key)
 	{
 		
 		try

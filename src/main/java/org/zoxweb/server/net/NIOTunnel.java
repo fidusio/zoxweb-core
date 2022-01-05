@@ -117,12 +117,13 @@ public class NIOTunnel
 	@Override
 	public void close() throws IOException
     {
-
-		IOUtil.close(destinationChannel);
-		IOUtil.close(sourceChannel);
-		ByteBufferUtil.cache(sourceBB);
-		ByteBufferUtil.cache(destinationBB);
-		log.info("closed:" + remoteAddress);
+		if(!isClosed.getAndSet(true))
+		{
+			IOUtil.close(destinationChannel);
+			IOUtil.close(sourceChannel);
+			ByteBufferUtil.cache(sourceBB, destinationBB);
+			log.info("closed:" + remoteAddress);
+		}
 	}
 
 
@@ -140,8 +141,8 @@ public class NIOTunnel
 						sourceSK = key;
 						destinationChannel = SocketChannel.open((new InetSocketAddress(remoteAddress.getInetAddress(), remoteAddress.getPort())));
 						//relay = new ChannelRelayTunnel(getReadBufferSize(), destinationChannel, sourceChannel, sourceSK,  true,  getSelectorController());
-						destinationBB = ByteBuffer.allocate(getReadBufferSize());
-						sourceBB = ByteBuffer.allocate(getReadBufferSize());
+						destinationBB = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.DIRECT);
+						sourceBB = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.DIRECT);
 						destinationSK = getSelectorController().register(NIOChannelCleaner.DEFAULT, destinationChannel, SelectionKey.OP_READ, this, new DefaultSKController(),false);
 					}
 				}

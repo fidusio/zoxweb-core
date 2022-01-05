@@ -21,6 +21,7 @@ import java.nio.channels.Channel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.spi.AbstractSelectableChannel;
 import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 import org.zoxweb.server.io.ByteBufferUtil;
@@ -37,27 +38,24 @@ public abstract class ProtocolProcessor
 
 	private volatile SelectorController selectorController;
 	private volatile InetFilterRulesManager outgoingInetFilterRulesManager;
-	private volatile int defaultReadBufferSize = ByteBufferUtil.DEFAULT_BUFFER_SIZE;
+
 
 	private volatile NVGenericMap properties = null;
 	protected volatile Executor executor;
-	
+	protected final AtomicBoolean isClosed = new AtomicBoolean(false);
+
 	protected ProtocolProcessor()
 	{
 		
 	}
+
 	
-	public int getReadBufferSize()
-	{
-		return defaultReadBufferSize;
-	}
-	
-	public synchronized void setReadBufferSize(int size)
-	{
-		if (size < 512)
-			throw new IllegalArgumentException("Invalid size " + size + " min allowed size 512 bytes");
-		defaultReadBufferSize = size;
-	}
+//	public synchronized void setReadBufferSize(int size)
+//	{
+//		if (size < 512)
+//			throw new IllegalArgumentException("Invalid size " + size + " min allowed size 512 bytes");
+//		defaultReadBufferSize = size;
+//	}
 	
 
 
