@@ -89,7 +89,7 @@ public class HTTPCallTool implements Runnable
             HTTPMethod httpMethod = HTTPMethod.lookup(params.stringValue("-m", "GET"));
             String contentFilename = params.stringValue("-c", true);
             String content = contentFilename != null ? IOUtil.inputStreamToString(contentFilename) : null;
-            boolean printResult = params.booleanValue("-pr", true);
+            boolean printResult = params.nameExists("-pr");
             String proxy = params.stringValue("-p", true);
             int cap = params.intValue("-cap", 0);
             String user = params.stringValue("-user", true);

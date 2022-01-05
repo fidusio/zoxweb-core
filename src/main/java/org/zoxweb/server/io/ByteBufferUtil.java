@@ -36,7 +36,7 @@ public class ByteBufferUtil
 	
 	private static final ByteBufferUtil SINGLETON = new ByteBufferUtil();
 
-	final private Map<Integer, SimpleQueue<ByteBuffer>> cachedBuffers = new HashMap<Integer, SimpleQueue<ByteBuffer>>();
+	volatile private Map<Integer, SimpleQueue<ByteBuffer>> cachedBuffers = new HashMap<Integer, SimpleQueue<ByteBuffer>>();
 	volatile private int count;
 	volatile private int availableCapacity;
 
@@ -44,7 +44,7 @@ public class ByteBufferUtil
 	/**
 	 * The maximum number of buffer cached per byte buffer capacity
 	 */
-	public static final int CACHE_LIMIT = 256;
+	public static final int CACHE_LIMIT = 512;
 
 
 	public static final ByteBuffer EMPTY = allocateByteBuffer(0);
@@ -96,8 +96,11 @@ public class ByteBufferUtil
 			if (sq != null)
 			{
 				bb = sq.dequeue();
-				availableCapacity -= bb.capacity();
-				count--;
+				if(bb != null)
+				{
+					availableCapacity -= bb.capacity();
+					count--;
+				}
 			}
 		}
 		
