@@ -36,7 +36,8 @@ public class ByteBufferUtil
 	
 	private static final ByteBufferUtil SINGLETON = new ByteBufferUtil();
 
-	private Map<Integer, SimpleQueue<ByteBuffer>> cachedBuffers = new HashMap<Integer, SimpleQueue<ByteBuffer>>();
+	volatile private Map<Integer, SimpleQueue<ByteBuffer>> cachedBuffers = new HashMap<Integer, SimpleQueue<ByteBuffer>>();
+	volatile private int size;
 
 	public static final int DEFAULT_BUFFER_SIZE = 4096;
 	public static final int CACHE_LIMIT = 256;
@@ -71,6 +72,7 @@ public class ByteBufferUtil
 					if (!sq.contains(bb))
 					{
 						sq.queue(bb);
+						size++;
 					}
 				}
 			}
@@ -78,17 +80,18 @@ public class ByteBufferUtil
 	}
 	private int size0()
 	{
-		int size = 0;
-		synchronized (cachedBuffers)
-		{
-			for (SimpleQueue<ByteBuffer> sq : cachedBuffers.values())
-			{
-				size += sq.size();
-			}
-
-		}
-
 		return size;
+//		int size = 0;
+//		synchronized (cachedBuffers)
+//		{
+//			for (SimpleQueue<ByteBuffer> sq : cachedBuffers.values())
+//			{
+//				size += sq.size();
+//			}
+//
+//		}
+
+//		return size;
 	}
 	
 	private  ByteBuffer toByteBuffer0(BufferType bType, byte[] buffer, int offset, int length, boolean copy)
@@ -103,6 +106,7 @@ public class ByteBufferUtil
 			if (sq != null)
 			{
 				bb = sq.dequeue();
+				size--;
 			}
 		}
 		
