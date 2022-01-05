@@ -20,14 +20,14 @@ public class ParamUtil {
         Map<String, ParamInfo> byParam = new LinkedHashMap<String, ParamInfo>();
 
 
-        public ParamInfoList add(String name, ParamInfo.ValueType valueType, String param, boolean manadatory, boolean caseSensitive)
+        public ParamInfoList add(String name, ParamInfo.ValueType valueType, String param, boolean mandatory, boolean caseSensitive)
         {
 
             ParamInfo toAdd = new ParamInfo();
             toAdd.setName(name);
             toAdd.setValueType(valueType);
             toAdd.setParam(param);
-            toAdd.setMandatory(manadatory);
+            toAdd.setMandatory(mandatory);
             toAdd.setCaseSensitive(caseSensitive);
 
 
@@ -65,7 +65,7 @@ public class ParamUtil {
     {
         private Map<String, List<String>> map = new LinkedHashMap<String, List<String>>();
         private boolean ignoreCase = false;
-        private int counter;
+        private final int counter;
         private ParamMap(boolean ignoreCase, Map<String, List<String>> map, int  length)
         {
             this.map = map;
@@ -235,11 +235,15 @@ public class ParamUtil {
         public boolean parameterExists(String name)
         {
             List<String> ret = lookup(name);
-            if(ret != null && ret.size() == 1)
-                return true;
-
-            return false;
+            return (ret != null && ret.size() == 1);
         }
+
+        public boolean nameExists(String name)
+        {
+            return lookup(name) != null;
+        }
+
+
 
         public boolean booleanValue(String name)
         {
@@ -450,20 +454,13 @@ public class ParamUtil {
                     }
                     else if (pi.getValueType() == ParamInfo.ValueType.MULTI)
                     {
-
-
                         lastMulti = pi;
                         value = args[++index];
 
                     }
-
-                    else if (index < args.length)
-                    {
-                        value = args[++index];
-                    }
                     else
                     {
-                        // error
+                        value = args[++index];
                     }
 
                 }

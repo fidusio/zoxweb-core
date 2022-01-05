@@ -36,10 +36,14 @@ public class ByteBufferUtil
 	
 	private static final ByteBufferUtil SINGLETON = new ByteBufferUtil();
 
-	volatile private Map<Integer, SimpleQueue<ByteBuffer>> cachedBuffers = new HashMap<Integer, SimpleQueue<ByteBuffer>>();
-	volatile private int size;
+	final private Map<Integer, SimpleQueue<ByteBuffer>> cachedBuffers = new HashMap<Integer, SimpleQueue<ByteBuffer>>();
+	volatile private int count;
+	volatile private int availableCapacity;
 
 	public static final int DEFAULT_BUFFER_SIZE = 4096;
+	/**
+	 * The maximum number of buffer cached per byte buffer capacity
+	 */
 	public static final int CACHE_LIMIT = 256;
 
 
@@ -62,7 +66,6 @@ public class ByteBufferUtil
 				if (sq == null)
 				{
 					sq = new SimpleQueue<ByteBuffer>(false);
-					//System.out.println("new capacity:" + bb.capacity());
 					cachedBuffers.put(bb.capacity(), sq);
 				}
 
@@ -72,27 +75,14 @@ public class ByteBufferUtil
 					if (!sq.contains(bb))
 					{
 						sq.queue(bb);
-						size++;
+						availableCapacity += bb.capacity();
+						count++;
 					}
 				}
 			}
 		}
 	}
-	private int size0()
-	{
-		return size;
-//		int size = 0;
-//		synchronized (cachedBuffers)
-//		{
-//			for (SimpleQueue<ByteBuffer> sq : cachedBuffers.values())
-//			{
-//				size += sq.size();
-//			}
-//
-//		}
 
-//		return size;
-	}
 	
 	private  ByteBuffer toByteBuffer0(BufferType bType, byte[] buffer, int offset, int length, boolean copy)
 	{
@@ -106,7 +96,8 @@ public class ByteBufferUtil
 			if (sq != null)
 			{
 				bb = sq.dequeue();
-				size--;
+				availableCapacity -= bb.capacity();
+				count--;
 			}
 		}
 		
@@ -143,7 +134,7 @@ public class ByteBufferUtil
 		write(bc, ubaos.getInternalBuffer(), 0, ubaos.size());
 	}
 	
-	public static void write(ByteChannel bc, byte array[], int off, int len) throws IOException
+	public static void write(ByteChannel bc, byte[] array, int off, int len) throws IOException
 	{
 		SharedUtil.checkIfNulls("null byte channel", bc);
 
@@ -189,7 +180,7 @@ public class ByteBufferUtil
 		return SINGLETON.toByteBuffer0(bType, null, 0, capacity, false);
 	}
 
-	public static ByteBuffer allocateByteBuffer(BufferType bType, byte buffer[], int offset, int length, boolean copy)
+	public static ByteBuffer allocateByteBuffer(BufferType bType, byte[] buffer, int offset, int length, boolean copy)
 	{
 		return SINGLETON.toByteBuffer0(bType, buffer, offset, length, copy);
 	}
@@ -210,9 +201,6 @@ public class ByteBufferUtil
 	}
 
 
-//	public static int smartWrite(ByteChannel bc, ByteBuffer bb) throws IOException{
-//		return smartWrite(null, bc, bb);
-//	}
 
 	public static int smartWrite(Lock lock, ByteChannel bc, ByteBuffer bb) throws IOException {
 		return smartWrite(lock, bc, bb, true);
@@ -286,12 +274,19 @@ public class ByteBufferUtil
 	}
 
 	/**
-	 *
-	 * @return the number of buffer in the cache
+	 * @return the number of byte buffers in the cache
  	 */
-	public static int cacheSize()
+	public static int cacheCount()
 	{
-		return SINGLETON.size0();
+		return SINGLETON.count;
+	}
+
+	/**
+	 * @return total bytes of the available byte buffers
+	 */
+	public static int cacheCapacity()
+	{
+		return SINGLETON.availableCapacity;
 	}
 	
 }
