@@ -200,14 +200,15 @@ public class NIOSocket
 												ska.getSKController().setSelectable(key, true);
 											});
 								    	}
-								    	else {
-											try {
+								    	else
+										{
+											try
+											{
 												currentPP.accept(key);
 											}
 											catch (Exception e){}
 											// very crucial setup
-
-												ska.getSKController().setSelectable(key,true);
+											ska.getSKController().setSelectable(key,true);
 								    	}
 							    	}
 							    } 
@@ -286,10 +287,14 @@ public class NIOSocket
 										// accept the new connection
 
 										if (executor != null) {
-											executor.execute(() -> {
-												try {
+											executor.execute(() ->
+											{
+												try
+												{
 													psp.acceptConnection(psf.getNIOChannelCleaner(), sc, psf.isBlocking());
-												} catch (IOException e) {
+												}
+												catch (IOException e)
+												{
 													e.printStackTrace();
 													IOUtil.close(psp);
 												}

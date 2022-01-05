@@ -76,6 +76,20 @@ public class ByteBufferUtil
 			}
 		}
 	}
+	private int size0()
+	{
+		int size = 0;
+		synchronized (cachedBuffers)
+		{
+			for (SimpleQueue<ByteBuffer> sq : cachedBuffers.values())
+			{
+				size += sq.size();
+			}
+
+		}
+
+		return size;
+	}
 	
 	private  ByteBuffer toByteBuffer0(BufferType bType, byte[] buffer, int offset, int length, boolean copy)
 	{
@@ -265,6 +279,15 @@ public class ByteBufferUtil
 			for(ByteBuffer bb: buffers)
 				SINGLETON.cache0(bb);
 		}
+	}
+
+	/**
+	 *
+	 * @return the number of buffer in the cache
+ 	 */
+	public static int cacheSize()
+	{
+		return SINGLETON.size0();
 	}
 	
 }
