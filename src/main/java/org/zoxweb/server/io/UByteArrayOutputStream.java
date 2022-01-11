@@ -435,6 +435,18 @@ public class UByteArrayOutputStream
 		return buf;
 	}
 
+	public String getString(int startIndex)
+	{
+		int length = size() - startIndex;
+		return SharedStringUtil.toString(getInternalBuffer(), startIndex, length);
+	}
+
+
+	public String getString(int indexStart, int length)
+	{
+		return SharedStringUtil.toString(getInternalBuffer(), indexStart, length);
+	}
+
 	/**
 	 * Write entire inner content to output stream based ong block size
 	 * @param os to write the data to

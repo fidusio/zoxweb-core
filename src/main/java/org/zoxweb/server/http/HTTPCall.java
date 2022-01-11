@@ -141,7 +141,7 @@ public class HTTPCall
 			case PUT:
 				if (!embedPostPutParamsInURI || hcc.isMultiPartEncoding())
 				{
-					HTTPMultiPartUtil.preMutliPart(hcc);
+					HTTPMultiPartUtil.preMultiPart(hcc);
 					break;
 				}
 			case GET:

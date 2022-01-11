@@ -459,15 +459,21 @@ public class HTTPUtil
 
 	public static List<GetNameValue<String>> parseQuery(URL url)
 	{
-		return parseQuery(url.getQuery());
+		return parseQuery(url.getQuery(), false);
 	}
 
 
-	public static List<GetNameValue<String>> parseQuery(String query)
+	public static List<GetNameValue<String>> parseQuery(String query, boolean fullURI)
 	{
 		if (query == null)
 		{
 			return null;
+		}
+		if(fullURI)
+		{
+			int index = query.indexOf("?");
+			if (index != -1)
+				query = query.substring(index + 1);
 		}
 
 		String allParams[] = query.split("&");
@@ -483,6 +489,35 @@ public class HTTPUtil
 		}
 
 		return ret;
+	}
+
+
+	public static ArrayValues<GetNameValue<String>> parseQuery(ArrayValues<GetNameValue<String>> av, String query, boolean fullURI)
+	{
+		if (query == null)
+		{
+			return null;
+		}
+		if(fullURI)
+		{
+			int index = query.indexOf("?");
+			if (index != -1)
+				query = query.substring(index + 1);
+		}
+
+		String allParams[] = query.split("&");
+
+
+		for (String param : allParams)
+		{
+			NVPair nvp = SharedUtil.toNVPair(param);
+			if (nvp != null && !SharedStringUtil.isEmpty(nvp.getName()))
+			{
+				av.add(nvp);
+			}
+		}
+
+		return av;
 	}
 
 	/**

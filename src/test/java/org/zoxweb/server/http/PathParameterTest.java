@@ -34,4 +34,17 @@ public class PathParameterTest {
 
         }
     }
+
+    @Test
+    public void parseQuery()
+    {
+        String[] uris = {
+                "/hello?a=1&b=2",
+        };
+
+        for(String uri :  uris)
+        {
+            System.out.println(HTTPUtil.parseQuery(uri, true));
+        }
+    }
 }

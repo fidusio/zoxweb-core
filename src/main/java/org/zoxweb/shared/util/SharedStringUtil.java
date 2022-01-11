@@ -139,12 +139,12 @@ public final class SharedStringUtil
 
 
 
-	public static String getTokenByIndex(String path, String sep, int index, boolean caseInsensitive)
+	public static String getTokenByIndex(String path, String sep, int index, boolean ignoreCase)
 	{
 		String params[] = SharedStringUtil.parseStringLenient(path, sep);
 		if (index < params.length)
 		{
-			return caseInsensitive ? params[index].toLowerCase() : params[index];
+			return ignoreCase ? params[index].toLowerCase() : params[index];
 		}
 
 		return null;

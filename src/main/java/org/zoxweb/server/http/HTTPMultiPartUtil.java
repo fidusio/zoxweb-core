@@ -23,15 +23,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.zoxweb.shared.http.HTTPMessageConfigInterface;
-import org.zoxweb.shared.http.HTTPHeaderName;
-import org.zoxweb.shared.http.HTTPHeaderValue;
-import org.zoxweb.shared.http.HTTPMethod;
+import org.zoxweb.shared.http.*;
 import org.zoxweb.shared.protocol.ProtocolDelimiter;
 import org.zoxweb.shared.util.ArrayValues;
 import org.zoxweb.shared.util.Const.TimeUnitType;
 import org.zoxweb.shared.util.NVPair;
 import org.zoxweb.shared.util.GetNameValue;
+import org.zoxweb.shared.util.SharedStringUtil;
 
 public class HTTPMultiPartUtil 
 {
@@ -40,7 +38,7 @@ public class HTTPMultiPartUtil
 	
 	
 	/**
-	 * Generate a boundary string in hex format based on the java time in nano seconds 
+	 * Generate a boundary string in hex format based on the java time in nano time
 	 * @return boundary
 	 */
 	public static String generateBoundary(TimeUnitType tut)
@@ -53,9 +51,9 @@ public class HTTPMultiPartUtil
 		switch(tut)
 		{
 		case MILLIS:
-			return Long.toString(System.currentTimeMillis(), 16);
+			return "--------" + Long.toString(System.currentTimeMillis(), 16);
 		case NANOS:
-			return Long.toString(System.nanoTime(), 16);
+			return "--------" + Long.toString(System.nanoTime(), 16);
 		default:
 			throw new IllegalArgumentException("Unit not supported:" + tut);
 		
@@ -70,7 +68,7 @@ public class HTTPMultiPartUtil
 	 */
 	public static String formatBoundary(String boundary)
 	{
-		return HTTPHeaderValue.BOUNDARY_EDGE + boundary;
+		return  boundary;
 	}
 	
 	/**
@@ -95,13 +93,13 @@ public class HTTPMultiPartUtil
 	}
 	
 	
-	public static String formatMutliPartData(GetNameValue<String> gnv)
+	public static String formatMultiPartData(GetNameValue<String> gnv)
 	{
 		if ( gnv instanceof HTTPMultiPartParameter)
 		{
 			return formatMultiPartParameter( (HTTPMultiPartParameter) gnv);
 		}
-		return formatMutliPartNameValue( gnv.getName(), gnv.getValue());
+		return formatMultiPartNameValue(gnv.getName(), gnv.getValue());
 	}
 	
 	
@@ -211,7 +209,7 @@ public class HTTPMultiPartUtil
 		return sb.toString();
 	}
 
-	public static String formatMutliPartNameValue(String name, String value)
+	public static String formatMultiPartNameValue(String name, String value)
 	{
 		return HTTPHeaderName.CONTENT_DISPOSITION.getName() + ProtocolDelimiter.COLON+ProtocolDelimiter.SPACE +
 			   HTTPHeaderValue.FORM_DATA + ProtocolDelimiter.SEMICOLON + ProtocolDelimiter.SPACE + 
@@ -240,12 +238,12 @@ public class HTTPMultiPartUtil
 		//sb.append(formatStartBoundary( boundary));
 		for (GetNameValue<String> gnv : params)
 		{
-			sb.append(formatStartBoundary( boundary));
-			String data = formatMutliPartData( gnv);
-			sb.append( data);
+			sb.append(formatStartBoundary(boundary));
+			String data = formatMultiPartData(gnv);
+			sb.append(data);
 		}
 		
-		sb.append(formatEndBoundary( boundary));
+		sb.append(formatEndBoundary(boundary));
 		
 		return sb.toString();
 	}
@@ -269,7 +267,7 @@ public class HTTPMultiPartUtil
 	{
 		for (GetNameValue<String> gnv : params.values())
 		{
-			os.write(formatStartBoundary( boundary).getBytes());
+			os.write(formatStartBoundary(boundary).getBytes());
 			writeMultiPartData(os, gnv);
 		}
 
@@ -286,7 +284,7 @@ public class HTTPMultiPartUtil
 			return;
 		}
 		
-		os.write(formatMutliPartNameValue( gnv.getName(), gnv.getValue()).getBytes());
+		os.write(formatMultiPartNameValue( gnv.getName(), gnv.getValue()).getBytes());
 	}
 	
 	
@@ -416,24 +414,33 @@ public class HTTPMultiPartUtil
 		}
 	}
 	
-	public static  boolean  preMutliPart(HTTPMessageConfigInterface hcc)
+	public static  boolean  preMultiPart(HTTPMessageConfigInterface hcc)
 			throws IOException
 	{
 		if (hcc.isMultiPartEncoding() && (hcc.getMethod() == HTTPMethod.POST || hcc.getMethod() == HTTPMethod.PUT))
 		{
 			GetNameValue<String> ct = null;
-			if (hcc.getHeaderParameters() != null)
+			String contentType = hcc.getContentType();
+			if (!SharedStringUtil.contains(contentType, "boundary=" , true))
 			{
-				ct = hcc.getHeaderParameters().get(MULTI_PART_HEADER_CONTENT_TYPE.getName());
-			}
-			
-			if (ct == null)
-			{
-				// set the boundary
 				hcc.setBoundary(generateBoundary(TimeUnitType.NANOS));
 				// add the boundary parameter to the request header
-				hcc.getHeaderParameters().add(new NVPair(MULTI_PART_HEADER_CONTENT_TYPE.getName(), MULTI_PART_HEADER_CONTENT_TYPE.getValue() + hcc.getBoundary()));
+				hcc.getHeaderParameters().add(new NVPair(HTTPHeaderName.CONTENT_TYPE, MULTI_PART_HEADER_CONTENT_TYPE.getValue() + hcc.getBoundary()));
+
 			}
+//			if (contentType.equalsIgnoreCase(MULTI_PART_HEADER_CONTENT_TYPE.getValue()))
+//			if (hcc.getHeaderParameters() != null)
+//			{
+//				ct = hcc.getHeaderParameters().get(MULTI_PART_HEADER_CONTENT_TYPE.getName());
+//			}
+//
+//			if (ct == null)
+//			{
+//				// set the boundary
+//				hcc.setBoundary(generateBoundary(TimeUnitType.NANOS));
+//				// add the boundary parameter to the request header
+//				hcc.getHeaderParameters().add(new NVPair(MULTI_PART_HEADER_CONTENT_TYPE.getName(), MULTI_PART_HEADER_CONTENT_TYPE.getValue() + hcc.getBoundary()));
+//			}
 
 			return true;
 		}

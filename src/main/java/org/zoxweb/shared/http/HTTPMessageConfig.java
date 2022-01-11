@@ -33,7 +33,7 @@ import org.zoxweb.shared.util.NVConfigEntity;
 import org.zoxweb.shared.util.NVConfigEntityLocal;
 import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.NVGetNameValueList;
-import org.zoxweb.shared.util.NVPairGetNameMap;
+import org.zoxweb.shared.util.NVGenericMap;
 import org.zoxweb.shared.util.SetNameValue;
 import org.zoxweb.shared.util.SharedStringUtil;
 import org.zoxweb.shared.util.SharedUtil;
@@ -68,23 +68,25 @@ public class HTTPMessageConfig
 		URL(NVConfigManager.createNVConfig("url", "The http URL", "URL", false, true, String.class)),
 		URI(NVConfigManager.createNVConfig("uri", "The http URI", "URI", false, true, String.class)),
 		CHARSET(NVConfigManager.createNVConfig("charset", "The character set", "Charset", false, true, String.class)),
-		BOUNDARY(NVConfigManager.createNVConfig("boundary", "The mutltipart boundary", "Boundary", false, true, String.class)),
+		BOUNDARY(NVConfigManager.createNVConfig("boundary", "The multipart boundary", "Boundary", false, true, String.class)),
 		CONNECTION_TIMEOUT(NVConfigManager.createNVConfig("connection_timeout", "The connection timeout in millis (<= 0 for ever)", "ConnectionTimeout", false, true, Integer.class)),
 		READ_TIMEOUT(NVConfigManager.createNVConfig("read_timeout", "The read timeout in millis (<= 0 for ever)", "ReadTimeout", false, true, Integer.class)),
 		REDIRECT_ENABLED(NVConfigManager.createNVConfig("redirect_enabled", "The redirect enabled", "RedirectEnabled", false, true, Boolean.class)),
-		MULTI_PART_ENCODING(NVConfigManager.createNVConfig("mutli_part_encoding", "The multipart encoding", "MultiPartEncoding", false, true, Boolean.class)),
+		MULTI_PART_ENCODING(NVConfigManager.createNVConfig("multi_part_encoding", "The multipart encoding", "MultiPartEncoding", false, true, Boolean.class)),
 		HTTP_METHOD(NVConfigManager.createNVConfig("http_method", "The http method", "HTTPMethod", false, true, HTTPMethod.class)),
 		HTTP_VERSION(NVConfigManager.createNVConfig("http_version", "The http version", "HTTPVersion", false, true, HTTPVersion.class)),
 		HTTP_STATUS_CODE(NVConfigManager.createNVConfig("http_status_code", "The http status code", "HTTPStatusCode", false, true, HTTPStatusCode.class)),
-		HEADER_PARAMETERS(NVConfigManager.createNVConfig("headers_parameters", "The header parameters", "HeaderParameters", false, true, true, String[].class, null)),
+		//HEADER_PARAMETERS(NVConfigManager.createNVConfig("headers_parameters", "The header parameters", "HeaderParameters", false, true, true, String[].class, null)),
+		HEADER_PARAMETERS(NVConfigManager.createNVConfig("headers_parameters", "The header parameters", "HeaderParameters", false, true, NVGenericMap.class)),
 		REASON(NVConfigManager.createNVConfig("reason", "The server reaso", "Reason", false, true, String.class)),
 		USER(NVConfigManager.createNVConfig("user", "The user name", "User", false, true, String.class)),
 		PASSWORD(NVConfigManager.createNVConfig("password", "The user name password", "Password", false, true, String.class)),
 		AUTHENTICATION(NVConfigManager.createNVConfigEntity("authentication", "The http authentication", "Authentication", false, true, HTTPAuthentication.class, ArrayType.NOT_ARRAY)),
-		PARAMETERS(NVConfigManager.createNVConfig("parameters", "parameters", "Parameters", false, true, false, String[].class, null)),
+		//PARAMETERS(NVConfigManager.createNVConfig("parameters", "parameters", "Parameters", false, true, false, String[].class, null)),
+		PARAMETERS(NVConfigManager.createNVConfig("parameters", "parameters", "Parameters", false, true, NVGenericMap.class)),
 		PROXY_ADDRESS(NVConfigManager.createNVConfigEntity("proxy_address", "The proxy address if not null","ProxyAddress",true, false, InetSocketAddressDAO.class, ArrayType.NOT_ARRAY)),
 		ENABLE_ENCODING(NVConfigManager.createNVConfig("enable_encoding", "The NVP will be url encoded", "EnableEncoding", false, true, Boolean.class)),
-		ENABLE_SECURE_CHECK(NVConfigManager.createNVConfig("enable_secure_check", "If the connection is secure, certificte will be valiated", "EnableSecureCheck", false, true, Boolean.class)),
+		ENABLE_SECURE_CHECK(NVConfigManager.createNVConfig("enable_secure_check", "If the connection is secure, certificate will be validated", "EnableSecureCheck", false, true, Boolean.class)),
 		HTTP_PARAMETER_FORMATTER(NVConfigManager.createNVConfig("http_parameter_formatter", "The NVP parameter formatter", "HTTPParameterFormatter", false, true, HTTPEncoder.class)),
 		
 		CONTENT(NVConfigManager.createNVConfig("content", "The payload content", "Content", false, true, byte[].class)),
@@ -138,8 +140,9 @@ public class HTTPMessageConfig
 		setHTTPParameterFormatter(HTTPEncoder.URL_ENCODED);
 		// updating PARAMETERS and HEADER_PARAMETERS to NVGetNameValueMap
 		// reason to support multi-parts parameters
-		attributes.put(Params.PARAMETERS.getNVConfig().getName(), new NVGetNameValueList(Params.PARAMETERS.getNVConfig().getName(), new ArrayList<GetNameValue<String>>()));
-		attributes.put(Params.HEADER_PARAMETERS.getNVConfig().getName(), new NVPairGetNameMap(Params.HEADER_PARAMETERS.getNVConfig().getName(), new LinkedHashMap<GetName, GetNameValue<String>>()));
+		//attributes.put(Params.PARAMETERS.getNVConfig().getName(), new NVGetNameValueList(Params.PARAMETERS.getNVConfig().getName(), new ArrayList<GetNameValue<String>>()));
+		//attributes.put(Params.HEADER_PARAMETERS.getNVConfig().getName(), new NVPairGetNameMap(Params.HEADER_PARAMETERS.getNVConfig().getName(), new LinkedHashMap<GetName, GetNameValue<String>>()));
+
 	}
 	
 
@@ -149,7 +152,7 @@ public class HTTPMessageConfig
 		GetNameValue<String> mp = getHeaderParameters().get(HTTPHeaderName.CONTENT_TYPE.getName());
 		if (mp != null && mp.getValue() != null)
 		{
-			if (SharedStringUtil.contains(HTTPMimeType.MULTIPART_FORM_DATA.getValue(), mp.getValue(), true))
+			if (SharedStringUtil.contains(mp.getValue(), HTTPMimeType.MULTIPART_FORM_DATA.getValue(), true))
 			{
 				return true;
 			}
@@ -171,7 +174,7 @@ public class HTTPMessageConfig
 	 * @return parameters 
 	 */
 	@SuppressWarnings("unchecked")
-	public synchronized ArrayValues<GetNameValue<String>> getParameters() 
+	public ArrayValues<GetNameValue<String>> getParameters()
 	{
 		return (ArrayValues<GetNameValue<String>>) lookup(Params.PARAMETERS);
 	}
@@ -201,7 +204,7 @@ public class HTTPMessageConfig
 	 * @return headers
 	 */
 	@SuppressWarnings("unchecked")
-	public synchronized ArrayValues<GetNameValue<String>> getHeaderParameters() 
+	public ArrayValues<GetNameValue<String>> getHeaderParameters()
 	{
 		return  (ArrayValues<GetNameValue<String>>) lookup(Params.HEADER_PARAMETERS);
 	}
@@ -325,7 +328,7 @@ public class HTTPMessageConfig
 
 	/**
 	 * This is a optional parameter that is set by the http call 
-	 * in case of mutlitpart post
+	 * in case of multipart post
 	 * @param boundary
 	 */
 	public void setBoundary(String boundary)

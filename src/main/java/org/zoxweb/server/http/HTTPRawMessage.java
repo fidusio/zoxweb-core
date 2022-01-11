@@ -15,16 +15,9 @@
  */
 package org.zoxweb.server.http;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-
 import org.zoxweb.server.io.UByteArrayOutputStream;
-
-import org.zoxweb.shared.http.HTTPHeaderName;
-import org.zoxweb.shared.http.HTTPMessageConfig;
-import org.zoxweb.shared.http.HTTPMessageConfigInterface;
-import org.zoxweb.shared.http.HTTPMethod;
+import org.zoxweb.shared.http.*;
 import org.zoxweb.shared.protocol.ProtocolDelimiter;
 import org.zoxweb.shared.util.GetNameValue;
 import org.zoxweb.shared.util.SharedStringUtil;
@@ -81,11 +74,10 @@ public class HTTPRawMessage
 		return ubaos;
 	}
 
-	private void parseRawHeaders()
+	private void parseRawHeaders(boolean client)
 	{
 		if (endOfHeadersIndex != -1)
 		{
-			//headers = new ArrayList<GetNameValue<String>>();
 			int lineCounter =0;
 			for (; parseIndex < endOfHeadersIndex;)
 			{
@@ -104,6 +96,29 @@ public class HTTPRawMessage
 					else
 					{
 						firstLine = oneLine;
+						if(client)
+						{
+							String tokens[] = getFirstLine().split(" ");
+							for (int i = 0; i < tokens.length; i++) {
+								String token = tokens[i];
+								switch (i) {
+									case 0:
+										hmci.setMethod(HTTPMethod.lookup(token));
+										break;
+									case 1:
+										hmci.setURI(token);
+										break;
+									case 2:
+										hmci.setHTTPVersion(token);
+										break;
+								}
+							}
+							if(hmci.getMethod() == HTTPMethod.GET)
+							{
+								HTTPDecoder.WWW_URL_ENC.decode(this);
+							}
+						}
+
 					}
 					parseIndex = endOfCurrentLine+ProtocolDelimiter.CRLF.getBytes().length;
 				}
@@ -153,42 +168,89 @@ public class HTTPRawMessage
 
 	public synchronized HTTPMessageConfigInterface parse(boolean client)
 	{
-		if (endOfHeadersIndex() == -1)
-		{
+		if (endOfHeadersIndex() == -1) {
 			// detect end of message
 			endOfHeadersIndex = ubaos.indexOf(ProtocolDelimiter.CRLFCRLF.getBytes());
 
-			if (endOfHeadersIndex != -1)
-			{
-				parseRawHeaders();
-				if(client)
+			if (endOfHeadersIndex != -1) {
+				parseRawHeaders(client);
+				if (client && isMessageComplete())
 				{
-					if(getFirstLine() != null)
+
+					if (hmci.getMethod() != HTTPMethod.GET)
 					{
-						String tokens[] = getFirstLine().split(" ");
-						for(int i = 0; i < tokens.length; i++)
+
+						HTTPMimeType hmt = HTTPMimeType.lookup(hmci.getContentType());
+						if(hmt != null)
 						{
-							String token = tokens[i];
-							switch (i)
+							switch (hmt)
 							{
-								case 0:
-									hmci.setMethod(HTTPMethod.lookup(token));
+
+								case APPLICATION_WWW_URL_ENC:
+									HTTPDecoder.WWW_URL_ENC.decode(this);
 									break;
-								case 1:
-									hmci.setURI(token);
+								case APPLICATION_JSON:
 									break;
-								case 2:
-									hmci.setHTTPVersion(token);
+								case APPLICATION_OCTET_STREAM:
+									break;
+								case MULTIPART_FORM_DATA:
+									HTTPDecoder.MULTIPART_FORM_DATA.decode(this);
+									break;
+								case TEXT_CSV:
+									break;
+								case TEXT_CSS:
+									break;
+								case TEXT_HTML:
+									break;
+								case TEXT_JAVASCRIPT:
+									break;
+								case TEXT_PLAIN:
+									break;
+								case TEXT_YAML:
+									break;
+								case IMAGE_BMP:
+									break;
+								case IMAGE_GIF:
+									break;
+								case IMAGE_JPEG:
+									break;
+								case IMAGE_PNG:
+									break;
+								case IMAGE_SVG:
+									break;
+								case IMAGE_ICON:
+									break;
+								case IMAGE_TIF:
 									break;
 							}
 						}
+
+
+//						if (HTTPMimeType.lookup(hmci.getContentType()) == HTTPMimeType.APPLICATION_WWW_URL_ENC) {
+//							int index = endOfHeadersIndex() + ProtocolDelimiter.CRLFCRLF.getBytes().length;
+//							int size = ubaos.size();
+//							HTTPUtil.parseQuery(
+//									hmci.getParameters(),
+//									ubaos.getString(index),
+//									false);
+//						}
+//						else if (HTTPMimeType.lookup(hmci.getContentType()) == HTTPMimeType.MULTIPART_FORM_DATA)
+//						{
+//							String boundaryName = HTTPHeaderValue.BOUNDARY.getValue() + "=";
+//							int index = SharedStringUtil.indexOf(hmci.getContentType(), boundaryName, 0, true);
+//							if(index != -1)
+//							{
+//								String boundary = SharedStringUtil.trimOrNull(hmci.getContentType().substring(index+boundaryName.length()));
+//								hmci.setBoundary(boundary);
+//							}
+//
+//							// we need to parse the payload next
+//						}
 					}
 				}
 			}
-
-			return hmci;
 		}
-		return null;
+		return hmci;
 	}
 
 //	public int getContentLength()
@@ -205,6 +267,11 @@ public class HTTPRawMessage
 //
 //		return null;
 //	}
+
+
+	public HTTPMessageConfigInterface getHTTPMessageConfig() {
+		return hmci;
+	}
 
 	@Override
 	public String toString()
