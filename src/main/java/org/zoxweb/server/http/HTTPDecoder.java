@@ -3,16 +3,18 @@ package org.zoxweb.server.http;
 import java.util.List;
 import java.util.logging.Logger;
 
+import org.zoxweb.server.io.UByteArrayOutputStream;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.http.*;
 import org.zoxweb.shared.protocol.ProtocolDelimiter;
-import org.zoxweb.shared.util.DataDecoder;
-import org.zoxweb.shared.util.NVEntity;
-import org.zoxweb.shared.util.NVGenericMap;
+import org.zoxweb.shared.util.*;
 import org.zoxweb.shared.util.SharedBase64.Base64Type;
-import org.zoxweb.shared.util.SharedStringUtil;
+
+import javax.print.attribute.standard.MediaSize;
 
 public final class HTTPDecoder {
+  public static final byte[] NAME_EQUAL_DOUBLE_QUOTE = SharedStringUtil.getBytes("name=\"");
+  public static final byte[] DOUBLE_QUOTE = {'\"'};
   private final static Logger log = Logger.getLogger(HTTPDecoder.class.getName());
 
   private HTTPDecoder() {
@@ -64,6 +66,7 @@ public final class HTTPDecoder {
 
 
   public static final DataDecoder<HTTPRawMessage, HTTPMessageConfigInterface> MULTIPART_FORM_DATA = (hrm) ->{
+
     HTTPMessageConfigInterface hmci = hrm.getHTTPMessageConfig();
     switch(hmci.getMethod())
     {
@@ -75,21 +78,45 @@ public final class HTTPDecoder {
           if (HTTPMimeType.lookup(hmci.getContentType()) == HTTPMimeType.MULTIPART_FORM_DATA)
           {
             String boundaryName = HTTPHeaderValue.BOUNDARY.getValue() + "=";
+
             int index = SharedStringUtil.indexOf(hmci.getContentType(), boundaryName, 0, true);
+
             if(index != -1)
             {
               String boundary = SharedStringUtil.trimOrNull(hmci.getContentType().substring(index+boundaryName.length()));
               hmci.setBoundary(boundary);
               // we need to parse the payload next
               index = hrm.endOfHeadersIndex() + ProtocolDelimiter.CRLFCRLF.getBytes().length;
-              String payload = hrm.getUBAOS().getString(index);
 
+              UByteArrayOutputStream ubaos = hrm.getUBAOS();
+              while((index = ubaos.indexOf(index, NAME_EQUAL_DOUBLE_QUOTE)) != -1)
+              {
+                index += NAME_EQUAL_DOUBLE_QUOTE.length;
+                int indexEnd = ubaos.indexOf(index, DOUBLE_QUOTE);
+                String name = ubaos.getString(index, indexEnd - index);
+                index = ubaos.indexOf(indexEnd, ProtocolDelimiter.CRLFCRLF.getBytes());
+                index += ProtocolDelimiter.CRLFCRLF.getBytes().length;
+                indexEnd = ubaos.indexOf(index, ProtocolDelimiter.CRLF.getBytes());
+                String value = ubaos.getString(index, indexEnd - index);
+                hmci.getParameters().add(new NVPair(name, value));
+              }
 
-
+//              String payload = hrm.getUBAOS().getString(index);
+//              index = 0;
+//              // not very solid
+//              while( (index = payload.indexOf("name=\"", index)) != -1)
+//              {
+//                index += 6;
+//                String name = payload.substring(index, payload.indexOf("\"", index));
+//                index = payload.indexOf(ProtocolDelimiter.CRLFCRLF.getValue(), index);
+//                index += ProtocolDelimiter.CRLFCRLF.getBytes().length;
+//                int endOfLine =  payload.indexOf(ProtocolDelimiter.CRLF.getValue(), index);
+//                String value = payload.substring(index, endOfLine).trim();
+//                index = endOfLine + ProtocolDelimiter.CRLF.getBytes().length;
+//                hmci.getParameters().add(new NVPair(name, value));
+//              }
               return hmci;
             }
-
-
           }
         }
     }

@@ -16,6 +16,8 @@
 package org.zoxweb.server.http;
 
 import java.util.Arrays;
+import java.util.logging.Logger;
+
 import org.zoxweb.server.io.UByteArrayOutputStream;
 import org.zoxweb.shared.http.*;
 import org.zoxweb.shared.protocol.ProtocolDelimiter;
@@ -25,6 +27,7 @@ import org.zoxweb.shared.util.SharedUtil;
 
 public class HTTPRawMessage 
 {
+	private final static Logger log = Logger.getLogger(HTTPRawMessage.class.getName());
 	private UByteArrayOutputStream ubaos;
 	private int endOfHeadersIndex = -1;
 	private int parseIndex = 0;
@@ -174,82 +177,59 @@ public class HTTPRawMessage
 
 			if (endOfHeadersIndex != -1) {
 				parseRawHeaders(client);
-				if (client && isMessageComplete())
-				{
+			}
+		}
+		if (client && isMessageComplete())
+		{
 
-					if (hmci.getMethod() != HTTPMethod.GET)
-					{
+			if (hmci.getMethod() != HTTPMethod.GET) {
 
-						HTTPMimeType hmt = HTTPMimeType.lookup(hmci.getContentType());
-						if(hmt != null)
-						{
-							switch (hmt)
-							{
+				HTTPMimeType hmt = HTTPMimeType.lookup(hmci.getContentType());
+				if (hmt != null) {
+					switch (hmt) {
 
-								case APPLICATION_WWW_URL_ENC:
-									HTTPDecoder.WWW_URL_ENC.decode(this);
-									break;
-								case APPLICATION_JSON:
-									break;
-								case APPLICATION_OCTET_STREAM:
-									break;
-								case MULTIPART_FORM_DATA:
-									HTTPDecoder.MULTIPART_FORM_DATA.decode(this);
-									break;
-								case TEXT_CSV:
-									break;
-								case TEXT_CSS:
-									break;
-								case TEXT_HTML:
-									break;
-								case TEXT_JAVASCRIPT:
-									break;
-								case TEXT_PLAIN:
-									break;
-								case TEXT_YAML:
-									break;
-								case IMAGE_BMP:
-									break;
-								case IMAGE_GIF:
-									break;
-								case IMAGE_JPEG:
-									break;
-								case IMAGE_PNG:
-									break;
-								case IMAGE_SVG:
-									break;
-								case IMAGE_ICON:
-									break;
-								case IMAGE_TIF:
-									break;
-							}
-						}
-
-
-//						if (HTTPMimeType.lookup(hmci.getContentType()) == HTTPMimeType.APPLICATION_WWW_URL_ENC) {
-//							int index = endOfHeadersIndex() + ProtocolDelimiter.CRLFCRLF.getBytes().length;
-//							int size = ubaos.size();
-//							HTTPUtil.parseQuery(
-//									hmci.getParameters(),
-//									ubaos.getString(index),
-//									false);
-//						}
-//						else if (HTTPMimeType.lookup(hmci.getContentType()) == HTTPMimeType.MULTIPART_FORM_DATA)
-//						{
-//							String boundaryName = HTTPHeaderValue.BOUNDARY.getValue() + "=";
-//							int index = SharedStringUtil.indexOf(hmci.getContentType(), boundaryName, 0, true);
-//							if(index != -1)
-//							{
-//								String boundary = SharedStringUtil.trimOrNull(hmci.getContentType().substring(index+boundaryName.length()));
-//								hmci.setBoundary(boundary);
-//							}
-//
-//							// we need to parse the payload next
-//						}
+						case APPLICATION_WWW_URL_ENC:
+							HTTPDecoder.WWW_URL_ENC.decode(this);
+							break;
+						case APPLICATION_JSON:
+							break;
+						case APPLICATION_OCTET_STREAM:
+							break;
+						case MULTIPART_FORM_DATA:
+							HTTPDecoder.MULTIPART_FORM_DATA.decode(this);
+							break;
+						case TEXT_CSV:
+							break;
+						case TEXT_CSS:
+							break;
+						case TEXT_HTML:
+							break;
+						case TEXT_JAVASCRIPT:
+							break;
+						case TEXT_PLAIN:
+							break;
+						case TEXT_YAML:
+							break;
+						case IMAGE_BMP:
+							break;
+						case IMAGE_GIF:
+							break;
+						case IMAGE_JPEG:
+							break;
+						case IMAGE_PNG:
+							break;
+						case IMAGE_SVG:
+							break;
+						case IMAGE_ICON:
+							break;
+						case IMAGE_TIF:
+							break;
 					}
 				}
 			}
+
 		}
+
 		return hmci;
 	}
 

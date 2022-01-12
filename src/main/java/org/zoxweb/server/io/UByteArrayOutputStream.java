@@ -151,6 +151,13 @@ public class UByteArrayOutputStream
 	{
 		return SharedUtil.indexOf(getInternalBuffer(), startAt, size(), match, offset, length);
 	}
+
+	public int indexOf(int startAt, byte[] match)
+	{
+		return SharedUtil.indexOf(getInternalBuffer(), startAt, size(), match, 0, match.length);
+	}
+
+
 	
 	public int indexOf(String str)
 	{
