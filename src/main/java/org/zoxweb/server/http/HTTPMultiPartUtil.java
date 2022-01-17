@@ -22,7 +22,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
+import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.shared.http.*;
 import org.zoxweb.shared.protocol.ProtocolDelimiter;
 import org.zoxweb.shared.util.ArrayValues;
@@ -31,11 +33,14 @@ import org.zoxweb.shared.util.NVPair;
 import org.zoxweb.shared.util.GetNameValue;
 import org.zoxweb.shared.util.SharedStringUtil;
 
-public class HTTPMultiPartUtil 
+public final class HTTPMultiPartUtil
 {
 
 	public static final GetNameValue<String> MULTI_PART_HEADER_CONTENT_TYPE = new NVPair(HTTPHeaderName.CONTENT_TYPE.getName(), "multipart/form-data; boundary=");
-	
+	private final static Logger log = Logger.getLogger(HTTPMultiPartUtil.class.getName());
+	private HTTPMultiPartUtil(){
+		log.info("Default ctr");
+	}
 	
 	/**
 	 * Generate a boundary string in hex format based on the java time in nano time
@@ -61,35 +66,35 @@ public class HTTPMultiPartUtil
 		}
 	}
 
-	/**
-	 * Format: BOUNDARY_EDGE + boundary
-	 * @param boundary
-	 * @return formated boundary
-	 */
-	public static String formatBoundary(String boundary)
-	{
-		return  boundary;
-	}
+//	/**
+//	 * Format:boundary
+//	 * @param boundary for
+//	 * @return formatted boundary
+//	 */
+//	public static String formatBoundary(String boundary)
+//	{
+//		return  boundary;
+//	}
 	
 	/**
-	 * Format : BOUNDARY_EDGE + boundary+ \r\n
-	 * @param boundary
-	 * @return start 
+	 * Format : BOUNDARY_EDGE + boundary + \r\n
+	 * @param boundary value
+	 * @return --boundary\r\n
 	 */
 	public static String formatStartBoundary(String boundary)
 	{
-		return formatBoundary(boundary) + ProtocolDelimiter.CRLF;
+		return HTTPHeaderValue.BOUNDARY_EDGE + boundary + ProtocolDelimiter.CRLF;
 	}
 	
 	
 	/**
 	 * Format : BOUNDARY_EDGE + boundary + BOUNDARY_EDGE \r\n
-	 * @param boundary
-	 * @return end
+	 * @param boundary value=
+	 * @return --boundary--\r\n
 	 */
 	public static String formatEndBoundary(String boundary)
 	{
-		return formatBoundary(boundary) + HTTPHeaderValue.BOUNDARY_EDGE + ProtocolDelimiter.CRLF;
+		return HTTPHeaderValue.BOUNDARY_EDGE + boundary + HTTPHeaderValue.BOUNDARY_EDGE + ProtocolDelimiter.CRLF;
 	}
 	
 	
@@ -97,7 +102,7 @@ public class HTTPMultiPartUtil
 	{
 		if ( gnv instanceof HTTPMultiPartParameter)
 		{
-			return formatMultiPartParameter( (HTTPMultiPartParameter) gnv);
+			return formatMultiPartParameter((HTTPMultiPartParameter) gnv);
 		}
 		return formatMultiPartNameValue(gnv.getName(), gnv.getValue());
 	}
@@ -182,7 +187,7 @@ public class HTTPMultiPartUtil
 					{
 						for (int i = 0; i < headersParameters.size(); i++)
 						{
-							if (i>0)
+							if (i > 0)
 							{
 								sb.append( ProtocolDelimiter.SEMICOLON);
 								sb.append( ProtocolDelimiter.SPACE);
@@ -214,7 +219,7 @@ public class HTTPMultiPartUtil
 		return HTTPHeaderName.CONTENT_DISPOSITION.getName() + ProtocolDelimiter.COLON+ProtocolDelimiter.SPACE +
 			   HTTPHeaderValue.FORM_DATA + ProtocolDelimiter.SEMICOLON + ProtocolDelimiter.SPACE + 
 			   HTTPHeaderValue.NAME + ProtocolDelimiter.EQUAL + "\"" + name + "\"" +
-			   ProtocolDelimiter.CRLFCRLF + value +ProtocolDelimiter.CRLF;
+			   ProtocolDelimiter.CRLFCRLF + value + ProtocolDelimiter.CRLF;
 	}
 
 	/**
@@ -227,8 +232,8 @@ public class HTTPMultiPartUtil
 	 * }
 	 * BOUNDARY_EDGE + boundary + BOUNDARY_EDGE \r\n
 	 * 
-	 * @param boundary
-	 * @param params
+	 * @param boundary value
+	 * @param params list
 	 * @return all content formatted
 	 */
 	public static String formatMultiPartContent(String boundary, List<GetNameValue<String>> params)
@@ -254,17 +259,18 @@ public class HTTPMultiPartUtil
 	{
 		for ( GetNameValue<String> gnv : params)
 		{
-			os.write(formatStartBoundary( boundary).getBytes());
+			os.write(formatStartBoundary(boundary).getBytes());
 			writeMultiPartData(os, gnv);
 		}
 		
-		os.write(formatEndBoundary( boundary).getBytes());
+		os.write(formatEndBoundary(boundary).getBytes());
 	}
 	
 	
 	public static void writeMultiPartContent(OutputStream os, String boundary, ArrayValues<GetNameValue<String>> params)
 			throws IOException
 	{
+		//log.info("StartBoundary: " + formatStartBoundary(boundary));
 		for (GetNameValue<String> gnv : params.values())
 		{
 			os.write(formatStartBoundary(boundary).getBytes());
@@ -272,6 +278,7 @@ public class HTTPMultiPartUtil
 		}
 
 		os.write(formatEndBoundary( boundary).getBytes());
+		//log.info("EndBoundary: " + formatEndBoundary(boundary));
 	}
 	
 
@@ -366,7 +373,7 @@ public class HTTPMultiPartUtil
 				}
 			}
 					   // we need to add all the extra fields and headers  here
-					   
+			//log.info(sb.toString());
 			os.write(sb.toString().getBytes());
 					   
 			os.write(ProtocolDelimiter.CRLF.getBytes());
@@ -375,7 +382,7 @@ public class HTTPMultiPartUtil
 			if (hmpp.getInputStreamValue() != null)
 			{
 				InputStream is = hmpp.getInputStreamValue();
-				byte buffer[] = new byte[512];
+				byte[] buffer = new byte[512];
 				int read;
 
 				try
@@ -389,14 +396,7 @@ public class HTTPMultiPartUtil
 				{
 					if (hmpp.isAutoClose())
 					{
-						try
-						{
-							is.close();
-						}
-						catch( IOException e)
-						{
-							
-						}
+						IOUtil.close(is);
 					}
 				}
 			}
@@ -406,7 +406,8 @@ public class HTTPMultiPartUtil
 			}
 			else if (hmpp.getValue() != null)
 			{
-				os.write(hmpp.getValue().getBytes());
+				os.write(SharedStringUtil.getBytes(hmpp.getValue()));
+				//log.info("Value: " + hmpp.getValue());
 			}
 					   
 			os.write( ProtocolDelimiter.CRLF.getBytes());
@@ -415,13 +416,12 @@ public class HTTPMultiPartUtil
 	}
 	
 	public static  boolean  preMultiPart(HTTPMessageConfigInterface hcc)
-			throws IOException
 	{
 		if (hcc.isMultiPartEncoding() && (hcc.getMethod() == HTTPMethod.POST || hcc.getMethod() == HTTPMethod.PUT))
 		{
-			GetNameValue<String> ct = null;
-			String contentType = hcc.getContentType();
-			if (!SharedStringUtil.contains(contentType, "boundary=" , true))
+//			GetNameValue<String> ct = null;
+//			String contentType = hcc.getContentType();
+			if (!SharedStringUtil.contains(hcc.getContentType(), "boundary=" , true))
 			{
 				hcc.setBoundary(generateBoundary(TimeUnitType.NANOS));
 				// add the boundary parameter to the request header

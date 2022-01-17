@@ -951,7 +951,7 @@ public class HTTPUtil
 					{
 
 					case MULTIPART_FORM_DATA:
-						ret.getParameters().add( new HTTPMultiPartParameter(name, value));
+						ret.getParameters().add(new HTTPMultiPartParameter(name, value));
 						break;
 					case TEXT_PLAIN:
 					case APPLICATION_WWW_URL_ENC:
@@ -966,7 +966,8 @@ public class HTTPUtil
 
 			if (encoding == HTTPMimeType.MULTIPART_FORM_DATA)
 			{
-				ret.setMultiPartEncoding( true);
+				ret.setContentType(HTTPMimeType.MULTIPART_FORM_DATA);
+				//ret.setMultiPartEncoding( true);
 			}
 			//ret.setParameters(params);
 			ret.setName(formName);
@@ -979,10 +980,10 @@ public class HTTPUtil
 			}
 			catch(IOException e)
 			{
-				ret.setURI( formAction);
+				ret.setURI(formAction);
 			}
 
-			ret.setMethod((HTTPMethod) SharedUtil.lookupEnum(formMethod, HTTPMethod.values()));
+			ret.setMethod(formMethod);
 
 
 			if (reqCookie != null)

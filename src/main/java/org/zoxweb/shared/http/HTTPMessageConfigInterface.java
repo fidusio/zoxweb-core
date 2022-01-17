@@ -39,7 +39,7 @@ extends ReferenceID<String>, SetName, SetDescription
 	/**
 	 * @param multiPartEncoding true to enable multi part encoding
 	 */
-	void setMultiPartEncoding(boolean multiPartEncoding);
+	//void setMultiPartEncoding(boolean multiPartEncoding);
 	
 	
 	/**

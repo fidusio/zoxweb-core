@@ -15,38 +15,22 @@
  */
 package org.zoxweb.shared.http;
 
-import java.util.ArrayList;
-
-import java.util.LinkedHashMap;
 import java.util.List;
 
 
 import org.zoxweb.shared.data.SetNameDescriptionDAO;
 import org.zoxweb.shared.net.InetSocketAddressDAO;
-import org.zoxweb.shared.util.ArrayValues;
-import org.zoxweb.shared.util.GetNVConfig;
-import org.zoxweb.shared.util.GetName;
-import org.zoxweb.shared.util.GetNameValue;
-import org.zoxweb.shared.util.GetValue;
-import org.zoxweb.shared.util.NVConfig;
-import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
-import org.zoxweb.shared.util.NVConfigManager;
-import org.zoxweb.shared.util.NVGetNameValueList;
-import org.zoxweb.shared.util.NVGenericMap;
-import org.zoxweb.shared.util.SetNameValue;
-import org.zoxweb.shared.util.SharedStringUtil;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.*;
 import org.zoxweb.shared.util.NVConfigEntity.ArrayType;
 
 /**
  * This class is configuration object that contains all the required parameters to perform 
  * <p>
- * HTTTP Task such as:
+ * HTTP Task such as:
  * <ul>
- * <li> do an http submit
- * <li> do an http query
- * <li> do a http rest invocation
+ * <li> do http submit
+ * <li> do http query
+ * <li> do http rest invocation
  * </ul
  * </p> 
  * @author javaconsigliere
@@ -72,13 +56,13 @@ public class HTTPMessageConfig
 		CONNECTION_TIMEOUT(NVConfigManager.createNVConfig("connection_timeout", "The connection timeout in millis (<= 0 for ever)", "ConnectionTimeout", false, true, Integer.class)),
 		READ_TIMEOUT(NVConfigManager.createNVConfig("read_timeout", "The read timeout in millis (<= 0 for ever)", "ReadTimeout", false, true, Integer.class)),
 		REDIRECT_ENABLED(NVConfigManager.createNVConfig("redirect_enabled", "The redirect enabled", "RedirectEnabled", false, true, Boolean.class)),
-		MULTI_PART_ENCODING(NVConfigManager.createNVConfig("multi_part_encoding", "The multipart encoding", "MultiPartEncoding", false, true, Boolean.class)),
+		//MULTI_PART_ENCODING(NVConfigManager.createNVConfig("multi_part_encoding", "The multipart encoding", "MultiPartEncoding", false, true, Boolean.class)),
 		HTTP_METHOD(NVConfigManager.createNVConfig("http_method", "The http method", "HTTPMethod", false, true, HTTPMethod.class)),
 		HTTP_VERSION(NVConfigManager.createNVConfig("http_version", "The http version", "HTTPVersion", false, true, HTTPVersion.class)),
 		HTTP_STATUS_CODE(NVConfigManager.createNVConfig("http_status_code", "The http status code", "HTTPStatusCode", false, true, HTTPStatusCode.class)),
 		//HEADER_PARAMETERS(NVConfigManager.createNVConfig("headers_parameters", "The header parameters", "HeaderParameters", false, true, true, String[].class, null)),
 		HEADER_PARAMETERS(NVConfigManager.createNVConfig("headers_parameters", "The header parameters", "HeaderParameters", false, true, NVGenericMap.class)),
-		REASON(NVConfigManager.createNVConfig("reason", "The server reaso", "Reason", false, true, String.class)),
+		REASON(NVConfigManager.createNVConfig("reason", "The server reason", "Reason", false, true, String.class)),
 		USER(NVConfigManager.createNVConfig("user", "The user name", "User", false, true, String.class)),
 		PASSWORD(NVConfigManager.createNVConfig("password", "The user name password", "Password", false, true, String.class)),
 		AUTHENTICATION(NVConfigManager.createNVConfigEntity("authentication", "The http authentication", "Authentication", false, true, HTTPAuthentication.class, ArrayType.NOT_ARRAY)),
@@ -152,20 +136,17 @@ public class HTTPMessageConfig
 		GetNameValue<String> mp = getHeaderParameters().get(HTTPHeaderName.CONTENT_TYPE.getName());
 		if (mp != null && mp.getValue() != null)
 		{
-			if (SharedStringUtil.contains(mp.getValue(), HTTPMimeType.MULTIPART_FORM_DATA.getValue(), true))
-			{
-				return true;
-			}
+			return SharedStringUtil.contains(mp.getValue(), HTTPMimeType.MULTIPART_FORM_DATA.getValue(), true);
 		}
 		
-		return lookupValue(Params.MULTI_PART_ENCODING);
+		return false;//lookupValue(Params.MULTI_PART_ENCODING);
 	}
 
 
-	public void setMultiPartEncoding(boolean multiPartEncoding) 
-	{
-		setValue(Params.MULTI_PART_ENCODING, multiPartEncoding);
-	}
+//	public void setMultiPartEncoding(boolean multiPartEncoding)
+//	{
+//		setValue(Params.MULTI_PART_ENCODING, multiPartEncoding);
+//	}
 	
 	
 	/**
@@ -239,7 +220,7 @@ public class HTTPMessageConfig
 	
 	/**
 	 * Set the action type
-	 * @param httpMethod
+	 * @param httpMethod the http requested method
 	 */
 	public void setMethod(HTTPMethod httpMethod) 
 	{
@@ -327,7 +308,7 @@ public class HTTPMessageConfig
 	}
 
 	/**
-	 * This is a optional parameter that is set by the http call 
+	 * This is an optional parameter that is set by the http call
 	 * in case of multipart post
 	 * @param boundary
 	 */
@@ -411,7 +392,7 @@ public class HTTPMessageConfig
 	}
 	
 	/**
-	 * The connect timeout in millis seconds before throwing an exception, 0 to disable
+	 * The connection timeout in millis seconds before throwing an exception, 0 to disable
 	 * 
 	 * @return connection timeout
 	 */
@@ -677,7 +658,7 @@ public class HTTPMessageConfig
 		}
 		else
 		{
-			byte content[] = getContent();
+			byte[] content = getContent();
 			if (content != null)
 			{
 				return content.length;

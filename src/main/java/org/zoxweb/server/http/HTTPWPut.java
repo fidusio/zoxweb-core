@@ -25,9 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.zoxweb.server.security.SSLCheckDisabler;
-import org.zoxweb.shared.http.HTTPMessageConfig;
-import org.zoxweb.shared.http.HTTPMethod;
-import org.zoxweb.shared.http.HTTPResponseData;
+import org.zoxweb.shared.http.*;
 import org.zoxweb.shared.util.GetNameValue;
 import org.zoxweb.shared.util.NVPair;
 import org.zoxweb.shared.util.SharedStringUtil;
@@ -56,7 +54,7 @@ public class HTTPWPut
 	
 	public static HTTPResponseData wPut(URL destURL, 
 				 					 	boolean disableSSLCheck, 
-				 					 	boolean isMutliPart,
+				 					 	boolean isMultiPart,
 				 					 	String username,
 				 					 	String password,
 				 					 	List<GetNameValue<String>> headers, 
@@ -70,7 +68,9 @@ public class HTTPWPut
 		
 		hcc.setURL(destURL.getProtocol() +"://"+ destURL.getHost() );
 		hcc.setURI(destURL.getPath());
-		hcc.setMultiPartEncoding(isMutliPart);
+		if(isMultiPart)
+			hcc.setContentType(HTTPMimeType.MULTIPART_FORM_DATA);
+		//hcc.setMultiPartEncoding(isMutliPart);
 
 		if (headers != null)
 		{
@@ -194,7 +194,7 @@ public class HTTPWPut
 						add = true;
 					}
 					
-					if (tempURL!= null || tempIS != null)
+					if (tempURL != null || tempIS != null)
 					{
 						p.setName( nameval[0]);
 
