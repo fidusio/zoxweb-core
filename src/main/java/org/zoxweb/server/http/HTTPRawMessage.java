@@ -94,7 +94,7 @@ public class HTTPRawMessage
 					if (lineCounter > 1)
 					{
 						GetNameValue<String> gnv = SharedUtil.toNVPair(oneLine, ":", true);
-						hmci.getHeaderParameters().add(gnv);
+						hmci.getHeaders().add(gnv);
 					}
 					else
 					{
@@ -257,7 +257,7 @@ public class HTTPRawMessage
 	public String toString()
 	{
 		return "HTTPRawMessage [endOfMessage=" + endOfHeadersIndex
-				+ ", contentLength=" + hmci.getContentLength() + ", headers=" + hmci.getHeaderParameters()
+				+ ", contentLength=" + hmci.getContentLength() + ", headers=" + hmci.getHeaders()
 				+ ", firstLine=" + firstLine + ", baos=" +ubaos.size()+"]";
 	}
 

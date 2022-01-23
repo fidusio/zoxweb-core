@@ -115,7 +115,7 @@ public class HTTPUtil
 			hcc.setContentLength(hcc.getContent().length);
 		}
 
-		for (GetNameValue<String> header : hcc.getHeaderParameters().values())
+		for (GetNameValue<String> header : hcc.getHeaders().values())
 		{
 			ubaos.write(header.getName() + ": " + header.getValue() +  ProtocolDelimiter.CRLF.getValue());
 		}
@@ -193,7 +193,7 @@ public class HTTPUtil
 		{
 			for (String header : headersToRemove)
 			{
-				hcc.getHeaderParameters().remove(header);
+				hcc.getHeaders().remove(header);
 			}
 		}
 
@@ -214,7 +214,7 @@ public class HTTPUtil
 			hcc.setContentLength(hcc.getContent().length);
 		}
 		//hcc.getHeaderParameters().remove(HTTPHeaderName.HOST.getName());
-		for (GetNameValue<String> header : hcc.getHeaderParameters().values())
+		for (GetNameValue<String> header : hcc.getHeaders().values())
 		{
 			ubaos.write(header.getName() + ": " + header.getValue() + ProtocolDelimiter.CRLF.getValue());
 		}
@@ -1055,7 +1055,7 @@ public class HTTPUtil
 		// locate the end of headers
 		int endOfHeadersIndex = ubaos.indexOf(ProtocolDelimiter.CRLFCRLF.getBytes());
 
-		if (endOfHeadersIndex > 0 && (hmci == null || hmci.getHeaderParameters().size() == 0))
+		if (endOfHeadersIndex > 0 && (hmci == null || hmci.getHeaders().size() == 0))
 		{
 			// find the termination
 			int lineCounter = 0;
@@ -1093,7 +1093,7 @@ public class HTTPUtil
 					}
 					else
 					{
-						hmci.getHeaderParameters().add(SharedUtil.toNVPair(oneLine, ":", true));
+						hmci.getHeaders().add(SharedUtil.toNVPair(oneLine, ":", true));
 					}
 				}
 

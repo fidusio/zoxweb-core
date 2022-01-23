@@ -286,7 +286,7 @@ public class NIOProxyProtocol
 	{
 		HTTPMessageConfigInterface hcc = createHeader(null, a);
 		
-		hcc.getHeaderParameters().add(new NVPair("Content-Type","text/html; charset=iso-8859-1"));
+		hcc.getHeaders().add(new NVPair("Content-Type","text/html; charset=iso-8859-1"));
 		String msg = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0 Transitional//EN\">\r"
 		+ "<HTML><HEAD>\r"
 		+ "<TITLE>" + hcc.getHTTPStatusCode().CODE + "</TITLE>\r"
@@ -322,13 +322,13 @@ public class NIOProxyProtocol
 			statusCode = HTTPStatusCode.INTERNAL_SERVER_ERROR;
 		
 		hcc.setHTTPStatusCode(statusCode);
-		hcc.getHeaderParameters().add(new NVPair("Server", NAME));
+		hcc.getHeaders().add(new NVPair("Server", NAME));
 		if (httpStatus == 501)
 		{
-			hcc.getHeaderParameters().add(new NVPair("Allow", "GET, HEAD, POST, PUT, DELETE, CONNECT, PATCH"));
+			hcc.getHeaders().add(new NVPair("Allow", "GET, HEAD, POST, PUT, DELETE, CONNECT, PATCH"));
 		}
-		hcc.getHeaderParameters().add(new NVPair("Cache-Control", "no-cache, must-revalidate"));
-		hcc.getHeaderParameters().add(new NVPair("Connection","close"));
+		hcc.getHeaders().add(new NVPair("Cache-Control", "no-cache, must-revalidate"));
+		hcc.getHeaders().add(new NVPair("Connection","close"));
 		return hcc;
 	}
 	
@@ -340,16 +340,16 @@ public class NIOProxyProtocol
 	{
 		if (((Boolean)getProperties().getValue(AUTHENTICATION)))
 		{
-			if (requestInfo.getHTTPMessageConfigInterface().getHeaderParameters().get(HTTPHeaderName.PROXY_AUTHORIZATION) == null)
+			if (requestInfo.getHTTPMessageConfigInterface().getHeaders().get(HTTPHeaderName.PROXY_AUTHORIZATION) == null)
 			{
 				HTTPMessageConfigInterface hccError = createErrorMSG(HTTPStatusCode.PROXY_AUTHENTICATION_REQUIRED.CODE, HTTPStatusCode.PROXY_AUTHENTICATION_REQUIRED.REASON, requestMCCI.getURI());
-				hccError.getHeaderParameters().add(new NVPair(HTTPHeaderName.PROXY_AUTHENTICATE, "Basic "));
+				hccError.getHeaders().add(new NVPair(HTTPHeaderName.PROXY_AUTHENTICATE, "Basic "));
 				ByteBufferUtil.write(clientChannel, HTTPUtil.formatResponse(hccError, requestRawBuffer));
 				close();
 				return false;	
 			}
 			
-			requestInfo.getHTTPMessageConfigInterface().getHeaderParameters().remove(HTTPHeaderName.PROXY_AUTHORIZATION);
+			requestInfo.getHTTPMessageConfigInterface().getHeaders().remove(HTTPHeaderName.PROXY_AUTHORIZATION);
 		}
 		return true;
 	}
@@ -682,7 +682,7 @@ public class NIOProxyProtocol
 	{
 		if (hmci != null)
 		{
-			if(hmci.getHeaderParameters().get(HTTPHeaderName.CONTENT_LENGTH) != null)
+			if(hmci.getHeaders().get(HTTPHeaderName.CONTENT_LENGTH) != null)
 			log.info(""+hmci.getContentLength() + ", " +hmci.getContentType());
 		}
 	}

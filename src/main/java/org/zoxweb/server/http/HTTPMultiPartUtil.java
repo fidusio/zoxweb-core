@@ -425,7 +425,7 @@ public final class HTTPMultiPartUtil
 			{
 				hcc.setBoundary(generateBoundary(TimeUnitType.NANOS));
 				// add the boundary parameter to the request header
-				hcc.getHeaderParameters().add(new NVPair(HTTPHeaderName.CONTENT_TYPE, MULTI_PART_HEADER_CONTENT_TYPE.getValue() + hcc.getBoundary()));
+				hcc.getHeaders().add(new NVPair(HTTPHeaderName.CONTENT_TYPE, MULTI_PART_HEADER_CONTENT_TYPE.getValue() + hcc.getBoundary()));
 
 			}
 //			if (contentType.equalsIgnoreCase(MULTI_PART_HEADER_CONTENT_TYPE.getValue()))

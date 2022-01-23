@@ -133,7 +133,7 @@ public class HTTPMessageConfig
 	public boolean isMultiPartEncoding() 
 	{
 		
-		GetNameValue<String> mp = getHeaderParameters().get(HTTPHeaderName.CONTENT_TYPE.getName());
+		GetNameValue<String> mp = getHeaders().get(HTTPHeaderName.CONTENT_TYPE.getName());
 		if (mp != null && mp.getValue() != null)
 		{
 			return SharedStringUtil.contains(mp.getValue(), HTTPMimeType.MULTIPART_FORM_DATA.getValue(), true);
@@ -185,7 +185,7 @@ public class HTTPMessageConfig
 	 * @return headers
 	 */
 	@SuppressWarnings("unchecked")
-	public ArrayValues<GetNameValue<String>> getHeaderParameters()
+	public ArrayValues<GetNameValue<String>> getHeaders()
 	{
 		return  (ArrayValues<GetNameValue<String>>) lookup(Params.HEADER_PARAMETERS);
 	}
@@ -195,7 +195,7 @@ public class HTTPMessageConfig
 	 * @param headerParams
 	 */
 	@SuppressWarnings("unchecked")
-	public synchronized void setHeaderParameters(List<GetNameValue<String>> headerParams) 
+	public synchronized void setHeaders(List<GetNameValue<String>> headerParams)
 	{
 		ArrayValues<GetNameValue<String>> headerParameters = ((ArrayValues<GetNameValue<String>>)lookup(Params.HEADER_PARAMETERS));
 		if (headerParams == null || headerParams.size() == 0)
@@ -366,7 +366,7 @@ public class HTTPMessageConfig
 	public String toString() {
 		return "HTTPCallConfig [isMultiPartEncoding()=" + isMultiPartEncoding()
 				+ ", getParameters()=" + getParameters()
-				+ ", getHeaderParameters()=" + getHeaderParameters()
+				+ ", getHeaderParameters()=" + getHeaders()
 				+ ", getMethod()=" + getMethod() + ", getURI()=" + getURI()
 				+ ", getURL()=" + getURL() + ", getContent()="
 				+  (getContent() != null ? new String(getContent()) : "null") + ", getBoundary()="
@@ -581,7 +581,7 @@ public class HTTPMessageConfig
 	public String getContentType()
 	{
 		
-		return SharedUtil.getValue(getHeaderParameters().get(HTTPHeaderName.CONTENT_TYPE.getName()));
+		return SharedUtil.getValue(getHeaders().get(HTTPHeaderName.CONTENT_TYPE.getName()));
 	}
 
 
@@ -593,7 +593,7 @@ public class HTTPMessageConfig
 	public void setContentType(String contentType)
 	{
 		
-		getHeaderParameters().add(HTTPHeaderName.toHTTPHeader(HTTPHeaderName.CONTENT_TYPE, contentType));
+		getHeaders().add(HTTPHeaderName.toHTTPHeader(HTTPHeaderName.CONTENT_TYPE, contentType));
 	}
 
 	/**
@@ -603,7 +603,7 @@ public class HTTPMessageConfig
 	public void setContentType(GetValue<String> contentType)
 	{
 		
-		getHeaderParameters().add(HTTPHeaderName.toHTTPHeader(HTTPHeaderName.CONTENT_TYPE, contentType));
+		getHeaders().add(HTTPHeaderName.toHTTPHeader(HTTPHeaderName.CONTENT_TYPE, contentType));
 	}
 
 
@@ -615,7 +615,7 @@ public class HTTPMessageConfig
 	public String getCookie()
 	{
 		
-		return SharedUtil.getValue(getHeaderParameters().get(HTTPHeaderName.COOKIE.getName()));
+		return SharedUtil.getValue(getHeaders().get(HTTPHeaderName.COOKIE.getName()));
 	}
 
 
@@ -627,7 +627,7 @@ public class HTTPMessageConfig
 	public void setCookie(String cookieValue)
 	{
 		
-		getHeaderParameters().add(HTTPHeaderName.toHTTPHeader(HTTPHeaderName.COOKIE, cookieValue));
+		getHeaders().add(HTTPHeaderName.toHTTPHeader(HTTPHeaderName.COOKIE, cookieValue));
 	}
 
 
@@ -639,7 +639,7 @@ public class HTTPMessageConfig
 	public void setCookie(GetValue<String> cookieValue)
 	{
 		
-		getHeaderParameters().add(HTTPHeaderName.toHTTPHeader(HTTPHeaderName.COOKIE, cookieValue));
+		getHeaders().add(HTTPHeaderName.toHTTPHeader(HTTPHeaderName.COOKIE, cookieValue));
 		
 	}
 
@@ -651,7 +651,7 @@ public class HTTPMessageConfig
 	public int getContentLength() 
 	{
 		
-		String contentValue = SharedUtil.getValue(getHeaderParameters().get(HTTPHeaderName.CONTENT_LENGTH.getName()));
+		String contentValue = SharedUtil.getValue(getHeaders().get(HTTPHeaderName.CONTENT_LENGTH.getName()));
 		if (contentValue != null)
 		{
 			return Integer.parseInt(contentValue);
@@ -675,14 +675,14 @@ public class HTTPMessageConfig
 	{
 		
 		
-		SetNameValue<String> ct = (SetNameValue<String>) getHeaderParameters().get(HTTPHeaderName.CONTENT_LENGTH.getName());
+		SetNameValue<String> ct = (SetNameValue<String>) getHeaders().get(HTTPHeaderName.CONTENT_LENGTH.getName());
 		if (ct != null)
 		{
 			ct.setValue("" + length);
 		}
 		else
 		{
-			getHeaderParameters().add(HTTPHeaderName.toHTTPHeader(HTTPHeaderName.CONTENT_LENGTH, "" + length));
+			getHeaders().add(HTTPHeaderName.toHTTPHeader(HTTPHeaderName.CONTENT_LENGTH, "" + length));
 		}
 		
 	}

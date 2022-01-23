@@ -213,7 +213,7 @@ public class HTTPCall
 			
 			
 		
-			ArrayValues<GetNameValue<String>> reqHeaders = hcc.getHeaderParameters();
+			ArrayValues<GetNameValue<String>> reqHeaders = hcc.getHeaders();
 			// set the request headers
 			if (reqHeaders != null)
 			{
@@ -317,7 +317,7 @@ public class HTTPCall
 				case SEE_OTHER:
 					NVPair cookie = HTTPUtil.extractCookie(con.getHeaderFields(), 0);
 					if (cookie != null)
-						hcc.getHeaderParameters().add(cookie);
+						hcc.getHeaders().add(cookie);
 					String newURL = con.getHeaderField("Location");
 					
 					hcc.setURI(null);

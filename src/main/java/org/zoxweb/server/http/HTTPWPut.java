@@ -74,7 +74,7 @@ public class HTTPWPut
 
 		if (headers != null)
 		{
-			hcc.setHeaderParameters(headers);
+			hcc.setHeaders(headers);
 		}
 
 		HTTPCall hc = new HTTPCall( hcc, disableSSLCheck ? SSLCheckDisabler.SINGLETON : null);

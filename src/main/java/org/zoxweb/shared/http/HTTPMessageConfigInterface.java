@@ -102,13 +102,13 @@ extends ReferenceID<String>, SetName, SetDescription
 	 * Set the HTTP request parameters
 	 * @return headers
 	 */
-	ArrayValues<GetNameValue<String>> getHeaderParameters();
+	ArrayValues<GetNameValue<String>> getHeaders();
 
 	/**
 	 * Get the HTTP request parameters
 	 * @param headerParams
 	 */
-	void setHeaderParameters(List<GetNameValue<String>> headerParams);
+	void setHeaders(List<GetNameValue<String>> headerParams);
 	
 	/**
 	 * @return true if url encoding is enabled
