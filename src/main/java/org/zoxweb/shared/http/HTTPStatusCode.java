@@ -16,9 +16,15 @@
 package org.zoxweb.shared.http;
 
 public enum HTTPStatusCode 
-{	
-	
+{
+    /**
+     * 100 Continue
+     */
 	CONTINUE(100, "Continue"),
+
+    /**
+     * 101 Switching Protocol
+     */
 	SWITCHING_PROTOCOLS(101, "Switching Protocols"),
 	
 	
