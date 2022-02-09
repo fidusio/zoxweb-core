@@ -101,6 +101,42 @@ public class ParamUtil {
            throw new IllegalArgumentException(name + " value not found or no valid");
         }
 
+        public int smartIntValue(String name, Integer defaultValue)
+        {
+            List<String> ret = lookup(name);
+            if(ret == null)
+            {
+                if(defaultValue == null)
+                    throw new IllegalArgumentException("Parameter " + name + " not found");
+                return defaultValue;
+            }
+
+            if (ret.size() == 1)
+            {
+                return SharedUtil.parseInt(ret.get(0));
+            }
+
+            throw new IllegalArgumentException(name + " value not found or no valid");
+        }
+
+        public long smartLongValue(String name, Long defaultValue)
+        {
+            List<String> ret = lookup(name);
+            if(ret == null)
+            {
+                if(defaultValue == null)
+                    throw new IllegalArgumentException("Parameter " + name + " not found");
+                return defaultValue;
+            }
+
+            if (ret.size() == 1)
+            {
+                return SharedUtil.parseLong(ret.get(0));
+            }
+
+            throw new IllegalArgumentException(name + " value not found or no valid");
+        }
+
 
         public float floatValue(int index)
         {
