@@ -435,6 +435,23 @@ public class Const {
       this.tokens = tokens;
     }
 
+
+    /**
+     * Converts string to time in milliseconds.
+     *
+     * @return the time string value in millis
+     */
+    public static long toMillisNullZero(String time)
+            throws IllegalArgumentException {
+      if(time == null)
+        return 0;
+
+      return toMillis(time);
+    }
+
+
+
+
     /**
      * Converts string to time in milliseconds.
      *

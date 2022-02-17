@@ -20,6 +20,7 @@ import java.util.List;
 
 import org.zoxweb.shared.util.GetValue;
 import org.zoxweb.shared.util.SharedStringUtil;
+import org.zoxweb.shared.util.SharedUtil;
 
 @SuppressWarnings("serial")
 public class MatchPatternFilter
@@ -186,6 +187,7 @@ public class MatchPatternFilter
 		
 		matchPatterns.add(pattern);
 	}
+
 	
 	/**
 	 * Creates a MatchPatternFilter object based on the given match criteria.
@@ -194,6 +196,10 @@ public class MatchPatternFilter
 	 */
 	public static MatchPatternFilter createMatchFilter(String... matchCriteria)
     {
+		if (matchCriteria.length == 1)
+		{
+			matchCriteria = matchCriteria[0].split(" ");
+		}
 		MatchPatternFilter mpf = new MatchPatternFilter();
 		
 		for (String str : matchCriteria)
