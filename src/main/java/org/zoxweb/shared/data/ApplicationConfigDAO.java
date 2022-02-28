@@ -64,6 +64,7 @@ public class ApplicationConfigDAO
 		FORWARD_URL("FORWARD_URL", ""),
 		SECURE_URL("SECURE_URL", ""),
 		NIO_CONFIG("NIO_CONFIG", ""),
+		IP_BLOCKER_CONFIG("IP_BLOCKER_CONFIG", ""),
 		
 		CONF_DIR("CONF_DIR", "conf"),
 		CACHE_DIR("CACHE_DIR", "data/cache"),

@@ -77,7 +77,12 @@ public class ServiceManager
 		}
 
 		IPBlockerListener ipBlocker = null;
-		String filename = acd.lookupValue("ip_blocker_config");
+		String filename = acd.lookupValue(ApplicationDefaultParam.IP_BLOCKER_CONFIG);
+
+		if(filename !=  null)
+			log.info(ApplicationDefaultParam.IP_BLOCKER_CONFIG +": " + filename);
+	    else
+			log.info(ApplicationDefaultParam.IP_BLOCKER_CONFIG + " NOT FOUND");
 		if (filename != null)
 		{
 			log.info("creating IP_BLOCKER");

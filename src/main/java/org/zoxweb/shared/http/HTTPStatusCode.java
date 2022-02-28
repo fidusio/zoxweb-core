@@ -150,11 +150,15 @@ public enum HTTPStatusCode
     /**
      * 416 Requested Range Not Satisfiable.
      */
-    REQUESTED_RANGE_NOT_SATIFIABLE(416, "Requested Range Not Satisfiable"),
+    REQUESTED_RANGE_NOT_SATISFIABLE(416, "Requested Range Not Satisfiable"),
     /**
      * 417 Expectation Failed.
      */
     EXPECTATION_FAILED(417, "Expectation Failed"),
+    /**
+     * 418
+     */
+    TEAPOT(418, "I'm a teapot"),
 
 
     /**
