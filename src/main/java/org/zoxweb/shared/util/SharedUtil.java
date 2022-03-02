@@ -262,19 +262,23 @@ public class SharedUtil
     {
 		return toCanonicalID(false, sep, objArray);
 	}
+
+
+
+
+
+
 	
-	
-	
-	
-	public static String toCanonicalID(boolean ignoreNulls, char sep, Object... objArray)
+	public static String toCanonicalID(boolean ignoreNulls, char sep,  Object... objArray)
     {
 		StringBuilder sb = new StringBuilder();
 		
 		if (objArray != null)
 		{
+
 			for (int i = 0; i < objArray.length; i++)
 			{
-				_toCanonicalID(i, sb, ignoreNulls, sep, objArray[i] );
+				_toCanonicalID(i, sb, ignoreNulls, sep, objArray[i]);
 			}
 		}
 		

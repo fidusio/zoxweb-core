@@ -810,6 +810,19 @@ public final class SharedStringUtil
 	  return firstIndex;
 	}
 
+
+	public static String concat(String sep, int length, String ... tokens)
+	{
+		StringBuilder sb = new StringBuilder();
+
+		for(int i = 0; i < length; i++)
+		{
+			sb.append(sep);
+			sb.append(tokens[i]);
+		}
+		return sb.toString();
+	}
+
 	/**
 	 * Concatenates s1 + sep + s2 = total, sep will not be added if s1 ends with sep or s2 starts with sep.
 	 * @param s1
