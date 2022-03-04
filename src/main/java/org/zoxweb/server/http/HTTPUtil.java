@@ -71,13 +71,22 @@ public class HTTPUtil
 		return !text.equals(txt);
 	}
 
+
+	public static HTTPMessageConfigInterface formatResponse(HTTPStatusCode statusCode)
+			throws IOException
+	{
+		HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit(null, null, (HTTPMethod) null);
+		hmci.setHTTPStatusCode(statusCode);
+		hmci.setContentType(HTTPMimeType.APPLICATION_JSON.format(HTTPConst.CHARSET_UTF_8));
+		return hmci;
+	}
+
 	public static HTTPMessageConfigInterface formatResponse(NVEntity nve, HTTPStatusCode statusCode)
 			throws IOException
 	{
 		HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit(null, null, (HTTPMethod) null);
 		hmci.setHTTPStatusCode(statusCode);
 		hmci.setContentType(HTTPMimeType.APPLICATION_JSON.format(HTTPConst.CHARSET_UTF_8));
-
 		hmci.setContent(GSONUtil.toJSON(nve,false, false, true));
 		return hmci;
 	}

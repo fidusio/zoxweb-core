@@ -181,6 +181,10 @@ extends ReferenceID<String>, SetName, SetDescription
 	 */
 	boolean isRedirectEnabled();
 
+	/**
+	 * If true allow request redirection
+	 * @param redirectEnabled
+	 */
 	void setRedirectEnabled(boolean redirectEnabled);
 	
 	/**
@@ -334,15 +338,38 @@ extends ReferenceID<String>, SetName, SetDescription
 	 * @return HTTPVersion
 	 */
 	HTTPVersion getHTTPVersion();
-	
+
+	/**
+	 * @param version HTTP version 1.1 or 1.0
+	 */
 	void setHTTPVersion(String version);
-	
+
+	/**
+	 *
+	 * @param version HTTP version 1.1 or 1.0
+	 */
 	void setHTTPVersion(HTTPVersion version);
-	
-	
+
+	/**
+	 * @param status set the status code
+	 */
 	void setHTTPStatusCode(HTTPStatusCode status);
-	
+
+	/**
+	 * @return the status code of the message
+	 */
 	HTTPStatusCode getHTTPStatusCode();
+
+	/**
+	 * @return if true is case of HTTP error code and io exception should be thrown
+	 */
+	boolean isHTTPErrorAsException();
+
+	/**
+	 * @param errorAsException set the status of http error as exception
+	 */
+	void setHTTPErrorAsException(boolean errorAsException);
+
 	
 	
 }

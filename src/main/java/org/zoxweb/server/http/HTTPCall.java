@@ -298,16 +298,15 @@ public class HTTPCall
 			{
 				ret  = IOUtil.inputStreamToByteArray(isError, false);
 				respHeaders = con.getHeaderFields();
-				HTTPResponseData rd = new HTTPResponseData(status, ret.toByteArray(), respHeaders);
-				throw new HTTPCallException(con.getResponseMessage(),  rd);
+				HTTPResponseData hrd = new HTTPResponseData(status, ret.toByteArray(), respHeaders);
+				if (hcc.isHTTPErrorAsException())
+					throw new HTTPCallException(con.getResponseMessage(),  hrd);
+				else
+					return hrd;
 			}
 			
 			HTTPStatusCode hsc = HTTPStatusCode.statusByCode(status);
-			
-			
-			
-		
-			
+
 			if (hsc != null && hcc.isRedirectEnabled())
 			{
 				switch(hsc)

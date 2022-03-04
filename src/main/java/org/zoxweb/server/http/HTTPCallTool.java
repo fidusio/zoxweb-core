@@ -18,11 +18,7 @@ package org.zoxweb.server.http;
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.server.util.GSONUtil;
-import org.zoxweb.shared.http.HTTPMessageConfig;
-import org.zoxweb.shared.http.HTTPMessageConfigInterface;
-import org.zoxweb.shared.http.HTTPMethod;
-import org.zoxweb.shared.http.HTTPMimeType;
-import org.zoxweb.shared.http.HTTPResponseData;
+import org.zoxweb.shared.http.*;
 import org.zoxweb.shared.net.InetAddressDAO;
 import org.zoxweb.shared.net.InetSocketAddressDAO;
 import org.zoxweb.shared.net.ProxyType;
@@ -63,11 +59,19 @@ public class HTTPCallTool implements Runnable
         catch(Exception e)
         {
             e.printStackTrace();
+            if(e instanceof HTTPCallException)
+            {
+                rd = ((HTTPCallException) e).getResponseData();
+            }
+
+        }
+        if(rd.getStatus() != HTTPStatusCode.OK.CODE)
+        {
             failCounter.incrementAndGet();
         }
         counter.incrementAndGet();
         if(printResult) {
-            log.info("Total: " + counter + " Fail: " + failCounter + " response: " + rd.getStatus() + " length: " + rd.getData().length);
+            log.info("Total: " + counter + " Fail: " + failCounter + " status: " + rd.getStatus() + " length: " + rd.getData().length);
             log.info(new String(rd.getData()));
         }
     }
@@ -94,6 +98,8 @@ public class HTTPCallTool implements Runnable
             int cap = params.intValue("-cap", 0);
             String user = params.stringValue("-user", true);
             String password = params.stringValue("-password", true);
+            boolean errorAsException = params.nameExists("-eae");
+            System.out.println("ErrorAsException: " + errorAsException);
 
             log.info("proxy: " + proxy);
             InetSocketAddressDAO proxyAddress = proxy != null ? InetSocketAddressDAO.parse(proxy, ProxyType.HTTP) : null;
@@ -104,6 +110,7 @@ public class HTTPCallTool implements Runnable
                 hmci.setProxyAddress(proxyAddress);
                 hmci.setUser(user);
                 hmci.setPassword(password);
+                hmci.setHTTPErrorAsException(errorAsException);
 
                 hmci.setContentType(HTTPMimeType.APPLICATION_JSON);
                 hmci.setSecureCheckEnabled(false);
