@@ -22,6 +22,7 @@ import org.zoxweb.shared.net.InetSocketAddressDAO;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
@@ -91,6 +92,7 @@ public class NIOTunnel
 	private volatile SelectionKey  destinationSK = null;
 	private volatile SocketChannel sourceChannel = null;
 	private volatile SelectionKey  sourceSK = null;
+	private volatile SocketAddress sourceAddress = null;
 	private volatile ByteBuffer destinationBB;
 	private volatile ByteBuffer sourceBB;
 
@@ -122,7 +124,7 @@ public class NIOTunnel
 			IOUtil.close(destinationChannel);
 			IOUtil.close(sourceChannel);
 			ByteBufferUtil.cache(sourceBB, destinationBB);
-			log.info("closed:" + remoteAddress);
+			log.info("closed: " + sourceAddress + " - "   + remoteAddress);
 		}
 	}
 
@@ -138,12 +140,14 @@ public class NIOTunnel
 				synchronized (this) {
 					if(sourceChannel == null) {
 						sourceChannel = (SocketChannel) key.channel();
+						sourceAddress = sourceChannel.getRemoteAddress();
 						sourceSK = key;
 						destinationChannel = SocketChannel.open((new InetSocketAddress(remoteAddress.getInetAddress(), remoteAddress.getPort())));
 						//relay = new ChannelRelayTunnel(getReadBufferSize(), destinationChannel, sourceChannel, sourceSK,  true,  getSelectorController());
 						destinationBB = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.DIRECT);
 						sourceBB = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.DIRECT);
 						destinationSK = getSelectorController().register(NIOChannelCleaner.DEFAULT, destinationChannel, SelectionKey.OP_READ, this, new DefaultSKController(),false);
+
 					}
 				}
 
