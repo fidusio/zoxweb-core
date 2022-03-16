@@ -417,6 +417,18 @@ public class SharedUtil
       
       return null;
 	}
+
+
+	public static <V extends Enum<?>> V lookupEnum(int ordinal, Enum<?> ...list)
+	{
+		for(Enum e: list)
+		{
+			if(e.ordinal() == ordinal)
+				return (V) e;
+		}
+
+		return null;
+	}
 	
 	
 	public static GetName lookupGetName(GetName gNames[], String name)
