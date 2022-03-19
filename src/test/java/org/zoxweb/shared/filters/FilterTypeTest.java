@@ -27,13 +27,13 @@ public class FilterTypeTest {
 
     @Test
     public void testEmailFilterIsValid() {
-        String[] validEmails = {"johnsmith@example.com ", "JohnSmith@example.com"};
+        String[] validEmails = {"johnsmith@example.com ", "JohnSmith@example.com", "podbarista@podbarista.cafe", "podbarista@podbarista.coffe"};
 
         for (String email : validEmails) {
             assertTrue(FilterType.EMAIL.isValid(email));
         }
 
-        String[] invalidEmails = {"johnsmith@example", "johnsmith", null};
+        String[] invalidEmails = {"johnsmith@example", "johnsmith", null,""};
 
         for (String email : invalidEmails) {
             assertFalse(FilterType.EMAIL.isValid(email));
