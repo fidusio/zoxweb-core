@@ -12,10 +12,9 @@ import org.zoxweb.shared.util.Const.TimeInMillis;
 
 public class DateUtil {
 
-  public static final SimpleDateFormat DEFAULT_DATE_FORMAT = new SimpleDateFormat(
-      "yyyy-MM-dd HH:mm:ss.SSS");
-  public static final SimpleDateFormat DEFAULT_JAVA_FORMAT = new SimpleDateFormat(
-      "EEE MMM dd HH:mm:ss zzz yyyy");
+  public static final SimpleDateFormat DEFAULT_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+  public static final SimpleDateFormat DEFAULT_DATE_FORMAT_TZ = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS zzz");
+  public static final SimpleDateFormat DEFAULT_JAVA_FORMAT = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy");
   public static final SimpleDateFormat DEFAULT_GMT_MILLIS = createSDF("yyyy-MM-dd'T'HH:mm:ss.SSSX",
       "UTC");
   public static final SimpleDateFormat DEFAULT_ZULU_MILLIS = createSDF("yyyy-MM-dd'T'HH:mm:ss.SSSZ",
