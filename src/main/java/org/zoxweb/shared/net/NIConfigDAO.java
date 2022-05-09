@@ -21,7 +21,7 @@ public class NIConfigDAO
   implements GetNVConfig, GetName
   {
     NI_NAME(NVConfigManager.createNVConfig("ni_name", "Network interface physical name", "NIName", false, true, String.class)),
-    INET_PROTO(NVConfigManager.createNVConfig("inet_proto", "Inet proptocol", "Proto", false, true, InetProto.class)),
+    INET_PROTO(NVConfigManager.createNVConfig("inet_proto", "Inet protocol", "Proto", false, true, InetProto.class)),
     ADDRESS(NVConfigManager.createNVConfig("address", "Address", "Address", false, true, String.class)),
     NETMASK(NVConfigManager.createNVConfig("netmask", "Network Mask", "NetMask", false, true, String.class)),
     GATEWAY(NVConfigManager.createNVConfig("gateway", "Gateway", "Gateway", false, true, String.class)),

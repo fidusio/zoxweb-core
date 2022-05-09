@@ -44,6 +44,7 @@ implements AppConfig
 		TRIGGER_COUNTER(NVConfigManager.createNVConfig("trigger_counter", "Trigger counter", "TriggerCounter", true, true, false, long.class, new LongRangeFilter(5, true, 14, true))),
 		RESET_TIME(NVConfigManager.createNVConfig("reset_time", "Reset time in min", "ResetTime", true, true, false, long.class, new LongRangeFilter(1, true, 15, true))),
 		RATE(NVConfigManager.createNVConfig("rate", "Rate", "Rate", true, true, false, float.class, new FloatRangeFilter(1, true, 100, true))),
+		REPORT_URL(NVConfigManager.createNVConfig("report_url", "Report URL for ips", "ReportURL", false, true, String.class)),
 		;
 		
 		private final NVConfig nvc;
@@ -216,7 +217,15 @@ implements AppConfig
 		setValue(Param.PORT_TOKEN, portToken);
 	}
 
-	
+	public String getReportURL()
+	{
+		return lookupValue(Param.REPORT_URL);
+	}
+
+	public void setReportURL(String url)
+	{
+		setValue(Param.REPORT_URL, url);
+	}
 	
 	
 
