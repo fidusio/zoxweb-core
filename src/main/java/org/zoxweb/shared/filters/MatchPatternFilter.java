@@ -36,7 +36,7 @@ public class MatchPatternFilter
 		implements GetValue<String>
     {
 
-		ASTERIK("*"),
+		ASTERISK("*"),
 		CASE_INSENSITIVE("-i"),
 		RECURSIVE("-r"),
 		QUESTION_MARK("?")
@@ -68,9 +68,9 @@ public class MatchPatternFilter
 //	private static final String ASTERIK_CHARACTER_PATTERN = "[\u0000-\uFFFFa-zA-Z0-9\\s!#$%&'()+,-.;=@^_'~{}\\[\\]]*[*]{0,1}";
 	
 	public static final String DEFAULT_PATTERN_PREFIX = "([\u0020-\u0021\u0023-\u0029\u002B-\u0039\u003B\u003D\u0040-\u005A\\u005C\u005E-\u007B\u007D-\uFFFF]\\[\"\\.\\*:<>?|////\\\\])*";
-	public static final String SINGLE_PATTERN_OCCURANCE_VALUE = "{1}";
+	public static final String SINGLE_PATTERN_OCCURRENCE_VALUE = "{1}";
 	public static final String SINGLE_CHARACTER_PATTERN = "[\u0020-\u0021\u0023-\u0029\u002B-\u0039\u003B\u003D\u0040-\u005A\\u005C\u005E-\u007B\u007D-\uFFFF]{1}";
-	public static final String ASTERIK_CHARACTER_PATTERN = "[\u0020-\u0021\u0023-\u0029\u002B-\u0039\u003B\u003D\u0040-\u005A\\u005C\u005E-\u007B\u007D-\uFFFF]*[*]{0,1}";
+	public static final String ASTERISK_CHARACTER_PATTERN = "[\u0020-\u0021\u0023-\u0029\u002B-\u0039\u003B\u003D\u0040-\u005A\\u005C\u005E-\u007B\u007D-\uFFFF]*[*]{0,1}";
 	
 	/**
 	 * The constructor is declared private to prevent outside instantiation of this class.
@@ -140,14 +140,14 @@ public class MatchPatternFilter
     {
 		int currentIndex = 0;
 		
-		if (pattern.indexOf(MatchLiteral.ASTERIK.getValue()) != -1)
+		if (pattern.indexOf(MatchLiteral.ASTERISK.getValue()) != -1)
 		{
-			currentIndex = pattern.indexOf(MatchLiteral.ASTERIK.getValue());
+			currentIndex = pattern.indexOf(MatchLiteral.ASTERISK.getValue());
 		}
 		
 		while (currentIndex != -1)
         {
-			int index = pattern.indexOf(MatchLiteral.ASTERIK.getValue(), currentIndex + 1);
+			int index = pattern.indexOf(MatchLiteral.ASTERISK.getValue(), currentIndex + 1);
 			
 			if (currentIndex + 1 == index)
 			{
@@ -171,10 +171,10 @@ public class MatchPatternFilter
 			pattern = pattern.toLowerCase();
 		}
 		
-		if (pattern.contains(MatchLiteral.ASTERIK.getValue()))
+		if (pattern.contains(MatchLiteral.ASTERISK.getValue()))
 		{
-			pattern = preFilter(pattern, MatchLiteral.ASTERIK.getValue());
-			pattern = SharedStringUtil.embedText(pattern, MatchLiteral.ASTERIK.getValue(), ASTERIK_CHARACTER_PATTERN);
+			pattern = preFilter(pattern, MatchLiteral.ASTERISK.getValue());
+			pattern = SharedStringUtil.embedText(pattern, MatchLiteral.ASTERISK.getValue(), ASTERISK_CHARACTER_PATTERN);
 
 		}
 		
@@ -183,7 +183,7 @@ public class MatchPatternFilter
 			pattern = SharedStringUtil.embedText(pattern, MatchLiteral.QUESTION_MARK.getValue(), SINGLE_CHARACTER_PATTERN);
 		}
 		
-		pattern = DEFAULT_PATTERN_PREFIX + "(" + pattern + ")" + SINGLE_PATTERN_OCCURANCE_VALUE;
+		pattern = DEFAULT_PATTERN_PREFIX + "(" + pattern + ")" + SINGLE_PATTERN_OCCURRENCE_VALUE;
 		
 		matchPatterns.add(pattern);
 	}
