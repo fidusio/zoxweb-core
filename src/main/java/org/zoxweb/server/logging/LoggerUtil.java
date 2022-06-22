@@ -113,7 +113,7 @@ public final class LoggerUtil
       @Override
       public synchronized String format(LogRecord lr) {
         return String.format(DEFAULT_FORMAT_INTERNAL,
-            DateUtil.DEFAULT_GMT_MILLIS.format(new Date(lr.getMillis())),
+            DateUtil.DEFAULT_DATE_FORMAT_TZ.format(new Date(lr.getMillis())),
             lr.getSourceClassName(),
             lr.getSourceMethodName(),
             lr.getLevel().getLocalizedName(),
