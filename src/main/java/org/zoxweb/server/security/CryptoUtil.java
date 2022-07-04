@@ -16,8 +16,7 @@
 package org.zoxweb.server.security;
 
 import java.io.*;
-import java.nio.ByteBuffer;
-import java.nio.channels.SocketChannel;
+
 import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
@@ -28,7 +27,7 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.logging.Logger;
+
 
 import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
@@ -37,7 +36,6 @@ import javax.net.ssl.*;
 
 
 import org.zoxweb.server.http.HTTPUtil;
-import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.io.UByteArrayOutputStream;
 import org.zoxweb.server.util.GSONUtil;
@@ -68,7 +66,7 @@ public class CryptoUtil {
 
 
   private static final Lock LOCK = new ReentrantLock();
-  private static final Logger  log = Logger.getLogger(CryptoUtil.class.getName());
+  //private static final Logger  log = Logger.getLogger(CryptoUtil.class.getName());
 
 
   /**
@@ -247,18 +245,18 @@ public class CryptoUtil {
       throws NullPointerException, IllegalArgumentException, AccessException {
 
     SharedUtil.checkIfNulls("Null values", passwordDAO, password);
-    boolean valid = false;
 
-    try {
-      valid = isPasswordValid(passwordDAO, new String(password));
+    try
+    {
+      if(isPasswordValid(passwordDAO, new String(password)))
+        return; // we hava a valid password
     } catch (NoSuchAlgorithmException e) {
       //e.printStackTrace();
       throw new AccessException("Invalid Credentials");
     }
+    // password validation failed,
+    throw new AccessException("Invalid Credentials");
 
-    if (!valid) {
-      throw new AccessException("Invalid Credentials");
-    }
   }
 
   public static EncryptedKeyDAO rekeyEncrytedKeyDAO(final EncryptedKeyDAO toBeRekeyed,
@@ -1038,20 +1036,38 @@ public class CryptoUtil {
 
   public static byte[] encrypt(PublicKey receiver, byte[] data)
       throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException, IOException, ShortBufferException {
-    Cipher cipher = Cipher.getInstance(receiver.getAlgorithm());
+    return encrypt(receiver, receiver.getAlgorithm(), data);
+  }
+
+
+  public static byte[] encrypt(PublicKey receiver, String cipherName, byte[] data)
+          throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException, IOException, ShortBufferException {
+    Cipher cipher = Cipher.getInstance(cipherName);
     cipher.init(Cipher.ENCRYPT_MODE, receiver);
     return cipher.doFinal(data);
 
   }
 
-  public static byte[] decrypt(PrivateKey receiver, byte[] data)
-      throws NoSuchPaddingException,
+  public static byte[] decrypt(PrivateKey sender, byte[] data)
+          throws NoSuchPaddingException,
           NoSuchAlgorithmException,
           InvalidKeyException,
           BadPaddingException,
-          IllegalBlockSizeException {
-    Cipher cipher = Cipher.getInstance(receiver.getAlgorithm());
-    cipher.init(Cipher.DECRYPT_MODE, receiver);
+          IllegalBlockSizeException, InvalidAlgorithmParameterException {
+    return decrypt(sender, sender.getAlgorithm(), null, data);
+  }
+
+  public static byte[] decrypt(PrivateKey sender, String cipherName, AlgorithmParameters algParameters, byte[] data)
+          throws NoSuchPaddingException,
+          NoSuchAlgorithmException,
+          InvalidKeyException,
+          BadPaddingException,
+          IllegalBlockSizeException, InvalidAlgorithmParameterException {
+    Cipher cipher = Cipher.getInstance(cipherName);
+    if(algParameters != null)
+      cipher.init(Cipher.DECRYPT_MODE, sender, algParameters);
+    else
+      cipher.init(Cipher.DECRYPT_MODE, sender);
     return cipher.doFinal(data);
   }
 
