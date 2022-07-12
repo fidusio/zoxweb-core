@@ -111,6 +111,9 @@ public class SharedBase64
 		
 		public final byte[] ENCODE_SET;
 		public final byte[] DECODE_SET;
+
+
+
 	}
 	/**
 	 * The constructor is declared private to prevent instantiation.
@@ -127,7 +130,7 @@ public class SharedBase64
 	 */
 	public static byte[] decode(byte[] data)
     {
-		return decode(Base64Type.DEFAULT, data, 0, data.length);
+		return decode(null, data, 0, data.length);
 	}
 	
 	public static byte[] decode(Base64Type bt, byte[] data)
@@ -137,8 +140,78 @@ public class SharedBase64
 	
 	public static byte[] decode(byte[] data, int index, int len)
     {
-		return decode(Base64Type.DEFAULT, data, index, len);
+		return decode(null, data, index, len);
     }
+
+
+	public static boolean validate(byte b)
+	{
+		return REVERSE_BASE_64[b] != -1 || URL_REVERSE_BASE_64[b] != -1 || b == '=';
+	}
+
+
+	public static boolean validate(String str)
+	{
+		return validate(SharedStringUtil.getBytes(str));
+	}
+	public static boolean validate(byte[] data)
+	{
+		return validate(data, 0, data.length);
+	}
+
+	public static boolean validate(byte[] data, int index, int len)
+	{
+		if (len > data.length)
+			len = data.length;
+		if(len == 0)
+			return false;
+		for (; index < len; index++)
+		{
+			if(!validate(data[index]))
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+
+	public static Base64Type detectType(String data)
+	{
+		return detectType(SharedStringUtil.getBytes(data));
+	}
+	public static Base64Type detectType(byte[] data, int index, int len)
+	{
+		if (len > data.length)
+			len = data.length;
+
+		for(; index < len; index++)
+		{
+			if (!validate(data[index]))
+			{
+				throw new IllegalArgumentException("invalid base64 character at index " + index + " " + (char) data[index]);
+			}
+			switch(data[index])
+			{
+				case '+':
+				case '/':
+				case '=':
+					return Base64Type.DEFAULT;
+				case '-':
+				case '_':
+					return Base64Type.URL;
+			}
+		}
+
+		return Base64Type.DEFAULT;
+	}
+
+
+	public static Base64Type detectType(byte[] data)
+	{
+		return detectType(data, 0, data.length);
+	}
 
 	/**
 	 * Decodes a base64 array to a byte array.
@@ -156,7 +229,7 @@ public class SharedBase64
 		}
     	if (bt == null)
     	{
-    		bt = Base64Type.DEFAULT;
+			bt = detectType(data, index, len);
     	}
     	
 //	    if(Base64Type.DEFAULT == bt && len % 4 != 0)

@@ -120,7 +120,7 @@ final public class GSONUtil
       @Override
       public NVGenericMap deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
 					throws JsonParseException
-			{
+	  {
         // TODO Auto-generated method stub
         return fromJSONGenericMap((JsonObject)json, null, Base64Type.DEFAULT);
       }
@@ -204,7 +204,7 @@ final public class GSONUtil
 			JsonTreeWriter jtw = new JsonTreeWriter();
 			try
 			{
-				toJSON(jtw, src.getClass(), src, false, true, Base64Type.DEFAULT);
+				toJSON(jtw, src.getClass(), src, false, true, null);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -1063,7 +1063,7 @@ final public class GSONUtil
 		return null;
 	}
 	
-	private static NVGenericMap fromJSONGenericMap(JsonObject je, NVConfigEntity nvce, Base64Type btype) 
+	private static NVGenericMap fromJSONGenericMap(JsonObject je, NVConfigEntity nvce, Base64Type b64Type)
 			throws APIException, AccessException
 	{
 			NVGenericMap ret = new NVGenericMap();
@@ -1110,7 +1110,7 @@ final public class GSONUtil
 							}
 							else if (nvb instanceof NVGenericMapList)
 							{
-								((NVGenericMapList)nvb).add(fromJSONGenericMap((JsonObject)ja.get(i), null, btype));
+								((NVGenericMapList)nvb).add(fromJSONGenericMap((JsonObject)ja.get(i), null, b64Type));
 							}
 						}
 					}
@@ -1129,11 +1129,11 @@ final public class GSONUtil
 				{
 					try
 					{
-						ret.add(new NVEntityReference(element.getKey(), (NVEntity)fromJSON(jne.getAsJsonObject(), null, btype)));
+						ret.add(new NVEntityReference(element.getKey(), (NVEntity)fromJSON(jne.getAsJsonObject(), null, b64Type)));
 					}
 					catch(Exception e)
 					{
-						NVGenericMap toAdd = fromJSONGenericMap(jne.getAsJsonObject(), null, btype);
+						NVGenericMap toAdd = fromJSONGenericMap(jne.getAsJsonObject(), null, b64Type);
 						toAdd.setName(element.getKey());
 						ret.add(toAdd);
 					}
@@ -1780,7 +1780,7 @@ final public class GSONUtil
 						
 						if (byteArray64 != null)
 						{
-							nve.setValue(nvc, SharedBase64.decode(b64Type, byteArray64.getBytes()));
+							nve.setValue(nvc, SharedBase64.decode(b64Type,  SharedStringUtil.getBytes(byteArray64)));
 						}
 					}
 					else if (Integer[].class.equals(metaType))
