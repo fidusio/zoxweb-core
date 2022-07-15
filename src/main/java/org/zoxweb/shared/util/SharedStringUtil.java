@@ -960,6 +960,49 @@ public final class SharedStringUtil
 		return ret.toString();
 	}
 
+
+	/**
+	 * This method add chars between the text characters
+	 * @param text
+	 * @param chars
+	 * @return
+	 */
+	public static String spaceChars(String text, String chars)
+	{
+		StringBuilder ret = new StringBuilder();
+		char[] stringChars = text.toCharArray();
+		for(int i = 0; i <stringChars.length; i++)
+		{
+			ret.append(stringChars[i]);
+			if (i+1 < stringChars.length)
+				ret.append(chars);
+		}
+		return ret.toString();
+	}
+
+
+	public static String repeatSequence(String sc, int count)
+	{
+		return repeatSequence(sc, count, null);
+	}
+	public static String repeatSequence(String sc, int count, String sep)
+	{
+		if(count < 1)
+		{
+			return sc;
+		}
+		if(sep != null && sep.length() == 0)
+			sep = null;
+		StringBuilder sb = new StringBuilder();
+		for(int i=0; i < count; i++)
+		{
+			sb.append(sc);
+			if(sep != null && i + 1 < count)
+				sb.append(sep);
+		}
+		return sb.toString();
+	}
+
 	public static String formatStringToByteArray(String str, boolean hex)
 	{
 		byte data[] = getBytes(str);

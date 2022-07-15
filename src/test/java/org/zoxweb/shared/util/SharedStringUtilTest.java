@@ -58,7 +58,7 @@ public class SharedStringUtilTest {
 		System.out.println(str + " length:" + str.length());
 	}
 
-	@Test void parseStrings()
+	@Test public void parseStrings()
 	{
 		String[] values = {
 			"name=v1",
@@ -69,6 +69,19 @@ public class SharedStringUtilTest {
 		List<GetNameValue<String>> parsed = SharedStringUtil.parseStrings('=', values);
 		assert(parsed.size() == values.length);
 		System.out.println(parsed);
+	}
+
+	@Test public void spaceChars()
+	{
+		String test = "Hello World";
+		System.out.println(SharedStringUtil.spaceChars(test, "*"));
+	}
+
+	@Test public void repeatSequence()
+	{
+		String test = "Hello World";
+		System.out.println(SharedStringUtil.repeatSequence(test, 3, "*"));
+		System.out.println(SharedStringUtil.repeatSequence(test, 3));
 	}
 
 }
