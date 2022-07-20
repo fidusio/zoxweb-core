@@ -16,7 +16,8 @@
 package org.zoxweb;
 
 import org.jsoup.Jsoup;
-import org.jsoup.safety.Whitelist;
+//import org.jsoup.safety.Whitelist;
+import org.jsoup.safety.Safelist;
 
 import org.zoxweb.server.http.HTTPCall;
 import org.zoxweb.shared.http.HTTPMessageConfig;
@@ -33,7 +34,7 @@ public class JsoupTest {
 			HTTPMessageConfigInterface hcc = HTTPMessageConfig.createAndInit(args[index++], null, HTTPMethod.GET);
 			String htmlBody = SharedStringUtil.toString(new HTTPCall(hcc).sendRequest().getData());
 		
-			String filtered = Jsoup.clean(htmlBody, Whitelist.relaxed());
+			String filtered = Jsoup.clean(htmlBody, Safelist.relaxed());
 			System.out.println("Different:" + htmlBody.equals(filtered));
 			System.out.println("Different:" + filtered);
 			System.out.println("Different:" + htmlBody);

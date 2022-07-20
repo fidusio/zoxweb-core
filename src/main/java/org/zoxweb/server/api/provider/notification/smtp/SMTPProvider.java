@@ -19,14 +19,19 @@ import java.util.List;
 import java.util.Properties;
 import java.util.logging.Logger;
 
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.PasswordAuthentication;
-import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
+//import javax.mail.Message;
+//import javax.mail.MessagingException;
+//import javax.mail.PasswordAuthentication;
+//import javax.mail.Session;
+//import javax.mail.Transport;
+//import javax.mail.internet.InternetAddress;
+//import javax.mail.internet.MimeMessage;
 
+//import jakarta.mail.*;
+
+import jakarta.mail.*;
+import jakarta.mail.internet.InternetAddress;
+import jakarta.mail.internet.MimeMessage;
 import org.zoxweb.server.api.APIServiceProviderBase;
 import org.zoxweb.server.http.HTTPUtil;
 
@@ -204,7 +209,7 @@ public class SMTPProvider
 		        log.info(SMTPMessageIDFilter.SINGLETON.validate(msg.getHeader(SMTPMessageParam.MESSAGE_ID.getValue())));
 		      } 
 		      
-		      catch (MessagingException e) 
+		      catch (MessagingException e)
 		      {
 		            throw new RuntimeException(e);
 		      }
@@ -473,7 +478,7 @@ public class SMTPProvider
 	private Session createSession(Properties properties, final String userName, final String password)
 	{
 	   Session session = Session.getInstance(properties, 
-			   new javax.mail.Authenticator() 
+			   new Authenticator()
 	   			{@Override
 			       protected PasswordAuthentication getPasswordAuthentication()
 			       {
