@@ -29,6 +29,7 @@ Copyright (C) 2015-2021 http://www.zoxweb.com
 ## RELEASES
 
 <ul> Versions
+<li>2.2.4 2022-07-20 (stable)
 <li>2.2.3 2021-01-02
 <li>2.2.1 2019-05-12
 <li>2.2.0 2019-05-08
