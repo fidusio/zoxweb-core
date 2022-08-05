@@ -6,13 +6,13 @@
 
 ## PROJECT INFORMATION
 
-Project website: http://www.zoxweb.com/ <br />
+Project website: http://xlogist.io <br />
 <br />
  
-Copyright (C) 2015-2021 http://www.zoxweb.com
+Copyright (C) 2017-2022 http://xlogistx.io
 
 ## LICENSE
- ZoxWeb.com LLC
+ XlogistX.IO 
  
  Licensed under the Apache License Version 2.0 (the "License");
  you may not use this file except in compliance with the License.

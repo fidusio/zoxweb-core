@@ -4,12 +4,18 @@ import org.zoxweb.server.task.TaskCallback;
 
 import java.util.logging.Logger;
 
-public abstract class SessionCallback<C, P, S> implements TaskCallback<P,S> {
+/**
+ * Session callback
+ * @param <CF> Session configuration
+ * @param <C> Session consumer
+ * @param <S> Session supplier
+ */
+public abstract class SessionCallback<CF, C, S> implements TaskCallback<C,S> {
     protected  static final transient Logger log = Logger.getLogger(SessionCallback.class.getName());
-    private C config;
+    private CF config;
 
-    public final C getConfig(){return config;}
-    public void setConfig(C config){this.config = config;}
+    public final CF getConfig(){return config;}
+    public void setConfig(CF config){this.config = config;}
     @Override
     public void exception(Exception e) {
         log.info("" + e);
