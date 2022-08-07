@@ -15,7 +15,7 @@ public abstract class SessionCallback<CF, C, S> implements TaskCallback<C,S> {
     private CF config;
 
     public final CF getConfig(){return config;}
-    public void setConfig(CF config){this.config = config;}
+    public final void setConfig(CF config){this.config = config;}
     @Override
     public void exception(Exception e) {
         log.info("" + e);
