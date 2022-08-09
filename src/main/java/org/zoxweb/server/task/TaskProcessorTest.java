@@ -18,12 +18,13 @@ package org.zoxweb.server.task;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.logging.Logger;
 
 import org.zoxweb.shared.util.Const;
 
 public class TaskProcessorTest
     implements Runnable {
-
+  private static final Logger log = Logger.getLogger(TaskProcessorTest.class.getName());
   private AtomicInteger ai = new AtomicInteger();
   private Lock lock = new ReentrantLock();
   private int counter = 0;
@@ -76,19 +77,22 @@ public class TaskProcessorTest
 
     delta = TaskUtil.waitIfBusyThenClose(25) - delta;
 
-    System.out.println(
-        "It took " + Const.TimeInMillis.toString(delta) + " millis callback " + td + " using queue "
+    log.info("It took " + Const.TimeInMillis.toString(delta) + " millis callback " + td + " using queue "
             + tp.getQueueMaxSize() + " and " + tp.availableExecutorThreads() + " executor thread");
-    System.out.println("Available thread " + tp.availableExecutorThreads() + " total "
+    log.info("Available thread " + tp.availableExecutorThreads() + " total "
         + td.counter + ":" + td.ai.get());
   }
 
   public static void main(String[] args) {
     int index = 0;
     int numberOfTasks = args.length > index ? Integer.parseInt(args[index++]) : 20_000_000;
+    log.info("Java version: " + System.getProperty("java.version"));
+
+
+
     TaskProcessor te = TaskUtil.getDefaultTaskProcessor();
     count(numberOfTasks);
-    System.out.println("serial inc " + numberOfTasks + " took " + Const.TimeInMillis.toString(count(numberOfTasks)));
+    log.info("serial inc " + numberOfTasks + " took " + Const.TimeInMillis.toString(count(numberOfTasks)));
     runTest(te, new TaskProcessorTest(), numberOfTasks);
   }
 
