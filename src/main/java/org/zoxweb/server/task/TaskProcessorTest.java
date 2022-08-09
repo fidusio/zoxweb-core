@@ -25,8 +25,8 @@ import org.zoxweb.shared.util.Const;
 public class TaskProcessorTest
     implements Runnable {
   private static final Logger log = Logger.getLogger(TaskProcessorTest.class.getName());
-  private AtomicInteger ai = new AtomicInteger();
-  private Lock lock = new ReentrantLock();
+  private final AtomicInteger ai = new AtomicInteger();
+  private final Lock lock = new ReentrantLock();
   private int counter = 0;
 
   public void run() {
@@ -34,9 +34,9 @@ public class TaskProcessorTest
     lockInc();
   }
 
-  public synchronized void inc() {
-    counter++;
-  }
+//  public synchronized void inc() {
+//    counter++;
+//  }
   public  void lockInc()
   {
     try {
@@ -85,7 +85,7 @@ public class TaskProcessorTest
 
   public static void main(String[] args) {
     int index = 0;
-    int numberOfTasks = args.length > index ? Integer.parseInt(args[index++]) : 20_000_000;
+    int numberOfTasks = args.length > index ? Integer.parseInt(args[index]) : 20_000_000;
     log.info("Java version: " + System.getProperty("java.version"));
 
 
