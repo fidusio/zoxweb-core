@@ -39,11 +39,13 @@ public class TaskProcessorTest
 //  }
   public  void lockInc()
   {
-    try {
+    try
+    {
       lock.lock();
       counter++;
     }
-    finally {
+    finally
+    {
       lock.unlock();
     }
 
@@ -77,9 +79,9 @@ public class TaskProcessorTest
 
     delta = TaskUtil.waitIfBusyThenClose(25) - delta;
 
-    log.info("It took " + Const.TimeInMillis.toString(delta) + " millis callback " + td + " using queue "
+    System.out.println("It took " + Const.TimeInMillis.toString(delta) + " millis callback " + td + " using queue "
             + tp.getQueueMaxSize() + " and " + tp.availableExecutorThreads() + " executor thread");
-    log.info("Available thread " + tp.availableExecutorThreads() + " total "
+    System.out.println("Available thread " + tp.availableExecutorThreads() + " total "
         + td.counter + ":" + td.ai.get());
   }
 
