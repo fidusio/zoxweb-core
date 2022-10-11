@@ -50,21 +50,24 @@
     <skipTests>true</skipTests>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <jdk.version>1.8</jdk.version>
-    <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
-    <maven-plugin-source.version>3.0.1</maven-plugin-source.version>
-    <maven-resources-plugin.version>3.1.0</maven-resources-plugin.version>
-    <maven-surefile-plugin.version>3.0.0-M4</maven-surefile-plugin.version>
-    <maven-jar-plugin.version>3.2.0</maven-jar-plugin.version>
-    <maven-jar-plugin.version>3.0.2</maven-jar-plugin.version>
-    <maven-javadoc.version>2.10.4</maven-javadoc.version>
+    <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
+    <maven-plugin-source.version>3.2.1</maven-plugin-source.version>
+    <maven-resources-plugin.version>3.3.0</maven-resources-plugin.version>
+    <maven-surefile-plugin.version>3.0.0-M7</maven-surefile-plugin.version>
+    <maven-jar-plugin.version>3.3.0</maven-jar-plugin.version>
+    <!-- <maven-javadoc.version>2.10.4</maven-javadoc.version> -->
+    <maven-javadoc.version>3.4.1</maven-javadoc.version>
+    <exec-maven.version>3.1.0</exec-maven.version>
+
+
     <gson.version>2.9.1</gson.version>
     <javax-cache.version>1.1.1</javax-cache.version>
     <!--<javax-mail.version>1.6.7</javax-mail.version> -->
     <jakarta-mail.version>2.0.1</jakarta-mail.version>
     <jsoup.version>1.15.3</jsoup.version>
-    <snakeyaml.version>1.31</snakeyaml.version>
-    <junit.version>5.8.2</junit.version>
-    <exec-maven.version>3.0.0</exec-maven.version>
+    <snakeyaml.version>1.33</snakeyaml.version>
+    <junit.version>5.9.0</junit.version>
+
 
   </properties>
 
