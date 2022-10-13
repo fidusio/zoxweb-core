@@ -33,7 +33,7 @@ extends HTTPAuthentication
 	
 	
 	public static final NVConfig NVC_TOKEN = NVConfigManager.createNVConfig("token", null,"Token", false, true, String.class);
-	
+
 	public static final NVConfigEntity NVC_HTTP_AUTHENTICATION_BEARER = new NVConfigEntityLocal("http_authentication_bearer", null , null, true, false, false, false, HTTPAuthenticationBearer.class, SharedUtil.toNVConfigList(NVC_TOKEN), null, false, HTTPAuthenticationBearer.NVC_HTTP_AUTHENTICATION);
 	
 	
@@ -63,6 +63,8 @@ extends HTTPAuthentication
 	{
 		setValue(NVC_TOKEN, token);
 	}
+
+
 	
 	public String toString()
 	{
@@ -71,6 +73,9 @@ extends HTTPAuthentication
 	
 	public GetNameValue<String> toHTTPHeader()
 	{
+		if (getTokenTypeOverride() != null)
+			return  getType().toHTTPHeader(getTokenTypeOverride(), getToken());
+
 		return getType().toHTTPHeader(getToken());
 	}
 	

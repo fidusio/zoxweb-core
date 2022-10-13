@@ -33,19 +33,29 @@ extends SetNameDAO
 {
 	Object obj;
 	public static final NVConfig NVC_HTTP_AUTHORIZATION_TYPE = NVConfigManager.createNVConfig("authorization", null,"HTTPAuthorizationType", false, true, HTTPAuthorizationType.class);
-	
-	public static final NVConfigEntity NVC_HTTP_AUTHENTICATION = new NVConfigEntityLocal(null, null , null, true, false, false, false, HTTPAuthentication.class, SharedUtil.toNVConfigList(NVC_HTTP_AUTHORIZATION_TYPE), null, false, SetNameDAO.NVC_NAME_DAO);
+	public static final NVConfig NVC_TOKEN_TYPE_OVERRIDE = NVConfigManager.createNVConfig("token_type_override", null,"Token type override", false, true, String.class);
+	public static final NVConfigEntity NVC_HTTP_AUTHENTICATION = new NVConfigEntityLocal(null, null , null, true, false, false, false, HTTPAuthentication.class, SharedUtil.toNVConfigList(NVC_HTTP_AUTHORIZATION_TYPE, NVC_TOKEN_TYPE_OVERRIDE), null, false, SetNameDAO.NVC_NAME_DAO);
 	
 	protected HTTPAuthentication(NVConfigEntity nvce, HTTPAuthorizationType type)
 	{
 		super(nvce);
 		setValue(NVC_HTTP_AUTHORIZATION_TYPE, type);
 	}
-	
+
+
 	
 	public HTTPAuthorizationType getType()
 	{
 		return lookupValue(NVC_HTTP_AUTHORIZATION_TYPE);
+	}
+	public String getTokenTypeOverride()
+	{
+		return lookupValue(NVC_TOKEN_TYPE_OVERRIDE);
+	}
+
+	public void setTokenTypeOverride(String tokenType)
+	{
+		setValue(NVC_TOKEN_TYPE_OVERRIDE, tokenType);
 	}
 	
 	abstract public GetNameValue<String> toHTTPHeader();
