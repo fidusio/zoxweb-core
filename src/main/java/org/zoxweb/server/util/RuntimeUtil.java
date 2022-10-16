@@ -273,4 +273,21 @@ public class RuntimeUtil
 	  return sb.toString();
 	}
 
+
+	/**
+	 * This method return the java major version ex: 11.0.5 will return 11
+	 * @return java vm major version
+	 */
+	public static int getJavaVersion()
+	{
+		String javaVersion = System.getProperty("java.version");
+		Const.JavaClassVersion version = Const.JavaClassVersion.lookup(javaVersion);
+		if (version.MAJOR > Const.JavaClassVersion.VER_1_4.MAJOR)
+			return Integer.parseInt(version.VERSION);
+
+		return 0;
+
+	}
+
+
 }

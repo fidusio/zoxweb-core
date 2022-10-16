@@ -127,20 +127,20 @@ public class JSONTest {
 			t.date = new Date();
 
 			//System.out.println(GGSONUtil.DEFAULT_GSON.toJson(t)SONUtil.DEFAULT_GSON.toJson(sysDAO));
-			String ts = GSONUtil.DEFAULT_GSON.toJson(t);
+			String ts = GSONUtil.toJSONDefault(t);
 			System.out.println(ts);
 			System.out.println(GSONUtil.toJSON(sysDAO, false, false,true));
-			Toto t2 = GSONUtil.DEFAULT_GSON.fromJson(ts, Toto.class);
+			Toto t2 = GSONUtil.fromJSONDefault(ts, Toto.class);
 			System.out.println(t.date.equals(t2.date));
 			EnumTester et = new EnumTester();
-			String testET = GSONUtil.DEFAULT_GSON.toJson(et);
+			String testET = GSONUtil.toJSONDefault(et);
 			System.out.println(testET);
 			et.tims = new TimeInMillis[]{TimeInMillis.SECOND, TimeInMillis.DAY};
-			testET = GSONUtil.DEFAULT_GSON.toJson(et);
+			testET = GSONUtil.toJSONDefault(et);
 			System.out.println(testET);
 			testET = "{\"tims\":[\"SECOND\",\"day\"]}";
-			et = GSONUtil.DEFAULT_GSON.fromJson(testET, EnumTester.class);
-			testET = GSONUtil.DEFAULT_GSON.toJson(et);
+			et = GSONUtil.fromJSONDefault(testET, EnumTester.class);
+			testET = GSONUtil.toJSONDefault(et);
 			System.out.println(testET);
 
 

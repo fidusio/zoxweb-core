@@ -37,6 +37,7 @@ import org.jsoup.select.Elements;
 import org.zoxweb.server.io.UByteArrayOutputStream;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.server.util.ReflectionUtil;
+import org.zoxweb.server.util.RuntimeUtil;
 import org.zoxweb.shared.http.*;
 import org.zoxweb.shared.http.HTTPEncoder;
 import org.zoxweb.shared.net.InetSocketAddressDAO;
@@ -124,7 +125,7 @@ public class HTTPUtil
 			hcc.setContentLength(hcc.getContent().length);
 		}
 
-		for (GetNameValue<String> header : hcc.getHeaders().values())
+		for (GetNameValue<String> header : hcc.getHeaders().asArrayValuesString().values())
 		{
 			ubaos.write(header.getName() + ": " + header.getValue() +  ProtocolDelimiter.CRLF.getValue());
 		}
@@ -223,7 +224,7 @@ public class HTTPUtil
 			hcc.setContentLength(hcc.getContent().length);
 		}
 		//hcc.getHeaderParameters().remove(HTTPHeaderName.HOST.getName());
-		for (GetNameValue<String> header : hcc.getHeaders().values())
+		for (GetNameValue<String> header : hcc.getHeaders().asArrayValuesString().values())
 		{
 			ubaos.write(header.getName() + ": " + header.getValue() + ProtocolDelimiter.CRLF.getValue());
 		}
@@ -249,8 +250,8 @@ public class HTTPUtil
 
 				if (!extraMethodAdded.get())
 				{
-
-					ReflectionUtil.updateFinalStatic(HttpURLConnection.class, "methods", HTTPMethod.toMethodNames());
+					if(RuntimeUtil.getJavaVersion() <= 11)
+						ReflectionUtil.updateFinalStatic(HttpURLConnection.class, "methods", HTTPMethod.toMethodNames());
 //					new String[]
 //							{
 //								// We are adding patch at the end
@@ -749,7 +750,7 @@ public class HTTPUtil
 	public static String formatFullURL(HTTPMessageConfig hcc)
 			throws UnsupportedEncodingException
 	{
-		String encodedContentParams = HTTPUtil.formatParameters(hcc.getParameters(), null, hcc.isURLEncodingEnabled(), hcc.getHTTPParameterFormatter());
+		String encodedContentParams = HTTPUtil.formatParameters(hcc.getParameters().asArrayValuesString(), null, hcc.isURLEncodingEnabled(), hcc.getHTTPParameterFormatter());
 		String urlURI = SharedStringUtil.concat(hcc.getURL(), hcc.getURI(), "/");
 
 		if (encodedContentParams.length() > 0)

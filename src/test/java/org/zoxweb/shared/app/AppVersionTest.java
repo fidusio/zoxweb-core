@@ -18,7 +18,7 @@ public class AppVersionTest {
     assert dt!= null;
 
     System.out.println(appVersionDAO.getReleaseDate());
-    String json = GSONUtil.DEFAULT_GSON.toJson(appVersionDAO);
+    String json = GSONUtil.toJSONDefault(appVersionDAO);
     System.out.println(json);
     AppVersionDAO temp = GSONUtil.fromJSON(json, AppVersionDAO.class);
     System.out.println(temp.getReleaseDate());

@@ -69,7 +69,7 @@ public class HTTPProxyTest {
               (hcc.getContent() != null ? new String(hcc.getContent()) : "") + ":" + hcc
                   .getContentLength());
           System.out.println(DeviceType.lookup(SharedUtil
-              .lookupValue(hcc.getHeaders(), HTTPHeaderName.USER_AGENT.getName())));
+              .lookupValue(hcc.getHeaders().asArrayValuesString(), HTTPHeaderName.USER_AGENT.getName())));
         }
         System.out.println("Is Request complete " + HTTPUtil.checkRequestStatus(hcc));
       } catch (Exception e) {

@@ -31,37 +31,66 @@ public class Const {
   public static final String UTF8 = "UTF-8";
 
   public enum JavaClassVersion {
+    VER_UNKNOWN("UNKNOWN", "UNKNOWN", 0, 0),
     //VER_1_0("1.0", 45, 3),
-    VER_1_1("1.1", 45, 3),
-    VER_1_2("1.2", 46, 0),
-    VER_1_3("1.3", 47, 0),
-    VER_1_4("1.4", 48, 0),
-    VER_1_5("1.5", 49, 0),
-    VER_1_6("1.6", 50, 0),
-    VER_1_7("1.7", 51, 0),
-    VER_1_8("1.8", 52, 0),
-    VER_1_9("1.9", 53, 0),
-    VER_11("11", 55, 0),
-    VER_UNKNOWN("UNKNOWN", 0, 0);
+    VER_1_1("1.1","1.1", 45, 3),
+    VER_1_2("1.2","1.2", 46, 0),
+    VER_1_3("1.3","1.3", 47, 0),
+    VER_1_4("1.4","1.4", 48, 0),
+    VER_1_5("5","1.5", 49, 0),
+    VER_1_6("6", "1.6", 50, 0),
+    VER_1_7("7","1.7", 51, 0),
+    VER_1_8("8","1.8", 52, 0),
+    VER_1_9("9","1.9", 53, 0),
+    VER_10("10","10", 53, 0),
+    VER_11("11", "11", 55, 0),
+    VER_12("12", "12", 56, 0),
+    VER_13("13", "13", 57, 0),
+    VER_14("14", "14", 58, 0),
+    VER_15("15", "15", 59, 0),
+    VER_16("16", "16", 60, 0),
+    VER_17("17", "17", 61, 0),
+    VER_18("18", "18", 62, 0),
+    VER_19("19", "19", 63, 0),
+    ;
 
-    private final String version;
-    private final int major;
-    private final int minor;
+    public final String VERSION;
+    public final String ALT_VERSION;
 
-    JavaClassVersion(String version, int major, int minor) {
-      this.version = version;
-      this.major = major;
-      this.minor = minor;
+    public final int MAJOR;
+    public final int MINOR;
+
+    JavaClassVersion(String version, String altVersion, int major, int minor) {
+      this.VERSION = version;
+      this.ALT_VERSION = altVersion;
+      this.MAJOR = major;
+      this.MINOR = minor;
+    }
+
+    public static JavaClassVersion lookup(String javaVersion)
+    {
+      if(!SharedStringUtil.isEmpty(javaVersion))
+      {
+        JavaClassVersion[] all = JavaClassVersion.values();
+
+        for(int i = 1; i < all.length; i++)
+        {
+          if(javaVersion.startsWith(all[i].ALT_VERSION))
+            return all[i];
+        }
+      }
+
+      return JavaClassVersion.VER_UNKNOWN;
     }
 
 
     public String toString() {
-      return version + "," + major + "." + minor;
+      return VERSION + "," + MAJOR + "." + MINOR;
     }
 
     public static JavaClassVersion lookup(int major, int minor) {
       for (JavaClassVersion ver : values()) {
-        if (ver.major == major && ver.minor == minor) {
+        if (ver.MAJOR == major && ver.MINOR == minor) {
           return ver;
         }
       }
@@ -69,17 +98,17 @@ public class Const {
       return VER_UNKNOWN;
     }
 
-    public static JavaClassVersion lookup(String version) {
-      if (!SharedStringUtil.isEmpty(version)) {
-        for (JavaClassVersion ver : values()) {
-          if (ver.version.equalsIgnoreCase(version)) {
-            return ver;
-          }
-        }
-      }
-
-      return VER_UNKNOWN;
-    }
+//    public static JavaClassVersion lookup(String version) {
+//      if (!SharedStringUtil.isEmpty(version)) {
+//        for (JavaClassVersion ver : values()) {
+//          if (ver.VERSION.equalsIgnoreCase(version)) {
+//            return ver;
+//          }
+//        }
+//      }
+//
+//      return VER_UNKNOWN;
+//    }
   }
 
   public enum Bool

@@ -18,12 +18,7 @@ package org.zoxweb.shared.http;
 import java.util.List;
 
 import org.zoxweb.shared.net.InetSocketAddressDAO;
-import org.zoxweb.shared.util.ArrayValues;
-import org.zoxweb.shared.util.GetNameValue;
-import org.zoxweb.shared.util.GetValue;
-import org.zoxweb.shared.util.ReferenceID;
-import org.zoxweb.shared.util.SetDescription;
-import org.zoxweb.shared.util.SetName;
+import org.zoxweb.shared.util.*;
 
 /**
  *
@@ -47,7 +42,9 @@ extends ReferenceID<String>, SetName, SetDescription
 	 * The parameters sequence should be preserved during invocation 
 	 * @return http parameters
 	 */
-	ArrayValues<GetNameValue<String>> getParameters();
+//	ArrayValues<GetNameValue<String>> getParameters();
+	NVGenericMap getParameters();
+	//NVGenericMap getParametersNVGM();
 
 	/**
 	 * Set the action parameters list
@@ -102,7 +99,10 @@ extends ReferenceID<String>, SetName, SetDescription
 	 * Set the HTTP request parameters
 	 * @return headers
 	 */
-	ArrayValues<GetNameValue<String>> getHeaders();
+	//ArrayValues<GetNameValue<String>> getHeaders();
+
+	NVGenericMap getHeaders();
+	//NVGenericMap getHeadersNVGM();
 
 	/**
 	 * Get the HTTP request parameters
@@ -307,6 +307,12 @@ extends ReferenceID<String>, SetName, SetDescription
 	 * @param contentType
 	 */
 	void setContentType(String contentType);
+
+
+	String getAccept();
+	void setAccept(String accept);
+
+	void setAccept(GetValue<String> accept);
 	
 	/**
 	 * 

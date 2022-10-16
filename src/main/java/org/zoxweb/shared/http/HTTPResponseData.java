@@ -15,6 +15,8 @@
  */
 package org.zoxweb.shared.http;
 
+import org.zoxweb.shared.util.SharedStringUtil;
+
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
@@ -82,8 +84,16 @@ public class HTTPResponseData
 		this.status = status;
 	}
 
-	public byte[] getData() {
+	public byte[] getData()
+	{
 		return data;
+	}
+	public String getDataAsString()
+	{
+		if (getData() != null)
+			return SharedStringUtil.toString(getData());
+
+		return null;
 	}
 
 	public void setData(byte[] data) {

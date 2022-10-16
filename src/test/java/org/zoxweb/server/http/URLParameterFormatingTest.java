@@ -10,17 +10,17 @@ import org.zoxweb.shared.util.NVPair;
 
 public class URLParameterFormatingTest {
 
-  HTTPMessageConfig hcc = new HTTPMessageConfig();
+  static HTTPMessageConfig hcc = new HTTPMessageConfig();
 
   @BeforeAll
-  public void setUp() {
+  public static void setUp() {
     hcc.getParameters().add(new NVPair("address", "www.yahoo.com"));
     hcc.getParameters().add(new NVPair("port", "343"));
     hcc.getParameters().add(new NVPair("widget", "tata"));
     hcc.getParameters().add(new NVPair("a", "a"));
     hcc.getParameters().add(new NVPair("z", "z"));
     hcc.getParameters().add(new NVPair("k", "k"));
-    hcc.getParameters().add(new NVPair((String) null, "v"));
+    //hcc.getParameters().add(new NVPair((String) null, "v"));
   }
 
   @Test
@@ -28,7 +28,7 @@ public class URLParameterFormatingTest {
 
     StringBuilder sb = new StringBuilder("batata&");
 
-    System.out.println(HTTPEncoder.URL_ENCODED.format(sb, hcc.getParameters().values()));
+    System.out.println(HTTPEncoder.URL_ENCODED.format(sb, hcc.getParameters().asArrayValuesString().values()));
 
   }
 
@@ -37,7 +37,7 @@ public class URLParameterFormatingTest {
 
     StringBuilder sb = new StringBuilder("batata/");
 
-    System.out.println(HTTPEncoder.URI_REST_ENCODED.format(sb, hcc.getParameters().values()));
+    System.out.println(HTTPEncoder.URI_REST_ENCODED.format(sb, hcc.getParameters().asArrayValuesString().values()));
 
   }
 
@@ -52,7 +52,7 @@ public class URLParameterFormatingTest {
   @Test
   public void all() {
     for (HTTPEncoder hpe : HTTPEncoder.values()) {
-      System.out.println(hpe.format(null, hcc.getParameters().values()));
+      System.out.println(hpe.format(null, hcc.getParameters().asArrayValuesString().values()));
     }
     System.out
         .println("===============================================================================");

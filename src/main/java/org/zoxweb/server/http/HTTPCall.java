@@ -122,11 +122,11 @@ public class HTTPCall
 		int status;
 		Map<String, List<String>> respHeaders = null;
 		// format the payload first
-		String encodedContentParams = HTTPUtil.formatParameters(hcc.getParameters(), hcc.getCharset(), hcc.isURLEncodingEnabled(), hcc.getHTTPParameterFormatter());
+		String encodedContentParams = HTTPUtil.formatParameters(hcc.getParameters().asArrayValuesString(), hcc.getCharset(), hcc.isURLEncodingEnabled(), hcc.getHTTPParameterFormatter());
 		String urlURI = fullURL();
 
 		boolean embedPostPutParamsInURI = false;
-		GetNameValue<String> contentType = hcc.getParameters().get(HTTPHeaderName.CONTENT_TYPE.getName());
+		GetNameValue<String> contentType = hcc.getParameters().asArrayValuesString().get(HTTPHeaderName.CONTENT_TYPE.getName());
 		if (contentType != null && contentType.getValue() != null && contentType.getValue().toLowerCase().indexOf("x-www-form-urlencoded") == -1)
 		{
 			embedPostPutParamsInURI = true;
@@ -213,13 +213,13 @@ public class HTTPCall
 			
 			
 		
-			ArrayValues<GetNameValue<String>> reqHeaders = hcc.getHeaders();
+			ArrayValues<GetNameValue<String>> reqHeaders = hcc.getHeaders().asArrayValuesString();
 			// set the request headers
 			if (reqHeaders != null)
 			{
 				for (GetNameValue<String> nvp : reqHeaders.values())
 				{
-					con.setRequestProperty( nvp.getName(), nvp.getValue());
+					con.setRequestProperty(nvp.getName(), nvp.getValue());
 				}
 			}
 			
@@ -256,7 +256,7 @@ public class HTTPCall
 					os = con.getOutputStream();
 					if (hcc.isMultiPartEncoding())
 					{
-						HTTPMultiPartUtil.writeMultiPartContent(os, hcc.getBoundary(), hcc.getParameters());
+						HTTPMultiPartUtil.writeMultiPartContent(os, hcc.getBoundary(), hcc.getParameters().asArrayValuesString());
 					}
 					else
 						os.write(encodedContentParams.getBytes());

@@ -133,11 +133,11 @@ public class HTTPMessageConfig
 
 	public boolean isMultiPartEncoding() 
 	{
-		
-		GetNameValue<String> mp = getHeaders().get(HTTPHeaderName.CONTENT_TYPE.getName());
-		if (mp != null && mp.getValue() != null)
+		String mp = getHeaders().getValue(HTTPHeaderName.CONTENT_TYPE);
+		//GetNameValue<String> mp = getHeaders().get(HTTPHeaderName.CONTENT_TYPE.getName());
+		if (mp != null)// && mp.getValue() != null)
 		{
-			return SharedStringUtil.contains(mp.getValue(), HTTPMimeType.MULTIPART_FORM_DATA.getValue(), true);
+			return SharedStringUtil.contains(mp, HTTPMimeType.MULTIPART_FORM_DATA.getValue(), true);
 		}
 		
 		return false;//lookupValue(Params.MULTI_PART_ENCODING);
@@ -156,10 +156,15 @@ public class HTTPMessageConfig
 	 * @return parameters 
 	 */
 	@SuppressWarnings("unchecked")
-	public ArrayValues<GetNameValue<String>> getParameters()
+	public NVGenericMap getParameters()
 	{
-		return (ArrayValues<GetNameValue<String>>) lookup(Params.PARAMETERS);
+		return (NVGenericMap) lookup(Params.PARAMETERS);
 	}
+
+//	@Override
+//	public NVGenericMap getParametersNVGM() {
+//		return (NVGenericMap) lookup(Params.PARAMETERS);
+//	}
 
 	/**
 	 * Set the action parameters list
@@ -186,10 +191,15 @@ public class HTTPMessageConfig
 	 * @return headers
 	 */
 	@SuppressWarnings("unchecked")
-	public ArrayValues<GetNameValue<String>> getHeaders()
+	public NVGenericMap getHeaders()
 	{
-		return  (ArrayValues<GetNameValue<String>>) lookup(Params.HEADER_PARAMETERS);
+		return (NVGenericMap) lookup(Params.HEADER_PARAMETERS);
 	}
+
+//	@Override
+//	public NVGenericMap getHeadersNVGM() {
+//		return (NVGenericMap) lookup(Params.HEADER_PARAMETERS);
+//	}
 
 	/**
 	 * Get the HTTP request parameters
@@ -582,7 +592,7 @@ public class HTTPMessageConfig
 	public String getContentType()
 	{
 		
-		return SharedUtil.getValue(getHeaders().get(HTTPHeaderName.CONTENT_TYPE.getName()));
+		return getHeaders().getValue(HTTPHeaderName.CONTENT_TYPE);
 	}
 
 
@@ -595,6 +605,21 @@ public class HTTPMessageConfig
 	{
 		
 		getHeaders().add(HTTPHeaderName.toHTTPHeader(HTTPHeaderName.CONTENT_TYPE, contentType));
+	}
+
+	@Override
+	public String getAccept() {
+		return getHeaders().getValue(HTTPHeaderName.ACCEPT);
+	}
+
+	@Override
+	public void setAccept(String accept) {
+		getHeaders().add(HTTPHeaderName.toHTTPHeader(HTTPHeaderName.ACCEPT, accept));
+	}
+
+	@Override
+	public void setAccept(GetValue<String> accept) {
+		getHeaders().add(HTTPHeaderName.toHTTPHeader(HTTPHeaderName.ACCEPT, accept));
 	}
 
 	/**
@@ -616,7 +641,7 @@ public class HTTPMessageConfig
 	public String getCookie()
 	{
 		
-		return SharedUtil.getValue(getHeaders().get(HTTPHeaderName.COOKIE.getName()));
+		return getHeaders().getValue(HTTPHeaderName.COOKIE);
 	}
 
 
@@ -652,7 +677,7 @@ public class HTTPMessageConfig
 	public int getContentLength() 
 	{
 		
-		String contentValue = SharedUtil.getValue(getHeaders().get(HTTPHeaderName.CONTENT_LENGTH.getName()));
+		String contentValue = getHeaders().getValue(HTTPHeaderName.CONTENT_LENGTH);///SharedUtil.getValue(getHeaders().get(HTTPHeaderName.CONTENT_LENGTH.getName()));
 		if (contentValue != null)
 		{
 			return Integer.parseInt(contentValue);

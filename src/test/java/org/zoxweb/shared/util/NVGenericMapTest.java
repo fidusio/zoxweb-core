@@ -117,11 +117,11 @@ public class NVGenericMapTest
 			TestClass tc = new TestClass();
 			tc.name = "not set";
 			tc.nvgm = nvgm;
-			json = GSONUtil.DEFAULT_GSON.toJson(tc);
+			json = GSONUtil.toJSONDefault(tc);
 			System.out.println(json);
-			tc = GSONUtil.DEFAULT_GSON.fromJson(json, TestClass.class);
+			tc = GSONUtil.fromJSONDefault(json, TestClass.class);
 			
-			json = GSONUtil.DEFAULT_GSON.toJson(tc);
+			json = GSONUtil.toJSONDefault(tc);
             System.out.println(json);
 			
 		}

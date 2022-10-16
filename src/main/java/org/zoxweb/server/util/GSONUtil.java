@@ -87,7 +87,7 @@ final public class GSONUtil
 	
 	private final static GSONUtil SINGLETON = new GSONUtil();
 	
-	public final static Gson DEFAULT_GSON = new GsonBuilder()
+	private final static Gson DEFAULT_GSON = new GsonBuilder()
 											.registerTypeAdapter(NVGenericMap.class, new NVGenericMapSerDeserializer())
 											.registerTypeHierarchyAdapter(NVEntity.class, new NVEntitySerDeserializer())
 					                        .registerTypeAdapter(Date.class, new DateSerDeserializer())
@@ -193,6 +193,22 @@ final public class GSONUtil
 		}
 
 	}
+
+	public static <T> T fromJSONDefault(byte[] json, Class<T> classOfT)
+	{
+		return DEFAULT_GSON.fromJson(SharedStringUtil.toString(json), classOfT);
+	}
+
+	public static <T> T fromJSONDefault(String json, Class<T> classOfT)
+	{
+		return DEFAULT_GSON.fromJson(json, classOfT);
+	}
+
+	public static String toJSONDefault(Object o)
+	{
+		return DEFAULT_GSON.toJson(o);
+	}
+
 	
 
 	public static class NVEntitySerDeserializer implements JsonSerializer<NVEntity>,JsonDeserializer<NVEntity>

@@ -48,14 +48,14 @@ public final class HTTPDecoder {
     switch(hmci.getMethod())
     {
       case GET:
-        HTTPUtil.parseQuery(hmci.getParameters(), hmci.getURI(), true);
+        HTTPUtil.parseQuery(hmci.getParameters().asArrayValuesString(), hmci.getURI(), true);
         return hmci;
       default:
         if (hrm.isMessageComplete())
         {
           if (HTTPMimeType.lookup(hmci.getContentType()) == HTTPMimeType.APPLICATION_WWW_URL_ENC) {
             int index = hrm.endOfHeadersIndex() + ProtocolDelimiter.CRLFCRLF.getBytes().length;
-            HTTPUtil.parseQuery(hmci.getParameters(), hrm.getUBAOS().getString(index),false);
+            HTTPUtil.parseQuery(hmci.getParameters().asArrayValuesString(), hrm.getUBAOS().getString(index),false);
             return hmci;
           }
         }

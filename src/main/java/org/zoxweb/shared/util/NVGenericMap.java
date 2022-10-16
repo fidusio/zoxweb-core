@@ -268,4 +268,10 @@ public class NVGenericMap
 
 	}
 
+
+	public ArrayValues<GetNameValue<String>> asArrayValuesString()
+	{
+		return (ArrayValues<GetNameValue<String>>)((Object)this);
+	}
+
 }

@@ -55,7 +55,6 @@
     <maven-resources-plugin.version>3.3.0</maven-resources-plugin.version>
     <maven-surefile-plugin.version>3.0.0-M7</maven-surefile-plugin.version>
     <maven-jar-plugin.version>3.3.0</maven-jar-plugin.version>
-    <!-- <maven-javadoc.version>2.10.4</maven-javadoc.version> -->
     <maven-javadoc.version>3.4.1</maven-javadoc.version>
     <exec-maven.version>3.1.0</exec-maven.version>
 
