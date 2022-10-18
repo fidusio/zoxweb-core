@@ -1,13 +1,35 @@
 package org.zoxweb.server.security;
 
+import org.zoxweb.shared.util.SharedStringUtil;
+import org.zoxweb.shared.util.SharedUtil;
+
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.util.Arrays;
 
 
-public class BCrypt {
+public class BCrypt
+{
+    public static class BCryptHash
+    {
+        public final int logRound;
+        public final String salt;
+        public final String hash;
 
+        public BCryptHash(String fullHash)
+        {
+            String[] tokens = SharedStringUtil.parseString(fullHash, "\\$", true);
+            logRound = Integer.parseInt(tokens[1]);
+            salt = tokens[2].substring(0, 22);
+            hash = tokens[2].substring(22);
+        }
+
+        public String toString()
+        {
+            return SharedUtil.toCanonicalID(',', logRound, salt, hash);
+        }
+    }
     // BCrypt parameters
     private static final int GENSALT_DEFAULT_LOG2_ROUNDS = 10;
 
@@ -170,7 +192,7 @@ public class BCrypt {
      * @param rs the destination buffer for the base64-encoded string
      * @exception IllegalArgumentException if the length is invalid
      */
-    static void encode_base64(byte d[], int len, StringBuilder rs) throws IllegalArgumentException {
+    static void encode_base64(byte[] d, int len, StringBuilder rs) throws IllegalArgumentException {
         int off = 0;
         int c1, c2;
 
