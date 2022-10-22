@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -83,7 +84,9 @@ import com.google.gson.stream.JsonWriter;
 final public class GSONUtil 
 {
 
-	private static final transient Logger log = Logger.getLogger(Const.LOGGER_NAME);
+	private static final Logger log = Logger.getLogger(Const.LOGGER_NAME);
+
+	private static final AtomicLong counter = new AtomicLong();
 	
 	private final static GSONUtil SINGLETON = new GSONUtil();
 	
@@ -194,18 +197,27 @@ final public class GSONUtil
 
 	}
 
+
+	public static long getJSONDefaultCount()
+	{
+		return counter.get();
+	}
+
 	public static <T> T fromJSONDefault(byte[] json, Class<T> classOfT)
 	{
+		counter.incrementAndGet();
 		return DEFAULT_GSON.fromJson(SharedStringUtil.toString(json), classOfT);
 	}
 
 	public static <T> T fromJSONDefault(String json, Class<T> classOfT)
 	{
+		counter.incrementAndGet();
 		return DEFAULT_GSON.fromJson(json, classOfT);
 	}
 
 	public static String toJSONDefault(Object o)
 	{
+		counter.incrementAndGet();
 		return DEFAULT_GSON.toJson(o);
 	}
 
@@ -268,7 +280,7 @@ final public class GSONUtil
 			return toJSON((NVEntity) obj, true, false, false);
 		}
 
-		return DEFAULT_GSON.toJson(obj);
+		return toJSONDefault(obj);
 	}
 
 	public static String toJSON(NVEntity nve, boolean indent) 

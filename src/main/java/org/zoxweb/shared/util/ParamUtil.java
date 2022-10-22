@@ -324,7 +324,7 @@ public class ParamUtil {
             return stringValue(name, defaultValue, false);
         }
 
-        private String stringValue(String name, String defaultValue, boolean nullOk)
+        public String stringValue(String name, String defaultValue, boolean nullOk)
         {
             List<String> ret = lookup(name);
             if(ret == null)
