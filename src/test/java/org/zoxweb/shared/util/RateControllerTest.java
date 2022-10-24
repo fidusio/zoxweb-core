@@ -27,7 +27,7 @@ public class RateControllerTest {
         for(int i = 0; i < vals.size(); i+=2)
         {
 
-            //assert(vals.get(i+1) - vals.get(i) == controller.getDelta());
+            assert(vals.get(i+1) - vals.get(i) == controller.getDelta());
         }
 
 
