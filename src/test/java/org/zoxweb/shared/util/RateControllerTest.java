@@ -11,7 +11,7 @@ public class RateControllerTest {
     @Test
     public void tpsTest()
     {
-        RateController controller = new RateController(500);
+        RateController controller = new RateController((float)1.66);
 
         TaskUtil.sleep(1000);
 
@@ -22,6 +22,13 @@ public class RateControllerTest {
 
         for(int i = 0; i < 100; i++)
             vals.add(controller.nextDelay());
+
+
+        for(int i = 0; i < vals.size(); i+=2)
+        {
+
+            //assert(vals.get(i+1) - vals.get(i) == controller.getDelta());
+        }
 
 
         System.out.println("Delay: "  + vals);
