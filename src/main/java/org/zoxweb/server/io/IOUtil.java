@@ -307,20 +307,32 @@ public class IOUtil
 		}
 	}
 
+
+	/**
+	 * Write a string to file
+	 * @param file
+	 * @param toWrite
+	 * @throws IOException
+	 */
+	public static void writeToFile(File file, String toWrite)
+			throws IOException
+	{
+		writeToFile(file, SharedStringUtil.getBytes(toWrite));
+	}
+
     /**
      *
-     * @param f
+     * @param file
      * @param buffer
      * @throws IOException
      */
-	public static void writeToFile(File f, byte buffer[])
+	public static void writeToFile(File file, byte buffer[])
         throws IOException
 	{
 		FileOutputStream fos = null;
-		
 		try
 		{
-			fos = new FileOutputStream(f);
+			fos = new FileOutputStream(file);
 			fos.write(buffer);
 		}
 		finally

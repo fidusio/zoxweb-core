@@ -18,7 +18,7 @@ public class RateControllerTest {
         System.out.println(controller + " " + controller.nextDelay());
 
 
-        List<Long> vals = new ArrayList<Long>();
+        List<Long> vals = new ArrayList<>();
 
         for(int i = 0; i < 100; i++)
             vals.add(controller.nextDelay());
@@ -40,7 +40,25 @@ public class RateControllerTest {
 
         TaskUtil.sleep(1100);
         System.out.println(controller + " " + controller.nextDelay()  + " " + (controller.getNextTime() - System.currentTimeMillis()));
+    }
+
+    @Test
+    public void tpsZeroTest()
+    {
+        RateController controller = new RateController(0);
+        List<Long> vals = new ArrayList<>();
+
+        for(int i = 0; i < 100; i++)
+            vals.add(controller.nextDelay());
 
 
+        for(int i = 0; i < vals.size(); i+=2)
+        {
+
+            assert(vals.get(i+1) - vals.get(i) == controller.getDelta());
+        }
+
+        System.out.println("Zero Delay: "  + vals);
+        System.out.println("Zero Delay: "  + controller);
     }
 }

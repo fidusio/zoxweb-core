@@ -137,7 +137,7 @@ public class RuntimeUtil
     {
 		f.createNewFile();
 		f.setExecutable(true);
-		IOUtil.writeToFile(f, command.getBytes());
+		IOUtil.writeToFile(f, command);
 		return runAndFinish(f.getCanonicalPath());
 	}
 

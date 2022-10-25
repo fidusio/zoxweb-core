@@ -59,8 +59,10 @@ public class RateController
         {
             delay = next - now;
         }
-        transactions++;
+
         nextTime = now + delay;
+
+        transactions++;
         return delay;
     }
 
@@ -71,11 +73,11 @@ public class RateController
 
     public synchronized RateController setTPS(float tps)
     {
-        if(tps <=0)
+        if(tps < 0)
             throw new IllegalArgumentException("Invalid tps " + tps);
 
         this.tps = tps;
-        delta = (long)((float)1000/tps);
+        delta = tps != 0 ? (long)((float)1000/tps) : 0 ;
         return this;
     }
 
