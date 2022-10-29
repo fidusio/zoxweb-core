@@ -14,6 +14,12 @@ import java.util.Map;
 public class ParamUtil {
     private ParamUtil(){}
 
+//    public static class ParamType
+//        implements GetName
+//    {
+//        private String name;
+//    }
+
     public static class ParamInfoList
     {
         Map<String, ParamInfo> byName = new LinkedHashMap<String, ParamInfo>();
@@ -380,16 +386,28 @@ public class ParamUtil {
     }
 
 
+
     public static ParamMap parse(String nvTag, String ...args)
     {
-        return parse(nvTag, true, args);
+        return parse(nvTag, true, 0, args);
+    }
+
+    public static ParamMap parse(String nvTag, int index, String ...args)
+    {
+        return parse(nvTag, true, index, args);
     }
 
     public static ParamMap parse(String nvTag, boolean ignoreCase, String ...args)
     {
+        return parse(nvTag,ignoreCase, 0, args);
+    }
+
+
+    public static ParamMap parse(String nvTag, boolean ignoreCase, int index, String ...args)
+    {
         Map<String, List<String>> retMap = new LinkedHashMap<String, List<String>>();
 
-        int index = 0;
+
         int counter = 0;
         for(; index < args.length; index++)
         {
@@ -444,9 +462,14 @@ public class ParamUtil {
 
     public static ParamMap parse(ParamInfoList piList, String ...args)
     {
+        return parse(piList, 0, args);
+    }
+
+    public static ParamMap parse(ParamInfoList piList, int index, String ...args)
+    {
         Map<String, List<String>> retMap = new LinkedHashMap<String, List<String>>();
 
-        int index = 0;
+
         int counter = 0;
         ParamInfo lastMulti = null;
         for(; index < args.length; index++)

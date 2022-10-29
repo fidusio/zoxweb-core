@@ -77,7 +77,7 @@ public class TaskProcessorTest
       tp.execute(td);
     }
 
-    delta = TaskUtil.waitIfBusyThenClose(25) - delta;
+    delta = TaskUtil.waitIfBusy(25) - delta;
 
     System.out.println("It took " + Const.TimeInMillis.toString(delta) + " millis callback " + td + " using queue "
             + tp.getQueueMaxSize() + " and " + tp.availableExecutorThreads() + " executor thread");
@@ -87,15 +87,23 @@ public class TaskProcessorTest
 
   public static void main(String[] args) {
     int index = 0;
-    int numberOfTasks = args.length > index ? Integer.parseInt(args[index]) : 20_000_000;
-    log.info("Java version: " + System.getProperty("java.version"));
+    int numberOfThread =  args.length > index ? Integer.parseInt(args[index++]) : -1;
+    int numberOfTasks = args.length > index ? Integer.parseInt(args[index++]) : 20_000_000;
+
+    TaskUtil.setTaskProcessorThreadCount(numberOfThread);
+
 
 
 
     TaskProcessor te = TaskUtil.getDefaultTaskProcessor();
+    log.info("Java version: " + System.getProperty("java.version") + " number of task " + numberOfTasks +
+            " Available Threads: " + TaskUtil.getDefaultTaskProcessor().availableExecutorThreads() );
     count(numberOfTasks);
     log.info("serial inc " + numberOfTasks + " took " + Const.TimeInMillis.toString(count(numberOfTasks)));
     runTest(te, new TaskProcessorTest(), numberOfTasks);
+    log.info("DONE " + TaskUtil.isBusy() + " thread count " + TaskUtil.getDefaultTaskProcessor().availableExecutorThreads() +
+            " pending task "  + TaskUtil.getDefaultTaskProcessor().pendingTasks());
+    TaskUtil.close();
   }
 
 }

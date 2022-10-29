@@ -37,9 +37,10 @@ public class TaskUtil
 	private static int maxTasks = 500;
 	private static int threadMultiplier = 4;
 	private static int minTPThreadCount = 16;
+	private static int tpThreadCount = -1;
 	public static final long START_TIME_MILLIS = System.currentTimeMillis();
 	
-	public static transient final Logger LOG = Logger.getLogger(Const.LOGGER_NAME); 
+	public static final Logger LOG = Logger.getLogger(Const.LOGGER_NAME);
 	
 	private TaskUtil() {
 	}
@@ -70,7 +71,19 @@ public class TaskUtil
 		}
 	}
 
-
+	public static void setTaskProcessorThreadCount(int threadCount)
+	{
+		if (TASK_PROCESSOR == null) {
+			try {
+				LOCK.lock();
+				if (TASK_PROCESSOR == null && threadCount > 2) {
+					tpThreadCount = threadCount;
+				}
+			} finally {
+				LOCK.unlock();
+			}
+		}
+	}
 	public static void setMinTaskProcessorThreadCount(int minThreadCount){
 		if (TASK_PROCESSOR == null) {
 			try {
@@ -102,12 +115,16 @@ public class TaskUtil
 			try {
 				LOCK.lock();
 				if (TASK_PROCESSOR == null) {
-					 int threadCount = Runtime.getRuntime().availableProcessors()*threadMultiplier;
-					 if (threadCount < minTPThreadCount)
-					 {
-					 		threadCount = minTPThreadCount;
-					 }
-					 TASK_PROCESSOR = new TaskProcessor("DE",maxTasks, threadCount, Thread.NORM_PRIORITY, false);
+					int threadCount = tpThreadCount;
+					if (threadCount < 2 )
+					{
+						threadCount = Runtime.getRuntime().availableProcessors() * threadMultiplier;
+						if (threadCount < minTPThreadCount)
+						{
+							threadCount = minTPThreadCount;
+						}
+					}
+					TASK_PROCESSOR = new TaskProcessor("DE",maxTasks, threadCount, Thread.NORM_PRIORITY, false);
 				}
 			} finally {
 				LOCK.unlock();
@@ -175,11 +192,23 @@ public class TaskUtil
 	    return getDefaultTaskScheduler().pendingTasks() != 0 || getDefaultTaskProcessor().isBusy();
 	}
 
+	public static long waitIfBusy(long millisToSleepAndCheck)
+	{
+		if(millisToSleepAndCheck < 1)
+			throw new IllegalArgumentException("wait time must be greater than 0 millis second.");
+		while(isBusy())
+		{
+			sleep(millisToSleepAndCheck);
+		}
+
+		return System.currentTimeMillis();
+	}
+
 
 	public static long waitIfBusyThenClose(long millisToSleepAndCheck)
 	{
 		if(millisToSleepAndCheck < 1)
-			throw new IllegalArgumentException("wait time must be greater than 0 second.");
+			throw new IllegalArgumentException("wait time must be greater than 0 millis second.");
 		if (TASK_SIMPLE_SCHEDULER != null)
 		{
 			do {

@@ -53,6 +53,7 @@ public class RateController
     {
         long delay = 0;
 
+
         long next = nextTime + delta;
         long now = System.currentTimeMillis();
         if(next > now)
@@ -77,7 +78,20 @@ public class RateController
             throw new IllegalArgumentException("Invalid tps " + tps);
 
         this.tps = tps;
-        delta = tps != 0 ? (long)((float)1000/tps) : 0 ;
+        delta = 0;
+
+        if (tps != 0)
+        {
+            float floatDelta = (float)1000/tps;
+            if (Math.round(floatDelta) == floatDelta)
+            {
+                delta = (long)floatDelta;
+            }
+            else {
+                delta = (long)floatDelta + 1;
+            }
+        }
+
         return this;
     }
 

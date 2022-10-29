@@ -1124,4 +1124,11 @@ public class HTTPUtil
 		return hmci;
 	}
 
+	public static <O> HTTPResponseObject<O> toHTTPResponseObject(HTTPResponseData httpResponseData, Class<?> clazz)
+	{
+		O object = (httpResponseData.getData() != null && clazz != null) ? (O) GSONUtil.fromJSONDefault(httpResponseData.getData(), clazz) : null;
+		return new HTTPResponseObject(httpResponseData.getStatus(), httpResponseData.getResponseHeaders(), object!= null ? object : httpResponseData.getData());
+	}
+
+
 }

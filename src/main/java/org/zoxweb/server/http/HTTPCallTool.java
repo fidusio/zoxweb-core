@@ -16,6 +16,7 @@
 package org.zoxweb.server.http;
 
 import org.zoxweb.server.io.IOUtil;
+import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.http.*;
@@ -33,7 +34,7 @@ import java.util.logging.Logger;
 
 public class HTTPCallTool implements Runnable
 {
-    private static Logger log = Logger.getLogger(HTTPCallTool.class.getName());
+    private static LogWrapper log = new LogWrapper(HTTPCallTool.class);
     private static AtomicLong counter = new AtomicLong();
     private static AtomicLong failCounter = new AtomicLong();
 
@@ -51,9 +52,7 @@ public class HTTPCallTool implements Runnable
         HTTPResponseData rd = null;
         try
         {
-            HTTPCall hc = new HTTPCall(hmci);
-            rd = hc.sendRequest();
-
+            rd = HTTPCall.send(hmci);
 
         }
         catch(Exception e)

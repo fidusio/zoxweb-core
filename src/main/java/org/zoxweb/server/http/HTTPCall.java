@@ -377,7 +377,22 @@ public class HTTPCall
 	
 	
 	
-	
+	public static HTTPResponseData send(HTTPMessageConfigInterface hmci)
+			throws IOException
+	{
+		return new HTTPCall(hmci).sendRequest();
+	}
+
+	public static <O> HTTPResponseObject<O> send(HTTPMessageConfigInterface hmci, Class<?> clazz)
+			throws IOException
+	{
+		HTTPResponseData hrd = new HTTPCall(hmci).sendRequest();
+
+		return HTTPUtil.toHTTPResponseObject(hrd, clazz);
+	}
+
+
+
 	
 	private String fullURL()
 	{
