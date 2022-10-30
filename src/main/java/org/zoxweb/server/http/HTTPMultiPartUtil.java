@@ -22,13 +22,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.shared.http.*;
 import org.zoxweb.shared.protocol.ProtocolDelimiter;
 import org.zoxweb.shared.util.ArrayValues;
-import org.zoxweb.shared.util.Const.TimeUnitType;
+
 import org.zoxweb.shared.util.NVPair;
 import org.zoxweb.shared.util.GetNameValue;
 import org.zoxweb.shared.util.SharedStringUtil;
@@ -46,18 +47,18 @@ public final class HTTPMultiPartUtil
 	 * Generate a boundary string in hex format based on the java time in nano time
 	 * @return boundary
 	 */
-	public static String generateBoundary(TimeUnitType tut)
+	public static String generateBoundary(TimeUnit tut)
 	{
 		if (tut == null)
 		{
-			tut = TimeUnitType.NANOS;
+			tut = TimeUnit.NANOSECONDS;
 		}
 
 		switch(tut)
 		{
-		case MILLIS:
+			case MILLISECONDS:
 			return "--------" + Long.toString(System.currentTimeMillis(), 16);
-		case NANOS:
+			case NANOSECONDS:
 			return "--------" + Long.toString(System.nanoTime(), 16);
 		default:
 			throw new IllegalArgumentException("Unit not supported:" + tut);
@@ -423,7 +424,7 @@ public final class HTTPMultiPartUtil
 //			String contentType = hcc.getContentType();
 			if (!SharedStringUtil.contains(hcc.getContentType(), "boundary=" , true))
 			{
-				hcc.setBoundary(generateBoundary(TimeUnitType.NANOS));
+				hcc.setBoundary(generateBoundary(TimeUnit.NANOSECONDS));
 				// add the boundary parameter to the request header
 				hcc.getHeaders().add(new NVPair(HTTPHeaderName.CONTENT_TYPE, MULTI_PART_HEADER_CONTENT_TYPE.getValue() + hcc.getBoundary()));
 

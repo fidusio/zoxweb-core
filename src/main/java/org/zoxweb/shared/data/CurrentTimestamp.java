@@ -1,12 +1,14 @@
 package org.zoxweb.shared.data;
 
-import org.zoxweb.shared.util.Const.TimeUnitType;
+
 import org.zoxweb.shared.util.GetNVConfig;
 import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
 import org.zoxweb.shared.util.NVConfigEntityLocal;
 import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.SharedUtil;
+
+import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings("serial")
 public class CurrentTimestamp
@@ -18,7 +20,7 @@ public class CurrentTimestamp
 	implements GetNVConfig
 	{
 		TIMESTAMP(NVConfigManager.createNVConfig("timestamp", "Current time value", "Timestamp", true, false, false, true, Long.class, null)),
-		UNIT(NVConfigManager.createNVConfig("unit", "current time value unit", "Unit", true, false, false, true, TimeUnitType.class, null)),
+		UNIT(NVConfigManager.createNVConfig("unit", "current time value unit", "Unit", true, false, false, true, TimeUnit.class, null)),
 		SOURCE(NVConfigManager.createNVConfig("source", "current time value unit", "Source", false, false, String.class)),
 		;
 	
@@ -52,16 +54,16 @@ public class CurrentTimestamp
 	
 	public CurrentTimestamp()
 	{
-		this(System.currentTimeMillis(), TimeUnitType.MILLIS, null);
+		this(System.currentTimeMillis(), TimeUnit.MILLISECONDS, null);
 		// TODO Auto-generated constructor stub
 	}
 	
-	public CurrentTimestamp(long currentTimeValue, TimeUnitType tut)
+	public CurrentTimestamp(long currentTimeValue, TimeUnit tut)
 	{
 		this(currentTimeValue, tut, null);
 	}
 	
-	public CurrentTimestamp(long currentTimeValue, TimeUnitType tut, String source)
+	public CurrentTimestamp(long currentTimeValue, TimeUnit tut, String source)
 	{
 		super(NVC_CURRENT_TIMESTAMP);
 		setValue(Param.TIMESTAMP, currentTimeValue);
@@ -74,7 +76,7 @@ public class CurrentTimestamp
 		return lookupValue(Param.TIMESTAMP);
 	}
 	
-	public TimeUnitType unit()
+	public TimeUnit unit()
 	{
 		return lookupValue(Param.UNIT);
 	}

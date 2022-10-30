@@ -1,30 +1,52 @@
 package org.zoxweb.shared.util;
 
 
+import java.util.concurrent.TimeUnit;
 
 public class RateController
 {
-    private float tps;
 
-    private long delta;
+
+    private float rate;
+    private TimeUnit unit;
+    private Const.TimeInMillis tim;
+
+    private long deltaInMillis;
     private long nextTime;
     private long transactions;
 
 
-    public RateController(long tps)
+
+    public RateController(long rate, TimeUnit unit)
     {
-        this((float) tps);
+        this((float) rate, unit);
     }
-    public RateController(float tps)
+    public RateController(float rate, TimeUnit unit)
     {
-        setTPS(tps);
-        nextTime = System.currentTimeMillis();
+        setRate(rate, unit);
+        nextTime = System.currentTimeMillis() - deltaInMillis;
+    }
+
+    public RateController(String rate)
+    {
+        setRate(rate);
+        nextTime = System.currentTimeMillis() - deltaInMillis;
     }
 
 
     public float getTPS()
     {
-        return tps;
+        return deltaInMillis*rate;
+    }
+
+    public float getRate()
+    {
+        return rate;
+    }
+
+    public TimeUnit getRateUnit()
+    {
+        return unit;
     }
     public long getNextTime()
     {
@@ -35,9 +57,9 @@ public class RateController
      *
      * @return delta in millis
      */
-    public long getDelta()
+    public long getDeltaInMillis()
     {
-        return delta;
+        return deltaInMillis;
     }
 
     public long getTransactions()
@@ -54,7 +76,7 @@ public class RateController
         long delay = 0;
 
 
-        long next = nextTime + delta;
+        long next = nextTime + deltaInMillis;
         long now = System.currentTimeMillis();
         if(next > now)
         {
@@ -67,28 +89,44 @@ public class RateController
         return delay;
     }
 
-    public RateController setTPS(long tps)
+
+    public RateController setRate(String rate)
     {
-        return setTPS((float) tps);
+        String[] tokens = SharedStringUtil.parseString(rate, "/", true);
+        float rateValue = Float.parseFloat(tokens[0]);
+        Const.TimeInMillis timValue = Const.TimeInMillis.toTimeInMillis(tokens[1]);
+        return setRate(rateValue, timValue.UNIT);
     }
 
-    public synchronized RateController setTPS(float tps)
+    public RateController setRate(long rate, TimeUnit unit)
     {
-        if(tps < 0)
-            throw new IllegalArgumentException("Invalid tps " + tps);
+        return setRate((float) rate, unit);
+    }
 
-        this.tps = tps;
-        delta = 0;
 
-        if (tps != 0)
+    public synchronized RateController setRate(float rate, TimeUnit unit)
+    {
+        SharedUtil.checkIfNulls("TimeUnit null", unit);
+        this.rate = rate;
+        this.unit = unit;
+
+        if(rate < 0)
+            throw new IllegalArgumentException("Invalid tps " + rate);
+
+
+        tim = Const.TimeInMillis.convert(unit);
+
+        deltaInMillis = 0;
+
+        if (rate != 0)
         {
-            float floatDelta = (float)1000/tps;
+            float floatDelta = (float)tim.MILLIS/rate;
             if (Math.round(floatDelta) == floatDelta)
             {
-                delta = (long)floatDelta;
+                deltaInMillis = (long)floatDelta;
             }
             else {
-                delta = (long)floatDelta + 1;
+                deltaInMillis = (long)floatDelta + 1;
             }
         }
 
@@ -98,8 +136,8 @@ public class RateController
     @Override
     public String toString() {
         return "RateController{" +
-                "tps=" + tps +
-                ", delta=" + delta +
+                "rate=" + rate + "/" + tim.getTokens()[0] +
+                ", delta=" + deltaInMillis +
                 ", lastTime=" + nextTime +
                 ", transactions=" + transactions +
                 '}';

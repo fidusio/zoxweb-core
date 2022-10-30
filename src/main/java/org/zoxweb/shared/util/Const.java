@@ -18,6 +18,7 @@ package org.zoxweb.shared.util;
 import org.zoxweb.shared.db.QueryMarker;
 
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Contains constants and enums.
@@ -394,14 +395,14 @@ public class Const {
    *
    * @author mzebib
    */
-  public enum TimeUnitType {
-    NANOS,
-    MILLIS,
-    SECOND,
-    MINUTES,
-    HOUR,
-    DAY,
-  }
+//  public enum TimeUnitType {
+//    NANOS,
+//    MILLIS,
+//    SECOND,
+//    MINUTES,
+//    HOUR,
+//    DAY,
+//  }
 
   /**
    * This enum is used to describe the string to be expected or converted to
@@ -439,30 +440,39 @@ public class Const {
    */
   public enum TimeInMillis {
     // One millisecond
-    MILLI(1, "millis", "milli"),
+    MILLI(1, TimeUnit.MILLISECONDS, "millis", "milli"),
 
     // One second in milliseconds
-    SECOND(MILLI.MILLIS * 1000, "seconds", "second", "secs", "sec", "s"),
+    SECOND(MILLI.MILLIS * 1000, TimeUnit.SECONDS,"seconds", "second", "secs", "sec", "s"),
 
     // One minute in milliseconds
-    MINUTE(SECOND.MILLIS * 60, "minutes", "minute", "mins", "min", "m"),
+    MINUTE(SECOND.MILLIS * 60, TimeUnit.MINUTES,"minutes", "minute", "mins", "min", "m"),
 
     // One hour in milliseconds
-    HOUR(MINUTE.MILLIS * 60, "hours", "hour", "h"),
+    HOUR(MINUTE.MILLIS * 60, TimeUnit.HOURS,"hours", "hour", "h"),
 
     // One day in milliseconds
-    DAY(HOUR.MILLIS * 24, "days", "day"),
+    DAY(HOUR.MILLIS * 24, TimeUnit.DAYS,"days", "day","d"),
 
     // One week in milliseconds
-    WEEK(DAY.MILLIS * 7, "weeks", "week");
+    WEEK(DAY.MILLIS * 7, (TimeUnit) null, "weeks", "week", "w");
 
     public final long MILLIS;
+    public final TimeUnit UNIT;
     private final String[] tokens;
 
-    TimeInMillis(long duration, String... tokens) {
+    TimeInMillis(long duration, TimeUnit unit, String... tokens) {
       this.MILLIS = duration;
       this.tokens = tokens;
+      this.UNIT = unit;
     }
+
+    public String[] getTokens()
+    {
+      return tokens;
+    }
+
+
 
 
     /**
@@ -478,8 +488,48 @@ public class Const {
       return toMillis(time);
     }
 
+    public static TimeInMillis toTimeInMillis(String unit)
+    {
+      if (unit.indexOf("/") != -1)
+        unit = unit.substring(unit.indexOf("/")+1);
 
+      for (TimeInMillis tis : TimeInMillis.values())
+      {
+        for (String  token : tis.tokens)
+        {
+          if(token.equalsIgnoreCase(unit))
+            return tis;
+        }
+      }
+      return null;
+    }
 
+    public static TimeInMillis convert(TimeUnit unit)
+    {
+      switch(unit)
+      {
+
+        case MILLISECONDS:
+          return TimeInMillis.MILLI;
+
+        case SECONDS:
+          return TimeInMillis.SECOND;
+
+        case MINUTES:
+          return TimeInMillis.MINUTE;
+
+        case HOURS:
+          return TimeInMillis.HOUR;
+
+        case DAYS:
+          return TimeInMillis.DAY;
+
+        case NANOSECONDS:
+        case MICROSECONDS:
+        default:
+          throw new IllegalArgumentException(unit + " not supported.");
+      }
+    }
 
     /**
      * Converts string to time in milliseconds.

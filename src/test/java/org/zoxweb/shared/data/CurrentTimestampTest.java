@@ -5,12 +5,13 @@ package org.zoxweb.shared.data;
 
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.zoxweb.server.util.GSONUtil;
-import org.zoxweb.shared.util.Const.TimeUnitType;
+
 
 public class CurrentTimestampTest 
 {
@@ -18,7 +19,7 @@ public class CurrentTimestampTest
 	@Test
 	public void timeInMillis() throws IOException
 	{
-		CurrentTimestamp ct = new CurrentTimestamp(System.currentTimeMillis(), TimeUnitType.MILLIS);
+		CurrentTimestamp ct = new CurrentTimestamp(System.currentTimeMillis(), TimeUnit.MILLISECONDS);
 		String json = GSONUtil.toJSON(ct, true, false, false);
 		System.out.println(json);
 		CurrentTimestamp newCT = GSONUtil.fromJSON(json, CurrentTimestamp.class);
@@ -27,7 +28,7 @@ public class CurrentTimestampTest
 		Assertions.assertEquals(json, newJson);
 		
 		
-		ct = new CurrentTimestamp(System.currentTimeMillis(), TimeUnitType.MILLIS, "localhost");
+		ct = new CurrentTimestamp(System.currentTimeMillis(), TimeUnit.MILLISECONDS, "localhost");
 		json = GSONUtil.toJSON(ct, true, false, true);
 		System.out.println(json);
 		newCT = GSONUtil.fromJSON(json, CurrentTimestamp.class);
@@ -40,7 +41,7 @@ public class CurrentTimestampTest
 	@Test
 	public void timeInNanos() throws IOException
 	{
-		CurrentTimestamp ct = new CurrentTimestamp(System.nanoTime(), TimeUnitType.NANOS);
+		CurrentTimestamp ct = new CurrentTimestamp(System.nanoTime(), TimeUnit.NANOSECONDS);
 		String json = GSONUtil.toJSON(ct, true, false, false);
 		System.out.println(json);
 		CurrentTimestamp newCT = GSONUtil.fromJSON(json, CurrentTimestamp.class);
@@ -49,7 +50,7 @@ public class CurrentTimestampTest
 		Assertions.assertEquals(json, newJson);
 		
 		
-		ct = new CurrentTimestamp(System.nanoTime(), TimeUnitType.NANOS, "localhost");
+		ct = new CurrentTimestamp(System.nanoTime(), TimeUnit.NANOSECONDS, "localhost");
 		json = GSONUtil.toJSON(ct, true, false, true);
 		System.out.println(json);
 		newCT = GSONUtil.fromJSON(json, CurrentTimestamp.class);

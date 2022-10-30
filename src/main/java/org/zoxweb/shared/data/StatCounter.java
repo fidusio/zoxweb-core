@@ -3,9 +3,10 @@ package org.zoxweb.shared.data;
 
 
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 import org.zoxweb.shared.util.Const.TimeInMillis;
-import org.zoxweb.shared.util.Const.TimeUnitType;
+
 import org.zoxweb.shared.util.GetNVConfig;
 import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
@@ -115,28 +116,28 @@ public class StatCounter
 		setValue(Param.REFERENCE_TS, ts);
 	}
 	
-	public double rate(TimeUnitType tut)
+	public double rate(TimeUnit tut)
 	{
 		// default in millis
 		double rate = (double)getCounter()/(double)delta();
 		switch(tut)
 		{
-		case DAY:
-			rate *= TimeInMillis.DAY.MILLIS;
+			case DAYS:
+				rate *= TimeInMillis.DAY.MILLIS;
 			break;
-		case HOUR:
-			rate *= TimeInMillis.HOUR.MILLIS;
+			case HOURS:
+				rate *= TimeInMillis.HOUR.MILLIS;
 			break;
-		case MINUTES:
-			rate *= TimeInMillis.MINUTE.MILLIS;
+			case MINUTES:
+				rate *= TimeInMillis.MINUTE.MILLIS;
 			break;
-		case NANOS:
-			rate /= 1000000;
+			case NANOSECONDS:
+				rate /= 1000000;
 			break;
-		case SECOND:
-			rate *= TimeInMillis.SECOND.MILLIS;
+			case SECONDS:
+				rate *= TimeInMillis.SECOND.MILLIS;
 			break;
-		case MILLIS:
+			case MILLISECONDS:
 			// no conversion 
 		default:
 			break;

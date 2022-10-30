@@ -18,9 +18,10 @@ package org.zoxweb.shared.util;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.zoxweb.server.http.HTTPMultiPartUtil;
-import org.zoxweb.shared.util.Const.TimeUnitType;
+
 
 public class UtilTest {
 
@@ -44,7 +45,7 @@ public class UtilTest {
             }
 		}
 		
-		TimeUnitType tut = TimeUnitType.NANOS;
+		TimeUnit tut = TimeUnit.NANOSECONDS;
 		long ts = System.nanoTime();
 		System.out.println(HTTPMultiPartUtil.generateBoundary( tut));
 		ts = System.nanoTime() -ts;
@@ -55,9 +56,9 @@ public class UtilTest {
 
 		for (int i =0; i < 10; i++) {
 			if (i%2 == 0) {
-				tut = TimeUnitType.MILLIS;
+				tut = TimeUnit.MILLISECONDS;
 			} else {
-                tut = TimeUnitType.NANOS;
+                tut = TimeUnit.NANOSECONDS;
             }
 			
 			ts = System.nanoTime();

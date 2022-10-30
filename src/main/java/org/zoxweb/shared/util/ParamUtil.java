@@ -327,7 +327,7 @@ public class ParamUtil {
 
         public String stringValue(String name, String defaultValue)
         {
-            return stringValue(name, defaultValue, false);
+            return stringValue(name, defaultValue, true);
         }
 
         public String stringValue(String name, String defaultValue, boolean nullOk)
