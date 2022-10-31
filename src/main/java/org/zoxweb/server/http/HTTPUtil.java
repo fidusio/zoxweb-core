@@ -156,7 +156,7 @@ public class HTTPUtil
 		ubaos.write(HTTPVersion.HTTP_1_1.getValue() + " " + hsc.CODE + " " +hsc.REASON + ProtocolDelimiter.CRLF.getValue());
 		// write headers
 
-		Set<Map.Entry<String, List<String>>> set = rd.getResponseHeaders().entrySet();
+		Set<Map.Entry<String, List<String>>> set = rd.getHeaders().entrySet();
 		Iterator<Map.Entry<String, List<String>>> params= set.iterator();
 
 		while (params.hasNext())
@@ -782,7 +782,7 @@ public class HTTPUtil
 
 	public static String extractRequestCookie(HTTPResponseData rd)
 	{
-		List<String> cookies = SharedUtil.lookupMap(rd.getResponseHeaders(), "Set-Cookie", true);
+		List<String> cookies = SharedUtil.lookupMap(rd.getHeaders(), "Set-Cookie", true);
 
 		if (cookies!= null && cookies.size() > 0)
 		{
@@ -813,7 +813,7 @@ public class HTTPUtil
 
 	public static GetNameValue<String> extractHeaderCookie(HTTPResponseData rd)
 	{
-		List<String> cookies = SharedUtil.lookupMap(rd.getResponseHeaders(), "Set-Cookie", true);
+		List<String> cookies = SharedUtil.lookupMap(rd.getHeaders(), "Set-Cookie", true);
 
 		if (cookies!= null && cookies.size() > 0)
 		{
@@ -877,7 +877,7 @@ public class HTTPUtil
 	public static List<HttpCookie> extractCookies(HTTPResponseData rd)
 	{
 		List<HttpCookie> ret = new ArrayList<HttpCookie>();
-		List<String> cookies = SharedUtil.lookupMap(rd.getResponseHeaders(), "Set-Cookie", true);
+		List<String> cookies = SharedUtil.lookupMap(rd.getHeaders(), "Set-Cookie", true);
 
 		if (cookies!= null && cookies.size() > 0)
 		{
@@ -896,7 +896,7 @@ public class HTTPUtil
 	{
 		if (name != null)
 		{
-			List<String> cookies = SharedUtil.lookupMap(rd.getResponseHeaders(), "Set-Cookie", true);
+			List<String> cookies = SharedUtil.lookupMap(rd.getHeaders(), "Set-Cookie", true);
 
 			if (cookies!= null && cookies.size() > 0)
 			{
@@ -1127,7 +1127,7 @@ public class HTTPUtil
 	public static <O> HTTPResponseObject<O> toHTTPResponseObject(HTTPResponseData httpResponseData, Class<?> clazz)
 	{
 		O object = (httpResponseData.getData() != null && clazz != null) ? (O) GSONUtil.fromJSONDefault(httpResponseData.getData(), clazz) : null;
-		return new HTTPResponseObject(httpResponseData.getStatus(), httpResponseData.getResponseHeaders(), object!= null ? object : httpResponseData.getData());
+		return new HTTPResponseObject(httpResponseData.getStatus(), httpResponseData.getHeaders(), object!= null ? object : httpResponseData.getData());
 	}
 
 

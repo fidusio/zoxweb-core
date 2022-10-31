@@ -100,7 +100,7 @@ public class HTTPResponseData
 		this.data = data;
 	}
 
-	public Map<String, List<String>> getResponseHeaders() {
+	public Map<String, List<String>> getHeaders() {
 		return responseHeaders;
 	}
 
