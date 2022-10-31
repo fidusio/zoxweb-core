@@ -36,7 +36,7 @@ public class RateController
 
     public float getTPS()
     {
-        return deltaInMillis*rate;
+        return (rate/tim.MILLIS)*1000;
     }
 
     public float getRate()

@@ -73,7 +73,7 @@ public class RateControllerTest {
         RateController controller = new RateController(1000, TimeUnit.SECONDS);
         long[] tpses = {0, 1, 5, 7, 9, 10, 100, 250, 300, 400, 500, 750, 1000, 2000};
 
-        String[] rates ={"500/s", "250/secs", "1000/min", "50/hour"};
+        String[] rates ={"500/s", "250/secs", "1000/min", "50/hour", "250/min"};
 
         for(long tps: tpses)
         {
@@ -85,7 +85,7 @@ public class RateControllerTest {
         for(String rate: rates)
         {
             controller.setRate(rate);
-            System.out.println("rate: " +  rate + " delta: " + controller.getDeltaInMillis());
+            System.out.println("rate: " +  rate + " delta: " + controller.getDeltaInMillis() + " tps: " +controller.getTPS());
         }
 
 

@@ -18,8 +18,9 @@ package org.zoxweb.server.task;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.logging.Logger;
 
+
+import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.util.ThresholdQueue;
 import org.zoxweb.shared.util.*;
 
@@ -33,7 +34,8 @@ import org.zoxweb.shared.util.*;
 public class TaskProcessor
 		implements Runnable, DaemonController, Executor, GetNVProperties {
 
-	private static final transient Logger log = Logger.getLogger(TaskProcessor.class.getName());
+	//private static final transient Logger log = Logger.getLogger(TaskProcessor.class.getName());
+	public final static LogWrapper log = new LogWrapper(TaskProcessor.class);
 
 	public static final long WAIT_TIME = TimeUnit.MILLISECONDS.toMillis(500);
 	private static final AtomicLong instanceCounter = new AtomicLong();

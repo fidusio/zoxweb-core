@@ -20,10 +20,11 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.List;
-import java.util.logging.Logger;
+
 
 import org.zoxweb.server.http.proxy.NIOProxyProtocol.NIOProxyProtocolFactory;
 import org.zoxweb.server.io.IOUtil;
+import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.logging.LoggerUtil;
 import org.zoxweb.server.net.InetFilterRulesManager;
 import org.zoxweb.server.net.NIOSocket;
@@ -33,7 +34,6 @@ import org.zoxweb.server.util.ApplicationConfigManager;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.data.ApplicationConfigDAO;
 
-import org.zoxweb.shared.util.Const;
 import org.zoxweb.shared.util.SharedStringUtil;
 import org.zoxweb.shared.util.SharedBase64.Base64Type;
 
@@ -43,7 +43,8 @@ import org.zoxweb.shared.util.SharedBase64.Base64Type;
 public class JHTTPPUtil 
 {
 	
-	private static final transient Logger log = Logger.getLogger(Const.LOGGER_NAME);
+	//private static final transient Logger log = Logger.getLogger(Const.LOGGER_NAME);
+	public final static LogWrapper log = new LogWrapper(JHTTPPUtil.class);
 	
 	private JHTTPPUtil()
 	{

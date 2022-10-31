@@ -20,12 +20,13 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
-import java.util.logging.Logger;
+
 
 import org.zoxweb.server.http.HTTPUtil;
 import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.io.UByteArrayOutputStream;
+import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.logging.LoggerUtil;
 import org.zoxweb.server.io.ByteBufferUtil.BufferType;
 import org.zoxweb.server.net.*;
@@ -42,8 +43,10 @@ public class NIOProxyProtocol
 	extends ProtocolProcessor
 {
 
-	private static boolean debug = false;
-	private static final transient Logger log = Logger.getLogger(NIOProxyProtocol.class.getName());
+
+	public final static LogWrapper log = new LogWrapper(NIOProxyProtocol.class).setEnabled(false);
+//	private static boolean debug = false;
+//	private static final transient Logger log = Logger.getLogger(NIOProxyProtocol.class.getName());
 	public static final String NAME = "ZWNIOProxy";
 	
 	public static final String AUTHENTICATION = "AUTHENTICATION";
@@ -243,7 +246,7 @@ public class NIOProxyProtocol
 
     		if (read == -1)
     		{
-    			if(debug)
+    			if(log.isEnabled())
     				log.info("+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+Read:" + read);
     			
     			
@@ -271,7 +274,7 @@ public class NIOProxyProtocol
     	}
     	catch(Exception e)
     	{
-    		if(debug)
+    		if(log.isEnabled())
     			e.printStackTrace();
     		IOUtil.close(this);
     		
@@ -395,8 +398,7 @@ public class NIOProxyProtocol
 				}
 				if(remoteChannel != null && !NetUtil.areInetSocketAddressDAOEquals(requestInfo.remoteAddress, lastRemoteAddress))
 				{
-					if(debug)
-						log.info("NOT supposed to happen");
+					log.info("NOT supposed to happen");
 					//IOUtil.close(remoteChannel);
 					if (channelRelay != null)
 					{
@@ -442,7 +444,7 @@ public class NIOProxyProtocol
     			ByteBufferUtil.write(clientChannel, requestRawBuffer);
     			requestRawBuffer.reset();
     			requestMCCI = null;
-    			if(debug)
+    			if(log.isEnabled())
     				log.info(new String(requestRawBuffer.toByteArray()));
     			
     			
@@ -456,7 +458,7 @@ public class NIOProxyProtocol
 			}
 			else
 			{
-				if (debug)
+				if (log.isEnabled())
 					log.info(new String(requestRawBuffer.toByteArray()));
 				
 				
@@ -478,12 +480,12 @@ public class NIOProxyProtocol
 					{
 						channelRelay.accept(remoteChannelSK);
 						channelRelay.waitThenStopReading(remoteChannelSK);
-						if(debug)
+						if(log.isEnabled())
 							log.info("THIS IS  supposed to happen RELAY STOP:" +lastRemoteAddress + "," + requestInfo.remoteAddress);
 					}
 					else if (remoteChannelSK != null)
 					{
-						if (debug)
+						if (log.isEnabled())
 							log.info("THIS IS  supposed to happen CANCEL READ");
 						getSelectorController().cancelSelectionKey(remoteChannelSK);
 					}
@@ -502,7 +504,7 @@ public class NIOProxyProtocol
 					}
 					catch(Exception e)
 					{
-						if (debug)
+						if (log.isEnabled())
 						{
 							log.info(new String(requestRawBuffer.toByteArray()));
 							log.info("" + requestInfo.remoteAddress);

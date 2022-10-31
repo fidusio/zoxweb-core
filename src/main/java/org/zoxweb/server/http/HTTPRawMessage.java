@@ -16,9 +16,9 @@
 package org.zoxweb.server.http;
 
 import java.util.Arrays;
-import java.util.logging.Logger;
 
 import org.zoxweb.server.io.UByteArrayOutputStream;
+import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.shared.http.*;
 import org.zoxweb.shared.protocol.ProtocolDelimiter;
 import org.zoxweb.shared.util.GetNameValue;
@@ -27,7 +27,7 @@ import org.zoxweb.shared.util.SharedUtil;
 
 public class HTTPRawMessage 
 {
-	private final static Logger log = Logger.getLogger(HTTPRawMessage.class.getName());
+	public final static LogWrapper log = new LogWrapper(HTTPRawMessage.class);
 	private UByteArrayOutputStream ubaos;
 	private int endOfHeadersIndex = -1;
 	private int parseIndex = 0;
