@@ -6,14 +6,25 @@ import java.util.concurrent.TimeUnit;
 public class RateController
 {
 
+    public enum Mode
+    {
+        TIME_BASED,
+        RATE_COUNTER
+    }
+
 
     private float rate;
+
     private TimeUnit unit;
     private Const.TimeInMillis tim;
 
     private long deltaInMillis;
     private long nextTime;
     private long transactions;
+    private final Mode modeType;
+//    private int rateCounter = 0;
+//    private long startTime;
+    private long duration;
 
 
 
@@ -24,12 +35,19 @@ public class RateController
     public RateController(float rate, TimeUnit unit)
     {
         setRate(rate, unit);
+        modeType = Mode.TIME_BASED;
         nextTime = System.currentTimeMillis() - deltaInMillis;
     }
 
     public RateController(String rate)
     {
+        this(Mode.TIME_BASED, rate);
+    }
+    private RateController(Mode modeType, String rate)
+    {
+        this.modeType = modeType;
         setRate(rate);
+
         nextTime = System.currentTimeMillis() - deltaInMillis;
     }
 
@@ -37,6 +55,11 @@ public class RateController
     public float getTPS()
     {
         return (rate/tim.MILLIS)*1000;
+    }
+
+    public long getTPSAsLong()
+    {
+        return (long) getTPS();
     }
 
     public float getRate()
@@ -51,6 +74,11 @@ public class RateController
     public long getNextTime()
     {
         return nextTime;
+    }
+
+    public Mode getMode()
+    {
+        return modeType;
     }
 
     /**
@@ -73,17 +101,44 @@ public class RateController
      */
     public synchronized long nextDelay()
     {
-        long delay = 0;
-
-
-        long next = nextTime + deltaInMillis;
-        long now = System.currentTimeMillis();
-        if(next > now)
+        if(rate == 0)
         {
-            delay = next - now;
+            throw new IllegalArgumentException("Rate is zero");
+        }
+        long delay = 0;
+        long now = System.currentTimeMillis();
+        switch (getMode())
+        {
+
+            case TIME_BASED:
+                long next = nextTime + deltaInMillis;
+
+                if(next > now)
+                {
+                    delay = next - now;
+                }
+
+                nextTime = now + delay;
+                break;
+            case RATE_COUNTER:
+//                if(rateCounter == 0)
+//                {
+//                    startTime = now;
+//                }
+//                rateCounter++;
+//
+//                if (rateCounter <= rate &&  now - startTime < duration)
+//                {
+//                    delay = 0;
+//                }
+//                else {
+//                    delay = startTime + duration;
+//                    rateCounter = 0 ;
+//                }
+                break;
         }
 
-        nextTime = now + delay;
+
 
         transactions++;
         return delay;
@@ -128,6 +183,7 @@ public class RateController
             else {
                 deltaInMillis = (long)floatDelta + 1;
             }
+            duration = deltaInMillis*(long)rate;
         }
 
         return this;

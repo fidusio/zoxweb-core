@@ -23,8 +23,10 @@ import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.URL;
+import java.nio.file.AtomicMoveNotSupportedException;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.zoxweb.server.io.CloseEnabledInputStream;
 import org.zoxweb.server.io.IOUtil;
@@ -44,6 +46,8 @@ import org.zoxweb.shared.util.SharedUtil;
 
 public class HTTPCall 
 {
+
+	public final static AtomicBoolean ENABLE_HTTP = new AtomicBoolean(true);
 	private final HTTPMessageConfigInterface hcc;
 	private final String urlOverride;
 	private final ReplacementFilter uriFilter;
@@ -186,7 +190,11 @@ public class HTTPCall
 			if (pType != Proxy.Type.DIRECT)
 				proxy = new Proxy(NetUtil.lookup(hcc.getProxyAddress().getProxyType()), new InetSocketAddress(hcc.getProxyAddress().getInetAddress(),  hcc.getProxyAddress().getPort()));
 		}
-		
+
+		if(!ENABLE_HTTP.get())
+		{
+			return null;
+		}
 		try
 		{
 			if (proxy != null)
@@ -277,7 +285,7 @@ public class HTTPCall
 					os = con.getOutputStream();
 				}
 				
-				os.write( hcc.getContent());
+				os.write(hcc.getContent());
 			}
 			if (contentAsIS != null)
 			{

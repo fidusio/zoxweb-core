@@ -665,56 +665,120 @@ public class Const {
       return toMillis(time) * 1000;
     }
 
-    public static String toString(long millis) {
+//    public static String toString(long millis) {
+//      boolean pastTime = false;
+//      if(millis < 0 )
+//      {
+//        millis = - millis;
+//        pastTime = true;
+//      }
+//      //if (millis <= WEEK.MILLIS)
+//      {
+//        long mil = millis % SECOND.MILLIS;
+//        millis /= SECOND.MILLIS;
+//        long sec = millis % 60;
+//        millis /= 60;
+//        long min = millis % 60;
+//        millis /= 60;
+//        long hour = millis;
+//        millis /= 24;
+//
+//
+//        long day = millis;
+//        millis /=7;
+//        long week = millis;
+//
+//
+//        //hour += day*24;
+//
+//        StringBuilder sb = new StringBuilder();
+//        if (week > 0)
+//        {
+//          sb.append(week + "w ");
+//          day = day % 7;
+//          hour = hour % 24;
+//        }
+//        if (week == 0 && day > 0) {
+//          sb.append(day + "d ");
+//          hour = hour % 24;
+//        }
+//        sb.append((hour <= 9 ? "0" : "") + hour);
+//        sb.append(':');
+//        sb.append((min <= 9 ? "0" : "") + min);
+//        sb.append(':');
+//        sb.append((sec <= 9 ? "0" : "") + sec);
+//
+//        //sb.append(String.format("%02d:%02d:%02d", hour, min, sec));
+//        if (mil > 0) {
+//          sb.append('.');
+//          if (mil < 99) {
+//            sb.append(0);
+//          }
+//          if (mil < 9) {
+//            sb.append(0);
+//          }
+//
+//          sb.append(mil);
+//        }
+//
+//        return pastTime ? "Neg(-) " + sb.toString() : sb.toString();
+//      }
+//
+//      //throw new IllegalArgumentException("Out of range");
+//    }
+
+    public static String toString(long millis)
+    {
       boolean pastTime = false;
-      if(millis < 0 )
-      {
-        millis = - millis;
+      if (millis < 0) {
+        millis = -millis;
         pastTime = true;
       }
-      if (millis <= WEEK.MILLIS) {
-        long mil = millis % SECOND.MILLIS;
-        millis /= SECOND.MILLIS;
-        long sec = millis % 60;
-        millis /= 60;
-        long min = millis % 60;
-        millis /= 60;
-        long hour = millis;
-        millis /= 24;
 
-        long day = millis;
+      long week = millis / TimeInMillis.WEEK.MILLIS;
+      long remainder = millis % TimeInMillis.WEEK.MILLIS;
+      long day = remainder / TimeInMillis.DAY.MILLIS;
+      remainder %= TimeInMillis.DAY.MILLIS;
 
-        //hour += day*24;
+      long hour = remainder / TimeInMillis.HOUR.MILLIS;
+      remainder %= TimeInMillis.HOUR.MILLIS;
+      long min = remainder / TimeInMillis.MINUTE.MILLIS;
+      remainder %= TimeInMillis.MINUTE.MILLIS;
+      long sec = remainder / TimeInMillis.SECOND.MILLIS;
+      long mil = millis % SECOND.MILLIS;
 
-        StringBuilder sb = new StringBuilder();
-        if (day > 0) {
-          sb.append(day + "d ");
-          hour = hour % 24;
+
+      StringBuilder sb = new StringBuilder();
+      if (week > 0) {
+        sb.append(week + "w ");
+      }
+      if (day > 0) {
+        sb.append(day + "d ");
+
+      }
+      sb.append((hour <= 9 ? "0" : "") + hour);
+      sb.append(':');
+      sb.append((min <= 9 ? "0" : "") + min);
+      sb.append(':');
+      sb.append((sec <= 9 ? "0" : "") + sec);
+
+      //sb.append(String.format("%02d:%02d:%02d", hour, min, sec));
+      if (mil > 0) {
+        sb.append('.');
+        if (mil < 99) {
+          sb.append(0);
         }
-        sb.append((hour <= 9 ? "0" : "") + hour);
-        sb.append(':');
-        sb.append((min <= 9 ? "0" : "") + min);
-        sb.append(':');
-        sb.append((sec <= 9 ? "0" : "") + sec);
-
-        //sb.append(String.format("%02d:%02d:%02d", hour, min, sec));
-        if (mil > 0) {
-          sb.append('.');
-          if (mil < 99) {
-            sb.append(0);
-          }
-          if (mil < 9) {
-            sb.append(0);
-          }
-
-          sb.append(mil);
+        if (mil < 9) {
+          sb.append(0);
         }
 
-        return pastTime ? "Neg(-) " + sb.toString() : sb.toString();
+        sb.append(mil);
       }
 
-      throw new IllegalArgumentException("Out of range");
+      return pastTime ? "Neg(-) " + sb.toString() : sb.toString();
     }
+
+
   }
 
   public enum TimeZoneOffset
