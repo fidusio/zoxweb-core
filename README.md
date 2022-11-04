@@ -29,7 +29,8 @@ Copyright (C) 2017-2022 http://xlogistx.io
 ## RELEASES
 
 <ul> Versions
-<li>2.2.9 2022-10-30 (Latest)
+<li>2.3.0 2022-10-30 (Latest)
+<li>2.2.9 2022-10-30
 <li>2.2.8 2022-10-25
 <li>2.2.7 2022-10-18
 <li>2.2.6 2022-10-13
