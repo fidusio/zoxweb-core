@@ -811,7 +811,7 @@ public class HTTPUtil
 		return null;
 	}
 
-	public static GetNameValue<String> extractHeaderCookie(HTTPResponseData rd)
+	public static GetNameValue<String> extractHeaderCookie(HTTPResponse rd)
 	{
 		List<String> cookies = SharedUtil.lookupMap(rd.getHeaders(), "Set-Cookie", true);
 
@@ -874,7 +874,7 @@ public class HTTPUtil
 	}
 
 
-	public static List<HttpCookie> extractCookies(HTTPResponseData rd)
+	public static List<HttpCookie> extractCookies(HTTPResponse rd)
 	{
 		List<HttpCookie> ret = new ArrayList<HttpCookie>();
 		List<String> cookies = SharedUtil.lookupMap(rd.getHeaders(), "Set-Cookie", true);

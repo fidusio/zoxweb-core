@@ -30,9 +30,7 @@ public class FormParserTest {
 	public static void main(String[] args) {
 		try {
 			String str = IOUtil.inputStreamToString(new FileInputStream("/temp/test.html"), true);
-			HTTPResponseData rd = new HTTPResponseData();
-			rd.setData(str.getBytes(SharedStringUtil.UTF_8));
-			rd.setResponseHeaders(new HashMap<String, List<String>>());
+			HTTPResponseData rd = new HTTPResponseData(200, new HashMap<String, List<String>>(), str.getBytes(SharedStringUtil.UTF_8));
 
 			for (HTTPMessageConfigInterface hcci : HTTPUtil.extractFormsContent(rd, 0)) {
                 System.out.println(hcci);

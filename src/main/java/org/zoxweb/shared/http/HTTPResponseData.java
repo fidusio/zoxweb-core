@@ -24,44 +24,30 @@ import java.util.Map;
 
 @SuppressWarnings("serial")
 public class HTTPResponseData
+extends HTTPResponse
 	implements Serializable
+
 {
-	private int status;
+
 	
 
 	@Override
 	public String toString() {
-		return "ResponseData [status=" + status + ", data="
-				+ (data != null ? new String(data) : "null") + ", responseHeaders="
-				+ responseHeaders+"]";
+		return "ResponseData [status=" + getStatus() + ", data="
+				+ (data != null ? new String(data) : "null") + ", headers="
+				+ getHeaders()+"]";
 	}
 
-	private byte[] data;
+	private final byte[] data;
 	
 	
 	
 
-	private Map<String, List<String>> responseHeaders;
 
-	/**
-	 * Default constructor
-	 */
-	public HTTPResponseData()
-	{	
-	}
 
-	/**
-	 *
-	 * @deprecated
-	 * @param data response data.
-	 * @param stat response status.
-	 * @param rh response headers.
-	 *
-	 */
-	public HTTPResponseData(final byte[] data, final int stat, Map<String, List<String>> rh)
-	{
-		this(stat, data, rh);
-	}
+
+
+
 
 	/**
 	 * Main constructor
@@ -69,20 +55,14 @@ public class HTTPResponseData
 	 * @param data response data.
 	 * @param rh response headers.
 	 */
-	public HTTPResponseData(final int stat, final byte[] data, Map<String, List<String>> rh)
+	public HTTPResponseData( int stat, Map<String, List<String>> rh, byte[] data)
 	{
-		setStatus(stat);
-		setData(data);
-		setResponseHeaders(rh);
+		super(stat, rh);
+
+		this.data = data;
 	}
 
-	public int getStatus() {
-		return status;
-	}
 
-	public void setStatus(int status) {
-		this.status = status;
-	}
 
 	public byte[] getData()
 	{
@@ -96,17 +76,7 @@ public class HTTPResponseData
 		return null;
 	}
 
-	public void setData(byte[] data) {
-		this.data = data;
-	}
 
-	public Map<String, List<String>> getHeaders() {
-		return responseHeaders;
-	}
-
-	public void setResponseHeaders(Map<String, List<String>> responseHeaders) {
-		this.responseHeaders = responseHeaders;
-	}
 	
 	
 	

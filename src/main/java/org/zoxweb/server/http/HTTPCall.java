@@ -306,7 +306,7 @@ public class HTTPCall
 			{
 				ret  = IOUtil.inputStreamToByteArray(isError, false);
 				respHeaders = con.getHeaderFields();
-				HTTPResponseData hrd = new HTTPResponseData(status, ret.toByteArray(), respHeaders);
+				HTTPResponseData hrd = new HTTPResponseData(status, respHeaders, ret.toByteArray());
 				if (hcc.isHTTPErrorAsException())
 					throw new HTTPCallException(con.getResponseMessage(),  hrd);
 				else
@@ -332,7 +332,7 @@ public class HTTPCall
 					
 					if (contentAsIS != null)
 					{
-						throw new HTTPCallException("Can not forward with ContentAsIS set",  new HTTPResponseData(status, null, con.getHeaderFields()));
+						throw new HTTPCallException("Can not forward with ContentAsIS set",  new HTTPResponseData(status, con.getHeaderFields(), null));
 					}
 					HTTPCall hccRedirect = new HTTPCall(hcc, ssp, urlOverride, uriFilter, osBypass, contentAsIS);
 					return hccRedirect.sendRequest();
@@ -380,7 +380,7 @@ public class HTTPCall
 		}
 		
 		
-		return new HTTPResponseData( status, ret != null ? ret.toByteArray() : null, respHeaders);
+		return new HTTPResponseData( status, respHeaders, ret != null ? ret.toByteArray() : null);
 	}
 	
 	
