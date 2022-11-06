@@ -24,7 +24,7 @@ import java.util.Map;
 
 @SuppressWarnings("serial")
 public class HTTPResponseData
-extends HTTPResponse
+extends HTTPResponseObject<byte[]>
 	implements Serializable
 
 {
@@ -34,11 +34,9 @@ extends HTTPResponse
 	@Override
 	public String toString() {
 		return "ResponseData [status=" + getStatus() + ", data="
-				+ (data != null ? new String(data) : "null") + ", headers="
+				+ (getData() != null ? getDataAsString() : "null") + ", headers="
 				+ getHeaders()+"]";
 	}
-
-	private final byte[] data;
 	
 	
 	
@@ -57,17 +55,13 @@ extends HTTPResponse
 	 */
 	public HTTPResponseData( int stat, Map<String, List<String>> rh, byte[] data)
 	{
-		super(stat, rh);
+		super(stat, rh, data);
 
-		this.data = data;
+
 	}
 
 
 
-	public byte[] getData()
-	{
-		return data;
-	}
 	public String getDataAsString()
 	{
 		if (getData() != null)

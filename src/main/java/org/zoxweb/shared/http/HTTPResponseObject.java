@@ -7,17 +7,17 @@ public class HTTPResponseObject <O>
 extends HTTPResponse
 {
 
-    private final O object;
+    private final O data;
 
-    public HTTPResponseObject(int status, Map<String, List<String>> headers, O object)
+    public HTTPResponseObject(int status, Map<String, List<String>> headers, O data)
     {
         super(status, headers);
-        this.object = object;
+        this.data = data;
     }
 
 
-    public <T> T getObject()
+    public O getData()
     {
-        return (T) object;
+        return  data;
     }
 }
