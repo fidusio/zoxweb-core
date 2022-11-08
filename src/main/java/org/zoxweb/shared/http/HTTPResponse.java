@@ -69,4 +69,9 @@ public abstract class HTTPResponse
         return (int)longHeaderValue(headerName);
     }
 
+    public String[] headerNames()
+    {
+        return headers.keySet().toArray(new String[0]);
+    }
+
 }
