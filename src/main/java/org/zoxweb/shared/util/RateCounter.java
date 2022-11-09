@@ -2,13 +2,24 @@ package org.zoxweb.shared.util;
 
 
 
-public class RateCounter {
-
+public class RateCounter
+    implements GetName
+{
+    private final NamedDescription namedDescription;
     private long counter = 0;
     private long deltaCounter = 0;
 
-    public RateCounter()
-    {}
+
+    public RateCounter(NamedDescription namedDescription)
+    {
+        this.namedDescription = namedDescription != null ? namedDescription : new NamedDescription("");
+    }
+
+    public NamedDescription getNameDescription()
+    {
+        return namedDescription;
+    }
+
 
     public RateCounter inc(long delta)
     {
@@ -56,4 +67,18 @@ public class RateCounter {
         return rate((float)rateMultiplier);
     }
 
+
+    public String getName()
+    {
+        return namedDescription.getName();
+    }
+
+    @Override
+    public String toString() {
+        return "RateCounter{" +
+                "namedDescription=" + namedDescription +
+                ", counter=" + counter +
+                ", deltaCounter=" + deltaCounter +
+                '}';
+    }
 }

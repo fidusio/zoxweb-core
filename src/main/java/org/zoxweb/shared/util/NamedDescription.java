@@ -5,6 +5,16 @@ public class NamedDescription
     private String name;
     private String description;
 
+    public NamedDescription(Enum<?> name)
+    {
+        this(SharedUtil.enumName(name), null);
+    }
+
+    public NamedDescription(Enum<?> name, String description)
+    {
+        this(SharedUtil.enumName(name), description);
+    }
+
 
     public NamedDescription(String name){
         this(name, null);
@@ -34,5 +44,13 @@ public class NamedDescription
     @Override
     public void setName(String name) {
         this.name = name;
+    }
+
+    @Override
+    public String toString() {
+        return "NamedDescription{" +
+                "name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                '}';
     }
 }

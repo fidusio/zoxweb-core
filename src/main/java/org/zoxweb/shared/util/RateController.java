@@ -4,53 +4,50 @@ package org.zoxweb.shared.util;
 import java.util.concurrent.TimeUnit;
 
 public class RateController
+    implements GetName
 {
-
-    public enum Mode
-    {
-        TIME_BASED,
-        RATE_COUNTER
-    }
-
-
     private float rate;
-
     private TimeUnit unit;
     private Const.TimeInMillis tim;
-
     private long deltaInMillis;
     private long nextTime;
     private long transactions;
-    private final Mode modeType;
+
 //    private int rateCounter = 0;
 //    private long startTime;
     private long duration;
+    private final NamedDescription namedDescription;
 
 
 
-    public RateController(long rate, TimeUnit unit)
+    public RateController(NamedDescription namedDescription, long rate, TimeUnit unit)
     {
-        this((float) rate, unit);
+        this(namedDescription, (float) rate, unit);
     }
-    public RateController(float rate, TimeUnit unit)
+    public RateController(NamedDescription namedDescription, float rate, TimeUnit unit)
     {
         setRate(rate, unit);
-        modeType = Mode.TIME_BASED;
+        this.namedDescription = namedDescription != null ? namedDescription : new NamedDescription("");
         nextTime = System.currentTimeMillis() - deltaInMillis;
     }
 
-    public RateController(String rate)
+    public RateController(NamedDescription namedDescription, String rate)
     {
-        this(Mode.TIME_BASED, rate);
-    }
-    private RateController(Mode modeType, String rate)
-    {
-        this.modeType = modeType;
         setRate(rate);
-
+        this.namedDescription = namedDescription != null ? namedDescription : new NamedDescription("");
         nextTime = System.currentTimeMillis() - deltaInMillis;
     }
 
+    public NamedDescription getNameDescription()
+    {
+        return namedDescription;
+    }
+
+
+    public String getName()
+    {
+      return namedDescription.getName();
+    }
 
     public float getTPS()
     {
@@ -76,10 +73,6 @@ public class RateController
         return nextTime;
     }
 
-    public Mode getMode()
-    {
-        return modeType;
-    }
 
     /**
      *
@@ -107,36 +100,17 @@ public class RateController
         }
         long delay = 0;
         long now = System.currentTimeMillis();
-        switch (getMode())
+
+        long next = nextTime + deltaInMillis;
+
+        if(next > now)
         {
-
-            case TIME_BASED:
-                long next = nextTime + deltaInMillis;
-
-                if(next > now)
-                {
-                    delay = next - now;
-                }
-
-                nextTime = now + delay;
-                break;
-            case RATE_COUNTER:
-//                if(rateCounter == 0)
-//                {
-//                    startTime = now;
-//                }
-//                rateCounter++;
-//
-//                if (rateCounter <= rate &&  now - startTime < duration)
-//                {
-//                    delay = 0;
-//                }
-//                else {
-//                    delay = startTime + duration;
-//                    rateCounter = 0 ;
-//                }
-                break;
+            delay = next - now;
         }
+
+        nextTime = now + delay;
+
+
 
 
 
@@ -192,7 +166,8 @@ public class RateController
     @Override
     public String toString() {
         return "RateController{" +
-                "rate=" + rate + "/" + tim.getTokens()[0] +
+                "nameDescription=" + namedDescription +
+                ", rate=" + rate + "/" + tim.getTokens()[0] +
                 ", delta=" + deltaInMillis +
                 ", lastTime=" + nextTime +
                 ", transactions=" + transactions +
