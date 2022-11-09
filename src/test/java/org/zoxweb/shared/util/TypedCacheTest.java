@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 
-public class CacheByTypeTest {
+public class TypedCacheTest {
     @Test
     public void test()
     {
