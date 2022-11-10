@@ -17,9 +17,26 @@ public class RateCounterTest {
             }
 
             ts = System.currentTimeMillis() - ts;
-            rateCounter.inc(ts);
-            System.out.println(j + ": " +rateCounter.rate() + " " + rateCounter.rate(Const.TimeInMillis.SECOND.MILLIS));
+            rateCounter.register(ts);
+            System.out.println(j + ": " +rateCounter.average() + " " + rateCounter.average(Const.TimeInMillis.SECOND.MILLIS));
         }
+
+    }
+
+    @Test
+    public void rate()
+    {
+        RateCounter rc = new RateCounter("test");
+        rc.register(100);
+        System.out.println(rc + " " + rc.average() + " " + rc.rate(Const.TimeInMillis.SECOND.MILLIS));
+        rc.register(1000);
+        System.out.println(rc + " " + rc.average() + " " + rc.rate(Const.TimeInMillis.SECOND.MILLIS));
+        rc.register(2000);
+        System.out.println(rc + " " + rc.average() + " " + rc.rate(Const.TimeInMillis.SECOND.MILLIS));
+        for(int i =0; i < 100; i++)
+            rc.register(20);
+
+        System.out.println(rc + " " + rc.average() + " " + rc.rate());
 
     }
 }

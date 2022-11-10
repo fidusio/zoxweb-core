@@ -10,6 +10,10 @@ public class RateCounter
     private long deltaCounter = 0;
 
 
+    public RateCounter(String name)
+    {
+        this(new NamedDescription(name));
+    }
     public RateCounter(NamedDescription namedDescription)
     {
         this.namedDescription = namedDescription != null ? namedDescription : new NamedDescription("");
@@ -21,33 +25,41 @@ public class RateCounter
     }
 
 
-    public RateCounter inc(long delta)
+    public RateCounter register(long delta)
     {
-        return inc(delta, 1);
+        return register(delta, 1);
     }
 
-    public synchronized RateCounter inc(long delta, long count)
+    public synchronized RateCounter register(long delta, long inc)
     {
        deltaCounter += delta;
-       counter += count;
+       counter += inc;
        return this;
     }
 
-    public long getDeltaCounter()
+
+    public synchronized RateCounter reset()
+    {
+        deltaCounter = 0;
+        counter = 0;
+        return this;
+    }
+
+    public long getDeltas()
     {
         return deltaCounter;
     }
-    public long getCounter()
+    public long getCounts()
     {
         return counter;
     }
 
-    public float rate()
+    public float average()
     {
-        return rate(1);
+        return average(1);
     }
 
-    public float rate(float rateMultiplier)
+    public float average(float rateMultiplier)
     {
         float ret = 0;
         if(counter != 0) {
@@ -56,15 +68,38 @@ public class RateCounter
         return ret;
     }
 
-    public float rate(long rateMultiplier)
+    public float average(long rateMultiplier)
     {
-      return rate((float)rateMultiplier);
+      return average((float)rateMultiplier);
+    }
+
+    public float rate()
+    {
+        return rate(1);
+    }
+
+    public float rate(int multiplier)
+    {
+        return rate((float)multiplier);
+    }
+
+    public float rate(long multiplier)
+    {
+        return rate((float)multiplier);
+    }
+    public float rate(float multiplier)
+    {
+        float ret = 0;
+        if(deltaCounter != 0) {
+            ret = multiplier * ((float) counter / (float) deltaCounter);
+        }
+        return ret;
     }
 
 
-    public float rate(int rateMultiplier)
+    public float average(int rateMultiplier)
     {
-        return rate((float)rateMultiplier);
+        return average((float)rateMultiplier);
     }
 
 
@@ -77,8 +112,8 @@ public class RateCounter
     public String toString() {
         return "RateCounter{" +
                 "namedDescription=" + namedDescription +
-                ", counter=" + counter +
-                ", deltaCounter=" + deltaCounter +
+                ", counts=" + counter +
+                ", deltas=" + deltaCounter +
                 '}';
     }
 }

@@ -25,12 +25,18 @@ public class TypedCache {
 
     public TypedCache registerType(Enum<?> cacheType)
     {
-        return registerType(cacheType.name());
+        return registerType(SharedUtil.enumName(cacheType));
     }
 
     public <C> C lookupObject(Enum<?> cacheType, String cachedObjectName)
     {
-        return lookupObject(cacheType.name(), cachedObjectName);
+        return lookupObject(SharedUtil.enumName(cacheType), cachedObjectName);
+    }
+
+
+    public <C> C lookupObject(Enum<?> cacheType, Enum<?> cachedObjectName)
+    {
+        return lookupObject(SharedUtil.enumName(cacheType), SharedUtil.enumName(cachedObjectName));
     }
 
 

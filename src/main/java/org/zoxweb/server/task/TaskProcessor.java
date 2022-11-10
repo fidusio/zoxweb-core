@@ -358,7 +358,7 @@ public class TaskProcessor
 	public String toString()
 	{
 		//return "TaskProcessor[" +executorsCounter+","+ tasksQueue.getHighMark() +"," +tasksQueue.getLowMark()+"]";
-		return "TaskProcessor[" +executorsCounter+","+ tasksQueue+"]";
+		return "TaskProcessor[" +executorsCounter + "," +  availableExecutorThreads() + "," + tasksQueue + "]";
 	}
 	/**
 	 * @return Return true if there is pending tasks or any worker thread is executing a task
