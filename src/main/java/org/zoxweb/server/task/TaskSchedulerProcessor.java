@@ -355,4 +355,9 @@ public class TaskSchedulerProcessor
 
 		return ret;
 	}
+
+	public String toString()
+	{
+		return "TaskSchedulerProcessor["+ SharedUtil.toCanonicalID(',', counterID, live, queue.size(), waitTime())+"]";
+	}
 }

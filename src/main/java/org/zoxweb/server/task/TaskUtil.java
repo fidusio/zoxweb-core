@@ -279,5 +279,10 @@ public class TaskUtil
 		getSimpleTaskScheduler().close();
 		getDefaultEventManager().close();
 	}
+
+	public static String info()
+	{
+		return getDefaultTaskProcessor().toString() + " " + getDefaultTaskScheduler().toString();
+	}
 	
 }

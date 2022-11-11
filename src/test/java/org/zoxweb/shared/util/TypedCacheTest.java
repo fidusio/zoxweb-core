@@ -9,7 +9,7 @@ public class TypedCacheTest {
     public void test()
     {
         TypedCache cache = new TypedCache();
-        cache.addObject("RC", new RateController(new NamedDescription("n1"), "10/s"));
+        cache.addObject("RC", new RateController("n1", "10/s"));
         RateController rc =  cache.lookupObject("RC", "n1");
         rc.nextDelay();
         rc.nextDelay();

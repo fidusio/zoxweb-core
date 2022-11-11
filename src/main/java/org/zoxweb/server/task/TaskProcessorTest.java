@@ -83,6 +83,7 @@ public class TaskProcessorTest
             + tp.getQueueMaxSize() + " and " + tp.availableExecutorThreads() + " executor thread");
     System.out.println("Available thread " + tp.availableExecutorThreads() + " total "
         + td.counter + ":" + td.ai.get());
+    System.out.println(TaskUtil.info());
   }
 
   public static void main(String[] args) {

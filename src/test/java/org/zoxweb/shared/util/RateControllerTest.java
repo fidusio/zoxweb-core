@@ -14,7 +14,7 @@ public class RateControllerTest {
     @Test
     public void tpsTest()
     {
-        RateController controller = new RateController(new NamedDescription("test"), 300, TimeUnit.MINUTES);
+        RateController controller = new RateController("test", 300, TimeUnit.MINUTES);
 
         TaskUtil.sleep(1000);
 
@@ -48,7 +48,7 @@ public class RateControllerTest {
     @Test
     public void tpsZeroTest()
     {
-        RateController controller = new RateController(new NamedDescription("test"), 1000, TimeUnit.MINUTES);
+        RateController controller = new RateController("test", 1000, TimeUnit.MINUTES);
         List<Long> vals = new ArrayList<>();
         long ts = System.currentTimeMillis();
         for(int i = 0; i < 100; i++)
@@ -75,7 +75,7 @@ public class RateControllerTest {
     public void tspRateDelta()
     {
 
-        RateController controller = new RateController(new NamedDescription("test"), 1000, TimeUnit.SECONDS);
+        RateController controller = new RateController("test", 1000, TimeUnit.SECONDS);
         long[] tpses = {0, 1, 5, 7, 9, 10, 100, 250, 300, 400, 500, 750, 1000, 2000};
 
         String[] rates ={"500/s", "250/secs", "1000/min", "50/hour", "250/min", "0/sec"};
@@ -97,7 +97,7 @@ public class RateControllerTest {
     @Test
     public void testRateZero()
     {
-        RateController controller = new RateController(new NamedDescription("test"), "0/min");
+        RateController controller = new RateController("test", "0/min");
         System.out.println(controller);
 
         IllegalArgumentException e = Assertions.assertThrows(IllegalArgumentException.class, ()->{
@@ -111,6 +111,21 @@ public class RateControllerTest {
         System.out.println("tps asLong " + controller.getTPSAsLong() + " " + controller.getTPS() + " " + controller.nextDelay() + " " + controller.nextDelay());
 
 
+    }
+
+    @Test
+    public void testRateDelay()
+    {
+        String[] rates={
+                "10000/min",
+                "500/sec"
+        };
+
+        for (String rate: rates)
+        {
+            RateController rc = new RateController(rate, rate);
+            System.out.println(rc);
+        }
     }
     @Test
     public void testTimeToString()

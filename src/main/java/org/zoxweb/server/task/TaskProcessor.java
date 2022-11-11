@@ -214,7 +214,7 @@ public class TaskProcessor
 					 "[" + taskQueueMaxSize +"," +executorThreadCount+"]");
 		}
 		
-		tasksQueue = new ThresholdQueue<TaskEvent>(taskQueueMaxSize);
+		tasksQueue = new ThresholdQueue<TaskEvent>((taskQueueMaxSize*75)/100, taskQueueMaxSize);
 		if (SharedStringUtil.isEmpty(defaultPrefix))
 		{
 			defaultPrefix = "TP";
@@ -358,7 +358,7 @@ public class TaskProcessor
 	public String toString()
 	{
 		//return "TaskProcessor[" +executorsCounter+","+ tasksQueue.getHighMark() +"," +tasksQueue.getLowMark()+"]";
-		return "TaskProcessor[" +executorsCounter + "," +  availableExecutorThreads() + "," + tasksQueue + "]";
+		return "TaskProcessor[" + counterID + "," + live + "," + executorsCounter + "," +  availableExecutorThreads() + "," + tasksQueue + "]";
 	}
 	/**
 	 * @return Return true if there is pending tasks or any worker thread is executing a task
@@ -440,7 +440,7 @@ public class TaskProcessor
 	/**
 	 * This is the worker thread queue is used by the TaskProcessor by dequeuing it and waiting for the queue
 	 * to be queued after each the ExecutorThread terminate a task
-	 * note is is also used to signal communication between the TaskProcessor thread and ExecutorThread thread.
+	 * note it is also used to signal communication between the TaskProcessor thread and ExecutorThread thread.
 	 * The size of this queue is set by the constructor of TaskProcessor
 	 */
 	

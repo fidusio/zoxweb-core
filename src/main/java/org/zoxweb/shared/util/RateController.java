@@ -20,21 +20,22 @@ public class RateController
 
 
 
-    public RateController(NamedDescription namedDescription, long rate, TimeUnit unit)
+    public RateController(String name, long rate, TimeUnit unit)
     {
-        this(namedDescription, (float) rate, unit);
+        this(name, (float) rate, unit);
     }
-    public RateController(NamedDescription namedDescription, float rate, TimeUnit unit)
+    public RateController(String name, float rate, TimeUnit unit)
     {
         setRate(rate, unit);
-        this.namedDescription = namedDescription != null ? namedDescription : new NamedDescription("");
+        this.namedDescription = new NamedDescription(name);
         nextTime = System.currentTimeMillis() - deltaInMillis;
     }
 
-    public RateController(NamedDescription namedDescription, String rate)
+
+    public RateController(String name, String rate)
     {
         setRate(rate);
-        this.namedDescription = namedDescription != null ? namedDescription : new NamedDescription("");
+        this.namedDescription = new NamedDescription(name);//namedDescription != null ? namedDescription : new NamedDescription("");
         nextTime = System.currentTimeMillis() - deltaInMillis;
     }
 

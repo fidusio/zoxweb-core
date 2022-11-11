@@ -123,7 +123,7 @@ public class ThresholdQueue<O>
 	public String toString()
     {
 	  
-	  return SharedUtil.toCanonicalID(',', size(), array.length, threshold, thresholdEnabled);
+	  return SharedUtil.toCanonicalID(',', array.length, threshold, size(), thresholdEnabled);
 	
 	}
 
