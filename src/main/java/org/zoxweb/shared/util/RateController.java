@@ -6,6 +6,13 @@ import java.util.concurrent.TimeUnit;
 public class RateController
     implements GetName
 {
+
+    public enum RCType
+    {
+        TIME,
+        COUNTER
+    }
+
     private float rate;
     private TimeUnit unit;
     private Const.TimeInMillis tim;
@@ -13,8 +20,11 @@ public class RateController
     private long nextTime;
     private long transactions;
 
-//    private int rateCounter = 0;
-//    private long startTime;
+    private RCType type = RCType.TIME;
+    private int counter = 0;
+    private long counterEndTime = 0;
+    private long counterStartTime = 0;
+
     private long duration;
     private final NamedDescription namedDescription;
 
@@ -45,6 +55,18 @@ public class RateController
     }
 
 
+    public RCType getType()
+    {
+        return type;
+    }
+
+    public RateController setType(RCType type)
+    {
+        SharedUtil.checkIfNulls("Null type", type);
+        this.type = type;
+        return this;
+    }
+
     public String getName()
     {
       return namedDescription.getName();
@@ -63,6 +85,11 @@ public class RateController
     public float getRate()
     {
         return rate;
+    }
+
+    public long getDuration()
+    {
+        return duration;
     }
 
     public TimeUnit getRateUnit()
@@ -100,20 +127,54 @@ public class RateController
             throw new IllegalArgumentException("Rate is zero");
         }
         long delay = 0;
-        long now = System.currentTimeMillis();
 
-        long next = nextTime + deltaInMillis;
 
-        if(next > now)
+        switch (type)
         {
-            delay = next - now;
+
+            case TIME:
+            {
+                long now = System.currentTimeMillis();
+                long next = nextTime + deltaInMillis;
+
+                if(next > now)
+                {
+                    delay = next - now;
+                }
+
+                nextTime = now + delay;
+            }
+                break;
+            case COUNTER:
+            {
+                long now = System.currentTimeMillis();
+
+                if(counterEndTime < now )//|| now - counterStartTime > duration)
+                {
+                    counter = 0;
+                    counterEndTime = now + duration;
+                    counterStartTime = now;
+                }
+
+               if((now - counterStartTime)> duration || counter == rate)
+               {
+                   counter = 0;
+
+                   counterStartTime = counterEndTime;
+                   counterEndTime+=duration;
+               }
+               counter++;
+
+               if(now - counterStartTime < duration && counterEndTime - now <= duration)
+               {
+                   delay = 0;
+               }
+               else {
+                   delay = counterStartTime - now;
+               }
+            }
+                break;
         }
-
-        nextTime = now + delay;
-
-
-
-
 
         transactions++;
         return delay;
@@ -160,18 +221,27 @@ public class RateController
             }
             duration = deltaInMillis*(long)rate;
         }
+        counterStartTime = System.currentTimeMillis();
+        counterEndTime = counterStartTime + duration;
 
         return this;
     }
 
+
+
     @Override
     public String toString() {
         return "RateController{" +
-                "nameDescription=" + namedDescription +
-                ", rate=" + rate + "/" + tim.getTokens()[0] +
-                ", delta=" + deltaInMillis +
-                ", lastTime=" + nextTime +
+                "name=" + getName() +
+                "rate=" + rate + "/" + tim.getTokens()[0] +
+                ", unit=" + unit +
+                ", deltaInMillis=" + deltaInMillis +
+                ", nextTime=" + nextTime +
                 ", transactions=" + transactions +
+                ", type=" + type +
+                ", counter=" + counter +
+                ", counterEndTime=" + counterEndTime +
+                ", duration=" + duration +
                 '}';
     }
 }

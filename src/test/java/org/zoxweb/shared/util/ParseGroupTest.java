@@ -17,18 +17,20 @@ package org.zoxweb.shared.util;
 
 import java.util.List;
 
-import org.zoxweb.shared.util.SharedStringUtil;
+import org.junit.jupiter.api.Test;
 
 public class ParseGroupTest 
 {
-	public static void main(String[] args) {
-		String str = "Dear $$personal_title$$ $$first_name$$ $$last_name$$, {{braket,{sub-braket}}}";
+
+	@Test
+	public void tokes() {
+		String str = "Dear $$personal_title$$ $$first_name$$ $$last_name$$, {{bracket,{sub-bracket}}}";
 
 		List<CharSequence> listOfCharSeq = SharedStringUtil.parseGroup(str, "$$", "$$", false);
 		
 		System.out.println(listOfCharSeq);
 		
-		listOfCharSeq = SharedStringUtil.parseGroup(str, "{", "}", true);
+		listOfCharSeq = SharedStringUtil.parseGroup(str, "{", "}", false);
 		
 		System.out.println(listOfCharSeq);
 

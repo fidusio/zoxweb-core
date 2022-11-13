@@ -347,17 +347,16 @@ public class TaskSchedulerProcessor
 		ret.setName("task_scheduler");
 		ret.add(new NVLong("instance_id", counterID));
 		ret.add(new NVInt("pending_tasks", queue.size()));
-		long currentWaitTime = waitTime();
-		if(currentWaitTime >= 0)
-			ret.add("current_wait", Const.TimeInMillis.toString(waitTime()));
-		else
-			ret.add(new NVLong("current_wait", -1));
+
+		ret.add("current_wait", Const.TimeInMillis.toString(waitTime()));
+
 
 		return ret;
 	}
 
 	public String toString()
 	{
-		return "TaskSchedulerProcessor["+ SharedUtil.toCanonicalID(',', counterID, live, queue.size(), waitTime())+"]";
+		return "TaskSchedulerProcessor["+ SharedUtil.toCanonicalID(',', counterID, live, queue.size(),
+				Const.TimeInMillis.toString(waitTime()))+"]";
 	}
 }

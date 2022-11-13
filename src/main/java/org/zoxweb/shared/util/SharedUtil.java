@@ -115,7 +115,7 @@ public class SharedUtil
 		}
 		catch(NumberFormatException e){}
 
-		int index = -1;
+		int index;
 		if((index = strInt.indexOf("x")) != -1 || (index = strInt.indexOf("X")) != -1)
 		{
 			strInt = strInt.substring(index+1);

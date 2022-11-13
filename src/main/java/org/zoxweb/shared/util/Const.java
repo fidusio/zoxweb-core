@@ -29,7 +29,7 @@ public class Const {
 
   public static final String LOGGER_NAME = "zoxweb-core";
 
-  public static final String UTF8 = "UTF-8";
+  //public static final String UTF8 = "UTF-8";
 
   public enum JavaClassVersion {
     VER_UNKNOWN("UNKNOWN", "UNKNOWN", 0, 0),
@@ -152,7 +152,7 @@ public class Const {
     }
 
     public static Bool parse(String str) {
-      return (Bool) SharedUtil.lookupEnum(str, Bool.values());
+      return SharedUtil.lookupEnum(str, Bool.values());
     }
 
     public static boolean lookupValue(String str) {
@@ -219,7 +219,7 @@ public class Const {
 
     ;
 
-    private String name;
+    private final String name;
 
     Unit(String name) {
       this.name = name;
@@ -278,10 +278,7 @@ public class Const {
     }
   }
 
-  /**
-   * Number of bits inside a byte
-   */
-  //public static final int BITS_IN_BYTE = 8;
+
 
   /**
    * This enum represents size in bytes of default memory constants.
@@ -294,19 +291,19 @@ public class Const {
     // Byte
     B("B", 1),
 
-    // Kilo bytes
+    // Kilobytes
     K("KB", 1024),
 
-    // Mega bytes
+    // Megabytes
     M("MB", K.LENGTH * 1024),
 
-    // Giga bytes
+    // Gigabytes
     G("GB", M.LENGTH * 1024),
 
-    // Tera bytes
+    // Terabytes
     T("TB", G.LENGTH * 1024),
 
-    // Peta bytes
+    // Petabytes
     P("PB", T.LENGTH * 1024);
 
     /**
@@ -315,7 +312,7 @@ public class Const {
     public final long LENGTH;
 
 
-    private String name;
+    private final String name;
 
     SizeInBytes(String name, long value) {
       this.name = name;
@@ -390,19 +387,7 @@ public class Const {
     }
   }
 
-  /**
-   * This enum represents types of unit of time.
-   *
-   * @author mzebib
-   */
-//  public enum TimeUnitType {
-//    NANOS,
-//    MILLIS,
-//    SECOND,
-//    MINUTES,
-//    HOUR,
-//    DAY,
-//  }
+
 
   /**
    * This enum is used to describe the string to be expected or converted to
@@ -455,7 +440,7 @@ public class Const {
     DAY(HOUR.MILLIS * 24, TimeUnit.DAYS,"days", "day","d"),
 
     // One week in milliseconds
-    WEEK(DAY.MILLIS * 7, (TimeUnit) null, "weeks", "week", "w");
+    WEEK(DAY.MILLIS * 7, null, "weeks", "week", "w");
 
     public final long MILLIS;
     public final TimeUnit UNIT;
@@ -490,8 +475,9 @@ public class Const {
 
     public static TimeInMillis toTimeInMillis(String unit)
     {
-      if (unit.indexOf("/") != -1)
-        unit = unit.substring(unit.indexOf("/")+1);
+      int index =unit.indexOf("/");
+      if (index != -1)
+        unit = unit.substring(index+1);
 
       for (TimeInMillis tis : TimeInMillis.values())
       {
@@ -626,7 +612,7 @@ public class Const {
     }
 
     /**
-     * Converts the time to nano second value (10 power -9 second)
+     * Converts the time to nanosecond value (10 power -9 second)
      *
      * @return the time string value in nanos
      */
@@ -665,67 +651,7 @@ public class Const {
       return toMillis(time) * 1000;
     }
 
-//    public static String toString(long millis) {
-//      boolean pastTime = false;
-//      if(millis < 0 )
-//      {
-//        millis = - millis;
-//        pastTime = true;
-//      }
-//      //if (millis <= WEEK.MILLIS)
-//      {
-//        long mil = millis % SECOND.MILLIS;
-//        millis /= SECOND.MILLIS;
-//        long sec = millis % 60;
-//        millis /= 60;
-//        long min = millis % 60;
-//        millis /= 60;
-//        long hour = millis;
-//        millis /= 24;
-//
-//
-//        long day = millis;
-//        millis /=7;
-//        long week = millis;
-//
-//
-//        //hour += day*24;
-//
-//        StringBuilder sb = new StringBuilder();
-//        if (week > 0)
-//        {
-//          sb.append(week + "w ");
-//          day = day % 7;
-//          hour = hour % 24;
-//        }
-//        if (week == 0 && day > 0) {
-//          sb.append(day + "d ");
-//          hour = hour % 24;
-//        }
-//        sb.append((hour <= 9 ? "0" : "") + hour);
-//        sb.append(':');
-//        sb.append((min <= 9 ? "0" : "") + min);
-//        sb.append(':');
-//        sb.append((sec <= 9 ? "0" : "") + sec);
-//
-//        //sb.append(String.format("%02d:%02d:%02d", hour, min, sec));
-//        if (mil > 0) {
-//          sb.append('.');
-//          if (mil < 99) {
-//            sb.append(0);
-//          }
-//          if (mil < 9) {
-//            sb.append(0);
-//          }
-//
-//          sb.append(mil);
-//        }
-//
-//        return pastTime ? "Neg(-) " + sb.toString() : sb.toString();
-//      }
-//
-//      //throw new IllegalArgumentException("Out of range");
-//    }
+
 
     public static String toString(long millis)
     {
@@ -750,17 +676,20 @@ public class Const {
 
       StringBuilder sb = new StringBuilder();
       if (week > 0) {
-        sb.append(week + "w ");
+        sb.append(week);
+        sb.append("W:");
       }
-      if (day > 0) {
-        sb.append(day + "d ");
+      if (day > 0 || week > 0)
+      {
+        sb.append(day);
+        sb.append("D:");
 
       }
-      sb.append((hour <= 9 ? "0" : "") + hour);
+      sb.append((hour <= 9 ? "0" : ""));sb.append(hour);
       sb.append(':');
-      sb.append((min <= 9 ? "0" : "") + min);
+      sb.append((min <= 9 ? "0" : ""));sb.append(min);
       sb.append(':');
-      sb.append((sec <= 9 ? "0" : "") + sec);
+      sb.append((sec <= 9 ? "0" : ""));sb.append(sec);
 
       //sb.append(String.format("%02d:%02d:%02d", hour, min, sec));
       if (mil > 0) {
@@ -775,7 +704,7 @@ public class Const {
         sb.append(mil);
       }
 
-      return pastTime ? "Neg(-) " + sb.toString() : sb.toString();
+      return pastTime ? "-" + sb: sb.toString();
     }
 
 
@@ -825,10 +754,10 @@ public class Const {
     UTC_PLUS_1300("UTC+13:00", '+', 13, 0),
     UTC_PLUS_1400("UTC+14:00", '+', 14, 0);
 
-    private String name;
-    private char sign;
-    private int hours;
-    private int minutes;
+    private final String name;
+    private final char sign;
+    private final int hours;
+    private final int minutes;
 
     TimeZoneOffset(String name, char sign, int hours, int minutes) {
       this.name = name;
@@ -871,7 +800,7 @@ public class Const {
     YEARLY,
     DAY,
     NIGHT,
-    CUSTOM;
+    CUSTOM
   }
 
   /**

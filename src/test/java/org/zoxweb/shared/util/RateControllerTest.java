@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.zoxweb.server.task.TaskUtil;
 
 import java.util.ArrayList;
-import java.util.Date;
+
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -25,6 +25,7 @@ public class RateControllerTest {
 
         for(int i = 0; i < 100; i++)
             vals.add(controller.nextDelay());
+        System.out.println(vals);
 
 
         for(int i = 0; i < vals.size(); i+=2)
@@ -33,8 +34,6 @@ public class RateControllerTest {
             assert(vals.get(i+1) - vals.get(i) == controller.getDeltaInMillis());
         }
 
-
-        System.out.println("Delay: "  + vals);
 
 
         TaskUtil.sleep(500);
@@ -54,7 +53,7 @@ public class RateControllerTest {
         for(int i = 0; i < 100; i++)
             vals.add(controller.nextDelay());
 
-
+        System.out.println(vals);
 
 
         for(int i = 0; i < vals.size(); i+=2)
@@ -100,9 +99,7 @@ public class RateControllerTest {
         RateController controller = new RateController("test", "0/min");
         System.out.println(controller);
 
-        IllegalArgumentException e = Assertions.assertThrows(IllegalArgumentException.class, ()->{
-            controller.nextDelay();
-        });
+        IllegalArgumentException e = Assertions.assertThrows(IllegalArgumentException.class, controller::nextDelay);
 
         System.out.println("Exception: " + e + " tps asLong " + controller.getTPSAsLong());
         controller.setRate("1000/min");
@@ -127,35 +124,35 @@ public class RateControllerTest {
             System.out.println(rc);
         }
     }
+
+
     @Test
-    public void testTimeToString()
+    public void counterTypeTest()
     {
+        RateController controller = new RateController("test", 10, TimeUnit.SECONDS);
+        controller.setType(RateController.RCType.COUNTER);
+        List<Long> vals = new ArrayList<>();
         long ts = System.currentTimeMillis();
-        long[] times = {
-                0,
-                50,
-                Const.TimeInMillis.MILLI.MILLIS,
-                Const.TimeInMillis.SECOND.MILLIS,
-                Const.TimeInMillis.MINUTE.MILLIS,
-                Const.TimeInMillis.HOUR.MILLIS,
-                Const.TimeInMillis.DAY.MILLIS,
-                Const.TimeInMillis.WEEK.MILLIS,
-        };
-
-        for(long t : times)
-            System.out.println(Const.TimeInMillis.toString(t));
-        System.out.println();
-        for(long t : times)
-            System.out.println(Const.TimeInMillis.toString(t*25));
+        for(int i = 0; i < 100; i++)
+            vals.add(controller.nextDelay());
+        System.out.println(vals);
 
 
-        System.out.println(Const.TimeInMillis.toString(Const.TimeInMillis.WEEK.MILLIS + Const.TimeInMillis.DAY.MILLIS +
-                Const.TimeInMillis.HOUR.MILLIS*26 + Const.TimeInMillis.MINUTE.MILLIS*70 +50));
+        TaskUtil.sleep(5000);
+        for(int i = 0; i < 100; i++)
+            vals.add(controller.nextDelay());
+
+        System.out.println(vals);
+        TaskUtil.sleep(15500);
+        vals.clear();
+        for(int i = 0; i < 100; i++)
+            vals.add(controller.nextDelay());
+        System.out.println(vals);
 
 
-        System.out.println(Const.TimeInMillis.toString(System.currentTimeMillis()) + " " + new Date(0));
+
+
         ts = System.currentTimeMillis() - ts;
-        System.out.println(Const.TimeInMillis.toString(ts) + " " + ts);
-
+        System.out.println(controller.nextDelay() + " delta " + ts);
     }
 }
