@@ -23,7 +23,6 @@ import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.URL;
-import java.nio.file.AtomicMoveNotSupportedException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -84,7 +83,6 @@ public class HTTPCall
 					ReplacementFilter uriFilter,
 					OutputStream osBypass,
 					CloseEnabledInputStream contentAsIS)
-//					boolean embedParamsInURI)
 	{
 		SharedUtil.checkIfNulls("HTTPActionParameters can't be null", params);
 		this.hcc = params;
@@ -122,6 +120,7 @@ public class HTTPCall
 	 */
 	public HTTPResponseData sendRequest() throws IOException
 	{
+		long ts = System.currentTimeMillis();
 		ByteArrayOutputStream ret = null;
 		int status;
 		Map<String, List<String>> respHeaders = null;

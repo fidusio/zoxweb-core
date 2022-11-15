@@ -8,10 +8,12 @@ public abstract class HTTPResponse
     private final int status;
     private final Map<String, List<String>> headers;
 
+
     protected HTTPResponse (int status, Map<String, List<String>> headers)
     {
         this.status = status;
         this.headers = headers;
+
     }
 
     public  int getStatus()
@@ -23,7 +25,6 @@ public abstract class HTTPResponse
     {
         return headers;
     }
-
 
 
     public List<String> headerValues(String headersName)

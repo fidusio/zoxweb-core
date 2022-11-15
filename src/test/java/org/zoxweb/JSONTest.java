@@ -167,8 +167,9 @@ public class JSONTest {
 			nvsl = (NVStringList) GSONUtil.fromJSONGenericMap(jsonNVSL, null, null).get("tataName");
 			System.out.println(nvsl);
 
-
-
+			String toTest = "{\"expiresAt\":\"2022-11-13T21:21:36.000Z\",\"status\":\"SUCCESS\",\"sessionToken\":\"20111aLgTqumDTlWyRddXIXG5aAJ44Vk1MZc2p0kpprEGFG5GkCuuSs\",\"_embedded\":{\"user\":{\"id\":\"00u65c954kbR2m11a1d7\",\"passwordChanged\":\"2022-11-13T21:01:47.000Z\",\"profile\":{\"login\":\"2-test@nodomain.com\",\"firstName\":\"2-NoName\",\"lastName\":\"2-NoLast\",\"locale\":\"en_US\",\"timeZone\":\"America/Los_Angeles\"}}},\"_links\":{\"cancel\":{\"href\":\"https://walgreeendi-perf.oktapreview.com/api/v1/authn/cancel\",\"hints\":{\"allow\":[\"POST\"]}}}}";
+			NVGenericMap toTestNVGM = GSONUtil.fromJSONDefault(toTest, NVGenericMap.class);
+			System.out.println(toTestNVGM);
 
 		} catch (Exception e) {
 			e.printStackTrace();

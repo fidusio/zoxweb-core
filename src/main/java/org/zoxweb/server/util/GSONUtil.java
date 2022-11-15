@@ -1335,29 +1335,28 @@ final public class GSONUtil
 		{
 			// if there is no dots it should be a 
 			//if (jp.getAsString().indexOf(".") == -1)
+
+			try
 			{
-				try
-				{
-					Number number = SharedUtil.parseNumber(jp.getAsString());
-					return SharedUtil.numberToNVBase(name, number);
-					
-				}
-				catch(NumberFormatException e)
-				{
-					e.printStackTrace();
-				}
+				Number number = SharedUtil.parseNumber(jp.getAsString());
+				return SharedUtil.numberToNVBase(name, number);
+
 			}
-			//else
+			catch(NumberFormatException e)
 			{
-				try
-				{
-					return new NVDouble(name, jp.getAsDouble());
-				}
-				catch(NumberFormatException e)
-				{
-					e.printStackTrace();
-				}
+				e.printStackTrace();
 			}
+
+
+			try
+			{
+				return new NVDouble(name, jp.getAsDouble());
+			}
+			catch(NumberFormatException e)
+			{
+				e.printStackTrace();
+			}
+
 		}
 		else if (jp.isString())
 		{
@@ -1378,7 +1377,10 @@ final public class GSONUtil
 			{
 				if (TimestampFilter.SINGLETON.isValid(jp.getAsString()))
 				{
-					return new NVLong(name, TimestampFilter.SINGLETON.validate(jp.getAsString()));
+					try {
+						return new NVLong(name, TimestampFilter.SINGLETON.validate(jp.getAsString()));
+					}
+					catch (Exception ex){}
 				}
 			}
 			
