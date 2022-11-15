@@ -10,7 +10,6 @@ import org.zoxweb.shared.protocol.ProtocolDelimiter;
 import org.zoxweb.shared.util.*;
 import org.zoxweb.shared.util.SharedBase64.Base64Type;
 
-import javax.print.attribute.standard.MediaSize;
 
 public final class HTTPDecoder {
   public static final byte[] NAME_EQUAL_DOUBLE_QUOTE = SharedStringUtil.getBytes("name=\"");

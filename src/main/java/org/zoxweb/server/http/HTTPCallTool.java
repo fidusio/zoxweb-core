@@ -20,7 +20,7 @@ import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.http.*;
-import org.zoxweb.shared.net.InetAddressDAO;
+
 import org.zoxweb.shared.net.InetSocketAddressDAO;
 import org.zoxweb.shared.net.ProxyType;
 import org.zoxweb.shared.util.Const;
@@ -30,7 +30,7 @@ import org.zoxweb.shared.util.ParamUtil;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.logging.Logger;
+
 
 public class HTTPCallTool implements Runnable
 {

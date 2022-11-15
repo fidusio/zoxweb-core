@@ -33,7 +33,7 @@ public class HTTPMultiPartParameter
 
 	private String name;
 	private String value;
-	private HashMap<String, ArrayList<GetNameValue<String>>> headers = new HashMap<String, ArrayList<GetNameValue<String>>>();
+	private final HashMap<String, ArrayList<GetNameValue<String>>> headers = new HashMap<String, ArrayList<GetNameValue<String>>>();
 	
 	private String fileName;
 	private byte[] content = null;
@@ -53,12 +53,12 @@ public class HTTPMultiPartParameter
 		setValue( value);
 	}
 	
-	public void addHeader(GetName gv,  @SuppressWarnings("unchecked") GetNameValue<String> ...gnvs)
+	public void addHeader(GetName gv, GetNameValue<String> ...gnvs)
 	{
 		addHeader(gv.getName(), gnvs);
 	}
 	
-	public synchronized void addHeader(String headerName, @SuppressWarnings("unchecked") GetNameValue<String> ...gnvs)
+	public synchronized void addHeader(String headerName, GetNameValue<String> ...gnvs)
 	{
 		 ArrayList<GetNameValue<String>> list = headers.get(headerName);
 
