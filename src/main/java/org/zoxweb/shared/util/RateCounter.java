@@ -93,6 +93,7 @@ public class RateCounter
         if(deltaCounter != 0) {
             ret = multiplier * ((float) counter / (float) deltaCounter);
         }
+
         return ret;
     }
 
@@ -111,9 +112,10 @@ public class RateCounter
     @Override
     public String toString() {
         return "RateCounter{" +
-                "namedDescription=" + namedDescription +
+                "name=" + getName() +
                 ", counts=" + counter +
                 ", deltas=" + deltaCounter +
+                ", average=" + average() +
                 '}';
     }
 }

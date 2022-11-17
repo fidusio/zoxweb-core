@@ -9,6 +9,10 @@ public abstract class HTTPResponse
     private final Map<String, List<String>> headers;
 
 
+
+    private long duration = 0;
+
+
     protected HTTPResponse (int status, Map<String, List<String>> headers)
     {
         this.status = status;
@@ -73,6 +77,18 @@ public abstract class HTTPResponse
     public String[] headerNames()
     {
         return headers.keySet().toArray(new String[0]);
+    }
+
+    /**
+     * If set return the total call duration in millis
+     * @return
+     */
+    public long getDuration() {
+        return duration;
+    }
+
+    public void setDuration(long duration) {
+        this.duration = duration;
     }
 
 }

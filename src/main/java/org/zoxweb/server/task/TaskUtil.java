@@ -34,7 +34,7 @@ public class TaskUtil
 	private static EventListenerManager<BaseEventObject<?>,?> EV_MANAGER = null;
 	private static final Lock LOCK = new ReentrantLock();
 	
-	private static int maxTasks = 500;
+	private static int maxTasks = 1000;
 	private static int threadMultiplier = 4;
 	private static int minTPThreadCount = 16;
 	private static int tpThreadCount = -1;

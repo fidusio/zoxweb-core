@@ -154,11 +154,14 @@ final public class GSONUtil
         if(jp.isNumber())
           return new Date(jp.getAsLong());
         
-        try {
-          return DateUtil.DEFAULT_GMT_MILLIS.parse(jp.getAsString());
+        try
+		{
+			if(jp.isString() && !SharedStringUtil.isEmpty(jp.getAsString()))
+          		return DateUtil.DEFAULT_GMT_MILLIS.parse(jp.getAsString());
         } catch (ParseException e) {
           // TODO Auto-generated catch block
-          e.printStackTrace();
+          //e.printStackTrace();
+		  log.info(jp + " Exception: " + e);
         }
         return null;
       }

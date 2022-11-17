@@ -38,7 +38,7 @@ public class HTTPCallTool implements Runnable
     private static AtomicLong counter = new AtomicLong();
     private static AtomicLong failCounter = new AtomicLong();
 
-    private HTTPMessageConfigInterface hmci;
+    private final HTTPMessageConfigInterface hmci;
     private boolean printResult;
 
     public HTTPCallTool(HTTPMessageConfigInterface hmci, boolean printResult)
@@ -71,7 +71,7 @@ public class HTTPCallTool implements Runnable
         counter.incrementAndGet();
         if(printResult) {
             log.info("Total: " + counter + " Fail: " + failCounter + " status: " + rd.getStatus() + " length: " + rd.getData().length);
-            log.info(new String(rd.getData()));
+            log.info(rd.getDataAsString());
         }
     }
 

@@ -37,14 +37,12 @@ import org.zoxweb.shared.filters.ReplacementFilter;
 
 import org.zoxweb.shared.http.*;
 import org.zoxweb.shared.http.HTTPEncoder;
-import org.zoxweb.shared.util.ArrayValues;
-import org.zoxweb.shared.util.GetNameValue;
-import org.zoxweb.shared.util.NVPair;
-import org.zoxweb.shared.util.SharedStringUtil;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.*;
 
 public class HTTPCall 
 {
+
+	public final static RateCounter HTTP_CALLS = new RateCounter(new NamedDescription("HTTP_CALLS", "This counter is used the send static functions it capture the whole call duration including parameter formatting, call, result decoding."));
 
 	public final static AtomicBoolean ENABLE_HTTP = new AtomicBoolean(true);
 	private final HTTPMessageConfigInterface hcc;
@@ -387,15 +385,46 @@ public class HTTPCall
 	public static HTTPResponseData send(HTTPMessageConfigInterface hmci)
 			throws IOException
 	{
-		return new HTTPCall(hmci).sendRequest();
+		long ts = System.currentTimeMillis();
+		HTTPResponseData ret;
+		try {
+			ret = new HTTPCall(hmci).sendRequest();
+		}
+		catch(HTTPCallException e)
+		{
+			ts = System.currentTimeMillis() - ts;
+			if(e.getResponseData() != null)
+				e.getResponseData().setDuration(ts);
+			HTTP_CALLS.register(ts);
+			throw e;
+		}
+		ts = System.currentTimeMillis() - ts;
+		ret.setDuration(ts);
+		HTTP_CALLS.register(ts);
+		return ret;
 	}
 
 	public static <O> HTTPResponseObject<O> send(HTTPMessageConfigInterface hmci, Class<?> clazz)
 			throws IOException
 	{
-		HTTPResponseData hrd = new HTTPCall(hmci).sendRequest();
-
-		return HTTPUtil.toHTTPResponseObject(hrd, clazz);
+		long ts = System.currentTimeMillis();
+		HTTPResponseData hrd = null;
+		try {
+			hrd = new HTTPCall(hmci).sendRequest();
+		}
+		catch(HTTPCallException e)
+		{
+			ts = System.currentTimeMillis() - ts;
+			if(e.getResponseData() != null)
+				e.getResponseData().setDuration(ts);
+			HTTP_CALLS.register(ts);
+			throw e;
+		}
+		HTTPResponseObject<O> ret =  HTTPUtil.toHTTPResponseObject(hrd, clazz);
+		ts = System.currentTimeMillis() - ts;
+		ret.setDuration(ts);
+		HTTP_CALLS.register(ts);
+		return ret;
 	}
 
 

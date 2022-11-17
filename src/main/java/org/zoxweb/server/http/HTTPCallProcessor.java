@@ -58,7 +58,8 @@ public class HTTPCallProcessor
 					System.out.println("Calling:" + hcc.getURL() + "/" + hcc.getURI());
 					try
 					{
-						HTTPResponseData rd = new HTTPCall(hcc, SSLCheckDisabler.SINGLETON).sendRequest();
+						hcc.setSecureCheckEnabled(false);
+						HTTPResponseData rd = HTTPCall.send(hcc);//(hcc, SSLCheckDisabler.SINGLETON).sendRequest();
 						System.out.println("Result:" + rd.getStatus());
 					}
 					catch (Exception e)
