@@ -91,12 +91,21 @@ final public class GSONUtil
 	private final static GSONUtil SINGLETON = new GSONUtil();
 	
 	private final static Gson DEFAULT_GSON = new GsonBuilder()
-											.registerTypeAdapter(NVGenericMap.class, new NVGenericMapSerDeserializer())
-											.registerTypeHierarchyAdapter(NVEntity.class, new NVEntitySerDeserializer())
-					                        .registerTypeAdapter(Date.class, new DateSerDeserializer())
-											//.registerTypeAdapter(Enum.class, new EnumSerDeserializer())
-											.create();
-	
+			.registerTypeAdapter(NVGenericMap.class, new NVGenericMapSerDeserializer())
+			.registerTypeHierarchyAdapter(NVEntity.class, new NVEntitySerDeserializer())
+			.registerTypeAdapter(Date.class, new DateSerDeserializer())
+											//.registerTypeAdapter(Enum.class, new EnumSerDeserializer()
+			.create();
+
+	private final static Gson DEFAULT_GSON_PRETTY = new GsonBuilder()
+			.registerTypeAdapter(NVGenericMap.class, new NVGenericMapSerDeserializer())
+			.registerTypeHierarchyAdapter(NVEntity.class, new NVEntitySerDeserializer())
+			.registerTypeAdapter(Date.class, new DateSerDeserializer())
+			.setPrettyPrinting()
+			//.registerTypeAdapter(Enum.class, new EnumSerDeserializer()
+			.create();
+
+
 	private GsonBuilder builder = null;
 	
 	
@@ -218,9 +227,19 @@ final public class GSONUtil
 		return DEFAULT_GSON.fromJson(json, classOfT);
 	}
 
+
 	public static String toJSONDefault(Object o)
 	{
+		return toJSONDefault(o, false);
+	}
+
+	public static String toJSONDefault(Object o, boolean pretty)
+	{
 		counter.incrementAndGet();
+
+		if(pretty)
+			return DEFAULT_GSON_PRETTY.toJson(o);
+
 		return DEFAULT_GSON.toJson(o);
 	}
 
