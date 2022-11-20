@@ -28,7 +28,6 @@ import java.util.logging.Logger;
 
 import org.zoxweb.server.io.IOUtil;
 
-//import org.zoxweb.server.task.TaskProcessor;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.shared.data.events.BaseEventObject;
 import org.zoxweb.shared.data.events.EventListenerManager;
@@ -39,6 +38,7 @@ import org.zoxweb.shared.security.SecurityStatus;
 
 import org.zoxweb.shared.util.Const.TimeInMillis;
 import org.zoxweb.shared.util.DaemonController;
+import org.zoxweb.shared.util.RateCounter;
 import org.zoxweb.shared.util.SharedUtil;
 
 /**
@@ -48,22 +48,20 @@ import org.zoxweb.shared.util.SharedUtil;
 public class NIOSocket
     implements Runnable, DaemonController, Closeable
 {
-	private static final transient Logger logger = Logger.getLogger(NIOSocket.class.getName());
+	private static final Logger logger = Logger.getLogger(NIOSocket.class.getName());
 	public static boolean debug = false;
 	private boolean live = true;
 	private final SelectorController selectorController;
 	private final Executor executor;
-	private AtomicLong connectionCount = new AtomicLong();
+	private final AtomicLong connectionCount = new AtomicLong();
 
-	private long totalDuration = 0;
-	private long dispatchCounter = 0;
+
 	private long selectedCountTotal = 0;
 	private long statLogCounter = 0;
-	private int selectedCount = 0;
-	//private int currentTotalKeys = 0;
-	private AtomicLong attackTotalCount = new AtomicLong();
+	private final AtomicLong attackTotalCount = new AtomicLong();
 	private final long startTime = System.currentTimeMillis();
 	private EventListenerManager<BaseEventObject<?>,?> eventListenerManager = null;
+	private final RateCounter callsCounter = new RateCounter("NIO-CALLS-COUNTER");
 	
 
 	
@@ -84,7 +82,7 @@ public class NIOSocket
 		if (sa != null)
 			addServerSocket(sa, backlog, psf);
 
-		TaskUtil.startRun("NIO-SOCKET", this);
+		TaskUtil.startRunnable(this, "NIO-SOCKET");
 	}
 	
 	public SelectionKey addServerSocket(InetSocketAddress sa, int backlog, ProtocolSessionFactory<?> psf) throws IOException
@@ -156,13 +154,13 @@ public class NIOSocket
 		{
 			try 
 			{
-				selectedCount = 0;
+				int selectedCount = 0;
 				if (selectorController.getSelector().isOpen())
 				{
 
 					//currentTotalKeys = selectorController.getSelector().keys().size();
 					selectedCount = selectorController.select();
-					long detla = System.nanoTime();
+					long delta = System.nanoTime();
 					if (selectedCount > 0)
 					{
 						Set<SelectionKey> selectedKeys = selectorController.getSelector().selectedKeys();
@@ -182,7 +180,7 @@ public class NIOSocket
 									if(debug) logger.info(ska.attachment() + " ska is selectable: " + ska.getSKController().isSelectable(key) + " for reading " );
 							    	if (ska.getSKController().isSelectable(key) && currentPP != null)
 							    	{
-							    		// very very crucial setup prior to processing
+							    		// very,very,very crucial setup prior to processing
 										ska.getSKController().setSelectable(key,false);
 
 							    		// a channel is ready for reading
@@ -323,8 +321,7 @@ public class NIOSocket
 						    {
 						    	e.printStackTrace();
 						    }
-						    
-						    
+
 						    try
 						    {
 						    	// key clean up
@@ -332,13 +329,6 @@ public class NIOSocket
 						    	{
 									key.cancel();
 									SharedUtil.getWrappedValue(key.channel()).close();
-
-
-//									logger.info("Connection closed Average dispatch processing " + TimeInMillis.nanosToString(averageProcessingTime()) +
-//											" total time:" + TimeInMillis.nanosToString(totalDuration) +
-//											" total dispatches: " + dispatchCounter + " total select-calls: " + selectedCountTotal +
-//											" last select-count: " + selectedCount + " total selector-keys: " + selectorController.getSelector().keys().size() +
-//											" available workers:" +  TaskUtil.availableThreads(executor) + "," + TaskUtil.pendingTasks(executor));
 						    	}
 						    }
 						    catch(Exception e)
@@ -348,9 +338,9 @@ public class NIOSocket
 						    
 						}
 						
-						detla = System.nanoTime() - detla;
-						totalDuration += detla;
-						dispatchCounter++;
+						delta = System.nanoTime() - delta;
+						callsCounter.register(delta);
+
 					}
 					
 				}
@@ -358,14 +348,14 @@ public class NIOSocket
 
 				
 				// stats
-				if(getStatLogCounter() > 0 && (dispatchCounter%getStatLogCounter() == 0 || (System.currentTimeMillis() - snapTime) > getStatLogCounter()))
+				if(getStatLogCounter() > 0 && (callsCounter.getCounts()%getStatLogCounter() == 0 || (System.currentTimeMillis() - snapTime) > getStatLogCounter()))
 				{
 					snapTime = System.currentTimeMillis();
 
 
 					logger.info("Average dispatch processing " + TimeInMillis.nanosToString(averageProcessingTime()) +
-							" total time:" + TimeInMillis.nanosToString(totalDuration) +
-							" total dispatches:" + dispatchCounter + " total select calls:" + selectedCountTotal +
+							" total time:" + TimeInMillis.nanosToString(callsCounter.getDeltas()) +
+							" total dispatches:" + callsCounter.getCounts() + " total select calls:" + selectedCountTotal +
 							" last select count:" + selectedCount + " total select keys:" +selectorController.getSelector().keys().size() +
 						   " available workers:" +  TaskUtil.availableThreads(executor) + "," + TaskUtil.pendingTasks(executor));
 					;
@@ -383,11 +373,7 @@ public class NIOSocket
 	
 	public long averageProcessingTime()
 	{
-		if (dispatchCounter > 0)
-			return totalDuration/dispatchCounter;
-		
-		return -1;
-		
+		return (long) callsCounter.average();
 	}
 	
 	@Override
@@ -414,12 +400,9 @@ public class NIOSocket
 			}
 			catch(Exception e)
 			{
-				
 			}
 		}
-		
-		//IOUtil.close(pw);
-	
+
 	}
 	
 	
@@ -438,15 +421,6 @@ public class NIOSocket
 		this.statLogCounter = statLogCounter;
 	}
 
-//	public InetFilterRulesManager getIncomingInetFilterRulesManager()
-//	{
-//		return ifrm;
-//	}
-//	
-//	public InetFilterRulesManager getOutgoingInetFilterRulesManager()
-//	{
-//		return outgoingIFRM;
-//	}
 	
 	
 }

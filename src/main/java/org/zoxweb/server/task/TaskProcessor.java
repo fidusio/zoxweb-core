@@ -39,17 +39,17 @@ public class TaskProcessor
 
 	public static final long WAIT_TIME = TimeUnit.MILLISECONDS.toMillis(500);
 	private static final AtomicLong instanceCounter = new AtomicLong();
-	private long counterID = instanceCounter.incrementAndGet();
-	private Thread thread;
+	private final long counterID = instanceCounter.incrementAndGet();
+	private final Thread thread;
 	private boolean live = true;
-	private ThresholdQueue<TaskEvent>  tasksQueue;
+	private final ThresholdQueue<TaskEvent>  tasksQueue;
 
 
 
 	/**
 	 * This is the worker thread queue is used by the TaskProcessor by dequeuing it and waiting for the queue
 	 * to be queued after each the ExecutorThread terminate a task
-	 * note is is also used to signal communication between the TaskProcessor thread and ExecutorThread thread.
+	 * note it is also used to signal communication between the TaskProcessor thread and ExecutorThread thread.
 	 * The size of this queue is set by the constructor of TaskProcessor
 	 */
 	private boolean executorNotify;
@@ -57,6 +57,7 @@ public class TaskProcessor
 	
 	private int executorsCounter = 0;
 	private boolean innerLive = true;
+	private final ThreadGroup threadGroup;
 	private static final AtomicLong TP_COUNTER = new AtomicLong(0);
 
 
@@ -73,8 +74,8 @@ public class TaskProcessor
 		protected long callCounter = 0;
 		
 		
-		protected ExecutorThread(String parentID, int priority) {
-			Thread temp = new Thread(this, parentID +"-ET-" + counter);
+		protected ExecutorThread(ThreadGroup tg, String parentID, int priority) {
+			Thread temp = new Thread(tg, this, parentID +"-ET-" + counter);
 			
 			temp.setPriority(priority);
 			temp.start();
@@ -221,14 +222,15 @@ public class TaskProcessor
 		}
 		String tpID = defaultPrefix + "-" + TP_COUNTER.incrementAndGet();
 		workersQueue = new ArrayQueue<ExecutorThread>(executorThreadCount);
+		threadGroup = new ThreadGroup(tpID);
 		for (int i = 0; i < executorThreadCount; i++)
 		{
 			// create and queue the executor threads
-			workersQueue.queue(new ExecutorThread(tpID, threadPriority));
+			workersQueue.queue(new ExecutorThread(threadGroup, tpID, threadPriority));
 		}
 		// start the task processor
 		this.executorNotify = executorNotify;
-		thread = new Thread(this, tpID);
+		thread = new Thread(threadGroup, this, tpID +"-TP");
 
 
 		thread.start();
@@ -253,7 +255,7 @@ public class TaskProcessor
 		// if the task is not null
 		if (task != null)
 		{
-			// queue the task if the haven't reached  tasksQueue.getHighMark()
+			// queue the task if it hasn't reached  tasksQueue.getHighMark()
 			// if we have reached the tasksQueue.getHighMark() we will block till we reach
 			// tasksQueue.getLowMark()
 			tasksQueue.queue(task);
@@ -311,7 +313,7 @@ public class TaskProcessor
 			{
 				// if the tasksQueue is empty 
 				// and the TaskProcessor is not terminated
-				// wait for incoming task, to be awaken by the queueTask method
+				// wait for incoming task to be awaken by the queueTask method
 				if (tasksQueue.isEmpty() && live)
 				{
 					try 
@@ -401,7 +403,10 @@ public class TaskProcessor
 		return tasksQueue.capacity();
 	}
 
-
+	public ThreadGroup getThreadGroup()
+	{
+		return threadGroup;
+	}
 
 
 

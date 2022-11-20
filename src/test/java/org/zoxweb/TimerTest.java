@@ -26,7 +26,7 @@ public class TimerTest {
 
 		delta = System.nanoTime() - delta;
 		
-		System.out.println("Total time in nanos:" + delta + " requeted time:" + nanos + " error:" + (error));
+		System.out.println("Total time in nanos:" + delta + " requeued time:" + nanos + " error:" + (error));
 	}
 
 	public static void main(String[] args) {

@@ -422,5 +422,18 @@ public final class ServerUtil
 			e.printStackTrace();
 		}
 	}
+
+
+	public static void lock(Lock lock)
+	{
+		if (lock != null)
+			lock.lock();
+	}
+
+	public static void unlock(Lock lock)
+	{
+		if(lock != null)
+			lock.unlock();
+	}
 	
 }

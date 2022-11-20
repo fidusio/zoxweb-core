@@ -18,7 +18,6 @@ package org.zoxweb.server.task;
 import java.util.Comparator;
 import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentSkipListSet;
-import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicLong;
 import org.zoxweb.shared.util.*;
 
@@ -128,8 +127,8 @@ public class TaskSchedulerProcessor
 	private TaskSchedulerProcessor(Comparator<Appointment> tsc, TaskProcessor tp) {
 		SharedUtil.checkIfNulls("TaskSchedulerComparator can't be null", tsc);
 		queue =  new ConcurrentSkipListSet<TaskSchedulerAppointment>(tsc);
-		taskProcessor = tp;	
-		new Thread(this, "TSP-" + counterID).start();
+		taskProcessor = tp;
+		TaskUtil.startRunnable(tp != null?  tp.getThreadGroup() : null, this, "TSP-" + counterID);
 	}
 
 	public void close() {
@@ -180,7 +179,7 @@ public class TaskSchedulerProcessor
 	}
 
 
-	public Executor getExecutor()
+	public TaskProcessor getExecutor()
 	{
 		return taskProcessor;
 	}
@@ -356,7 +355,25 @@ public class TaskSchedulerProcessor
 
 	public String toString()
 	{
-		return "TaskSchedulerProcessor["+ SharedUtil.toCanonicalID(',', counterID, live, queue.size(),
-				Const.TimeInMillis.toString(waitTime()))+"]";
+		return (getExecutor() != null ? getExecutor().toString() + ", TaskSchedulerProcessor[ " : "TaskSchedulerProcessor[") +
+				SharedUtil.toCanonicalID(',', counterID, live, queue.size(), Const.TimeInMillis.toString(waitTime()))+"]";
 	}
+
+
+	public boolean isBusy()
+	{
+		return pendingTasks() != 0;
+	}
+
+//	public static long waitIfBusy(long millisToSleepAndCheck)
+//	{
+//		if(millisToSleepAndCheck < 1)
+//			throw new IllegalArgumentException("wait time must be greater than 0 millis second.");
+//		while(isBusy())
+//		{
+//			TaskUtil.sleep(millisToSleepAndCheck);
+//		}
+//
+//		return System.currentTimeMillis();
+//	}
 }

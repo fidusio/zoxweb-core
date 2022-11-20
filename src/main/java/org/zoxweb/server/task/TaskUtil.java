@@ -189,69 +189,93 @@ public class TaskUtil
 	
 	public static boolean isBusy()
 	{
-	    return getDefaultTaskScheduler().pendingTasks() != 0 || getDefaultTaskProcessor().isBusy();
+	    return isBusy(getDefaultTaskProcessor(), getDefaultTaskScheduler());
+		// getDefaultTaskScheduler().pendingTasks() != 0 || getDefaultTaskProcessor().isBusy();
 	}
 
-	public static long waitIfBusy(long millisToSleepAndCheck)
+	public static boolean isBusy(TaskProcessor tp, TaskSchedulerProcessor tsp)
 	{
-		if(millisToSleepAndCheck < 1)
+		if (tp == null && tsp == null)
+			throw new NullPointerException("TaskProcessor and TaskSchedulerProcessor null");
+		return (tp == null ? false : tp.isBusy()) || (tsp == null ? false : tsp.isBusy());
+	}
+
+	public static long waitIfBusy(long durationInMillis)
+	{
+		return waitIfBusy(durationInMillis, getDefaultTaskProcessor(), getDefaultTaskScheduler());
+	}
+
+	public static long waitIfBusy(long durationInMillis, TaskProcessor tp, TaskSchedulerProcessor tsp)
+	{
+		if (tp == null && tsp == null)
+			throw new NullPointerException("TaskProcessor and TaskSchedulerProcessor null");
+		if(durationInMillis < 1)
 			throw new IllegalArgumentException("wait time must be greater than 0 millis second.");
-		while(isBusy())
+		do
 		{
-			sleep(millisToSleepAndCheck);
-		}
+			sleep(durationInMillis);
+			// check after wait for reason
+			// sometimes the tp and tsp needs some time to start working
+			// the con is the caller will always have to wait at least one duration
+		}while(isBusy(tp, tsp));
 
 		return System.currentTimeMillis();
 	}
 
 
-	public static long waitIfBusyThenClose(long millisToSleepAndCheck)
+	public static long waitIfBusyThenClose(long durationInMillis)
 	{
-		if(millisToSleepAndCheck < 1)
+		if(durationInMillis < 1)
 			throw new IllegalArgumentException("wait time must be greater than 0 millis second.");
 		if (TASK_SIMPLE_SCHEDULER != null)
 		{
 			do {
 				try {
-					Thread.sleep(millisToSleepAndCheck);
+					Thread.sleep(durationInMillis);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
-			} while (TASK_SIMPLE_SCHEDULER.pendingTasks() != 0 );
+			} while (TASK_SIMPLE_SCHEDULER.isBusy());//pendingTasks() != 0 );
 			TASK_SIMPLE_SCHEDULER.close();
 		}
-		return waitIfBusyThenClose(getDefaultTaskProcessor(), getDefaultTaskScheduler(), millisToSleepAndCheck);
+		return waitIfBusyThenClose(durationInMillis, getDefaultTaskProcessor(), getDefaultTaskScheduler());
 	}
 
 
 
-	public static long waitIfBusyThenClose(TaskProcessor tp, TaskSchedulerProcessor tsp, long millisToSleepAndCheck)
-	{
-		if(millisToSleepAndCheck < 1)
-			throw new IllegalArgumentException("wait time must be greater than 0 second.");
-		do
-		{
-			try
-			{
-				Thread.sleep(millisToSleepAndCheck);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}while(tsp.pendingTasks() != 0 || tp.isBusy());
 
-		long timestamp = System.currentTimeMillis();
+
+	public static long waitIfBusyThenClose(long millisToSleepAndCheck, TaskProcessor tp, TaskSchedulerProcessor tsp)
+	{
+//		if(millisToSleepAndCheck < 1)
+//			throw new IllegalArgumentException("wait time must be greater than 0 second.");
+//		do
+//		{
+//			try
+//			{
+//				Thread.sleep(millisToSleepAndCheck);
+//			} catch (InterruptedException e) {
+//				e.printStackTrace();
+//			}
+//		}while(tsp.pendingTasks() != 0 || tp.isBusy());
+
+		long timestamp = waitIfBusy(millisToSleepAndCheck, tp, tsp);
 		tsp.close();
 		tp.close();
 		return timestamp;
 	}
 
 
-	public static Thread startRun(String name, Runnable run) {
-		Thread ret = new Thread(run);
+	public static Thread startRunnable(ThreadGroup tg, Runnable run, String name) {
+		Thread ret = tg != null ? new Thread(tg, run) : new Thread(run);
 		if(name != null)
 			ret.setName(name);
 		ret.start();
 		return ret;
+	}
+
+	public static Thread startRunnable(Runnable run, String name) {
+		return startRunnable(null, run, name);
 	}
 
 
@@ -282,7 +306,7 @@ public class TaskUtil
 
 	public static String info()
 	{
-		return getDefaultTaskProcessor().toString() + " " + getDefaultTaskScheduler().toString();
+		return getDefaultTaskScheduler().toString();
 	}
 	
 }

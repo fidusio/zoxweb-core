@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
 
+import org.zoxweb.server.util.ServerUtil;
 import org.zoxweb.shared.util.SharedUtil;
 import org.zoxweb.shared.util.SimpleQueue;
 
@@ -214,27 +215,26 @@ public class ByteBufferUtil
 	public static int smartWrite(Lock lock, ByteChannel bc, ByteBuffer bb, boolean flip) throws IOException
 	{
 		int totalWritten = 0;
-		if(lock != null)
-			lock.lock();
-		try {
+		ServerUtil.lock(lock);
+
+		try
+		{
 			if(flip)
 				bb.flip();
 
-			//synchronized (bc)
+			while (bb.hasRemaining())
 			{
-				while (bb.hasRemaining()) {
-					int written = bc.write(bb);
-					if (written == -1)
-						return -1;
-
-					totalWritten += written;
-				}
+				int written = bc.write(bb);
+				if (written == -1)
+					return -1;
+				totalWritten += written;
 			}
+
 			bb.compact();
 		}
-		finally {
-			if(lock != null)
-				lock.unlock();
+		finally
+		{
+			ServerUtil.unlock(lock);
 		}
 		return totalWritten;
 	}
