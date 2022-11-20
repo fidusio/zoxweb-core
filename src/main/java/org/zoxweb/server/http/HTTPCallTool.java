@@ -25,6 +25,7 @@ import org.zoxweb.shared.net.InetSocketAddressDAO;
 import org.zoxweb.shared.net.ProxyType;
 import org.zoxweb.shared.util.Const;
 import org.zoxweb.shared.util.ParamUtil;
+import org.zoxweb.shared.util.RateCounter;
 
 
 import java.util.ArrayList;
@@ -35,8 +36,9 @@ import java.util.concurrent.atomic.AtomicLong;
 public class HTTPCallTool implements Runnable
 {
     private static LogWrapper log = new LogWrapper(HTTPCallTool.class);
-    private static AtomicLong counter = new AtomicLong();
+    //private static AtomicLong counter = new AtomicLong();
     private static AtomicLong failCounter = new AtomicLong();
+    //private static RateCounter callsCounter = new RateCounter("CallToolsCounter");
 
     private final HTTPMessageConfigInterface hmci;
     private boolean printResult;
@@ -68,9 +70,10 @@ public class HTTPCallTool implements Runnable
         {
             failCounter.incrementAndGet();
         }
-        counter.incrementAndGet();
+        //counter.incrementAndGet();
+
         if(printResult) {
-            log.info("Total: " + counter + " Fail: " + failCounter + " status: " + rd.getStatus() + " length: " + rd.getData().length);
+            log.info("Total: " + HTTPCall.HTTP_CALLS.getCounts() + " Fail: " + failCounter + " status: " + rd.getStatus() + " length: " + rd.getData().length);
             log.info(rd.getDataAsString());
         }
     }
@@ -140,10 +143,12 @@ public class HTTPCallTool implements Runnable
 
             ts = TaskUtil.waitIfBusyThenClose(25) - ts;
 
-            
-            float rate = ((float)counter.get()/(float)ts)*1000;
+            RateCounter rc = new RateCounter("OverAll");
+            rc.register(ts, HTTPCall.HTTP_CALLS.getCounts());
+            //float rate = ((float)counter.get()/(float)ts)*1000;
 
-            log.info("It took:" + Const.TimeInMillis.toString(ts) + " to send:" + counter.get() + " failed:" + failCounter+ " rate:" + rate + " per/second");
+            log.info("It took:" + Const.TimeInMillis.toString(ts) + " to send:" + HTTPCall.HTTP_CALLS.getCounts() + " failed:" + failCounter+
+                    " rate:" + rc.rate(Const.TimeInMillis.SECOND.MILLIS) + " per/second" + " average: " + HTTPCall.HTTP_CALLS.average() + " millis");
             //log.info(""+System.getProperties());
 
         }
