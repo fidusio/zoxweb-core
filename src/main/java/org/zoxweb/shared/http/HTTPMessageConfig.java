@@ -60,7 +60,6 @@ public class HTTPMessageConfig
 		HTTP_METHOD(NVConfigManager.createNVConfig("http_method", "The http method", "HTTPMethod", false, true, HTTPMethod.class)),
 		HTTP_VERSION(NVConfigManager.createNVConfig("http_version", "The http version", "HTTPVersion", false, true, HTTPVersion.class)),
 		HTTP_STATUS_CODE(NVConfigManager.createNVConfig("http_status_code", "The http status code", "HTTPStatusCode", false, true, HTTPStatusCode.class)),
-		//HEADER_PARAMETERS(NVConfigManager.createNVConfig("headers_parameters", "The header parameters", "HeaderParameters", false, true, true, String[].class, null)),
 		HEADER_PARAMETERS(NVConfigManager.createNVConfig("headers_parameters", "The header parameters", "HeaderParameters", false, true, NVGenericMap.class)),
 		REASON(NVConfigManager.createNVConfig("reason", "The server reason", "Reason", false, true, String.class)),
 		USER(NVConfigManager.createNVConfig("user", "The user name", "User", false, true, String.class)),
@@ -765,6 +764,8 @@ public class HTTPMessageConfig
 		
 		setValue(Params.HTTP_STATUS_CODE, hStatus);
 	}
+
+
 
 
 

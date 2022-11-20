@@ -42,9 +42,7 @@ extends ReferenceID<String>, SetName, SetDescription
 	 * The parameters sequence should be preserved during invocation 
 	 * @return http parameters
 	 */
-//	ArrayValues<GetNameValue<String>> getParameters();
 	NVGenericMap getParameters();
-	//NVGenericMap getParametersNVGM();
 
 	/**
 	 * Set the action parameters list
@@ -375,6 +373,8 @@ extends ReferenceID<String>, SetName, SetDescription
 	 * @param errorAsException set the status of http error as exception
 	 */
 	void setHTTPErrorAsException(boolean errorAsException);
+
+
 
 	
 	

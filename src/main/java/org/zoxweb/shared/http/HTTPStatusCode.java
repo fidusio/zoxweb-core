@@ -21,11 +21,14 @@ public enum HTTPStatusCode
      * 100 Continue
      */
 	CONTINUE(100, "Continue"),
-
     /**
      * 101 Switching Protocol
      */
 	SWITCHING_PROTOCOLS(101, "Switching Protocols"),
+    /**
+     * 103
+     */
+    EARLY_HINTS(103, "Early Hints"),
 	
 	
 	/**
@@ -43,7 +46,7 @@ public enum HTTPStatusCode
     /**
      * 202 Accepted.
      */
-    NON_AUTHORITIVE_INFORMATION(203, "Non-Authoritative Information"),
+    NON_AUTHORITATIVE_INFORMATION(203, "Non-Authoritative Information"),
     /**
      * 204 No Content.
      */
@@ -53,7 +56,7 @@ public enum HTTPStatusCode
      */
     RESET_CONTENT(205, "Reset Content"),
     /**
-     * 206 Reset Content.
+     * 206 Partial Content
      */
     PARTIAL_CONTENT(206, "Partial Content"),
 
@@ -82,6 +85,12 @@ public enum HTTPStatusCode
      * 307 Temporary Redirect.
      */
     TEMPORARY_REDIRECT(307, "Temporary Redirect"),
+
+    /**
+     * 308 Permanent Redirect.
+     */
+    PERMANENT_REDIRECT(308, "Temporary Redirect"),
+
 
     /**
      * 400 Bad Request.
@@ -159,6 +168,35 @@ public enum HTTPStatusCode
      * 418
      */
     TEAPOT(418, "I'm a teapot"),
+    /**
+     * 422
+     */
+    UPROCESSABLE_ENTITY(422, "Unprocessable Entity"),
+    /**
+     * 425
+     */
+    TOO_EARLY(425, "Too Early"),
+    /**
+     * 426
+     */
+    UPGRADE_REQUIRED(426, "Upgrade Required"),
+    /**
+     * 428
+     */
+    PRECONDITION_REQUIRED(428, "Precondition Required"),
+    /**
+     * 429
+     */
+    TOO_MANY_REQUESTS(429, "Too Many Requests"),
+    /**
+     * 431
+     */
+    REQUEST_HEADER_FIELDS_TOO_LARGE(431, "Request Header Fields Too Large"),
+    /**
+     * 451
+     */
+    UNAVAILABLE_FOR_LEGAL_REASONS(451, "Unavailable For Legal Reasons"),
+
 
 
     /**
@@ -184,8 +222,29 @@ public enum HTTPStatusCode
     /**
      * 505 HTTP Version Not Supported.
      */
-    HTTP_VERSION_NOT_SUPPORTED(505, "HTTP Version Not Supported");
-	
+    HTTP_VERSION_NOT_SUPPORTED(505, "HTTP Version Not Supported"),
+    /**
+     * 506 Variant Also Negotiated
+     */
+    VARIANT_ALSO_NEGOTIATED(506, "Variant Also Negotiated"),
+    /**
+     * 507 Insufficient Storage
+     */
+    INSUFFICIENT_STORAGE(507, "Insufficient Storage"),
+    /**
+     * 508 Loop Detected
+     */
+    LOOP_DETECTED(508, "Loop Detected"),
+    /**
+     * 510
+     */
+    NOT_EXTENDED(510, "Not Extended"),
+    /**
+     * 511 Network Authentication Required
+     */
+    NETWORK_AUTHENTICATION_REQUIRED(511, "Network Authentication Required"),
+
+
 	
 	;
 	

@@ -147,8 +147,8 @@ public class HTTPCallTool implements Runnable
             rc.register(ts, HTTPCall.HTTP_CALLS.getCounts());
             //float rate = ((float)counter.get()/(float)ts)*1000;
 
-            log.info("It took:" + Const.TimeInMillis.toString(ts) + " to send:" + HTTPCall.HTTP_CALLS.getCounts() + " failed:" + failCounter+
-                    " rate:" + rc.rate(Const.TimeInMillis.SECOND.MILLIS) + " per/second" + " average: " + HTTPCall.HTTP_CALLS.average() + " millis");
+            log.info("It took: " + Const.TimeInMillis.toString(ts) + " to send: " + HTTPCall.HTTP_CALLS.getCounts() + " failed: " + failCounter+
+                    " rate: " + rc.rate(Const.TimeInMillis.SECOND.MILLIS) + " per/second" + " average call duration: " + HTTPCall.HTTP_CALLS.average() + " millis");
             //log.info(""+System.getProperties());
 
         }
