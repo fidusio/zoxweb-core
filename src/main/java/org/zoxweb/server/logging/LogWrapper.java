@@ -53,10 +53,10 @@ public class LogWrapper {
     {
         if(isEnabled())
         {
-            if (o == null)
+            if (o == null || o.length == 0)
                 logger.info(message + ": " + "null");
-            else if(o.length < 2)
-                logger.info(message +": " + (o.length == 0 ? "" : o[1]));
+            else if(o.length == 1)
+                logger.info(message +": " + o[0]);
             else
                 logger.info(message +": " + Arrays.toString(o));
         }
