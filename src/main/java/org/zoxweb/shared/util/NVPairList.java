@@ -92,6 +92,20 @@ public class NVPairList
 		return value.size();
 	}
 
+	/**
+	 * Return the value associated with the parameter name
+	 * @param name of the parameter seeking value
+	 * @return null of value associated with name
+	 */
+	public String getValue(String name)
+	{
+		NVPair nvp = get(name);
+		if (nvp != null)
+			return nvp.getValue();
+
+		return null;
+	}
+
     /**
      * @see org.zoxweb.shared.util.ArrayValues#add(java.lang.Object)
      * @param v
