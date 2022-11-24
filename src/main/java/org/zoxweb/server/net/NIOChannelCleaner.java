@@ -32,9 +32,9 @@ public class NIOChannelCleaner
 	implements Runnable
 {
 
-	private static final transient Logger log = Logger.getLogger(NIOChannelCleaner.class.getName());
-	private Set<SelectionKey> set = new HashSet<SelectionKey>();
-	private long sleepTime = -1;
+	private static final Logger log = Logger.getLogger(NIOChannelCleaner.class.getName());
+	private final Set<SelectionKey> set = new HashSet<SelectionKey>();
+	private final long sleepTime;
 
 	private Appointment tsa = null;
 	private long runCall = 0;
@@ -58,11 +58,11 @@ public class NIOChannelCleaner
 		
 		// wait again
 		tsa.setDelayInMillis(sleepTime);
-		if(runCall % 4 == 0)
-		{
-			//System.gc1();
-			//log.info("total purged:" + totalPurged + " total pending:" + set.size() + " runCall:" + runCall + " availableThread:" + TaskUtil.getDefaultTaskProcessor().availableExecutorThreads());
-		}
+//		if(runCall % 4 == 0)
+//		{
+//			System.gc1();
+//			log.info("total purged:" + totalPurged + " total pending:" + set.size() + " runCall:" + runCall + " availableThread:" + TaskUtil.getDefaultTaskProcessor().availableExecutorThreads());
+//		}
 	}
 	
 	
@@ -101,10 +101,10 @@ public class NIOChannelCleaner
 	
 	protected synchronized int purge()
 	{
-		SelectionKey toCheck[] = null;
+		SelectionKey[] toCheck = null;
 		synchronized(set)
 		{
-			toCheck = set.toArray(new SelectionKey[set.size()]);
+			toCheck = set.toArray(new SelectionKey[0]);
 		}
 		int counter = 0;
 		for (SelectionKey sk : toCheck)

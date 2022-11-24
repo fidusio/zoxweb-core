@@ -33,7 +33,7 @@ public class  ChannelRelayTunnel
 {
 
 	private static boolean debug = false;
-	private static final transient Logger log = Logger.getLogger(ChannelRelayTunnel.class.getName());
+	private static final Logger log = Logger.getLogger(ChannelRelayTunnel.class.getName());
 
 	private ByteChannel readSource;
 	private ByteChannel writeDestination;

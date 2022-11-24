@@ -23,6 +23,7 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.channels.ServerSocketChannel;
+
 import java.util.logging.Logger;
 
 import javax.net.ssl.SSLContext;
@@ -41,7 +42,7 @@ public class SecureNetworkTunnel
     implements Runnable, Closeable
 {
 
-	private static transient final Logger log = Logger.getLogger(SecureNetworkTunnel.class.getName());
+	private static final Logger log = Logger.getLogger(SecureNetworkTunnel.class.getName());
 	/*
 	 * json file format
 	   {
@@ -73,7 +74,7 @@ public class SecureNetworkTunnel
 	}
 	
 	
-	@SuppressWarnings("resource")
+	//@SuppressWarnings("resource")
 	@Override
 	public void run() 
 	{
@@ -115,6 +116,8 @@ public class SecureNetworkTunnel
 				ksConfig = args[index++];
 				nio = true;
 			}
+
+
 			KeyStoreConfig ksc = GSONUtil.create(false).fromJson(IOUtil.inputStreamToString(new FileInputStream(ksConfig), true), KeyStoreConfig.class);
 			
 			
@@ -179,7 +182,7 @@ public class SecureNetworkTunnel
 		catch (Exception e)
 		{
 			e.printStackTrace();
-			System.out.println("SecureNetworkTunnel keystoreJSONConfigFile localport,remoteHost:remotePort...");
+			System.err.println("SecureNetworkTunnel keystoreJSONConfigFile localport,remoteHost:remotePort...");
 			System.exit(0);
 		}
 	}

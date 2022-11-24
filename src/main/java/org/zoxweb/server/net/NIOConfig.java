@@ -53,7 +53,7 @@ extends AppCreatorDefault<NIOSocket, ConfigDAO>
 	public static final String RESOURCE_NAME = "NIOConfig";
 	
 
-	private static final transient Logger log = Logger.getLogger(NIOConfig.class.getName());
+	private static final Logger log = Logger.getLogger(NIOConfig.class.getName());
 	private List<Closeable> services = new ArrayList<Closeable>();
 
 	public String getName()

@@ -31,7 +31,7 @@ public class NetworkTunnel
 	
 	
 	
-	private static transient final Logger log = Logger.getLogger(NetworkTunnel.class.getName());
+	private static  final Logger log = Logger.getLogger(NetworkTunnel.class.getName());
 	public static boolean debug = false;
 	
 

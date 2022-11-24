@@ -11,7 +11,7 @@ import java.util.logging.Logger;
  * @param <S> Session supplier
  */
 public abstract class SessionCallback<CF, C, S> implements TaskCallback<C,S> {
-    protected  static final transient Logger log = Logger.getLogger(SessionCallback.class.getName());
+    protected  static final Logger log = Logger.getLogger(SessionCallback.class.getName());
     private CF config;
 
     public final CF getConfig(){return config;}

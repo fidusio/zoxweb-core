@@ -32,7 +32,7 @@ import java.util.logging.Logger;
 public class NIOTunnel
     extends ProtocolProcessor
 {
-    private static final transient Logger log = Logger.getLogger(NIOTunnel.class.getName());
+    private static final Logger log = Logger.getLogger(NIOTunnel.class.getName());
 
 	private static boolean debug = false;
 
