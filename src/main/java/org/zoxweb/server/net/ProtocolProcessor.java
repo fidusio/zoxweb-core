@@ -22,6 +22,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.spi.AbstractSelectableChannel;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
 import org.zoxweb.server.io.ByteBufferUtil;
@@ -35,6 +36,9 @@ public abstract class ProtocolProcessor
 	implements GetName, GetDescription, Closeable, Consumer<SelectionKey>
 {
 
+	private static final AtomicLong ID_COUNTER = new AtomicLong();
+
+	private final long id = ID_COUNTER.incrementAndGet();
 
 	private volatile SelectorController selectorController;
 	private volatile InetFilterRulesManager outgoingInetFilterRulesManager;
@@ -57,6 +61,9 @@ public abstract class ProtocolProcessor
 //		defaultReadBufferSize = size;
 //	}
 	
+
+
+	public long getID(){return id;}
 
 
 	/**
