@@ -55,38 +55,7 @@ public class NVGenericMap
 		
 		return null;
 	}
-	
-	
-	
-	
-	
 
-//	public GetNameValue<?> get(Enum<?> name)
-//    {
-//		GetNameValue<?> ret = null;
-//    	if (name != null)
-//    	{
-//    		ret = value.get(new GetNameKey(name.name(), true));
-//			if (ret == null && name instanceof GetName)
-//			{
-//				return get(((GetName)name).getName());
-//			}
-//		}
-//
-//
-//		return ret;
-//	}
-//
-//
-//
-//	public <V> V getValue(Enum<?> name)
-//	{
-//		GetNameValue<?> ret = get(name);
-//		if(ret != null)
-//			return (V)ret.getValue();
-//
-//		return null;
-//	}
 
 
 	public GetNameValue<?> get(String name)
