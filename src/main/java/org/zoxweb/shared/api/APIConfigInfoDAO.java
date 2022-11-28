@@ -100,14 +100,6 @@ public class APIConfigInfoDAO
 		super(NVC_API_CONFIG_INFO_DAO);
 	}
 
-	/**
-	 * This constructor instantiates API configuration information DAOO based on list of NVConfigEntity type.
-	 * @param list
-	 */
-//	protected APIConfigInfoDAO(List<NVConfigEntity> list)
-//	{
-//		super(SharedUtil.merge(list, NVC_API_CONFIG_INFO_DAO));
-//	}
 	
 	/**
 	 * @return the API type name.
@@ -120,12 +112,12 @@ public class APIConfigInfoDAO
 
 	/**
 	 * This method sets the API type name.
-	 * @param name
+	 * @param apiTypeName type name
 	 */
 	@Override
-	public void setAPITypeName(String name) 
+	public void setAPITypeName(String apiTypeName)
 	{
-		setValue(Params.API_TYPE_NAME, name);
+		setValue(Params.API_TYPE_NAME, apiTypeName);
 	}
 	
 	/**
@@ -141,7 +133,7 @@ public class APIConfigInfoDAO
 
 	/**
 	 * This method sets the service type.
-	 * @param serviceTypes
+	 * @param serviceTypes used
 	 */
 	@Override
 	public void setServiceTypes(APIServiceType[] serviceTypes)
@@ -326,24 +318,6 @@ public class APIConfigInfoDAO
 		return apiSecurityManager;
 	}
 
-//	/**
-//	 * @see org.zoxweb.shared.api.APIConfigInfo#getAPIKeyRefID()
-//	 */
-//	@Override
-//	public String getAPIKeyRefID()
-//	{
-//		return lookupValue(Params.API_KEY_REF_ID);
-//	}
-//
-//	/**
-//	 * @see org.zoxweb.shared.api.APIConfigInfo#setAPIKeyRefID(java.lang.String)
-//	 */
-//	@Override
-//	public void setAPIKeyRefID(String apiKeyRefID)
-//	{
-//		setValue(Params.API_KEY_REF_ID, apiKeyRefID);
-//		
-//	}
 
 
 }
