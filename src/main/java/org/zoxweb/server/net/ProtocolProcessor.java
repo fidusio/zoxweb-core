@@ -17,16 +17,12 @@ package org.zoxweb.server.net;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.nio.channels.Channel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.spi.AbstractSelectableChannel;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
-
-import org.zoxweb.server.io.ByteBufferUtil;
-
 
 import org.zoxweb.shared.util.GetDescription;
 import org.zoxweb.shared.util.GetName;
@@ -38,7 +34,7 @@ public abstract class ProtocolProcessor
 
 	private static final AtomicLong ID_COUNTER = new AtomicLong();
 
-	private final long id = ID_COUNTER.incrementAndGet();
+	protected final long id = ID_COUNTER.incrementAndGet();
 
 	private volatile SelectorController selectorController;
 	private volatile InetFilterRulesManager outgoingInetFilterRulesManager;
@@ -53,13 +49,7 @@ public abstract class ProtocolProcessor
 		
 	}
 
-	
-//	public synchronized void setReadBufferSize(int size)
-//	{
-//		if (size < 512)
-//			throw new IllegalArgumentException("Invalid size " + size + " min allowed size 512 bytes");
-//		defaultReadBufferSize = size;
-//	}
+
 	
 
 
@@ -86,7 +76,7 @@ public abstract class ProtocolProcessor
 
 
 	protected void acceptConnection(NIOChannelCleaner ncc, AbstractSelectableChannel asc, boolean isBlocking) throws IOException {
-		SelectionKey sk = selectorController.register(ncc,  asc, SelectionKey.OP_READ, this, new DefaultSKController(), isBlocking);
+		selectorController.register(ncc,  asc, SelectionKey.OP_READ, this, new DefaultSKController(), isBlocking);
 	}
 
 	public InetFilterRulesManager getOutgoingInetFilterRulesManager() 
@@ -100,7 +90,6 @@ public abstract class ProtocolProcessor
 		this.outgoingInetFilterRulesManager = inetFilterRulesManager;
 	}
 
-//	public boolean channelReadState(Channel channel){return true;}
 
 	public void setProperties(NVGenericMap prop)
 	{
