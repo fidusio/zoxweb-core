@@ -376,7 +376,7 @@ public class HTTPMessageConfig
 	public String toString() {
 		return "HTTPCallConfig [isMultiPartEncoding()=" + isMultiPartEncoding()
 				+ ", getParameters()=" + getParameters()
-				+ ", getHeaderParameters()=" + getHeaders()
+				+ ", getHeaders()=" + getHeaders()
 				+ ", getMethod()=" + getMethod() + ", getURI()=" + getURI()
 				+ ", getURL()=" + getURL() + ", getContent()="
 				+  (getContent() != null ? new String(getContent()) : "null") + ", getBoundary()="
