@@ -28,27 +28,26 @@ import org.zoxweb.shared.util.SharedUtil;
 public class HTTPRawMessage 
 {
 	public final static LogWrapper log = new LogWrapper(HTTPRawMessage.class);
-	private UByteArrayOutputStream ubaos;
+	private final UByteArrayOutputStream ubaos;
 	private int endOfHeadersIndex = -1;
 	private int parseIndex = 0;
-	//private int contentLength = -1;
-	//private List<GetNameValue<String>> headers = null;
+
 	private String firstLine = null;
-	private HTTPMessageConfigInterface hmci = new HTTPMessageConfig();
+	private final HTTPMessageConfigInterface hmci = new HTTPMessageConfig();
 
 	public HTTPRawMessage(String msg)
 	{
 		this(SharedStringUtil.getBytes(msg));
 	}
-	public HTTPRawMessage(byte fullMessage[])
+	public HTTPRawMessage(byte[] fullMessage)
 	{
 		this(fullMessage, 0 , fullMessage.length);
 	}
 	
-	public HTTPRawMessage(byte fullMessage[], int offset, int len)
+	public HTTPRawMessage(byte[] fullMessage, int offset, int len)
 	{
-		ubaos = new UByteArrayOutputStream( len);
-		ubaos.write( fullMessage, offset, len);
+		ubaos = new UByteArrayOutputStream(len);
+		ubaos.write(fullMessage, offset, len);
 	}
 	
 	public HTTPRawMessage()
@@ -66,13 +65,9 @@ public class HTTPRawMessage
 	{
 		return firstLine;
 	}
-	
-//	public List<GetNameValue<String>> getHeaders()
-//	{
-//		return headers;
-//	}
 
-	public UByteArrayOutputStream getUBAOS()
+
+	public UByteArrayOutputStream getInternalBAOS()
 	{
 		return ubaos;
 	}
@@ -82,7 +77,7 @@ public class HTTPRawMessage
 		if (endOfHeadersIndex != -1)
 		{
 			int lineCounter =0;
-			for (; parseIndex < endOfHeadersIndex;)
+			while (parseIndex < endOfHeadersIndex)
 			{
 				int endOfCurrentLine = ubaos.indexOf(parseIndex, ProtocolDelimiter.CRLF.getBytes(), 0, ProtocolDelimiter.CRLF.getBytes().length);
 				
@@ -101,7 +96,7 @@ public class HTTPRawMessage
 						firstLine = oneLine;
 						if(client)
 						{
-							String tokens[] = getFirstLine().split(" ");
+							String[] tokens = getFirstLine().split(" ");
 							for (int i = 0; i < tokens.length; i++) {
 								String token = tokens[i];
 								switch (i) {
@@ -121,7 +116,6 @@ public class HTTPRawMessage
 								HTTPDecoder.WWW_URL_ENC.decode(this);
 							}
 						}
-
 					}
 					parseIndex = endOfCurrentLine+ProtocolDelimiter.CRLF.getBytes().length;
 				}
@@ -140,7 +134,6 @@ public class HTTPRawMessage
 			{
 				return ((endOfHeadersIndex + hmci.getContentLength()  + ProtocolDelimiter.CRLFCRLF.getBytes().length) == endOfMessageIndex());
 			}
-			
 			return true;
 		}
 		return false;

@@ -54,7 +54,7 @@ public final class HTTPDecoder {
         {
           if (HTTPMimeType.lookup(hmci.getContentType()) == HTTPMimeType.APPLICATION_WWW_URL_ENC) {
             int index = hrm.endOfHeadersIndex() + ProtocolDelimiter.CRLFCRLF.getBytes().length;
-            HTTPUtil.parseQuery(hmci.getParameters().asArrayValuesString(), hrm.getUBAOS().getString(index),false);
+            HTTPUtil.parseQuery(hmci.getParameters().asArrayValuesString(), hrm.getInternalBAOS().getString(index),false);
             return hmci;
           }
         }
@@ -87,7 +87,7 @@ public final class HTTPDecoder {
               // we need to parse the payload next
               index = hrm.endOfHeadersIndex() + ProtocolDelimiter.CRLFCRLF.getBytes().length;
 
-              UByteArrayOutputStream ubaos = hrm.getUBAOS();
+              UByteArrayOutputStream ubaos = hrm.getInternalBAOS();
               while((index = ubaos.indexOf(index, NAME_EQUAL_DOUBLE_QUOTE)) != -1)
               {
                 index += NAME_EQUAL_DOUBLE_QUOTE.length;
