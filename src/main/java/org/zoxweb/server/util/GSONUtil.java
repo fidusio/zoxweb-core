@@ -958,7 +958,15 @@ final public class GSONUtil
 		}
 		if (gnv instanceof NVEnum)
 		{
-			writer.name(name).value(((Enum<?>)gnv.getValue()).name());
+			//writer.name(name).value(((Enum<?>)gnv.getValue()).name());
+			Enum<?> enumValue = (Enum<?>) gnv.getValue();
+			if (enumValue == null)
+				return writer;
+
+			writer.name(name).beginObject()
+					.name(MetaToken.VALUE.getName()).value(enumValue.name())
+					.name(MetaToken.ENUM_TYPE.getName()).value(enumValue.getClass().getName())
+					.endObject();
 		}
 		else if (gnv instanceof  NVInt || gnv instanceof NVLong || gnv instanceof NVFloat || gnv instanceof NVDouble)
 		{
@@ -968,6 +976,17 @@ final public class GSONUtil
 				return writer;
 			}
 			writer.name(name).value((Number)gnv.getValue());
+		}
+		else if (gnv instanceof NVPair &&
+				((NVPair)gnv).getValueFilter() != null &&
+				((NVPair)gnv).getValueFilter() != FilterType.CLEAR)
+		{
+			//writer.name(name).value((String) gnv.getValue());
+			writer.name(name).beginObject()
+					.name(MetaToken.VALUE.getName()).value((String)gnv.getValue())
+					.name(MetaToken.VALUE_FILTER.getName()).value(((NVPair)gnv).getValueFilter().toCanonicalID())
+					.endObject();
+			//toJSON(writer, (NVPair)gnv, true, printNull);
 		}
 		else if (gnv.getValue() instanceof String)
 		{
@@ -1177,15 +1196,20 @@ final public class GSONUtil
 				}
 				else if (jne.isJsonObject())
 				{
-					try
+					GetNameValue<?> nvpMaybe = guessNVPairEnum(element.getKey(), (JsonObject) jne);
+					if (nvpMaybe != null)
 					{
-						ret.add(new NVEntityReference(element.getKey(), (NVEntity)fromJSON(jne.getAsJsonObject(), null, b64Type)));
+						ret.add(nvpMaybe);
 					}
-					catch(Exception e)
-					{
-						NVGenericMap toAdd = fromJSONGenericMap(jne.getAsJsonObject(), null, b64Type);
-						toAdd.setName(element.getKey());
-						ret.add(toAdd);
+					else {
+						try {
+							ret.add(new NVEntityReference(element.getKey(),
+									(NVEntity) fromJSON(jne.getAsJsonObject(), null, b64Type)));
+						} catch (Exception e) {
+							NVGenericMap toAdd = fromJSONGenericMap(jne.getAsJsonObject(), null, b64Type);
+							toAdd.setName(element.getKey());
+							ret.add(toAdd);
+						}
 					}
 				}
 			}
@@ -1301,7 +1325,72 @@ final public class GSONUtil
 		
 		return ret;
 	}
-	
+
+	private static GetNameValue<?> guessNVPairEnum(String name, JsonObject jo)
+	{
+
+		JsonElement joType = jo.get(MetaToken.VALUE_FILTER.getName());
+		if (joType != null)
+		{
+			// we have potential NVPAIR
+			switch (jo.size())
+			{
+				case 1:
+				{
+
+					FilterType vf = SharedUtil.lookupEnum(joType.getAsString(), FilterType.values());
+					if(vf != null)
+						return new NVPair(name, null, vf);
+				}
+				break;
+				case 2:
+				{
+					JsonElement jeValue = jo.get(MetaToken.VALUE.getName());
+					if(jeValue != null)
+					{
+						FilterType vf = SharedUtil.lookupEnum(joType.getAsString(), FilterType.values());
+
+						if(vf != null)
+							return new NVPair(name, jeValue.isJsonNull() ? null : jeValue.getAsString(), vf);
+					}
+				}
+				break;
+			}
+		}
+		joType = jo.get(MetaToken.ENUM_TYPE.getName());
+		if (joType != null)
+		{
+			// we have a potential enum type
+			switch (jo.size())
+			{
+				case 2:
+				{
+					JsonElement jeValue = jo.get(MetaToken.VALUE.getName());
+					if(jeValue != null && !jeValue.isJsonNull())
+					{
+						try {
+							Class<Enum<?>> enumType = (Class<Enum<?>>) Class.forName(joType.getAsString());
+							if (enumType.isEnum())
+							{
+								Enum<?> enumValue = SharedUtil.lookupEnum(jeValue.getAsString(), enumType.getEnumConstants());
+								return new NVEnum(name, enumValue);
+							}
+
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				}
+				break;
+			}
+
+		}
+
+
+
+		return null;
+
+	}
 	
 	public static NVBase<?> guessPrimitive(String name, NVConfig nvc, JsonPrimitive jp)
 	{
