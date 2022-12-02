@@ -884,7 +884,7 @@ public class Const {
     FORM("Form");
 
 
-    private String name;
+    private final String name;
 
     DocumentType(String name) {
       this.name = name;
@@ -939,8 +939,11 @@ public class Const {
     }
 
 
-    public static GNVTypeName toGNVTypeName(String name, char sep) {
-      String[] tokens = name.split("\\" + sep);
+    public static GNVTypeName toGNVTypeName(char sep, String name) {
+      StringBuilder regex = new StringBuilder();
+      regex.append('\\');
+      regex.append(name);
+      String[] tokens = name.split(regex.toString());
       if (tokens.length > 1) {
         GNVType type = SharedUtil.lookupEnum(tokens[0], GNVType.values());
         if (type != null) {

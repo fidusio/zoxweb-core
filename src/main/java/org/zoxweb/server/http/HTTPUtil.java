@@ -883,7 +883,7 @@ public class HTTPUtil
 		{
 			for (String cookie : cookies)
 			{
-				List<HttpCookie> httpCookies = HttpCookie.parse( cookie);
+				List<HttpCookie> httpCookies = HttpCookie.parse(cookie);
 				ret.addAll(httpCookies);
 			}
 		}

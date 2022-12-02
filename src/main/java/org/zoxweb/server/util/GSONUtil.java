@@ -936,16 +936,14 @@ final public class GSONUtil
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private static JsonWriter toJSONGenericMap(JsonWriter writer, GetNameValue<?> gnv,  boolean printNull, boolean printClassType) throws IOException
-	{
+	{if (gnv instanceof NVPair &&
+				((NVPair) gnv).getValueFilter() != null &&
+				((NVPair) gnv).getValueFilter() != FilterType.CLEAR)
+			printNull = true;
 
 		if (gnv.getValue() == null && !printNull)
-		{
 			return writer;
-		}
-//		String name = null;
-//			if (printClassType)
-//				name = GNVType.toName(gnv, ':');
-//			else
+
 		String name = gnv.getName();
 
 		if (gnv instanceof NVBoolean)
@@ -956,7 +954,7 @@ final public class GSONUtil
 			}
 			writer.name(name).value((Boolean)gnv.getValue());
 		}
-		if (gnv instanceof NVEnum)
+		else if (gnv instanceof NVEnum)
 		{
 			//writer.name(name).value(((Enum<?>)gnv.getValue()).name());
 			Enum<?> enumValue = (Enum<?>) gnv.getValue();
@@ -1392,13 +1390,13 @@ final public class GSONUtil
 
 	}
 	
-	public static NVBase<?> guessPrimitive(String name, NVConfig nvc, JsonPrimitive jp)
+	private static NVBase<?> guessPrimitive(String name, NVConfig nvc, JsonPrimitive jp)
 	{
 		GNVType gnvType = nvc != null ? GNVType.toGNVType(nvc) : null;
 		
 		if (gnvType == null)
 		{
-			GNVTypeName tn = GNVType.toGNVTypeName(name, ':');
+			GNVTypeName tn = GNVType.toGNVTypeName(':', name);
 			if (tn != null)
 			{
 				gnvType = tn.getType();

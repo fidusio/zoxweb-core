@@ -16,10 +16,7 @@
 package org.zoxweb.shared.http;
 
 import org.zoxweb.shared.security.SecurityConsts.OAuthParam;
-import org.zoxweb.shared.util.GetName;
-import org.zoxweb.shared.util.GetNameValue;
-import org.zoxweb.shared.util.GetValue;
-import org.zoxweb.shared.util.NVPair;
+import org.zoxweb.shared.util.*;
 
 public enum HTTPHeaderName
     implements GetName
@@ -29,6 +26,8 @@ public enum HTTPHeaderName
 	ACCEPT_LANGUAGE("Accept-Language"),
 	ACCEPT_DATETIME("Accept-Datetime"),
 	ACCEPT_ENCODING("Accept-Encoding"),
+	ACCESS_CONTROL_ALLOW_CREDENTIALS("Access-Control-Allow-Credentials"),
+	ACCESS_CONTROL_ALLOW_ORIGIN("Access-Control-Allow-Origin"),
 	AUTHORIZATION(OAuthParam.AUTHORIZATION.getNVConfig().getDisplayName()),
 	CONNECTION("Connection"),
 	CONTENT_DISPOSITION("Content-Disposition"),
@@ -79,27 +78,57 @@ public enum HTTPHeaderName
 	}
 	
 	
-	public static GetNameValue<String> toHTTPHeader(GetName gn, GetValue<String> value)
+	public static GetNameValue<String> toHTTPHeader(GetName gn, GetValue<String> ...values)
 	{
-		return new NVPair(gn, value);
+		return toHTTPHeader(gn.getName(), values);
 	}
 	
 	
-	public static GetNameValue<String> toHTTPHeader(GetName gn, String value)
+	public static GetNameValue<String> toHTTPHeader(GetName gn, String ...values)
 	{
-		return new NVPair(gn, value);
+		return toHTTPHeader(gn.getName(), values);
 	}
 	
 	
-	public static GetNameValue<String> toHTTPHeader(String name, GetValue<String> value)
+	public static GetNameValue<String> toHTTPHeader(String name, GetValue<String> ...values)
 	{
-		return new NVPair(name, value);
+		StringBuilder headerValue = new StringBuilder();
+
+		if(values != null)
+		{
+			for(int i=0; i<values.length; i++)
+			{
+				if (headerValue.length() > 0)
+					headerValue.append("; ");
+
+				if (values[i] != null && !SharedStringUtil.isEmpty(values[i].getValue()))
+					headerValue.append(values[i].getValue());
+
+			}
+		}
+
+		return new NVPair(name, headerValue.toString());
 	}
 	
 	
-	public static GetNameValue<String> toHTTPHeader(String name, String value)
+	public static GetNameValue<String> toHTTPHeader(String name, String ...values)
 	{
-		return new NVPair(name, value);
+		StringBuilder headerValue = new StringBuilder();
+
+		if(values != null)
+		{
+			for(int i=0; i<values.length; i++)
+			{
+				if (headerValue.length() > 0)
+					headerValue.append("; ");
+
+				if (!SharedStringUtil.isEmpty(values[i]))
+					headerValue.append(values[i]);
+
+			}
+		}
+
+		return new NVPair(name, headerValue.toString());
 	}
 
 }
