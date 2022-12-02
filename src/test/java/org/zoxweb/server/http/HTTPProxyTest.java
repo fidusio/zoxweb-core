@@ -17,7 +17,7 @@ package org.zoxweb.server.http;
 
 import org.zoxweb.server.io.UByteArrayOutputStream;
 import org.zoxweb.server.security.SSLCheckDisabler;
-import org.zoxweb.shared.http.HTTPHeaderName;
+import org.zoxweb.shared.http.HTTPHeader;
 import org.zoxweb.shared.http.HTTPMessageConfig;
 import org.zoxweb.shared.http.HTTPMessageConfigInterface;
 import org.zoxweb.shared.http.HTTPMethod;
@@ -69,7 +69,7 @@ public class HTTPProxyTest {
               (hcc.getContent() != null ? new String(hcc.getContent()) : "") + ":" + hcc
                   .getContentLength());
           System.out.println(DeviceType.lookup(SharedUtil
-              .lookupValue(hcc.getHeaders().asArrayValuesString(), HTTPHeaderName.USER_AGENT.getName())));
+              .lookupValue(hcc.getHeaders().asArrayValuesString(), HTTPHeader.USER_AGENT.getName())));
         }
         System.out.println("Is Request complete " + HTTPUtil.checkRequestStatus(hcc));
       } catch (Exception e) {

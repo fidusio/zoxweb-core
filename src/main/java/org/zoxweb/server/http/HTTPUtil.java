@@ -836,7 +836,7 @@ public class HTTPUtil
 				}
 			}
 
-			return  new NVPair(HTTPHeaderName.COOKIE, sb.toString());
+			return  new NVPair(HTTPHeader.COOKIE, sb.toString());
 		}
 
 		return null;

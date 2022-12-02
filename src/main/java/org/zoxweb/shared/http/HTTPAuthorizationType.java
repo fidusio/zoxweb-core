@@ -42,19 +42,19 @@ public enum HTTPAuthorizationType
 			if(!SharedStringUtil.isEmpty(username) && !SharedStringUtil.isEmpty(password))
 			{
 			
-				return new NVPair(HTTPHeaderName.AUTHORIZATION, 
+				return new NVPair(HTTPHeader.AUTHORIZATION,
 					BASIC + " " + new String(SharedBase64.encode(SharedStringUtil.getBytes(SharedUtil.toCanonicalID(':', username, password)))));
 			}
 			
 			if(!SharedStringUtil.isEmpty(username))
 			{
-				return new NVPair(HTTPHeaderName.AUTHORIZATION, 
+				return new NVPair(HTTPHeader.AUTHORIZATION,
 					BASIC + " " + new String(SharedBase64.encode(SharedStringUtil.getBytes(username+":"))));
 			}
 			
 			if(!SharedStringUtil.isEmpty(password))
 			{
-				return new NVPair(HTTPHeaderName.AUTHORIZATION, 
+				return new NVPair(HTTPHeader.AUTHORIZATION,
 					BASIC + " " + new String(SharedBase64.encode(SharedStringUtil.getBytes(":"+password))));
 			}
 			
@@ -92,9 +92,9 @@ public enum HTTPAuthorizationType
 		{
 			if (args.length == 1)
 			// TODO Auto-generated method stub
-				return new NVPair(HTTPHeaderName.AUTHORIZATION, BEARER+ " " + args[0]);
+				return new NVPair(HTTPHeader.AUTHORIZATION, BEARER+ " " + args[0]);
 			else if (args.length > 1)
-				return new NVPair(HTTPHeaderName.AUTHORIZATION, args[0]+ " " + args[1]);
+				return new NVPair(HTTPHeader.AUTHORIZATION, args[0]+ " " + args[1]);
 			
 			return null;
 		}

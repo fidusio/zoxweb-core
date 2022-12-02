@@ -37,7 +37,7 @@ import org.zoxweb.shared.util.SharedStringUtil;
 public final class HTTPMultiPartUtil
 {
 
-	public static final GetNameValue<String> MULTI_PART_HEADER_CONTENT_TYPE = new NVPair(HTTPHeaderName.CONTENT_TYPE.getName(), "multipart/form-data; boundary=");
+	public static final GetNameValue<String> MULTI_PART_HEADER_CONTENT_TYPE = new NVPair(HTTPHeader.CONTENT_TYPE.getName(), "multipart/form-data; boundary=");
 	private final static Logger log = Logger.getLogger(HTTPMultiPartUtil.class.getName());
 	private HTTPMultiPartUtil(){
 		log.info("Default ctr");
@@ -136,9 +136,9 @@ public final class HTTPMultiPartUtil
 		StringBuilder sb = new StringBuilder();
 		if (headers != null)
 		{
-			ArrayList<GetNameValue<String>> contentDisposition = headers.get(HTTPHeaderName.CONTENT_DISPOSITION.getName());
+			ArrayList<GetNameValue<String>> contentDisposition = headers.get(HTTPHeader.CONTENT_DISPOSITION.getName());
 
-			sb.append(HTTPHeaderName.CONTENT_DISPOSITION.getName()+ProtocolDelimiter.COLON+ProtocolDelimiter.SPACE+
+			sb.append(HTTPHeader.CONTENT_DISPOSITION.getName()+ProtocolDelimiter.COLON+ProtocolDelimiter.SPACE+
 					   HTTPHeaderValue.FORM_DATA+ProtocolDelimiter.SEMICOLON+ProtocolDelimiter.SPACE+ HTTPHeaderValue.NAME+ProtocolDelimiter.EQUAL +
 					   "\"" + hmpp.getName() + "\"" );
 			
@@ -217,7 +217,7 @@ public final class HTTPMultiPartUtil
 
 	public static String formatMultiPartNameValue(String name, String value)
 	{
-		return HTTPHeaderName.CONTENT_DISPOSITION.getName() + ProtocolDelimiter.COLON+ProtocolDelimiter.SPACE +
+		return HTTPHeader.CONTENT_DISPOSITION.getName() + ProtocolDelimiter.COLON+ProtocolDelimiter.SPACE +
 			   HTTPHeaderValue.FORM_DATA + ProtocolDelimiter.SEMICOLON + ProtocolDelimiter.SPACE + 
 			   HTTPHeaderValue.NAME + ProtocolDelimiter.EQUAL + "\"" + name + "\"" +
 			   ProtocolDelimiter.CRLFCRLF + value + ProtocolDelimiter.CRLF;
@@ -304,10 +304,10 @@ public final class HTTPMultiPartUtil
 
 		if (headers != null)
 		{
-			ArrayList<GetNameValue<String>> contentDisposition = headers.get(HTTPHeaderName.CONTENT_DISPOSITION.getName());
+			ArrayList<GetNameValue<String>> contentDisposition = headers.get(HTTPHeader.CONTENT_DISPOSITION.getName());
 			
 			
-			sb.append(HTTPHeaderName.CONTENT_DISPOSITION.getName()+ProtocolDelimiter.COLON+ProtocolDelimiter.SPACE+
+			sb.append(HTTPHeader.CONTENT_DISPOSITION.getName()+ProtocolDelimiter.COLON+ProtocolDelimiter.SPACE+
 					   HTTPHeaderValue.FORM_DATA+ProtocolDelimiter.SEMICOLON+ProtocolDelimiter.SPACE+ HTTPHeaderValue.NAME+ProtocolDelimiter.EQUAL +
 					   "\"" + hmpp.getName() + "\"" );
 			
@@ -426,7 +426,7 @@ public final class HTTPMultiPartUtil
 			{
 				hcc.setBoundary(generateBoundary(TimeUnit.NANOSECONDS));
 				// add the boundary parameter to the request header
-				hcc.getHeaders().add(new NVPair(HTTPHeaderName.CONTENT_TYPE, MULTI_PART_HEADER_CONTENT_TYPE.getValue() + hcc.getBoundary()));
+				hcc.getHeaders().add(new NVPair(HTTPHeader.CONTENT_TYPE, MULTI_PART_HEADER_CONTENT_TYPE.getValue() + hcc.getBoundary()));
 
 			}
 //			if (contentType.equalsIgnoreCase(MULTI_PART_HEADER_CONTENT_TYPE.getValue()))

@@ -8,6 +8,6 @@ public class HTTPHeaderTest {
     @Test
     public void testHeaderName()
     {
-        System.out.println(HTTPHeaderName.toHTTPHeader(HTTPHeaderName.ACCESS_CONTROL_ALLOW_CREDENTIALS, HTTPMimeType.APPLICATION_JSON));
+        System.out.println(HTTPHeader.toHTTPHeader(HTTPHeader.ACCESS_CONTROL_ALLOW_CREDENTIALS, HTTPMimeType.APPLICATION_JSON));
     }
 }

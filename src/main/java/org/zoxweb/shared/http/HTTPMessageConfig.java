@@ -132,7 +132,7 @@ public class HTTPMessageConfig
 
 	public boolean isMultiPartEncoding() 
 	{
-		String mp = getHeaders().getValue(HTTPHeaderName.CONTENT_TYPE);
+		String mp = getHeaders().getValue(HTTPHeader.CONTENT_TYPE);
 		//GetNameValue<String> mp = getHeaders().get(HTTPHeaderName.CONTENT_TYPE.getName());
 		if (mp != null)// && mp.getValue() != null)
 		{
@@ -591,7 +591,7 @@ public class HTTPMessageConfig
 	public String getContentType()
 	{
 		
-		return getHeaders().getValue(HTTPHeaderName.CONTENT_TYPE);
+		return getHeaders().getValue(HTTPHeader.CONTENT_TYPE);
 	}
 
 
@@ -603,22 +603,22 @@ public class HTTPMessageConfig
 	public void setContentType(String contentType)
 	{
 		
-		getHeaders().add(HTTPHeaderName.toHTTPHeader(HTTPHeaderName.CONTENT_TYPE, contentType));
+		getHeaders().add(HTTPHeader.toHTTPHeader(HTTPHeader.CONTENT_TYPE, contentType));
 	}
 
 	@Override
 	public String getAccept() {
-		return getHeaders().getValue(HTTPHeaderName.ACCEPT);
+		return getHeaders().getValue(HTTPHeader.ACCEPT);
 	}
 
 	@Override
 	public void setAccept(String accept) {
-		getHeaders().add(HTTPHeaderName.toHTTPHeader(HTTPHeaderName.ACCEPT, accept));
+		getHeaders().add(HTTPHeader.toHTTPHeader(HTTPHeader.ACCEPT, accept));
 	}
 
 	@Override
 	public void setAccept(GetValue<String> accept) {
-		getHeaders().add(HTTPHeaderName.toHTTPHeader(HTTPHeaderName.ACCEPT, accept));
+		getHeaders().add(HTTPHeader.toHTTPHeader(HTTPHeader.ACCEPT, accept));
 	}
 
 	/**
@@ -628,7 +628,7 @@ public class HTTPMessageConfig
 	public void setContentType(GetValue<String> contentType)
 	{
 		
-		getHeaders().add(HTTPHeaderName.toHTTPHeader(HTTPHeaderName.CONTENT_TYPE, contentType));
+		getHeaders().add(HTTPHeader.toHTTPHeader(HTTPHeader.CONTENT_TYPE, contentType));
 	}
 
 
@@ -640,7 +640,7 @@ public class HTTPMessageConfig
 	public String getCookie()
 	{
 		
-		return getHeaders().getValue(HTTPHeaderName.COOKIE);
+		return getHeaders().getValue(HTTPHeader.COOKIE);
 	}
 
 
@@ -652,7 +652,7 @@ public class HTTPMessageConfig
 	public void setCookie(String cookieValue)
 	{
 		
-		getHeaders().add(HTTPHeaderName.toHTTPHeader(HTTPHeaderName.COOKIE, cookieValue));
+		getHeaders().add(HTTPHeader.toHTTPHeader(HTTPHeader.COOKIE, cookieValue));
 	}
 
 
@@ -664,7 +664,7 @@ public class HTTPMessageConfig
 	public void setCookie(GetValue<String> cookieValue)
 	{
 		
-		getHeaders().add(HTTPHeaderName.toHTTPHeader(HTTPHeaderName.COOKIE, cookieValue));
+		getHeaders().add(HTTPHeader.toHTTPHeader(HTTPHeader.COOKIE, cookieValue));
 		
 	}
 
@@ -676,7 +676,7 @@ public class HTTPMessageConfig
 	public int getContentLength() 
 	{
 		
-		String contentValue = getHeaders().getValue(HTTPHeaderName.CONTENT_LENGTH);///SharedUtil.getValue(getHeaders().get(HTTPHeaderName.CONTENT_LENGTH.getName()));
+		String contentValue = getHeaders().getValue(HTTPHeader.CONTENT_LENGTH);///SharedUtil.getValue(getHeaders().get(HTTPHeaderName.CONTENT_LENGTH.getName()));
 		if (contentValue != null)
 		{
 			return Integer.parseInt(contentValue);
@@ -700,14 +700,14 @@ public class HTTPMessageConfig
 	{
 		
 		
-		SetNameValue<String> ct = (SetNameValue<String>) getHeaders().get(HTTPHeaderName.CONTENT_LENGTH.getName());
+		SetNameValue<String> ct = (SetNameValue<String>) getHeaders().get(HTTPHeader.CONTENT_LENGTH.getName());
 		if (ct != null)
 		{
 			ct.setValue("" + length);
 		}
 		else
 		{
-			getHeaders().add(HTTPHeaderName.toHTTPHeader(HTTPHeaderName.CONTENT_LENGTH, "" + length));
+			getHeaders().add(HTTPHeader.toHTTPHeader(HTTPHeader.CONTENT_LENGTH, "" + length));
 		}
 		
 	}

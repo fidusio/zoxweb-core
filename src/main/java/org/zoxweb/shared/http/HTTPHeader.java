@@ -18,7 +18,7 @@ package org.zoxweb.shared.http;
 import org.zoxweb.shared.security.SecurityConsts.OAuthParam;
 import org.zoxweb.shared.util.*;
 
-public enum HTTPHeaderName
+public enum HTTPHeader
     implements GetName
 {
 	ACCEPT("Accept"),
@@ -59,7 +59,7 @@ public enum HTTPHeaderName
 	private final String name;
 	
 	
-	HTTPHeaderName( String n)
+	HTTPHeader(String n)
 	{
 		name = n;
 	}

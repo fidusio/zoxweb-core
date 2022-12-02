@@ -23,7 +23,7 @@ import org.zoxweb.shared.http.HTTPAuthentication;
 import org.zoxweb.shared.http.HTTPAuthenticationBasic;
 import org.zoxweb.shared.http.HTTPAuthenticationBearer;
 import org.zoxweb.shared.http.HTTPAuthorizationType;
-import org.zoxweb.shared.http.HTTPHeaderName;
+import org.zoxweb.shared.http.HTTPHeader;
 import org.zoxweb.shared.http.HTTPMimeType;
 import org.zoxweb.shared.security.JWT;
 import org.zoxweb.shared.security.JWTToken;
@@ -123,7 +123,7 @@ public class HTTPRequestAttributes
 
 		if (headers != null)
 		{
-			HTTPAuthentication temp = HTTPAuthorizationType.parse((GetNameValue<String>) SharedUtil.lookup(headers, HTTPHeaderName.AUTHORIZATION));
+			HTTPAuthentication temp = HTTPAuthorizationType.parse((GetNameValue<String>) SharedUtil.lookup(headers, HTTPHeader.AUTHORIZATION));
 			
 			if (temp != null && temp instanceof HTTPAuthenticationBearer)
 			{

@@ -117,13 +117,13 @@ public enum HTTPMimeType
 	
 	public static GetNameValue<String> toContentType(GetValue<String> contentType)
 	{
-		return new NVPair(HTTPHeaderName.CONTENT_TYPE, contentType);
+		return new NVPair(HTTPHeader.CONTENT_TYPE, contentType);
 	}
 	
 	
 	public static GetNameValue<String> toContentType(String contentType)
 	{
-		return new NVPair(HTTPHeaderName.CONTENT_TYPE, contentType);
+		return new NVPair(HTTPHeader.CONTENT_TYPE, contentType);
 	}
 
 }

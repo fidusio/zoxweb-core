@@ -83,7 +83,7 @@ public class NIOProxyProtocol
 		{
 			if (headerNotSent)
 			{
-				ByteBufferUtil.write(remoteChannel, HTTPUtil.formatRequest(hmci, true, null, HTTPHeaderName.PROXY_CONNECTION.getName()));
+				ByteBufferUtil.write(remoteChannel, HTTPUtil.formatRequest(hmci, true, null, HTTPHeader.PROXY_CONNECTION.getName()));
 				headerNotSent = false;
 				writePayload(remoteChannel, requestRawBuffer, payloadIndex);
 				if (hmci.getContentLength()  < 0)
@@ -343,16 +343,16 @@ public class NIOProxyProtocol
 	{
 		if (((Boolean)getProperties().getValue(AUTHENTICATION)))
 		{
-			if (requestInfo.getHTTPMessageConfigInterface().getHeaders().get(HTTPHeaderName.PROXY_AUTHORIZATION) == null)
+			if (requestInfo.getHTTPMessageConfigInterface().getHeaders().get(HTTPHeader.PROXY_AUTHORIZATION) == null)
 			{
 				HTTPMessageConfigInterface hccError = createErrorMSG(HTTPStatusCode.PROXY_AUTHENTICATION_REQUIRED.CODE, HTTPStatusCode.PROXY_AUTHENTICATION_REQUIRED.REASON, requestMCCI.getURI());
-				hccError.getHeaders().add(new NVPair(HTTPHeaderName.PROXY_AUTHENTICATE, "Basic "));
+				hccError.getHeaders().add(new NVPair(HTTPHeader.PROXY_AUTHENTICATE, "Basic "));
 				ByteBufferUtil.write(clientChannel, HTTPUtil.formatResponse(hccError, requestRawBuffer));
 				close();
 				return false;	
 			}
 			
-			requestInfo.getHTTPMessageConfigInterface().getHeaders().remove(HTTPHeaderName.PROXY_AUTHORIZATION);
+			requestInfo.getHTTPMessageConfigInterface().getHeaders().remove(HTTPHeader.PROXY_AUTHORIZATION);
 		}
 		return true;
 	}
@@ -434,7 +434,7 @@ public class NIOProxyProtocol
     			requestRawBuffer.write(requestMCCI.getHTTPVersion().getValue() + " 200 Connection established" + ProtocolDelimiter.CRLF);
 				//requestRawBuffer.write(HTTPVersion.HTTP_1_0.getValue() + " 200 Connection established" + ProtocolDelimiter.CRLF);
     			//if (requestInfo.remoteAddress.getPort() != 80)
-    				requestRawBuffer.write(HTTPHeaderName.PROXY_AGENT + ": " +getName() + ProtocolDelimiter.CRLFCRLF);
+    				requestRawBuffer.write(HTTPHeader.PROXY_AGENT + ": " +getName() + ProtocolDelimiter.CRLFCRLF);
     			//else
     			//	requestRawBuffer.write(ProtocolDelimiter.CRLF.getBytes());
     			
@@ -684,7 +684,7 @@ public class NIOProxyProtocol
 	{
 		if (hmci != null)
 		{
-			if(hmci.getHeaders().get(HTTPHeaderName.CONTENT_LENGTH) != null)
+			if(hmci.getHeaders().get(HTTPHeader.CONTENT_LENGTH) != null)
 			log.info(""+hmci.getContentLength() + ", " +hmci.getContentType());
 		}
 	}

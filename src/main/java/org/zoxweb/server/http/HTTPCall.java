@@ -127,7 +127,7 @@ public class HTTPCall
 		String urlURI = fullURL();
 
 		boolean embedPostPutParamsInURI = false;
-		GetNameValue<String> contentType = hcc.getParameters().asArrayValuesString().get(HTTPHeaderName.CONTENT_TYPE.getName());
+		GetNameValue<String> contentType = hcc.getParameters().asArrayValuesString().get(HTTPHeader.CONTENT_TYPE.getName());
 		if (contentType != null && contentType.getValue() != null && contentType.getValue().toLowerCase().indexOf("x-www-form-urlencoded") == -1)
 		{
 			embedPostPutParamsInURI = true;
