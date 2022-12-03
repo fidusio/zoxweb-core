@@ -76,7 +76,7 @@ public final class HTTPDecoder {
         {
           if (HTTPMimeType.lookup(hmci.getContentType()) == HTTPMimeType.MULTIPART_FORM_DATA)
           {
-            String boundaryName = HTTPHeaderValue.BOUNDARY.getValue() + "=";
+            String boundaryName = HTTPAttribute.BOUNDARY.getValue() + "=";
 
             int index = SharedStringUtil.indexOf(hmci.getContentType(), boundaryName, 0, true);
 

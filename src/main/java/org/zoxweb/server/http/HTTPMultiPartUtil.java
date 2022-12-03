@@ -84,7 +84,7 @@ public final class HTTPMultiPartUtil
 	 */
 	public static String formatStartBoundary(String boundary)
 	{
-		return HTTPHeaderValue.BOUNDARY_EDGE + boundary + ProtocolDelimiter.CRLF;
+		return HTTPAttribute.BOUNDARY_EDGE+ boundary + ProtocolDelimiter.CRLF;
 	}
 	
 	
@@ -95,7 +95,7 @@ public final class HTTPMultiPartUtil
 	 */
 	public static String formatEndBoundary(String boundary)
 	{
-		return HTTPHeaderValue.BOUNDARY_EDGE + boundary + HTTPHeaderValue.BOUNDARY_EDGE + ProtocolDelimiter.CRLF;
+		return HTTPAttribute.BOUNDARY_EDGE + boundary + HTTPAttribute.BOUNDARY_EDGE + ProtocolDelimiter.CRLF;
 	}
 	
 	
@@ -139,14 +139,14 @@ public final class HTTPMultiPartUtil
 			ArrayList<GetNameValue<String>> contentDisposition = headers.get(HTTPHeader.CONTENT_DISPOSITION.getName());
 
 			sb.append(HTTPHeader.CONTENT_DISPOSITION.getName()+ProtocolDelimiter.COLON+ProtocolDelimiter.SPACE+
-					   HTTPHeaderValue.FORM_DATA+ProtocolDelimiter.SEMICOLON+ProtocolDelimiter.SPACE+ HTTPHeaderValue.NAME+ProtocolDelimiter.EQUAL +
+					   HTTPAttribute.FORM_DATA+ProtocolDelimiter.SEMICOLON+ProtocolDelimiter.SPACE+ HTTPAttribute.NAME+ProtocolDelimiter.EQUAL +
 					   "\"" + hmpp.getName() + "\"" );
 			
 			if (hmpp.getFileName() != null)
 			{
 				sb.append( ProtocolDelimiter.SEMICOLON);
 				sb.append( ProtocolDelimiter.SPACE);
-				sb.append( HTTPHeaderValue.FILENAME );
+				sb.append( HTTPAttribute.FILENAME );
 				sb.append( ProtocolDelimiter.EQUAL);
 				sb.append( ProtocolDelimiter.DOUBLE_QUOTE);
 				sb.append( hmpp.getFileName());
@@ -218,8 +218,8 @@ public final class HTTPMultiPartUtil
 	public static String formatMultiPartNameValue(String name, String value)
 	{
 		return HTTPHeader.CONTENT_DISPOSITION.getName() + ProtocolDelimiter.COLON+ProtocolDelimiter.SPACE +
-			   HTTPHeaderValue.FORM_DATA + ProtocolDelimiter.SEMICOLON + ProtocolDelimiter.SPACE + 
-			   HTTPHeaderValue.NAME + ProtocolDelimiter.EQUAL + "\"" + name + "\"" +
+			   HTTPAttribute.FORM_DATA + ProtocolDelimiter.SEMICOLON + ProtocolDelimiter.SPACE +
+			   HTTPAttribute.NAME + ProtocolDelimiter.EQUAL + "\"" + name + "\"" +
 			   ProtocolDelimiter.CRLFCRLF + value + ProtocolDelimiter.CRLF;
 	}
 
@@ -308,14 +308,14 @@ public final class HTTPMultiPartUtil
 			
 			
 			sb.append(HTTPHeader.CONTENT_DISPOSITION.getName()+ProtocolDelimiter.COLON+ProtocolDelimiter.SPACE+
-					   HTTPHeaderValue.FORM_DATA+ProtocolDelimiter.SEMICOLON+ProtocolDelimiter.SPACE+ HTTPHeaderValue.NAME+ProtocolDelimiter.EQUAL +
+					   HTTPAttribute.FORM_DATA+ProtocolDelimiter.SEMICOLON+ProtocolDelimiter.SPACE+ HTTPAttribute.NAME+ProtocolDelimiter.EQUAL +
 					   "\"" + hmpp.getName() + "\"" );
 			
 			if (hmpp.getFileName() != null)
 			{
 				sb.append( ProtocolDelimiter.SEMICOLON);
 				sb.append( ProtocolDelimiter.SPACE);
-				sb.append( HTTPHeaderValue.FILENAME );
+				sb.append( HTTPAttribute.FILENAME );
 				sb.append( ProtocolDelimiter.EQUAL);
 				sb.append( ProtocolDelimiter.DOUBLE_QUOTE);
 				sb.append( hmpp.getFileName());
