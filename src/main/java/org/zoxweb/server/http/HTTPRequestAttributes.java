@@ -19,10 +19,10 @@ import java.util.List;
 
 import org.zoxweb.server.io.FileInfoStreamSource;
 import org.zoxweb.server.security.CryptoUtil;
-import org.zoxweb.shared.http.HTTPAuthentication;
-import org.zoxweb.shared.http.HTTPAuthenticationBasic;
-import org.zoxweb.shared.http.HTTPAuthenticationBearer;
-import org.zoxweb.shared.http.HTTPAuthorizationType;
+import org.zoxweb.shared.http.HTTPAuthorization;
+import org.zoxweb.shared.http.HTTPAuthorizationBasic;
+import org.zoxweb.shared.http.HTTPAuthorizationBearer;
+import org.zoxweb.shared.http.HTTPAuthScheme;
 import org.zoxweb.shared.http.HTTPHeader;
 import org.zoxweb.shared.http.HTTPMimeType;
 import org.zoxweb.shared.security.JWT;
@@ -54,7 +54,7 @@ public class HTTPRequestAttributes
 	private String content = null;
 	private OutputDataDecoder<String> contentDecoder = null;
 	private final String contentType;
-	private final HTTPAuthentication httpAuthentication;
+	private final HTTPAuthorization httpAuthentication;
 	private final String pathInfo;
 	private final String uri;
 	private AppIDURI appIDURI;
@@ -123,16 +123,16 @@ public class HTTPRequestAttributes
 
 		if (headers != null)
 		{
-			HTTPAuthentication temp = HTTPAuthorizationType.parse((GetNameValue<String>) SharedUtil.lookup(headers, HTTPHeader.AUTHORIZATION));
+			HTTPAuthorization temp = HTTPAuthScheme.parse((GetNameValue<String>) SharedUtil.lookup(headers, HTTPHeader.AUTHORIZATION));
 			
-			if (temp != null && temp instanceof HTTPAuthenticationBearer)
+			if (temp != null && temp instanceof HTTPAuthorizationBearer)
 			{
 				try
 				{
-					JWT jwt = CryptoUtil.parseJWT(((HTTPAuthenticationBearer)temp).getToken());
+					JWT jwt = CryptoUtil.parseJWT(((HTTPAuthorizationBearer)temp).getToken());
 					jwtToken = new JWTToken();
 					jwtToken.setJWT(jwt);
-					jwtToken.setToken(((HTTPAuthenticationBearer)temp).getToken());
+					jwtToken.setToken(((HTTPAuthorizationBearer)temp).getToken());
 					subjectID = jwt.getPayload().getSubjectID();
 				}
 				catch (Exception e)
@@ -140,9 +140,9 @@ public class HTTPRequestAttributes
 					
 				}
 			}
-			else if (temp != null && temp instanceof HTTPAuthenticationBasic)
+			else if (temp != null && temp instanceof HTTPAuthorizationBasic)
 			{
-				subjectID = ((HTTPAuthenticationBasic)temp).getUser();
+				subjectID = ((HTTPAuthorizationBasic)temp).getUser();
 			}
 			
 			httpAuthentication = temp;//HTTPAuthorizationType.parse((GetNameValue<String>) SharedUtil.lookup(headers, HTTPHeaderName.AUTHORIZATION));
@@ -203,7 +203,7 @@ public class HTTPRequestAttributes
 	 * 
 	 * @return the HTTPAuthentication 
 	 */
-	public HTTPAuthentication getHTTPAuthentication()
+	public HTTPAuthorization getHTTPAuthentication()
 	{
 		return httpAuthentication;
 	}

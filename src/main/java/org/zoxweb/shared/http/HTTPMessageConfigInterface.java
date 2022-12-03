@@ -267,11 +267,11 @@ extends ReferenceID<String>, SetName, SetDescription
 	
 	/**
 	 * 
-	 * @return HTTPAuthentication
+	 * @return HTTPAuthorization
 	 */
-	HTTPAuthentication getAuthentication();
+	HTTPAuthorization getAuthorization();
 	
-	void setAuthentication(HTTPAuthentication httpAuthentication);
+	void setAuthorization(HTTPAuthorization httpAuthentication);
 	
 	/**
 	 * @return the proxy address null if not set

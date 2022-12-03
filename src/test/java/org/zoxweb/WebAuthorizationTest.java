@@ -20,7 +20,7 @@ import java.util.List;
 
 import org.zoxweb.server.http.HTTPCall;
 import org.zoxweb.server.util.GSONUtil;
-import org.zoxweb.shared.http.HTTPAuthorizationType;
+import org.zoxweb.shared.http.HTTPAuthScheme;
 import org.zoxweb.shared.http.HTTPMessageConfig;
 import org.zoxweb.shared.http.HTTPMethod;
 import org.zoxweb.shared.util.GetNameValue;
@@ -39,15 +39,15 @@ public class WebAuthorizationTest {
 			hcc.setMethod(HTTPMethod.POST);
 			
 			List<GetNameValue<String>> tokens = new ArrayList<GetNameValue<String>>();
-			tokens.add(HTTPAuthorizationType.BASIC.toHTTPHeader("userName", ":passwordValue"));
+			tokens.add(HTTPAuthScheme.BASIC.toHTTPHeader("userName", ":passwordValue"));
 			
-			tokens.add(HTTPAuthorizationType.BEARER.toHTTPHeader("tokenValue"));
-			tokens.add(HTTPAuthorizationType.BASIC.toHTTPHeader("userName", null));
-			tokens.add(HTTPAuthorizationType.BASIC.toHTTPHeader(null, null));
+			tokens.add(HTTPAuthScheme.BEARER.toHTTPHeader("tokenValue"));
+			tokens.add(HTTPAuthScheme.BASIC.toHTTPHeader("userName", null));
+			tokens.add(HTTPAuthScheme.BASIC.toHTTPHeader(null, null));
 			
 			for (GetNameValue<String> token : tokens) {
-				System.out.println(token + " " + HTTPAuthorizationType.parse(token));
-				hcc.setAuthentication(HTTPAuthorizationType.parse(token));
+				System.out.println(token + " " + HTTPAuthScheme.parse(token));
+				hcc.setAuthorization(HTTPAuthScheme.parse(token));
 				System.out.println(GSONUtil.toJSON(hcc, true, false, true));
 				HTTPCall hc = new HTTPCall(hcc);
 				System.out.println(hc.sendRequest());

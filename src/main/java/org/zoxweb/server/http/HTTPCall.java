@@ -233,15 +233,15 @@ public class HTTPCall
 			// if url.getUserInfo() is not null ?
 			// if hcc.getUser() && hcc.getPassword() != null
 			// if still null check if the HTTPAuthentication is not null
-			GetNameValue<String> authorizationHeader = HTTPAuthorizationType.BASIC.toHTTPHeader(url.getUserInfo(), null);
+			GetNameValue<String> authorizationHeader = HTTPAuthScheme.BASIC.toHTTPHeader(url.getUserInfo(), null);
 			if (authorizationHeader == null)
 			{
-				authorizationHeader = HTTPAuthorizationType.BASIC.toHTTPHeader(hcc.getUser(), hcc.getPassword());
+				authorizationHeader = HTTPAuthScheme.BASIC.toHTTPHeader(hcc.getUser(), hcc.getPassword());
 			}
 			
-			if(authorizationHeader == null && hcc.getAuthentication() != null)
+			if(authorizationHeader == null && hcc.getAuthorization() != null)
 			{
-				authorizationHeader = hcc.getAuthentication().toHTTPHeader();
+				authorizationHeader = hcc.getAuthorization().toHTTPHeader();
 			}
 			
 			

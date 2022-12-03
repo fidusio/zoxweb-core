@@ -60,11 +60,11 @@ public class HTTPMessageConfig
 		HTTP_METHOD(NVConfigManager.createNVConfig("http_method", "The http method", "HTTPMethod", false, true, HTTPMethod.class)),
 		HTTP_VERSION(NVConfigManager.createNVConfig("http_version", "The http version", "HTTPVersion", false, true, HTTPVersion.class)),
 		HTTP_STATUS_CODE(NVConfigManager.createNVConfig("http_status_code", "The http status code", "HTTPStatusCode", false, true, HTTPStatusCode.class)),
-		HEADER_PARAMETERS(NVConfigManager.createNVConfig("headers_parameters", "The header parameters", "HeaderParameters", false, true, NVGenericMap.class)),
+		HEADERS(NVConfigManager.createNVConfig("headers", "The header parameters", "HeaderParameters", false, true, NVGenericMap.class)),
 		REASON(NVConfigManager.createNVConfig("reason", "The server reason", "Reason", false, true, String.class)),
 		USER(NVConfigManager.createNVConfig("user", "The user name", "User", false, true, String.class)),
 		PASSWORD(NVConfigManager.createNVConfig("password", "The user name password", "Password", false, true, String.class)),
-		AUTHENTICATION(NVConfigManager.createNVConfigEntity("authentication", "The http authentication", "Authentication", false, true, HTTPAuthentication.class, ArrayType.NOT_ARRAY)),
+		AUTHORIZATION(NVConfigManager.createNVConfigEntity("authorization", "The http authorization header", "HTTPAuthorization", false, true, HTTPAuthorization.class, ArrayType.NOT_ARRAY)),
 		//PARAMETERS(NVConfigManager.createNVConfig("parameters", "parameters", "Parameters", false, true, false, String[].class, null)),
 		PARAMETERS(NVConfigManager.createNVConfig("parameters", "parameters", "Parameters", false, true, NVGenericMap.class)),
 		PROXY_ADDRESS(NVConfigManager.createNVConfigEntity("proxy_address", "The proxy address if not null","ProxyAddress",true, false, InetSocketAddressDAO.class, ArrayType.NOT_ARRAY)),
@@ -192,7 +192,7 @@ public class HTTPMessageConfig
 	@SuppressWarnings("unchecked")
 	public NVGenericMap getHeaders()
 	{
-		return (NVGenericMap) lookup(Params.HEADER_PARAMETERS);
+		return (NVGenericMap) lookup(Params.HEADERS);
 	}
 
 //	@Override
@@ -207,7 +207,7 @@ public class HTTPMessageConfig
 	@SuppressWarnings("unchecked")
 	public synchronized void setHeaders(List<GetNameValue<String>> headerParams)
 	{
-		ArrayValues<GetNameValue<String>> headerParameters = ((ArrayValues<GetNameValue<String>>)lookup(Params.HEADER_PARAMETERS));
+		ArrayValues<GetNameValue<String>> headerParameters = ((ArrayValues<GetNameValue<String>>)lookup(Params.HEADERS));
 		if (headerParams == null || headerParams.size() == 0)
 		{
 			headerParameters.clear();
@@ -386,7 +386,7 @@ public class HTTPMessageConfig
 				+ getReadTimeout() + ", getCharset()=" + getCharset()
 				+ ", getProxyAddress()=" + getProxyAddress() + ", getUser()="
 				+ getUser() + ", getPassword()=" + getPassword()
-				+ ", getAuthentication()=" + getAuthentication() + "]";
+				+ ", getAuthentication()=" + getAuthorization() + "]";
 	}
 
 
@@ -543,12 +543,12 @@ public class HTTPMessageConfig
 
 
 	/**
-	 * @see org.zoxweb.shared.http.HTTPMessageConfigInterface#getAuthentication()
+	 * @see org.zoxweb.shared.http.HTTPMessageConfigInterface#getAuthorization()
 	 */
 	@Override
-	public HTTPAuthentication getAuthentication() {
+	public HTTPAuthorization getAuthorization() {
 		
-		return lookupValue(Params.AUTHENTICATION);
+		return lookupValue(Params.AUTHORIZATION);
 	}
 
 
@@ -556,9 +556,9 @@ public class HTTPMessageConfig
 	/**
 	 */
 	@Override
-	public void setAuthentication(HTTPAuthentication httpAuthentication) {
+	public void setAuthorization(HTTPAuthorization httpAuthentication) {
 		
-		setValue(Params.AUTHENTICATION, httpAuthentication);
+		setValue(Params.AUTHORIZATION, httpAuthentication);
 	}
 
 
