@@ -92,6 +92,17 @@ public class HTTPUtil
 		return hmci;
 	}
 
+
+	public static HTTPMessageConfigInterface formatResponse(String content, HTTPStatusCode statusCode)
+			throws IOException
+	{
+		HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit(null, null, (HTTPMethod) null);
+		hmci.setHTTPStatusCode(statusCode);
+		hmci.setContentType(HTTPMimeType.APPLICATION_JSON.format(HTTPConst.CHARSET_UTF_8));
+		hmci.setContent(content);
+		return hmci;
+	}
+
 	public static HTTPMessageConfigInterface formatResponse(NVGenericMap nvgm, HTTPStatusCode statusCode)
 			throws IOException
 	{
