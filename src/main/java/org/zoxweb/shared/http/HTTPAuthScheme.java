@@ -106,7 +106,20 @@ public enum HTTPAuthScheme
 			return new HTTPAuthorizationBearer(value);
 		}
 		
-	}
+	},
+	SSWS("SSWS")
+			{
+				@Override
+				public GetNameValue<String> toHTTPHeader(String... args) {
+					return  new NVPair(HTTPHeader.AUTHORIZATION, SSWS + " " + args[0]);
+				}
+
+				@Override
+				public HTTPAuthorization toHTTPAuthentication(String value) {
+					return null;
+				}
+			},
+
 	;
 
 	

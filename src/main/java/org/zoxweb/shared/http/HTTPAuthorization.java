@@ -32,14 +32,19 @@ public abstract class HTTPAuthorization
 extends SetNameDAO
 {
 
-	public static final NVConfig NVC_AUTH_SCHEME = NVConfigManager.createNVConfig("authorization", null,"HTTPAuthScheme", false, true, HTTPAuthScheme.class);
-	public static final NVConfig NVC_AUTH_SCHEME_OVERRIDE = NVConfigManager.createNVConfig("auth_scheme_override", null,"Token type override", false, true, String.class);
-	public static final NVConfigEntity NVC_HTTP_AUTHORIZATION = new NVConfigEntityLocal(null, null , null, true, false, false, false, HTTPAuthorization.class, SharedUtil.toNVConfigList(NVC_AUTH_SCHEME, NVC_AUTH_SCHEME_OVERRIDE), null, false, SetNameDAO.NVC_NAME_DAO);
+	public static final NVConfig NVC_AUTH_SCHEME = NVConfigManager.createNVConfig("auth_scheme", null,"HTTPAuthScheme", false, true, HTTPAuthScheme.class);
+	//public static final NVConfig NVC_AUTH_SCHEME_OVERRIDE = NVConfigManager.createNVConfig("auth_scheme_override", null,"Token type override", false, true, String.class);
+	public static final NVConfigEntity NVC_HTTP_AUTHORIZATION = new NVConfigEntityLocal(null, null , null, true, false, false, false, HTTPAuthorization.class, SharedUtil.toNVConfigList(NVC_AUTH_SCHEME), null, false, SetNameDAO.NVC_NAME_DAO);
 	
 	protected HTTPAuthorization(NVConfigEntity nvce, HTTPAuthScheme type)
 	{
 		super(nvce);
 		setValue(NVC_AUTH_SCHEME, type);
+	}
+
+	protected HTTPAuthorization(NVConfigEntity nvce)
+	{
+		super(nvce);
 	}
 
 
@@ -48,15 +53,15 @@ extends SetNameDAO
 	{
 		return lookupValue(NVC_AUTH_SCHEME);
 	}
-	public String getAuthSchemeOverride()
-	{
-		return lookupValue(NVC_AUTH_SCHEME_OVERRIDE);
-	}
-
-	public void setAuthSchemeOverride(String tokenType)
-	{
-		setValue(NVC_AUTH_SCHEME_OVERRIDE, tokenType);
-	}
+//	public String getAuthSchemeOverride()
+//	{
+//		return lookupValue(NVC_AUTH_SCHEME_OVERRIDE);
+//	}
+//
+//	public void setAuthSchemeOverride(String tokenType)
+//	{
+//		setValue(NVC_AUTH_SCHEME_OVERRIDE, tokenType);
+//	}
 	
 	abstract public GetNameValue<String> toHTTPHeader();
 	

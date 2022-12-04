@@ -73,8 +73,8 @@ extends HTTPAuthorization
 	
 	public GetNameValue<String> toHTTPHeader()
 	{
-		if (getAuthSchemeOverride() != null)
-			return  getAuthScheme().toHTTPHeader(getAuthSchemeOverride(), getToken());
+//		if (getAuthSchemeOverride() != null)
+//			return  getAuthScheme().toHTTPHeader(getAuthSchemeOverride(), getToken());
 
 		return getAuthScheme().toHTTPHeader(getToken());
 	}
