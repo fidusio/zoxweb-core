@@ -16,6 +16,7 @@
 package org.zoxweb.server.http;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpCookie;
 import java.net.HttpURLConnection;
@@ -28,6 +29,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -38,6 +40,7 @@ import org.zoxweb.server.io.UByteArrayOutputStream;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.server.util.ReflectionUtil;
 import org.zoxweb.server.util.RuntimeUtil;
+import org.zoxweb.shared.data.SimpleMessage;
 import org.zoxweb.shared.http.*;
 import org.zoxweb.shared.http.HTTPEncoder;
 import org.zoxweb.shared.net.InetSocketAddressDAO;
@@ -93,8 +96,19 @@ public class HTTPUtil
 	}
 
 
+
+	public static HTTPMessageConfigInterface formatErrorResponse(String msg, HTTPStatusCode hsc)
+	{
+		SimpleMessage sem = new SimpleMessage(msg, hsc.CODE, hsc.REASON);
+		sem.setCreationTime(System.currentTimeMillis());
+		return formatResponse(GSONUtil.toJSONDefault(sem), hsc);
+	}
+
+
+
+
+
 	public static HTTPMessageConfigInterface formatResponse(String content, HTTPStatusCode statusCode)
-			throws IOException
 	{
 		HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit(null, null, (HTTPMethod) null);
 		hmci.setHTTPStatusCode(statusCode);
