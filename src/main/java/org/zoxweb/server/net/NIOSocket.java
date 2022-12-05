@@ -174,7 +174,9 @@ public class NIOSocket
 							SKAttachment ska = (SKAttachment) key.attachment();
 						    try
 						    {	    	
-						    	if (key.isValid() && SharedUtil.getWrappedValue(key.channel()).isOpen() && key.isReadable())
+						    	if (key.isValid()
+									&& SharedUtil.getWrappedValue(key.channel()).isOpen()
+									&& key.isReadable())
 							    {
 							    	ProtocolProcessor currentPP = (ProtocolProcessor)ska.attachment();
 									if(debug) logger.info(ska.attachment() + " ska is selectable: " + ska.getSKController().isSelectable(key) + " for reading " );
@@ -210,7 +212,9 @@ public class NIOSocket
 								    	}
 							    	}
 							    } 
-						    	else if(key.isValid() && SharedUtil.getWrappedValue(key.channel()).isOpen() && key.isAcceptable()) 
+						    	else if(key.isValid()
+										&& SharedUtil.getWrappedValue(key.channel()).isOpen()
+										&& key.isAcceptable())
 							    {
 							        // a connection was accepted by a ServerSocketChannel.
 							    	
@@ -231,14 +235,9 @@ public class NIOSocket
 							    			{
 							    				attackTimestamp = System.currentTimeMillis();
 							    			}
-							    			
-//
+
 							    			InetSocketAddress isa = (InetSocketAddress) ((ServerSocketChannel)key.channel()).getLocalAddress();
-							    			
-							    			
-							    			
 							    			// in try block with catch exception since logger can point to file log
-							    			
 							    			logger.info( "@ port:" + isa.getPort() + " access denied for:" + sc.getRemoteAddress());
 							    			if(eventListenerManager != null)
 											{
@@ -307,11 +306,15 @@ public class NIOSocket
 							    	}
 	
 							    } 
-							    else if (key.isValid() && SharedUtil.getWrappedValue(key.channel()).isOpen() && key.isConnectable())
+							    else if (key.isValid()
+										&& SharedUtil.getWrappedValue(key.channel()).isOpen()
+										&& key.isConnectable())
 							    {
 							        // a connection was established with a remote server.
 							    } 
-							    else if (key.isValid() && SharedUtil.getWrappedValue(key.channel()).isOpen() && key.isWritable())
+							    else if (key.isValid()
+										&& SharedUtil.getWrappedValue(key.channel()).isOpen()
+										&& key.isWritable())
 							    {
 							        // a channel is ready for writing
 							    }
@@ -319,13 +322,15 @@ public class NIOSocket
 						    }
 						    catch(Exception e)
 						    {
-						    	e.printStackTrace();
+								if(!(e instanceof CancelledKeyException))
+						    		e.printStackTrace();
 						    }
 
 						    try
 						    {
 						    	// key clean up
-						    	if (!key.isValid()|| !SharedUtil.getWrappedValue(key.channel()).isOpen())
+						    	if (!key.isValid()
+									|| !SharedUtil.getWrappedValue(key.channel()).isOpen())
 						    	{
 									key.cancel();
 									SharedUtil.getWrappedValue(key.channel()).close();
@@ -337,35 +342,25 @@ public class NIOSocket
 						    }
 						    
 						}
-						
 						delta = System.nanoTime() - delta;
 						callsCounter.register(delta);
-
 					}
-					
 				}
 
-
-				
 				// stats
 				if(getStatLogCounter() > 0 && (callsCounter.getCounts()%getStatLogCounter() == 0 || (System.currentTimeMillis() - snapTime) > getStatLogCounter()))
 				{
 					snapTime = System.currentTimeMillis();
-
-
 					logger.info("Average dispatch processing " + TimeInMillis.nanosToString(averageProcessingTime()) +
 							" total time:" + TimeInMillis.nanosToString(callsCounter.getDeltas()) +
 							" total dispatches:" + callsCounter.getCounts() + " total select calls:" + selectedCountTotal +
 							" last select count:" + selectedCount + " total select keys:" +selectorController.getSelector().keys().size() +
 						   " available workers:" +  TaskUtil.availableThreads(executor) + "," + TaskUtil.pendingTasks(executor));
-					;
 				}
 			}
 			catch (Exception e) 
 			{
-				// TODO Auto-generated catch block
 				e.printStackTrace();
-				
 			}
 		}
 	}
