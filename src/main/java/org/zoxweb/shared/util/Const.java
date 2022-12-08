@@ -207,7 +207,11 @@ public class Const {
     /**
      * Query type
      */
-    QUERY
+    QUERY,
+    /**
+     * Internal resource specific to the caller
+     */
+    RESOURCE,
   }
 
   public enum Unit

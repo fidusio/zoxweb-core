@@ -22,23 +22,39 @@ public class HTTPCallException
 extends IOException 
 {
 	
-	
-	private HTTPResponseData responseData;
+	private final HTTPStatusCode statusCode;
+	private final HTTPResponseData responseData;
 	
 	public HTTPCallException()
 	{
+		this(null, null, null);
 	}
 	
-	
+
+
 	public HTTPCallException(String reason)
 	{
-		this(reason, null);
+		this(reason, null, null);
 	}
-	
+
 	public HTTPCallException(String reason, HTTPResponseData rd)
+	{
+		this(reason, null, rd);
+	}
+
+	public HTTPCallException(String reason, HTTPStatusCode statusCode)
+	{
+		this(reason, statusCode, null);
+	}
+
+	public HTTPCallException(String reason, HTTPStatusCode statusCode, HTTPResponseData rd)
 	{
 		super( reason);
 		responseData = rd;
+		if (statusCode == null && responseData != null)
+			this.statusCode = HTTPStatusCode.statusByCode(rd.getStatus());
+		else
+			this.statusCode = statusCode;
 	}
 	
 	@Override
@@ -50,5 +66,10 @@ extends IOException
 	public HTTPResponseData getResponseData() 
 	{
 		return responseData;
+	}
+
+	public HTTPStatusCode getStatusCode()
+	{
+		return statusCode;
 	}
 }

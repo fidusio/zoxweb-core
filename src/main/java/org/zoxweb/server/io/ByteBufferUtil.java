@@ -17,6 +17,7 @@ package org.zoxweb.server.io;
 
 import java.io.IOException;
 
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.channels.ByteChannel;
 import java.util.HashMap;
@@ -72,7 +73,7 @@ public class ByteBufferUtil
 
 				if (sq.size() < CACHE_LIMIT)
 				{
-					bb.clear();
+					((Buffer)bb).clear();
 					if (!sq.contains(bb))
 					{
 						sq.queue(bb);
@@ -122,7 +123,7 @@ public class ByteBufferUtil
 		if (copy)
 		{
 			bb.put(buffer, offset, length);
-			bb.flip();
+			((Buffer)bb).flip();
 		}
 			
 		
@@ -161,8 +162,8 @@ public class ByteBufferUtil
 			for (int offset = off; offset < end;)
 			{
 				int length = offset+bb.capacity() > end ? end - offset : bb.capacity();
-	
-				bb.clear();
+
+				((Buffer)bb).clear();
 				bb.put(array, offset, length);
 				offset+=length;
 				write(bc, bb);
@@ -194,7 +195,7 @@ public class ByteBufferUtil
 
 	public static int write(ByteChannel bc, ByteBuffer bb) throws IOException
 	{
-		bb.flip();
+		((Buffer)bb).flip();
 		int totalWritten = 0;
 		while(bb.hasRemaining())
 		{
@@ -220,7 +221,7 @@ public class ByteBufferUtil
 		try
 		{
 			if(flip)
-				bb.flip();
+				((Buffer)bb).flip();
 
 			while (bb.hasRemaining())
 			{
@@ -252,7 +253,7 @@ public class ByteBufferUtil
 	public static void write(ByteBuffer bbSrc, UByteArrayOutputStream ubaosDst, boolean flip) throws IOException
 	{
 		if(flip)
-			bbSrc.flip();
+			((Buffer)bbSrc).flip();
 
 		for (int i = 0; i < bbSrc.limit(); i++)
 		{
