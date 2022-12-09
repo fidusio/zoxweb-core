@@ -21,8 +21,9 @@ import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.nio.channels.ServerSocketChannel;
 import java.security.Provider;
-import java.util.ArrayList;
-import java.util.List;
+
+import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.net.ssl.SSLContext;
@@ -51,15 +52,14 @@ public class NIOConfig
 extends AppCreatorDefault<NIOSocket, ConfigDAO>
 {
 	public static final String RESOURCE_NAME = "NIOConfig";
+	private NIOSocket nioSocket;
 	
 
 	private static final Logger log = Logger.getLogger(NIOConfig.class.getName());
-	private List<Closeable> services = new ArrayList<Closeable>();
+	private Set<Closeable> services = new HashSet<>();
 
-	public String getName()
-	{
-		return RESOURCE_NAME;
-	}
+
+
 	
 	public NIOConfig(String configDAOFile) throws InstantiationException, IllegalAccessException, ClassNotFoundException, IOException
 	{
@@ -76,13 +76,29 @@ extends AppCreatorDefault<NIOSocket, ConfigDAO>
 	{
 		setAppConfig(configDAO);
 	}
-	
-	
-	
-	public NIOSocket createApp() throws IOException
+
+	public NIOConfig()
 	{
-		NIOSocket ret = new NIOSocket(TaskUtil.getDefaultTaskProcessor());
-		services.add(ret);
+	}
+	public NIOConfig setNIOSocket(NIOSocket nios)
+	{
+		nioSocket = nios;
+		return this;
+	}
+
+	public NIOSocket getNIOSocket(){return nioSocket;}
+
+	public String getName()
+	{
+		return RESOURCE_NAME;
+	}
+	
+	
+	public synchronized NIOSocket createApp() throws IOException
+	{
+		if(nioSocket == null)
+			nioSocket = new NIOSocket(TaskUtil.getDefaultTaskProcessor());
+		services.add(nioSocket);
 		
 		for (NVEntity nve : getAppConfig().getContent().values())
 		{
@@ -123,7 +139,7 @@ extends AppCreatorDefault<NIOSocket, ConfigDAO>
 					
 						ssc.bind(new InetSocketAddress(port), backlog);
 	
-						ret.addServerSocket(ssc, psf);
+						nioSocket.addServerSocket(ssc, psf);
 					}
 					
 					log.info("Service added " + psf.getName() +" port:" + port + " backlog:" + backlog);
@@ -132,7 +148,7 @@ extends AppCreatorDefault<NIOSocket, ConfigDAO>
 		}
 		
 		
-		return ret;
+		return nioSocket;
 	}
 	
 	
