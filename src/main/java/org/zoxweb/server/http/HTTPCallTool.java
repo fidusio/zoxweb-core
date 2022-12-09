@@ -101,6 +101,7 @@ public class HTTPCallTool implements Runnable
             String user = params.stringValue("-user", true);
             String password = params.stringValue("-password", true);
             boolean errorAsException = params.nameExists("-eae");
+            boolean certCheckEnabled = params.nameExists("-certCheckEnabled");
             System.out.println("ErrorAsException: " + errorAsException);
 
             log.info("proxy: " + proxy);
@@ -115,14 +116,14 @@ public class HTTPCallTool implements Runnable
                 hmci.setHTTPErrorAsException(errorAsException);
 
                 hmci.setContentType(HTTPMimeType.APPLICATION_JSON);
-                hmci.setSecureCheckEnabled(false);
+                hmci.setSecureCheckEnabled(certCheckEnabled);
                 if (content != null)
                     hmci.setContent(content);
                 log.info(GSONUtil.toJSON((HTTPMessageConfig) hmci, true, false, false));
                 hmcis.add(hmci);
             }
             long ts = System.currentTimeMillis();
-            int messages = 0;
+            //int messages = 0;
             for(int i = 0; i < repeat; i++)
             {
 //                while(TaskUtil.getDefaultTaskProcessor().availableExecutorThreads() < 10)
