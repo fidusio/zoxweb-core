@@ -23,6 +23,7 @@ import org.zoxweb.shared.net.InetSocketAddressDAO;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
@@ -173,7 +174,7 @@ public class NIOTunnel
     		do
             {
     			{
-    				currentBB.clear();
+					((Buffer)currentBB).clear();
     				read = readChannel.read(currentBB);
     			}
     			if (read > 0)

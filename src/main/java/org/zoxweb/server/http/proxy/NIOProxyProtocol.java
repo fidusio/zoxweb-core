@@ -17,6 +17,7 @@ package org.zoxweb.server.http.proxy;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
@@ -223,7 +224,7 @@ public class NIOProxyProtocol
 			int read = 0;
     		do
     		{
-    			sourceBB.clear();
+				((Buffer)sourceBB).clear();
     			
     			read = ((SocketChannel)key.channel()).read(sourceBB);
     			if (read > 0)

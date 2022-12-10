@@ -90,7 +90,6 @@ public class NIOSocket
 		SharedUtil.checkIfNulls("Null values", sa, psf);
 		ServerSocketChannel ssc = ServerSocketChannel.open();
 		ssc.bind(sa, backlog);
-		logger.info(ssc + " added");
 		return addServerSocket(ssc, psf);
 	}
 	

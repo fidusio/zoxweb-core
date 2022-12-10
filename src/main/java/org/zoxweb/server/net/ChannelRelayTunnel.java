@@ -17,6 +17,7 @@ package org.zoxweb.server.net;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.channels.ByteChannel;
 import java.nio.channels.SelectionKey;
@@ -114,7 +115,7 @@ public class  ChannelRelayTunnel
 			int read;
 			do
 			{
-				sBuffer.clear();
+				((Buffer)sBuffer).clear();
 				read = ((SocketChannel)currentSK.channel()).read(sBuffer);
 				
 //				SSLSessionData outputSSLSessionData = getOutputSSLSessionData();
