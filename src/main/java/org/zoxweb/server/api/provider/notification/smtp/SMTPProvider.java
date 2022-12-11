@@ -35,6 +35,7 @@ import jakarta.mail.internet.MimeMessage;
 import org.zoxweb.server.api.APIServiceProviderBase;
 import org.zoxweb.server.http.HTTPUtil;
 
+import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.shared.util.GetName;
 import org.zoxweb.shared.util.GetValue;
@@ -49,6 +50,7 @@ import org.zoxweb.shared.api.APINotificationDelivery;
 import org.zoxweb.shared.api.APINotificationMessage;
 import org.zoxweb.shared.api.APITransactionInfo;
 import org.zoxweb.shared.filters.MessageContentFilter;
+import sun.jvm.hotspot.ui.tree.SimpleTreeModel;
 
 /**
  * The Simple Mail Transfer Protocol (SMTP) provider class is used an email from the server.
@@ -59,7 +61,7 @@ public class SMTPProvider
 	implements APINotification<Void>
 {
 
-	private static final transient Logger log = Logger.getLogger("SMTPProvider");
+	private static final LogWrapper log = new LogWrapper(SMTPProvider.class);
 	
 	/**
 	 * This enum contains SMTP message parameters.
@@ -204,9 +206,8 @@ public class SMTPProvider
 
 		         // Send Message
 		         Transport.send(msg);
-		         
-		         
-		        log.info(SMTPMessageIDFilter.SINGLETON.validate(msg.getHeader(SMTPMessageParam.MESSAGE_ID.getValue())));
+
+				 if (log.isEnabled()) log.getLogger().info(SMTPMessageIDFilter.SINGLETON.validate(msg.getHeader(SMTPMessageParam.MESSAGE_ID.getValue())));
 		      } 
 		      
 		      catch (MessagingException e)

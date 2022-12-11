@@ -15,24 +15,23 @@
  */
 package org.zoxweb.server.net;
 
-import java.nio.channels.SelectionKey;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.logging.Logger;
-
 import org.zoxweb.server.io.IOUtil;
-
+import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.task.TaskSchedulerProcessor;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.shared.util.Appointment;
 import org.zoxweb.shared.util.Const.TimeInMillis;
 import org.zoxweb.shared.util.SharedUtil;
 
+import java.nio.channels.SelectionKey;
+import java.util.HashSet;
+import java.util.Set;
+
 public class NIOChannelCleaner
 	implements Runnable
 {
 
-	private static final Logger log = Logger.getLogger(NIOChannelCleaner.class.getName());
+	private static final LogWrapper log = new LogWrapper(NIOChannelCleaner.class.getName());
 	private final Set<SelectionKey> set = new HashSet<SelectionKey>();
 	private final long sleepTime;
 
@@ -46,7 +45,7 @@ public class NIOChannelCleaner
 	{
 		this.sleepTime = sleepTime;
 		tsa = tsp.queue(sleepTime, this);
-		log.info("started");
+		if(log.isEnabled()) log.getLogger().info("started");
 	}
 	
 	@Override

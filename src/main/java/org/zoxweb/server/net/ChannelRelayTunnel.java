@@ -15,6 +15,11 @@
  */
 package org.zoxweb.server.net;
 
+import org.zoxweb.server.io.ByteBufferUtil;
+import org.zoxweb.server.io.ByteBufferUtil.BufferType;
+import org.zoxweb.server.io.IOUtil;
+import org.zoxweb.server.logging.LogWrapper;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.nio.Buffer;
@@ -22,19 +27,14 @@ import java.nio.ByteBuffer;
 import java.nio.channels.ByteChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
-import java.util.logging.Logger;
-
-import org.zoxweb.server.io.ByteBufferUtil;
-import org.zoxweb.server.io.IOUtil;
-import org.zoxweb.server.io.ByteBufferUtil.BufferType;
 
 
 public class  ChannelRelayTunnel
 	extends ProtocolProcessor
 {
 
-	private static boolean debug = false;
-	private static final Logger log = Logger.getLogger(ChannelRelayTunnel.class.getName());
+
+	private static final LogWrapper log = new LogWrapper(ChannelRelayTunnel.class).setEnabled(false);
 
 	private ByteChannel readSource;
 	private ByteChannel writeDestination;
@@ -130,7 +130,7 @@ public class  ChannelRelayTunnel
 //					else
 					{
 						ByteBufferUtil.write(writeDestination, sBuffer);
-						if (debug) log.info(ByteBufferUtil.toString(sBuffer));
+						if(log.isEnabled()) log.getLogger().info(ByteBufferUtil.toString(sBuffer));
 					}
 				}
 			}while(read > 0);
@@ -141,7 +141,7 @@ public class  ChannelRelayTunnel
 		}
 		catch(Exception e)
 		{
-			log.info("error:" +e);
+			if(log.isEnabled()) log.getLogger().info("error:" +e);
 			if (!(e instanceof IOException))
 				e.printStackTrace();
 			IOUtil.close(this);
@@ -162,7 +162,7 @@ public class  ChannelRelayTunnel
 			try 
 			{
 				wait(100);
-				if(debug) log.info("after wait");
+				if(log.isEnabled()) log.getLogger().info("after wait");
 			} 
 			catch (InterruptedException e)
 			{
