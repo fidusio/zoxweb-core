@@ -15,6 +15,18 @@
  */
 package org.zoxweb.server.net.security;
 
+import org.zoxweb.server.io.IOUtil;
+import org.zoxweb.server.logging.LogWrapper;
+import org.zoxweb.server.net.NIOSocket;
+import org.zoxweb.server.net.NIOTunnel.NIOTunnelFactory;
+import org.zoxweb.server.net.NetworkTunnel;
+import org.zoxweb.server.security.CryptoUtil;
+import org.zoxweb.server.task.TaskUtil;
+import org.zoxweb.server.util.GSONUtil;
+import org.zoxweb.shared.net.InetSocketAddressDAO;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLServerSocketFactory;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
@@ -24,25 +36,11 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.channels.ServerSocketChannel;
 
-import java.util.logging.Logger;
-
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLServerSocketFactory;
-
-import org.zoxweb.server.io.IOUtil;
-import org.zoxweb.server.net.NIOSocket;
-import org.zoxweb.server.net.NetworkTunnel;
-import org.zoxweb.server.net.NIOTunnel.NIOTunnelFactory;
-import org.zoxweb.server.security.CryptoUtil;
-import org.zoxweb.server.task.TaskUtil;
-import org.zoxweb.server.util.GSONUtil;
-import org.zoxweb.shared.net.InetSocketAddressDAO;
-
 public class SecureNetworkTunnel
     implements Runnable, Closeable
 {
 
-	private static final Logger log = Logger.getLogger(SecureNetworkTunnel.class.getName());
+	public static final LogWrapper log = new LogWrapper(SecureNetworkTunnel.class);
 	/*
 	 * json file format
 	   {
@@ -80,7 +78,7 @@ public class SecureNetworkTunnel
 	{
 		try
 		{
-			log.info("secure socket started " + ss.getLocalPort() + " " + remoteSocketAddress);
+			if (log.isEnabled()) log.getLogger().info("secure socket started " + ss.getLocalPort() + " " + remoteSocketAddress);
 			while (!ss.isClosed())
 			{
 				Socket sIn = ss.accept();
@@ -129,7 +127,7 @@ public class SecureNetworkTunnel
 			
 			if (nio)
 			{
-				log.info("Creating NIO Secure tunnel");
+				if (log.isEnabled()) log.info("Creating NIO Secure tunnel");
 				
 				NIOSocket nios = new NIOSocket(TaskUtil.getDefaultTaskProcessor());
 				for(; index < args.length; index++)
@@ -156,7 +154,7 @@ public class SecureNetworkTunnel
 			}
 			else
 			{
-				log.info("Creating classic Secure tunnel");
+				if (log.isEnabled()) log.info("Creating classic Secure tunnel");
 				SSLServerSocketFactory sslssf = sslc.getServerSocketFactory();
 				for(; index < args.length; index++)
 				{
@@ -170,7 +168,7 @@ public class SecureNetworkTunnel
 					}
 					catch(Exception e)
 					{
-						log.info("Failed to start " + args[index]);
+						if (log.isEnabled()) log.info("Failed to start " + args[index]);
 						e.printStackTrace();
 					}
 				}

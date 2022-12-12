@@ -16,7 +16,7 @@
 package org.zoxweb.shared.util;
 
 /**
- * The SimpleQueue is a FIFO queue class. It is used to store non null Objects only.
+ * The SimpleQueue is a FIFO queue class. It is used to store none null Objects only.
  * <br>
  * The following code illustrate how to use this class: <xmp> ... SimpleQueue q = new
  * SimpleQueue(); // to add an object to the queue q.queue( element); ... // to

@@ -15,18 +15,17 @@
  */
 package org.zoxweb.server.io;
 
-import java.io.IOException;
+import org.zoxweb.server.util.ServerUtil;
+import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.SimpleQueue;
 
+import java.io.IOException;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.channels.ByteChannel;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
-
-import org.zoxweb.server.util.ServerUtil;
-import org.zoxweb.shared.util.SharedUtil;
-import org.zoxweb.shared.util.SimpleQueue;
 
 public class ByteBufferUtil 
 {
@@ -39,6 +38,7 @@ public class ByteBufferUtil
 	private static final ByteBufferUtil SINGLETON = new ByteBufferUtil();
 
 	final private Map<Integer, SimpleQueue<ByteBuffer>> cachedBuffers = new HashMap<Integer, SimpleQueue<ByteBuffer>>();
+	final private SimpleQueue<UByteArrayOutputStream> cachedUBAOS = new SimpleQueue<UByteArrayOutputStream>();
 	volatile private int count;
 	volatile private int availableCapacity;
 
@@ -55,6 +55,15 @@ public class ByteBufferUtil
 	{	
 
 		
+	}
+
+	private void cache0(UByteArrayOutputStream ubaos)
+	{
+		if(ubaos != null && ubaos.size() <= 1024)
+		{
+			ubaos.reset();
+			cachedUBAOS.queue(ubaos);
+		}
 	}
 	
 	private void cache0(ByteBuffer bb)
@@ -193,6 +202,19 @@ public class ByteBufferUtil
 		return SINGLETON.toByteBuffer0(bType, buffer, offset, length, copy);
 	}
 
+
+	public static UByteArrayOutputStream allocateUBAOS(int capacity)
+	{
+		if (capacity <= 1024)
+		{
+			UByteArrayOutputStream ret = SINGLETON.cachedUBAOS.dequeue();
+			if (ret != null)
+				return ret;
+		}
+
+		return new UByteArrayOutputStream(capacity);
+	}
+
 	public static int write(ByteChannel bc, ByteBuffer bb) throws IOException
 	{
 		((Buffer)bb).flip();
@@ -276,6 +298,14 @@ public class ByteBufferUtil
 	{
 		if(buffers != null) {
 			for(ByteBuffer bb: buffers)
+				SINGLETON.cache0(bb);
+		}
+	}
+
+	public static void cache(UByteArrayOutputStream ...buffers)
+	{
+		if(buffers != null) {
+			for(UByteArrayOutputStream bb: buffers)
 				SINGLETON.cache0(bb);
 		}
 	}

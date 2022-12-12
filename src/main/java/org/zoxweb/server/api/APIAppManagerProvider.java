@@ -1,13 +1,6 @@
 package org.zoxweb.server.api;
 
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-
-import java.util.List;
-import java.util.UUID;
-import java.util.logging.Logger;
-
-
+import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.security.CryptoUtil;
 import org.zoxweb.server.security.JWTProvider;
 import org.zoxweb.server.security.KeyMakerProvider;
@@ -17,44 +10,35 @@ import org.zoxweb.shared.api.APIAppManager;
 import org.zoxweb.shared.api.APIDataStore;
 import org.zoxweb.shared.api.APIException;
 import org.zoxweb.shared.api.APISecurityManager;
+import org.zoxweb.shared.crypto.CryptoConst.MDType;
 import org.zoxweb.shared.crypto.EncryptedKeyDAO;
 import org.zoxweb.shared.crypto.PasswordDAO;
-import org.zoxweb.shared.crypto.CryptoConst.MDType;
 import org.zoxweb.shared.data.*;
 import org.zoxweb.shared.db.QueryMarker;
 import org.zoxweb.shared.db.QueryMatch;
 import org.zoxweb.shared.db.QueryMatchString;
 import org.zoxweb.shared.filters.AppIDNameFilter;
 import org.zoxweb.shared.filters.FilterType;
-import org.zoxweb.shared.security.AccessException;
-import org.zoxweb.shared.security.AccessSecurityException;
-import org.zoxweb.shared.security.JWT;
-import org.zoxweb.shared.security.SecurityConsts;
-import org.zoxweb.shared.security.SubjectAPIKey;
+import org.zoxweb.shared.security.*;
 import org.zoxweb.shared.security.model.PPEncoder;
 import org.zoxweb.shared.security.model.PermissionModel;
 import org.zoxweb.shared.security.model.SecurityModel;
 import org.zoxweb.shared.security.model.SecurityModel.AppPermission;
-
 import org.zoxweb.shared.security.model.SecurityModel.Role;
 import org.zoxweb.shared.security.shiro.ShiroAssociationRuleDAO;
 import org.zoxweb.shared.security.shiro.ShiroAssociationType;
 import org.zoxweb.shared.security.shiro.ShiroPermissionDAO;
 import org.zoxweb.shared.security.shiro.ShiroRoleDAO;
-import org.zoxweb.shared.util.CRUD;
-import org.zoxweb.shared.util.Const;
+import org.zoxweb.shared.util.*;
 import org.zoxweb.shared.util.Const.LogicalOperator;
 import org.zoxweb.shared.util.Const.RelationalOperator;
 import org.zoxweb.shared.util.Const.Status;
 import org.zoxweb.shared.util.ExceptionReason.Reason;
-import org.zoxweb.shared.util.GetValue;
-import org.zoxweb.shared.util.MetaToken;
-import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVEntity;
-import org.zoxweb.shared.util.NVGenericMap;
-import org.zoxweb.shared.util.NVPair;
-import org.zoxweb.shared.util.SharedStringUtil;
-import org.zoxweb.shared.util.SharedUtil;
+
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 public class APIAppManagerProvider
     implements APIAppManager {
@@ -63,8 +47,8 @@ public class APIAppManagerProvider
     private volatile APISecurityManager<?> apiSecurityManager;
 
     //private HashMap<String, SubjectAPIKey> cache = new HashMap<String, SubjectAPIKey>();
-	private static final transient Logger log = Logger.getLogger(APIAppManagerProvider.class.getName());
-	private static final NVConfigEntity USER_NVCs[] =
+	private static final LogWrapper log = new LogWrapper(APIAppManagerProvider.class);
+	private static final NVConfigEntity[] USER_NVCs =
 		{
 			UserIDCredentialsDAO.NVC_USER_ID_CREDENTIALS_DAO,
 			UserPreferenceDAO.NVC_USER_PREFERENCE_DAO,
@@ -227,7 +211,7 @@ public class APIAppManagerProvider
 			throws NullPointerException, IllegalArgumentException, AccessException, APIException
 	{
 		SharedUtil.checkIfNulls("subjectID null", apiDataStore, subjectID);
-		QueryMatch<?> query = null;
+		QueryMatch<?> query;
 		if (FilterType.EMAIL.isValid(subjectID))
 		{
 			// if we have an email
@@ -284,11 +268,13 @@ public class APIAppManagerProvider
 			throw new APIException("User already exist");
 		}
 
-		log.info("SubjectID: " + userID.getSubjectID());
-		log.info("First Name: " + userID.getUserInfo().getFirstName());
-		log.info("Middle Name: " + userID.getUserInfo().getMiddleName());
-		log.info("Last Name: " + userID.getUserInfo().getLastName());
-		log.info("Birthday: " + userID.getUserInfo().getDOB());
+		if (log.isEnabled()) {
+			log.getLogger().info("SubjectID: " + userID.getSubjectID());
+			log.getLogger().info("First Name: " + userID.getUserInfo().getFirstName());
+			log.getLogger().info("Middle Name: " + userID.getUserInfo().getMiddleName());
+			log.getLogger().info("Last Name: " + userID.getUserInfo().getLastName());
+			log.getLogger().info("Birthday: " + userID.getUserInfo().getDOB());
+		}
 		
 		userID.setReferenceID(null);
 		SharedUtil.validate(userID, true, true);
@@ -331,9 +317,7 @@ public class APIAppManagerProvider
 			switch(userIDStatus)
 			{
 			case ACTIVE:
-				break;
 			case DEACTIVATED:
-				break;
 			case INACTIVE:
 				break;
 			case PENDING_ACCOUNT_ACTIVATION:
@@ -407,7 +391,7 @@ public class APIAppManagerProvider
     {
     	if (subjectAPIKey != null) {
 			getAPISecurityManager().invalidateResource(subjectAPIKey.getSubjectID());
-			log.info("" + subjectAPIKey.getClass().getName());
+			if (log.isEnabled()) log.getLogger().info("" + subjectAPIKey.getClass().getName());
 			delete(subjectAPIKey, subjectAPIKey instanceof AppDeviceDAO);
 		}
     }
@@ -452,7 +436,7 @@ public class APIAppManagerProvider
     public JWT validateJWT(String token)
             throws NullPointerException, IllegalArgumentException, AccessException, APIException{
         SharedUtil.checkIfNulls("Null Token", token);
-        JWT jwt = null;
+        JWT jwt;
         try {
             jwt = CryptoUtil.parseJWT(token);
         } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
@@ -830,7 +814,7 @@ public class APIAppManagerProvider
     		
     		
     		ShiroRoleDAO appAdminRole = SecurityModel.Role.APP_ADMIN.toRole(domainID, appID);
-    		PermissionModel adminPermissions[] = {
+    		PermissionModel[] adminPermissions = {
     				AppPermission.ASSIGN_ROLE_APP,
     				AppPermission.ORDER_DELETE,
     				AppPermission.ORDER_UPDATE,
@@ -852,7 +836,7 @@ public class APIAppManagerProvider
     		}
     		
     		ShiroRoleDAO appUserRole = SecurityModel.Role.APP_USER.toRole(domainID, appID);
-    		PermissionModel userPermissions[] = {
+    		PermissionModel[] userPermissions = {
     				AppPermission.ORDER_CREATE,
     				AppPermission.ORDER_DELETE,
     				AppPermission.ORDER_UPDATE,
@@ -867,7 +851,7 @@ public class APIAppManagerProvider
     		}
     		
     		ShiroRoleDAO appServiceProviderRole = SecurityModel.Role.APP_SERVICE_PROVIDER.toRole(domainID, appID);
-    		PermissionModel spPermissions[] = 
+    		PermissionModel[] spPermissions =
     		{
     				AppPermission.ORDER_UPDATE_STATUS_APP,
     				AppPermission.ORDER_READ_APP,
@@ -881,7 +865,7 @@ public class APIAppManagerProvider
     		}
     		
     		ShiroRoleDAO appResourceRole = SecurityModel.Role.RESOURCE.toRole(domainID, appID);
-    		PermissionModel resourcePermissions[] = {
+    		PermissionModel[] resourcePermissions = {
     				AppPermission.RESOURCE_READ_PRIVATE,
     				AppPermission.RESOURCE_READ_PUBLIC
     		};
@@ -958,16 +942,16 @@ public class APIAppManagerProvider
 			 throws NullPointerException, IllegalArgumentException, AccessException
 	{
 		String permission = PPEncoder.SINGLETON.encode(SecurityModel.PERM_ASSIGN_ROLE, appID.getAppGID());
-		log.info("permision to check:" + permission);
-		log.info(SharedUtil.toCanonicalID(',', subjectID, roleName));
+		if (log.isEnabled()) log.getLogger().info("permision to check:" + permission);
+		if (log.isEnabled()) log.getLogger().info(SharedUtil.toCanonicalID(',', subjectID, roleName));
 		getAPISecurityManager().checkPermissions(permission);
 		// permission checked
 		UserIDDAO userID = lookupUserIDDAO(subjectID);
 		if (userID != null)
 		{
 			String roleSubjectID = appID.getAppGID() + "-" + roleName;
-			log.info("role:" + roleSubjectID);
-			log.info("userid:" +userID.getPrimaryEmail() + ":" + userID.getUserID());
+			if (log.isEnabled()) log.getLogger().info("role:" + roleSubjectID);
+			if (log.isEnabled()) log.getLogger().info("userid:" +userID.getPrimaryEmail() + ":" + userID.getUserID());
 			ShiroRoleDAO role = getAPISecurityManager().lookupRole(roleSubjectID);
 			if (role == null)
 			{
@@ -981,12 +965,12 @@ public class APIAppManagerProvider
 				{
 				case CREATE:
 					getAPISecurityManager().addShiroRule(sard);
-					log.info("Created");
+					if (log.isEnabled()) log.getLogger().info("Created");
 					getAPISecurityManager().invalidateResource(subjectID);
 					break;
 				case DELETE:
 					getAPISecurityManager().deleteShiroRule(sard);
-					log.info("Deleted");
+					if (log.isEnabled()) log.getLogger().info("Deleted");
 					getAPISecurityManager().invalidateResource(subjectID);
 				default:
 					break;

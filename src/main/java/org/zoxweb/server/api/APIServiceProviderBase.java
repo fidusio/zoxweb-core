@@ -15,8 +15,6 @@
  */
 package org.zoxweb.server.api;
 
-import java.util.concurrent.atomic.AtomicLong;
-
 import org.zoxweb.server.util.ServerUtil;
 import org.zoxweb.shared.api.APIConfigInfo;
 import org.zoxweb.shared.api.APIExceptionHandler;
@@ -25,6 +23,8 @@ import org.zoxweb.shared.data.DataConst.APIProperty;
 import org.zoxweb.shared.util.Const;
 import org.zoxweb.shared.util.GetName;
 import org.zoxweb.shared.util.SharedUtil;
+
+import java.util.concurrent.atomic.AtomicLong;
 
 @SuppressWarnings("serial")
 public abstract class APIServiceProviderBase<V>
@@ -43,7 +43,7 @@ public abstract class APIServiceProviderBase<V>
 
 	/**
 	 * Updates the last time object was used (milliseconds).
-	 * @return
+	 * @return last time accessed
 	 */
 	protected synchronized long touch()
 	{
@@ -107,15 +107,11 @@ public abstract class APIServiceProviderBase<V>
 			{
 			case ASYNC_CREATE:
 				return (T) Boolean.TRUE;
-			case ASYNC_DELETE:
-				break;
-			case ASYNC_READ:
-				break;
-			case ASYNC_UPDATE:
-				break;
 			case RETRY_DELAY:
 				return (T)  Long.valueOf(Const.TimeInMillis.SECOND.MILLIS*ServerUtil.RNG.nextInt(4) + Const.TimeInMillis.SECOND.MILLIS*2);
-				
+			case ASYNC_DELETE:
+			case ASYNC_READ:
+			case ASYNC_UPDATE:
 			default:
 				break;
 			

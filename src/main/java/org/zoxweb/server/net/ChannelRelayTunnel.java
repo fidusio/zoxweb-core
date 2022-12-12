@@ -121,17 +121,8 @@ public class  ChannelRelayTunnel
 //				SSLSessionData outputSSLSessionData = getOutputSSLSessionData();
 				if (read > 0)
 				{
-//					if (outputSSLSessionData != null)
-//					{
-//						outputSSLSessionData.write(writeDestination, bBuffer, true);
-//						if (debug) log.info("Wrote Encrypted DATA !!!!!");
-//
-//					}
-//					else
-					{
-						ByteBufferUtil.write(writeDestination, sBuffer);
-						if(log.isEnabled()) log.getLogger().info(ByteBufferUtil.toString(sBuffer));
-					}
+					ByteBufferUtil.write(writeDestination, sBuffer);
+					if(log.isEnabled()) log.getLogger().info(ByteBufferUtil.toString(sBuffer));
 				}
 			}while(read > 0);
 			

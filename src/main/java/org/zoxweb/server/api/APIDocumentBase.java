@@ -1,19 +1,16 @@
 package org.zoxweb.server.api;
 
-import java.io.IOException;
-import java.io.InputStream;
-
-
-import java.io.OutputStream;
-import java.util.concurrent.locks.Lock;
-
 import org.zoxweb.server.util.LockQueue;
 import org.zoxweb.shared.api.APIDocumentStore;
 import org.zoxweb.shared.api.APIException;
-
 import org.zoxweb.shared.api.APIFileInfoMap;
 import org.zoxweb.shared.data.DataConst.DocumentStatus;
 import org.zoxweb.shared.security.AccessException;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.concurrent.locks.Lock;
 
 @SuppressWarnings("serial")
 abstract public class APIDocumentBase<V>
@@ -51,18 +48,20 @@ abstract public class APIDocumentBase<V>
 			deleteQueue = null;
 		}
 	}
-	
-	
-	
+
+
 	/**
 	 * This method creates a file.
 	 * @param folderID
 	 * @param file
 	 * @param is
+	 * @param closeStream
 	 * @return
+	 * @throws NullPointerException
 	 * @throws IllegalArgumentException
 	 * @throws IOException
-	 * @throws NullPointerException
+	 * @throws AccessException
+	 * @throws APIException
 	 */
 	public APIFileInfoMap createFile(String folderID, APIFileInfoMap file, InputStream is, boolean closeStream)  
 			throws NullPointerException, IllegalArgumentException, IOException, AccessException, APIException

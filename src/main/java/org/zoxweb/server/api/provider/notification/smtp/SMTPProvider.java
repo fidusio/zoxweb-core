@@ -15,42 +15,20 @@
  */
 package org.zoxweb.server.api.provider.notification.smtp;
 
-import java.util.List;
-import java.util.Properties;
-import java.util.logging.Logger;
-
-//import javax.mail.Message;
-//import javax.mail.MessagingException;
-//import javax.mail.PasswordAuthentication;
-//import javax.mail.Session;
-//import javax.mail.Transport;
-//import javax.mail.internet.InternetAddress;
-//import javax.mail.internet.MimeMessage;
-
-//import jakarta.mail.*;
-
 import jakarta.mail.*;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import org.zoxweb.server.api.APIServiceProviderBase;
 import org.zoxweb.server.http.HTTPUtil;
-
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.task.TaskUtil;
-import org.zoxweb.shared.util.GetName;
-import org.zoxweb.shared.util.GetValue;
-import org.zoxweb.shared.util.NVPair;
-import org.zoxweb.shared.util.SharedStringUtil;
-import org.zoxweb.shared.util.SharedUtil;
-import org.zoxweb.shared.api.APIException;
-import org.zoxweb.shared.api.APIExceptionHandler;
-import org.zoxweb.shared.api.APIMessage;
-import org.zoxweb.shared.api.APINotification;
-import org.zoxweb.shared.api.APINotificationDelivery;
-import org.zoxweb.shared.api.APINotificationMessage;
-import org.zoxweb.shared.api.APITransactionInfo;
+import org.zoxweb.shared.api.*;
 import org.zoxweb.shared.filters.MessageContentFilter;
-import sun.jvm.hotspot.ui.tree.SimpleTreeModel;
+import org.zoxweb.shared.util.*;
+
+import java.util.List;
+import java.util.Properties;
+
 
 /**
  * The Simple Mail Transfer Protocol (SMTP) provider class is used an email from the server.
