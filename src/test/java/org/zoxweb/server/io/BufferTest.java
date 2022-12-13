@@ -15,57 +15,77 @@
  */
 package org.zoxweb.server.io;
 
-import java.nio.ByteBuffer;
-
-import java.util.List;
-
 import org.zoxweb.server.io.ByteBufferUtil.BufferType;
 import org.zoxweb.shared.util.Const;
+import org.zoxweb.shared.util.SharedStringUtil;
 import org.zoxweb.shared.util.SharedUtil;
+
+import java.nio.ByteBuffer;
+import java.util.List;
 
 public class BufferTest
 {
 	public static void main(String[] args){
 		
 		UByteArrayOutputStream bufferOutput = new UByteArrayOutputStream();
-		byte[] delims = "\n".getBytes();
-	
-		//ByteBufferParser byteParser = new ByteBufferParser(bufferOutput, delims);
+		byte[] delimiter = SharedStringUtil.getBytes( "\n");
 
-		byte[][] data = {"John".getBytes(),
-			" Smith\r".getBytes(),
-			"\nis at work".getBytes(),
-			"\ncoding\r\n from 9 to 5.\nMarwan is always looking over my shoulder\n".getBytes(),
-			"".getBytes(),
+
+
+
+		String[] data = {"John",
+				" Smith\r",
+				"\nis at work",
+				"\ncoding\r\n from 9 to 5.\nMario is always looking over my shoulder\n",
+				"\n\nMarioTaZa ",
 			null};
 
-		for (int i = 0; i < data.length; i++) {
-			if (data[i] != null) {
-				byte[] dataInput = data[i];
-		    	bufferOutput.write(dataInput);
-		    	//System.out.println(bufferOutput.toString());
+		System.out.println("Data length " + data.length);
+		for (String str : data) {
+			if (str!= null) {
+				bufferOutput.write(str);
 			}
+		}
 		
-		List<byte[]> matchedTokens = ByteBufferParser.parse(bufferOutput, delims);
-		//ArrayList<byte[]> matchedTokens = byteParser.parse();
-		
-			if(matchedTokens.size() > 0) {
-				System.out.println(matchedTokens.size());
-		
-				for (int j = 0; j < matchedTokens.size(); j++) {
-					String s = new String(matchedTokens.get(j));
-					System.out.println(s);
+		List<byte[]> matchedTokens = bufferOutput.parse(delimiter, true);
+		System.out.println("Tokens found " + matchedTokens.size() + " buffer size: " + bufferOutput.size());
+		if(matchedTokens.size() > 0) {
+
+
+			for (int j = 0; j < matchedTokens.size(); j++) {
+				String s = new String(matchedTokens.get(j));
+				System.out.println(j + ":" + s.length() + ":" + s);
+			}
+		}
+
+		long total = 0;
+		for(int i=0; i< 50; i++)
+		{
+			for (String str : data) {
+				if (str!= null) {
+					bufferOutput.write(str);
 				}
 			}
+			long ts = System.nanoTime();
+			matchedTokens = bufferOutput.parse(delimiter,true);
+			ts = System.nanoTime() - ts;
+			total+=ts;
+			System.out.println("it took:" + Const.TimeInMillis.nanosToString(total));
+		}
+
+		//ArrayList<byte[]> matchedTokens = byteParser.parse();
+		System.out.println("Tokens found " + matchedTokens.size() + " buffer size: " + bufferOutput.size());
+		if(matchedTokens.size() > 0) {
+
+
+			for (int j = 0; j < matchedTokens.size(); j++) {
+				String s = new String(matchedTokens.get(j));
+				System.out.println(j + ":" + s.length() + ":" + s);
+			}
+		}
 
 			try {
-//				CustomClassLoader cl = new CustomClassLoader(((URLClassLoader) Thread.currentThread().getContextClassLoader()).getURLs());
-//				
-//
-//				Class<?> clazz = Class.forName("java.nio.CustomHeapByteBuffer", true, cl);
-//				Constructor<?> constructor = clazz.getConstructor(byte[].class, int.class, int.class, int.class, int.class, int.class);
-				
-				byte buffer[] = new byte[1000000];
+				byte[] buffer = new byte[1000000];
 				bufferOutput.write(buffer);
 				buffer = bufferOutput.toByteArray();
 				ByteBuffer bb =  ByteBufferUtil.allocateByteBuffer(BufferType.HEAP, buffer, 0, buffer.length, true);
@@ -74,7 +94,7 @@ public class BufferTest
 				ByteBufferUtil.write(bb, bufferOutput, true);
 				delta = System.nanoTime() - delta;
 				
-				System.out.println("fastwrite:" + bufferOutput.size() +" it took:" + Const.TimeInMillis.nanosToString(delta));
+				System.out.println("fast write:" + bufferOutput.size() +" it took:" + Const.TimeInMillis.nanosToString(delta));
 
 				bb =  ByteBufferUtil.allocateByteBuffer(BufferType.HEAP, buffer, 0, buffer.length, true);
 				bufferOutput.reset();
@@ -98,7 +118,7 @@ public class BufferTest
 				bb.clear();
 				//bb.flip();
 				
-				for (i=0; i < 11; i++) {
+				for (int i=0; i < 11; i++) {
 					try {
 						bb.put((byte) i);
 						System.out.println(SharedUtil.toCanonicalID(',', bb.position(), bb.limit(), bb.capacity()));
@@ -116,12 +136,10 @@ public class BufferTest
 					System.out.println(SharedUtil.toCanonicalID(',', bb.position(), bb.limit(), bb.capacity()));
 				}
 				
-				//ByteBufferUtil.toByteBuffer(bufferOutput);
-				Class<?> c = Class.forName("java.nio.CustomHeapByteBuffer");
-				System.out.println(c.getName());
+
 			} catch (Throwable t) {
 				t.printStackTrace();
 			}
 		}
-	}
+
 }

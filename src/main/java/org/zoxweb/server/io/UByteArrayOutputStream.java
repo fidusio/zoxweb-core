@@ -15,11 +15,13 @@
  */
 package org.zoxweb.server.io;
 
-import java.io.*;
-import java.util.Arrays;
-
 import org.zoxweb.shared.util.SharedStringUtil;
 import org.zoxweb.shared.util.SharedUtil;
+
+import java.io.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * The UByteArrayOutputStream class.
@@ -39,7 +41,7 @@ public class UByteArrayOutputStream
 
 	/**
 	 * 
-	 * @param size
+	 * @param size of initial buffer
 	 */
 	public UByteArrayOutputStream(int size)
 	{
@@ -54,7 +56,7 @@ public class UByteArrayOutputStream
 	
 	/**
 	 * 
-	 * @param buffer
+	 * @param buffer to be written
 	 */
 	public UByteArrayOutputStream(byte[] buffer)
 	{
@@ -63,9 +65,9 @@ public class UByteArrayOutputStream
 
 	/**
 	 * 
-	 * @param buffer
-	 * @param offset
-	 * @param len
+	 * @param buffer to be written
+	 * @param offset of the buffer
+	 * @param len of the data to write
 	 */
 	public UByteArrayOutputStream(byte[] buffer , int offset, int len)
 	{
@@ -112,7 +114,7 @@ public class UByteArrayOutputStream
 	}
 
 	/**
-	 * @param index 
+	 * @param index of the char we need to look at
 	 * @return the char at index.
 	 */
 	public char charAt(int index) 
@@ -121,7 +123,7 @@ public class UByteArrayOutputStream
 	}
 
 	/**
-	 * @param index 
+	 * @param index of byte looking for
 	 * @return the byte at index.
 	 */
 	public byte byteAt(int index) 
@@ -238,13 +240,13 @@ public class UByteArrayOutputStream
 	 * Write a string to the data buffer
 	 * @param str
 	 */
-	public synchronized void write(String str)
+	public void write(String str)
 	{
-		write(SharedStringUtil.getBytes(str), 0, str.length());
+		write(SharedStringUtil.getBytes(str));
 	}
 
 	@Override
-	public synchronized void write(byte[] buf)
+	public void write(byte[] buf)
 	{
 		write(buf, 0, buf.length);
 	}
@@ -504,5 +506,39 @@ public class UByteArrayOutputStream
 		System.out.println("Buffer Length " + baos.buf.length);
 		System.out.println( new String(baos.buf, 0, baos.size()));
 	}
+	public List<byte[]> parse(byte[] delim, boolean noEmpty)
+	{
+		if (delim == null)
+		{
+			throw new NullPointerException("uboas and/or delimiter cannot be null.");
+		}
+
+		if (delim.length == 0)
+		{
+			throw new IllegalArgumentException("Empty delimiter is not accepted.");
+		}
+
+		int match = 0;
+		ArrayList<byte[]> matchedTokens = new ArrayList<byte[]>();
+		int index = 0;
+		synchronized (this)
+		{
+			while ((match = indexOf(index, delim)) != -1)
+			{
+				byte[] message = Arrays.copyOfRange(getInternalBuffer(), index, match);
+
+				if(!noEmpty || message.length > 0)
+					matchedTokens.add(message);
+				index = match+delim.length;
+			}
+			if (index > 0)
+			{
+				removeAt(0, index);
+			}
+		}
+
+		return matchedTokens;
+	}
+
  
 }

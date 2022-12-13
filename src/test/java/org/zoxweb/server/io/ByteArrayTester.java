@@ -15,16 +15,15 @@
  */
 package org.zoxweb.server.io;
 
+import org.zoxweb.shared.util.Const.TypeInBytes;
+import org.zoxweb.shared.util.SharedUtil;
+
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
-
-import org.zoxweb.server.io.UByteArrayOutputStream;
-import org.zoxweb.shared.util.Const.TypeInBytes;
-import org.zoxweb.shared.util.SharedUtil;
 
 public class ByteArrayTester
 {
@@ -107,8 +106,7 @@ public class ByteArrayTester
 			UByteArrayOutputStream.printInfo(baos);
 
 			System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
-			ObjectInputStream ois = new ObjectInputStream(new FileInputStream(
-					"baos"));
+			ObjectInputStream ois = new ObjectInputStream(new FileInputStream("baos"));
 			UByteArrayOutputStream tmp = (UByteArrayOutputStream) ois
 					.readObject();
 			ois.close();
