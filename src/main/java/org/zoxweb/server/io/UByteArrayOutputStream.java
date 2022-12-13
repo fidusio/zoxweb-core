@@ -195,7 +195,6 @@ public class UByteArrayOutputStream
 				{
 					diff = (byte) ((byte)diff-(byte)buff1[i]);
 				}
-				
 				ret.write((byte) diff);
 			}
 			
