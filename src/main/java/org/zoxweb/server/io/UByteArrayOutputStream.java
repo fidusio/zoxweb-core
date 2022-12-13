@@ -19,9 +19,7 @@ import org.zoxweb.shared.util.SharedStringUtil;
 import org.zoxweb.shared.util.SharedUtil;
 
 import java.io.*;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * The UByteArrayOutputStream class.
@@ -505,39 +503,7 @@ public class UByteArrayOutputStream
 		System.out.println("Buffer Length " + baos.buf.length);
 		System.out.println( new String(baos.buf, 0, baos.size()));
 	}
-	public List<byte[]> parse(byte[] delim, boolean noEmpty)
-	{
-		if (delim == null)
-		{
-			throw new NullPointerException("uboas and/or delimiter cannot be null.");
-		}
 
-		if (delim.length == 0)
-		{
-			throw new IllegalArgumentException("Empty delimiter is not accepted.");
-		}
-
-		int match = 0;
-		ArrayList<byte[]> matchedTokens = new ArrayList<byte[]>();
-		int index = 0;
-		synchronized (this)
-		{
-			while ((match = indexOf(index, delim)) != -1)
-			{
-				byte[] message = Arrays.copyOfRange(getInternalBuffer(), index, match);
-
-				if(!noEmpty || message.length > 0)
-					matchedTokens.add(message);
-				index = match+delim.length;
-			}
-			if (index > 0)
-			{
-				removeAt(0, index);
-			}
-		}
-
-		return matchedTokens;
-	}
 
  
 }

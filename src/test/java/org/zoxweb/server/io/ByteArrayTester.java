@@ -15,7 +15,9 @@
  */
 package org.zoxweb.server.io;
 
+import org.zoxweb.shared.util.Const;
 import org.zoxweb.shared.util.Const.TypeInBytes;
+import org.zoxweb.shared.util.SharedStringUtil;
 import org.zoxweb.shared.util.SharedUtil;
 
 import java.io.FileInputStream;
@@ -24,6 +26,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.List;
 
 public class ByteArrayTester
 {
@@ -185,6 +188,90 @@ public class ByteArrayTester
 				delta1 = System.nanoTime() - delta1;
 				
 				System.out.println(val + " delta " + delta + " delta1 " + delta1 + " equals " + Arrays.equals(buffer, buffer1));
+			}
+
+			UByteArrayOutputStream bufferOutput = new UByteArrayOutputStream();
+			byte[] delimiter = SharedStringUtil.getBytes( "\n");
+
+
+
+
+			String[] data = {"John",
+					" Smith\r",
+					"\nis at work",
+					"\ncoding\r\n from 9 to 5.\nMario is always looking over my shoulder\n",
+					"\n\nMarioTaZa ",
+					null};
+
+			System.out.println("Data length " + data.length);
+			for (String str : data) {
+				if (str!= null) {
+					bufferOutput.write(str);
+				}
+			}
+
+			List<byte[]> matchedTokens = IOUtil.parse(bufferOutput, delimiter, true);
+
+			System.out.println("Tokens found " + matchedTokens.size() + " buffer size: " + bufferOutput.size());
+			if(matchedTokens.size() > 0) {
+
+
+				for (int j = 0; j < matchedTokens.size(); j++) {
+					String s = new String(matchedTokens.get(j));
+					System.out.println(j + ":" + s.length() + ":" + s);
+				}
+			}
+
+
+			byte[] buffer = new byte[1000000];
+			bufferOutput.write(buffer);
+			buffer = bufferOutput.toByteArray();
+			ByteBuffer bb =  ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, buffer, 0, buffer.length, true);
+			bufferOutput.reset();
+			long delta = System.nanoTime();
+			ByteBufferUtil.write(bb, bufferOutput, true);
+			delta = System.nanoTime() - delta;
+
+			System.out.println("fast write:" + bufferOutput.size() +" it took:" + Const.TimeInMillis.nanosToString(delta));
+
+			bb =  ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, buffer, 0, buffer.length, true);
+			bufferOutput.reset();
+
+			delta = System.currentTimeMillis();
+			ByteBufferUtil.write(bb, bufferOutput, true);
+			delta = System.currentTimeMillis() - delta;
+
+			System.out.println(bufferOutput.size() + " millis " + delta);
+
+			bb =  ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, buffer, 0, buffer.length, true);
+			System.out.println(bb.getClass().getName());
+
+			System.out.println(SharedUtil.toCanonicalID(',', bb.position(), bb.limit(), bb.capacity()));
+			while (bb.hasRemaining()) {
+				bb.get();
+				//System.out.println(SharedUtil.toCanonicalID(',', bb.position(), bb.limit(), bb.capacity()));
+			}
+			System.out.println(SharedUtil.toCanonicalID(',', bb.position(), bb.limit(), bb.capacity()));
+
+			bb.clear();
+			//bb.flip();
+
+			for (int i=0; i < 11; i++) {
+				try {
+					bb.put((byte) i);
+					System.out.println(SharedUtil.toCanonicalID(',', bb.position(), bb.limit(), bb.capacity()));
+				} catch(Exception e) {
+					e.printStackTrace();
+					break;
+				}
+			}
+
+			bb.flip();
+			System.out.println(SharedUtil.toCanonicalID(',', bb.position(), bb.limit(), bb.capacity()));
+
+			while(bb.hasRemaining()) {
+				bb.get();
+				System.out.println(SharedUtil.toCanonicalID(',', bb.position(), bb.limit(), bb.capacity()));
 			}
 
 		} catch (Exception e) {

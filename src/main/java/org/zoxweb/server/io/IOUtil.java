@@ -15,26 +15,19 @@
  */
 package org.zoxweb.server.io;
 
-import java.io.ByteArrayOutputStream;
-import java.io.Closeable;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.RandomAccessFile;
-import java.io.Reader;
+import org.zoxweb.shared.util.SharedStringUtil;
+import org.zoxweb.shared.util.SharedUtil;
+
+import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
-
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
-import org.zoxweb.shared.util.SharedStringUtil;
-import org.zoxweb.shared.util.SharedUtil;
 
 public class IOUtil 
 {
@@ -456,5 +449,40 @@ public class IOUtil
 		{
 			os.flush();
 		}
+	}
+
+	public static List<byte[]> parse(UByteArrayOutputStream uboas, byte[] delim, boolean noEmpty)
+	{
+		if (uboas == null || delim == null)
+		{
+			throw new NullPointerException("uboas and/or delimiter cannot be null.");
+		}
+
+		if (delim.length == 0)
+		{
+			throw new IllegalArgumentException("Empty delimiter is not accepted.");
+		}
+
+		int match = 0;
+		ArrayList<byte[]> matchedTokens = new ArrayList<byte[]>();
+		int index = 0;
+		synchronized (uboas)
+		{
+			while ((match = uboas.indexOf(index, delim)) != -1)
+			{
+				byte[] message = Arrays.copyOfRange(uboas.getInternalBuffer(), index, match);
+				//uboas.removeAt(0, match + delim.length);
+
+				if(!noEmpty || message.length > 0)
+					matchedTokens.add(message);
+				index = match+delim.length;
+			}
+			if (index > 0)
+			{
+				uboas.removeAt(0, index);
+			}
+		}
+
+		return matchedTokens;
 	}
 }
