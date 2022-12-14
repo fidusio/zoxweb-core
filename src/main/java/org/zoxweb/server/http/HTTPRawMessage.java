@@ -15,15 +15,18 @@
  */
 package org.zoxweb.server.http;
 
-import java.util.Arrays;
-
 import org.zoxweb.server.io.UByteArrayOutputStream;
 import org.zoxweb.server.logging.LogWrapper;
-import org.zoxweb.shared.http.*;
+import org.zoxweb.shared.http.HTTPMessageConfig;
+import org.zoxweb.shared.http.HTTPMessageConfigInterface;
+import org.zoxweb.shared.http.HTTPMethod;
+import org.zoxweb.shared.http.HTTPMimeType;
 import org.zoxweb.shared.protocol.ProtocolDelimiter;
 import org.zoxweb.shared.util.GetNameValue;
 import org.zoxweb.shared.util.SharedStringUtil;
 import org.zoxweb.shared.util.SharedUtil;
+
+import java.util.Arrays;
 
 public class HTTPRawMessage 
 {
@@ -79,7 +82,7 @@ public class HTTPRawMessage
 			int lineCounter =0;
 			while (parseIndex < endOfHeadersIndex)
 			{
-				int endOfCurrentLine = ubaos.indexOf(parseIndex, ProtocolDelimiter.CRLF.getBytes(), 0, ProtocolDelimiter.CRLF.getBytes().length);
+				int endOfCurrentLine = ubaos.indexOf(parseIndex, ProtocolDelimiter.CRLF.getBytes());//, 0, ProtocolDelimiter.CRLF.getBytes().length);
 				
 				if (endOfCurrentLine != -1)
 				{
