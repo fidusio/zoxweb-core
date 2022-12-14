@@ -35,13 +35,12 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class HTTPCallTool implements Runnable
 {
-    private static LogWrapper log = new LogWrapper(HTTPCallTool.class);
-    //private static AtomicLong counter = new AtomicLong();
-    private static AtomicLong failCounter = new AtomicLong();
-    //private static RateCounter callsCounter = new RateCounter("CallToolsCounter");
+    private static final LogWrapper log = new LogWrapper(HTTPCallTool.class);
+    private static final AtomicLong failCounter = new AtomicLong();
+
 
     private final HTTPMessageConfigInterface hmci;
-    private boolean printResult;
+    private final boolean printResult;
 
     public HTTPCallTool(HTTPMessageConfigInterface hmci, boolean printResult)
     {
@@ -64,17 +63,16 @@ public class HTTPCallTool implements Runnable
             {
                 rd = ((HTTPCallException) e).getResponseData();
             }
-
         }
         if(rd.getStatus() != HTTPStatusCode.OK.CODE)
         {
             failCounter.incrementAndGet();
         }
-        //counter.incrementAndGet();
+
 
         if(printResult) {
-            log.info("Total: " + HTTPCall.HTTP_CALLS.getCounts() + " Fail: " + failCounter + " status: " + rd.getStatus() + " length: " + rd.getData().length);
-            log.info(rd.getDataAsString());
+            log.getLogger().info("Total: " + HTTPCall.HTTP_CALLS.getCounts() + " Fail: " + failCounter + " status: " + rd.getStatus() + " length: " + rd.getData().length);
+            log.getLogger().info(rd.getDataAsString());
         }
     }
 
@@ -102,9 +100,9 @@ public class HTTPCallTool implements Runnable
             String password = params.stringValue("-password", true);
             boolean errorAsException = params.nameExists("-eae");
             boolean certCheckEnabled = params.nameExists("-certCheckEnabled");
-            System.out.println("ErrorAsException: " + errorAsException);
+            log.getLogger().info("ErrorAsException: " + errorAsException);
 
-            log.info("proxy: " + proxy);
+            log.getLogger().info("proxy: " + proxy);
             InetSocketAddressDAO proxyAddress = proxy != null ? InetSocketAddressDAO.parse(proxy, ProxyType.HTTP) : null;
 
             List<HTTPMessageConfigInterface> hmcis = new ArrayList<>();
@@ -119,39 +117,27 @@ public class HTTPCallTool implements Runnable
                 hmci.setSecureCheckEnabled(certCheckEnabled);
                 if (content != null)
                     hmci.setContent(content);
-                log.info(GSONUtil.toJSON((HTTPMessageConfig) hmci, true, false, false));
+                log.getLogger().info(GSONUtil.toJSON((HTTPMessageConfig) hmci, true, false, false));
                 hmcis.add(hmci);
+                // vm warmup
+                new HTTPCall(hmci).sendRequest();
             }
+
+
             long ts = System.currentTimeMillis();
-            //int messages = 0;
+
             for(int i = 0; i < repeat; i++)
             {
-//                while(TaskUtil.getDefaultTaskProcessor().availableExecutorThreads() < 10)
-//                {
-//                    TaskUtil.sleep(50);
-//                    log.info("After sleep:" + TaskUtil.getDefaultTaskProcessor().availableExecutorThreads());
-//                }
                 for(HTTPMessageConfigInterface hmci : hmcis) {
                     TaskUtil.getDefaultTaskScheduler().queue(0, new HTTPCallTool(hmci, printResult));
-//                    log.info("PendingTask: " +TaskUtil.getDefaultTaskScheduler().pendingTasks() );
                 }
-
             }
-
-
-
-           
-
             ts = TaskUtil.waitIfBusyThenClose(25) - ts;
-
             RateCounter rc = new RateCounter("OverAll");
             rc.register(ts, HTTPCall.HTTP_CALLS.getCounts());
-            //float rate = ((float)counter.get()/(float)ts)*1000;
 
-            log.info("It took: " + Const.TimeInMillis.toString(ts) + " to send: " + HTTPCall.HTTP_CALLS.getCounts() + " failed: " + failCounter+
+            log.getLogger().info("It took: " + Const.TimeInMillis.toString(ts) + " to send: " + HTTPCall.HTTP_CALLS.getCounts() + " failed: " + failCounter+
                     " rate: " + rc.rate(Const.TimeInMillis.SECOND.MILLIS) + " per/second" + " average call duration: " + HTTPCall.HTTP_CALLS.average() + " millis");
-            //log.info(""+System.getProperties());
-
         }
         catch(Exception e)
         {
