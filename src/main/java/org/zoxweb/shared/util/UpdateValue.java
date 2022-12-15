@@ -25,6 +25,6 @@ public interface UpdateValue<V>
 	 * Updates the value.
 	 * @param value
 	 */
-	public void updateValue(V value);
+	void updateValue(V value);
 
 }

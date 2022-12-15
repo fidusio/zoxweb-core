@@ -27,12 +27,12 @@ public interface AccountID<T>
 	 * Returns the account ID.
 	 * @return the typed account id
 	 */
-	public T getAccountID();
+	T getAccountID();
 	
 	/**
 	 * Sets the account ID.
 	 * @param accountID
 	 */
-	public void setAccountID(T accountID);
+	void setAccountID(T accountID);
 	
 }

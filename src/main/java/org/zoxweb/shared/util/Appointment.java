@@ -26,7 +26,7 @@ public interface Appointment
 	extends IsClosed
 {
 	
-	public static final Comparator<Appointment> EQUAL_COMPARATOR = new AppointmentComparator();
+	Comparator<Appointment> EQUAL_COMPARATOR = new AppointmentComparator();
 	
 	/**
 	 * @return the delay time in millis
@@ -35,13 +35,13 @@ public interface Appointment
 
 	/**
 	 * Set the delay time in millis
-	 * @param delayInMillis
+	 * @param delayInMillis to wait
 	 */
 	void setDelayInMillis(long delayInMillis);
 	/**
 	 * Set the delay in millis with nanos offset
-	 * @param delayInMillis
-	 * @param nanoOffset
+	 * @param delayInMillis to wait
+	 * @param nanoOffset nanos to add
 	 */
 	void setDelayInNanos(long delayInMillis, long nanoOffset);
 	
@@ -59,7 +59,7 @@ public interface Appointment
 	
 	/**
 	 * Adjusted expiration to granular precision beyond millis
-	 * @return
+	 * @return nano wait
 	 */
 	long getPreciseExpiration();
 

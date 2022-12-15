@@ -15,37 +15,26 @@
  */
 package org.zoxweb.server.http.proxy;
 
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.UnknownHostException;
-import java.net.InetAddress;
-import java.net.BindException;
-import java.util.Vector;
-import java.util.Properties;
-import java.util.logging.Logger;
-
+import org.zoxweb.server.io.IOUtil;
+import org.zoxweb.server.net.InetFilterRulesManager;
+import org.zoxweb.server.util.ApplicationConfigManager;
 import org.zoxweb.shared.http.HTTPMethod;
 import org.zoxweb.shared.security.SecurityStatus;
 import org.zoxweb.shared.util.Const;
 import org.zoxweb.shared.util.DaemonController;
 import org.zoxweb.shared.util.SharedStringUtil;
-import org.zoxweb.server.io.IOUtil;
-import org.zoxweb.server.net.InetFilterRulesManager;
-import org.zoxweb.server.util.ApplicationConfigManager;
+
+import java.io.*;
+import java.net.*;
+import java.util.Properties;
+import java.util.Vector;
+import java.util.logging.Logger;
 
 public class JHTTPPServer 
     implements Runnable, DaemonController
 {
 
-	private static final transient Logger log = Logger.getLogger(Const.LOGGER_NAME);
-	// private static final String CRLF="\r\n";
+	private static final Logger log = Logger.getLogger(Const.LOGGER_NAME);
 	private final String VERSION = "2.0";
 
 	private final String V_SPECIAL = " 2016-3-15";

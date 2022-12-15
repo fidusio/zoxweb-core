@@ -15,19 +15,19 @@
  */
 package org.zoxweb.server.http.proxy;
 
+import org.zoxweb.server.io.IOUtil;
+import org.zoxweb.shared.util.Const;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.logging.Logger;
 
-import org.zoxweb.server.io.IOUtil;
-import org.zoxweb.shared.util.Const;
-
 public class JHTTPPRead implements Runnable
 {
 	private static final int BUFFER_SIZE = 4096;
-	private static final transient Logger log = Logger.getLogger(Const.LOGGER_NAME);
+	private static final Logger log = Logger.getLogger(Const.LOGGER_NAME);
 
 	private BufferedInputStream in;
 

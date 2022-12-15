@@ -32,9 +32,9 @@ public class AppointmentComparator
 
 	/**
 	 * Compares in micros and return sigmun result [-1, 0 , 1]
-	 * Note: comparators should always return singnum values other wise sorting could get funky.
-	 * @param o1
-	 * @param o2
+	 * Note: comparators should always return sing num values otherwise sorting could get funky.
+	 * @param o1 to compare
+	 * @param o2 compare to
 	 * @return
 	 * @exception NullPointerException if o1 or o2 are null
 	 */

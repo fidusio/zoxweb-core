@@ -20,19 +20,19 @@ public class OnURLAction
 	implements java.io.Serializable
 {
 
-	private String customerrortext = null, desc = null, newlocation = null;
-	private boolean log, block, customtext, http_rq, anotherlocation;
+	private String customErrorText = null, desc = null, newLocation = null;
+	private boolean log, block, customText, http_rq, anotherLocation;
 
 	public OnURLAction(String desc)
 	{
 		this.desc = desc;
 	}
 
-	public void denyAccess(String customerrortext)
+	public void denyAccess(String customErrorText)
 	{
 		this.block = true;
-		this.customtext = true;
-		this.customerrortext = customerrortext;
+		this.customText = true;
+		this.customErrorText = customErrorText;
 	}
 
 	public void denyAccess()
@@ -47,11 +47,11 @@ public class OnURLAction
 
 	public void anotherLocation(String newlocation)
 	{
-		this.anotherlocation = true;
-		this.newlocation = newlocation;
+		this.anotherLocation = true;
+		this.newLocation = newlocation;
 	}
 
-	public boolean onAccesssDeny()
+	public boolean onAccessDeny()
 	{
 		return block;
 	}
@@ -63,7 +63,7 @@ public class OnURLAction
 
 	public boolean onAccessDenyWithCustomText()
 	{
-		return customtext;
+		return customText;
 	}
 
 	public boolean onAccessSendHTTPRequest()
@@ -73,12 +73,12 @@ public class OnURLAction
 
 	public boolean onAccessRedirect()
 	{
-		return this.anotherlocation;
+		return this.anotherLocation;
 	}
 
 	public String newLocation()
 	{
-		return this.newlocation;
+		return this.newLocation;
 	}
 
 	public void setHTTPAction(boolean http_rq, String httppath)
@@ -89,7 +89,8 @@ public class OnURLAction
 
 	public String getCustomErrorText()
 	{
-		return customerrortext;
+		return customErrorText;
+
 	}
 
 	public String getDescription()

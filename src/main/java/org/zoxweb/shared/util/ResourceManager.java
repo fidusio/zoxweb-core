@@ -15,6 +15,8 @@ public class ResourceManager
 		API_APP_MANAGER("APIAppManager"),
 		JWT_CACHE("JWTCache"),
 		AUTH_TOKEN("AuthToken"),
+		HTTP_SERVER("HttpServer"),
+		PROXY_SERVER("ProxyServer")
 		
 		;
 
@@ -34,46 +36,26 @@ public class ResourceManager
 	
 	public static final ResourceManager SINGLETON = new ResourceManager();
 	
-	private Map<Object, Object> resources = new LinkedHashMap<Object, Object>();
+	private final Map<Object, Object> resources = new LinkedHashMap<>();
 	
 	private ResourceManager()
 	{
 		
 	}
-	
-	@SuppressWarnings("unchecked")
-	public <V> V lookup(String name)
-	{
-		return (V) resources.get(name);
-	}
+
 	
 	@SuppressWarnings("unchecked")
 	public <V> V lookup(Object k)
     {
-        return (V) resources.get(k);
+        return (V) resources.get(keyMap(k));
     }
-	
-	public <V> V lookup(GetName gn)
+
+	public synchronized <V> ResourceManager map(Object k, V res)
 	{
-		return lookup(gn.getName());
+		resources.put(keyMap(k), res);
+		return this;
 	}
-	
-	public synchronized <V> void map(String name, V res)
-	{
-		resources.put(name, res);
-		
-	}
-	
-	public synchronized <V> void map(Object k, V res)
-	{
-	  resources.put(k, res);
-	}
-	
-	public synchronized <V> void map(GetName gn, V res)
-	{
-		map(gn.getName(), res);
-	}
-	
+
 	public synchronized Object [] resources()
 	{
 		return resources.values().toArray();
@@ -82,6 +64,13 @@ public class ResourceManager
 	@SuppressWarnings("unchecked")
     public synchronized <V> V remove(Object key)
 	{
-	  return (V) resources.remove(key);
+		return (V) resources.remove(keyMap(key));
+	}
+
+	private Object keyMap(Object key)
+	{
+		if (key instanceof GetName)
+			return ((GetName) key).getName();
+		return key;
 	}
 }

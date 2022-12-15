@@ -15,16 +15,16 @@
  */
 package org.zoxweb.server.http.proxy;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.BufferedInputStream;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.logging.Logger;
-
 import org.zoxweb.server.io.UByteArrayOutputStream;
 import org.zoxweb.shared.util.Const;
 import org.zoxweb.shared.util.SharedStringUtil;
+
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.logging.Logger;
 
 public class JHTTPPClientInputStream 
     extends BufferedInputStream
@@ -160,7 +160,7 @@ public class JHTTPPClientInputStream
 							OnURLAction action = (OnURLAction) server
 									.getURLActions().elementAt(
 											match.getActionIndex());
-							if (action.onAccesssDeny()) {
+							if (action.onAccessDeny()) {
 								statuscode = JHTTPPSession.SC_URL_BLOCKED;
 								if (action.onAccessDenyWithCustomText())
 									errordescription = action

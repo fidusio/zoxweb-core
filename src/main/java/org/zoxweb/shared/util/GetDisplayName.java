@@ -28,6 +28,6 @@ public interface GetDisplayName
 	 * used in the context of name override or for context change.
 	 * @return display name 
 	 */
-	public String getDisplayName();
+	String getDisplayName();
 	
 }

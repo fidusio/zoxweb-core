@@ -15,13 +15,13 @@
  */
 package org.zoxweb.shared.util;
 
-import java.math.BigDecimal;
-import java.util.*;
-
 import org.zoxweb.shared.data.ReferenceIDDAO;
 import org.zoxweb.shared.filters.GetValueFilter;
 import org.zoxweb.shared.filters.ValueFilter;
 import org.zoxweb.shared.util.Const.GNVType;
+
+import java.math.BigDecimal;
+import java.util.*;
 
 /**
  * Contains shared utility methods.
@@ -38,7 +38,7 @@ public class SharedUtil
 	}
 
 	/**
-	 * Checks all the objs if any of them is null it will throws a NullPointerException.
+	 * Checks all the objs if any of them is null it will throw a NullPointerException.
 	 * @param msg to be added to the NullPointerException
 	 * @param objs to be checked
 	 * @throws NullPointerException if any of th
@@ -185,7 +185,7 @@ public class SharedUtil
 			}
 			if(classIndex == -1)
 			{
-				throw new IllegalArgumentException("Numbers can't be normilized " + Arrays.toString(numbers));
+				throw new IllegalArgumentException("Numbers can't be normalized " + Arrays.toString(numbers));
 			}
 			if (classIndex > priorityMatch) {
 				priorityMatch = classIndex;
@@ -286,7 +286,7 @@ public class SharedUtil
 	}
 
 	/**
-	 * Creates a canonical string based on a enum list of a certain data type and 
+	 * Creates a canonical string based on an enum list of a certain data type and
 	 * the elements in list are read separately and are specified by a character.
 	 * @param sep
 	 * @param enumer
@@ -352,7 +352,7 @@ public class SharedUtil
 	}
 
 	/**
-	 * This utility method look for the matching enum in case insensitive fashion.
+	 * This utility method look for the matching enum in case-insensitive fashion.
 	 * 
 	 * <br>It will try different matches with the following inventory:
 	 * <ol>
@@ -373,7 +373,7 @@ public class SharedUtil
 	
 	
 	/**
-     * This utility method look for the matching enum in case insensitive fashion.
+     * This utility method look for the matching enum in case-insensitive fashion.
      * 
      * <br>It will try different matches with the following inventory:
      * <ol>
@@ -431,7 +431,7 @@ public class SharedUtil
 	}
 	
 	
-	public static GetName lookupGetName(GetName gNames[], String name)
+	public static GetName lookupGetName(GetName[] gNames, String name)
 	{
 	  if (name != null && gNames != null)
 	  {
@@ -560,14 +560,6 @@ public class SharedUtil
 			{
 				Enum<?>[] all = (Enum<?>[]) enumClass.getEnumConstants();
 				return lookupEnum(value, all);
-//				for (int i=0; i < all.length; i++)
-//				{
-//					//Enum<?> e = (Enum<?>) all[i];
-//					if (all[i].name().equals(value))
-//					{
-//						return all[i];
-//					}
-//				}
 			}
 			else
 			    {
@@ -704,7 +696,7 @@ public class SharedUtil
 			if (index != -1)
 			{
 				String name = SharedStringUtil.trimOrNull(str.substring(0, index));
-				String value = str.substring(index+1, str.length());
+				String value = str.substring(index+1);
 
 				if (value.length() == 0)
 				{
@@ -1334,34 +1326,7 @@ public class SharedUtil
 		return ret;
 	}
 	
-//	public static <V>List<V> lookupMatches(List<? extends GetNameValue<V>> arrayList, String name)
-//	{
-//		return lookupMatches(arrayList, name, null);
-//	}
-//	
-//	@SuppressWarnings("unchecked")
-//	public static <V>List<V> lookupMatches(List<? extends GetNameValue<V>> arrayList, String name, String canonicalSep)
-//	{
-//				
-//		ArrayList<V> ret = new ArrayList<V>(); 
-//		
-//		if (name != null)
-//		{
-//			if (canonicalSep != null)
-//			{
-//				name = SharedStringUtil.parseNameValue(name, canonicalSep)[0];
-//			}
-//			for (GetNameValue<V> nvp: arrayList)
-//			{
-//				if (name.equalsIgnoreCase(((GetName)nvp).getName()))
-//				{
-//					ret.add((V) nvp);
-//				}
-//			}
-//		}
-//		
-//		return ret;
-//	}
+
 	
 	/**
 	 * 
@@ -1490,9 +1455,9 @@ public class SharedUtil
 	 * @param configList
 	 * @return true if all mandatory parameters are set
 	 */ 
-	public static boolean areAllMandtorySet(List<NVPair> paramList, GetNVConfig[] configList)
+	public static boolean areAllMandatorySet(List<NVPair> paramList, GetNVConfig[] configList)
     {
-		return (firstMissingMandtory(paramList, configList) == null);
+		return (firstMissingMandatory(paramList, configList) == null);
 	}
 	
 	/**
@@ -1501,7 +1466,7 @@ public class SharedUtil
 	 * @param configList
 	 * @return the first not set mandatory nvconfig
 	 */
-	public static NVConfig firstMissingMandtory(List<NVPair> paramList, GetNVConfig[] configList)
+	public static NVConfig firstMissingMandatory(List<NVPair> paramList, GetNVConfig[] configList)
     {
 		for (GetNVConfig con : configList)
 		{
@@ -1640,10 +1605,9 @@ public class SharedUtil
 					return new NVEntityGetNameMap (config.getName());
 				case LIST:
 					return new NVEntityReferenceList(config.getName());
-				case NOT_ARRAY:
-					break;
 				case REFERENCE_ID_MAP:
 					return new NVEntityReferenceIDMap (config.getName());
+				case NOT_ARRAY:
 				default:
 					break;
 				
@@ -1705,12 +1669,6 @@ public class SharedUtil
 
 			if (config.isEnum())
 			{
-				
-//				if ( DynamicEnumMap.class.equals( config.getMetaType()))
-//				{
-//					return new NVDynamicEnum(config.getName(), null, (DynamicEnumMap) config.getValueFilter());
-//				}
-				
 				return (new NVEnum(config.getName(), null));
 			}
 			else if (String.class.equals(c))
@@ -1903,21 +1861,16 @@ public class SharedUtil
 	{
 		switch(type)
 		{
-//		case NVBLOB:
-//			break;
-//		case NVBOOLEAN:
-//			break;
+
 		case NVDOUBLE:
-			return (T) new Double(n.doubleValue());
+			return (T) Double.valueOf(n.doubleValue());
 			
 		case NVFLOAT:
-			return (T) new Float(n.floatValue());
+			return (T)  Float.valueOf(n.floatValue());
 		case NVINT:
-			return (T) new Integer(n.intValue());
+			return (T) Integer.valueOf(n.intValue());
 		case NVLONG:
-			return (T) new Long(n.longValue());
-//		case NVString:
-//			break;
+			return (T) Long.valueOf(n.longValue());
 		default:
 			throw new IllegalArgumentException("Invalid type " + type);
 		
@@ -1931,10 +1884,7 @@ public class SharedUtil
 	{
 		switch(type)
 		{
-//		case NVBLOB:
-//			break;
-//		case NVBOOLEAN:
-//			break;
+
 		case NVDOUBLE:
 			return (T) new Double(Double.parseDouble(v));
 			
@@ -1944,8 +1894,6 @@ public class SharedUtil
 			return (T) new Integer(Integer.parseInt(v));
 		case NVLONG:
 			return (T) new Long(Long.parseLong(v));
-//		case NVString:
-//			break;
 		default:
 			throw new IllegalArgumentException("Invalid type " + type);
 		
@@ -2005,41 +1953,6 @@ public class SharedUtil
 		if (c.isArray())
 		{
 			throw new IllegalArgumentException(config + " Cannot be converted, is of type array.");
-//			if ( config instanceof NVConfigEntity)
-//			{
-//				return new NVEntityReferenceList(config);
-//			}
-//			
-//		
-//			// enum must be checked first
-//			if ( c.getComponentType().isEnum())
-//			{
-//				return  ( new NVEnumList( config.getName(), new ArrayList<Enum<?>>()));
-//			}
-//			else if ( String[].class.equals( c))
-//			{
-//				return ( new NVPairList (config.getName(), new ArrayList<NVPair>()));
-//			}
-//			else if ( Long[].class.equals( c))
-//			{
-//				return ( new NVLongList( config.getName(), new ArrayList<Long>()));
-//			}
-//			else if ( byte[].class.equals( c))
-//			{
-//				return ( new NVBlob());
-//			}
-//			else if ( Integer[].class.equals( c))
-//			{
-//				return ( new NVIntList( config.getName(), new ArrayList<Integer>()));
-//			}
-//			else if ( Float[].class.equals( c))
-//			{
-//				return ( new NVFloatList( config.getName(), new ArrayList<Float>()));
-//			}
-//			else if ( Double[].class.equals( c))
-//			{
-//				return ( new NVDoubleList( config.getName(), new ArrayList<Double>()));
-//			}
 		}
 		else
         {
@@ -2102,7 +2015,7 @@ public class SharedUtil
 			}
 		}
 
-		throw new IllegalArgumentException("Unsuppored type " + config);
+		throw new IllegalArgumentException("Unsupported type " + config);
 	}
 
 	/**
@@ -2266,58 +2179,11 @@ public class SharedUtil
 		
 		return list;
 	}
-	
-//	public static NVConfigEntity mergeMeta(NVConfigEntity ... cList)
-//	{
-//		NVConfigEntity first = null;
-//		for (int i= 0; i < cList.length; i++)//NVConfigEntity c : cList)
-//		{
-//			
-//			NVConfigEntity c = cList[i];
-//			if ( first == null)
-//			{
-//				first = c;
-//				synchronized( LOCK)
-//				{
-//					if (!first.isMetaInitComplete())
-//					{
-//						first.setMetaInitComplete( true);
-//						continue;
-//					}
-//					else
-//					{
-//						break;
-//					}
-//				}
-//			}
-//			first.getAttributes().addAll(0, c.getAttributes());
-//			if ( i+1 == cList.length)
-//				first.setAttributes(first.getAttributes());
-//		}
-//		return first;
-//	}
-	
+
 	
 	@SafeVarargs
 	public static List<NVConfig> mergeMeta(List<NVConfig>... cList)
     {
-//		ArrayList<NVConfig> first = null;
-//		
-//		for (int i = 0; i < cList.length; i++)//NVConfigEntity c : cList)
-//		{
-//			ArrayList<NVConfig> c = cList[i];
-//			
-//			if (first == null)
-//			{
-//				first = c;
-//				continue;
-//			}
-//			
-//			first.addAll(0, c);
-//			
-//		}
-//		
-//		return first;
 		return mergeMeta(true, cList);
 	}
 	
@@ -2340,36 +2206,7 @@ public class SharedUtil
 		
 		return first;
 	}
-	
-//	public static NVConfigEntity mergeMeta(List<NVConfigEntity> cList)
-//	{
-//		NVConfigEntity first = null;
-//		for (int i= 0; i < cList.size(); i++)//NVConfigEntity c : cList)
-//		{
-//			
-//			NVConfigEntity c = cList.get(i);
-//			if ( first == null)
-//			{
-//				first = c;
-//				synchronized( LOCK)
-//				{
-//					if (!first.isMetaInitComplete())
-//					{
-//						first.setMetaInitComplete( true);
-//						continue;
-//					}
-//					else
-//					{
-//						break;
-//					}
-//				}
-//			}
-//			first.getAttributes().addAll(0, c.getAttributes());
-//			if ( i+1 == cList.size())
-//				first.setAttributes(first.getAttributes());
-//		}
-//		return first;
-//	}
+
 	
 	/**
 	 * 
@@ -2646,106 +2483,7 @@ public class SharedUtil
 	}
 	
 	
-	
-	
 
-//	/**
-//	 * Format a list of NPairs
-//	 * @param list
-//	 * @return
-//	 */
-//	public static String format(ArrayList<NVPair> list)
-//	{
-//		return format(list,"=", false, "&"); 
-//	}
-//	
-//	/**
-//	 * This method will convert an ArrayList of NVPair into a single string
-//	 * @param list all the NVPair
-//	 * @param nameValueSep the name value separator
-//	 * @param quotedValue if the value should be quoted
-//	 * @param nvPairSep the separator between the nvpairs
-//	 * @return the formated string
-//	 */
-//	public static String format(ArrayList<NVPair> list, String nameValueSep, boolean quotedValue, String nvPairSep)
-//	{
-//		StringBuilder sb = new StringBuilder();
-//		
-//		for (int i = 0; i < list.size(); i++)
-//		{
-//			NVPair nvp = list.get(i);
-//			sb.append(format( nvp.getName(), nvp.getValue(), nameValueSep, quotedValue));
-//			if (i + 1 < list.size())
-//			{
-//				sb.append(nvPairSep);
-//			}
-//		}
-//		
-//		return sb.toString();
-//	}
-//	
-//	
-//	/**
-//	 * 
-//	 * @param list
-//	 * @param sep
-//	 * @return
-//	 */
-//	public static String format(List<?> list, String sep)
-//	{
-//		StringBuilder sb = new StringBuilder();
-//		
-//		for (Object o : list)
-//		{
-//			if (o != null)
-//			{
-//				if (sb.length() > 0)
-//				{
-//					sb.append(sep);
-//				}
-//				
-//				sb.append( o);
-//			}
-//		}
-//		
-//		return sb.toString();
-//	}
-//	
-//	/**
-//	 * 
-//	 * @param pair
-//	 * @return
-//	 */
-//	public static <V> String format(GetNameValue<V> pair)
-//	{
-//		if (pair != null)
-//			return format(pair.getName(), pair.getValue());
-//		else 
-//			return format((String)null, (String)null);
-//	}
-//	
-//	/**
-//	 * 
-//	 * @param pair
-//	 * @param nameValueSep
-//	 * @param quotedValue
-//	 * @return
-//	 */
-//	public static <V> String format(GetNameValue<V> pair, String nameValueSep, boolean quotedValue)
-//	{
-//		return format(pair.getName(), pair.getValue(), nameValueSep,  quotedValue);
-//	}
-//	
-//	/**
-//	 * 
-//	 * @param name
-//	 * @param value
-//	 * @return
-//	 */
-//	public static <V> String format(String name, V value)
-//	{
-//		return format(name, value, "=", false);
-//	}
 
 	/**
 	 * 
@@ -2960,8 +2698,6 @@ public class SharedUtil
 							ts.setCreationTime(System.currentTimeMillis());
 						}
 						break;
-					case DELETE:
-						break;
 					case READ:
 						ts.setLastTimeRead(System.currentTimeMillis());
 						break;
@@ -3029,7 +2765,7 @@ public class SharedUtil
 	}
 	
 	
-	public static NVStringList toNVStringList(String name, String values[], boolean skipEmptyOrNull)
+	public static NVStringList toNVStringList(String name, String[] values, boolean skipEmptyOrNull)
 	{
 		NVStringList ret = new NVStringList(name);
 		if (values != null)

@@ -15,21 +15,13 @@
  */
 package org.zoxweb.server.http.proxy;
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.nio.Buffer;
-import java.nio.ByteBuffer;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.SocketChannel;
-
-
 import org.zoxweb.server.http.HTTPUtil;
 import org.zoxweb.server.io.ByteBufferUtil;
+import org.zoxweb.server.io.ByteBufferUtil.BufferType;
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.io.UByteArrayOutputStream;
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.logging.LoggerUtil;
-import org.zoxweb.server.io.ByteBufferUtil.BufferType;
 import org.zoxweb.server.net.*;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.shared.http.*;
@@ -38,17 +30,24 @@ import org.zoxweb.shared.protocol.ProtocolDelimiter;
 import org.zoxweb.shared.security.SecurityStatus;
 import org.zoxweb.shared.util.NVBoolean;
 import org.zoxweb.shared.util.NVPair;
+import org.zoxweb.shared.util.ResourceManager;
 import org.zoxweb.shared.util.SharedStringUtil;
+
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.nio.Buffer;
+import java.nio.ByteBuffer;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.SocketChannel;
 
 public class NIOProxyProtocol 
 	extends ProtocolProcessor
 {
-
+	public final static String NIO_PROXY = ResourceManager.SINGLETON.map(ResourceManager.Resource.PROXY_SERVER, "NIOHTTPProxy").lookup(ResourceManager.Resource.PROXY_SERVER);
 
 	public final static LogWrapper log = new LogWrapper(NIOProxyProtocol.class).setEnabled(false);
-//	private static boolean debug = false;
-//	private static final transient Logger log = Logger.getLogger(NIOProxyProtocol.class.getName());
-	public static final String NAME = "ZWNIOProxy";
+
+
 	
 	public static final String AUTHENTICATION = "AUTHENTICATION";
 
@@ -171,7 +170,7 @@ public class NIOProxyProtocol
 	private SelectionKey  clientChannelSK = null;
 	private ChannelRelayTunnel channelRelay = null;
 	private RequestInfo requestInfo = null;
-	private ByteBuffer sourceBB;
+	private final ByteBuffer sourceBB;
 
 	private boolean relayConnection = false;
 
@@ -184,7 +183,7 @@ public class NIOProxyProtocol
 	@Override
 	public String getName()
 	{
-		return NAME;
+		return NIO_PROXY;
 	}
 
 	@Override
@@ -221,7 +220,7 @@ public class NIOProxyProtocol
 			}
 			
 			
-			int read = 0;
+			int read;
     		do
     		{
 				((Buffer)sourceBB).clear();
@@ -302,7 +301,7 @@ public class NIOProxyProtocol
 		+ "<p class=\"tiagtext\"><a href=\"" + url + "\">" + url + "</A> </p>\r"
 		+ "<P class=\"i25\">Reason: " + errorMsg + "</P>"
 		+ "<HR size=\"4\">\r"
-		+ "<p class=\"i25\"><A HREF=\"http://www.zoxweb.com/\">ProxyNIO</A> HTTP Proxy, Version " + NAME
+		+ "<p class=\"i25\"><A HREF=\"http://www.zoxweb.com/\">ProxyNIO</A> HTTP Proxy, Version " + NIO_PROXY
 		+"</p>\r"
 		//+"<p class=\"i25\"><A HREF=\"http://" + localhost + "/\">jHTTPp2 local website</A> <A HREF=\"http://" + localhost + "/" + server.WEB_CONFIG_FILE + "\">Configuration</A></p>"
 		+ "</BODY></HTML>";
@@ -326,7 +325,7 @@ public class NIOProxyProtocol
 			statusCode = HTTPStatusCode.INTERNAL_SERVER_ERROR;
 		
 		hcc.setHTTPStatusCode(statusCode);
-		hcc.getHeaders().add(new NVPair("Server", NAME));
+		hcc.getHeaders().add(HTTPHeader.SERVER.getName(), NIO_PROXY);
 		if (httpStatus == 501)
 		{
 			hcc.getHeaders().add(new NVPair("Allow", "GET, HEAD, POST, PUT, DELETE, CONNECT, PATCH"));
@@ -404,7 +403,7 @@ public class NIOProxyProtocol
 					if (channelRelay != null)
 					{
 						// try to read any pending data
-						// very very nasty bug
+						// very, very nasty bug
 						channelRelay.accept(remoteChannelSK);
 						channelRelay.waitThenStopReading(remoteChannelSK);
 					}
@@ -446,7 +445,7 @@ public class NIOProxyProtocol
     			requestRawBuffer.reset();
     			requestMCCI = null;
     			if(log.isEnabled())
-    				log.info(new String(requestRawBuffer.toByteArray()));
+    				log.getLogger().info(new String(requestRawBuffer.toByteArray()));
     			
     			
     			remoteChannelSK = getSelectorController().register(NIOChannelCleaner.DEFAULT,
@@ -460,7 +459,7 @@ public class NIOProxyProtocol
 			else
 			{
 				if (log.isEnabled())
-					log.info(new String(requestRawBuffer.toByteArray()));
+					log.getLogger().info(new String(requestRawBuffer.toByteArray()));
 				
 				
 				if (NetUtil.checkSecurityStatus(getOutgoingInetFilterRulesManager(), requestInfo.remoteAddress.getInetAddress(), remoteChannel) !=  SecurityStatus.ALLOW)
@@ -482,12 +481,12 @@ public class NIOProxyProtocol
 						channelRelay.accept(remoteChannelSK);
 						channelRelay.waitThenStopReading(remoteChannelSK);
 						if(log.isEnabled())
-							log.info("THIS IS  supposed to happen RELAY STOP:" +lastRemoteAddress + "," + requestInfo.remoteAddress);
+							log.getLogger().info("THIS IS  supposed to happen RELAY STOP:" +lastRemoteAddress + "," + requestInfo.remoteAddress);
 					}
 					else if (remoteChannelSK != null)
 					{
 						if (log.isEnabled())
-							log.info("THIS IS  supposed to happen CANCEL READ");
+							log.getLogger().info("THIS IS  supposed to happen CANCEL READ");
 						getSelectorController().cancelSelectionKey(remoteChannelSK);
 					}
 				}
@@ -497,7 +496,7 @@ public class NIOProxyProtocol
 				
 				if(remoteChannelSK == null || !remoteChannelSK.isValid())
 				{
-					//log.info("ChangeConnection:" + changeConnection);
+					//log.getLogger().info("ChangeConnection:" + changeConnection);
 					try
 					{
 						remoteChannel = SocketChannel.open((new InetSocketAddress(requestInfo.remoteAddress.getInetAddress(), requestInfo.remoteAddress.getPort())));
@@ -507,8 +506,8 @@ public class NIOProxyProtocol
 					{
 						if (log.isEnabled())
 						{
-							log.info(new String(requestRawBuffer.toByteArray()));
-							log.info("" + requestInfo.remoteAddress);
+							log.getLogger().info(new String(requestRawBuffer.toByteArray()));
+							log.getLogger().info("" + requestInfo.remoteAddress);
 							e.printStackTrace();
 						}
 						HTTPMessageConfigInterface hccError = createErrorMSG(404, "Host Not Found", requestInfo.remoteAddress.getInetAddress() + ":" + requestInfo.remoteAddress.getPort());
@@ -520,7 +519,7 @@ public class NIOProxyProtocol
 				
 				if (requestMCCI.isMultiPartEncoding())
 				{
-					log.info("We have multi Econding");
+					log.getLogger().info("We have multi Econding");
 				}
 				
 			
@@ -631,7 +630,7 @@ public class NIOProxyProtocol
 					}
 				}
 			}
-			log.info("filename:" + filename);
+			log.getLogger().info("filename:" + filename);
 			
 			NIOProxyProtocolFactory factory = new NIOProxyProtocolFactory();
 			factory.setLogger(LoggerUtil.loggerToFile(NIOProxyProtocol.class.getName()+".proxy", filename));
@@ -648,7 +647,7 @@ public class NIOProxyProtocol
 						Runnable init(NIOSocket nios)
 						{
 							this.toClose = nios;
-							log.info("Cleaner initiated");
+							log.getLogger().info("Cleaner initiated");
 							return this;
 						}
 						@Override
@@ -660,14 +659,14 @@ public class NIOProxyProtocol
 							TaskUtil.getDefaultTaskScheduler().close();
 							TaskUtil.getDefaultTaskProcessor().close();
 							ts = System.nanoTime() - ts;
-							log.info("Cleanup took:" + ts);
+							log.getLogger().info("Cleanup took:" + ts);
 						}
 				
 					}.init(nios);
 			
 			Runtime.getRuntime().addShutdownHook(new Thread(cleaner));
 
-			log.info("Proxy Started @ port:" + port + " java version:" + System.getProperty("java.version"));
+			log.getLogger().info("Proxy Started @ port:" + port + " java version:" + System.getProperty("java.version"));
 		}
 		catch(Exception e)
 		{
@@ -686,7 +685,7 @@ public class NIOProxyProtocol
 		if (hmci != null)
 		{
 			if(hmci.getHeaders().get(HTTPHeader.CONTENT_LENGTH) != null)
-			log.info(""+hmci.getContentLength() + ", " +hmci.getContentType());
+				log.getLogger().info(""+hmci.getContentLength() + ", " +hmci.getContentType());
 		}
 	}
 }

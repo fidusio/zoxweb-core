@@ -15,27 +15,23 @@
  */
 package org.zoxweb.server.http.proxy;
 
-import java.net.Socket;
+import org.zoxweb.server.io.IOUtil;
+import org.zoxweb.server.io.UByteArrayOutputStream;
+import org.zoxweb.shared.util.Const;
+
+import java.io.*;
 import java.net.InetAddress;
+import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
 import java.util.zip.GZIPOutputStream;
-import java.io.BufferedOutputStream;
-import java.io.BufferedInputStream;
-import java.io.IOException;
-import java.io.File;
-import java.io.FileInputStream;
-
-import org.zoxweb.server.io.IOUtil;
-import org.zoxweb.server.io.UByteArrayOutputStream;
-import org.zoxweb.shared.util.Const;
 
 public class JHTTPPSession 
     implements Runnable
 {
 
-	private static final transient Logger log = Logger.getLogger(Const.LOGGER_NAME);
+	private static final Logger log = Logger.getLogger(Const.LOGGER_NAME);
 
 	public static final int SC_OK=0;
 	public static final int SC_CONNECTING_TO_HOST=1;
