@@ -15,16 +15,15 @@
  */
 package org.zoxweb.server.net;
 
+import org.zoxweb.shared.util.SharedUtil;
+
 import java.io.IOException;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
-
 import java.nio.channels.spi.AbstractSelectableChannel;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
-import org.zoxweb.shared.util.SharedUtil;
 
 /**
  * This class is used to allow the Selector object to be used in multi-threaded environment.
@@ -65,12 +64,12 @@ public class SelectorController
 	 */
 	public SelectionKey register(AbstractSelectableChannel ch, int ops) throws IOException
 	{
-		return register(null, ch, ops, null, null, false);
+		return register(null, ch, ops, null, false);
 	}
 
-	public SelectionKey register(AbstractSelectableChannel ch, int ops, Object attachement) throws IOException
+	public SelectionKey register(AbstractSelectableChannel ch, int ops, Object attachment) throws IOException
 	{
-		return register(null, ch, ops, attachement, null, false);
+		return register(null, ch, ops, attachment, false);
 	}
 
 
@@ -100,7 +99,6 @@ public class SelectorController
 								 AbstractSelectableChannel ch,
 								 int ops,
 								 Object attachment,
-								 SKController skController,
 								 boolean blocking) throws IOException
 	{
 		SelectionKey ret;
@@ -115,7 +113,7 @@ public class SelectorController
 			SharedUtil.getWrappedValue(ch).configureBlocking(blocking);
 
 
-			ret = SharedUtil.getWrappedValue(ch).register(selector, ops, new SKAttachment(attachment, skController));
+			ret = SharedUtil.getWrappedValue(ch).register(selector, ops, new SKAttachment(attachment));
 			if (niocc != null)
 			{
 				niocc.add(ret);
@@ -135,8 +133,7 @@ public class SelectorController
 	public SelectionKey register(NIOChannelCleaner niocc,
 								 AbstractSelectableChannel ch,
 								 int ops,
-								 Object attachment,
-								 SKController skController)
+								 Object attachment)
 			throws IOException
 	{
 		SelectionKey ret;
@@ -149,7 +146,7 @@ public class SelectorController
 			// invoke the main lock
 			selectLock.lock();
 			//SharedUtil.getWrappedValue(ch).configureBlocking(blocking);
-			ret = SharedUtil.getWrappedValue(ch).register(selector, ops, new SKAttachment(attachment, skController));
+			ret = SharedUtil.getWrappedValue(ch).register(selector, ops, new SKAttachment(attachment));
 			if (niocc != null)
 			{
 				niocc.add(ret);

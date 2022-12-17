@@ -15,6 +15,10 @@
  */
 package org.zoxweb.server.net;
 
+import org.zoxweb.shared.util.GetDescription;
+import org.zoxweb.shared.util.GetName;
+import org.zoxweb.shared.util.NVGenericMap;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.nio.channels.SelectionKey;
@@ -23,10 +27,6 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
-
-import org.zoxweb.shared.util.GetDescription;
-import org.zoxweb.shared.util.GetName;
-import org.zoxweb.shared.util.NVGenericMap;
 
 public abstract class ProtocolProcessor
 	implements GetName, GetDescription, Closeable, Consumer<SelectionKey>
@@ -76,7 +76,7 @@ public abstract class ProtocolProcessor
 
 
 	protected void acceptConnection(NIOChannelCleaner ncc, AbstractSelectableChannel asc, boolean isBlocking) throws IOException {
-		selectorController.register(ncc,  asc, SelectionKey.OP_READ, this, new DefaultSKController(), isBlocking);
+		selectorController.register(ncc,  asc, SelectionKey.OP_READ, this, isBlocking);
 	}
 
 	public InetFilterRulesManager getOutgoingInetFilterRulesManager() 

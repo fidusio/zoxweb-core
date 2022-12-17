@@ -15,6 +15,19 @@
  */
 package org.zoxweb.server.net;
 
+import org.zoxweb.server.io.IOUtil;
+import org.zoxweb.server.task.TaskUtil;
+import org.zoxweb.shared.data.events.BaseEventObject;
+import org.zoxweb.shared.data.events.EventListenerManager;
+import org.zoxweb.shared.data.events.InetSocketAddressEvent;
+import org.zoxweb.shared.net.InetSocketAddressDAO;
+import org.zoxweb.shared.net.SharedNetUtil;
+import org.zoxweb.shared.security.SecurityStatus;
+import org.zoxweb.shared.util.Const.TimeInMillis;
+import org.zoxweb.shared.util.DaemonController;
+import org.zoxweb.shared.util.RateCounter;
+import org.zoxweb.shared.util.SharedUtil;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.Inet4Address;
@@ -25,21 +38,6 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
-
-import org.zoxweb.server.io.IOUtil;
-
-import org.zoxweb.server.task.TaskUtil;
-import org.zoxweb.shared.data.events.BaseEventObject;
-import org.zoxweb.shared.data.events.EventListenerManager;
-import org.zoxweb.shared.data.events.InetSocketAddressEvent;
-import org.zoxweb.shared.net.InetSocketAddressDAO;
-import org.zoxweb.shared.net.SharedNetUtil;
-import org.zoxweb.shared.security.SecurityStatus;
-
-import org.zoxweb.shared.util.Const.TimeInMillis;
-import org.zoxweb.shared.util.DaemonController;
-import org.zoxweb.shared.util.RateCounter;
-import org.zoxweb.shared.util.SharedUtil;
 
 /**
  * NIO Socket 
@@ -178,11 +176,11 @@ public class NIOSocket
 									&& key.isReadable())
 							    {
 							    	ProtocolProcessor currentPP = (ProtocolProcessor)ska.attachment();
-									if(debug) logger.info(ska.attachment() + " ska is selectable: " + ska.getSKController().isSelectable(key) + " for reading " );
-							    	if (ska.getSKController().isSelectable(key) && currentPP != null)
+									if(debug) logger.info(ska.attachment() + " ska is selectable: " + ska.isSelectable() + " for reading " );
+							    	if (ska.isSelectable() && currentPP != null)
 							    	{
 							    		// very,very,very crucial setup prior to processing
-										ska.getSKController().setSelectable(key,false);
+										ska.setSelectable(false);
 
 							    		// a channel is ready for reading
 								    	if (executor != null)
@@ -196,7 +194,7 @@ public class NIOSocket
 												}
 								    			// very crucial setup
 
-												ska.getSKController().setSelectable(key, true);
+												ska.setSelectable(true);
 											});
 								    	}
 								    	else
@@ -207,7 +205,7 @@ public class NIOSocket
 											}
 											catch (Exception e){}
 											// very crucial setup
-											ska.getSKController().setSelectable(key,true);
+											ska.setSelectable(true);
 								    	}
 							    	}
 							    } 

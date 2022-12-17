@@ -452,7 +452,7 @@ public class NIOProxyProtocol
     													  		   remoteChannel,
     													  		   SelectionKey.OP_READ,
     													  		   new ChannelRelayTunnel(ByteBufferUtil.DEFAULT_BUFFER_SIZE, remoteChannel, clientChannel, clientChannelSK, true, getSelectorController()),
-    													  		   new DefaultSKController(), false);
+    													  		  false);
     			requestInfo = null;
     			
 			}
@@ -549,7 +549,7 @@ public class NIOProxyProtocol
 				if(remoteChannelSK == null || !remoteChannelSK.isValid())
 				{
 					channelRelay = new ChannelRelayTunnel(ByteBufferUtil.DEFAULT_BUFFER_SIZE, remoteChannel, clientChannel, clientChannelSK, true, getSelectorController());
-					remoteChannelSK = getSelectorController().register(NIOChannelCleaner.DEFAULT, remoteChannel, SelectionKey.OP_READ, channelRelay, new DefaultSKController(), false);
+					remoteChannelSK = getSelectorController().register(NIOChannelCleaner.DEFAULT, remoteChannel, SelectionKey.OP_READ, channelRelay, false);
 				}
 				
 				

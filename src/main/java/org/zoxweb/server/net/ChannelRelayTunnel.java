@@ -148,7 +148,7 @@ public class  ChannelRelayTunnel
 	public synchronized void waitThenStopReading(SelectionKey sk)
 	{
 		SKAttachment ska = (SKAttachment) sk.attachment();
-		while(!ska.getSKController().isSelectable(sk) && sk.channel().isOpen())
+		while(!ska.isSelectable() && sk.channel().isOpen())
 		{
 			try 
 			{
