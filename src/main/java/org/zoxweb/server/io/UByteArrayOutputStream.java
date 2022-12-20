@@ -26,7 +26,7 @@ import java.util.Arrays;
  */
 public class UByteArrayOutputStream 
 	extends ByteArrayOutputStream 
-	implements Externalizable, InternalBufferAccess
+	implements Externalizable, BytesArrayAccess
 {
 
 	/**
@@ -231,6 +231,16 @@ public class UByteArrayOutputStream
 		}
 		
 		return false;
+	}
+
+
+	public synchronized byte[] copyBytes(int from)
+	{
+		return copyBytes(from, size());
+	}
+	public synchronized byte[] copyBytes(int from, int to)
+	{
+		return Arrays.copyOfRange(getInternalBuffer(), from, to);
 	}
 
 	/**

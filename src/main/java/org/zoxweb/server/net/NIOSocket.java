@@ -16,6 +16,7 @@
 package org.zoxweb.server.net;
 
 import org.zoxweb.server.io.IOUtil;
+import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.shared.data.events.BaseEventObject;
 import org.zoxweb.shared.data.events.EventListenerManager;
@@ -37,7 +38,6 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.logging.Logger;
 
 /**
  * NIO Socket 
@@ -46,8 +46,8 @@ import java.util.logging.Logger;
 public class NIOSocket
     implements Runnable, DaemonController, Closeable
 {
-	private static final Logger logger = Logger.getLogger(NIOSocket.class.getName());
-	public static boolean debug = false;
+	public static final LogWrapper logger = new LogWrapper(NIOSocket.class).setEnabled(false);
+	//public static boolean debug = false;
 	private boolean live = true;
 	private final SelectorController selectorController;
 	private final Executor executor;
@@ -74,7 +74,7 @@ public class NIOSocket
 	
 	public NIOSocket(InetSocketAddress sa, int backlog, ProtocolSessionFactory<?> psf, Executor exec) throws IOException
 	{
-		logger.info("Executor: " + exec);
+		logger.getLogger().info("Executor: " + exec);
 		selectorController = new SelectorController(Selector.open());
 		this.executor = exec;
 		if (sa != null)
@@ -96,7 +96,7 @@ public class NIOSocket
 		SharedUtil.checkIfNulls("Null values", ssc, psf);
 		
 		SelectionKey sk = selectorController.register(ssc, SelectionKey.OP_ACCEPT, psf);
-		logger.info(ssc + " added");
+		logger.getLogger().info(ssc + " added");
 		
 		return sk;
 	}
@@ -114,7 +114,7 @@ public class NIOSocket
 	{
 		SharedUtil.checkIfNulls("Null values", dc, psf);
 		SelectionKey sk = selectorController.register(dc, SelectionKey.OP_ACCEPT, psf);
-		logger.info(dc + " added");
+		logger.getLogger().info(dc + " added");
 		
 		return sk;
 	}
@@ -176,7 +176,7 @@ public class NIOSocket
 									&& key.isReadable())
 							    {
 							    	ProtocolProcessor currentPP = (ProtocolProcessor)ska.attachment();
-									if(debug) logger.info(ska.attachment() + " ska is selectable: " + ska.isSelectable() + " for reading " );
+									if(logger.isEnabled()) logger.getLogger().info(ska.attachment() + " ska is selectable: " + ska.isSelectable() + " for reading " );
 							    	if (ska.isSelectable() && currentPP != null)
 							    	{
 							    		// very,very,very crucial setup prior to processing
@@ -218,8 +218,7 @@ public class NIOSocket
 							    	SocketChannel sc = ((ServerSocketChannel)key.channel()).accept();
 
 							    	ProtocolSessionFactory<?> psf = (ProtocolSessionFactory<?>) ska.attachment();
-									if (debug)
-										logger.info("Accepted: " + sc + " psf:" + psf);
+									if(logger.isEnabled()) logger.getLogger().info("Accepted: " + sc + " psf:" + psf);
 							    	// check if the incoming connection is allowed
 
 
@@ -235,7 +234,7 @@ public class NIOSocket
 
 							    			InetSocketAddress isa = (InetSocketAddress) ((ServerSocketChannel)key.channel()).getLocalAddress();
 							    			// in try block with catch exception since logger can point to file log
-							    			logger.info( "@ port:" + isa.getPort() + " access denied for:" + sc.getRemoteAddress());
+							    			logger.getLogger().info( "@ port:" + isa.getPort() + " access denied for:" + sc.getRemoteAddress());
 							    			if(eventListenerManager != null)
 											{
 												if (sc.getRemoteAddress() instanceof InetSocketAddress)
@@ -253,7 +252,7 @@ public class NIOSocket
 							    			{
 							    				float burstRate = (float) ((500.00/(float)(System.currentTimeMillis() - attackTimestamp))*TimeInMillis.SECOND.MILLIS);
 							    				float overAllRate = (float)((float)currentAttackCount/(float)(System.currentTimeMillis() - startTime))*TimeInMillis.SECOND.MILLIS;
-							    				logger.info(" Burst Attacks:" + burstRate+ " a/s" + " Total Attacks:" + overAllRate + " a/s" + " total:" + attackTotalCount + " in " + TimeInMillis.toString(System.currentTimeMillis() - startTime));
+							    				logger.getLogger().info(" Burst Attacks:" + burstRate+ " a/s" + " Total Attacks:" + overAllRate + " a/s" + " total:" + attackTotalCount + " in " + TimeInMillis.toString(System.currentTimeMillis() - startTime));
 							    				attackTimestamp = 0;
 							    			}
 							    		}
@@ -348,7 +347,7 @@ public class NIOSocket
 				if(getStatLogCounter() > 0 && (callsCounter.getCounts()%getStatLogCounter() == 0 || (System.currentTimeMillis() - snapTime) > getStatLogCounter()))
 				{
 					snapTime = System.currentTimeMillis();
-					logger.info("Average dispatch processing " + TimeInMillis.nanosToString(averageProcessingTime()) +
+					logger.getLogger().info("Average dispatch processing " + TimeInMillis.nanosToString(averageProcessingTime()) +
 							" total time:" + TimeInMillis.nanosToString(callsCounter.getDeltas()) +
 							" total dispatches:" + callsCounter.getCounts() + " total select calls:" + selectedCountTotal +
 							" last select count:" + selectedCount + " total select keys:" +selectorController.getSelector().keys().size() +

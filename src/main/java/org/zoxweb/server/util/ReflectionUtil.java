@@ -17,7 +17,6 @@ package org.zoxweb.server.util;
 
 
 import org.zoxweb.shared.annotation.ParamProp;
-import org.zoxweb.shared.util.Const;
 import org.zoxweb.shared.util.SharedUtil;
 
 import java.lang.annotation.Annotation;
@@ -258,6 +257,40 @@ public class ReflectionUtil
 			return true;
 		}
 		return false;
+	}
+
+
+	public static Field findField(Class<?> clazz, Class<?> fieldClassType, JMod...modifiers)
+	{
+		Field[] fields = clazz.getDeclaredFields();
+		int mod = 0;
+		if(modifiers != null)
+		{
+			mod = JMod.toModifier(modifiers);
+		}
+
+		for (Field field : fields)
+		{
+
+			if (mod != 0)
+			{
+				if (field.getModifiers() != mod)
+					continue;
+			}
+
+			if (fieldClassType.isAssignableFrom(field.getType()))
+				return field;
+		}
+		return null;
+	}
+
+
+	public static <V> V getValueFromField(Class<?> clazz, Class<?> fieldClassType, JMod...modifiers)
+			throws IllegalAccessException
+	{
+		Field match = findField(clazz, fieldClassType, modifiers);
+
+		return match != null ? (V) match.get(null) : null;
 	}
 
 	public static boolean isParameterAnnotatedAs(Parameter p, Class<? extends Annotation>...annotationTypes)

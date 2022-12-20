@@ -187,24 +187,26 @@ public class HTTPRawMessage
 						case APPLICATION_WWW_URL_ENC:
 							HTTPDecoder.WWW_URL_ENC.decode(this);
 							break;
-						case APPLICATION_JSON:
-							break;
+
 						case APPLICATION_OCTET_STREAM:
 							break;
 						case MULTIPART_FORM_DATA:
 							HTTPDecoder.MULTIPART_FORM_DATA.decode(this);
 							break;
 						case TEXT_CSV:
-							break;
+
 						case TEXT_CSS:
-							break;
+
 						case TEXT_HTML:
-							break;
+
 						case TEXT_JAVASCRIPT:
-							break;
+
 						case TEXT_PLAIN:
-							break;
+
 						case TEXT_YAML:
+
+						case APPLICATION_JSON:
+							hmci.setContent(ubaos.copyBytes(endOfHeadersIndex +ProtocolDelimiter.CRLFCRLF.getBytes().length));
 							break;
 						case IMAGE_BMP:
 							break;

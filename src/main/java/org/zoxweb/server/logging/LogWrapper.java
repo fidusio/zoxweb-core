@@ -5,7 +5,7 @@ import java.util.logging.Logger;
 
 public class LogWrapper {
     private final Logger logger;
-    private boolean enabled = true;
+    private volatile boolean enabled = true;
     public LogWrapper(Logger logger)
     {
         this.logger = logger;
@@ -32,7 +32,7 @@ public class LogWrapper {
     }
     public LogWrapper setEnabled(boolean stat)
     {
-        enabled = stat;
+        this.enabled = stat;
         return this;
     }
     public LogWrapper info(Object o)
