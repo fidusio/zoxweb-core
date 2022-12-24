@@ -15,32 +15,35 @@
  */
 package org.zoxweb.server.net;
 
+import org.zoxweb.server.http.proxy.NIOProxyProtocol;
+import org.zoxweb.server.http.proxy.NIOProxyProtocol.NIOProxyProtocolFactory;
+import org.zoxweb.server.io.IOUtil;
+import org.zoxweb.server.logging.LoggerUtil;
+import org.zoxweb.server.net.NIOTunnel.NIOTunnelFactory;
+import org.zoxweb.server.net.security.IPBlockerListener;
+import org.zoxweb.server.net.security.SecureNetworkTunnel;
+import org.zoxweb.server.security.CryptoUtil;
+import org.zoxweb.server.task.TaskUtil;
+import org.zoxweb.server.util.GSONUtil;
+import org.zoxweb.shared.app.AppCreatorDefault;
+import org.zoxweb.shared.crypto.SSLContextInfo;
+import org.zoxweb.shared.data.ConfigDAO;
+import org.zoxweb.shared.security.IPBlockerConfig;
+import org.zoxweb.shared.util.*;
+
+import javax.net.ssl.SSLContext;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.nio.channels.ServerSocketChannel;
 import java.security.Provider;
-
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import javax.net.ssl.SSLContext;
-
-import org.zoxweb.server.http.proxy.NIOProxyProtocol;
-import org.zoxweb.server.http.proxy.NIOProxyProtocol.NIOProxyProtocolFactory;
-import org.zoxweb.server.io.IOUtil;
-import org.zoxweb.server.logging.LoggerUtil;
-import org.zoxweb.server.net.NIOTunnel.NIOTunnelFactory;
-import org.zoxweb.server.net.security.*;
-import org.zoxweb.server.security.CryptoUtil;
-import org.zoxweb.server.task.TaskUtil;
-import org.zoxweb.server.util.GSONUtil;
-import org.zoxweb.shared.app.AppCreatorDefault;
-import org.zoxweb.shared.data.ConfigDAO;
-import org.zoxweb.shared.security.IPBlockerConfig;
-import org.zoxweb.shared.util.*;
+import static org.zoxweb.shared.crypto.SSLContextInfo.Param.CIPHERS;
+import static org.zoxweb.shared.crypto.SSLContextInfo.Param.PROTOCOLS;
 
 
 /**
@@ -63,13 +66,13 @@ extends AppCreatorDefault<NIOSocket, ConfigDAO>
 	
 	public NIOConfig(String configDAOFile) throws InstantiationException, IllegalAccessException, ClassNotFoundException, IOException
 	{
-		this((ConfigDAO)GSONUtil.fromJSON(IOUtil.inputStreamToString(configDAOFile)));
+		this(GSONUtil.fromJSON(IOUtil.inputStreamToString(configDAOFile)));
 	}
 	
 	
 	public NIOConfig(InputStream configDAOFile) throws InstantiationException, IllegalAccessException, ClassNotFoundException, IOException
 	{
-		this((ConfigDAO)GSONUtil.fromJSON(IOUtil.inputStreamToString(configDAOFile, true)));
+		this (GSONUtil.fromJSON(IOUtil.inputStreamToString(configDAOFile, true)));
 	}
 	
 	public NIOConfig(ConfigDAO configDAO)
@@ -182,6 +185,8 @@ extends AppCreatorDefault<NIOSocket, ConfigDAO>
 							String trustFile = config.getProperties().getValue("truststore_file");
 							String providerName = config.getProperties().getValue("provider");
 							String protocol = config.getProperties().getValue("protocol");
+							NVStringList protocols =((NVStringList)config.getProperties().get(PROTOCOLS));
+							NVStringList ciphers =((NVStringList)config.getProperties().get(CIPHERS));
 
 							Provider provider = null;
 							if(providerName != null)
@@ -189,16 +194,19 @@ extends AppCreatorDefault<NIOSocket, ConfigDAO>
 								Class pClass = Class.forName(providerName);
 								provider = (Provider) pClass.getDeclaredConstructor().newInstance();
 							}
-							SSLContext sslc = CryptoUtil.initSSLContext(protocol, provider, IOUtil.locateFile(config.getProperties().getValue("keystore_file")),
-																		(String)config.getProperties().getValue("keystore_type"), 
+							SSLContext sslContext = CryptoUtil.initSSLContext(protocol, provider, IOUtil.locateFile(config.getProperties().getValue("keystore_file")),
+																		config.getProperties().getValue("keystore_type"),
 																		ksPassword.toCharArray(),  
 																		aliasPassword != null ?  aliasPassword.toCharArray() : null,
 																		trustFile != null ? IOUtil.locateFile(trustFile) : null,
 																		trustStorePassword != null ?  trustStorePassword.toCharArray() : null);
-							config.attach(sslc);
+
+
+							config.attach(new SSLContextInfo(sslContext,
+									protocols != null ? protocols.getValues() :null,
+									ciphers != null ? ciphers.getValues() : null));
 						}
 						else {
-
 							Object toAttach = clazz.getDeclaredConstructor().newInstance();
 							config.attach(toAttach);
 						}

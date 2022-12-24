@@ -15,9 +15,9 @@
  */
 package org.zoxweb.shared.filters;
 
-import java.io.Serializable;
-
 import org.zoxweb.shared.util.CanonicalID;
+
+import java.io.Serializable;
 
 
 /**
@@ -38,16 +38,16 @@ public interface ValueFilter<I extends Object, O extends Object>
 	 * @throws NullPointerException if in is null
 	 * @throws IllegalArgumentException if in is invalid
 	 */
-	public O validate(I in)
+	O validate(I in)
         throws NullPointerException, IllegalArgumentException;
 	
 	
 	/**
 	 * Check if the value is valid
 	 * @param in value to be checked
-	 * @return true if valid false if not
+	 * @return true if in value valid
 	 */
-	public boolean isValid(I in);
+	boolean isValid(I in);
 	
 
 }
