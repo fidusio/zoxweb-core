@@ -16,6 +16,7 @@
 package org.zoxweb.server.io;
 
 import org.zoxweb.server.util.ServerUtil;
+import org.zoxweb.shared.util.Const;
 import org.zoxweb.shared.util.SharedUtil;
 import org.zoxweb.shared.util.SimpleQueue;
 
@@ -23,7 +24,8 @@ import java.io.IOException;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.channels.ByteChannel;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.locks.Lock;
 
 public class ByteBufferUtil 
@@ -58,16 +60,19 @@ public class ByteBufferUtil
 
 	private void cache0(UByteArrayOutputStream ubaos)
 	{
-		if(ubaos != null && ubaos.size() <= 1024)
+		if(cachedUBAOS.size() < CACHE_LIMIT && ubaos != null && ubaos.size() <= Const.SizeInBytes.K.SIZE)
 		{
-			ubaos.reset();
-			cachedUBAOS.queue(ubaos);
+			synchronized (this) {
+				ubaos.reset();
+				cachedUBAOS.queue(ubaos);
+				availableCapacity += ubaos.getInternalBuffer().length;
+			}
 		}
 	}
 	
 	private void cache0(ByteBuffer bb)
 	{
-		synchronized(cachedBuffers)
+		synchronized(this)
 		{
 			if (bb != null)
 			{
@@ -99,7 +104,7 @@ public class ByteBufferUtil
 		ByteBuffer bb = null;
 		SimpleQueue<ByteBuffer> sq = null;
 
-		synchronized(cachedBuffers)
+		synchronized(this)
 		{
 			sq = cachedBuffers.get(length-offset);
 
@@ -201,17 +206,26 @@ public class ByteBufferUtil
 		return SINGLETON.toByteBuffer0(bType, buffer, offset, length, copy);
 	}
 
-
-	public static UByteArrayOutputStream allocateUBAOS(int capacity)
+	private UByteArrayOutputStream toUBAOS0(int capacity)
 	{
 		if (capacity <= 1024)
 		{
-			UByteArrayOutputStream ret = SINGLETON.cachedUBAOS.dequeue();
-			if (ret != null)
-				return ret;
+			synchronized (this) {
+				UByteArrayOutputStream ret = cachedUBAOS.dequeue();
+
+				if (ret != null) {
+					availableCapacity -= ret.getInternalBuffer().length;
+					return ret;
+				}
+			}
 		}
 
 		return new UByteArrayOutputStream(capacity);
+	}
+
+	public static UByteArrayOutputStream allocateUBAOS(int capacity)
+	{
+		return SINGLETON.toUBAOS0(capacity);
 	}
 
 	public static int write(ByteChannel bc, ByteBuffer bb) throws IOException
@@ -315,6 +329,11 @@ public class ByteBufferUtil
 	public static int cacheCount()
 	{
 		return SINGLETON.count;
+	}
+
+	public static int baosCount()
+	{
+		return SINGLETON.cachedUBAOS.size();
 	}
 
 	/**

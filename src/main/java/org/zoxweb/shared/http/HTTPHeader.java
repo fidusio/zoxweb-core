@@ -52,6 +52,7 @@ public enum HTTPHeader
 	PROXY_AUTHORIZATION("Proxy-Authorization"),
 	SERVER("Server"),
 	SET_COOKIE("Set-Cookie"),
+	STRICT_TRANSPORT_SECURITY("Strict-Transport-Security"),
 	TRANSFER_ENCODING("Transfer-Encoding"),
 	USER_AGENT("User-Agent"),
 	WWW_AUTHENTICATE("WWW-Authenticate"),
@@ -133,6 +134,50 @@ public enum HTTPHeader
 		}
 
 		return new NVPair(name, headerValue.toString());
+	}
+
+	public static GetNameValue<String> toHTTPHeader(GetName name, GetNameValue<?> ...gnvs)
+	{
+
+		return toHTTPHeader(name.getName(), gnvs);
+	}
+
+
+	public static GetNameValue<String> toHTTPHeader(String name, GetNameValue<?> ...gnvs)
+	{
+
+		StringBuilder headerValue = new StringBuilder();
+
+		if(gnvs != null)
+		{
+			for(int i=0; i<gnvs.length; i++)
+			{
+				if (headerValue.length() > 0)
+					headerValue.append("; ");
+
+				if (gnvs[i] !=null && !SharedStringUtil.isEmpty(gnvs[i].getName()))
+				{
+					headerValue.append(gnvs[i].getName());
+					if(gnvs[i].getValue() != null)
+					{
+						headerValue.append('=');
+						headerValue.append(gnvs[i].getValue());
+					}
+				}
+
+			}
+		}
+		return new NVPair(name, headerValue.toString());
+	}
+
+	public static String toString(GetNameValue<?> gnv)
+	{
+		return gnv.getName() + ": " + gnv.getValue();
+	}
+
+	public static byte[] toBytes(GetNameValue<?> gnv)
+	{
+		return SharedStringUtil.getBytes(gnv.getName() + ": " + gnv.getValue());
 	}
 
 }

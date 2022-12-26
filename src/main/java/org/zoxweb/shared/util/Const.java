@@ -299,28 +299,28 @@ public class Const {
     K("KB", 1024),
 
     // Megabytes
-    M("MB", K.LENGTH * 1024),
+    M("MB", K.SIZE * 1024),
 
     // Gigabytes
-    G("GB", M.LENGTH * 1024),
+    G("GB", M.SIZE * 1024),
 
     // Terabytes
-    T("TB", G.LENGTH * 1024),
+    T("TB", G.SIZE * 1024),
 
     // Petabytes
-    P("PB", T.LENGTH * 1024);
+    P("PB", T.SIZE * 1024);
 
     /**
      * Returns the size of bytes.
      */
-    public final long LENGTH;
+    public final long SIZE;
 
 
     private final String name;
 
     SizeInBytes(String name, long value) {
       this.name = name;
-      LENGTH = value;
+      SIZE = value;
     }
 
     /**
@@ -336,11 +336,11 @@ public class Const {
       for (int i = values.length - 1; i >= 0; i--) {
         SizeInBytes bs = values[i];
         if (str.endsWith(bs.getName())) {
-          multiplier = bs.LENGTH;
+          multiplier = bs.SIZE;
           str = str.substring(0, str.length() - bs.getName().length());
           break;
         } else if (str.endsWith(bs.name())) {
-          multiplier = bs.LENGTH;
+          multiplier = bs.SIZE;
           str = str.substring(0, str.length() - bs.name().length());
           break;
         }
@@ -351,7 +351,7 @@ public class Const {
 
 
     public long sizeInBytes(long size) {
-      return LENGTH * size;
+      return SIZE * size;
     }
 
     @Override
@@ -361,12 +361,12 @@ public class Const {
 
     public long convertBytes(long sizeInBytes)
     {
-      return sizeInBytes/LENGTH;
+      return sizeInBytes/ SIZE;
     }
 
     public double convertBytesDouble(long sizeInBytes)
     {
-      return (double)sizeInBytes/(double)LENGTH;
+      return (double)sizeInBytes/(double) SIZE;
     }
 
     public static String toString(long bytes)

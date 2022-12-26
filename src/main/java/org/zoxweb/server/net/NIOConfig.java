@@ -18,6 +18,7 @@ package org.zoxweb.server.net;
 import org.zoxweb.server.http.proxy.NIOProxyProtocol;
 import org.zoxweb.server.http.proxy.NIOProxyProtocol.NIOProxyProtocolFactory;
 import org.zoxweb.server.io.IOUtil;
+import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.logging.LoggerUtil;
 import org.zoxweb.server.net.NIOTunnel.NIOTunnelFactory;
 import org.zoxweb.server.net.security.IPBlockerListener;
@@ -26,7 +27,7 @@ import org.zoxweb.server.security.CryptoUtil;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.app.AppCreatorDefault;
-import org.zoxweb.shared.crypto.SSLContextInfo;
+import org.zoxweb.server.security.SSLContextInfo;
 import org.zoxweb.shared.data.ConfigDAO;
 import org.zoxweb.shared.security.IPBlockerConfig;
 import org.zoxweb.shared.util.*;
@@ -40,10 +41,9 @@ import java.nio.channels.ServerSocketChannel;
 import java.security.Provider;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.logging.Logger;
 
-import static org.zoxweb.shared.crypto.SSLContextInfo.Param.CIPHERS;
-import static org.zoxweb.shared.crypto.SSLContextInfo.Param.PROTOCOLS;
+import static org.zoxweb.server.security.SSLContextInfo.Param.CIPHERS;
+import static org.zoxweb.server.security.SSLContextInfo.Param.PROTOCOLS;
 
 
 /**
@@ -58,19 +58,19 @@ extends AppCreatorDefault<NIOSocket, ConfigDAO>
 	private NIOSocket nioSocket;
 	
 
-	private static final Logger log = Logger.getLogger(NIOConfig.class.getName());
-	private Set<Closeable> services = new HashSet<>();
+	public static final LogWrapper log = new LogWrapper(NIOConfig.class).setEnabled(false);
+	private final Set<Closeable> services = new HashSet<>();
 
 
 
 	
-	public NIOConfig(String configDAOFile) throws InstantiationException, IllegalAccessException, ClassNotFoundException, IOException
+	public NIOConfig(String configDAOFile) throws  IOException
 	{
 		this(GSONUtil.fromJSON(IOUtil.inputStreamToString(configDAOFile)));
 	}
 	
 	
-	public NIOConfig(InputStream configDAOFile) throws InstantiationException, IllegalAccessException, ClassNotFoundException, IOException
+	public NIOConfig(InputStream configDAOFile) throws IOException
 	{
 		this (GSONUtil.fromJSON(IOUtil.inputStreamToString(configDAOFile, true)));
 	}
@@ -128,9 +128,9 @@ extends AppCreatorDefault<NIOSocket, ConfigDAO>
 					if (psf instanceof NIOTunnelFactory && psf.getProperties().getValue("ssl_engine") != null)
 					{
 
-						ConfigDAO sslContent =(ConfigDAO)psf.getProperties().getValue("ssl_engine");
+						ConfigDAO sslContent =psf.getProperties().getValue("ssl_engine");
 						SSLContext sslContext = (SSLContext) sslContent.attachment();
-						log.info("Creating secure network tunnel:" + port+ "," + ((NIOTunnelFactory)psf).getRemoteAddress() );
+						if(log.isEnabled()) log.getLogger().info("Creating secure network tunnel:" + port+ "," + ((NIOTunnelFactory)psf).getRemoteAddress() );
 						// secure temporary fix since the NIO Secure Socket still not fully operational
 						services.add(new SecureNetworkTunnel(sslContext.getServerSocketFactory(),
 											    port, backlog,
@@ -145,7 +145,7 @@ extends AppCreatorDefault<NIOSocket, ConfigDAO>
 						nioSocket.addServerSocket(ssc, psf);
 					}
 					
-					log.info("Service added " + psf.getName() +" port:" + port + " backlog:" + backlog);
+					if(log.isEnabled()) log.getLogger().info("Service added " + psf.getName() +" port:" + port + " backlog:" + backlog);
 				}
 			}
 		}
@@ -159,7 +159,7 @@ extends AppCreatorDefault<NIOSocket, ConfigDAO>
 	{
 		ArrayValues<NVEntity> content = configDAO.getContent();
 		
-		log.info("Start Parsing");
+		if(log.isEnabled()) log.getLogger().info("Start Parsing");
 		// first pass
 		for (NVEntity nve : content.values())
 		{
@@ -173,12 +173,12 @@ extends AppCreatorDefault<NIOSocket, ConfigDAO>
 				{
 					try 
 					{
-						Class clazz =  Class.forName(config.getBeanClassName());
-						log.info("Class: " + clazz);
+						Class<?> clazz =  Class.forName(config.getBeanClassName());
+						if(log.isEnabled()) log.getLogger().info("Class: " + clazz);
 						
 						if (clazz.isAssignableFrom(SSLContext.class))
 						{
-							log.info("We have SSLContext");
+							if(log.isEnabled()) log.getLogger().info("We have SSLContext");
 							String ksPassword = config.getProperties().getValue("keystore_password");
 							String aliasPassword = config.getProperties().getValue("alias_password");
 							String trustStorePassword = config.getProperties().getValue("truststore_password");
@@ -239,7 +239,7 @@ extends AppCreatorDefault<NIOSocket, ConfigDAO>
 						{
 							for (String rule : iRules.getValue())
 							{
-								log.info("Adding Incoming rule:" + rule);
+								if(log.isEnabled()) log.getLogger().info("Adding Incoming rule:" + rule);
 								try {
 									incomingIFRM.addInetFilterProp(rule);
 								}
@@ -262,7 +262,7 @@ extends AppCreatorDefault<NIOSocket, ConfigDAO>
 						{
 							for (String rule : oRules.getValue())
 							{
-								log.info("Adding Incoming rule:" + rule);
+								if(log.isEnabled()) log.getLogger().info("Adding Incoming rule:" + rule);
 								try {
 									outgoingIFRM.addInetFilterProp(rule);
 								}
@@ -307,25 +307,19 @@ extends AppCreatorDefault<NIOSocket, ConfigDAO>
 					{
 						String ssl_engine = config.getProperties().getValue("ssl_engine");
 						NVPair rh = (NVPair) config.getProperties().get("remote_host");
-						log.info("ssl_engine_found: " + ssl_engine);
+						if(log.isEnabled()) log.getLogger().info("ssl_engine_found: " + ssl_engine);
 						if(rh != null)
 							nioTF.getProperties().add(rh);
 						if(ssl_engine != null)
 						{
 							ConfigDAO sslContent = (ConfigDAO)configDAO.getContent().get(ssl_engine);
-							log.info("sslContent: " + sslContent);
+							if(log.isEnabled()) log.getLogger().info("sslContent: " + sslContent);
 							if(sslContent != null) {
-								log.info("" + sslContent);
+								if(log.isEnabled()) log.getLogger().info("" + sslContent);
 								nioTF.getProperties().add("ssl_engine", sslContent);
 							}
 						}
 
-//						if (ssl_engine != null)
-//						{
-//							ConfigDAO factory = (ConfigDAO)configDAO.getContent().get(ssl_engine);
-//							if (factory != null)
-//								nioTF.setIncomingSSLSessionDataFactory((SSLSessionDataFactory) factory.attachment());
-//						}
 
 						if(!SharedStringUtil.isEmpty(config.getProperties().getValue("log_file")))
 							nioTF.setLogger(LoggerUtil.loggerToFile(NIOTunnel.class.getName()+".proxy", config.getProperties().getValue("log_file")));
@@ -341,14 +335,10 @@ extends AppCreatorDefault<NIOSocket, ConfigDAO>
 				}
 			}
 		}
-		
-		
 		return configDAO;
 	}
 	
 	
-
-	@SuppressWarnings("resource")
 
 
 	@Override
@@ -359,8 +349,6 @@ extends AppCreatorDefault<NIOSocket, ConfigDAO>
 		{
 			IOUtil.close(c);
 		}
-		
-		
 	}
 
 
@@ -378,15 +366,15 @@ extends AppCreatorDefault<NIOSocket, ConfigDAO>
 		try
 		{
 			int index = 0;
-			System.out.println("loading file " + args[index]);
+			log.getLogger().info("loading file " + args[index]);
 			ConfigDAO configDAO = GSONUtil.fromJSON(IOUtil.inputStreamToString(args[index++]));
-			System.out.println(GSONUtil.toJSON(configDAO, true, false, false));
+			log.getLogger().info(GSONUtil.toJSON(configDAO, true, false, false));
 			NIOConfig nioConfig = new NIOConfig(configDAO);
 			NIOSocket nioSocket = nioConfig.createApp();
 			if (args.length > index) {
 				IPBlockerConfig ipBlockerConfig = GSONUtil.fromJSON(IOUtil.inputStreamToString(args[index++]), IPBlockerConfig.class);
 				IPBlockerListener.Creator c = new IPBlockerListener.Creator();
-				//log.info("\n" + GSONUtil.toJSON(appConfig, true, false, false));
+				//if(log.isEnabled()) log.getLogger().info("\n" + GSONUtil.toJSON(appConfig, true, false, false));
 				c.setAppConfig(ipBlockerConfig);
 				c.createApp();
 				nioSocket.setEventManager(TaskUtil.getDefaultEventManager());

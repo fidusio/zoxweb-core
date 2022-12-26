@@ -15,38 +15,30 @@
  */
 package org.zoxweb.server.http;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.HttpCookie;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-
-
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.parser.Parser;
 import org.jsoup.select.Elements;
-
+import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.server.io.UByteArrayOutputStream;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.server.util.ReflectionUtil;
 import org.zoxweb.server.util.RuntimeUtil;
 import org.zoxweb.shared.data.SimpleMessage;
 import org.zoxweb.shared.http.*;
-import org.zoxweb.shared.http.HTTPEncoder;
 import org.zoxweb.shared.net.InetSocketAddressDAO;
 import org.zoxweb.shared.protocol.MessageStatus;
 import org.zoxweb.shared.protocol.ProtocolDelimiter;
 import org.zoxweb.shared.util.*;
+
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.*;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Contains HTTP utitlty methods.
@@ -132,7 +124,7 @@ public class HTTPUtil
 	{
 		if (ubaos == null)
 		{
-			ubaos = new UByteArrayOutputStream();
+			ubaos = ByteBufferUtil.allocateUBAOS(256);
 		}
 		else
 		{
@@ -144,17 +136,20 @@ public class HTTPUtil
 			hv = HTTPVersion.HTTP_1_1;
 		// write the first line
 		ubaos.write(hv.getValue() + " " + hcc.getHTTPStatusCode().CODE + " " +hcc.getHTTPStatusCode().REASON + ProtocolDelimiter.CRLF.getValue());
-		// write headers
+		// set content length if available
 		if (hcc.getContent() != null && hcc.getContent().length > 0)
 		{
 			hcc.setContentLength(hcc.getContent().length);
 		}
-
+		// write headers
 		for (GetNameValue<String> header : hcc.getHeaders().asArrayValuesString().values())
 		{
-			ubaos.write(header.getName() + ": " + header.getValue() +  ProtocolDelimiter.CRLF.getValue());
+			// header.getName() + ": " + header.getValue())
+			ubaos.write(HTTPHeader.toBytes(header));
+			// header end of line
+		    ubaos.write(ProtocolDelimiter.CRLF.getValue());
 		}
-
+		// header separator
 		ubaos.write(ProtocolDelimiter.CRLF.getValue().getBytes());
 
 		if (hcc.getContent() != null && hcc.getContent().length > 0)
@@ -169,7 +164,7 @@ public class HTTPUtil
 	{
 		if (ubaos == null)
 		{
-			ubaos = new UByteArrayOutputStream();
+			ubaos = ByteBufferUtil.allocateUBAOS(256);
 		}
 		else
 		{
@@ -234,7 +229,7 @@ public class HTTPUtil
 
 		if (ubaos == null)
 		{
-			ubaos = new UByteArrayOutputStream();
+			ubaos = ByteBufferUtil.allocateUBAOS(256);
 		}
 		else
 		{
@@ -394,7 +389,7 @@ public class HTTPUtil
 			charset = SharedStringUtil.UTF_8;
 		}
 
-		UByteArrayOutputStream ret = new UByteArrayOutputStream();
+		UByteArrayOutputStream ret = ByteBufferUtil.allocateUBAOS(256);
 
 		if (params != null)
 		{

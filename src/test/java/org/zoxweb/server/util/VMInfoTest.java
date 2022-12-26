@@ -15,16 +15,13 @@
  */
 package org.zoxweb.server.util;
 
-import java.io.IOException;
-import java.util.logging.Logger;
-
 import org.zoxweb.server.task.TaskSchedulerProcessor;
-import org.zoxweb.server.util.GSONUtil;
-import org.zoxweb.server.util.RuntimeUtil;
-import org.zoxweb.server.util.VMMonitorTask;
 import org.zoxweb.shared.util.Appointment;
 import org.zoxweb.shared.util.AppointmentDefault;
 import org.zoxweb.shared.util.Const;
+
+import java.io.IOException;
+import java.util.logging.Logger;
 
 public class VMInfoTest {
 
@@ -32,9 +29,9 @@ public class VMInfoTest {
 
 	public static void main(String ...args) {
 		Runtime run = Runtime.getRuntime();
-		System.out.println("Total memory:" + run.totalMemory()/Const.SizeInBytes.M.LENGTH);
-		System.out.println("Free  memory:" + run.freeMemory()/Const.SizeInBytes.M.LENGTH);
-		System.out.println("Max   memory:" + run.maxMemory()/Const.SizeInBytes.M.LENGTH);
+		System.out.println("Total memory:" + run.totalMemory()/Const.SizeInBytes.M.SIZE);
+		System.out.println("Free  memory:" + run.freeMemory()/Const.SizeInBytes.M.SIZE);
+		System.out.println("Max   memory:" + run.maxMemory()/Const.SizeInBytes.M.SIZE);
 		long memory = run.totalMemory() - run.freeMemory();
 		System.out.println("Used memory:" + memory);
 

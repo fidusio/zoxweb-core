@@ -1,4 +1,4 @@
-package org.zoxweb.shared.crypto;
+package org.zoxweb.server.security;
 
 import org.zoxweb.shared.util.GetName;
 import org.zoxweb.shared.util.InstanceCreator;

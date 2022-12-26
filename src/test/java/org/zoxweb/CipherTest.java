@@ -40,7 +40,7 @@ public class CipherTest {
 			sb.append(" ");
 		}
 		
-		System.out.print(sb.toString());
+		System.out.print(sb);
 	}
 
 }

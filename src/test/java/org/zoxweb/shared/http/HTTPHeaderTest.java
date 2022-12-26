@@ -1,6 +1,9 @@
 package org.zoxweb.shared.http;
 
 import org.junit.jupiter.api.Test;
+import org.zoxweb.shared.util.GetNameValue;
+import org.zoxweb.shared.util.NVLong;
+import org.zoxweb.shared.util.NVPair;
 
 public class HTTPHeaderTest {
 
@@ -8,6 +11,18 @@ public class HTTPHeaderTest {
     @Test
     public void testHeaderName()
     {
-        System.out.println(HTTPHeader.toHTTPHeader(HTTPHeader.ACCESS_CONTROL_ALLOW_CREDENTIALS, HTTPMimeType.APPLICATION_JSON));
+        System.out.println(HTTPHeader.toString(HTTPHeader.toHTTPHeader(HTTPHeader.ACCESS_CONTROL_ALLOW_CREDENTIALS, HTTPMimeType.APPLICATION_JSON)));
+    }
+    @Test
+    public void testHeaderFormat()
+    {
+        GetNameValue<?>[]  gnvs = {
+                new NVLong("max-age", 31536000),
+                new NVPair("includeSubDomains", (String) null),
+                new NVPair("preload", (String) null),
+        };
+
+        System.out.println(HTTPHeader.toString(HTTPHeader.toHTTPHeader(HTTPHeader.STRICT_TRANSPORT_SECURITY, gnvs)));
+
     }
 }
