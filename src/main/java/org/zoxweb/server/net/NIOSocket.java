@@ -72,7 +72,7 @@ public class NIOSocket
 	
 	
 	
-	public NIOSocket(InetSocketAddress sa, int backlog, ProtocolSessionFactory<?> psf, Executor exec) throws IOException
+	public NIOSocket(InetSocketAddress sa, int backlog, ProtocolFactory<?> psf, Executor exec) throws IOException
 	{
 		logger.getLogger().info("Executor: " + exec);
 		selectorController = new SelectorController(Selector.open());
@@ -83,7 +83,7 @@ public class NIOSocket
 		TaskUtil.startRunnable(this, "NIO-SOCKET");
 	}
 	
-	public SelectionKey addServerSocket(InetSocketAddress sa, int backlog, ProtocolSessionFactory<?> psf) throws IOException
+	public SelectionKey addServerSocket(InetSocketAddress sa, int backlog, ProtocolFactory<?> psf) throws IOException
 	{
 		SharedUtil.checkIfNulls("Null values", sa, psf);
 		ServerSocketChannel ssc = ServerSocketChannel.open();
@@ -91,7 +91,7 @@ public class NIOSocket
 		return addServerSocket(ssc, psf);
 	}
 	
-	public SelectionKey addServerSocket(ServerSocketChannel ssc,  ProtocolSessionFactory<?> psf) throws IOException
+	public SelectionKey addServerSocket(ServerSocketChannel ssc,  ProtocolFactory<?> psf) throws IOException
 	{
 		SharedUtil.checkIfNulls("Null values", ssc, psf);
 		
@@ -101,7 +101,7 @@ public class NIOSocket
 		return sk;
 	}
 
-	public SelectionKey addDatagramChannel(InetSocketAddress sa,  ProtocolSessionFactory<?> psf) throws IOException
+	public SelectionKey addDatagramChannel(InetSocketAddress sa,  ProtocolFactory<?> psf) throws IOException
 	{
 		SharedUtil.checkIfNulls("Null values", sa, psf);
 		DatagramChannel dc = DatagramChannel.open();
@@ -110,7 +110,7 @@ public class NIOSocket
 		return addDatagramChannel(dc, psf);
 	}
 	
-	public SelectionKey addDatagramChannel(DatagramChannel dc,  ProtocolSessionFactory<?> psf) throws IOException
+	public SelectionKey addDatagramChannel(DatagramChannel dc,  ProtocolFactory<?> psf) throws IOException
 	{
 		SharedUtil.checkIfNulls("Null values", dc, psf);
 		SelectionKey sk = selectorController.register(dc, SelectionKey.OP_ACCEPT, psf);
@@ -119,12 +119,12 @@ public class NIOSocket
 		return sk;
 	}
 	
-	public SelectionKey addSeverSocket(InetSocketAddressDAO sa, int backlog, ProtocolSessionFactory<?> psf) throws IOException
+	public SelectionKey addSeverSocket(InetSocketAddressDAO sa, int backlog, ProtocolFactory<?> psf) throws IOException
 	{
 		return addServerSocket(new InetSocketAddress(sa.getPort()), backlog, psf);
 	}
 	
-	public SelectionKey addSeverSocket(int port, int backlog, ProtocolSessionFactory<?> psf) throws IOException
+	public SelectionKey addSeverSocket(int port, int backlog, ProtocolFactory<?> psf) throws IOException
 	{
 		return addServerSocket(new InetSocketAddress(port), backlog, psf);
 	}
@@ -175,7 +175,7 @@ public class NIOSocket
 									&& SharedUtil.getWrappedValue(key.channel()).isOpen()
 									&& key.isReadable())
 							    {
-							    	ProtocolProcessor currentPP = (ProtocolProcessor)ska.attachment();
+							    	ProtocolHandler currentPP = (ProtocolHandler)ska.attachment();
 									if(logger.isEnabled()) logger.getLogger().info(ska.attachment() + " ska is selectable: " + ska.isSelectable() + " for reading " );
 							    	if (ska.isSelectable() && currentPP != null)
 							    	{
@@ -217,7 +217,7 @@ public class NIOSocket
 							    	
 							    	SocketChannel sc = ((ServerSocketChannel)key.channel()).accept();
 
-							    	ProtocolSessionFactory<?> psf = (ProtocolSessionFactory<?>) ska.attachment();
+							    	ProtocolFactory<?> psf = (ProtocolFactory<?>) ska.attachment();
 									if(logger.isEnabled()) logger.getLogger().info("Accepted: " + sc + " psf:" + psf);
 							    	// check if the incoming connection is allowed
 
@@ -270,7 +270,7 @@ public class NIOSocket
 							    	else
 							    	{
 							    		// create a protocol instance
-								    	ProtocolProcessor psp = psf.newInstance();
+								    	ProtocolHandler psp = psf.newInstance();
 								    	
 								    	psp.setSelectorController(selectorController);
 								    	psp.setExecutor(executor);

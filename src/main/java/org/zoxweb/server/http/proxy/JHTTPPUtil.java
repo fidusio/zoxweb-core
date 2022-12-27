@@ -15,27 +15,24 @@
  */
 package org.zoxweb.server.http.proxy;
 
+import org.zoxweb.server.http.proxy.NIOProxyProtocol.NIOProxyProtocolFactory;
+import org.zoxweb.server.io.IOUtil;
+import org.zoxweb.server.logging.LogWrapper;
+import org.zoxweb.server.net.InetFilterRulesManager;
+import org.zoxweb.server.net.InetFilterRulesManager.InetFilterRule;
+import org.zoxweb.server.net.NIOSocket;
+import org.zoxweb.server.task.TaskUtil;
+import org.zoxweb.server.util.ApplicationConfigManager;
+import org.zoxweb.server.util.GSONUtil;
+import org.zoxweb.shared.data.ApplicationConfigDAO;
+import org.zoxweb.shared.util.SharedBase64.Base64Type;
+import org.zoxweb.shared.util.SharedStringUtil;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.List;
-
-
-import org.zoxweb.server.http.proxy.NIOProxyProtocol.NIOProxyProtocolFactory;
-import org.zoxweb.server.io.IOUtil;
-import org.zoxweb.server.logging.LogWrapper;
-import org.zoxweb.server.logging.LoggerUtil;
-import org.zoxweb.server.net.InetFilterRulesManager;
-import org.zoxweb.server.net.NIOSocket;
-import org.zoxweb.server.net.InetFilterRulesManager.InetFilterRule;
-import org.zoxweb.server.task.TaskUtil;
-import org.zoxweb.server.util.ApplicationConfigManager;
-import org.zoxweb.server.util.GSONUtil;
-import org.zoxweb.shared.data.ApplicationConfigDAO;
-
-import org.zoxweb.shared.util.SharedStringUtil;
-import org.zoxweb.shared.util.SharedBase64.Base64Type;
 
 /**
  *
@@ -291,7 +288,7 @@ public class JHTTPPUtil
 		
 		NIOProxyProtocolFactory factory = new NIOProxyProtocolFactory();
 		factory.setIncomingInetFilterRulesManager(ifrm);
-		factory.setLogger(LoggerUtil.loggerToFile(NIOProxyProtocol.class.getName()+".proxy", proxyLogFile));
+		//factory.setLogger(LoggerUtil.loggerToFile(NIOProxyProtocol.class.getName()+".proxy", proxyLogFile));
 			
 		NIOSocket nsio = new NIOSocket(new InetSocketAddress(port), backlog, factory, TaskUtil.getDefaultTaskProcessor());	
 		

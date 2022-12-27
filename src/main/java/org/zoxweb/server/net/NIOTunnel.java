@@ -31,7 +31,7 @@ import java.util.logging.Logger;
 
 
 public class NIOTunnel
-    extends ProtocolProcessor
+    extends ProtocolHandler
 {
     private static final Logger log = Logger.getLogger(NIOTunnel.class.getName());
 
@@ -39,7 +39,7 @@ public class NIOTunnel
 
 
 	public static class NIOTunnelFactory
-	    extends ProtocolSessionFactoryBase<NIOTunnel>
+	    extends ProtocolFactoryBase<NIOTunnel>
 	{
 
 		private InetSocketAddressDAO remoteAddress;

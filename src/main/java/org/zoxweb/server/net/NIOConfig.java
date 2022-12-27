@@ -15,22 +15,23 @@
  */
 package org.zoxweb.server.net;
 
-import org.zoxweb.server.http.proxy.NIOProxyProtocol;
 import org.zoxweb.server.http.proxy.NIOProxyProtocol.NIOProxyProtocolFactory;
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.logging.LogWrapper;
-import org.zoxweb.server.logging.LoggerUtil;
 import org.zoxweb.server.net.NIOTunnel.NIOTunnelFactory;
 import org.zoxweb.server.net.security.IPBlockerListener;
 import org.zoxweb.server.net.security.SecureNetworkTunnel;
 import org.zoxweb.server.security.CryptoUtil;
+import org.zoxweb.server.security.SSLContextInfo;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.app.AppCreatorDefault;
-import org.zoxweb.server.security.SSLContextInfo;
 import org.zoxweb.shared.data.ConfigDAO;
 import org.zoxweb.shared.security.IPBlockerConfig;
-import org.zoxweb.shared.util.*;
+import org.zoxweb.shared.util.ArrayValues;
+import org.zoxweb.shared.util.NVEntity;
+import org.zoxweb.shared.util.NVPair;
+import org.zoxweb.shared.util.NVStringList;
 
 import javax.net.ssl.SSLContext;
 import java.io.Closeable;
@@ -111,7 +112,7 @@ extends AppCreatorDefault<NIOSocket, ConfigDAO>
 			{
 				ConfigDAO config = (ConfigDAO)nve;
 				
-				if (config.attachment() instanceof ProtocolSessionFactory)
+				if (config.attachment() instanceof ProtocolFactory)
 				{
 					int port = ((ConfigDAO) nve).getProperties().getValue("port");
 					int backlog = 128;
@@ -123,7 +124,7 @@ extends AppCreatorDefault<NIOSocket, ConfigDAO>
 					{
 						
 					}
-					ProtocolSessionFactory<?> psf = (ProtocolSessionFactory<?>) config.attachment();
+					ProtocolFactory<?> psf = (ProtocolFactory<?>) config.attachment();
 					
 					if (psf instanceof NIOTunnelFactory && psf.getProperties().getValue("ssl_engine") != null)
 					{
@@ -291,8 +292,8 @@ extends AppCreatorDefault<NIOSocket, ConfigDAO>
 							nioPPF.setOutgoingInetFilterRulesManager(outgoingIFRM);
 						}
 
-						if(!SharedStringUtil.isEmpty(config.getProperties().getValue("log_file")))
-							nioPPF.setLogger(LoggerUtil.loggerToFile(NIOProxyProtocol.class.getName()+".proxy", config.getProperties().getValue("log_file")));
+//						if(!SharedStringUtil.isEmpty(config.getProperties().getValue("log_file")))
+//							nioPPF.setLogger(LoggerUtil.loggerToFile(NIOProxyProtocol.class.getName()+".proxy", config.getProperties().getValue("log_file")));
 						
 					}
 					catch(Exception e)
@@ -300,9 +301,9 @@ extends AppCreatorDefault<NIOSocket, ConfigDAO>
 						e.printStackTrace();
 					}
 				}
-				else if (config.attachment() instanceof ProtocolSessionFactoryBase)
+				else if (config.attachment() instanceof ProtocolFactoryBase)
 				{
-					ProtocolSessionFactoryBase nioTF = (ProtocolSessionFactoryBase) config.attachment();
+					ProtocolFactoryBase nioTF = (ProtocolFactoryBase) config.attachment();
 					try
 					{
 						String ssl_engine = config.getProperties().getValue("ssl_engine");
@@ -321,8 +322,8 @@ extends AppCreatorDefault<NIOSocket, ConfigDAO>
 						}
 
 
-						if(!SharedStringUtil.isEmpty(config.getProperties().getValue("log_file")))
-							nioTF.setLogger(LoggerUtil.loggerToFile(NIOTunnel.class.getName()+".proxy", config.getProperties().getValue("log_file")));
+//						if(!SharedStringUtil.isEmpty(config.getProperties().getValue("log_file")))
+//							nioTF.setLogger(LoggerUtil.loggerToFile(NIOTunnel.class.getName()+".proxy", config.getProperties().getValue("log_file")));
 
 
 						nioTF.init();

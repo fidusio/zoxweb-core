@@ -30,7 +30,7 @@ import java.nio.channels.SocketChannel;
 
 
 public class  ChannelRelayTunnel
-	extends ProtocolProcessor
+	extends ProtocolHandler
 {
 
 

@@ -21,7 +21,6 @@ import org.zoxweb.server.io.ByteBufferUtil.BufferType;
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.io.UByteArrayOutputStream;
 import org.zoxweb.server.logging.LogWrapper;
-import org.zoxweb.server.logging.LoggerUtil;
 import org.zoxweb.server.net.*;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.shared.http.*;
@@ -41,7 +40,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 
 public class NIOProxyProtocol 
-	extends ProtocolProcessor
+	extends ProtocolHandler
 {
 	public final static String NIO_PROXY = ResourceManager.SINGLETON.map(ResourceManager.Resource.PROXY_SERVER, "NIOHTTPProxy").lookup(ResourceManager.Resource.PROXY_SERVER);
 
@@ -127,7 +126,7 @@ public class NIOProxyProtocol
 	
 	
 	public static final class NIOProxyProtocolFactory
-		extends ProtocolSessionFactoryBase<NIOProxyProtocol>
+		extends ProtocolFactoryBase<NIOProxyProtocol>
 	{
 
 		public NIOProxyProtocolFactory()
@@ -633,7 +632,7 @@ public class NIOProxyProtocol
 			log.getLogger().info("filename:" + filename);
 			
 			NIOProxyProtocolFactory factory = new NIOProxyProtocolFactory();
-			factory.setLogger(LoggerUtil.loggerToFile(NIOProxyProtocol.class.getName()+".proxy", filename));
+			//factory.setLogger(LoggerUtil.loggerToFile(NIOProxyProtocol.class.getName()+".proxy", filename));
 			factory.setIncomingInetFilterRulesManager(clientIFRM);
 			
 			

@@ -129,7 +129,7 @@ public class HTTPCallTool implements Runnable
             for(int i = 0; i < repeat; i++)
             {
                 for(HTTPMessageConfigInterface hmci : hmcis) {
-                    TaskUtil.getDefaultTaskScheduler().queue(0, new HTTPCallTool(hmci, printResult));
+                    TaskUtil.getDefaultTaskProcessor().execute(new HTTPCallTool(hmci, printResult));
                 }
             }
             ts = TaskUtil.waitIfBusyThenClose(25) - ts;
