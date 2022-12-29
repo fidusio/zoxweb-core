@@ -15,16 +15,13 @@
  */
 package org.zoxweb.server.task;
 
-import java.util.concurrent.Executor;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-import java.util.logging.Logger;
-
-
 import org.zoxweb.server.util.DefaultEvenManager;
 import org.zoxweb.shared.data.events.BaseEventObject;
 import org.zoxweb.shared.data.events.EventListenerManager;
-import org.zoxweb.shared.util.Const;
+
+import java.util.concurrent.Executor;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class TaskUtil
 {
@@ -39,8 +36,7 @@ public class TaskUtil
 	private static int minTPThreadCount = 16;
 	private static int tpThreadCount = -1;
 	public static final long START_TIME_MILLIS = System.currentTimeMillis();
-	
-	public static final Logger LOG = Logger.getLogger(Const.LOGGER_NAME);
+
 	
 	private TaskUtil() {
 	}

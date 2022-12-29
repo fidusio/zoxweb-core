@@ -17,15 +17,16 @@ package org.zoxweb.server.net;
 
 import org.zoxweb.shared.util.GetNVProperties;
 import org.zoxweb.shared.util.GetName;
+import org.zoxweb.shared.util.InstanceCreator;
 
 public interface ProtocolFactory<P extends ProtocolHandler>
-extends GetName, GetNVProperties
+extends GetName, GetNVProperties, InstanceCreator<P>
 {
 	/**
 	 * Create a new instance of the underlying protocol
 	 * @return  new instance of session protocol
 	 */
-	P newInstance();
+//	P newInstance();
 
 	/**
 	 * True if the factory is of blocking type

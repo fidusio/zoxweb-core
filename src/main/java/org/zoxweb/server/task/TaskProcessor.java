@@ -15,14 +15,13 @@
  */
 package org.zoxweb.server.task;
 
-import java.util.concurrent.Executor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
-
-
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.util.ThresholdQueue;
 import org.zoxweb.shared.util.*;
+
+import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 
 /**
@@ -234,7 +233,7 @@ public class TaskProcessor
 
 
 		thread.start();
-		log.info("Started:" + this);
+		log.getLogger().info("Started:" + this);
 	}
 	
 	
@@ -275,7 +274,7 @@ public class TaskProcessor
 	@Override
 	public void run() 
 	{
-		log.info(toString());
+		log.getLogger().info(toString());
 		while(live)
 		{
 			TaskEvent event = null;
@@ -341,7 +340,7 @@ public class TaskProcessor
 		}
 		
 		
-		log.info("TaskProcessor[" +executorsCounter + "] terminated");
+		log.getLogger().info("TaskProcessor[" +executorsCounter + "] terminated");
 	}
 	
 	/**
@@ -385,7 +384,7 @@ public class TaskProcessor
 		if (live)
 		{
 			live = false;
-			//log.info("TaskProcessor will be terminated.");
+			//log.getLogger().info("TaskProcessor will be terminated.");
 			synchronized(this)
 			{
 				notifyAll();
