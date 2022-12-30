@@ -103,9 +103,10 @@ public class NIOChannelCleaner
 		SelectionKey[] toCheck = null;
 		synchronized(set)
 		{
-			toCheck = set.toArray(new SelectionKey[0]);
+			toCheck = set.toArray(new SelectionKey[set.size()]);
 		}
 		int counter = 0;
+
 		for (SelectionKey sk : toCheck)
 		{
 			if (!sk.isValid() || !SharedUtil.getWrappedValue(sk.channel()).isOpen())
@@ -113,8 +114,6 @@ public class NIOChannelCleaner
 				try
 				{
 					IOUtil.close(sk.channel());
-
-						
 					if (remove(sk) != null)
 					{
 						counter++;
@@ -126,7 +125,7 @@ public class NIOChannelCleaner
 				}
 			}
 		}
-	
+		//log.getLogger().info("Removed: " + counter + " total: " + toCheck.length);
 		return counter;
 	}
 

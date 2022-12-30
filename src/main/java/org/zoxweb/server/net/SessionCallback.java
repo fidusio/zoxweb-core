@@ -3,8 +3,6 @@ package org.zoxweb.server.net;
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.task.TaskCallback;
 
-import java.util.logging.Logger;
-
 /**
  * Session callback
  * @param <CF> Session configuration
@@ -19,7 +17,7 @@ public abstract class SessionCallback<CF, C, S> implements TaskCallback<C,S> {
     public void setConfig(CF config){this.config = config;}
     @Override
     public void exception(Exception e) {
-        log.info("" + e);
+        log.getLogger().info("" + e);
     }
 
 
