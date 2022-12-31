@@ -115,6 +115,9 @@ public class HTTPCallTool implements Runnable
 
                 hmci.setContentType(HTTPMimeType.APPLICATION_JSON);
                 hmci.setSecureCheckEnabled(certCheckEnabled);
+                hmci.setURLEncodingEnabled(false);
+                hmci.setHTTPParameterFormatter(null);
+
                 if (content != null)
                     hmci.setContent(content);
                 log.getLogger().info(GSONUtil.toJSON((HTTPMessageConfig) hmci, true, false, false));
