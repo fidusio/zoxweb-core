@@ -54,10 +54,11 @@
     <maven-plugin-source.version>3.2.1</maven-plugin-source.version>
     <maven-resources-plugin.version>3.3.0</maven-resources-plugin.version>
     <maven-surefile-plugin.version>3.0.0-M7</maven-surefile-plugin.version>
+    <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
     <maven-jar-plugin.version>3.3.0</maven-jar-plugin.version>
     <maven-javadoc.version>3.4.1</maven-javadoc.version>
     <exec-maven.version>3.1.0</exec-maven.version>
-
+    <sonatype-staging.version>1.6.13</sonatype-staging.version>
 
     <gson.version>2.10</gson.version>
     <javax-cache.version>1.1.1</javax-cache.version>
@@ -65,13 +66,27 @@
     <jakarta-mail.version>2.0.1</jakarta-mail.version>
     <jsoup.version>1.15.3</jsoup.version>
     <snakeyaml.version>1.33</snakeyaml.version>
+
     <junit.version>5.9.0</junit.version>
 
 
   </properties>
 
+
+  <distributionManagement>
+    <!--<snapshotRepository>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+    </snapshotRepository> -->
+    <repository>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+    </repository>
+  </distributionManagement>
+
   <build>
     <directory>target</directory>
+
    
     <resources>
       <resource>
@@ -94,6 +109,18 @@
         <artifactId>exec-maven-plugin</artifactId>
         <version>${exec-maven.version}</version>
         <configuration>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.sonatype.plugins</groupId>
+        <artifactId>nexus-staging-maven-plugin</artifactId>
+        <version>${sonatype-staging.version}</version>
+        <extensions>true</extensions>
+        <configuration>
+          <serverId>ossrh</serverId>
+          <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+          <autoReleaseAfterClose>true</autoReleaseAfterClose>
         </configuration>
       </plugin>
 
@@ -137,6 +164,21 @@
           <execution>
             <goals>
               <goal>test-jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-gpg-plugin</artifactId>
+        <version>${maven-gpg-plugin.version}</version>
+        <executions>
+          <execution>
+            <id>sign-artifacts</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>sign</goal>
             </goals>
           </execution>
         </executions>
