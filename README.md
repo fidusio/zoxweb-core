@@ -6,10 +6,10 @@
 
 ## PROJECT INFORMATION
 
-Project website: http://xlogist.io <br />
+Project website: https://xlogistx.io <br />
 <br />
  
-Copyright (C) 2017-2022 http://xlogistx.io
+Copyright (C) 2017-2022 https://xlogistx.io
 
 ## LICENSE
  XlogistX.IO 
@@ -28,9 +28,9 @@ Copyright (C) 2017-2022 http://xlogistx.io
 
 ## RELEASES
 
-<ul> Latest Versions
- <li>2.3.4 2023-01-02 
- <ul> Deprecated
+<ul> Latest Version
+ <li> zoxweb-core-2.3.4.jar release date 2023-01-02
+ <ul>Deprecated Versions
   <li>2.3.3 2022-12-22 
   <li>2.3.2 2022-11-30 
   <li>2.3.1 2022-11-15
