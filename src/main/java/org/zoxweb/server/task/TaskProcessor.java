@@ -51,8 +51,8 @@ public class TaskProcessor
 	 * note it is also used to signal communication between the TaskProcessor thread and ExecutorThread thread.
 	 * The size of this queue is set by the constructor of TaskProcessor
 	 */
-	private boolean executorNotify;
-	private SimpleQueueInterface<ExecutorThread> workersQueue = null;
+	private final boolean executorNotify;
+	private final SimpleQueueInterface<ExecutorThread> workersQueue;
 	
 	private int executorsCounter = 0;
 	private boolean innerLive = true;
@@ -172,7 +172,7 @@ public class TaskProcessor
 	
 	/**
 	 * Create a task processor with default count of worker thread if the <code>core count > 1 core count*1.5 if core == 1 then it is 2</code>
-	 * @param taskQueueMaxSize
+	 * @param taskQueueMaxSize task queue maximum size
 	 */
 	public TaskProcessor(int taskQueueMaxSize)
 			throws IllegalArgumentException {
@@ -208,7 +208,7 @@ public class TaskProcessor
 		throws IllegalArgumentException 
 	{
 		//super("TaskProcessor", "with", false);
-		if (taskQueueMaxSize <2 || executorThreadCount <2 || executorThreadCount > taskQueueMaxSize)
+		if (taskQueueMaxSize < 2 || executorThreadCount < 2 || executorThreadCount > taskQueueMaxSize)
 		{
 			throw new IllegalArgumentException("Invalid number of [taskQueueMaxSize,executorThreadCount] " + 
 					 "[" + taskQueueMaxSize +"," +executorThreadCount+"]");
@@ -277,12 +277,12 @@ public class TaskProcessor
 		log.getLogger().info(toString());
 		while(live)
 		{
-			TaskEvent event = null;
+			TaskEvent event;
 			// check if we have task's to execute
 			while((event = tasksQueue.dequeue()) != null)
 			{
 				
-				ExecutorThread et = null;
+				ExecutorThread et;
 				// if we have no executor thread
 				// we will wait till we have one
 				while ((et = workersQueue.dequeue()) == null)
@@ -330,7 +330,7 @@ public class TaskProcessor
 		// notify the executor thread to terminate
 		innerLive = false;
 		
-		ExecutorThread et = null;
+		ExecutorThread et;
 		while ((et = workersQueue.dequeue()) != null)
 		{
 			synchronized(et)

@@ -15,6 +15,7 @@
  */
 package org.zoxweb.shared.http;
 
+import org.zoxweb.shared.security.SecurityConsts.AuthenticationType;
 import org.zoxweb.shared.util.GetName;
 import org.zoxweb.shared.util.GetNameValue;
 import org.zoxweb.shared.util.NVPair;
@@ -31,7 +32,7 @@ public enum HTTPAuthScheme
 	implements GetName
 {
 	
-	BASIC("Basic")
+	BASIC(AuthenticationType.BASIC.getName())
 	{
 		public GetNameValue<String> toHTTPHeader(String ...args)
 		{
@@ -43,19 +44,19 @@ public enum HTTPAuthScheme
 			{
 			
 				return new NVPair(HTTPHeader.AUTHORIZATION,
-					BASIC + " " + new String(SharedBase64.encode(SharedStringUtil.getBytes(SharedUtil.toCanonicalID(':', username, password)))));
+					BASIC.getName() + " " + new String(SharedBase64.encode(SharedStringUtil.getBytes(SharedUtil.toCanonicalID(':', username, password)))));
 			}
 			
 			if(!SharedStringUtil.isEmpty(username))
 			{
 				return new NVPair(HTTPHeader.AUTHORIZATION,
-					BASIC + " " + new String(SharedBase64.encode(SharedStringUtil.getBytes(username+":"))));
+					BASIC.getName() + " " + new String(SharedBase64.encode(SharedStringUtil.getBytes(username+":"))));
 			}
 			
 			if(!SharedStringUtil.isEmpty(password))
 			{
 				return new NVPair(HTTPHeader.AUTHORIZATION,
-					BASIC + " " + new String(SharedBase64.encode(SharedStringUtil.getBytes(":"+password))));
+					BASIC.getName() + " " + new String(SharedBase64.encode(SharedStringUtil.getBytes(":"+password))));
 			}
 			
 			return null;
@@ -85,14 +86,14 @@ public enum HTTPAuthScheme
 			return new HTTPAuthorizationBasic(SharedStringUtil.trimOrNull(user), SharedStringUtil.trimOrNull(password));
 		}
 	},
-	BEARER("Bearer")
+	BEARER(AuthenticationType.BEARER.getName())
 	{
 		@Override
 		public GetNameValue<String> toHTTPHeader(String ...args)
 		{
 			if (args.length == 1)
 			// TODO Auto-generated method stub
-				return new NVPair(HTTPHeader.AUTHORIZATION, BEARER+ " " + args[0]);
+				return new NVPair(HTTPHeader.AUTHORIZATION, BEARER.getName()+ " " + args[0]);
 			else if (args.length > 1)
 				return new NVPair(HTTPHeader.AUTHORIZATION, args[0]+ " " + args[1]);
 			
@@ -107,16 +108,16 @@ public enum HTTPAuthScheme
 		}
 		
 	},
-	SSWS("SSWS")
+	SSWS(AuthenticationType.SSWS.getName())
 			{
 				@Override
 				public GetNameValue<String> toHTTPHeader(String... args) {
-					return  new NVPair(HTTPHeader.AUTHORIZATION, SSWS + " " + args[0]);
+					return  new NVPair(HTTPHeader.AUTHORIZATION, SSWS.getName() + " " + args[0]);
 				}
 
 				@Override
-				public HTTPAuthorization toHTTPAuthentication(String value) {
-					return null;
+				public HTTPAuthorization toHTTPAuthentication(String token) {
+					return new HTTPAuthorizationToken(SSWS, token);
 				}
 			},
 
@@ -170,7 +171,7 @@ public enum HTTPAuthScheme
 		{
 			return null;
 		}
-		String tokens[] = SharedStringUtil.parseString(value, " ");
+		String[] tokens = SharedStringUtil.parseString(value, " ");
 		if (tokens == null || tokens.length == 0)
 		{
 			throw new IllegalArgumentException("Invalid authentication value " + value );
@@ -178,7 +179,7 @@ public enum HTTPAuthScheme
 		
 		int index = 0;
 		String typeStr =  tokens[index++];
-		HTTPAuthScheme type = (HTTPAuthScheme) SharedUtil.lookupEnum(typeStr, HTTPAuthScheme.values());
+		HTTPAuthScheme type = SharedUtil.lookupEnum(typeStr, HTTPAuthScheme.values());
 		if (type == null)
 		{
 			throw new IllegalArgumentException("Invalid authentication value " + value );

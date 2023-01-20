@@ -61,6 +61,7 @@ public final class SecurityConsts
 		HOBA("HOBA"),
 		NONE("None"),
 		OAUTH("OAuth"),
+		SSWS("SSWS"),
 		;
 
 		private final String name;
