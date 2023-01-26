@@ -15,38 +15,17 @@
  */
 package org.zoxweb.server.net;
 
+import org.zoxweb.server.io.IOUtil;
+import org.zoxweb.shared.net.*;
+import org.zoxweb.shared.net.InetProp.*;
+import org.zoxweb.shared.security.SecurityStatus;
+import org.zoxweb.shared.util.SharedUtil;
+
 import java.io.Closeable;
 import java.io.FileReader;
 import java.io.IOException;
-import java.net.Inet4Address;
-import java.net.Inet6Address;
-import java.net.InetAddress;
-import java.net.InterfaceAddress;
-import java.net.NetworkInterface;
-import java.net.Proxy;
-import java.net.SocketAddress;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.Formatter;
-import java.util.Properties;
-
-import org.zoxweb.server.io.IOUtil;
-import org.zoxweb.shared.net.ConnectionPropDAO;
-import org.zoxweb.shared.net.InetAddressDAO;
-import org.zoxweb.shared.net.InetFilterDAO;
-import org.zoxweb.shared.net.InetProp.NICategory;
-import org.zoxweb.shared.net.InetProp.NIStatus;
-import org.zoxweb.shared.net.InetProp.NIType;
-import org.zoxweb.shared.net.InetSocketAddressDAO;
-import org.zoxweb.shared.net.ProxyType;
-import org.zoxweb.shared.net.SharedNetUtil;
-import org.zoxweb.shared.security.SecurityStatus;
-import org.zoxweb.shared.net.InetProp.IPVersion;
-import org.zoxweb.shared.net.InetProp.InetProto;
-import org.zoxweb.shared.util.SharedUtil;
+import java.net.*;
+import java.util.*;
 
 public class NetUtil 
 {
@@ -75,7 +54,7 @@ public class NetUtil
 	}
 	
 	
-	public static SecurityStatus checkSecurityStatus(InetFilterRulesManager ifrm, SocketAddress host, Closeable sc) throws IOException
+	public static SecurityStatus checkSecurityStatus(InetFilterRulesManager ifrm, SocketAddress host, Closeable sc)
 	{
 		SecurityStatus ret =  SecurityStatus.ALLOW;
 		if (ifrm != null) 	
@@ -91,7 +70,7 @@ public class NetUtil
 		return ret;
 	}
 	
-	public static SecurityStatus checkSecurityStatus(InetFilterRulesManager ifrm, InetAddress host, Closeable sc) throws IOException
+	public static SecurityStatus checkSecurityStatus(InetFilterRulesManager ifrm, InetAddress host, Closeable sc)
 	{
 		SecurityStatus ret =  SecurityStatus.ALLOW;
 		if (ifrm != null) 
@@ -167,55 +146,7 @@ public class NetUtil
 	
 	
 	
-//	public static synchronized void updateFilter( InetFilterDAO ipf) 
-//	{
-//		if ( ipf.getIP() != null && ipf.getNetworkMask() != null)
-//		{
-//			try
-//			{
-//				String network = getNetwork( ipf.getIP(), ipf.getNetworkMask());
-//			
-//				String ipBytes[] = network.split("[.]");
-//				String maskBytes[] = ipf.getNetworkMask().split("[.]");
-//				StringBuilder sb = new StringBuilder();
-//				for ( int i = ipBytes.length -1; i != -1; i--)
-//				{
-//					if ( ipBytes[i].equals("0") && maskBytes[i].equals("0"))
-//					{
-//						ipBytes[i] = null;
-//					}
-//					else
-//					{
-//						break;
-//					}
-//				}
-//				
-//				for ( int i = 0; i < ipBytes.length; i++)
-//				{
-//					String s = ipBytes[i];
-//					if ( s != null)
-//					{
-//						sb.append(s);
-//						if ( i + 1 != ipBytes.length)
-//							sb.append('.');
-//					}
-//					else
-//					{
-//						break;
-//					}
-//				}
-//				ipf.setFilter(sb.toString());
-//				
-//				
-//			}
-//			catch( IOException e)
-//			{
-//				
-//				ipf.setFilter( null);
-//			}
-//			
-//		}
-//	}
+
 	
 	public static boolean belongsToNetwork(InetFilterDAO ipf, String ipAddress)
 		throws IOException
@@ -268,14 +199,7 @@ public class NetUtil
 	}
 	
 	
-//	public static MACAddress getMACAddress(String ifName) throws IOException
-//	{
-//		NetworkInterface ni = NetworkInterface.getByName(ifName);
-//		byte macAddr[] = ni.getHardwareAddress();
-//		
-//		return MACAddress.getByAddress(macAddr);
-//		
-//	}
+
 
 	/**
 	 * Return all the ip V4 addresses associated with the ni
@@ -380,7 +304,7 @@ public class NetUtil
 				v.add((Inet6Address)addr);
 		}
 
-		return v.toArray(new Inet6Address[v.size()]);
+		return v.toArray(new Inet6Address[0]);
 	
 		
 	}
@@ -515,13 +439,13 @@ public class NetUtil
 		
 		
 	}
-	
+
 	
 	/**
 	 * Return the protocol type of network connection static or dhcp
 	 * @param niName
 	 * @return Inet protocol
-	 * @throws IOException if protocol is different than static or dhcp
+	 * @throws IOException if protocol is different from static or dhcp
 	 */
 	public static InetProto getProtoType( String niName) throws IOException
 	{
@@ -539,7 +463,7 @@ public class NetUtil
 			return pt;
 		
 		default:
-			throw new IOException("Network "+niName + " has unsupported BOOTPROTO" + proto );
+			throw new IOException("Network " + niName + " has unsupported BOOTPROTO" + proto );
 		}
 		
 		
@@ -627,7 +551,7 @@ public class NetUtil
 		return false;
 	}
 	
-	public static String generateBondingScript( ConnectionPropDAO nis[]) throws IOException
+	public static String generateBondingScript( ConnectionPropDAO[] nis) throws IOException
 	{
 		StringBuilder sb = new StringBuilder("#!/bin/sh\n");
 		sb.append("# Automatically generated bonding script " + new Date() + "\n");
@@ -712,12 +636,4 @@ public class NetUtil
 		
 		return false;
 	}
-	
-	
-
-	
-	
-//	public static final String BONDING_FN = "bonding.sh";
-//	public static final String ROUTING_FN = "routing.sh";
-//	public static final String BONDINGMODE = "BONDING_MODE";
 }
