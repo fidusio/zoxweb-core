@@ -80,10 +80,10 @@ public class NIOTunnel
 			setRemoteAddress(new InetSocketAddressDAO(getProperties().getValue("remote_host")));
 		}
 
-		@Override
-		public NIOChannelCleaner getNIOChannelCleaner() {
-			return NIOChannelCleaner.DEFAULT;
-		}
+//		@Override
+//		public NIOChannelCleaner getNIOChannelCleaner() {
+//			return NIOChannelCleaner.DEFAULT;
+//		}
 
 	}
 

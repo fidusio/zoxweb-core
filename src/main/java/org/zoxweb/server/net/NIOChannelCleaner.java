@@ -35,13 +35,13 @@ public class NIOChannelCleaner
 	private final Set<SelectionKey> set = new HashSet<SelectionKey>();
 	private final long sleepTime;
 
-	private Appointment tsa = null;
+	private final Appointment tsa;
 	private long runCall = 0;
 	
 	
 	public static final NIOChannelCleaner DEFAULT = new NIOChannelCleaner(TaskUtil.getDefaultTaskScheduler(), TimeInMillis.SECOND.MILLIS*4);
 	
-	public NIOChannelCleaner(TaskSchedulerProcessor tsp, long sleepTime)
+	private NIOChannelCleaner(TaskSchedulerProcessor tsp, long sleepTime)
 	{
 		this.sleepTime = sleepTime;
 		tsa = tsp.queue(sleepTime, this);
@@ -100,10 +100,10 @@ public class NIOChannelCleaner
 	
 	protected synchronized int purge()
 	{
-		SelectionKey[] toCheck = null;
+		SelectionKey[] toCheck;
 		synchronized(set)
 		{
-			toCheck = set.toArray(new SelectionKey[set.size()]);
+			toCheck = set.toArray(new SelectionKey[0]);
 		}
 		int counter = 0;
 

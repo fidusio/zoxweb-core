@@ -72,7 +72,7 @@ public abstract class ProtocolHandler
 	/**
 	 * @param selectorController the selector to set
 	 */
-	public void setSelectorController(SelectorController selectorController) 
+	public void setSelectorController(SelectorController selectorController)
 	{
 		this.selectorController = selectorController;
 	}
@@ -84,9 +84,10 @@ public abstract class ProtocolHandler
 //	}
 
 
-	protected void setupConnection(AbstractSelectableChannel asc) throws IOException
+	protected void setupConnection(AbstractSelectableChannel asc, boolean isBlocking) throws IOException
 	{
 		phSChannel = (SocketChannel) asc;
+		selectorController.register(NIOChannelCleaner.DEFAULT,  phSChannel, SelectionKey.OP_READ, this, isBlocking);
 	}
 
 

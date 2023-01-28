@@ -78,7 +78,7 @@ extends GetName, GetNVProperties, InstanceCreator<P>
 	void init();
 
 
-	NIOChannelCleaner getNIOChannelCleaner();
+	//NIOChannelCleaner getNIOChannelCleaner();
 
 	boolean isComplexSetup();
 	

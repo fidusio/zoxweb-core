@@ -285,8 +285,7 @@ public class NIOSocket
 											{
 												try
 												{
-													protocolHandler.setupConnection(sc);
-													selectorController.register(protocolFactory.getNIOChannelCleaner(),  sc, SelectionKey.OP_READ, protocolHandler, protocolFactory.isBlocking());
+													protocolHandler.setupConnection(sc, protocolFactory.isBlocking());
 												}
 												catch (IOException e)
 												{
@@ -297,8 +296,7 @@ public class NIOSocket
 										}
 										else
 										{
-											protocolHandler.setupConnection(sc);
-											selectorController.register(protocolFactory.getNIOChannelCleaner(),  sc, SelectionKey.OP_READ, protocolHandler, protocolFactory.isBlocking());
+											protocolHandler.setupConnection(sc, protocolFactory.isBlocking());
 										}
 								    	connectionCount.incrementAndGet();
 								    
