@@ -217,12 +217,12 @@ public class NIOSocket
 							    	
 							    	SocketChannel sc = ((ServerSocketChannel)key.channel()).accept();
 
-							    	ProtocolFactory<?> psf = (ProtocolFactory<?>) ska.attachment();
-									if(logger.isEnabled()) logger.getLogger().info("Accepted: " + sc + " psf:" + psf);
+							    	ProtocolFactory<?> protocolFactory = (ProtocolFactory<?>) ska.attachment();
+									if(logger.isEnabled()) logger.getLogger().info("Accepted: " + sc + " psf:" + protocolFactory);
 							    	// check if the incoming connection is allowed
 
 
-							    	if (NetUtil.checkSecurityStatus(psf.getIncomingInetFilterRulesManager(), sc.getRemoteAddress(), null) !=  SecurityStatus.ALLOW)
+							    	if (NetUtil.checkSecurityStatus(protocolFactory.getIncomingInetFilterRulesManager(), sc.getRemoteAddress(), null) !=  SecurityStatus.ALLOW)
 							    	{
 							    		try
 							    		{ 	
@@ -270,32 +270,35 @@ public class NIOSocket
 							    	else
 							    	{
 							    		// create a protocol instance
-								    	ProtocolHandler psp = psf.newInstance();
+								    	ProtocolHandler protocolHandler = protocolFactory.newInstance();
 								    	
-								    	psp.setSelectorController(selectorController);
-								    	psp.setExecutor(executor);
-								    	psp.setOutgoingInetFilterRulesManager(psf.getOutgoingInetFilterRulesManager());
+								    	protocolHandler.setSelectorController(selectorController);
+								    	protocolHandler.setExecutor(executor);
+								    	protocolHandler.setOutgoingInetFilterRulesManager(protocolFactory.getOutgoingInetFilterRulesManager());
 
 										// if we have an executor
 										// accept the new connection
 
-										if (executor != null) {
+										if (executor != null && protocolFactory.isComplexSetup())
+										{
 											executor.execute(() ->
 											{
 												try
 												{
-													psp.acceptConnection(psf.getNIOChannelCleaner(), sc, psf.isBlocking());
+													protocolHandler.setupConnection(sc);
+													selectorController.register(protocolFactory.getNIOChannelCleaner(),  sc, SelectionKey.OP_READ, protocolHandler, protocolFactory.isBlocking());
 												}
 												catch (IOException e)
 												{
 													e.printStackTrace();
-													IOUtil.close(psp);
+													IOUtil.close(protocolHandler);
 												}
 											});
 										}
 										else
 										{
-											psp.acceptConnection(psf.getNIOChannelCleaner(), sc, psf.isBlocking());
+											protocolHandler.setupConnection(sc);
+											selectorController.register(protocolFactory.getNIOChannelCleaner(),  sc, SelectionKey.OP_READ, protocolHandler, protocolFactory.isBlocking());
 										}
 								    	connectionCount.incrementAndGet();
 								    

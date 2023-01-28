@@ -22,6 +22,7 @@ import org.zoxweb.shared.util.NVGenericMap;
 import java.io.Closeable;
 import java.io.IOException;
 import java.nio.channels.SelectionKey;
+import java.nio.channels.SocketChannel;
 import java.nio.channels.spi.AbstractSelectableChannel;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -38,6 +39,9 @@ public abstract class ProtocolHandler
 
 	private volatile SelectorController selectorController;
 	private volatile InetFilterRulesManager outgoingInetFilterRulesManager;
+
+	protected volatile SocketChannel phSChannel;
+	protected volatile SelectionKey phSK;
 
 
 	private volatile NVGenericMap properties = null;
@@ -75,9 +79,19 @@ public abstract class ProtocolHandler
 	
 
 
-	protected void acceptConnection(NIOChannelCleaner ncc, AbstractSelectableChannel asc, boolean isBlocking) throws IOException {
-		selectorController.register(ncc,  asc, SelectionKey.OP_READ, this, isBlocking);
+//	protected void setupConnection(NIOChannelCleaner ncc, AbstractSelectableChannel asc, boolean isBlocking) throws IOException {
+//		selectorController.register(ncc,  asc, SelectionKey.OP_READ, this, isBlocking);
+//	}
+
+
+	protected void setupConnection(AbstractSelectableChannel asc) throws IOException
+	{
+		phSChannel = (SocketChannel) asc;
 	}
+
+
+
+
 
 	public InetFilterRulesManager getOutgoingInetFilterRulesManager() 
 	{

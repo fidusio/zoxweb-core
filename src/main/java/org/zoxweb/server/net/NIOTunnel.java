@@ -17,6 +17,7 @@ package org.zoxweb.server.net;
 
 import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.server.io.IOUtil;
+import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.shared.net.InetSocketAddressDAO;
 
@@ -27,15 +28,13 @@ import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
-import java.util.logging.Logger;
 
 
 public class NIOTunnel
     extends ProtocolHandler
 {
-    private static final Logger log = Logger.getLogger(NIOTunnel.class.getName());
+    private static final LogWrapper log = new LogWrapper(NIOTunnel.class).setEnabled(false);
 
-	private static boolean debug = false;
 
 
 	public static class NIOTunnelFactory
@@ -90,9 +89,9 @@ public class NIOTunnel
 
 
 	private volatile SocketChannel destinationChannel = null;
-	private volatile SelectionKey  destinationSK = null;
-	private volatile SocketChannel sourceChannel = null;
-	private volatile SelectionKey  sourceSK = null;
+	//private volatile SelectionKey  destinationSK = null;
+	//private volatile SocketChannel sourceChannel = null;
+	//private volatile SelectionKey  sourceSK = null;
 	private volatile SocketAddress sourceAddress = null;
 	private volatile ByteBuffer destinationBB;
 	private volatile ByteBuffer sourceBB;
@@ -123,7 +122,7 @@ public class NIOTunnel
 		if(!isClosed.getAndSet(true))
 		{
 			IOUtil.close(destinationChannel);
-			IOUtil.close(sourceChannel);
+			IOUtil.close(phSChannel);
 			ByteBufferUtil.cache(sourceBB, destinationBB);
 			log.info("closed: " + sourceAddress + " - "   + remoteAddress);
 		}
@@ -136,18 +135,19 @@ public class NIOTunnel
 		try
     	{
 
-			if(sourceChannel == null)
+			if(destinationChannel == null)
 			{
-				synchronized (this) {
-					if(sourceChannel == null) {
-						sourceChannel = (SocketChannel) key.channel();
-						sourceAddress = sourceChannel.getRemoteAddress();
-						sourceSK = key;
+				synchronized (this)
+				{
+					if(destinationChannel == null) {
+						//sourceChannel = (SocketChannel) key.channel();
+						sourceAddress = phSChannel.getRemoteAddress();
+						//sourceSK = key;
 						destinationChannel = SocketChannel.open((new InetSocketAddress(remoteAddress.getInetAddress(), remoteAddress.getPort())));
 						//relay = new ChannelRelayTunnel(getReadBufferSize(), destinationChannel, sourceChannel, sourceSK,  true,  getSelectorController());
 						destinationBB = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.DIRECT);
 						sourceBB = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.DIRECT);
-						destinationSK = getSelectorController().register(NIOChannelCleaner.DEFAULT, destinationChannel, SelectionKey.OP_READ, this,false);
+						//destinationSK = getSelectorController().register(NIOChannelCleaner.DEFAULT, destinationChannel, SelectionKey.OP_READ, this,false);
 
 					}
 				}
@@ -158,19 +158,19 @@ public class NIOTunnel
 			SocketChannel writeChannel;
 			ByteBuffer currentBB;
 
-			if (key.channel() == sourceChannel)
+			if (key.channel() == phSChannel)
 			{
-				readChannel = sourceChannel;
+				readChannel = phSChannel;
 				writeChannel = destinationChannel;
 				currentBB = sourceBB;
 			}
 			else
 			{
 				readChannel = destinationChannel;
-				writeChannel = sourceChannel;
+				writeChannel = phSChannel;
 				currentBB = destinationBB;
 			}
-			int read = 0 ;
+			int read = 0;
     		do
             {
     			{
@@ -186,23 +186,22 @@ public class NIOTunnel
     		
     		if (read == -1)
     		{
-    			if (debug) log.info("+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+Read:" + read);
+    			if (log.isEnabled()) log.getLogger().info("+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+Read:" + read);
 
     			close();
-    				
-    			if (debug) log.info(key + ":" + key.isValid()+ " " + Thread.currentThread() + " " + TaskUtil.getDefaultTaskProcessor().availableExecutorThreads());		
+
+				if (log.isEnabled()) log.getLogger().info(key + ":" + key.isValid()+ " " + Thread.currentThread() + " " + TaskUtil.getDefaultTaskProcessor().availableExecutorThreads());
     		}
     	}
     	catch(Exception e)
     	{
-    		if (debug) e.printStackTrace();
+    		if (log.isEnabled()) e.printStackTrace();
     		IOUtil.close(this);
-    		if (debug) log.info(System.currentTimeMillis() + ":Connection end " + key + ":" + key.isValid()+ " " + Thread.currentThread() + " " + TaskUtil.getDefaultTaskProcessor().availableExecutorThreads());
+			if (log.isEnabled()) log.getLogger().info(System.currentTimeMillis() + ":Connection end " + key + ":" + key.isValid()+ " " + Thread.currentThread() + " " + TaskUtil.getDefaultTaskProcessor().availableExecutorThreads());
     		
     	}
 	}
-	
-	@SuppressWarnings("resource")
+
     public static void main(String... args)
     {
 		try

@@ -29,6 +29,8 @@ public abstract class ProtocolFactoryBase<P extends ProtocolHandler>
 	//private volatile Logger logger;
 	private volatile NVGenericMap properties = new NVGenericMap();
 	private volatile boolean blocking = false;
+
+	protected boolean complexSetup = false;
 	
 
 	
@@ -85,5 +87,7 @@ public abstract class ProtocolFactoryBase<P extends ProtocolHandler>
 	{
 		return properties;
 	}
+
+	public boolean isComplexSetup(){return complexSetup;}
 
 }

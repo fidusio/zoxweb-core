@@ -165,8 +165,8 @@ public class NIOProxyProtocol
 	private InetSocketAddressDAO lastRemoteAddress = null;
 	private SocketChannel remoteChannel = null;
 	private SelectionKey  remoteChannelSK = null;
-	private SocketChannel clientChannel = null;
-	private SelectionKey  clientChannelSK = null;
+	//private SocketChannel phSChannel = null;
+	//private SelectionKey  clientChannelSK = null;
 	private ChannelRelayTunnel channelRelay = null;
 	private RequestInfo requestInfo = null;
 	private final ByteBuffer sourceBB;
@@ -196,7 +196,7 @@ public class NIOProxyProtocol
 	{
 		if(!isClosed.getAndSet(true))
 		{
-			IOUtil.close(clientChannel);
+			IOUtil.close(phSChannel);
 
 			if (channelRelay != null) {
 				IOUtil.close(channelRelay);
@@ -212,10 +212,9 @@ public class NIOProxyProtocol
 	{
 		try
     	{
-			if (clientChannel == null)
+			if (phSK == null)
 			{
-				clientChannel = (SocketChannel)key.channel();
-				clientChannelSK = key;
+				phSK = key;
 			}
 			
 			
@@ -346,7 +345,7 @@ public class NIOProxyProtocol
 			{
 				HTTPMessageConfigInterface hccError = createErrorMSG(HTTPStatusCode.PROXY_AUTHENTICATION_REQUIRED.CODE, HTTPStatusCode.PROXY_AUTHENTICATION_REQUIRED.REASON, requestMCCI.getURI());
 				hccError.getHeaders().add(new NVPair(HTTPHeader.PROXY_AUTHENTICATE, "Basic "));
-				ByteBufferUtil.write(clientChannel, HTTPUtil.formatResponse(hccError, requestRawBuffer));
+				ByteBufferUtil.write(phSChannel, HTTPUtil.formatResponse(hccError, requestRawBuffer));
 				close();
 				return false;	
 			}
@@ -390,7 +389,7 @@ public class NIOProxyProtocol
 				{
 					HTTPMessageConfigInterface hccError = createErrorMSG(403, "Access Denied", requestMCCI.getURI());
 					
-					ByteBufferUtil.write(clientChannel, HTTPUtil.formatResponse(hccError, requestRawBuffer));
+					ByteBufferUtil.write(phSChannel, HTTPUtil.formatResponse(hccError, requestRawBuffer));
 					close();
 					return;	
 					// we must reply with an error
@@ -420,7 +419,7 @@ public class NIOProxyProtocol
 					
 					HTTPMessageConfigInterface hccError = createErrorMSG(404, "Host Not Found", requestMCCI.getURI());
 					
-					ByteBufferUtil.write(clientChannel, HTTPUtil.formatResponse(hccError, requestRawBuffer));
+					ByteBufferUtil.write(phSChannel, HTTPUtil.formatResponse(hccError, requestRawBuffer));
 					close();
 					return;	
 				}
@@ -440,7 +439,7 @@ public class NIOProxyProtocol
     			// tobe tested
     			//remoteChannelSK = getSelectorController().register(NIOChannelCleaner.DEFAULT, remoteChannel, SelectionKey.OP_READ, new ChannelRelayTunnel(SourceOrigin.REMOTE, getReadBufferSize(), remoteChannel, clientChannel, clientChannelSK, true, getSelectorController()), FACTORY.isBlocking());
     			
-    			ByteBufferUtil.write(clientChannel, requestRawBuffer);
+    			ByteBufferUtil.write(phSChannel, requestRawBuffer);
     			requestRawBuffer.reset();
     			requestMCCI = null;
     			if(log.isEnabled())
@@ -450,7 +449,7 @@ public class NIOProxyProtocol
     			remoteChannelSK = getSelectorController().register(NIOChannelCleaner.DEFAULT,
     													  		   remoteChannel,
     													  		   SelectionKey.OP_READ,
-    													  		   new ChannelRelayTunnel(ByteBufferUtil.DEFAULT_BUFFER_SIZE, remoteChannel, clientChannel, clientChannelSK, true, getSelectorController()),
+    													  		   new ChannelRelayTunnel(ByteBufferUtil.DEFAULT_BUFFER_SIZE, remoteChannel, phSChannel, phSK, true, getSelectorController()),
     													  		  false);
     			requestInfo = null;
     			
@@ -465,7 +464,7 @@ public class NIOProxyProtocol
 				{
 					HTTPMessageConfigInterface hccError = createErrorMSG(403, "Access Denied", requestMCCI.getURI());
 				
-					ByteBufferUtil.write(clientChannel, HTTPUtil.formatResponse(hccError, requestRawBuffer));
+					ByteBufferUtil.write(phSChannel, HTTPUtil.formatResponse(hccError, requestRawBuffer));
 					close();
 					return;	
 					// we must reply with an error
@@ -510,7 +509,7 @@ public class NIOProxyProtocol
 							e.printStackTrace();
 						}
 						HTTPMessageConfigInterface hccError = createErrorMSG(404, "Host Not Found", requestInfo.remoteAddress.getInetAddress() + ":" + requestInfo.remoteAddress.getPort());
-						ByteBufferUtil.write(clientChannel, HTTPUtil.formatResponse(hccError, requestRawBuffer));
+						ByteBufferUtil.write(phSChannel, HTTPUtil.formatResponse(hccError, requestRawBuffer));
 						close();
 						return;	
 					}
@@ -547,7 +546,7 @@ public class NIOProxyProtocol
 				
 				if(remoteChannelSK == null || !remoteChannelSK.isValid())
 				{
-					channelRelay = new ChannelRelayTunnel(ByteBufferUtil.DEFAULT_BUFFER_SIZE, remoteChannel, clientChannel, clientChannelSK, true, getSelectorController());
+					channelRelay = new ChannelRelayTunnel(ByteBufferUtil.DEFAULT_BUFFER_SIZE, remoteChannel, phSChannel, phSK, true, getSelectorController());
 					remoteChannelSK = getSelectorController().register(NIOChannelCleaner.DEFAULT, remoteChannel, SelectionKey.OP_READ, channelRelay, false);
 				}
 				
