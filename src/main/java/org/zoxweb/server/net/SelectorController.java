@@ -15,7 +15,7 @@
  */
 package org.zoxweb.server.net;
 
-import org.zoxweb.shared.util.SharedUtil;
+//import org.zoxweb.shared.util.SharedUtil;
 
 import java.io.IOException;
 import java.nio.channels.SelectableChannel;
@@ -110,10 +110,8 @@ public class SelectorController
 			selector.wakeup();
 			// invoke the main lock
 			selectLock.lock();
-			SharedUtil.getWrappedValue(ch).configureBlocking(blocking);
-
-
-			ret = SharedUtil.getWrappedValue(ch).register(selector, ops, new SKAttachment(attachment));
+			ch.configureBlocking(blocking);
+			ret = ch.register(selector, ops, new SKAttachment(attachment));
 			if (niocc != null)
 			{
 				niocc.add(ret);
@@ -146,7 +144,7 @@ public class SelectorController
 			// invoke the main lock
 			selectLock.lock();
 			//SharedUtil.getWrappedValue(ch).configureBlocking(blocking);
-			ret = SharedUtil.getWrappedValue(ch).register(selector, ops, new SKAttachment(attachment));
+			ret = ch.register(selector, ops, new SKAttachment(attachment));
 			if (niocc != null)
 			{
 				niocc.add(ret);
