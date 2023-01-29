@@ -1,7 +1,8 @@
 package org.zoxweb.shared.util;
 
 public class NamedDescription
-        implements SetName, SetDescription {
+        implements NamedDescriptionInt
+{
     private String name;
     private String description;
 

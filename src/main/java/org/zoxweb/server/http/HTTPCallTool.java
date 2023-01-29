@@ -123,7 +123,7 @@ public class HTTPCallTool implements Runnable
                 log.getLogger().info(GSONUtil.toJSON((HTTPMessageConfig) hmci, true, false, false));
                 hmcis.add(hmci);
                 // vm warmup
-                new HTTPCall(hmci).sendRequest();
+                //new HTTPCall(hmci).sendRequest();
             }
 
 

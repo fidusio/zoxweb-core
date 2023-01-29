@@ -5,7 +5,7 @@ package org.zoxweb.shared.util;
 public class RateCounter
     implements GetName
 {
-    private final NamedDescription namedDescription;
+    private final NamedDescriptionInt namedDescription;
     private long counter = 0;
     private long deltaCounter = 0;
 
@@ -14,12 +14,12 @@ public class RateCounter
     {
         this(new NamedDescription(name));
     }
-    public RateCounter(NamedDescription namedDescription)
+    public RateCounter(NamedDescriptionInt namedDescription)
     {
         this.namedDescription = namedDescription != null ? namedDescription : new NamedDescription("");
     }
 
-    public NamedDescription getNameDescription()
+    public NamedDescriptionInt getNameDescription()
     {
         return namedDescription;
     }
