@@ -15,6 +15,15 @@
  */
 package org.zoxweb.server.http;
 
+import org.zoxweb.server.io.CloseEnabledInputStream;
+import org.zoxweb.server.io.IOUtil;
+import org.zoxweb.server.net.NetUtil;
+import org.zoxweb.server.security.SSLCheckDisabler;
+import org.zoxweb.server.security.SSLSocketProp;
+import org.zoxweb.shared.filters.ReplacementFilter;
+import org.zoxweb.shared.http.*;
+import org.zoxweb.shared.util.*;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,22 +36,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.zoxweb.server.io.CloseEnabledInputStream;
-import org.zoxweb.server.io.IOUtil;
-import org.zoxweb.server.net.NetUtil;
-import org.zoxweb.server.security.SSLCheckDisabler;
-import org.zoxweb.server.security.SSLSocketProp;
-
-import org.zoxweb.shared.filters.ReplacementFilter;
-
-import org.zoxweb.shared.http.*;
-import org.zoxweb.shared.http.HTTPEncoder;
-import org.zoxweb.shared.util.*;
-
 public class HTTPCall 
 {
 
-	public final static RateCounter HTTP_CALLS = new RateCounter(new NamedDescription("HTTP_CALLS", "This counter is used the send static functions it capture the whole call duration including parameter formatting, call, result decoding."));
+	public final static RateCounter HTTP_CALLS = new RateCounter("HTTP_CALLS", "This counter is used the send static functions it capture the whole call duration including parameter formatting, call, result decoding.");
 
 	public final static AtomicBoolean ENABLE_HTTP = new AtomicBoolean(true);
 	private final HTTPMessageConfigInterface hcc;

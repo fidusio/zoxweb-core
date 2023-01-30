@@ -1,6 +1,7 @@
 package org.zoxweb.shared.util;
 
 import org.junit.jupiter.api.Test;
+import org.zoxweb.server.util.GSONUtil;
 
 public class RateCounterTest {
 
@@ -8,7 +9,7 @@ public class RateCounterTest {
     public void simple()
     {
 
-        RateCounter rateCounter = new RateCounter(new NamedDescription("test"));
+        RateCounter rateCounter = new RateCounter("test");
         RateController rateController = new RateController("test", "1000/s");
         for(int j=0; j<10; j++) {
             long ts = System.currentTimeMillis();
@@ -37,6 +38,7 @@ public class RateCounterTest {
             rc.register(20);
 
         System.out.println(rc + " " + rc.average() + " " + rc.rate());
+        System.out.println(GSONUtil.toJSONDefault(rc, true));
 
     }
 }

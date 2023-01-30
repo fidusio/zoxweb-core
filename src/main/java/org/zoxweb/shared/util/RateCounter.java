@@ -3,26 +3,22 @@ package org.zoxweb.shared.util;
 
 
 public class RateCounter
-    implements GetName
+    extends NamedDescription
 {
-    private final NamedDescriptionInt namedDescription;
-    private long counter = 0;
-    private long deltaCounter = 0;
+
+    private long counts = 0;
+    private long deltas = 0;
 
 
     public RateCounter(String name)
     {
-        this(new NamedDescription(name));
+        this(name, null);
     }
-    public RateCounter(NamedDescriptionInt namedDescription)
+    public RateCounter(String name, String description)
     {
-        this.namedDescription = namedDescription != null ? namedDescription : new NamedDescription("");
+        super(name, description);
     }
 
-    public NamedDescriptionInt getNameDescription()
-    {
-        return namedDescription;
-    }
 
 
     public RateCounter register(long delta)
@@ -32,26 +28,26 @@ public class RateCounter
 
     public synchronized RateCounter register(long delta, long inc)
     {
-       deltaCounter += delta;
-       counter += inc;
+       deltas += delta;
+       counts += inc;
        return this;
     }
 
 
     public synchronized RateCounter reset()
     {
-        deltaCounter = 0;
-        counter = 0;
+        deltas = 0;
+        counts = 0;
         return this;
     }
 
     public long getDeltas()
     {
-        return deltaCounter;
+        return deltas;
     }
     public long getCounts()
     {
-        return counter;
+        return counts;
     }
 
     public float average()
@@ -62,8 +58,8 @@ public class RateCounter
     public float average(float rateMultiplier)
     {
         float ret = 0;
-        if(counter != 0) {
-            ret = rateMultiplier * ((float) deltaCounter / (float) counter);
+        if(counts != 0) {
+            ret = rateMultiplier * ((float) deltas / (float) counts);
         }
         return ret;
     }
@@ -90,8 +86,8 @@ public class RateCounter
     public float rate(float multiplier)
     {
         float ret = 0;
-        if(deltaCounter != 0) {
-            ret = multiplier * ((float) counter / (float) deltaCounter);
+        if(deltas != 0) {
+            ret = multiplier * ((float) counts / (float) deltas);
         }
 
         return ret;
@@ -104,17 +100,14 @@ public class RateCounter
     }
 
 
-    public String getName()
-    {
-        return namedDescription.getName();
-    }
 
     @Override
     public String toString() {
-        return "RateCounter{" +
-                "name=" + getName() +
-                ", counts=" + counter +
-                ", deltas=" + deltaCounter +
+        return "{" +
+                "name=\"" + getName()+"\"" +
+                (getDescription() != null ? ", description=\"" + getDescription() +"\"" : "") +
+                ", counts=" + counts +
+                ", deltas=" + deltas +
                 ", average=" + average() +
                 '}';
     }
