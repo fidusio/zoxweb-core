@@ -28,7 +28,6 @@ import org.zoxweb.server.net.NIOSocket;
 import org.zoxweb.server.net.ProtocolHandler;
 import org.zoxweb.server.net.SessionCallback;
 import org.zoxweb.server.security.CryptoUtil;
-import org.zoxweb.server.security.SSLContextInfo;
 import org.zoxweb.server.task.TaskCallback;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.shared.net.InetSocketAddressDAO;

@@ -24,7 +24,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.zoxweb.server.security.SSLCheckDisabler;
+import org.zoxweb.server.net.ssl.SSLCheckDisabler;
 import org.zoxweb.shared.http.*;
 import org.zoxweb.shared.util.GetNameValue;
 import org.zoxweb.shared.util.NVPair;

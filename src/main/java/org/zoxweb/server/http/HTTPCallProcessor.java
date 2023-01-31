@@ -19,7 +19,6 @@ import java.io.FileInputStream;
 import java.util.List;
 
 import org.zoxweb.server.io.IOUtil;
-import org.zoxweb.server.security.SSLCheckDisabler;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.http.HTTPMessageConfig;
 import org.zoxweb.shared.http.HTTPResponseData;

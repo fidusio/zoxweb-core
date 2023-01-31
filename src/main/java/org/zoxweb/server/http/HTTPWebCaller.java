@@ -5,7 +5,7 @@ import java.util.function.BiConsumer;
 
 import java.util.logging.Logger;
 
-import org.zoxweb.server.security.SSLCheckDisabler;
+import org.zoxweb.server.net.ssl.SSLCheckDisabler;
 
 import org.zoxweb.shared.http.HTTPMessageConfigInterface;
 import org.zoxweb.shared.http.HTTPResponseData;

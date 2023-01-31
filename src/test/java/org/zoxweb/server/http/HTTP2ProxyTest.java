@@ -21,7 +21,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.io.UByteArrayOutputStream;
-import org.zoxweb.server.security.SSLCheckDisabler;
+import org.zoxweb.server.net.ssl.SSLCheckDisabler;
 import org.zoxweb.shared.http.HTTPMessageConfig;
 import org.zoxweb.shared.http.HTTPMessageConfigInterface;
 import org.zoxweb.shared.http.HTTPMethod;

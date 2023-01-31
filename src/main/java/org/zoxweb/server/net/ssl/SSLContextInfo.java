@@ -1,4 +1,4 @@
-package org.zoxweb.server.security;
+package org.zoxweb.server.net.ssl;
 
 import org.zoxweb.shared.util.GetName;
 import org.zoxweb.shared.util.InstanceCreator;
@@ -7,7 +7,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
 
 public class SSLContextInfo
-    implements InstanceCreator
+    implements InstanceCreator<SSLEngine>
 {
 
     public enum Param

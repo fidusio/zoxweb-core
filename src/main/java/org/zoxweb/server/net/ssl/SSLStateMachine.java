@@ -1,7 +1,6 @@
 package org.zoxweb.server.net.ssl;
 
 import org.zoxweb.server.fsm.*;
-import org.zoxweb.server.security.SSLContextInfo;
 import org.zoxweb.server.task.TaskCallback;
 import org.zoxweb.shared.util.GetName;
 import org.zoxweb.shared.util.SharedStringUtil;

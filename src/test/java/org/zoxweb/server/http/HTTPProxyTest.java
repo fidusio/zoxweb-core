@@ -16,7 +16,7 @@
 package org.zoxweb.server.http;
 
 import org.zoxweb.server.io.UByteArrayOutputStream;
-import org.zoxweb.server.security.SSLCheckDisabler;
+import org.zoxweb.server.net.ssl.SSLCheckDisabler;
 import org.zoxweb.shared.http.HTTPHeader;
 import org.zoxweb.shared.http.HTTPMessageConfig;
 import org.zoxweb.shared.http.HTTPMessageConfigInterface;

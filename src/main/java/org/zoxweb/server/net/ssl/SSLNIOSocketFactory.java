@@ -3,7 +3,6 @@ package org.zoxweb.server.net.ssl;
 
 import org.zoxweb.server.net.BaseSessionCallback;
 import org.zoxweb.server.net.ProtocolFactoryBase;
-import org.zoxweb.server.security.SSLContextInfo;
 import org.zoxweb.shared.data.ConfigDAO;
 import org.zoxweb.shared.net.InetSocketAddressDAO;
 import org.zoxweb.shared.util.InstanceCreator;

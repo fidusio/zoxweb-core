@@ -22,7 +22,7 @@ import org.zoxweb.server.net.NIOTunnel.NIOTunnelFactory;
 import org.zoxweb.server.net.security.IPBlockerListener;
 import org.zoxweb.server.net.security.SecureNetworkTunnel;
 import org.zoxweb.server.security.CryptoUtil;
-import org.zoxweb.server.security.SSLContextInfo;
+import org.zoxweb.server.net.ssl.SSLContextInfo;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.app.AppCreatorDefault;
@@ -43,8 +43,8 @@ import java.security.Provider;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.zoxweb.server.security.SSLContextInfo.Param.CIPHERS;
-import static org.zoxweb.server.security.SSLContextInfo.Param.PROTOCOLS;
+import static org.zoxweb.server.net.ssl.SSLContextInfo.Param.CIPHERS;
+import static org.zoxweb.server.net.ssl.SSLContextInfo.Param.PROTOCOLS;
 
 
 /**

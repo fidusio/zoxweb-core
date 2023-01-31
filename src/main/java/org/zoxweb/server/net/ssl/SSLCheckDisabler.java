@@ -13,20 +13,14 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.zoxweb.server.security;
+package org.zoxweb.server.net.ssl;
 
+import javax.net.ssl.*;
 import java.net.URLConnection;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 
 /**
  * This class is a singleton object used to create a fake validation for SSL check. It is mainly
@@ -118,23 +112,5 @@ public class SSLCheckDisabler
       }
     };
   }
-
-  /**
-   * Return the system default SSL Factory
-   * @return
-   */
-//	public SSLSocketFactory getDefaultSSLSocketFactory()
-//	{
-//		return defaultSSLFactory;
-//	}
-//	
-//	/**
-//	 * Return the system default hostname verifier
-//	 * @return
-//	 */
-//	public HostnameVerifier getDefaultHostnameVerifier()
-//	{
-//		return defaultHostnameVerifier;
-//	}
 
 }
