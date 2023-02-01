@@ -172,7 +172,7 @@ public class NIOSocket
 						    try
 						    {	    	
 						    	if (key.isValid()
-									&& SharedUtil.getWrappedValue(key.channel()).isOpen()
+									&& key.channel().isOpen()
 									&& key.isReadable())
 							    {
 							    	ProtocolHandler currentPP = (ProtocolHandler)ska.attachment();
@@ -210,7 +210,7 @@ public class NIOSocket
 							    	}
 							    } 
 						    	else if(key.isValid()
-										&& SharedUtil.getWrappedValue(key.channel()).isOpen()
+										&& key.channel().isOpen()
 										&& key.isAcceptable())
 							    {
 							        // a connection was accepted by a ServerSocketChannel.
@@ -304,13 +304,13 @@ public class NIOSocket
 	
 							    } 
 							    else if (key.isValid()
-										&& SharedUtil.getWrappedValue(key.channel()).isOpen()
+										&& key.channel().isOpen()
 										&& key.isConnectable())
 							    {
 							        // a connection was established with a remote server.
 							    } 
 							    else if (key.isValid()
-										&& SharedUtil.getWrappedValue(key.channel()).isOpen()
+										&& key.channel().isOpen()
 										&& key.isWritable())
 							    {
 							        // a channel is ready for writing
@@ -327,10 +327,10 @@ public class NIOSocket
 						    {
 						    	// key clean up
 						    	if (!key.isValid()
-									|| !SharedUtil.getWrappedValue(key.channel()).isOpen())
+									|| !key.channel().isOpen())
 						    	{
 									key.cancel();
-									SharedUtil.getWrappedValue(key.channel()).close();
+									key.channel().close();
 						    	}
 						    }
 						    catch(Exception e)

@@ -71,7 +71,7 @@ public class SharedUtil
 		}
 	}
 
-	@SuppressWarnings("unchecked")
+	//@SuppressWarnings("unchecked")
 	public static <T> T getWrappedValue(T v)
     {
 		if (v instanceof WrappedValue)

@@ -80,18 +80,10 @@ public class NIOTunnel
 			setRemoteAddress(new InetSocketAddressDAO(getProperties().getValue("remote_host")));
 		}
 
-//		@Override
-//		public NIOChannelCleaner getNIOChannelCleaner() {
-//			return NIOChannelCleaner.DEFAULT;
-//		}
-
 	}
 
 
 	private volatile SocketChannel destinationChannel = null;
-	//private volatile SelectionKey  destinationSK = null;
-	//private volatile SocketChannel sourceChannel = null;
-	//private volatile SelectionKey  sourceSK = null;
 	private volatile SocketAddress sourceAddress = null;
 	private volatile ByteBuffer destinationBB;
 	private volatile ByteBuffer sourceBB;
@@ -139,16 +131,13 @@ public class NIOTunnel
 			{
 				synchronized (this)
 				{
-					if(destinationChannel == null) {
-						//sourceChannel = (SocketChannel) key.channel();
+					if(destinationChannel == null)
+					{
 						sourceAddress = phSChannel.getRemoteAddress();
-						//sourceSK = key;
 						destinationChannel = SocketChannel.open((new InetSocketAddress(remoteAddress.getInetAddress(), remoteAddress.getPort())));
-						//relay = new ChannelRelayTunnel(getReadBufferSize(), destinationChannel, sourceChannel, sourceSK,  true,  getSelectorController());
 						destinationBB = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.DIRECT);
 						sourceBB = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.DIRECT);
-						//destinationSK = getSelectorController().register(NIOChannelCleaner.DEFAULT, destinationChannel, SelectionKey.OP_READ, this,false);
-
+						getSelectorController().register(NIOChannelCleaner.DEFAULT, destinationChannel, SelectionKey.OP_READ, this,false);
 					}
 				}
 
