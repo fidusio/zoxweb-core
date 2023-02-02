@@ -15,18 +15,17 @@
  */
 package org.zoxweb.server.net;
 
-//import org.zoxweb.shared.util.SharedUtil;
-
 import java.io.IOException;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.spi.AbstractSelectableChannel;
+import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * This class is used to allow the Selector object to be used in multi-threaded environment.
+ * This class is used to allow the Selector object to be used in multithreaded environment.
  * @author mnael
  *
  */
@@ -45,36 +44,7 @@ public class SelectorController
 	{
 		this.selector = selector;
 	}
-	
-	/**
-	 * Register the socket channel with the selector by applying the following procedure:
-	 * <ol>
-	 * <li> invoke lock on the general lock
-	 * <li> wakeup the selector
-	 * <li> invoke lock on the select lock
-	 * <li> register the channel with the selector
-	 * <li> unlock the general lock
-	 * <li> unlock the select lock
-	 * <li> return the selection key
-	 * </ol>
-	 * @param ch selectable channel
-	 * @param ops channel ops
-	 * @return SelectionKey
-	 * @throws IOException is case of error
-	 */
-	public SelectionKey register(AbstractSelectableChannel ch, int ops) throws IOException
-	{
-		return register(null, ch, ops, null, false);
-	}
 
-	public SelectionKey register(AbstractSelectableChannel ch, int ops, Object attachment) throws IOException
-	{
-		return register(null, ch, ops, attachment, false);
-	}
-
-
-
-	
 
 	/**
 	 * Register the socket channel with the selector by applying the following procedure:
@@ -87,7 +57,6 @@ public class SelectorController
 	 * <li> unlock the select lock
 	 * <li> return the selection key
 	 * </ol>
-	 * @param niocc nio channel cleaner
 	 * @param ch selectable channel
 	 * @param ops channel ops
 	 * @param attachment attachment object
@@ -95,8 +64,7 @@ public class SelectorController
 	 * @return SelectionKey registered selection key with the selector
 	 * @throws IOException is case of error
 	 */
-	public SelectionKey register(NIOChannelCleaner niocc,
-								 AbstractSelectableChannel ch,
+	public SelectionKey register(AbstractSelectableChannel ch,
 								 int ops,
 								 Object attachment,
 								 boolean blocking) throws IOException
@@ -104,22 +72,23 @@ public class SelectorController
 		SelectionKey ret;
 		try
 		{
-			// block the select lock just in case
+			// register function global lock
 			lock.lock();
-			// wakeup the selector
+			// wakeup the selector if it is in select mode
 			selector.wakeup();
-			// invoke the main lock
+			// lock the selectLock to prevent it from entering select mode
 			selectLock.lock();
+
+			// configure the selection mode for the channel ###
 			ch.configureBlocking(blocking);
 			ret = ch.register(selector, ops, new SKAttachment(attachment));
-			if (niocc != null)
-			{
-				niocc.add(ret);
-			}
+			// ################################################
 		}
 		finally
 		{
+			// unlock the function global lock
 			lock.unlock();
+			// unlock the selectLock to allow the selector entering select mode
 			selectLock.unlock();
 			
 		}
@@ -127,38 +96,6 @@ public class SelectorController
 		return ret;
 	}
 
-
-	public SelectionKey register(NIOChannelCleaner niocc,
-								 AbstractSelectableChannel ch,
-								 int ops,
-								 Object attachment)
-			throws IOException
-	{
-		SelectionKey ret;
-		try
-		{
-			// block the select lock just in case
-			lock.lock();
-			// wakeup the selector
-			selector.wakeup();
-			// invoke the main lock
-			selectLock.lock();
-			//SharedUtil.getWrappedValue(ch).configureBlocking(blocking);
-			ret = ch.register(selector, ops, new SKAttachment(attachment));
-			if (niocc != null)
-			{
-				niocc.add(ret);
-			}
-		}
-		finally
-		{
-			lock.unlock();
-			selectLock.unlock();
-
-		}
-
-		return ret;
-	}
 
 	
 	/**
@@ -172,7 +109,7 @@ public class SelectorController
 	}
 	
 	/**
-	 * 
+	 * Invoke the select
 	 * @param timeout selection timeout
 	 * @return number of selected keys
 	 * @throws IOException in case of error
@@ -181,19 +118,27 @@ public class SelectorController
 	{
 		try
 		{
-			// we must lock
+			// we must call the global lock just in case a registration
+			// is taking place
 			lock.lock();
-			// and immediately unlock caused by a very fast thread;
+			// and immediately unlock it
 			lock.unlock();
+			// lock before selection
 			selectLock.lock();
+			// wait for the selector to return
 			return selector.select(timeout);
 		}
 		finally
 		{
+			// unlock the selection mode
 			selectLock.unlock();
 		}
 	}
-	
+
+	/**
+	 * Cancel the selection key
+	 * @param sk to be canceled
+	 */
 	public void cancelSelectionKey(SelectionKey sk)
 	{
 
@@ -208,8 +153,6 @@ public class SelectorController
 				// invoke the main lock
 				selectLock.lock();
 				sk.cancel();
-
-
 			}
 			finally
 			{
@@ -220,19 +163,36 @@ public class SelectorController
 
 	}
 
+	/**
+	 * Cancel selection key based on the channel
+	 * @param ch that has a selection key to be canceled
+	 */
 	public void cancelSelectionKey(SelectableChannel ch)
 	{
 		if(ch != null){
-			cancelSelectionKey(ch.keyFor(getSelector()));
+			cancelSelectionKey(ch.keyFor(selector));
 		}
 	}
-	
-	
 
-	
-	public Selector getSelector()
+
+	public boolean isOpen()
 	{
-		return selector;
+		return selector.isOpen();
+	}
+
+	public Set<SelectionKey> selectedKeys()
+	{
+		return selector.selectedKeys();
+	}
+
+	public Set<SelectionKey> keys()
+	{
+		return selector.keys();
+	}
+
+	public int keysCount()
+	{
+		return selector.keys().size();
 	}
 
 }

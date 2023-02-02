@@ -2,27 +2,26 @@ package org.zoxweb.server.net;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class SKAttachment<V>
+public class SKAttachment
 {
 
-    private volatile V attachment = null;
-    //private boolean stat = true;
+    private volatile Object attachment = null;
     private final AtomicBoolean stat = new AtomicBoolean(true);
 
-    public SKAttachment(V attachment)
+    public SKAttachment(Object attachment)
     {
         attach(attachment);
     }
 
 
-    public void attach(V obj)
+    public void attach(Object obj)
     {
         attachment = obj;
     }
 
-    public V attachment()
+    public <V> V attachment()
     {
-        return attachment;
+        return (V)attachment;
     }
 
 

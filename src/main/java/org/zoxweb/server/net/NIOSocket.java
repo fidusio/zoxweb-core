@@ -95,7 +95,7 @@ public class NIOSocket
 	{
 		SharedUtil.checkIfNulls("Null values", ssc, psf);
 		
-		SelectionKey sk = selectorController.register(ssc, SelectionKey.OP_ACCEPT, psf);
+		SelectionKey sk = selectorController.register(ssc, SelectionKey.OP_ACCEPT, psf, false);
 		logger.getLogger().info(ssc + " added");
 		
 		return sk;
@@ -113,7 +113,7 @@ public class NIOSocket
 	public SelectionKey addDatagramChannel(DatagramChannel dc,  ProtocolFactory<?> psf) throws IOException
 	{
 		SharedUtil.checkIfNulls("Null values", dc, psf);
-		SelectionKey sk = selectorController.register(dc, SelectionKey.OP_ACCEPT, psf);
+		SelectionKey sk = selectorController.register(dc, SelectionKey.OP_ACCEPT, psf, false);
 		logger.getLogger().info(dc + " added");
 		
 		return sk;
@@ -138,7 +138,7 @@ public class NIOSocket
 	{
 		return eventListenerManager;
 	}
-	
+
 
 	@Override
 	public void run()
@@ -146,13 +146,12 @@ public class NIOSocket
 		long snapTime = System.currentTimeMillis();
 		long attackTimestamp = 0;
 
-//
 		while(live)
 		{
 			try 
 			{
 				int selectedCount = 0;
-				if (selectorController.getSelector().isOpen())
+				if (selectorController.isOpen())
 				{
 
 					//currentTotalKeys = selectorController.getSelector().keys().size();
@@ -160,7 +159,7 @@ public class NIOSocket
 					long delta = System.nanoTime();
 					if (selectedCount > 0)
 					{
-						Set<SelectionKey> selectedKeys = selectorController.getSelector().selectedKeys();
+						Set<SelectionKey> selectedKeys = selectorController.selectedKeys();
 						Iterator<SelectionKey> keyIterator = selectedKeys.iterator();
 						selectedCountTotal += selectedCount;
 
@@ -170,13 +169,14 @@ public class NIOSocket
 						    keyIterator.remove();
 							SKAttachment ska = (SKAttachment) key.attachment();
 						    try
-						    {	    	
+						    {
+
 						    	if (key.isValid()
 									&& key.channel().isOpen()
 									&& key.isReadable())
 							    {
 							    	ProtocolHandler currentPP = (ProtocolHandler)ska.attachment();
-									if(logger.isEnabled()) logger.getLogger().info(ska.attachment() + " ska is selectable: " + ska.isSelectable() + " for reading " );
+									if(logger.isEnabled()) logger.getLogger().info(ska.attachment() + " ska is selectable: " + ska.isSelectable() + " for reading # " + selectedCount + "," + selectorController.keysCount());
 							    	if (ska.isSelectable() && currentPP != null)
 							    	{
 							    		// very,very,very crucial setup prior to processing
@@ -351,7 +351,7 @@ public class NIOSocket
 					logger.getLogger().info("Average dispatch processing " + TimeInMillis.nanosToString(averageProcessingTime()) +
 							" total time:" + TimeInMillis.nanosToString(callsCounter.getDeltas()) +
 							" total dispatches:" + callsCounter.getCounts() + " total select calls:" + selectedCountTotal +
-							" last select count:" + selectedCount + " total select keys:" +selectorController.getSelector().keys().size() +
+							" last select count:" + selectedCount + " total select keys:" +selectorController.keysCount() +
 						   " available workers:" +  TaskUtil.availableThreads(executor) + "," + TaskUtil.pendingTasks(executor));
 				}
 			}
@@ -381,7 +381,7 @@ public class NIOSocket
 		// TODO Auto-generated method stub
 		live = false;
 		
-		Set<SelectionKey>  keys = selectorController.getSelector().keys();
+		Set<SelectionKey>  keys = selectorController.keys();
 		for (SelectionKey sk : keys)
 		{
 			if (sk.channel() != null)

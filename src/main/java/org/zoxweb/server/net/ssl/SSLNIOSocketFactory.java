@@ -65,7 +65,7 @@ public class SSLNIOSocketFactory
         {
             e.printStackTrace();
         }
-        return new SSLNIOSocket(sslContext, remoteAddress, sc);
+        return new SSLNIOSocket(sslContext, sc, remoteAddress);
     }
 
     @Override

@@ -446,8 +446,7 @@ public class NIOProxyProtocol
     				log.getLogger().info(new String(requestRawBuffer.toByteArray()));
     			
     			
-    			remoteChannelSK = getSelectorController().register(NIOChannelCleaner.DEFAULT,
-    													  		   remoteChannel,
+    			remoteChannelSK = getSelectorController().register(remoteChannel,
     													  		   SelectionKey.OP_READ,
     													  		   new ChannelRelayTunnel(ByteBufferUtil.DEFAULT_BUFFER_SIZE, remoteChannel, phSChannel, phSK, true, getSelectorController()),
     													  		  false);
@@ -547,7 +546,7 @@ public class NIOProxyProtocol
 				if(remoteChannelSK == null || !remoteChannelSK.isValid())
 				{
 					channelRelay = new ChannelRelayTunnel(ByteBufferUtil.DEFAULT_BUFFER_SIZE, remoteChannel, phSChannel, phSK, true, getSelectorController());
-					remoteChannelSK = getSelectorController().register(NIOChannelCleaner.DEFAULT, remoteChannel, SelectionKey.OP_READ, channelRelay, false);
+					remoteChannelSK = getSelectorController().register(remoteChannel, SelectionKey.OP_READ, channelRelay, false);
 				}
 				
 				

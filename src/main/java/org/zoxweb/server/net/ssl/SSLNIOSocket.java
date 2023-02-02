@@ -23,7 +23,6 @@ import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.logging.LoggerUtil;
-import org.zoxweb.server.net.NIOChannelCleaner;
 import org.zoxweb.server.net.NIOSocket;
 import org.zoxweb.server.net.ProtocolHandler;
 import org.zoxweb.server.net.SessionCallback;
@@ -72,7 +71,7 @@ public class SSLNIOSocket
 						{
 							config.inRemoteData = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.DIRECT, ByteBufferUtil.DEFAULT_BUFFER_SIZE);
 							config.remoteChannel = SocketChannel.open((new InetSocketAddress(config.remoteAddress.getInetAddress(), config.remoteAddress.getPort())));
-							sslns.getSelectorController().register(null, config.remoteChannel, SelectionKey.OP_READ, sslns, false);
+							sslns.getSelectorController().register(config.remoteChannel, SelectionKey.OP_READ, sslns, false);
 						}
 						catch(Exception e)
 						{
@@ -127,13 +126,18 @@ public class SSLNIOSocket
 	final private SSLContextInfo sslContext;
 	private final SessionCallback sessionCallback;
 
-	public SSLNIOSocket(SSLContextInfo sslContext, InetSocketAddressDAO ra)
-	{
+//	public SSLNIOSocket(SSLContextInfo sslContext, InetSocketAddressDAO ra)
+//	{
+//
+//		this(sslContext, ra, new TunnelCallback());
+//	}
 
-		this(sslContext, ra, new TunnelCallback());
+	public SSLNIOSocket(SSLContextInfo sslContext, SSLSessionCallback sessionCallback)
+	{
+		this(sslContext, sessionCallback, null);
 	}
 
-	public SSLNIOSocket(SSLContextInfo sslContext, InetSocketAddressDAO ra, SSLSessionCallback sessionCallback)
+	public SSLNIOSocket(SSLContextInfo sslContext, SSLSessionCallback sessionCallback, InetSocketAddressDAO ra)
 	{
 		SharedUtil.checkIfNulls("context  can't be null", sslContext);
 		this.sslContext = sslContext;
@@ -143,7 +147,10 @@ public class SSLNIOSocket
 			this.sessionCallback = new TunnelCallback();
 		}
 		else
+		{
+			SharedUtil.checkIfNulls("SSL session call can't be null", sessionCallback);
 			this.sessionCallback = sessionCallback;
+		}
 
 		SharedUtil.checkIfNulls("Session callback can't be null", this.sessionCallback);
 	}
@@ -222,7 +229,7 @@ public class SSLNIOSocket
 		sslStateMachine.start(true);
 		// not sure about
 		//config.beginHandshake(false);
-		getSelectorController().register(NIOChannelCleaner.DEFAULT,  asc, SelectionKey.OP_READ, this, isBlocking);
+		getSelectorController().register(asc, SelectionKey.OP_READ, this, isBlocking);
 
 
 

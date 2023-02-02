@@ -32,9 +32,6 @@ public class NIOPlainSocket
 {
     private static final LogWrapper log = new LogWrapper(NIOPlainSocket.class).setEnabled(false);
 
-
-	//private volatile SocketChannel phSChannel = null;
-	//private volatile SelectionKey  sourceSK = null;
 	private volatile ByteBuffer phBB = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.DIRECT, 1024);
 
 

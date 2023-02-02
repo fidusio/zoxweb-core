@@ -87,7 +87,7 @@ public abstract class ProtocolHandler
 	protected void setupConnection(AbstractSelectableChannel asc, boolean isBlocking) throws IOException
 	{
 		phSChannel = (SocketChannel) asc;
-		selectorController.register(NIOChannelCleaner.DEFAULT,  phSChannel, SelectionKey.OP_READ, this, isBlocking);
+		selectorController.register(phSChannel, SelectionKey.OP_READ, this, isBlocking);
 	}
 
 
