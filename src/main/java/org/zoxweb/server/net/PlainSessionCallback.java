@@ -1,6 +1,5 @@
 package org.zoxweb.server.net;
 
-import java.io.OutputStream;
 import java.nio.channels.ByteChannel;
 
 public abstract class PlainSessionCallback extends BaseSessionCallback<ByteChannel>
@@ -14,7 +13,7 @@ public abstract class PlainSessionCallback extends BaseSessionCallback<ByteChann
 
 
 
-    final public OutputStream get()
+    final public BaseChannelOutputStream get()
     {
         return cos;
     }

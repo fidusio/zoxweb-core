@@ -7,4 +7,6 @@ import java.nio.ByteBuffer;
 public abstract class BaseSessionCallback<CF>
         extends SessionCallback<CF, ByteBuffer, OutputStream>
 {
+
+    public abstract BaseChannelOutputStream get();
 }
