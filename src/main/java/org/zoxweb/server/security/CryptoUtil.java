@@ -15,26 +15,6 @@
  */
 package org.zoxweb.server.security;
 
-import java.io.*;
-
-import java.security.*;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
-
-import java.security.cert.X509Certificate;
-
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-
-
-import javax.crypto.*;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
-import javax.net.ssl.*;
-
-
 import org.zoxweb.server.http.HTTPUtil;
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.io.UByteArrayOutputStream;
@@ -48,14 +28,24 @@ import org.zoxweb.shared.crypto.EncryptedKeyDAO;
 import org.zoxweb.shared.crypto.PasswordDAO;
 import org.zoxweb.shared.filters.BytesValueFilter;
 import org.zoxweb.shared.net.InetSocketAddressDAO;
-import org.zoxweb.shared.security.AccessException;
-import org.zoxweb.shared.security.JWTHeader;
-import org.zoxweb.shared.security.JWTPayload;
-import org.zoxweb.shared.security.KeyStoreInfoDAO;
-import org.zoxweb.shared.security.JWT;
+import org.zoxweb.shared.security.*;
 import org.zoxweb.shared.security.JWT.JWTField;
 import org.zoxweb.shared.util.*;
 import org.zoxweb.shared.util.SharedBase64.Base64Type;
+
+import javax.crypto.*;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
+import javax.net.ssl.*;
+import java.io.*;
+import java.security.*;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class CryptoUtil {
 
@@ -217,7 +207,7 @@ public class CryptoUtil {
     MessageDigest md = MessageDigest.getInstance(algo.getName());
     PasswordDAO passwordDAO = new PasswordDAO();
     passwordDAO.setSalt(salt);
-    passwordDAO.setPassword(hashWithInterations(md, salt, password, saltIteration, false));
+    passwordDAO.setPassword(hashWithIterations(md, salt, password, saltIteration, false));
     passwordDAO.setHashIteration(saltIteration);
     passwordDAO.setName(algo);
 
@@ -227,7 +217,7 @@ public class CryptoUtil {
   public static boolean isPasswordValid(PasswordDAO passwordDAO, String password)
       throws NullPointerException, IllegalArgumentException, NoSuchAlgorithmException {
     SharedUtil.checkIfNulls("Null values", passwordDAO, password);
-    byte[] genHash = hashWithInterations(MessageDigest.getInstance(passwordDAO.getName()),
+    byte[] genHash = hashWithIterations(MessageDigest.getInstance(passwordDAO.getName()),
         passwordDAO.getSalt(), SharedStringUtil.getBytes(password), passwordDAO.getHashIteration(),
         false);
 
@@ -343,7 +333,7 @@ public class CryptoUtil {
     IvParameterSpec ivSpec = new IvParameterSpec(
         generateKey(AES, (Const.TypeInBytes.BYTE.sizeInBits(AES_256_KEY_SIZE) / 2)).getEncoded());
     SecretKeySpec aesKey = new SecretKeySpec(
-        hashWithInterations(digest, ivSpec.getIV(), key, hashIteration, true), AES);
+        hashWithIterations(digest, ivSpec.getIV(), key, hashIteration, true), AES);
     Cipher cipher = Cipher.getInstance(AES_ENCRYPTION_CBC_NO_PADDING);
     cipher.init(Cipher.ENCRYPT_MODE, aesKey, ivSpec);
     Mac hmac = Mac.getInstance(HMAC_SHA_256);
@@ -454,7 +444,7 @@ public class CryptoUtil {
     MessageDigest digest = MessageDigest.getInstance(SHA_256);
     IvParameterSpec ivSpec = new IvParameterSpec(ekd.getIV());
     SecretKeySpec aesKey = new SecretKeySpec(
-        hashWithInterations(digest, ivSpec.getIV(), key, hashIteration, true), AES);
+        hashWithIterations(digest, ivSpec.getIV(), key, hashIteration, true), AES);
     Cipher cipher = Cipher.getInstance(AES_ENCRYPTION_CBC_NO_PADDING);
     cipher.init(Cipher.DECRYPT_MODE, aesKey, ivSpec);
     Mac hmac = Mac.getInstance(HMAC_SHA_256);
@@ -531,11 +521,13 @@ public class CryptoUtil {
   }
 
 
-  public static SSLContext initSSLContext(String protocol, Provider provider, File keyStoreFilename,
+  public static SSLContext initSSLContext(String protocol,
+                                          final Provider provider,
+                                          final File keyStoreFilename,
                                           String keyStoreType,
                                           final char[] keyStorePassword,
                                           final char[] crtPassword,
-                                          File trustStoreFilename,
+                                          final File trustStoreFilename,
                                           final char[] trustStorePassword)
           throws GeneralSecurityException, IOException {
     FileInputStream ksfis = null;
@@ -552,9 +544,14 @@ public class CryptoUtil {
 
   }
 
-  public static SSLContext initSSLContext(final String protocol, final Provider provider, final InputStream keyStoreIS, String keyStoreType,
-      final char[] keyStorePassword, final char[] crtPassword,
-      final InputStream trustStoreIS, final char[] trustStorePassword)
+  public static SSLContext initSSLContext(String protocol,
+                                          final Provider provider,
+                                          final InputStream keyStoreIS,
+                                          String keyStoreType,
+                                          final char[] keyStorePassword,
+                                          final char[] crtPassword,
+                                          final InputStream trustStoreIS,
+                                          final char[] trustStorePassword)
       throws GeneralSecurityException, IOException {
     KeyStore ks = CryptoUtil.loadKeyStore(keyStoreIS, keyStoreType, keyStorePassword);
     KeyStore ts = null;
@@ -571,6 +568,34 @@ public class CryptoUtil {
     } else {
       kmf.init(ks, keyStorePassword);
       tmf.init(ts != null ? ts : ks);
+    }
+
+    SSLContext sslContext = provider != null ? SSLContext.getInstance(protocol != null ? protocol : "TLS", provider) : SSLContext.getInstance("TLS");
+    sslContext.init(kmf.getKeyManagers(), null, defaultSecureRandom());
+    return sslContext;
+  }
+
+  public static SSLContext initSSLContext(final String protocol,
+                                          final Provider provider,
+                                          final KeyStore keyStore,
+                                          final char[] keyStorePassword,
+                                          final char[] crtPassword,
+                                          final KeyStore trustStore)
+          throws GeneralSecurityException
+  {
+
+
+    KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
+    TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
+
+
+
+    if (crtPassword != null) {
+      kmf.init(keyStore, crtPassword);
+      tmf.init(keyStore != null ? trustStore : keyStore);
+    } else {
+      kmf.init(keyStore, keyStorePassword);
+      tmf.init(trustStore != null ? trustStore : keyStore);
     }
 
     SSLContext sslContext = provider != null ? SSLContext.getInstance(protocol != null ? protocol : "TLS", provider) : SSLContext.getInstance("TLS");
@@ -663,11 +688,12 @@ public class CryptoUtil {
     }
   }
 
-  public static byte[] hashWithInterations(MessageDigest digest,
-      byte[] salt,
-      byte[] data,
-      int hashIterations,
-      boolean rechewdata) {
+  public static byte[] hashWithIterations(MessageDigest digest,
+                                          byte[] salt,
+                                          byte[] data,
+                                          int hashIterations,
+                                          boolean reChewData)
+  {
     // reset the digest
     digest.reset();
 
@@ -684,7 +710,7 @@ public class CryptoUtil {
       digest.reset();
       digest.update(hashed);
 
-      if (rechewdata) {
+      if (reChewData) {
         digest.update(data);
       }
 
