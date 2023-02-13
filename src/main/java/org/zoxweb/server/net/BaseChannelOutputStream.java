@@ -1,6 +1,7 @@
 package org.zoxweb.server.net;
 
 import org.zoxweb.server.io.ByteBufferUtil;
+import org.zoxweb.server.io.UByteArrayOutputStream;
 import org.zoxweb.server.logging.LogWrapper;
 
 import java.io.IOException;
@@ -15,7 +16,6 @@ public abstract class BaseChannelOutputStream extends OutputStream {
 
     protected final ByteChannel outChannel;
     protected final ByteBuffer outAppData;
-    //protected final ByteBuffer oneByteBuffer = ByteBufferUtil.allocateByteBuffer(1);
     protected final byte[] oneByteBuffer = new byte[1];
     protected final AtomicBoolean isClosed = new AtomicBoolean(false);
     public BaseChannelOutputStream(ByteChannel outByteChannel, int outAppBufferSize)
@@ -34,11 +34,19 @@ public abstract class BaseChannelOutputStream extends OutputStream {
     {
         oneByteBuffer[0] = (byte) b;
         write(oneByteBuffer, 0 ,1);
-
-//        throw new IOException("Not supported method");
     }
 
+    public void write(UByteArrayOutputStream ubaos, boolean reset) throws IOException
+    {
+        synchronized (ubaos)
+        {
+            write(ubaos.getInternalBuffer(), 0, ubaos.size());
+            if(reset)
+                ubaos.reset();
+        }
+    }
 
+    @Override
     public synchronized void write(byte[] b, int off, int len) throws IOException
     {
         if (off > b.length || len > (b.length - off) || off < 0 || len < 0)

@@ -19,7 +19,7 @@ public class SSLStateMachine extends StateMachine<SSLSessionConfig>
     public enum SessionState
     implements GetName
     {
-        READY("ready-state"),
+        DATA_READY("data-ready"),
         HANDSHAKING("handshaking"),
         POST_HANDSHAKE("post-handshake"),
 
@@ -103,7 +103,7 @@ public class SSLStateMachine extends StateMachine<SSLSessionConfig>
         sslSessionSM.setConfig(config)
                 .register(new State(StateInt.States.INIT).register(init))
                 .register(new SSLHandshakingState())
-                .register(new SSLReadState())
+                .register(new SSLDataReadyState())
                 .register(new State(SessionState.CLOSE).register(closed))
         ;
 
@@ -115,7 +115,7 @@ public class SSLStateMachine extends StateMachine<SSLSessionConfig>
 
     public static String rates()
     {
-        return SharedUtil.toCanonicalID(',', SSLHandshakingState.NeedWrap.rcNeedWrap, SSLHandshakingState.NeedUnwrap.rcNeedUnwrap, SSLHandshakingState.NeedTask.rcNeedTask, SSLHandshakingState.Finished.rcFinished, SSLReadState.NotHandshaking.rcNotHandshaking);
+        return SharedUtil.toCanonicalID(',', SSLHandshakingState.NeedWrap.rcNeedWrap, SSLHandshakingState.NeedUnwrap.rcNeedUnwrap, SSLHandshakingState.NeedTask.rcNeedTask, SSLHandshakingState.Finished.rcFinished, SSLDataReadyState.NotHandshaking.rcNotHandshaking);
     }
 
     public static <T> T lookupType(String type)
@@ -130,7 +130,7 @@ public class SSLStateMachine extends StateMachine<SSLSessionConfig>
             case "NEED_TASK":
                 return (T) SSLHandshakingState.NeedTask.rcNeedTask;
             case "FINISHED":
-                return (T) SSLReadState.NotHandshaking.rcNotHandshaking;
+                return (T) SSLDataReadyState.NotHandshaking.rcNotHandshaking;
             case "SSL_CONNECTION_COUNT":
                 return (T) Long.valueOf(counter.get());
 
