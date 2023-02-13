@@ -29,8 +29,9 @@ Copyright (C) 2017-2023 https://xlogistx.io
 ## RELEASES
 
 <ul> Latest Version
- <li> zoxweb-core-2.3.4.jar release date 2023-01-02
+ <li> zoxweb-core-2.3.5.jar release date 2023-02-13
  <ul>Deprecated Versions
+  <li>2.3.4 2023-01-02
   <li>2.3.3 2022-12-22 
   <li>2.3.2 2022-11-30 
   <li>2.3.1 2022-11-15
