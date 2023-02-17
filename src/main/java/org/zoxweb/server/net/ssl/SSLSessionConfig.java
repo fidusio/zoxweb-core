@@ -1,6 +1,7 @@
 package org.zoxweb.server.net.ssl;
 
 
+import org.zoxweb.server.fsm.Trigger;
 import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.logging.LogWrapper;
@@ -82,8 +83,8 @@ public class SSLSessionConfig
                       {
                         case NEED_WRAP:
                         case NEED_UNWRAP:
-                          //stateMachine.publishSync(new Trigger<TaskCallback<ByteBuffer, SSLChannelOutputStream>>(this, hs,null,null));
-                            StaticSSLStateMachine.dispatch(hs, this, null);
+                          stateMachine.publishSync(new Trigger<SSLSessionCallback>(this, hs,null,null));
+                          //StaticSSLStateMachine.SINGLETON.dispatch(hs, this, null);
                           break;
                         default:
                           IOUtil.close(sslChannel);
