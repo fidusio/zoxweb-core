@@ -87,16 +87,16 @@ public class SSLStateMachine extends StateMachine<SSLSessionConfig>
           }
         };
 
-    TriggerConsumerInt<SSLSessionCallback> closed =
-        new TriggerConsumer<SSLSessionCallback>(SessionState.CLOSE) {
-          @Override
-          public void accept(SSLSessionCallback callback)
-          {
-            SSLSessionConfig config = (SSLSessionConfig)getStateMachine().getConfig();
-            config.close();
-            if (log.isEnabled()) log.getLogger().info(getStateMachine().getName() + " " + callback + " closed");
-          }
-        };
+//    TriggerConsumerInt<SSLSessionCallback> closed =
+//        new TriggerConsumer<SSLSessionCallback>(SessionState.CLOSE) {
+//          @Override
+//          public void accept(SSLSessionCallback callback)
+//          {
+//            SSLSessionConfig config = (SSLSessionConfig)getStateMachine().getConfig();
+//            config.close();
+//            if (log.isEnabled()) log.getLogger().info(getStateMachine().getName() + " " + callback + " closed");
+//          }
+//        };
 
         sslSessionSM.setConfig(config)
                 .register(new State(StateInt.States.INIT).register(init))

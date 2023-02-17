@@ -3,6 +3,7 @@ package org.zoxweb.server.net.ssl;
 import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.shared.util.RateCounter;
+import org.zoxweb.shared.util.SharedStringUtil;
 import org.zoxweb.shared.util.SharedUtil;
 
 import javax.net.ssl.SSLEngineResult;
@@ -248,6 +249,33 @@ public class StaticSSLStateMachine {
                 needUnwrap(config, callback);
                 break;
         }
+    }
+
+
+    public static String rates()
+    {
+        return SharedUtil.toCanonicalID(',', rcNeedWrap, rcNeedUnwrap, rcNeedTask, rcFinished, rcNotHandshaking);
+    }
+
+    public static <T> T lookupType(String type)
+    {
+        type = SharedStringUtil.toUpperCase(type);
+        switch(type)
+        {
+            case "NEED_WRAP":
+                return (T) rcNeedWrap;
+            case "NEED_UNWRAP":
+                return (T) rcNeedUnwrap;
+            case "NEED_TASK":
+                return (T) rcNeedTask;
+            case "FINISHED":
+                return (T) rcNotHandshaking;
+//            case "SSL_CONNECTION_COUNT":
+//                return (T) Long.valueOf(counter.get());
+
+
+        }
+        return null;
     }
 
 }

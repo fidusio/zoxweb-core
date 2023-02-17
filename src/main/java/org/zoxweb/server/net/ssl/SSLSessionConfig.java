@@ -1,12 +1,10 @@
 package org.zoxweb.server.net.ssl;
 
 
-import org.zoxweb.server.fsm.Trigger;
 import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.net.SelectorController;
-import org.zoxweb.server.task.TaskCallback;
 import org.zoxweb.shared.net.InetSocketAddressDAO;
 import org.zoxweb.shared.util.SharedUtil;
 
@@ -84,7 +82,8 @@ public class SSLSessionConfig
                       {
                         case NEED_WRAP:
                         case NEED_UNWRAP:
-                          stateMachine.publishSync(new Trigger<TaskCallback<ByteBuffer, SSLChannelOutputStream>>(this, hs,null,null));
+                          //stateMachine.publishSync(new Trigger<TaskCallback<ByteBuffer, SSLChannelOutputStream>>(this, hs,null,null));
+                            StaticSSLStateMachine.dispatch(hs, this, null);
                           break;
                         default:
                           IOUtil.close(sslChannel);
@@ -103,7 +102,7 @@ public class SSLSessionConfig
             IOUtil.close(remoteChannel);
             selectorController.cancelSelectionKey(sslChannel);
             selectorController.cancelSelectionKey(remoteChannel);
-            stateMachine.close();
+            IOUtil.close(stateMachine);
             ByteBufferUtil.cache(inSSLNetData, inAppData, outSSLNetData, inRemoteData);
             IOUtil.close(sslOutputStream);
 

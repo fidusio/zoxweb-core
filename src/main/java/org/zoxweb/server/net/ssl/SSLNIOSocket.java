@@ -15,9 +15,7 @@
  */
 package org.zoxweb.server.net.ssl;
 
-import org.zoxweb.server.fsm.State;
 import org.zoxweb.server.fsm.StateMachine;
-import org.zoxweb.server.fsm.Trigger;
 import org.zoxweb.server.fsm.TriggerConsumer;
 import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.server.io.IOUtil;
@@ -25,9 +23,7 @@ import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.logging.LoggerUtil;
 import org.zoxweb.server.net.NIOSocket;
 import org.zoxweb.server.net.ProtocolHandler;
-import org.zoxweb.server.net.SessionCallback;
 import org.zoxweb.server.security.CryptoUtil;
-import org.zoxweb.server.task.TaskCallback;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.shared.net.InetSocketAddressDAO;
 import org.zoxweb.shared.util.ParamUtil;
@@ -120,11 +116,11 @@ public class SSLNIOSocket
 
     public static final LogWrapper log = new LogWrapper(SSLNIOSocket.class).setEnabled(false);
 
-	private SSLStateMachine sslStateMachine = null;
+	//private SSLStateMachine sslStateMachine = null;
 	private SSLSessionConfig config = null;
 	final public InetSocketAddressDAO remoteAddress;
 	final private SSLContextInfo sslContext;
-	private final SessionCallback sessionCallback;
+	private final SSLSessionCallback sessionCallback;
 
 //	public SSLNIOSocket(SSLContextInfo sslContext, InetSocketAddressDAO ra)
 //	{
@@ -170,7 +166,7 @@ public class SSLNIOSocket
 	@Override
 	public void close()
     {
-		if(sslStateMachine != null)
+		if(config != null)
 			config.close();
 
 	}
@@ -187,10 +183,11 @@ public class SSLNIOSocket
 			if (log.isEnabled()) log.getLogger().info("AcceptNewData: " + key);
 			if (key.channel() == config.sslChannel && key.channel().isOpen())
 			{
-				sslStateMachine.publishSync(new Trigger<TaskCallback<ByteBuffer, SSLChannelOutputStream>>(this,
-						SharedUtil.enumName(config.getHandshakeStatus()),
-						null,
-						sessionCallback));
+//				sslStateMachine.publishSync(new Trigger<SSLSessionCallback>(this,
+//						SharedUtil.enumName(config.getHandshakeStatus()),
+//						null,
+//						sessionCallback));
+				StaticSSLStateMachine.dispatch(config.getHandshakeStatus(), config, sessionCallback);
 			}
 			else if (key.channel() == config.remoteChannel && key.channel().isOpen())
 			{
@@ -215,25 +212,39 @@ public class SSLNIOSocket
 
 
 
-	@Override
+	//@Override
+//	protected void setupConnectionOld(AbstractSelectableChannel asc, boolean isBlocking) throws IOException {
+//    	sslStateMachine = SSLStateMachine.create(sslContext, null);
+//		config = sslStateMachine.getConfig();
+//		if(remoteAddress != null)
+//			sslStateMachine.register(new State("connect-remote").register(new PostHandshake(this)));
+//    	config.selectorController = getSelectorController();
+//		config.sslChannel = (SocketChannel) asc;
+//		config.remoteAddress = remoteAddress;
+//		config.sslOutputStream = new SSLChannelOutputStream(config, 512 );
+//		sessionCallback.setConfig(config);
+//		sslStateMachine.start(true);
+//		// not sure about
+//		//config.beginHandshake(false);
+//		getSelectorController().register(asc, SelectionKey.OP_READ, this, isBlocking);
+//	}
+
+
+
 	protected void setupConnection(AbstractSelectableChannel asc, boolean isBlocking) throws IOException {
-    	sslStateMachine = SSLStateMachine.create(sslContext, null);
-		config = sslStateMachine.getConfig();
-		if(remoteAddress != null)
-			sslStateMachine.register(new State("connect-remote").register(new PostHandshake(this)));
-    	config.selectorController = getSelectorController();
+		//sslStateMachine = SSLStateMachine.create(sslContext, null);
+		config = new SSLSessionConfig(sslContext);//sslStateMachine.getConfig();
+//		if(remoteAddress != null)
+//			sslStateMachine.register(new State("connect-remote").register(new PostHandshake(this)));
+		config.selectorController = getSelectorController();
 		config.sslChannel = (SocketChannel) asc;
 		config.remoteAddress = remoteAddress;
 		config.sslOutputStream = new SSLChannelOutputStream(config, 512 );
 		sessionCallback.setConfig(config);
-		sslStateMachine.start(true);
+		//sslStateMachine.start(true);
 		// not sure about
 		//config.beginHandshake(false);
 		getSelectorController().register(asc, SelectionKey.OP_READ, this, isBlocking);
-
-
-
-
 	}
 
 
