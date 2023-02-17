@@ -117,6 +117,21 @@ public class StateMachine<C>
         return this;
     }
 
+    @Override
+    public <D> StateMachineInt publish(StateInt state, String canID, D data) {
+        if(canID != null)
+            publish(new Trigger(this, canID, state, data));
+        return this;
+    }
+
+    @Override
+    public <D> StateMachineInt publish(StateInt state, Enum<?> canID, D data)
+    {
+        if(canID != null)
+            publish(new Trigger(this, canID, state, data));
+        return this;
+    }
+
 
     @Override
     public StateMachineInt publishSync(TriggerInt trigger)
@@ -134,6 +149,20 @@ public class StateMachine<C>
                 sct.run();
             });
         }
+        return this;
+    }
+
+    @Override
+    public <D> StateMachineInt publishSync(StateInt state, String canID, D data) {
+        if(canID != null)
+            publishSync(new Trigger(this, canID, state, data));
+        return this;
+    }
+
+    @Override
+    public <D> StateMachineInt publishSync(StateInt state, Enum<?> canID, D data) {
+        if(canID != null)
+            publishSync(new Trigger(this, canID, state, data));
         return this;
     }
 

@@ -16,11 +16,11 @@
 package org.zoxweb.server.util;
 
 
+import org.zoxweb.shared.util.*;
+
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.UUID;
-
-import org.zoxweb.shared.util.*;
-import org.zoxweb.shared.util.TimeStampInterface;
 
 public class MetaUtil
 {
@@ -36,12 +36,11 @@ public class MetaUtil
 	
 	public static synchronized  NVConfigEntity fromClass(String className)
 			throws ClassNotFoundException,
-				   InstantiationException,
-				   IllegalAccessException,
-				   NullPointerException,
-				   IllegalArgumentException,
-				   SecurityException, NoSuchMethodException
-    {
+			InstantiationException,
+			IllegalAccessException,
+			NullPointerException,
+			IllegalArgumentException,
+			SecurityException, NoSuchMethodException, InvocationTargetException {
 		SharedUtil.checkIfNulls("Null class name", className);
 		NVConfigEntity nvce = classNameToNVCE.get(className);
 
@@ -55,10 +54,9 @@ public class MetaUtil
 	}
 
 	public static NVConfigEntity fromClass(Class<?> clazz)
-        throws InstantiationException, IllegalAccessException, NullPointerException, IllegalArgumentException,  NoSuchMethodException, SecurityException
-    {
+			throws InstantiationException, IllegalAccessException, NullPointerException, IllegalArgumentException, NoSuchMethodException, SecurityException, InvocationTargetException {
 		SharedUtil.checkIfNulls("Null class name", clazz);
-		Object obj = clazz.newInstance();
+		Object obj = clazz.getConstructor().newInstance();
 
 		if (obj instanceof NVEntity)
 		{

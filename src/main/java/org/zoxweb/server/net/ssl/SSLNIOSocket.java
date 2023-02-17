@@ -17,7 +17,6 @@ package org.zoxweb.server.net.ssl;
 
 import org.zoxweb.server.fsm.State;
 import org.zoxweb.server.fsm.StateMachine;
-import org.zoxweb.server.fsm.Trigger;
 import org.zoxweb.server.fsm.TriggerConsumer;
 import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.server.io.IOUtil;
@@ -185,10 +184,11 @@ public class SSLNIOSocket
 			if (log.isEnabled()) log.getLogger().info("AcceptNewData: " + key);
 			if (key.channel() == config.sslChannel && key.channel().isOpen())
 			{
-				sslStateMachine.publishSync(new Trigger<SSLSessionCallback>(this,
-						SharedUtil.enumName(config.getHandshakeStatus()),
-						null,
-						sessionCallback));
+//				sslStateMachine.publishSync(new Trigger<SSLSessionCallback>(this,
+//						SharedUtil.enumName(config.getHandshakeStatus()),
+//						null,
+//						sessionCallback));
+				sslStateMachine.publishSync(null, config.getHandshakeStatus(), sessionCallback);
 //				StaticSSLStateMachine.SINGLETON.dispatch(config.getHandshakeStatus(), config, sessionCallback);
 			}
 			else if (key.channel() == config.remoteChannel && key.channel().isOpen())

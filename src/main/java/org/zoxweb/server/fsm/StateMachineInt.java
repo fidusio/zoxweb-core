@@ -13,9 +13,17 @@ extends GetName, AutoCloseable
     StateMachineInt register(StateInt state);
 
     StateMachineInt publish(TriggerInt trigger);
+    public <D>StateMachineInt publish(StateInt state, String canID, D data);
 
+    public <D>StateMachineInt publish(StateInt state, Enum<?> canID, D data);
     StateMachineInt publishSync(TriggerInt trigger);
+
+    public <D>StateMachineInt publishSync(StateInt state, String canID, D data);
+
+    public <D>StateMachineInt publishSync(StateInt state, Enum<?> canID, D data);
     StateMachineInt publishToCurrentState(TriggerInt trigger);
+
+
 
     <V extends C> V getConfig();
     StateMachineInt setConfig(C config);

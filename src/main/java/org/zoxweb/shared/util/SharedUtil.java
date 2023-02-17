@@ -1886,14 +1886,14 @@ public class SharedUtil
 		{
 
 		case NVDOUBLE:
-			return (T) new Double(Double.parseDouble(v));
+			return (T) Double.valueOf(v);
 			
 		case NVFLOAT:
-			return (T) new Float(Float.parseFloat(v));
+			return (T) Float.valueOf(v);
 		case NVINT:
-			return (T) new Integer(Integer.parseInt(v));
+			return (T) Integer.valueOf(v);
 		case NVLONG:
-			return (T) new Long(Long.parseLong(v));
+			return (T) Long.valueOf(v);
 		default:
 			throw new IllegalArgumentException("Invalid type " + type);
 		
