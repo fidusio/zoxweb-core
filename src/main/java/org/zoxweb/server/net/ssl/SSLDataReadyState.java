@@ -2,11 +2,9 @@ package org.zoxweb.server.net.ssl;
 
 import org.zoxweb.server.fsm.State;
 import org.zoxweb.server.fsm.TriggerConsumer;
-import org.zoxweb.server.task.TaskCallback;
 import org.zoxweb.shared.util.RateCounter;
 
 import javax.net.ssl.SSLEngineResult;
-import java.nio.ByteBuffer;
 
 import static javax.net.ssl.SSLEngineResult.HandshakeStatus.NOT_HANDSHAKING;
 
@@ -16,7 +14,7 @@ public class SSLDataReadyState
 
 
 
-    static class NotHandshaking extends TriggerConsumer<TaskCallback<ByteBuffer, SSLChannelOutputStream>>
+    static class NotHandshaking extends TriggerConsumer<SSLSessionCallback>
     {
         static RateCounter rcNotHandshaking = new RateCounter("NotHandshaking");
         NotHandshaking() {
@@ -24,10 +22,10 @@ public class SSLDataReadyState
         }
 
         @Override
-        public void accept(TaskCallback<ByteBuffer, SSLChannelOutputStream> callback)
+        public void accept(SSLSessionCallback callback)
         {
             long ts = System.currentTimeMillis();
-            SSLSessionConfig config = (SSLSessionConfig) getState().getStateMachine().getConfig();
+            SSLSessionConfig config = (SSLSessionConfig)getStateMachine().getConfig();
             if(log.isEnabled()) log.getLogger().info("" + config.getHandshakeStatus());
 
             if(config.sslChannel.isOpen())

@@ -3,14 +3,11 @@ package org.zoxweb.server.net.ssl;
 import org.zoxweb.server.fsm.State;
 import org.zoxweb.server.fsm.TriggerConsumer;
 import org.zoxweb.server.io.ByteBufferUtil;
-import org.zoxweb.server.task.TaskCallback;
 import org.zoxweb.shared.util.RateCounter;
 import org.zoxweb.shared.util.SharedUtil;
 
 import javax.net.ssl.SSLEngineResult;
-import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicLong;
-
 
 import static javax.net.ssl.SSLEngineResult.HandshakeStatus.*;
 import static org.zoxweb.server.net.ssl.SSLStateMachine.SessionState.POST_HANDSHAKE;
@@ -19,7 +16,7 @@ public class SSLHandshakingState extends State {
 
     private final static AtomicLong counter = new AtomicLong(0);
 
-    static class NeedWrap extends TriggerConsumer<TaskCallback<ByteBuffer, SSLChannelOutputStream>>
+    static class NeedWrap extends TriggerConsumer<SSLSessionCallback>
     {
         static RateCounter rcNeedWrap = new RateCounter("NeedWrap");
         NeedWrap()
@@ -27,10 +24,10 @@ public class SSLHandshakingState extends State {
             super(NEED_WRAP);
         }
         @Override
-        public void accept(TaskCallback<ByteBuffer, SSLChannelOutputStream> callback)
+        public void accept(SSLSessionCallback callback)
         {
             long ts = System.currentTimeMillis();
-            SSLSessionConfig config = (SSLSessionConfig) getState().getStateMachine().getConfig();
+            SSLSessionConfig config = (SSLSessionConfig)getStateMachine().getConfig();
             if (config.getHandshakeStatus() == NEED_WRAP)
             {
               try
@@ -72,7 +69,7 @@ public class SSLHandshakingState extends State {
 
     }
 
-    static class NeedUnwrap extends TriggerConsumer<TaskCallback<ByteBuffer, SSLChannelOutputStream>>
+    static class NeedUnwrap extends TriggerConsumer<SSLSessionCallback>
     {
         static RateCounter rcNeedUnwrap = new RateCounter("NeedUnwrap");
 
@@ -82,10 +79,10 @@ public class SSLHandshakingState extends State {
         }
 
     @Override
-    public void accept(TaskCallback<ByteBuffer, SSLChannelOutputStream> callback)
+    public void accept(SSLSessionCallback callback)
     {
         long ts = System.currentTimeMillis();
-        SSLSessionConfig config = (SSLSessionConfig) getState().getStateMachine().getConfig();
+        SSLSessionConfig config = (SSLSessionConfig)getStateMachine().getConfig();
         if(log.isEnabled()) log.getLogger().info("Entry: " + config.getHandshakeStatus());
 
         if (config.getHandshakeStatus() == NEED_UNWRAP || SharedUtil.enumName(config.getHandshakeStatus()).equals("NEED_UNWRAP_AGAIN"))
@@ -148,7 +145,7 @@ public class SSLHandshakingState extends State {
 
 
 
-    static class NeedTask extends TriggerConsumer<TaskCallback<ByteBuffer, SSLChannelOutputStream>>
+    static class NeedTask extends TriggerConsumer<SSLSessionCallback>
     {
         static RateCounter rcNeedTask = new RateCounter("NeedTask");
         NeedTask() {
@@ -156,9 +153,9 @@ public class SSLHandshakingState extends State {
         }
 
         @Override
-        public void accept(TaskCallback<ByteBuffer, SSLChannelOutputStream> callback) {
+        public void accept(SSLSessionCallback callback) {
             long ts = System.currentTimeMillis();
-            SSLSessionConfig config = (SSLSessionConfig) getState().getStateMachine().getConfig();
+            SSLSessionConfig config = (SSLSessionConfig)getStateMachine().getConfig();
             Runnable toRun;
             while((toRun = config.getDelegatedTask()) != null)
             {
@@ -168,15 +165,16 @@ public class SSLHandshakingState extends State {
             SSLEngineResult.HandshakeStatus status = config.getHandshakeStatus();
             if (log.isEnabled())
                 log.getLogger().info("After run: " + status);
-            publishSync(status, callback);
             ts = System.currentTimeMillis() - ts;
             rcNeedTask.register(ts);
+            publishSync(status, callback);
+
         }
     }
 
 
 
-    static class Finished extends TriggerConsumer<TaskCallback<ByteBuffer, SSLChannelOutputStream>>
+    static class Finished extends TriggerConsumer<SSLSessionCallback>
     {
         static RateCounter rcFinished = new RateCounter("Finished");
         Finished() {
@@ -184,9 +182,9 @@ public class SSLHandshakingState extends State {
         }
 
         @Override
-        public void accept(TaskCallback<ByteBuffer, SSLChannelOutputStream> callback) {
+        public void accept(SSLSessionCallback callback) {
             long ts = System.currentTimeMillis();
-            SSLSessionConfig config = (SSLSessionConfig) getState().getStateMachine().getConfig();
+            SSLSessionConfig config = (SSLSessionConfig)getStateMachine().getConfig();
 
 
             // ********************************************

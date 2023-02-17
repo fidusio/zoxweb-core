@@ -1,12 +1,10 @@
 package org.zoxweb.server.net.ssl;
 
 import org.zoxweb.server.fsm.*;
-import org.zoxweb.server.task.TaskCallback;
 import org.zoxweb.shared.util.GetName;
 import org.zoxweb.shared.util.SharedStringUtil;
 import org.zoxweb.shared.util.SharedUtil;
 
-import java.nio.ByteBuffer;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -89,12 +87,12 @@ public class SSLStateMachine extends StateMachine<SSLSessionConfig>
           }
         };
 
-    TriggerConsumerInt<TaskCallback<ByteBuffer, SSLChannelOutputStream>> closed =
-        new TriggerConsumer<TaskCallback<ByteBuffer, SSLChannelOutputStream>>(SessionState.CLOSE) {
+    TriggerConsumerInt<SSLSessionCallback> closed =
+        new TriggerConsumer<SSLSessionCallback>(SessionState.CLOSE) {
           @Override
-          public void accept(TaskCallback<ByteBuffer, SSLChannelOutputStream> callback)
+          public void accept(SSLSessionCallback callback)
           {
-            SSLSessionConfig config = (SSLSessionConfig) getState().getStateMachine().getConfig();
+            SSLSessionConfig config = (SSLSessionConfig)getStateMachine().getConfig();
             config.close();
             if (log.isEnabled()) log.getLogger().info(getStateMachine().getName() + " " + callback + " closed");
           }
@@ -104,7 +102,7 @@ public class SSLStateMachine extends StateMachine<SSLSessionConfig>
                 .register(new State(StateInt.States.INIT).register(init))
                 .register(new SSLHandshakingState())
                 .register(new SSLDataReadyState())
-                .register(new State(SessionState.CLOSE).register(closed))
+                //.register(new State(SessionState.CLOSE).register(closed))
         ;
 
 

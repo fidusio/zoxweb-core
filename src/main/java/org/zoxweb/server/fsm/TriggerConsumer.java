@@ -52,6 +52,7 @@ implements TriggerConsumerInt<T>
         return state;
     }
 
+
     public void setSate(StateInt state)
     {
         this.state = state;
@@ -110,6 +111,6 @@ implements TriggerConsumerInt<T>
 
     public StateMachineInt getStateMachine()
     {
-        return getState().getStateMachine();
+        return state.getStateMachine();
     }
 }
