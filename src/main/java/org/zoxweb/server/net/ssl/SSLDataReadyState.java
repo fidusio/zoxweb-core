@@ -68,6 +68,7 @@ public class SSLDataReadyState
                                 case CLOSED:
                                     // check result here
                                     if(log.isEnabled()) log.getLogger().info("CLOSED-DURING-NOT_HANDSHAKING: " + result + " bytesread: " + bytesRead);
+
                                     config.close();
                                     break;
                             }

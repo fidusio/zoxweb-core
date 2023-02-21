@@ -13,7 +13,6 @@ import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLEngineResult;
 import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLSession;
-import java.net.SocketAddress;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
@@ -60,15 +59,15 @@ public class SSLSessionConfig
     {
 
         //String msg = "";
-        SocketAddress connectionRemoteAddress = null;
+        //SocketAddress connectionRemoteAddress = null;
         if (!isClosed.getAndSet(true))
         {
             //log.getLogger().info("SSLSessionConfig-NOT-CLOSED-YET " +Thread.currentThread() + " " + sslChannel);
-            try
-            {
-                connectionRemoteAddress = sslChannel.getRemoteAddress();
-            }
-            catch (Exception e){}
+//            try
+//            {
+//                connectionRemoteAddress = sslChannel.getRemoteAddress();
+//            }
+//            catch (Exception e){}
 
             if(sslEngine != null)
             {
@@ -109,7 +108,7 @@ public class SSLSessionConfig
             IOUtil.close(sslOutputStream);
 
             if (log.isEnabled()) log.getLogger().info("SSLSessionConfig-CLOSED " +Thread.currentThread() + " " +
-                    sslChannel + " Address: " + connectionRemoteAddress);
+                    sslChannel);// + " Address: " + connectionRemoteAddress);
 //            TaskUtil.getDefaultTaskScheduler().queue(Const.TimeInMillis.SECOND.MILLIS, ()->
 //                log.getLogger().info(SSLStateMachine.rates()));
         }

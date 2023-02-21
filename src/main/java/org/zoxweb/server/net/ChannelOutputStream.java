@@ -25,7 +25,7 @@ public class ChannelOutputStream
      * @return the number of byte sent
      * @throws IOException in case of error
      */
-    protected int write(ByteBuffer bb) throws IOException
+    protected synchronized int write(ByteBuffer bb) throws IOException
     {
         return ByteBufferUtil.smartWrite(null, outChannel, bb);
     }

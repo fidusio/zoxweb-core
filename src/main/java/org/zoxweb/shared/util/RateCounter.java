@@ -26,6 +26,18 @@ public class RateCounter
         return register(delta, 1);
     }
 
+    public RateCounter inc()
+    {
+        register(0, 1);
+        return this;
+    }
+
+    public RateCounter inc(long inc)
+    {
+        register(0, inc);
+        return this;
+    }
+
     public synchronized RateCounter register(long delta, long inc)
     {
        deltas += delta;

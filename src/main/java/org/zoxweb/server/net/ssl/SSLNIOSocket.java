@@ -194,14 +194,17 @@ public class SSLNIOSocket
 			}
 			else if (key.channel() == config.remoteChannel && key.channel().isOpen())
 			{
-				int bytesRead = config.remoteChannel.read(config.inRemoteData);
-				if (bytesRead == -1)
-				{
-					if (log.isEnabled()) log.getLogger().info("SSLCHANNEL-CLOSED-NEED_UNWRAP: "+ config.getHandshakeStatus()	+ " bytesread: "+ bytesRead);
-					config.close();
-					return;
+				int bytesRead;
+				do {
+					bytesRead = config.remoteChannel.read(config.inRemoteData);
+					if (bytesRead > 0 ) config.sslOutputStream.write(config.inRemoteData);
+				}while(bytesRead > 0);
+
+				if (bytesRead == -1) {
+					if (log.isEnabled())
+						log.getLogger().info("SSLCHANNEL-CLOSED-NEED_UNWRAP: " + config.getHandshakeStatus() + " bytesread: " + bytesRead);
+					close();
 				}
-				config.sslOutputStream.write(config.inRemoteData);
 			}
     	}
     	catch(Exception e)
