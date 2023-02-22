@@ -1,7 +1,6 @@
 package org.zoxweb.server.net.ssl;
 
 
-import org.zoxweb.server.fsm.Trigger;
 import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.logging.LogWrapper;
@@ -13,6 +12,7 @@ import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLEngineResult;
 import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLSession;
+import java.io.Closeable;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
@@ -20,7 +20,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 
 public class SSLSessionConfig
-    implements AutoCloseable
+    implements Closeable
+
 {
     public final static LogWrapper log = new LogWrapper(SSLSessionConfig.class.getName()).setEnabled(false);
 
@@ -37,17 +38,16 @@ public class SSLSessionConfig
 
     volatile SocketChannel remoteChannel = null;
     volatile ByteBuffer inRemoteData = null;
-    volatile SSLStateMachine stateMachine = null;
+    volatile SSLDispatcher sslDispatcher = null;
     volatile boolean forcedClose = false;
     volatile InetSocketAddressDAO remoteAddress = null;
-    volatile StaticSSLStateMachine staticSSLStateMachine = null;
 
     //final Lock ioLock = null;//new ReentrantLock();
-    private final SSLEngine sslEngine; // the crypto engine
+    final SSLEngine sslEngine; // the crypto engine
 
 
     private final AtomicBoolean isClosed = new AtomicBoolean(false);
-    private final AtomicBoolean hasBegan = new AtomicBoolean(false);
+    final AtomicBoolean hasBegan = new AtomicBoolean(false);
 
     public SSLSessionConfig(SSLContextInfo sslContext)
     {
@@ -83,7 +83,8 @@ public class SSLSessionConfig
                       {
                         case NEED_WRAP:
                         case NEED_UNWRAP:
-                          stateMachine.publishSync(new Trigger<SSLSessionCallback>(this, hs,null,null));
+                          //stateMachine.publishSync(new Trigger<SSLSessionCallback>(this, hs,null,null));
+                          sslDispatcher.dispatch(hs, null);
                           //stateMachine.publishSync(null, hs, null);
                           //staticSSLStateMachine.dispatch(hs, null);
                           break;
@@ -104,7 +105,7 @@ public class SSLSessionConfig
             IOUtil.close(remoteChannel);
             selectorController.cancelSelectionKey(sslChannel);
             selectorController.cancelSelectionKey(remoteChannel);
-            IOUtil.close(stateMachine);
+            IOUtil.close((Closeable) sslDispatcher);
             ByteBufferUtil.cache(inSSLNetData, inAppData, outSSLNetData, inRemoteData);
             IOUtil.close(sslOutputStream);
 

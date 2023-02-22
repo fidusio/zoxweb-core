@@ -11,6 +11,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class StateMachine<C>
@@ -26,7 +27,7 @@ public class StateMachine<C>
     private final Map<String, StateInt> states = new LinkedHashMap<String, StateInt>();
     private C config;
     private final Executor executor;
-    private volatile boolean isClosed = false;
+    protected final AtomicBoolean isClosed = new AtomicBoolean(false);
 
     private final AtomicReference<StateInt> currentState = new AtomicReference<>();
 
@@ -272,15 +273,15 @@ public class StateMachine<C>
 
 
     @Override
-    public synchronized void close()
+    public void close()
     {
-        if(!isClosed)
-            isClosed = true;
+        isClosed.getAndSet(true);
+
     }
 
     public boolean isClosed()
     {
-        return isClosed;
+        return isClosed.get();
     }
 
 

@@ -5,13 +5,22 @@ import org.zoxweb.shared.util.GetName;
 import org.zoxweb.shared.util.SharedStringUtil;
 import org.zoxweb.shared.util.SharedUtil;
 
+import javax.net.ssl.SSLEngineResult;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class SSLStateMachine extends StateMachine<SSLSessionConfig>
+    implements SSLDispatcher
 {
 
 
+    @Override
+    public void dispatch(SSLEngineResult.HandshakeStatus status, SSLSessionCallback callback) {
+        publishSync(new Trigger<SSLSessionCallback>(this,
+               status,
+                null,
+                callback));
+    }
 
     //private final static AtomicLong HANDSHAKE_COUNTER = new AtomicLong();
     public enum SessionState
@@ -50,6 +59,9 @@ public class SSLStateMachine extends StateMachine<SSLSessionConfig>
     static final AtomicLong counter = new AtomicLong();
 
 
+
+
+
 //    private SSLStateMachine(long id, TaskSchedulerProcessor tsp) {
 //        super("SSLSessionStateMachine-" + id, tsp);
 //    }
@@ -57,6 +69,53 @@ public class SSLStateMachine extends StateMachine<SSLSessionConfig>
         super("SSLSessionStateMachine-" + id, executor);
     }
 
+
+//    public void close()
+//    {
+//        if (!isClosed.getAndSet(true))
+//        {
+//            SSLSessionConfig config = getConfig();
+//            if(config.sslEngine != null)
+//            {
+//
+//                try
+//                {
+//                    config.sslEngine.closeOutbound();
+//                    while (!config.forcedClose && config.hasBegan.get() && !config.sslEngine.isOutboundDone() && config.sslChannel.isOpen())
+//                    {
+//                        SSLEngineResult.HandshakeStatus hs = config.getHandshakeStatus();
+//                        switch (hs)
+//                        {
+//                            case NEED_WRAP:
+//                            case NEED_UNWRAP:
+//                                dispatch(hs, null);
+//                                break;
+//                            default:
+//                                IOUtil.close(config.sslChannel);
+//                        }
+//                    }
+//
+//                }
+//                catch (Exception e)
+//                {
+//                    e.printStackTrace();
+//                }
+//            }
+//
+//
+//            IOUtil.close(config.sslChannel);
+//            IOUtil.close(config.remoteChannel);
+//            config.selectorController.cancelSelectionKey(config.sslChannel);
+//            config.selectorController.cancelSelectionKey(config.remoteChannel);
+//            ByteBufferUtil.cache(config.inSSLNetData, config.inAppData, config.outSSLNetData, config.inRemoteData);
+//            IOUtil.close(config.sslOutputStream);
+//
+//            if (log.isEnabled()) log.getLogger().info("SSLSessionConfig-CLOSED " +Thread.currentThread() + " " +
+//                    config.sslChannel);// + " Address: " + connectionRemoteAddress);
+////            TaskUtil.getDefaultTaskScheduler().queue(Const.TimeInMillis.SECOND.MILLIS, ()->
+////                log.getLogger().info(SSLStateMachine.rates()));
+//        }
+//    }
 
 
 
@@ -76,7 +135,7 @@ public class SSLStateMachine extends StateMachine<SSLSessionConfig>
     public static SSLStateMachine create(SSLSessionConfig config, Executor e){
         SSLStateMachine sslSessionSM = new SSLStateMachine(counter.incrementAndGet(), e);
         sslSessionSM.setConfig(config);
-        config.stateMachine = sslSessionSM;
+        config.sslDispatcher = sslSessionSM;
 
     TriggerConsumerInt<Void> init = new TriggerConsumer<Void>(StateInt.States.INIT) {
           @Override

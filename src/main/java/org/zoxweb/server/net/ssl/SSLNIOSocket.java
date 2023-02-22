@@ -15,9 +15,7 @@
  */
 package org.zoxweb.server.net.ssl;
 
-import org.zoxweb.server.fsm.State;
 import org.zoxweb.server.fsm.StateMachine;
-import org.zoxweb.server.fsm.Trigger;
 import org.zoxweb.server.fsm.TriggerConsumer;
 import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.server.io.IOUtil;
@@ -118,12 +116,12 @@ public class SSLNIOSocket
 
     public static final LogWrapper log = new LogWrapper(SSLNIOSocket.class).setEnabled(false);
 
-	private SSLStateMachine sslStateMachine = null;
+	private SSLDispatcher sslDispatcher = null;
 	private SSLSessionConfig config = null;
 	final public InetSocketAddressDAO remoteAddress;
 	final private SSLContextInfo sslContext;
 	private final SSLSessionCallback sessionCallback;
-	private StaticSSLStateMachine staticSSLStateMachine = null;
+	///private StaticSSLStateMachine staticSSLStateMachine = null;
 
 //	public SSLNIOSocket(SSLContextInfo sslContext, InetSocketAddressDAO ra)
 //	{
@@ -186,10 +184,11 @@ public class SSLNIOSocket
 			if (log.isEnabled()) log.getLogger().info("AcceptNewData: " + key);
 			if (key.channel() == config.sslChannel && key.channel().isOpen())
 			{
-				sslStateMachine.publishSync(new Trigger<SSLSessionCallback>(this,
-						SharedUtil.enumName(config.getHandshakeStatus()),
-						null,
-						sessionCallback));
+//				sslStateMachine.publishSync(new Trigger<SSLSessionCallback>(this,
+//						SharedUtil.enumName(config.getHandshakeStatus()),
+//						null,
+//						sessionCallback));
+				sslDispatcher.dispatch(config.getHandshakeStatus(), sessionCallback);
 //				sslStateMachine.publishSync(null, config.getHandshakeStatus(), sessionCallback);
 //				staticSSLStateMachine.dispatch(config.getHandshakeStatus(), sessionCallback);
 			}
@@ -219,40 +218,41 @@ public class SSLNIOSocket
 
 
 
-	@Override
-	protected void setupConnection(AbstractSelectableChannel asc, boolean isBlocking) throws IOException {
-    	sslStateMachine = SSLStateMachine.create(sslContext, null);
-		config = sslStateMachine.getConfig();
-		if(remoteAddress != null)
-			sslStateMachine.register(new State("connect-remote").register(new PostHandshake(this)));
-    	config.selectorController = getSelectorController();
-		config.sslChannel = (SocketChannel) asc;
-		config.remoteAddress = remoteAddress;
-		config.sslOutputStream = new SSLChannelOutputStream(config, 512 );
-		sessionCallback.setConfig(config);
-		sslStateMachine.start(true);
-		// not sure about
-		//config.beginHandshake(false);
-		getSelectorController().register(asc, SelectionKey.OP_READ, this, isBlocking);
-	}
-
-
-
+//	@Override
 //	protected void setupConnection(AbstractSelectableChannel asc, boolean isBlocking) throws IOException {
-//		config = new SSLSessionConfig(sslContext);//sslStateMachine.getConfig();
-//		staticSSLStateMachine = new StaticSSLStateMachine(config);
-////		if(remoteAddress != null)
-////			sslStateMachine.register(new State("connect-remote").register(new PostHandshake(this)));
-//		config.selectorController = getSelectorController();
+//		SSLStateMachine sslStateMachine = SSLStateMachine.create(sslContext, null);;
+//    	sslDispatcher = sslStateMachine;
+//		config = sslStateMachine.getConfig();
+//		if(remoteAddress != null)
+//			sslStateMachine.register(new State("connect-remote").register(new PostHandshake(this)));
+//    	config.selectorController = getSelectorController();
 //		config.sslChannel = (SocketChannel) asc;
 //		config.remoteAddress = remoteAddress;
 //		config.sslOutputStream = new SSLChannelOutputStream(config, 512 );
 //		sessionCallback.setConfig(config);
-//		//sslStateMachine.start(true);
+//		sslStateMachine.start(true);
 //		// not sure about
 //		//config.beginHandshake(false);
 //		getSelectorController().register(asc, SelectionKey.OP_READ, this, isBlocking);
 //	}
+
+
+
+	protected void setupConnection(AbstractSelectableChannel asc, boolean isBlocking) throws IOException {
+		config = new SSLSessionConfig(sslContext);//sslStateMachine.getConfig();
+		sslDispatcher = new StaticSSLStateMachine(config);
+//		if(remoteAddress != null)
+//			sslStateMachine.register(new State("connect-remote").register(new PostHandshake(this)));
+		config.selectorController = getSelectorController();
+		config.sslChannel = (SocketChannel) asc;
+		config.remoteAddress = remoteAddress;
+		config.sslOutputStream = new SSLChannelOutputStream(config, 512 );
+		sessionCallback.setConfig(config);
+		//sslStateMachine.start(true);
+		// not sure about
+		//config.beginHandshake(false);
+		getSelectorController().register(asc, SelectionKey.OP_READ, this, isBlocking);
+	}
 
 
 

@@ -13,13 +13,17 @@ import java.util.function.Consumer;
 
 import static javax.net.ssl.SSLEngineResult.HandshakeStatus.*;
 
-public class StaticSSLStateMachine {
+public class StaticSSLStateMachine
+    implements SSLDispatcher, AutoCloseable
+{
     public static final LogWrapper log = new LogWrapper(StaticSSLStateMachine.class).setEnabled(false);
     static RateCounter rcNotHandshaking = new RateCounter("NotHandshaking");
     static RateCounter rcNeedWrap = new RateCounter("NeedWrap");
     static RateCounter rcNeedUnwrap = new RateCounter("NeedUnwrap");
     static RateCounter rcNeedTask = new RateCounter("NeedTask");
     static RateCounter rcFinished = new RateCounter("Finished");
+
+//    private final AtomicBoolean isClosed = new AtomicBoolean(false);
 
     private final SSLSessionConfig config;
 
@@ -32,10 +36,63 @@ public class StaticSSLStateMachine {
         statesCallback.put(FINISHED, new Finished());
         statesCallback.put(NEED_TASK, new NeedTask());
         statesCallback.put(NOT_HANDSHAKING, new NotHandshaking());
-        this.config.staticSSLStateMachine = this;
+        this.config.sslDispatcher = this;
     }
 
-     class NeedWrap implements Consumer<SSLSessionCallback> {
+    @Override
+    public void close() throws Exception {
+
+    }
+
+//    @Override
+//    public void close()
+//    {
+//        if (!isClosed.getAndSet(true))
+//        {
+//            if(config.sslEngine != null)
+//            {
+//
+//                try
+//                {
+//                    config.sslEngine.closeOutbound();
+//                    while (!config.forcedClose && config.hasBegan.get() && !config.sslEngine.isOutboundDone() && config.sslChannel.isOpen())
+//                    {
+//                        SSLEngineResult.HandshakeStatus hs = config.getHandshakeStatus();
+//                        switch (hs)
+//                        {
+//                            case NEED_WRAP:
+//                            case NEED_UNWRAP:
+//                                dispatch(hs, null);
+//                                break;
+//                            default:
+//                                IOUtil.close(config.sslChannel);
+//                        }
+//                    }
+//
+//                }
+//                catch (Exception e)
+//                {
+//                    e.printStackTrace();
+//                }
+//            }
+//
+//
+//            IOUtil.close(config.sslChannel);
+//            IOUtil.close(config.remoteChannel);
+//            config.selectorController.cancelSelectionKey(config.sslChannel);
+//            config.selectorController.cancelSelectionKey(config.remoteChannel);
+//            IOUtil.close(config.stateMachine);
+//            ByteBufferUtil.cache(config.inSSLNetData, config.inAppData, config.outSSLNetData, config.inRemoteData);
+//            IOUtil.close(config.sslOutputStream);
+//
+//            if (log.isEnabled()) log.getLogger().info("SSLSessionConfig-CLOSED " +Thread.currentThread() + " " +
+//                    config.sslChannel);// + " Address: " + connectionRemoteAddress);
+////            TaskUtil.getDefaultTaskScheduler().queue(Const.TimeInMillis.SECOND.MILLIS, ()->
+////                log.getLogger().info(SSLStateMachine.rates()));
+//        }
+//    }
+
+    class NeedWrap implements Consumer<SSLSessionCallback> {
         @Override
         public void accept(SSLSessionCallback callback) {
             long ts = System.currentTimeMillis();
