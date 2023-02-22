@@ -163,9 +163,10 @@ public class SSLHandshakingState extends State {
 
             }
             SSLEngineResult.HandshakeStatus status = config.getHandshakeStatus();
+
+            ts = System.currentTimeMillis() - ts;
             if (log.isEnabled())
                 log.getLogger().info("After run: " + status);
-            ts = System.currentTimeMillis() - ts;
             rcNeedTask.register(ts);
             publishSync(status, callback);
 

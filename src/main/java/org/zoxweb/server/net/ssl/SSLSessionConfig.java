@@ -1,7 +1,6 @@
 package org.zoxweb.server.net.ssl;
 
 
-import org.zoxweb.server.fsm.Trigger;
 import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.logging.LogWrapper;
@@ -40,6 +39,7 @@ public class SSLSessionConfig
     volatile SSLStateMachine stateMachine = null;
     volatile boolean forcedClose = false;
     volatile InetSocketAddressDAO remoteAddress = null;
+    volatile StaticSSLStateMachine staticSSLStateMachine = null;
 
     //final Lock ioLock = null;//new ReentrantLock();
     private final SSLEngine sslEngine; // the crypto engine
@@ -82,9 +82,9 @@ public class SSLSessionConfig
                       {
                         case NEED_WRAP:
                         case NEED_UNWRAP:
-                          stateMachine.publishSync(new Trigger<SSLSessionCallback>(this, hs,null,null));
+                          //stateMachine.publishSync(new Trigger<SSLSessionCallback>(this, hs,null,null));
                           //stateMachine.publishSync(null, hs, null);
-                          //StaticSSLStateMachine.SINGLETON.dispatch(hs, this, null);
+                          staticSSLStateMachine.dispatch(hs, null);
                           break;
                         default:
                           IOUtil.close(sslChannel);

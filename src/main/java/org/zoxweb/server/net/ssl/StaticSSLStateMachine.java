@@ -9,7 +9,7 @@ import org.zoxweb.shared.util.SharedUtil;
 import javax.net.ssl.SSLEngineResult;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import static javax.net.ssl.SSLEngineResult.HandshakeStatus.*;
 
@@ -21,21 +21,23 @@ public class StaticSSLStateMachine {
     static RateCounter rcNeedTask = new RateCounter("NeedTask");
     static RateCounter rcFinished = new RateCounter("Finished");
 
-    public final static StaticSSLStateMachine SINGLETON = new StaticSSLStateMachine();
+    private final SSLSessionConfig config;
 
-    private Map<Enum<?>, BiConsumer<SSLSessionConfig, SSLSessionCallback>> statesCallback = new LinkedHashMap<Enum<?>, BiConsumer<SSLSessionConfig, SSLSessionCallback>>();
-    private StaticSSLStateMachine()
+    private final Map<Enum<?>, Consumer<SSLSessionCallback>> statesCallback = new LinkedHashMap<Enum<?>, Consumer<SSLSessionCallback>>();
+    public StaticSSLStateMachine(SSLSessionConfig config)
     {
+        this.config = config;
         statesCallback.put(NEED_WRAP, new NeedWrap());
         statesCallback.put(NEED_UNWRAP, new NeedUnwrap());
         statesCallback.put(FINISHED, new Finished());
         statesCallback.put(NEED_TASK, new NeedTask());
         statesCallback.put(NOT_HANDSHAKING, new NotHandshaking());
+        this.config.staticSSLStateMachine = this;
     }
 
-     class NeedWrap implements BiConsumer<SSLSessionConfig, SSLSessionCallback> {
+     class NeedWrap implements Consumer<SSLSessionCallback> {
         @Override
-        public void accept(SSLSessionConfig config, SSLSessionCallback callback) {
+        public void accept(SSLSessionCallback callback) {
             long ts = System.currentTimeMillis();
 
             if (config.getHandshakeStatus() == NEED_WRAP) {
@@ -55,7 +57,7 @@ public class StaticSSLStateMachine {
                             int written = ByteBufferUtil.smartWrite(null, config.sslChannel, config.outSSLNetData);
                             if (log.isEnabled())
                                 log.getLogger().info(result.getHandshakeStatus() + " After writing data HANDSHAKING-NEED_WRAP: " + config.outSSLNetData + " written:" + written);
-                            dispatch(result.getHandshakeStatus(), config, callback);
+                            dispatch(result.getHandshakeStatus(), callback);
                             break;
                         case CLOSED:
                             config.close();
@@ -74,9 +76,9 @@ public class StaticSSLStateMachine {
     }
 
 
-     class NeedUnwrap implements BiConsumer<SSLSessionConfig, SSLSessionCallback> {
+     class NeedUnwrap implements Consumer<SSLSessionCallback> {
         @Override
-        public void accept(SSLSessionConfig config, SSLSessionCallback callback) {
+        public void accept(SSLSessionCallback callback) {
 
             long ts = System.currentTimeMillis();
             if (log.isEnabled()) log.getLogger().info("Entry: " + config.getHandshakeStatus());
@@ -115,7 +117,7 @@ public class StaticSSLStateMachine {
                                 throw new IllegalStateException("NEED_UNWRAP should never happen: " + result.getStatus());
                                 // this should never happen
                             case OK:
-                                dispatch(result.getHandshakeStatus(), config, callback);
+                                dispatch(result.getHandshakeStatus(), callback);
                                 break;
                             case CLOSED:
                                 // check result here
@@ -136,10 +138,10 @@ public class StaticSSLStateMachine {
         }
     }
 
-     class NeedTask implements BiConsumer<SSLSessionConfig, SSLSessionCallback>
+     class NeedTask implements Consumer<SSLSessionCallback>
     {
         @Override
-        public void accept(SSLSessionConfig config, SSLSessionCallback callback)
+        public void accept(SSLSessionCallback callback)
         {
             long ts = System.currentTimeMillis();
 
@@ -150,11 +152,12 @@ public class StaticSSLStateMachine {
 
             }
             SSLEngineResult.HandshakeStatus status = config.getHandshakeStatus();
+
+            ts = System.currentTimeMillis() - ts;
             if (log.isEnabled())
                 log.getLogger().info("After run: " + status);
-            ts = System.currentTimeMillis() - ts;
             rcNeedTask.register(ts);
-            dispatch(status, config, callback);
+            dispatch(status, callback);
 
         }
     }
@@ -163,10 +166,10 @@ public class StaticSSLStateMachine {
 
 
 
-     class Finished implements BiConsumer<SSLSessionConfig, SSLSessionCallback>
+     class Finished implements Consumer<SSLSessionCallback>
     {
         @Override
-        public void accept(SSLSessionConfig config, SSLSessionCallback callback)
+        public void accept(SSLSessionCallback callback)
         {
             long ts = System.currentTimeMillis();
 
@@ -187,7 +190,7 @@ public class StaticSSLStateMachine {
                 // ||-----------------------||
                 // The buffer has app data that needs to be decrypted
                 //**************************************************
-                dispatch(config.getHandshakeStatus(), config, callback);
+                dispatch(config.getHandshakeStatus(), callback);
             }
 
             ts = System.currentTimeMillis() - ts;
@@ -196,10 +199,10 @@ public class StaticSSLStateMachine {
         }
     }
 
-     class NotHandshaking implements BiConsumer<SSLSessionConfig, SSLSessionCallback>
+     class NotHandshaking implements Consumer<SSLSessionCallback>
     {
         @Override
-        public void accept(SSLSessionConfig config, SSLSessionCallback callback)
+        public void accept(SSLSessionCallback callback)
         {
             long ts = System.currentTimeMillis();
             if(log.isEnabled()) log.getLogger().info("" + config.getHandshakeStatus());
@@ -257,7 +260,7 @@ public class StaticSSLStateMachine {
                     }
                 }
                 else
-                    dispatch(config.getHandshakeStatus(), config, callback);
+                    dispatch(config.getHandshakeStatus(), callback);
 
             }
             ts = System.currentTimeMillis() - ts;
@@ -266,11 +269,11 @@ public class StaticSSLStateMachine {
     }
 
 
-    public void dispatch(SSLEngineResult.HandshakeStatus status, SSLSessionConfig config, SSLSessionCallback callback)
+    public void dispatch(SSLEngineResult.HandshakeStatus status, SSLSessionCallback callback)
     {
-        BiConsumer<SSLSessionConfig, SSLSessionCallback> function = statesCallback.get(status);
+        Consumer<SSLSessionCallback> function = statesCallback.get(status);
         if(function != null)
-            function.accept(config, callback);
+            function.accept(callback);
     }
 
 
