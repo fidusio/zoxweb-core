@@ -54,7 +54,7 @@ public abstract class ProtocolHandler
 	}
 
 
-	
+
 
 
 	public long getID(){return id;}
@@ -84,7 +84,7 @@ public abstract class ProtocolHandler
 //	}
 
 
-	protected void setupConnection(AbstractSelectableChannel asc, boolean isBlocking) throws IOException
+	public void setupConnection(AbstractSelectableChannel asc, boolean isBlocking) throws IOException
 	{
 		phSChannel = (SocketChannel) asc;
 		selectorController.register(phSChannel, SelectionKey.OP_READ, this, isBlocking);

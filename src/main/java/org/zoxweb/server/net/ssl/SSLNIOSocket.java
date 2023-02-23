@@ -37,49 +37,47 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.nio.channels.spi.AbstractSelectableChannel;
 
-import static org.zoxweb.server.net.ssl.SSLStateMachine.SessionState.POST_HANDSHAKE;
-
 
 public class SSLNIOSocket
     extends ProtocolHandler
 {
 
 
-	private static class PostHandshake extends TriggerConsumer<SSLSessionConfig>
-	{
-
-		private final SSLNIOSocket sslns;
-		PostHandshake(SSLNIOSocket sslns)
-		{
-			super(POST_HANDSHAKE);
-			this.sslns = sslns;
-		}
-		@Override
-		public void accept(SSLSessionConfig config)
-		{
-			if(config.remoteAddress != null && config.inRemoteData == null)
-			{
-				synchronized (config)
-				{
-					if(config.inRemoteData == null)
-					{
-						try
-						{
-							config.inRemoteData = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.DIRECT, ByteBufferUtil.DEFAULT_BUFFER_SIZE);
-							config.remoteChannel = SocketChannel.open((new InetSocketAddress(config.remoteAddress.getInetAddress(), config.remoteAddress.getPort())));
-							sslns.getSelectorController().register(config.remoteChannel, SelectionKey.OP_READ, sslns, false);
-						}
-						catch(Exception e)
-						{
-							if (log.isEnabled()) log.getLogger().info("" + e);
-							if (log.isEnabled()) log.getLogger().info("connect to " + config.remoteAddress + " FAILED");
-							config.close();
-						}
-					}
-				}
-			}
-		}
-	}
+//	private class PostHandshake extends TriggerConsumer<SSLSessionConfig>
+//	{
+//
+//		private final SSLNIOSocket sslns;
+//		PostHandshake(SSLNIOSocket sslns)
+//		{
+//			super(POST_HANDSHAKE);
+//			this.sslns = sslns;
+//		}
+//		@Override
+//		public void accept(SSLSessionConfig config)
+//		{
+//			if(config.remoteAddress != null && config.inRemoteData == null)
+//			{
+//				synchronized (config)
+//				{
+//					if(config.inRemoteData == null)
+//					{
+//						try
+//						{
+//							config.inRemoteData = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.DIRECT, ByteBufferUtil.DEFAULT_BUFFER_SIZE);
+//							config.remoteChannel = SocketChannel.open((new InetSocketAddress(config.remoteAddress.getInetAddress(), config.remoteAddress.getPort())));
+//							sslns.getSelectorController().register(config.remoteChannel, SelectionKey.OP_READ, sslns, false);
+//						}
+//						catch(Exception e)
+//						{
+//							if (log.isEnabled()) log.getLogger().info("" + e);
+//							if (log.isEnabled()) log.getLogger().info("connect to " + config.remoteAddress + " FAILED");
+//							config.close();
+//						}
+//					}
+//				}
+//			}
+//		}
+//	}
 
 
 	private static class TunnelCallback extends SSLSessionCallback
@@ -100,13 +98,13 @@ public class SSLNIOSocket
 				{
 					ByteBufferUtil.smartWrite(null, getConfig().remoteChannel, buffer);
 				}
-				catch(IOException e)
+				catch(Exception e)
 				{
+					e.printStackTrace();
 					if (log.isEnabled()) log.getLogger().info(e+"");
 					// we should close
 					IOUtil.close(get());
 				}
-
 			}
 		}
 	}
@@ -141,6 +139,7 @@ public class SSLNIOSocket
 		remoteAddress = ra;
 		if(remoteAddress != null && sessionCallback == null)
 		{
+			//this.sessionCallback = new TunnelCallback();
 			this.sessionCallback = new TunnelCallback();
 		}
 		else
@@ -184,16 +183,11 @@ public class SSLNIOSocket
 			if (log.isEnabled()) log.getLogger().info("AcceptNewData: " + key);
 			if (key.channel() == config.sslChannel && key.channel().isOpen())
 			{
-//				sslStateMachine.publishSync(new Trigger<SSLSessionCallback>(this,
-//						SharedUtil.enumName(config.getHandshakeStatus()),
-//						null,
-//						sessionCallback));
 				sslDispatcher.dispatch(config.getHandshakeStatus(), sessionCallback);
-//				sslStateMachine.publishSync(null, config.getHandshakeStatus(), sessionCallback);
-//				staticSSLStateMachine.dispatch(config.getHandshakeStatus(), sessionCallback);
 			}
 			else if (key.channel() == config.remoteChannel && key.channel().isOpen())
 			{
+				// this is the tunnel section
 				int bytesRead;
 				do {
 					bytesRead = config.remoteChannel.read(config.inRemoteData);
@@ -238,16 +232,14 @@ public class SSLNIOSocket
 
 
 
-	protected void setupConnection(AbstractSelectableChannel asc, boolean isBlocking) throws IOException {
+	public void setupConnection(AbstractSelectableChannel asc, boolean isBlocking) throws IOException {
 		config = new SSLSessionConfig(sslContext);//sslStateMachine.getConfig();
-		sslDispatcher = new StaticSSLStateMachine(config);
-//		if(remoteAddress != null)
-//			sslStateMachine.register(new State("connect-remote").register(new PostHandshake(this)));
 		config.selectorController = getSelectorController();
 		config.sslChannel = (SocketChannel) asc;
 		config.remoteAddress = remoteAddress;
 		config.sslOutputStream = new SSLChannelOutputStream(config, 512 );
 		sessionCallback.setConfig(config);
+		sslDispatcher = new CustomSSLStateMachine(this);
 		//sslStateMachine.start(true);
 		// not sure about
 		//config.beginHandshake(false);
@@ -265,7 +257,7 @@ public class SSLNIOSocket
 
 		TaskUtil.setThreadMultiplier(8);
 		TaskUtil.setMaxTasksQueue(2048);
-    	LoggerUtil.enableDefaultLogger("io.xlogistx");
+    	LoggerUtil.enableDefaultLogger("org.zoxweb");
 		try
 		{
 			ParamUtil.ParamMap params = ParamUtil.parse("-", args);
@@ -300,5 +292,36 @@ public class SSLNIOSocket
 		}
 	}
 
+
+	public SSLSessionConfig getConfig()
+	{
+		return config;
+	}
+
+
+	void createRemoteConnection()
+	{
+		if(config.remoteAddress != null && config.inRemoteData == null)
+			{
+				synchronized (config)
+				{
+					if(config.inRemoteData == null)
+					{
+						try
+						{
+							config.inRemoteData = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.DIRECT, ByteBufferUtil.DEFAULT_BUFFER_SIZE);
+							config.remoteChannel = SocketChannel.open((new InetSocketAddress(config.remoteAddress.getInetAddress(), config.remoteAddress.getPort())));
+							getSelectorController().register(config.remoteChannel, SelectionKey.OP_READ, this, false);
+						}
+						catch(Exception e)
+						{
+							if (log.isEnabled()) log.getLogger().info("" + e);
+							if (log.isEnabled()) log.getLogger().info("connect to " + config.remoteAddress + " FAILED");
+							config.close();
+						}
+					}
+				}
+			}
+	}
 
 }

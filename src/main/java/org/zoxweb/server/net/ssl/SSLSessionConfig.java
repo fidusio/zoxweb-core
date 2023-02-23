@@ -11,7 +11,6 @@ import org.zoxweb.shared.util.SharedUtil;
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLEngineResult;
 import javax.net.ssl.SSLException;
-import javax.net.ssl.SSLSession;
 import java.io.Closeable;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
@@ -42,6 +41,7 @@ public class SSLSessionConfig
     volatile boolean forcedClose = false;
     volatile InetSocketAddressDAO remoteAddress = null;
 
+
     //final Lock ioLock = null;//new ReentrantLock();
     final SSLEngine sslEngine; // the crypto engine
 
@@ -59,8 +59,7 @@ public class SSLSessionConfig
     public void close()
     {
 
-        //String msg = "";
-        //SocketAddress connectionRemoteAddress = null;
+
         if (!isClosed.getAndSet(true))
         {
             //log.getLogger().info("SSLSessionConfig-NOT-CLOSED-YET " +Thread.currentThread() + " " + sslChannel);
@@ -141,21 +140,12 @@ public class SSLSessionConfig
         return ret;
     }
 
-    public SSLSession getSession()
-    {
-        return sslEngine.getSession();
-    }
-
-    public SSLSession getHandshakeSession()
-    {
-        return sslEngine.getHandshakeSession();
-    }
 
 
     public void beginHandshake(boolean clientMode) throws SSLException {
-        if (hasBegan.get() == false)
+        if (!hasBegan.get())
         {
-            if(hasBegan.getAndSet(true) == false)
+            if(!hasBegan.getAndSet(true))
             {
                 // set the ssl engine mode client or sever
                 sslEngine.setUseClientMode(clientMode);

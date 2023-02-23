@@ -2,21 +2,26 @@ package org.zoxweb.server.net.ssl;
 
 import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.server.logging.LogWrapper;
+import org.zoxweb.shared.util.Identifier;
 import org.zoxweb.shared.util.RateCounter;
 import org.zoxweb.shared.util.SharedStringUtil;
 import org.zoxweb.shared.util.SharedUtil;
 
 import javax.net.ssl.SSLEngineResult;
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
 import static javax.net.ssl.SSLEngineResult.HandshakeStatus.*;
 
-public class StaticSSLStateMachine
-    implements SSLDispatcher, AutoCloseable
+class CustomSSLStateMachine
+    implements SSLDispatcher, Closeable, Identifier<Long>
 {
-    public static final LogWrapper log = new LogWrapper(StaticSSLStateMachine.class).setEnabled(false);
+    public static final LogWrapper log = new LogWrapper(CustomSSLStateMachine.class).setEnabled(false);
+
     static RateCounter rcNotHandshaking = new RateCounter("NotHandshaking");
     static RateCounter rcNeedWrap = new RateCounter("NeedWrap");
     static RateCounter rcNeedUnwrap = new RateCounter("NeedUnwrap");
@@ -24,26 +29,40 @@ public class StaticSSLStateMachine
     static RateCounter rcFinished = new RateCounter("Finished");
 
 //    private final AtomicBoolean isClosed = new AtomicBoolean(false);
-
+    private static final AtomicLong counter = new AtomicLong();
     private final SSLSessionConfig config;
+    private final SSLNIOSocket sslns;
+    private final long id;
 
-    private final Map<Enum<?>, Consumer<SSLSessionCallback>> statesCallback = new LinkedHashMap<Enum<?>, Consumer<SSLSessionCallback>>();
-    public StaticSSLStateMachine(SSLSessionConfig config)
+
+
+    public static long getIDCount()
     {
-        this.config = config;
+        return counter.get();
+    }
+    private final Map<Enum<?>, Consumer<SSLSessionCallback>> statesCallback = new LinkedHashMap<Enum<?>, Consumer<SSLSessionCallback>>();
+    CustomSSLStateMachine(SSLNIOSocket sslns)
+    {
+        this.sslns = sslns;
+        this.config = sslns.getConfig();
         statesCallback.put(NEED_WRAP, new NeedWrap());
         statesCallback.put(NEED_UNWRAP, new NeedUnwrap());
         statesCallback.put(FINISHED, new Finished());
         statesCallback.put(NEED_TASK, new NeedTask());
         statesCallback.put(NOT_HANDSHAKING, new NotHandshaking());
         this.config.sslDispatcher = this;
+        id = counter.incrementAndGet();
     }
 
     @Override
-    public void close() throws Exception {
-
+    public void close() throws IOException {
+        config.close();
     }
 
+    public Long getID()
+    {
+        return id;
+    }
 //    @Override
 //    public void close()
 //    {
@@ -233,11 +252,11 @@ public class StaticSSLStateMachine
             // ********************************************
             // Very crucial steps
             // ********************************************
-//        if(config.remoteAddress != null)
-//        {
-//            // we have a SSL tunnel
-//            publishSync(POST_HANDSHAKE, config);
-//        }
+        if(config.remoteAddress != null)
+        {
+            // we have a SSL tunnel
+            sslns.createRemoteConnection();
+        }
 
             if (config.inSSLNetData.position() > 0)
             {
