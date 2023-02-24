@@ -82,6 +82,7 @@ public class SSLNIOSocket
 
 	private static class TunnelCallback extends SSLSessionCallback
 	{
+
 		@Override
 		public void exception(Exception e) {
 			// exception handling
@@ -254,9 +255,6 @@ public class SSLNIOSocket
 	@SuppressWarnings("resource")
     public static void main(String... args)
     {
-
-		TaskUtil.setThreadMultiplier(8);
-		TaskUtil.setMaxTasksQueue(2048);
     	LoggerUtil.enableDefaultLogger("org.zoxweb");
 		try
 		{
@@ -302,26 +300,28 @@ public class SSLNIOSocket
 	void createRemoteConnection()
 	{
 		if(config.remoteAddress != null && config.inRemoteData == null)
+		{
+			synchronized (config)
 			{
-				synchronized (config)
+				if(config.inRemoteData == null)
 				{
-					if(config.inRemoteData == null)
+					try
 					{
-						try
-						{
-							config.inRemoteData = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.DIRECT, ByteBufferUtil.DEFAULT_BUFFER_SIZE);
-							config.remoteChannel = SocketChannel.open((new InetSocketAddress(config.remoteAddress.getInetAddress(), config.remoteAddress.getPort())));
-							getSelectorController().register(config.remoteChannel, SelectionKey.OP_READ, this, false);
-						}
-						catch(Exception e)
-						{
-							if (log.isEnabled()) log.getLogger().info("" + e);
-							if (log.isEnabled()) log.getLogger().info("connect to " + config.remoteAddress + " FAILED");
-							config.close();
-						}
+						config.inRemoteData = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.DIRECT, ByteBufferUtil.DEFAULT_BUFFER_SIZE);
+						config.remoteChannel = SocketChannel.open((new InetSocketAddress(config.remoteAddress.getInetAddress(), config.remoteAddress.getPort())));
+						getSelectorController().register(config.remoteChannel, SelectionKey.OP_READ, this, false);
+						//sessionCallback.setRemoteSocket(config.remoteChannel);
+
+					}
+					catch(Exception e)
+					{
+						if (log.isEnabled()) log.getLogger().info("" + e);
+						if (log.isEnabled()) log.getLogger().info("connect to " + config.remoteAddress + " FAILED");
+						config.close();
 					}
 				}
 			}
+		}
 	}
 
 }

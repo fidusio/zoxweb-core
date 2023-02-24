@@ -636,8 +636,6 @@ public class NIOProxyProtocol
 			
 			NIOSocket nios = new NIOSocket(new InetSocketAddress(port), 256, factory, TaskUtil.getDefaultTaskProcessor());
 			nios.setStatLogCounter(0);
-			
-			//nios.addSeverSocket(2401, new NIOTunnelFactory(new InetSocketAddressDAO("10.0.0.1:2401")));
 			Runnable cleaner = new Runnable()
 					{
 						NIOSocket toClose;

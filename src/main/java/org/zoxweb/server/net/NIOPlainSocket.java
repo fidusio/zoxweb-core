@@ -31,10 +31,7 @@ public class NIOPlainSocket
     extends ProtocolHandler
 {
     private static final LogWrapper log = new LogWrapper(NIOPlainSocket.class).setEnabled(false);
-
 	private volatile ByteBuffer phBB = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.DIRECT, 1024);
-
-
 
 	private final PlainSessionCallback sessionCallback;
 
