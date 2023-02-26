@@ -37,6 +37,7 @@ public class SharedUtil
 
 	}
 
+
 	/**
 	 * Checks all the objs if any of them is null it will throw a NullPointerException.
 	 * @param msg to be added to the NullPointerException
