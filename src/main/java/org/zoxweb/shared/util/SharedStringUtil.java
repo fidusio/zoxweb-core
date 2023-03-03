@@ -24,6 +24,38 @@ import java.util.List;
  */
 public final class SharedStringUtil
 {
+
+	public static class MatchToken
+	{
+		MatchToken(CharSequence t)
+		{
+			token = t;
+			index = -1;
+			count = 0;
+			referenceIndex = -1;
+		}
+
+		CharSequence token;
+		int index;
+		int count;
+		int referenceIndex;
+
+		public String toString()
+		{
+			return SharedUtil.toCanonicalID(':', token, referenceIndex, index, count);
+		}
+
+		public int getIndex()
+		{
+			return index;
+		}
+
+		public int getCount()
+		{
+			return count;
+		}
+	}
+
     //
     public static final String UTF_8  = "UTF-8";
     public static final String UTF_16 = "UTF-16";
@@ -56,36 +88,7 @@ public final class SharedStringUtil
 	 * The class contains a method called toString which returns a canonical string.
 	 *
 	 */
-	public static class MatchToken
-	{
-		MatchToken(CharSequence t)
-        {
-			token = t;
-			index = -1;
-			count = 0;
-			referenceIndex = -1;
-		}
-		
-		CharSequence token;
-		int index;
-		int count;
-		int referenceIndex;
-		
-		public String toString()
-        {
-			return SharedUtil.toCanonicalID(':', token, referenceIndex, index, count);
-		}
-		
-		public int getIndex()
-        {
-			return index;
-		}
-		
-		public int getCount()
-        {
-			return count;
-		}
-	}
+
 	
 	/**
 	 * Finds and returns the next token match within the string sequence. 

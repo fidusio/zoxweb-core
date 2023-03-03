@@ -3,7 +3,6 @@ package org.zoxweb.server.security;
 import org.zoxweb.shared.util.SharedStringUtil;
 import org.zoxweb.shared.util.SharedUtil;
 
-import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.util.Arrays;
@@ -555,10 +554,7 @@ public class BCrypt
      * @return the hashed password
      */
     public static String hashpw(String password, String salt) {
-        byte passwordb[];
-
-        passwordb = password.getBytes(StandardCharsets.UTF_8);
-
+        byte[] passwordb = SharedStringUtil.getBytes(password);
         return hashpw(passwordb, salt);
     }
 
@@ -729,7 +725,7 @@ public class BCrypt
      * @return true if the passwords match, false otherwise
      */
     public static boolean checkpw(String plaintext, String hashed) {
-        byte[] passwordb = plaintext.getBytes(StandardCharsets.UTF_8);
+        byte[] passwordb = SharedStringUtil.getBytes(plaintext);
         return equalsNoEarlyReturn(hashed, hashpwforcheck(passwordb, hashed));
     }
 
@@ -745,7 +741,7 @@ public class BCrypt
     }
 
     static boolean equalsNoEarlyReturn(String a, String b) {
-        return MessageDigest.isEqual(a.getBytes(StandardCharsets.UTF_8), b.getBytes(StandardCharsets.UTF_8));
+        return MessageDigest.isEqual(SharedStringUtil.getBytes(a), SharedStringUtil.getBytes(b));
     }
 
 }

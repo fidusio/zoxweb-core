@@ -17,14 +17,7 @@ package org.zoxweb.shared.crypto;
 
 import org.zoxweb.shared.crypto.CryptoConst.MDType;
 import org.zoxweb.shared.data.PropertyDAO;
-import org.zoxweb.shared.data.TimeStampDAO;
-import org.zoxweb.shared.util.GetNVConfig;
-import org.zoxweb.shared.util.NVConfig;
-import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
-import org.zoxweb.shared.util.NVConfigManager;
-import org.zoxweb.shared.util.SharedStringUtil;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.*;
 /**
  * PasswordDAO
  * @author mnael
@@ -123,6 +116,11 @@ public class PasswordDAO
 	public synchronized void setPassword(byte[] password)
     {
 		setValue(Param.PASSWORD, password);
+	}
+
+	public void setPassword(String password)
+	{
+		setPassword(SharedStringUtil.getBytes(password));
 	}
 
 	@Override
