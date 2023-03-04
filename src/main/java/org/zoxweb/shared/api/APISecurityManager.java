@@ -163,9 +163,9 @@ public interface APISecurityManager<S>
 	 
 	 /**
 	  * Invalidate a resource
-	  * @param resouceID
+	  * @param resourceID
 	  */
-	 void invalidateResource(String resouceID);
+	 void invalidateResource(String resourceID);
 	 
 	 
 	

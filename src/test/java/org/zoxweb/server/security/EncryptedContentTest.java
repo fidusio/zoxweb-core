@@ -15,21 +15,6 @@
  */
 package org.zoxweb.server.security;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.security.Key;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.CertificateException;
-import java.util.concurrent.atomic.AtomicLong;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.crypto.CryptoConst.MDType;
 import org.zoxweb.shared.crypto.CryptoConst.SecureRandomType;
@@ -37,6 +22,17 @@ import org.zoxweb.shared.crypto.EncryptedDAO;
 import org.zoxweb.shared.crypto.EncryptedKeyDAO;
 import org.zoxweb.shared.crypto.PasswordDAO;
 import org.zoxweb.shared.util.SharedStringUtil;
+
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.security.*;
+import java.security.cert.CertificateException;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class EncryptedContentTest {
 
@@ -125,16 +121,16 @@ public class EncryptedContentTest {
         PasswordDAO passwordDAO = null;
         for (int i = 0; i < 10; i++) {
           long ts = System.nanoTime();
-          passwordDAO = CryptoUtil.hashedPassword("sha-256", 0, 8196, "password");
+          passwordDAO = HashUtil.hashedPassword("sha-256", 0, 8196, "password");
           ts = System.nanoTime() - ts;
           System.out.println("it took " + ts + " nanos for interation " + i);
         }
 
         //System.out.println( passwordDAO.toCanonicalID());
-        System.out.println("passwordDAO:" + CryptoUtil.isPasswordValid(passwordDAO, "password"));
+        System.out.println("passwordDAO:" + HashUtil.isPasswordValid(passwordDAO, "password"));
         PasswordDAO passwordFromCanonicalID = PasswordDAO
             .fromCanonicalID(passwordDAO.toCanonicalID());
-        System.out.println("passwordFromCanonicalID:" + CryptoUtil
+        System.out.println("passwordFromCanonicalID:" + HashUtil
             .isPasswordValid(passwordFromCanonicalID, "password"));
         System.out.println(passwordFromCanonicalID.toCanonicalID());
         String json = GSONUtil.toJSON(passwordDAO, true, false, false);
@@ -145,7 +141,7 @@ public class EncryptedContentTest {
         System.out.println(passwordDAO.toCanonicalID());
         System.out.println(fromJSON.toCanonicalID());
 
-        System.out.println("password is equal " + CryptoUtil.isPasswordValid(fromJSON, "password"));
+        System.out.println("password is equal " + HashUtil.isPasswordValid(fromJSON, "password"));
 
         EncryptedKeyDAO ekd = CryptoUtil.createEncryptedKeyDAO("password");
         String ekdJSON = GSONUtil.toJSON(ekd, true, false, false);
@@ -241,8 +237,8 @@ public class EncryptedContentTest {
 
       for (MDType mdt : MDType.values()) {
         try {
-          PasswordDAO pDAO = CryptoUtil.hashedPassword(mdt.getName(), 0, -1, "password");
-          System.out.println(CryptoUtil
+          PasswordDAO pDAO = HashUtil.hashedPassword(mdt.getName(), 0, -1, "password");
+          System.out.println(HashUtil
               .isPasswordValid(PasswordDAO.fromCanonicalID(pDAO.toCanonicalID()), "password")
               + "::::" + pDAO.toCanonicalID());
         } catch (NullPointerException | IllegalArgumentException

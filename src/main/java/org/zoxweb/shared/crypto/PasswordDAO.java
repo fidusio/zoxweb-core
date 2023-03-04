@@ -17,7 +17,9 @@ package org.zoxweb.shared.crypto;
 
 import org.zoxweb.shared.crypto.CryptoConst.MDType;
 import org.zoxweb.shared.data.PropertyDAO;
+import org.zoxweb.shared.security.BCryptHash;
 import org.zoxweb.shared.util.*;
+
 /**
  * PasswordDAO
  * @author mnael
@@ -32,7 +34,7 @@ public class PasswordDAO
 	private enum Param
         implements GetNVConfig
     {
-		HASH_ITERATION(NVConfigManager.createNVConfig("hash_iteration", "Hash interration", "HashIteration", false, true, Integer.class)),
+		HASH_ITERATION(NVConfigManager.createNVConfig("hash_iteration", "Hash iteration", "HashIteration", false, true, Integer.class)),
 		SALT(NVConfigManager.createNVConfig("salt", "The password salt", "Salt", false, true, byte[].class)),
 		PASSWORD(NVConfigManager.createNVConfig("password", "The password", "Password", false, true, byte[].class)),
 
@@ -126,15 +128,33 @@ public class PasswordDAO
 	@Override
 	public String toCanonicalID()
     {
+		if(getCanonicalID() != null)
+			return getCanonicalID();
 		return SharedUtil.toCanonicalID(':', getName(),getHashIteration(), SharedStringUtil.bytesToHex(getSalt()), SharedStringUtil.bytesToHex( getPassword()));
 	}
 
 	public static PasswordDAO fromCanonicalID(String passwordCanonicalID)
-		throws NullPointerException, IllegalArgumentException
-    {
-		if (SharedStringUtil.isEmpty(passwordCanonicalID))
-		{
+		throws NullPointerException, IllegalArgumentException {
+		if (SharedStringUtil.isEmpty(passwordCanonicalID)) {
 			throw new NullPointerException("Empty password");
+		}
+
+
+		try
+		{
+			// special case to process BCrypt
+			BCryptHash bCryptHash = new BCryptHash(passwordCanonicalID);
+			PasswordDAO  ret = new PasswordDAO();
+			ret.setSalt(SharedStringUtil.getBytes(bCryptHash.salt));
+			ret.setPassword(bCryptHash.hash);
+			ret.setHashIteration(bCryptHash.logRound);
+			ret.setCanonicalID(bCryptHash.toCanonicalID());
+			ret.setName(MDType.BCRYPT);
+			return ret;
+		}
+		catch (Exception e)
+		{
+
 		}
 		
 		String[] tokens = passwordCanonicalID.split(":");

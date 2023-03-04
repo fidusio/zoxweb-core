@@ -1,10 +1,7 @@
 package org.zoxweb.server.api;
 
 import org.zoxweb.server.logging.LogWrapper;
-import org.zoxweb.server.security.CryptoUtil;
-import org.zoxweb.server.security.JWTProvider;
-import org.zoxweb.server.security.KeyMakerProvider;
-import org.zoxweb.server.security.UserIDCredentialsDAO;
+import org.zoxweb.server.security.*;
 import org.zoxweb.server.util.IDGeneratorUtil;
 import org.zoxweb.shared.api.APIAppManager;
 import org.zoxweb.shared.api.APIDataStore;
@@ -306,7 +303,7 @@ public class APIAppManagerProvider
 			userIDCredentials.setUserStatus(userIDStatus);
 			userIDCredentials.setCanonicalID(userID.getSubjectID());
 			
-			PasswordDAO passwordDAO = CryptoUtil.hashedPassword(MDType.SHA_512, 0, 8196, password);
+			PasswordDAO passwordDAO = HashUtil.hashedPassword(MDType.SHA_512, 0, 8196, password);
 			passwordDAO.setUserID(userID.getReferenceID());
 			passwordDAO.setReferenceID(userID.getReferenceID());
 			passwordDAO.setGlobalID(userID.getGlobalID());
@@ -589,11 +586,11 @@ public class APIAppManagerProvider
     	
     	UserIDCredentialsDAO credentials = ret.get(0);
     	// validate the old password
-    	CryptoUtil.validatePassword(credentials.getPassword(), oldPassword);
+    	HashUtil.validatePassword(credentials.getPassword(), oldPassword);
     	
     	try 
     	{
-			PasswordDAO newPasswordDAO = CryptoUtil.hashedPassword(MDType.SHA_512, 0, 8196, newPassword);
+			PasswordDAO newPasswordDAO = HashUtil.hashedPassword(MDType.SHA_512, 0, 8196, newPassword);
             newPasswordDAO.setUserID(credentials.getReferenceID());
             newPasswordDAO.setReferenceID(credentials.getReferenceID());
 			credentials.setPassword(newPasswordDAO);

@@ -1,7 +1,6 @@
 package org.zoxweb.server.security;
 
 import org.zoxweb.shared.util.SharedStringUtil;
-import org.zoxweb.shared.util.SharedUtil;
 
 import java.security.MessageDigest;
 import java.security.SecureRandom;
@@ -10,27 +9,8 @@ import java.util.Arrays;
 
 public class BCrypt
 {
-    public static class BCryptHash
-    {
-        public final int logRound;
-        public final String salt;
-        public final String hash;
-
-        public BCryptHash(String fullHash)
-        {
-            String[] tokens = SharedStringUtil.parseString(fullHash, "\\$", true);
-            logRound = Integer.parseInt(tokens[1]);
-            salt = tokens[2].substring(0, 22);
-            hash = tokens[2].substring(22);
-        }
-
-        public String toString()
-        {
-            return SharedUtil.toCanonicalID(',', logRound, salt, hash);
-        }
-    }
     // BCrypt parameters
-    private static final int GENSALT_DEFAULT_LOG2_ROUNDS = 10;
+    private static final int GEN_SALT_DEFAULT_LOG2_ROUNDS = 10;
 
     private static final int BCRYPT_SALT_LEN = 16;
 
@@ -706,7 +686,7 @@ public class BCrypt
     }
 
     public static String gensalt(String prefix) {
-        return gensalt(prefix, GENSALT_DEFAULT_LOG2_ROUNDS);
+        return gensalt(prefix, GEN_SALT_DEFAULT_LOG2_ROUNDS);
     }
 
     /**
@@ -715,7 +695,7 @@ public class BCrypt
      * @return an encoded salt value
      */
     public static String gensalt() {
-        return gensalt(GENSALT_DEFAULT_LOG2_ROUNDS);
+        return gensalt(GEN_SALT_DEFAULT_LOG2_ROUNDS);
     }
 
     /**

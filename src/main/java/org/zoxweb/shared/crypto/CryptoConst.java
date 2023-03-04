@@ -34,7 +34,9 @@ public final class CryptoConst
 		SHA_224("sha-224"),
 		SHA_256("sha-256"),
 		SHA_384("sha-384"),
-		SHA_512("sha-512")
+		SHA_512("sha-512"),
+
+		BCRYPT("bcrypt")
 
         ;
 

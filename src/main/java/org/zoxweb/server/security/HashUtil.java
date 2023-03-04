@@ -27,16 +27,18 @@
  */
 package org.zoxweb.server.security;
 
-import java.security.MessageDigest;
-import java.security.SecureRandom;
-
-import javax.crypto.spec.PBEKeySpec;
-import javax.crypto.SecretKeyFactory;
-
+import org.zoxweb.shared.crypto.CryptoConst;
+import org.zoxweb.shared.crypto.PasswordDAO;
+import org.zoxweb.shared.security.AccessException;
+import org.zoxweb.shared.security.BCryptHash;
 import org.zoxweb.shared.util.SharedStringUtil;
 import org.zoxweb.shared.util.SharedUtil;
 
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 
 /*
@@ -57,6 +59,7 @@ public class HashUtil {
   public static final int SALT_INDEX = 1;
   public static final int PBKDF2_INDEX = 2;
 
+  public static final int SALT_LENGTH = 32;
 
   /**
    * Returns a salted PBKDF2 hash of the password.
@@ -159,4 +162,178 @@ public class HashUtil {
     return MessageDigest.getInstance(algorithm);
   }
 
+
+
+  public static BCryptHash toBCryptHash(String bCryptCanonicalID)
+  {
+    return new BCryptHash(bCryptCanonicalID);
+  }
+
+  public static BCryptHash genenerateBCryptHash(byte[] password, int log)
+  {
+    return genenerateBCryptHash(SharedStringUtil.toString(password), log);
+  }
+
+  public static BCryptHash genenerateBCryptHash(String password, int log)
+  {
+
+    String salt = BCrypt.gensalt(log);
+    String hashedPW = BCrypt.hashpw(password, salt);
+    return toBCryptHash(hashedPW);
+  }
+
+  public static boolean isBCryptPasswordValid(String password, String bCryptHash)
+  {
+    return BCrypt.checkpw(password, bCryptHash);
+  }
+
+  public static boolean isBCryptPasswordValid(byte[] password, String bCryptHash)
+  {
+    return BCrypt.checkpw(password, bCryptHash);
+  }
+
+  public static PasswordDAO hashedPassword(String algo, int saltLength, int saltIteration,
+                                           String password)
+          throws NullPointerException, IllegalArgumentException, NoSuchAlgorithmException {
+    SharedUtil.checkIfNulls("Null parameter", algo, password);
+    return hashedPassword(CryptoConst.MDType.lookup(algo), saltLength, saltIteration, password);
+  }
+
+  public static PasswordDAO hashedPassword(CryptoConst.MDType algo, int saltLength, int saltIteration,
+                                           String password)
+          throws NullPointerException, IllegalArgumentException, NoSuchAlgorithmException {
+    SharedUtil.checkIfNulls("Null parameter", algo, password);
+    byte[] paswd = SharedStringUtil.getBytes(password);
+
+    return hashedPassword(algo, saltLength, saltIteration, paswd);
+  }
+
+  public static PasswordDAO hashedPassword(CryptoConst.MDType algo, int saltLength, int saltIteration,
+                                           byte[] password)
+          throws NullPointerException, IllegalArgumentException, NoSuchAlgorithmException {
+    SharedUtil.checkIfNulls("Null parameter", algo, password);
+    if (password.length < 6) {
+      throw new IllegalArgumentException("password length too short");
+    }
+    byte[] hashedPassword = null;
+    byte[] salt = null;
+
+    PasswordDAO passwordDAO = new PasswordDAO();
+    if (algo == CryptoConst.MDType.BCRYPT)
+    {
+      BCryptHash bcryptHash = genenerateBCryptHash(password, saltIteration);
+      passwordDAO.setCanonicalID(bcryptHash.toCanonicalID());
+      salt = SharedStringUtil.getBytes(bcryptHash.salt);
+      hashedPassword = SharedStringUtil.getBytes(bcryptHash.hash);
+    }
+    else
+    {
+      if (saltLength < SALT_LENGTH) {
+        saltLength = SALT_LENGTH;
+      }
+
+      if (saltIteration < 0) {
+        saltIteration = 0;
+      }
+      SecureRandom random = CryptoUtil.defaultSecureRandom();
+      salt = new byte[saltLength];
+      random.nextBytes(salt);
+      MessageDigest md = MessageDigest.getInstance(algo.getName());
+      hashedPassword = hashWithIterations(md, salt, password, saltIteration, false);
+    }
+
+
+
+    passwordDAO.setSalt(salt);
+    passwordDAO.setPassword(hashedPassword);
+    passwordDAO.setHashIteration(saltIteration);
+    passwordDAO.setName(algo);
+
+    return passwordDAO;
+  }
+
+
+  public static byte[] hashWithIterations(MessageDigest digest,
+                                          byte[] salt,
+                                          byte[] data,
+                                          int hashIterations,
+                                          boolean reChewData)
+  {
+    // reset the digest
+    digest.reset();
+
+    if (salt != null) {
+      // insert the salt
+      digest.update(salt);
+    }
+
+    // process the data
+    byte[] hashed = digest.digest(data);
+    int iterations = hashIterations - 1; //already hashed once above
+    //iterate remaining number:
+    for (int i = 0; i < iterations; i++) {
+      digest.reset();
+      digest.update(hashed);
+
+      if (reChewData) {
+        digest.update(data);
+      }
+
+      hashed = digest.digest();
+    }
+    return hashed;
+  }
+
+
+  public static PasswordDAO mergeContent(PasswordDAO password, PasswordDAO toMerge) {
+    synchronized (password) {
+      password.setName(toMerge.getName());
+      password.setHashIteration(toMerge.getHashIteration());
+      password.setSalt(toMerge.getSalt());
+      password.setPassword(toMerge.getPassword());
+    }
+
+    return password;
+  }
+
+  public static boolean isPasswordValid(final PasswordDAO passwordDAO, String password)
+          throws NullPointerException, IllegalArgumentException, NoSuchAlgorithmException {
+    SharedUtil.checkIfNulls("Null values", passwordDAO, password);
+    if(CryptoConst.MDType.lookup(passwordDAO.getName()) == CryptoConst.MDType.BCRYPT)
+    {
+      return isBCryptPasswordValid(password, passwordDAO.getCanonicalID());
+    }
+    else {
+      byte[] genHash = hashWithIterations(MessageDigest.getInstance(passwordDAO.getName()),
+              passwordDAO.getSalt(), SharedStringUtil.getBytes(password), passwordDAO.getHashIteration(),
+              false);
+
+      return SharedUtil.slowEquals(genHash, passwordDAO.getPassword());
+    }
+  }
+
+  public static void validatePassword(final PasswordDAO passwordDAO, String password)
+          throws NullPointerException, IllegalArgumentException, AccessException {
+    SharedUtil.checkIfNulls("Null values", passwordDAO, password);
+    validatePassword(passwordDAO, password.toCharArray());
+  }
+
+
+  public static void validatePassword(final PasswordDAO passwordDAO, final char[] password)
+          throws NullPointerException, IllegalArgumentException, AccessException {
+
+    SharedUtil.checkIfNulls("Null values", passwordDAO, password);
+
+    try
+    {
+      if(isPasswordValid(passwordDAO, new String(password)))
+        return; // we hava a valid password
+    } catch (NoSuchAlgorithmException e) {
+      //e.printStackTrace();
+      throw new AccessException("Invalid Credentials");
+    }
+    // password validation failed,
+    throw new AccessException("Invalid Credentials");
+
+  }
 }

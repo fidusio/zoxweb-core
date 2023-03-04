@@ -20,16 +20,17 @@ import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.io.UByteArrayOutputStream;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.crypto.CryptoConst;
-import org.zoxweb.shared.crypto.CryptoConst.MDType;
 import org.zoxweb.shared.crypto.CryptoConst.SecureRandomType;
 import org.zoxweb.shared.crypto.CryptoConst.SignatureAlgo;
 import org.zoxweb.shared.crypto.EncryptedDAO;
 import org.zoxweb.shared.crypto.EncryptedKeyDAO;
-import org.zoxweb.shared.crypto.PasswordDAO;
 import org.zoxweb.shared.filters.BytesValueFilter;
 import org.zoxweb.shared.net.InetSocketAddressDAO;
-import org.zoxweb.shared.security.*;
+import org.zoxweb.shared.security.JWT;
 import org.zoxweb.shared.security.JWT.JWTField;
+import org.zoxweb.shared.security.JWTHeader;
+import org.zoxweb.shared.security.JWTPayload;
+import org.zoxweb.shared.security.KeyStoreInfoDAO;
 import org.zoxweb.shared.util.*;
 import org.zoxweb.shared.util.SharedBase64.Base64Type;
 
@@ -156,98 +157,98 @@ public class CryptoUtil {
     return newSecureRandom(SECURE_RANDOM_ALGO);
   }
 
-  public static PasswordDAO hashedPassword(String algo, int saltLength, int saltIteration,
-      String password)
-      throws NullPointerException, IllegalArgumentException, NoSuchAlgorithmException {
-    SharedUtil.checkIfNulls("Null parameter", algo, password);
-    return hashedPassword(MDType.lookup(algo), saltLength, saltIteration, password);
-  }
+//  public static PasswordDAO hashedPassword(String algo, int saltLength, int saltIteration,
+//      String password)
+//      throws NullPointerException, IllegalArgumentException, NoSuchAlgorithmException {
+//    SharedUtil.checkIfNulls("Null parameter", algo, password);
+//    return hashedPassword(MDType.lookup(algo), saltLength, saltIteration, password);
+//  }
+//
+//  public static PasswordDAO hashedPassword(MDType algo, int saltLength, int saltIteration,
+//      String password)
+//      throws NullPointerException, IllegalArgumentException, NoSuchAlgorithmException {
+//    SharedUtil.checkIfNulls("Null parameter", algo, password);
+//    byte[] paswd = SharedStringUtil.getBytes(password);
+//
+//    return hashedPassword(algo, saltLength, saltIteration, paswd);
+//  }
 
-  public static PasswordDAO hashedPassword(MDType algo, int saltLength, int saltIteration,
-      String password)
-      throws NullPointerException, IllegalArgumentException, NoSuchAlgorithmException {
-    SharedUtil.checkIfNulls("Null parameter", algo, password);
-    byte[] paswd = SharedStringUtil.getBytes(password);
+//  public static PasswordDAO mergeContent(PasswordDAO password, PasswordDAO toMerge) {
+//    synchronized (password) {
+//      password.setName(toMerge.getName());
+//      password.setHashIteration(toMerge.getHashIteration());
+//      password.setSalt(toMerge.getSalt());
+//      password.setPassword(toMerge.getPassword());
+//    }
+//
+//    return password;
+//  }
 
-    return hashedPassword(algo, saltLength, saltIteration, paswd);
-  }
+//  public static PasswordDAO hashedPassword(MDType algo, int saltLength, int saltIteration,
+//      byte[] password)
+//      throws NullPointerException, IllegalArgumentException, NoSuchAlgorithmException {
+//    SharedUtil.checkIfNulls("Null parameter", algo, password);
+//    if (password.length < 6) {
+//      throw new IllegalArgumentException("password length too short");
+//    }
+//
+//    // Generate a random salt
+//    SecureRandom random = defaultSecureRandom();
+//
+//    if (saltLength < SALT_LENGTH) {
+//      saltLength = SALT_LENGTH;
+//    }
+//
+//    if (saltIteration < 0) {
+//      saltIteration = 0;
+//    }
+//
+//    byte[] salt = new byte[saltLength];
+//    random.nextBytes(salt);
+//    MessageDigest md = MessageDigest.getInstance(algo.getName());
+//    PasswordDAO passwordDAO = new PasswordDAO();
+//    passwordDAO.setSalt(salt);
+//    passwordDAO.setPassword(hashWithIterations(md, salt, password, saltIteration, false));
+//    passwordDAO.setHashIteration(saltIteration);
+//    passwordDAO.setName(algo);
+//
+//    return passwordDAO;
+//  }
 
-  public static PasswordDAO mergeContent(PasswordDAO password, PasswordDAO toMerge) {
-    synchronized (password) {
-      password.setName(toMerge.getName());
-      password.setHashIteration(toMerge.getHashIteration());
-      password.setSalt(toMerge.getSalt());
-      password.setPassword(toMerge.getPassword());
-    }
-
-    return password;
-  }
-
-  public static PasswordDAO hashedPassword(MDType algo, int saltLength, int saltIteration,
-      byte[] password)
-      throws NullPointerException, IllegalArgumentException, NoSuchAlgorithmException {
-    SharedUtil.checkIfNulls("Null parameter", algo, password);
-    if (password.length < 6) {
-      throw new IllegalArgumentException("password length too short");
-    }
-
-    // Generate a random salt
-    SecureRandom random = defaultSecureRandom();
-
-    if (saltLength < SALT_LENGTH) {
-      saltLength = SALT_LENGTH;
-    }
-
-    if (saltIteration < 0) {
-      saltIteration = 0;
-    }
-
-    byte[] salt = new byte[saltLength];
-    random.nextBytes(salt);
-    MessageDigest md = MessageDigest.getInstance(algo.getName());
-    PasswordDAO passwordDAO = new PasswordDAO();
-    passwordDAO.setSalt(salt);
-    passwordDAO.setPassword(hashWithIterations(md, salt, password, saltIteration, false));
-    passwordDAO.setHashIteration(saltIteration);
-    passwordDAO.setName(algo);
-
-    return passwordDAO;
-  }
-
-  public static boolean isPasswordValid(PasswordDAO passwordDAO, String password)
-      throws NullPointerException, IllegalArgumentException, NoSuchAlgorithmException {
-    SharedUtil.checkIfNulls("Null values", passwordDAO, password);
-    byte[] genHash = hashWithIterations(MessageDigest.getInstance(passwordDAO.getName()),
-        passwordDAO.getSalt(), SharedStringUtil.getBytes(password), passwordDAO.getHashIteration(),
-        false);
-
-    return SharedUtil.slowEquals(genHash, passwordDAO.getPassword());
-  }
-
-  public static void validatePassword(final PasswordDAO passwordDAO, String password)
-      throws NullPointerException, IllegalArgumentException, AccessException {
-    SharedUtil.checkIfNulls("Null values", passwordDAO, password);
-    validatePassword(passwordDAO, password.toCharArray());
-  }
-
-
-  public static void validatePassword(final PasswordDAO passwordDAO, final char[] password)
-      throws NullPointerException, IllegalArgumentException, AccessException {
-
-    SharedUtil.checkIfNulls("Null values", passwordDAO, password);
-
-    try
-    {
-      if(isPasswordValid(passwordDAO, new String(password)))
-        return; // we hava a valid password
-    } catch (NoSuchAlgorithmException e) {
-      //e.printStackTrace();
-      throw new AccessException("Invalid Credentials");
-    }
-    // password validation failed,
-    throw new AccessException("Invalid Credentials");
-
-  }
+//  public static boolean isPasswordValid(PasswordDAO passwordDAO, String password)
+//      throws NullPointerException, IllegalArgumentException, NoSuchAlgorithmException {
+//    SharedUtil.checkIfNulls("Null values", passwordDAO, password);
+//    byte[] genHash = hashWithIterations(MessageDigest.getInstance(passwordDAO.getName()),
+//        passwordDAO.getSalt(), SharedStringUtil.getBytes(password), passwordDAO.getHashIteration(),
+//        false);
+//
+//    return SharedUtil.slowEquals(genHash, passwordDAO.getPassword());
+//  }
+//
+//  public static void validatePassword(final PasswordDAO passwordDAO, String password)
+//      throws NullPointerException, IllegalArgumentException, AccessException {
+//    SharedUtil.checkIfNulls("Null values", passwordDAO, password);
+//    validatePassword(passwordDAO, password.toCharArray());
+//  }
+//
+//
+//  public static void validatePassword(final PasswordDAO passwordDAO, final char[] password)
+//      throws NullPointerException, IllegalArgumentException, AccessException {
+//
+//    SharedUtil.checkIfNulls("Null values", passwordDAO, password);
+//
+//    try
+//    {
+//      if(isPasswordValid(passwordDAO, new String(password)))
+//        return; // we hava a valid password
+//    } catch (NoSuchAlgorithmException e) {
+//      //e.printStackTrace();
+//      throw new AccessException("Invalid Credentials");
+//    }
+//    // password validation failed,
+//    throw new AccessException("Invalid Credentials");
+//
+//  }
 
   public static EncryptedKeyDAO rekeyEncrytedKeyDAO(final EncryptedKeyDAO toBeRekeyed,
       String originalKey, String newKey)
