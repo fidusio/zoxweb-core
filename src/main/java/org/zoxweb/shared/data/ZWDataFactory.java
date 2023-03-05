@@ -15,36 +15,21 @@
  */
 package org.zoxweb.shared.data;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import org.zoxweb.shared.accounting.AmountDAO;
-import org.zoxweb.shared.accounting.PaymentInfoDAO;
-import org.zoxweb.shared.accounting.FinancialTransactionDAO;
-import org.zoxweb.shared.accounting.BillingAccountDAO;
-import org.zoxweb.shared.accounting.BillingItemsContainerDAO;
-import org.zoxweb.shared.accounting.BillingItemDAO;
+import org.zoxweb.shared.accounting.*;
 import org.zoxweb.shared.api.*;
 import org.zoxweb.shared.app.AppVersionDAO;
-import org.zoxweb.shared.http.HTTPEndPoint;
-import org.zoxweb.shared.net.ConnectionConfig;
-import org.zoxweb.shared.security.*;
-import org.zoxweb.shared.util.*;
 import org.zoxweb.shared.data.ticket.TicketContainerDAO;
 import org.zoxweb.shared.data.ticket.TicketIssuerDAO;
 import org.zoxweb.shared.data.ticket.TicketResolutionDAO;
+import org.zoxweb.shared.http.HTTPEndPoint;
 import org.zoxweb.shared.http.HTTPServerConfig;
-import org.zoxweb.shared.net.IPRangeDAO;
-import org.zoxweb.shared.net.InetAddressDAO;
-import org.zoxweb.shared.net.InetFilterDAO;
-import org.zoxweb.shared.net.InetSocketAddressDAO;
-import org.zoxweb.shared.net.NIConfigDAO;
-import org.zoxweb.shared.net.NetworkInterfaceDAO;
-import org.zoxweb.shared.security.shiro.ShiroNVEntityCRUDs;
-import org.zoxweb.shared.security.shiro.ShiroPermissionDAO;
-import org.zoxweb.shared.security.shiro.ShiroRoleDAO;
-import org.zoxweb.shared.security.shiro.ShiroRoleGroupDAO;
-import org.zoxweb.shared.security.shiro.ShiroSubjectData;
+import org.zoxweb.shared.net.*;
+import org.zoxweb.shared.security.*;
+import org.zoxweb.shared.security.shiro.*;
+import org.zoxweb.shared.util.*;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * This NVEntity factory contains all NVEntity objects within this project.
@@ -170,7 +155,7 @@ public class ZWDataFactory
             public NVConfigEntity getNVConfigEntity()
             {
                 return AppDeviceDAO.NVC_APP_DEVICE_DAO;
-            };
+            }
         },
 		//	org.zoxweb.shared.data
 		ADDRESS_DAO(AddressDAO.class.getName())
@@ -780,6 +765,21 @@ public class ZWDataFactory
 				return Range.NVC_RANGE;
 			}
 		},
+		RATE_COUNTER(RateCounter.class.getName())
+		{
+			@SuppressWarnings({"unchecked"})
+			@Override
+			public RateCounter newInstance()
+			{
+				return new RateCounter();
+			}
+
+			@Override
+			public NVConfigEntity getNVConfigEntity()
+			{
+				return RateCounter.NVC_RATE_COUNTER;
+			}
+		},
 		RUNTIME_RESULT_DAO(RuntimeResultDAO.class.getName())
 		{
 			@SuppressWarnings("unchecked")
@@ -937,7 +937,7 @@ public class ZWDataFactory
 			public ParamInfo newInstance() {return new ParamInfo();}
 		    
 		    @Override
-			public NVConfigEntity getNVConfigEntity() {return ParamInfo.NVC_PARAM_INFO;};
+			public NVConfigEntity getNVConfigEntity() {return ParamInfo.NVC_PARAM_INFO;}
 
 		},
 		PAYMENT_INFO_DAO(PaymentInfoDAO.class.getName())
@@ -953,7 +953,7 @@ public class ZWDataFactory
 			public NVConfigEntity getNVConfigEntity() 
 			{
 				return PaymentInfoDAO.NVC_PAYMENT_INFO_DAO;
-			};
+			}
 		},
 		FINANCIAL_TRANSACTION_DAO(FinancialTransactionDAO.class.getName())
 		{
@@ -1138,7 +1138,7 @@ public class ZWDataFactory
 			public NVConfigEntity getNVConfigEntity() 
 			{
 				return BillingItemDAO.NVC_BILLING_ITEM_DAO;
-			};
+			}
 		},
 		BILLING_ITEMS_CONTAINER_DAO(BillingItemsContainerDAO.class.getName())
 		{
@@ -1340,7 +1340,7 @@ public class ZWDataFactory
 
 		;
 
-		private String name;
+		private final String name;
 		
 		NVEntityTypeClass(String name)
 		{
@@ -1359,7 +1359,7 @@ public class ZWDataFactory
 	 * Creates an instance of this class.
 	 */
 	public static final ZWDataFactory SINGLETON = new ZWDataFactory();
-	private Set<NVEntityFactory> factoriesSet = new HashSet<>();
+	private final Set<NVEntityFactory> factoriesSet = new HashSet<>();
 	
 	/**
 	 * The default constructor is declared private to prevent outside instantiation of this class.
@@ -1379,14 +1379,14 @@ public class ZWDataFactory
 	
 	/**
 	 * Creates NVEntity object based on given canonical ID.
-	 * @param canonicalID
+	 * @param canonicalID of the NVEntity
 	 */
 	@Override
 	public <V extends NVEntity> V createNVEntity(String canonicalID) 
 	{
 		if (!SharedStringUtil.isEmpty(canonicalID))
 		{
-			NVEntityTypeClass type = (NVEntityTypeClass) SharedUtil.lookupEnum(canonicalID, NVEntityTypeClass.values());
+			NVEntityTypeClass type = SharedUtil.lookupEnum(canonicalID, NVEntityTypeClass.values());
 			
 			if (type == null)
 			{

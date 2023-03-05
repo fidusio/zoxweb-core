@@ -11,6 +11,7 @@ public class RateCounterTest {
 
         RateCounter rateCounter = new RateCounter("test");
         RateController rateController = new RateController("test", "1000/s");
+
         for(int j=0; j<10; j++) {
             long ts = System.currentTimeMillis();
             for (int i = 0; i < 10000; i++) {
@@ -22,6 +23,19 @@ public class RateCounterTest {
             System.out.println(j + ": " +rateCounter.average() + " " + rateCounter.average(Const.TimeInMillis.SECOND.MILLIS));
         }
 
+    }
+    @Test
+    public void timeStampTest()
+    {
+        RateCounter rateCounter = new RateCounter("timestamp");
+        long millis = System.currentTimeMillis();
+        millis = rateCounter.registerTimeStamp(millis);
+        System.out.println(millis + ": " +rateCounter.average() + " " + rateCounter.average(Const.TimeInMillis.SECOND.MILLIS));
+        rateCounter.reset();
+        long nanos = System.nanoTime();
+        nanos = rateCounter.registerTimeStamp(false, nanos, 1);
+        System.out.println(nanos + ": " +rateCounter.average() + " " + rateCounter.average(Const.TimeInMillis.SECOND.MILLIS));
+        rateCounter.inc().inc(5);
     }
 
     @Test

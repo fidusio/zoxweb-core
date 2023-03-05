@@ -533,9 +533,9 @@ public class BCrypt
      * @param salt the salt to hash with (perhaps generated using BCrypt.gensalt)
      * @return the hashed password
      */
-    public static String hashpw(String password, String salt) {
-        byte[] passwordb = SharedStringUtil.getBytes(password);
-        return hashpw(passwordb, salt);
+    public static String hashpw(String password, String salt)
+    {
+        return hashpw(SharedStringUtil.getBytes(password), salt);
     }
 
     /**
@@ -582,7 +582,7 @@ public class BCrypt
 
         // Extract number of rounds
         if (salt.charAt(off + 2) > '$') {
-            throw new IllegalArgumentException("Missing salt rounds");
+            throw new IllegalArgumentException("Missing salt rounds " + salt);
         }
 
         if (off == 4 && saltLength < 29) {

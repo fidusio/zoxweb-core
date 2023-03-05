@@ -17,7 +17,6 @@ package org.zoxweb.shared.crypto;
 
 import org.zoxweb.shared.crypto.CryptoConst.MDType;
 import org.zoxweb.shared.data.PropertyDAO;
-import org.zoxweb.shared.security.BCryptHash;
 import org.zoxweb.shared.util.*;
 
 /**

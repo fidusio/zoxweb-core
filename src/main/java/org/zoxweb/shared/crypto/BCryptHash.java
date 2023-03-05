@@ -1,4 +1,4 @@
-package org.zoxweb.shared.security;
+package org.zoxweb.shared.crypto;
 
 import org.zoxweb.shared.util.CanonicalID;
 import org.zoxweb.shared.util.SharedStringUtil;
@@ -10,11 +10,12 @@ public class BCryptHash
     public final int logRound;
     public final String salt;
     public final String hash;
-    //public final String bCryptHash;
+    public final String bCryptHash;
+
 
     public BCryptHash(String fullHash)
     {
-        //bCryptHash = fullHash;
+        bCryptHash = fullHash;
 
         String[] tokens = SharedStringUtil.parseString(fullHash, "\\$", true);
         prefix = tokens[0];
@@ -30,6 +31,6 @@ public class BCryptHash
 
     public String toCanonicalID()
     {
-        return "$" + prefix + "$" + logRound + "$" + salt + hash;
+        return bCryptHash;
     }
 }

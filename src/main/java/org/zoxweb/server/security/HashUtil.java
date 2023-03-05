@@ -30,7 +30,7 @@ package org.zoxweb.server.security;
 import org.zoxweb.shared.crypto.CryptoConst;
 import org.zoxweb.shared.crypto.PasswordDAO;
 import org.zoxweb.shared.security.AccessException;
-import org.zoxweb.shared.security.BCryptHash;
+import org.zoxweb.shared.crypto.BCryptHash;
 import org.zoxweb.shared.util.SharedStringUtil;
 import org.zoxweb.shared.util.SharedUtil;
 
@@ -169,17 +169,16 @@ public class HashUtil {
     return new BCryptHash(bCryptCanonicalID);
   }
 
-  public static BCryptHash genenerateBCryptHash(byte[] password, int log)
+  public static BCryptHash toBCryptHash(int logRounds, byte[] password)
   {
-    return genenerateBCryptHash(SharedStringUtil.toString(password), log);
-  }
-
-  public static BCryptHash genenerateBCryptHash(String password, int log)
-  {
-
-    String salt = BCrypt.gensalt(log);
+    String salt = BCrypt.gensalt(logRounds);
     String hashedPW = BCrypt.hashpw(password, salt);
     return toBCryptHash(hashedPW);
+  }
+
+  public static BCryptHash toBCryptHash(int logRounds, String password)
+  {
+    return toBCryptHash(logRounds, SharedStringUtil.getBytes(password));
   }
 
   public static boolean isBCryptPasswordValid(String password, String bCryptHash)
@@ -203,9 +202,20 @@ public class HashUtil {
                                            String password)
           throws NullPointerException, IllegalArgumentException, NoSuchAlgorithmException {
     SharedUtil.checkIfNulls("Null parameter", algo, password);
-    byte[] paswd = SharedStringUtil.getBytes(password);
+    return hashedPassword(algo, saltLength, saltIteration, SharedStringUtil.getBytes(password));
+  }
 
-    return hashedPassword(algo, saltLength, saltIteration, paswd);
+  public static PasswordDAO hashedPasswordBCrypt(int logRounds, String password)
+          throws NoSuchAlgorithmException
+  {
+    return hashedPassword(CryptoConst.MDType.BCRYPT, 0, logRounds, password);
+  }
+
+
+  public static PasswordDAO hashedPasswordBcrypt(int logRounds, byte[] password)
+          throws NoSuchAlgorithmException
+  {
+    return hashedPassword(CryptoConst.MDType.BCRYPT, 0, logRounds, password);
   }
 
   public static PasswordDAO hashedPassword(CryptoConst.MDType algo, int saltLength, int saltIteration,
@@ -221,7 +231,7 @@ public class HashUtil {
     PasswordDAO passwordDAO = new PasswordDAO();
     if (algo == CryptoConst.MDType.BCRYPT)
     {
-      BCryptHash bcryptHash = genenerateBCryptHash(password, saltIteration);
+      BCryptHash bcryptHash = toBCryptHash(saltIteration, password);
       passwordDAO.setCanonicalID(bcryptHash.toCanonicalID());
       salt = SharedStringUtil.getBytes(bcryptHash.salt);
       hashedPassword = SharedStringUtil.getBytes(bcryptHash.hash);

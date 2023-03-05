@@ -18,10 +18,10 @@ package org.zoxweb.shared.util;
 /**
  *
  */
-public interface NVEntityInstance 
+public interface NVEntityInstance
 {
-	public <V extends NVEntity> V newInstance();
+	 <V extends NVEntity> V newInstance();
 	
-	public NVConfigEntity getNVConfigEntity();
+	 NVConfigEntity getNVConfigEntity();
 
 }
