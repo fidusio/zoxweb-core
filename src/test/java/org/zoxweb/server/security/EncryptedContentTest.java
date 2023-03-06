@@ -16,7 +16,7 @@
 package org.zoxweb.server.security;
 
 import org.zoxweb.server.util.GSONUtil;
-import org.zoxweb.shared.crypto.CryptoConst.MDType;
+import org.zoxweb.shared.crypto.CryptoConst.AlgoType;
 import org.zoxweb.shared.crypto.CryptoConst.SecureRandomType;
 import org.zoxweb.shared.crypto.EncryptedDAO;
 import org.zoxweb.shared.crypto.EncryptedKeyDAO;
@@ -121,7 +121,7 @@ public class EncryptedContentTest {
         PasswordDAO passwordDAO = null;
         for (int i = 0; i < 10; i++) {
           long ts = System.nanoTime();
-          passwordDAO = HashUtil.hashedPassword("sha-256", 0, 8196, "password");
+          passwordDAO = HashUtil.toPassword("sha-256", 0, 8196, "password");
           ts = System.nanoTime() - ts;
           System.out.println("it took " + ts + " nanos for interation " + i);
         }
@@ -235,9 +235,9 @@ public class EncryptedContentTest {
         e.printStackTrace();
       }
 
-      for (MDType mdt : MDType.values()) {
+      for (AlgoType mdt : AlgoType.values()) {
         try {
-          PasswordDAO pDAO = HashUtil.hashedPassword(mdt.getName(), 0, -1, "password");
+          PasswordDAO pDAO = HashUtil.toPassword(mdt.getName(), 0, -1, "password");
           System.out.println(HashUtil
               .isPasswordValid(PasswordDAO.fromCanonicalID(pDAO.toCanonicalID()), "password")
               + "::::" + pDAO.toCanonicalID());

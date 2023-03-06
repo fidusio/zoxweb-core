@@ -26,7 +26,7 @@ public final class CryptoConst
 
 	}
 
-	public enum MDType
+	public enum AlgoType
             implements GetName
     {
 		MD5("md5"),
@@ -42,7 +42,7 @@ public final class CryptoConst
 
 		private final String name;
 
-		MDType(String name)
+		AlgoType(String name)
         {
 			this.name = name;
 		}
@@ -59,9 +59,9 @@ public final class CryptoConst
 			return getName();
 		}
 		
-		public static MDType lookup(String mdName)
+		public static AlgoType lookup(String mdName)
         {
-			return (MDType) SharedUtil.lookupEnum(mdName, MDType.values());
+			return (AlgoType) SharedUtil.lookupEnum(mdName, AlgoType.values());
 		}
 	}
 
@@ -88,25 +88,25 @@ public final class CryptoConst
 			return name;
 		}
 		
-		public static MDType toMDType(String name)
+		public static AlgoType toMDType(String name)
         {
 			return toMDType((DataMDType)SharedUtil.lookupEnum(name, DataMDType.values()));
 		}
 		
-		public static MDType toMDType(DataMDType dmdt)
+		public static AlgoType toMDType(DataMDType dmdt)
         {
-			MDType ret = null;
+			AlgoType ret = null;
 			switch(dmdt)
 			{
 			case MD5_ENCRYPTED:
 				
 			case MD5_ORIGINAL:
-				ret = MDType.MD5;
+				ret = AlgoType.MD5;
 				break;
 			case SHA_256_ENCRYPTED:
 			
 			case SHA_256_ORIGINAL:
-				ret = MDType.SHA_256;
+				ret = AlgoType.SHA_256;
 				break;
 			}
 			

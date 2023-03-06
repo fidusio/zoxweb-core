@@ -191,35 +191,35 @@ public class HashUtil {
     return BCrypt.checkpw(password, bCryptHash);
   }
 
-  public static PasswordDAO hashedPassword(String algo, int saltLength, int saltIteration,
-                                           String password)
+  public static PasswordDAO toPassword(String algo, int saltLength, int saltIteration,
+                                       String password)
           throws NullPointerException, IllegalArgumentException, NoSuchAlgorithmException {
     SharedUtil.checkIfNulls("Null parameter", algo, password);
-    return hashedPassword(CryptoConst.MDType.lookup(algo), saltLength, saltIteration, password);
+    return toPassword(CryptoConst.AlgoType.lookup(algo), saltLength, saltIteration, password);
   }
 
-  public static PasswordDAO hashedPassword(CryptoConst.MDType algo, int saltLength, int saltIteration,
-                                           String password)
+  public static PasswordDAO toPassword(CryptoConst.AlgoType algo, int saltLength, int saltIteration,
+                                       String password)
           throws NullPointerException, IllegalArgumentException, NoSuchAlgorithmException {
     SharedUtil.checkIfNulls("Null parameter", algo, password);
-    return hashedPassword(algo, saltLength, saltIteration, SharedStringUtil.getBytes(password));
+    return toPassword(algo, saltLength, saltIteration, SharedStringUtil.getBytes(password));
   }
 
-  public static PasswordDAO hashedPasswordBCrypt(int logRounds, String password)
+  public static PasswordDAO toBCryptPassword(int logRounds, String password)
           throws NoSuchAlgorithmException
   {
-    return hashedPassword(CryptoConst.MDType.BCRYPT, 0, logRounds, password);
+    return toPassword(CryptoConst.AlgoType.BCRYPT, 0, logRounds, password);
   }
 
 
-  public static PasswordDAO hashedPasswordBcrypt(int logRounds, byte[] password)
+  public static PasswordDAO toBCryptPassword(int logRounds, byte[] password)
           throws NoSuchAlgorithmException
   {
-    return hashedPassword(CryptoConst.MDType.BCRYPT, 0, logRounds, password);
+    return toPassword(CryptoConst.AlgoType.BCRYPT, 0, logRounds, password);
   }
 
-  public static PasswordDAO hashedPassword(CryptoConst.MDType algo, int saltLength, int saltIteration,
-                                           byte[] password)
+  public static PasswordDAO toPassword(CryptoConst.AlgoType algo, int saltLength, int saltIteration,
+                                       byte[] password)
           throws NullPointerException, IllegalArgumentException, NoSuchAlgorithmException {
     SharedUtil.checkIfNulls("Null parameter", algo, password);
     if (password.length < 6) {
@@ -229,7 +229,7 @@ public class HashUtil {
     byte[] salt = null;
 
     PasswordDAO passwordDAO = new PasswordDAO();
-    if (algo == CryptoConst.MDType.BCRYPT)
+    if (algo == CryptoConst.AlgoType.BCRYPT)
     {
       BCryptHash bcryptHash = toBCryptHash(saltIteration, password);
       passwordDAO.setCanonicalID(bcryptHash.toCanonicalID());
@@ -309,7 +309,7 @@ public class HashUtil {
   public static boolean isPasswordValid(final PasswordDAO passwordDAO, String password)
           throws NullPointerException, IllegalArgumentException, NoSuchAlgorithmException {
     SharedUtil.checkIfNulls("Null values", passwordDAO, password);
-    if(CryptoConst.MDType.lookup(passwordDAO.getName()) == CryptoConst.MDType.BCRYPT)
+    if(CryptoConst.AlgoType.lookup(passwordDAO.getName()) == CryptoConst.AlgoType.BCRYPT)
     {
       return isBCryptPasswordValid(password, passwordDAO.getCanonicalID());
     }

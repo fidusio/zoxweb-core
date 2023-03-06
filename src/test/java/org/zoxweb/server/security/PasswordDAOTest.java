@@ -14,7 +14,7 @@ import java.util.Arrays;
 public class PasswordDAOTest {
     @Test
     public void createPassword() throws NoSuchAlgorithmException {
-        PasswordDAO p = HashUtil.hashedPassword(CryptoConst.MDType.SHA_256, 24, 8192, "password");
+        PasswordDAO p = HashUtil.toPassword(CryptoConst.AlgoType.SHA_256, 24, 8192, "password");
         System.out.println(GSONUtil.toJSONDefault(p, true));
        // p.setSalt(CryptoUtil.generateRandomHashedBytes());
     }
@@ -40,7 +40,7 @@ public class PasswordDAOTest {
         Assertions.assertTrue(HashUtil.isPasswordValid(parsed, "password"));
 
 
-        PasswordDAO bPassword = HashUtil.hashedPassword(CryptoConst.MDType.BCRYPT, 0, 10, "password");
+        PasswordDAO bPassword = HashUtil.toPassword(CryptoConst.AlgoType.BCRYPT, 0, 10, "password");
         System.out.println(GSONUtil.toJSONDefault(bPassword));
         Assertions.assertTrue(HashUtil.isPasswordValid(bPassword, "password"));
 
@@ -58,7 +58,7 @@ public class PasswordDAOTest {
         String salted = BCrypt.gensalt(9);
         String hashedPW = BCrypt.hashpw("password", salted);
         BCrypt.checkpw("password",hashedPW);
-        bPassword = HashUtil.hashedPassword(CryptoConst.MDType.BCRYPT, 0, 9, "password");
+        bPassword = HashUtil.toPassword(CryptoConst.AlgoType.BCRYPT, 0, 9, "password");
         System.out.println(GSONUtil.toJSONDefault(bPassword));
         Assertions.assertTrue(HashUtil.isPasswordValid(bPassword, "password"));
     }

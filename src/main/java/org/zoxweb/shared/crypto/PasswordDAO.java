@@ -15,7 +15,7 @@
  */
 package org.zoxweb.shared.crypto;
 
-import org.zoxweb.shared.crypto.CryptoConst.MDType;
+import org.zoxweb.shared.crypto.CryptoConst.AlgoType;
 import org.zoxweb.shared.data.PropertyDAO;
 import org.zoxweb.shared.util.*;
 
@@ -63,7 +63,7 @@ public class PasswordDAO
 		super(NVCE_PASSWORD_DAO);
 	}
 
-	public synchronized void setName(MDType mdt)
+	public synchronized void setName(AlgoType mdt)
     {
 		SharedUtil.checkIfNulls("Null Message Digest", mdt);
 		
@@ -74,7 +74,7 @@ public class PasswordDAO
     {
 		SharedUtil.checkIfNulls("Null Message Digest", name);
 
-		MDType mdt = MDType.lookup(name);
+		AlgoType mdt = AlgoType.lookup(name);
 
 		if (mdt == null)
 		{
@@ -148,7 +148,7 @@ public class PasswordDAO
 			ret.setPassword(bCryptHash.hash);
 			ret.setHashIteration(bCryptHash.logRound);
 			ret.setCanonicalID(bCryptHash.toCanonicalID());
-			ret.setName(MDType.BCRYPT);
+			ret.setName(AlgoType.BCRYPT);
 			return ret;
 		}
 		catch (Exception e)
