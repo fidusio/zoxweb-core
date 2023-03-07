@@ -16,7 +16,7 @@
 package org.zoxweb.server.security;
 
 import org.zoxweb.server.util.GSONUtil;
-import org.zoxweb.shared.crypto.CryptoConst.AlgoType;
+import org.zoxweb.shared.crypto.CryptoConst.HASHType;
 import org.zoxweb.shared.crypto.CryptoConst.SecureRandomType;
 import org.zoxweb.shared.crypto.EncryptedDAO;
 import org.zoxweb.shared.crypto.EncryptedKeyDAO;
@@ -235,7 +235,7 @@ public class EncryptedContentTest {
         e.printStackTrace();
       }
 
-      for (AlgoType mdt : AlgoType.values()) {
+      for (HASHType mdt : HASHType.values()) {
         try {
           PasswordDAO pDAO = HashUtil.toPassword(mdt.getName(), 0, -1, "password");
           System.out.println(HashUtil
