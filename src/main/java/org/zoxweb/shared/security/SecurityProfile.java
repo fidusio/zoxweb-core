@@ -1,9 +1,10 @@
 package org.zoxweb.shared.security;
 
 
+import org.zoxweb.shared.crypto.CryptoConst;
 import org.zoxweb.shared.data.PropertyDAO;
 import org.zoxweb.shared.util.*;
-import org.zoxweb.shared.security.SecurityConsts.AuthenticationType;
+import org.zoxweb.shared.crypto.CryptoConst.AuthenticationType;
 
 import java.util.List;
 
@@ -14,7 +15,7 @@ extends PropertyDAO
     public enum Param
             implements GetNVConfig
     {
-        AUTHENTICATIONS(NVConfigManager.createNVConfig("authentications", "Authentication types", "Authentications", false, true, AuthenticationType[].class)),
+        AUTHENTICATIONS(NVConfigManager.createNVConfig("authentications", "Authentication types", "Authentications", false, true, CryptoConst.AuthenticationType[].class)),
         PERMISSIONS(NVConfigManager.createNVConfig("permissions", "Permission tokens", "Permissions", false, true, NVStringList.class)),
         ROLES(NVConfigManager.createNVConfig("roles", "Role tokens", "Roles", false, true, NVStringList.class)),
         RESTRICTIONS(NVConfigManager.createNVConfig("restrictions", "Restrictions", "Restrictions", false, true, NVStringList.class)),
@@ -98,7 +99,7 @@ extends PropertyDAO
         return ((List<Enum>)lookupValue(Param.AUTHENTICATIONS)).toArray(new AuthenticationType[0]);
     }
 
-    public void setAuthenticationTypes(AuthenticationType ...authTypes)
+    public void setAuthenticationTypes(CryptoConst.AuthenticationType...authTypes)
     {
         NVEnumList el = (NVEnumList) lookup(Param.AUTHENTICATIONS);
         el.setValues(authTypes);

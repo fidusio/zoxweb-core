@@ -1068,6 +1068,16 @@ public class SharedUtil
 		return str;
 	}
 
+	public static byte[] reverseBytes(byte[] array)
+	{
+		byte[] ret = new byte[array.length];
+		for(int i = 0; i < array.length; i++)
+		{
+			ret[i] = array[array.length - (i+1)];
+		}
+		return ret;
+	}
+
 	/**
 	 * Looks up NV list that extends GetNameValue based on enum.
 	 * @param arrayList

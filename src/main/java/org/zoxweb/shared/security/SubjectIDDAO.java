@@ -15,6 +15,7 @@
  */
 package org.zoxweb.shared.security;
 
+import org.zoxweb.shared.crypto.CryptoConst;
 import org.zoxweb.shared.data.PropertyDAO;
 import org.zoxweb.shared.util.*;
 
@@ -37,7 +38,7 @@ public class SubjectIDDAO
 	public enum Param
 		implements GetNVConfig
 	{
-		SUBJECT_ID(NVConfigManager.createNVConfig("subject_id", "Subject identifier", "SubjectID", true, true, true, String.class, SecurityConsts.SubjectIDFilter.SINGLETON)),
+		SUBJECT_ID(NVConfigManager.createNVConfig("subject_id", "Subject identifier", "SubjectID", true, true, true, String.class, CryptoConst.SubjectIDFilter.SINGLETON)),
 		SUBJECT_TYPE(NVConfigManager.createNVConfig("subject_type", "Subject Type", "SubjectType", true, true, SubjectType.class)),
 
 

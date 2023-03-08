@@ -17,9 +17,9 @@ package org.zoxweb.server.security;
 
 import java.util.Date;
 
+import org.zoxweb.shared.crypto.CryptoConst;
 import org.zoxweb.shared.crypto.PasswordDAO;
 import org.zoxweb.shared.data.SetNameDescriptionDAO;
-import org.zoxweb.shared.security.SecurityConsts;
 import org.zoxweb.shared.util.*;
 
 /**
@@ -48,7 +48,7 @@ public class UserIDCredentialsDAO
     //USER_ID_DAO(NVConfigManager.createNVConfigEntity("user_id_dao", "User ID data access object.", "UserIDDAO", true, true, UserIDDAO.NVC_USER_ID_DAO)),
     USER_STATUS(NVConfigManager
         .createNVConfig("user_status", "User status", "UserStatus", true, true,
-            SecurityConsts.UserStatus.class)),
+            CryptoConst.UserStatus.class)),
     LAST_STATUS_UPDATE_TIMESTAMP(NVConfigManager
         .createNVConfig("last_status_update_timestamp", "Timestamp of last status update",
             "LastStatusUpdateTimestamp", true, true, Date.class)),
@@ -105,14 +105,14 @@ public class UserIDCredentialsDAO
    *
    * @return UserStatus
    */
-  public SecurityConsts.UserStatus getUserStatus() {
+  public CryptoConst.UserStatus getUserStatus() {
     return lookupValue(Param.USER_STATUS);
   }
 
   /**
    * Sets the user status.
    */
-  public void setUserStatus(SecurityConsts.UserStatus status) {
+  public void setUserStatus(CryptoConst.UserStatus status) {
     setValue(Param.USER_STATUS, status);
   }
 

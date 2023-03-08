@@ -1,7 +1,6 @@
 package org.zoxweb.shared.annotation;
+import org.zoxweb.shared.crypto.CryptoConst;
 import org.zoxweb.shared.http.URIScheme;
-import org.zoxweb.shared.security.SecurityConsts;
-import org.zoxweb.shared.security.SecurityConsts.*;
 import org.zoxweb.shared.util.Const;
 
 import java.lang.annotation.ElementType;
@@ -16,7 +15,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface SecurityProp
 {
-    AuthenticationType[] authentications();
+    CryptoConst.AuthenticationType[] authentications();
 
     /**
      * List of permissions to be applied to the current function

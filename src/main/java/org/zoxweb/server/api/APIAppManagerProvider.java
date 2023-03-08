@@ -7,6 +7,7 @@ import org.zoxweb.shared.api.APIAppManager;
 import org.zoxweb.shared.api.APIDataStore;
 import org.zoxweb.shared.api.APIException;
 import org.zoxweb.shared.api.APISecurityManager;
+import org.zoxweb.shared.crypto.CryptoConst;
 import org.zoxweb.shared.crypto.CryptoConst.HASHType;
 import org.zoxweb.shared.crypto.EncryptedKeyDAO;
 import org.zoxweb.shared.crypto.PasswordDAO;
@@ -251,7 +252,7 @@ public class APIAppManagerProvider
 		return lookupUserIDDAO(subjectID.getValue(), params);
 	}
 	
-	public synchronized UserIDDAO createUserIDDAO(UserIDDAO userID, SecurityConsts.UserStatus userIDStatus, String password)
+	public synchronized UserIDDAO createUserIDDAO(UserIDDAO userID, CryptoConst.UserStatus userIDStatus, String password)
 			throws NullPointerException, IllegalArgumentException, AccessException, APIException
 	{
 		SharedUtil.checkIfNulls("UserIDDAO object is null.", userID, userIDStatus);
@@ -479,7 +480,7 @@ public class APIAppManagerProvider
     }
 
   
-    public UserIDDAO createUserIDDAO(String subjectID, SecurityConsts.UserStatus userIDstatus, String password)
+    public UserIDDAO createUserIDDAO(String subjectID, CryptoConst.UserStatus userIDstatus, String password)
             throws NullPointerException, IllegalArgumentException, AccessException, APIException
     {
 
@@ -729,7 +730,7 @@ public class APIAppManagerProvider
         	userIDDAO.setSubjectID(subjectID);
 
 
-        	userIDDAO = createUserIDDAO(userIDDAO, SecurityConsts.UserStatus.ACTIVE, password);
+        	userIDDAO = createUserIDDAO(userIDDAO, CryptoConst.UserStatus.ACTIVE, password);
         }
 
         getAPISecurityManager().login(subjectID, password, appIDDAO.getDomainID(), appIDDAO.getAppID(), false);
@@ -772,7 +773,7 @@ public class APIAppManagerProvider
 			 // 2.
 			 userIDDAO.setSubjectID(subjectID);
 
-         	userIDDAO = createUserIDDAO(userIDDAO, SecurityConsts.UserStatus.ACTIVE, password);
+         	userIDDAO = createUserIDDAO(userIDDAO, CryptoConst.UserStatus.ACTIVE, password);
          	return userIDDAO.getUserInfo();
          }
          

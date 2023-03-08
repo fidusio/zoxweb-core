@@ -16,6 +16,7 @@
 package org.zoxweb.shared.security;
 
 
+import org.zoxweb.shared.crypto.CryptoConst;
 import org.zoxweb.shared.data.SetNameDescriptionDAO;
 
 import org.zoxweb.shared.util.AppID;
@@ -27,7 +28,6 @@ import org.zoxweb.shared.util.NVConfigEntityLocal;
 import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.NVGenericMap;
 import org.zoxweb.shared.util.SharedUtil;
-import org.zoxweb.shared.security.SecurityConsts.JWTAlgorithm;
 
 import java.util.Date;
 
@@ -127,11 +127,11 @@ extends SetNameDescriptionDAO
 		setValue(Param.JWT_HASH, hash);
 	}
 
-    public static JWT createJWT(JWTAlgorithm algorithm, String subjectID, AppID<String> appID) {
+    public static JWT createJWT(CryptoConst.JWTAlgorithm algorithm, String subjectID, AppID<String> appID) {
 	    return createJWT(algorithm, subjectID, appID.getDomainID(), appID.getAppID());
     }
 
-	public static JWT createJWT(JWTAlgorithm algorithm, String subjectID, String domainID, String appID) {
+	public static JWT createJWT(CryptoConst.JWTAlgorithm algorithm, String subjectID, String domainID, String appID) {
 		
 		JWT jwt = new JWT();
         JWTHeader jwtHeader = jwt.getHeader();

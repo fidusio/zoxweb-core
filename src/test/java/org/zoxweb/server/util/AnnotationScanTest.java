@@ -4,8 +4,8 @@ import org.junit.jupiter.api.Test;
 import org.zoxweb.shared.annotation.EndPointProp;
 import org.zoxweb.shared.annotation.ParamProp;
 import org.zoxweb.shared.annotation.SecurityProp;
+import org.zoxweb.shared.crypto.CryptoConst;
 import org.zoxweb.shared.http.HTTPMethod;
-import org.zoxweb.shared.security.SecurityConsts.AuthenticationType;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -13,11 +13,11 @@ import java.lang.reflect.Parameter;
 public class AnnotationScanTest {
 
 
-    @SecurityProp(authentications = {AuthenticationType.DOMAIN}, roles = "admin")
+    @SecurityProp(authentications = {CryptoConst.AuthenticationType.DOMAIN}, roles = "admin")
     public static class ToBeTested
     {
         @EndPointProp(uris = "/profile/{profileId}/{realm}", name = "profileReader", methods = {HTTPMethod.GET})
-        @SecurityProp(authentications = {AuthenticationType.ALL})
+        @SecurityProp(authentications = {CryptoConst.AuthenticationType.ALL})
         public String getProfile(@ParamProp(name ="profileId") String profileId, @ParamProp(name ="realm", optional = false) String realm)
         {
             return "str";
@@ -29,7 +29,7 @@ public class AnnotationScanTest {
 
 
         @EndPointProp(uris = "/check-user/{user}", name = "CheckUser", methods = {HTTPMethod.POST})
-        @SecurityProp(authentications = {AuthenticationType.ALL}, permissions= "self, admin")
+        @SecurityProp(authentications = {CryptoConst.AuthenticationType.ALL}, permissions= "self, admin")
         public static boolean checkStatus(String user, int i)
         {
             return true;

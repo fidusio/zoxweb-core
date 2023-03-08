@@ -1,5 +1,6 @@
 package org.zoxweb.shared.api;
 
+import org.zoxweb.shared.crypto.CryptoConst;
 import org.zoxweb.shared.data.AppConfigDAO;
 import org.zoxweb.shared.data.AppDeviceDAO;
 import org.zoxweb.shared.data.AppIDDAO;
@@ -9,7 +10,6 @@ import org.zoxweb.shared.data.UserPreferenceDAO;
 import org.zoxweb.shared.db.QueryMarker;
 import org.zoxweb.shared.security.AccessException;
 import org.zoxweb.shared.security.JWT;
-import org.zoxweb.shared.security.SecurityConsts;
 import org.zoxweb.shared.security.SubjectAPIKey;
 import org.zoxweb.shared.util.CRUD;
 import org.zoxweb.shared.util.NVConfigEntity;
@@ -85,7 +85,7 @@ public interface APIAppManager
      * @throws AccessException
      * @throws APIException
      */
-	UserIDDAO createUserIDDAO(UserIDDAO userIDDAO, SecurityConsts.UserStatus userIDstatus, String password)
+	UserIDDAO createUserIDDAO(UserIDDAO userIDDAO, CryptoConst.UserStatus userIDstatus, String password)
             throws NullPointerException, IllegalArgumentException, AccessException, APIException;
 
     /**
@@ -98,7 +98,7 @@ public interface APIAppManager
      * @throws AccessException
      * @throws APIException
      */
-    UserIDDAO createUserIDDAO(String subjectID, SecurityConsts.UserStatus userIDstatus, String password)
+    UserIDDAO createUserIDDAO(String subjectID, CryptoConst.UserStatus userIDstatus, String password)
             throws NullPointerException, IllegalArgumentException, AccessException, APIException;
 
 	/**

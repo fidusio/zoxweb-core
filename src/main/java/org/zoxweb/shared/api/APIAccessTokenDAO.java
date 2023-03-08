@@ -17,8 +17,8 @@ package org.zoxweb.shared.api;
 
 import java.util.Date;
 
+import org.zoxweb.shared.crypto.CryptoConst;
 import org.zoxweb.shared.data.TimeStampDAO;
-import org.zoxweb.shared.security.SecurityConsts.OAuthParam;
 import org.zoxweb.shared.util.Const;
 import org.zoxweb.shared.util.Const.TimeInMillis;
 import org.zoxweb.shared.util.GetNVConfig;
@@ -39,15 +39,15 @@ public class APIAccessTokenDAO
 	public enum Token
         implements GetNVConfig {
 //		ACCESS_TOKEN(NVConfigManager.createNVConfig("access_token", "Access token", "AccessToken", false, true, false, String.class, FilterType.ENCRYPT)),
-		ACCESS_TOKEN(OAuthParam.ACCESS_TOKEN.getNVConfig()),
+		ACCESS_TOKEN(CryptoConst.OAuthParam.ACCESS_TOKEN.getNVConfig()),
 //		EXPIRES_IN(NVConfigManager.createNVConfig("expires_in", "Expiration time value", "ExpiresIn", false, true, Integer.class)),
-		EXPIRES_IN(OAuthParam.EXPIRES_IN.getNVConfig()),
+		EXPIRES_IN(CryptoConst.OAuthParam.EXPIRES_IN.getNVConfig()),
 //		EXPIRATION_UNIT(NVConfigManager.createNVConfig("expiration_unit", "Expiration time unit", "ExpirationUnit", false, true, TimeInMillis.class)),
-		EXPIRATION_UNIT(OAuthParam.EXPIRATION_UNIT.getNVConfig()),
+		EXPIRATION_UNIT(CryptoConst.OAuthParam.EXPIRATION_UNIT.getNVConfig()),
 //		REFRESH_TOKEN(NVConfigManager.createNVConfig("refresh_token", "Refresh token", "RefreshToken", false, true, false, String.class, FilterType.ENCRYPT)),
-		REFRESH_TOKEN(OAuthParam.REFRESH_TOKEN.getNVConfig()),
+		REFRESH_TOKEN(CryptoConst.OAuthParam.REFRESH_TOKEN.getNVConfig()),
 //		TOKEN_TYPE(NVConfigManager.createNVConfig("token_type", "Token type", "TokenType", false, true, String.class)),
-		TOKEN_TYPE(OAuthParam.TOKEN_TYPE.getNVConfig()),
+		TOKEN_TYPE(CryptoConst.OAuthParam.TOKEN_TYPE.getNVConfig()),
 
 		;
 		

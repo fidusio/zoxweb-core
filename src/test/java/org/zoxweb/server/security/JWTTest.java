@@ -12,10 +12,11 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.zoxweb.server.util.GSONUtil;
+import org.zoxweb.shared.crypto.CryptoConst;
 import org.zoxweb.shared.security.JWT;
 import org.zoxweb.shared.security.JWTHeader;
 import org.zoxweb.shared.security.JWTPayload;
-import org.zoxweb.shared.security.SecurityConsts.JWTAlgorithm;
+import org.zoxweb.shared.crypto.CryptoConst.JWTAlgorithm;
 import org.zoxweb.shared.util.BytesValue;
 import org.zoxweb.shared.util.NVPair;
 import org.zoxweb.shared.util.SharedBase64.Base64Type;
@@ -35,7 +36,7 @@ public class JWTTest {
     jwtHS256 = new JWT();
     JWTHeader header = jwtHS256.getHeader();
 
-    header.setJWTAlgorithm(JWTAlgorithm.HS256);
+    header.setJWTAlgorithm(CryptoConst.JWTAlgorithm.HS256);
     header.setTokenType("JWT");
 
     JWTPayload payload = jwtHS256.getPayload();
@@ -47,7 +48,7 @@ public class JWTTest {
 
     jwtNONE = new JWT();
     header = jwtNONE.getHeader();
-    header.setJWTAlgorithm(JWTAlgorithm.none);
+    header.setJWTAlgorithm(CryptoConst.JWTAlgorithm.none);
 
     payload = jwtNONE.getPayload();
     payload.setDomainID("xlogistx.io");
@@ -60,7 +61,7 @@ public class JWTTest {
 
     header = jwtHS512.getHeader();
 
-    header.setJWTAlgorithm(JWTAlgorithm.HS512);
+    header.setJWTAlgorithm(CryptoConst.JWTAlgorithm.HS512);
     header.setTokenType("JWT");
 
     payload = jwtHS512.getPayload();
@@ -189,7 +190,7 @@ public class JWTTest {
 
     System.out.println("--------------------------------------------------------------");
     JWT jwtES256 = new JWT();
-    jwtES256.getHeader().setJWTAlgorithm(JWTAlgorithm.ES256);
+    jwtES256.getHeader().setJWTAlgorithm(CryptoConst.JWTAlgorithm.ES256);
     jwtES256.getHeader().setTokenType("JWT");
 
     JWTPayload payload = jwtES256.getPayload();
@@ -322,7 +323,7 @@ public class JWTTest {
     KeyPair rsaKP = CryptoUtil.generateKeyPair("RSA", 2048);
 
     JWTAlgorithm[] list = {
-        JWTAlgorithm.ES256, JWTAlgorithm.ES512, JWTAlgorithm.RS256, JWTAlgorithm.RS512
+        CryptoConst.JWTAlgorithm.ES256, CryptoConst.JWTAlgorithm.ES512, CryptoConst.JWTAlgorithm.RS256, CryptoConst.JWTAlgorithm.RS512
     };
 
     for (JWTAlgorithm algo : list) {

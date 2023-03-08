@@ -15,7 +15,7 @@
  */
 package org.zoxweb.shared.http;
 
-import org.zoxweb.shared.security.SecurityConsts.OAuthParam;
+import org.zoxweb.shared.crypto.CryptoConst;
 import org.zoxweb.shared.util.*;
 
 public enum HTTPHeader
@@ -28,7 +28,7 @@ public enum HTTPHeader
 	ACCEPT_ENCODING("Accept-Encoding"),
 	ACCESS_CONTROL_ALLOW_CREDENTIALS("Access-Control-Allow-Credentials"),
 	ACCESS_CONTROL_ALLOW_ORIGIN("Access-Control-Allow-Origin"),
-	AUTHORIZATION(OAuthParam.AUTHORIZATION.getNVConfig().getDisplayName()),
+	AUTHORIZATION(CryptoConst.OAuthParam.AUTHORIZATION.getNVConfig().getDisplayName()),
 	CONNECTION("Connection"),
 	CONTENT_DISPOSITION("Content-Disposition"),
 	CONTENT_ENCODING("Content-Encoding"),

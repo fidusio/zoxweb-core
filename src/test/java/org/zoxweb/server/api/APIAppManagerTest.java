@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.zoxweb.server.security.JWTProvider;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.api.APIAppManager;
+import org.zoxweb.shared.crypto.CryptoConst;
 import org.zoxweb.shared.data.AppDeviceDAO;
 import org.zoxweb.shared.data.AppIDDAO;
 import org.zoxweb.shared.data.DeviceDAO;
@@ -16,7 +17,6 @@ import org.zoxweb.shared.security.JWT;
 import org.zoxweb.shared.security.JWTHeader;
 import org.zoxweb.shared.security.JWTPayload;
 import org.zoxweb.shared.security.SubjectAPIKey;
-import org.zoxweb.shared.security.SecurityConsts.JWTAlgorithm;
 import org.zoxweb.shared.util.SharedBase64.Base64Type;
 
 public class APIAppManagerTest {
@@ -56,7 +56,7 @@ public class APIAppManagerTest {
 		JWT jwt = new JWT();
 		JWTHeader header = jwt.getHeader();
 		
-		header.setJWTAlgorithm(JWTAlgorithm.HS256);
+		header.setJWTAlgorithm(CryptoConst.JWTAlgorithm.HS256);
 		header.setTokenType("JWT");
 		
 		JWTPayload payload =jwt.getPayload();

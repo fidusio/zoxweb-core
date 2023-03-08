@@ -4,8 +4,8 @@ import org.zoxweb.server.logging.LoggerUtil;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.server.util.cache.JWTTokenCache;
+import org.zoxweb.shared.crypto.CryptoConst;
 import org.zoxweb.shared.security.JWT;
-import org.zoxweb.shared.security.SecurityConsts;
 import org.zoxweb.shared.util.Const;
 
 public class JWTCacheTest {
@@ -29,7 +29,7 @@ public class JWTCacheTest {
             JWT jwt = null;
             for(int i=0; i < count; i++)
             {
-                jwt = JWT.createJWT(SecurityConsts.JWTAlgorithm.HS256, subject, "xlogistx.io", "test");
+                jwt = JWT.createJWT(CryptoConst.JWTAlgorithm.HS256, subject, "xlogistx.io", "test");
                 sizeOfAllTockens += CryptoUtil.encodeJWT(password, jwt, true).length();
                 cache.map(jwt);
             }
