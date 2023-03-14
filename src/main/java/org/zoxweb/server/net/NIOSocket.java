@@ -185,15 +185,17 @@ public class NIOSocket
 							    		// a channel is ready for reading
 								    	if (executor != null)
 								    	{
-								    		executor.execute(()->{
-								    			try {
+								    		executor.execute(()->
+											{
+								    			try
+												{
 													currentPP.accept(key);
 												}
-								    			catch (Exception e){
+								    			catch (Exception e)
+												{
 								    				e.printStackTrace();
 												}
 								    			// very crucial setup
-
 												ska.setSelectable(true);
 											});
 								    	}
@@ -251,7 +253,7 @@ public class NIOSocket
 							    			if (currentAttackCount % 500 == 0)
 							    			{
 							    				float burstRate = (float) ((500.00/(float)(System.currentTimeMillis() - attackTimestamp))*TimeInMillis.SECOND.MILLIS);
-							    				float overAllRate = (float)((float)currentAttackCount/(float)(System.currentTimeMillis() - startTime))*TimeInMillis.SECOND.MILLIS;
+							    				float overAllRate = ((float)currentAttackCount/(float)(System.currentTimeMillis() - startTime))*TimeInMillis.SECOND.MILLIS;
 							    				logger.getLogger().info(" Burst Attacks:" + burstRate+ " a/s" + " Total Attacks:" + overAllRate + " a/s" + " total:" + attackTotalCount + " in " + TimeInMillis.toString(System.currentTimeMillis() - startTime));
 							    				attackTimestamp = 0;
 							    			}
