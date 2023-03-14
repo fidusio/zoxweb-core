@@ -243,6 +243,7 @@ public class SSLNIOSocket
 		sslDispatcher = new CustomSSLStateMachine(this);
 		//sslStateMachine.start(true);
 		// not sure about
+		// start the handshake here
 		config.beginHandshake(false);
 		getSelectorController().register(asc, SelectionKey.OP_READ, this, isBlocking);
 	}
