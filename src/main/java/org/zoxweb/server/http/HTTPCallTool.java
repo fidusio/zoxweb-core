@@ -17,6 +17,7 @@ package org.zoxweb.server.http;
 
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.logging.LogWrapper;
+import org.zoxweb.server.logging.LoggerUtil;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.http.*;
@@ -78,6 +79,7 @@ public class HTTPCallTool implements Runnable
 
     public static void main(String ...args)
     {
+        LoggerUtil.enableDefaultLogger("org.zoxweb");
         try
         {
             TaskUtil.setThreadMultiplier(8);
