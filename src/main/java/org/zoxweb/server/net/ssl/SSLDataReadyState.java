@@ -26,7 +26,8 @@ public class SSLDataReadyState
         {
             long ts = System.currentTimeMillis();
             SSLSessionConfig config = (SSLSessionConfig)getStateMachine().getConfig();
-            if(log.isEnabled()) log.getLogger().info("" + config.getHandshakeStatus());
+           if(log.isEnabled())
+                log.getLogger().info("" + config.getHandshakeStatus());
 
             if(config.sslChannel.isOpen())
             {
@@ -61,7 +62,6 @@ public class SSLDataReadyState
                                     throw new IllegalStateException("NOT_HANDSHAKING should never be " + result.getStatus());
                                     // this should never happen
                                 case OK:
-
                                     if(callback != null) callback.accept(config.inAppData);
                                     // config.sslRead.set(true);
                                     break;

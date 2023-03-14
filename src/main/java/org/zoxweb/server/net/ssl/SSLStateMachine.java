@@ -15,11 +15,9 @@ public class SSLStateMachine extends StateMachine<SSLSessionConfig>
 
 
     @Override
-    public void dispatch(SSLEngineResult.HandshakeStatus status, SSLSessionCallback callback) {
-        publishSync(new Trigger<SSLSessionCallback>(this,
-               status,
-                null,
-                callback));
+    public void dispatch(SSLEngineResult.HandshakeStatus status, SSLSessionCallback callback)
+    {
+        publishSync(new Trigger<SSLSessionCallback>(this, status, null, callback));
     }
 
     //private final static AtomicLong HANDSHAKE_COUNTER = new AtomicLong();
@@ -187,6 +185,8 @@ public class SSLStateMachine extends StateMachine<SSLSessionConfig>
             case "NEED_TASK":
                 return (T) SSLHandshakingState.NeedTask.rcNeedTask;
             case "FINISHED":
+                return (T) SSLHandshakingState.Finished.rcFinished;
+            case "NOT_HANDSHAKING":
                 return (T) SSLDataReadyState.NotHandshaking.rcNotHandshaking;
             case "SSL_CONNECTION_COUNT":
                 return (T) Long.valueOf(counter.get());

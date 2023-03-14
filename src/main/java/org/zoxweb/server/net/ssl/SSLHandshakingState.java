@@ -10,7 +10,6 @@ import javax.net.ssl.SSLEngineResult;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static javax.net.ssl.SSLEngineResult.HandshakeStatus.*;
-import static org.zoxweb.server.net.ssl.SSLStateMachine.SessionState.POST_HANDSHAKE;
 
 public class SSLHandshakingState extends State {
 
@@ -194,7 +193,8 @@ public class SSLHandshakingState extends State {
             if(config.remoteAddress != null)
             {
                 // we have a SSL tunnel
-                publishSync(POST_HANDSHAKE, config);
+                //publishSync(POST_HANDSHAKE, config);
+                config.sslNIOSocket.createRemoteConnection();
             }
 
             if (config.inSSLNetData.position() > 0)

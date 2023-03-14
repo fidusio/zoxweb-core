@@ -41,6 +41,10 @@ public class SSLSessionConfig
     volatile boolean forcedClose = false;
     volatile InetSocketAddressDAO remoteAddress = null;
 
+    // used for remote connection creation only
+    volatile SSLNIOSocket sslNIOSocket = null;
+
+
 
     //final Lock ioLock = null;//new ReentrantLock();
     final SSLEngine sslEngine; // the crypto engine
@@ -104,7 +108,7 @@ public class SSLSessionConfig
             IOUtil.close(remoteChannel);
             selectorController.cancelSelectionKey(sslChannel);
             selectorController.cancelSelectionKey(remoteChannel);
-            IOUtil.close((Closeable) sslDispatcher);
+            IOUtil.close((AutoCloseable) sslDispatcher);
             ByteBufferUtil.cache(inSSLNetData, inAppData, outSSLNetData, inRemoteData);
             IOUtil.close(sslOutputStream);
 

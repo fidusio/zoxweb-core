@@ -213,40 +213,41 @@ public class SSLNIOSocket
 
 
 
-//	@Override
-//	protected void setupConnection(AbstractSelectableChannel asc, boolean isBlocking) throws IOException {
-//		SSLStateMachine sslStateMachine = SSLStateMachine.create(sslContext, null);;
-//    	sslDispatcher = sslStateMachine;
-//		config = sslStateMachine.getConfig();
+	@Override
+	public void setupConnection(AbstractSelectableChannel asc, boolean isBlocking) throws IOException {
+		SSLStateMachine sslStateMachine = SSLStateMachine.create(sslContext, null);;
+    	sslDispatcher = sslStateMachine;
+		config = sslStateMachine.getConfig();
+		config.sslNIOSocket = this;
 //		if(remoteAddress != null)
 //			sslStateMachine.register(new State("connect-remote").register(new PostHandshake(this)));
-//    	config.selectorController = getSelectorController();
-//		config.sslChannel = (SocketChannel) asc;
-//		config.remoteAddress = remoteAddress;
-//		config.sslOutputStream = new SSLChannelOutputStream(config, 512 );
-//		sessionCallback.setConfig(config);
-//		sslStateMachine.start(true);
-//		// not sure about
-//		//config.beginHandshake(false);
-//		getSelectorController().register(asc, SelectionKey.OP_READ, this, isBlocking);
-//	}
-
-
-
-	public void setupConnection(AbstractSelectableChannel asc, boolean isBlocking) throws IOException {
-		config = new SSLSessionConfig(sslContext);//sslStateMachine.getConfig();
-		config.selectorController = getSelectorController();
+    	config.selectorController = getSelectorController();
 		config.sslChannel = (SocketChannel) asc;
 		config.remoteAddress = remoteAddress;
 		config.sslOutputStream = new SSLChannelOutputStream(config, 512 );
 		sessionCallback.setConfig(config);
-		sslDispatcher = new CustomSSLStateMachine(this);
-		//sslStateMachine.start(true);
+		sslStateMachine.start(true);
 		// not sure about
-		// start the handshake here
 		config.beginHandshake(false);
 		getSelectorController().register(asc, SelectionKey.OP_READ, this, isBlocking);
 	}
+
+
+
+//	public void setupConnection(AbstractSelectableChannel asc, boolean isBlocking) throws IOException {
+//		config = new SSLSessionConfig(sslContext);//sslStateMachine.getConfig();
+//		config.selectorController = getSelectorController();
+//		config.sslChannel = (SocketChannel) asc;
+//		config.remoteAddress = remoteAddress;
+//		config.sslOutputStream = new SSLChannelOutputStream(config, 512 );
+//		sessionCallback.setConfig(config);
+//		sslDispatcher = new CustomSSLStateMachine(this);
+//		//sslStateMachine.start(true);
+//		// not sure about
+//		// start the handshake here
+//		config.beginHandshake(false);
+//		getSelectorController().register(asc, SelectionKey.OP_READ, this, isBlocking);
+//	}
 
 
 
@@ -279,7 +280,7 @@ public class SSLNIOSocket
 
 
 			//TaskUtil.setThreadMultiplier(4);
-			SSLContext sslContext = CryptoUtil.initSSLContext(null, null, IOUtil.locateFile(keystore), ksType, ksPassword.toCharArray(), null, null ,null);
+			SSLContext sslContext = CryptoUtil.initSSLContext(keystore, ksType, ksPassword.toCharArray(), null, null ,null);
 
 			new NIOSocket(new InetSocketAddress(port), 512, new SSLNIOSocketFactory(new SSLContextInfo(sslContext), remoteAddress), TaskUtil.getDefaultTaskProcessor());
 		}
@@ -308,6 +309,7 @@ public class SSLNIOSocket
 				{
 					try
 					{
+
 						config.inRemoteData = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.DIRECT, ByteBufferUtil.DEFAULT_BUFFER_SIZE);
 						config.remoteChannel = SocketChannel.open((new InetSocketAddress(config.remoteAddress.getInetAddress(), config.remoteAddress.getPort())));
 						getSelectorController().register(config.remoteChannel, SelectionKey.OP_READ, this, false);
@@ -316,6 +318,7 @@ public class SSLNIOSocket
 					}
 					catch(Exception e)
 					{
+						e.printStackTrace();
 						if (log.isEnabled()) log.getLogger().info("" + e);
 						if (log.isEnabled()) log.getLogger().info("connect to " + config.remoteAddress + " FAILED");
 						config.close();
