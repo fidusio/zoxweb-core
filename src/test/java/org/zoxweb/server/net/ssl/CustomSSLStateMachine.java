@@ -18,7 +18,7 @@ import java.util.function.Consumer;
 import static javax.net.ssl.SSLEngineResult.HandshakeStatus.*;
 
 class CustomSSLStateMachine
-    implements SSLDispatcher, Closeable, Identifier<Long>
+    implements SSLConnectionHelper, Closeable, Identifier<Long>
 {
     public static final LogWrapper log = new LogWrapper(CustomSSLStateMachine.class).setEnabled(false);
 
@@ -56,7 +56,7 @@ class CustomSSLStateMachine
         statesCallback.put(FINISHED, new Finished());
         statesCallback.put(NEED_TASK,  new NeedTask());
         statesCallback.put(NOT_HANDSHAKING, new NotHandshaking());
-        this.config.sslDispatcher = this;
+        this.config.sslConnectionHelper = this;
         id = counter.incrementAndGet();
     }
 
@@ -216,7 +216,7 @@ class CustomSSLStateMachine
         if(config.remoteAddress != null)
         {
             // we have a SSL tunnel
-            sslns.createRemoteConnection();
+            createRemoteConnection();
         }
 
             if (config.inSSLNetData.position() > 0)
@@ -332,6 +332,17 @@ class CustomSSLStateMachine
 //                needUnwrap.accept(callback);
 //                break;
 //        }
+    }
+
+    @Override
+    public void createRemoteConnection()
+    {
+        sslns.createRemoteConnection();
+    }
+
+    public SSLSessionConfig getConfig()
+    {
+        return sslns.getConfig();
     }
 
 

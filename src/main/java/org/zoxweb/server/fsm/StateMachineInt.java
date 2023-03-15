@@ -1,13 +1,14 @@
 package org.zoxweb.server.fsm;
 
 import org.zoxweb.server.task.TaskSchedulerProcessor;
+import org.zoxweb.shared.util.GetConfig;
 import org.zoxweb.shared.util.GetName;
 
 import java.util.concurrent.Executor;
 
 
 public interface StateMachineInt<C>
-extends GetName, AutoCloseable
+extends GetName, AutoCloseable, GetConfig<C>
 {
 
     StateMachineInt register(StateInt state);
@@ -25,7 +26,6 @@ extends GetName, AutoCloseable
 
 
 
-    <V extends C> V getConfig();
     StateMachineInt setConfig(C config);
 
     void start(boolean sync);

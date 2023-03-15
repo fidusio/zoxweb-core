@@ -37,12 +37,12 @@ public class SSLSessionConfig
 
     volatile SocketChannel remoteChannel = null;
     volatile ByteBuffer inRemoteData = null;
-    volatile SSLDispatcher sslDispatcher = null;
+    volatile SSLConnectionHelper sslConnectionHelper = null;
     volatile boolean forcedClose = false;
     volatile InetSocketAddressDAO remoteAddress = null;
 
     // used for remote connection creation only
-    volatile SSLNIOSocket sslNIOSocket = null;
+
 
 
 
@@ -87,7 +87,7 @@ public class SSLSessionConfig
                         case NEED_WRAP:
                         case NEED_UNWRAP:
                           //stateMachine.publishSync(new Trigger<SSLSessionCallback>(this, hs,null,null));
-                          sslDispatcher.dispatch(hs, null);
+                          sslConnectionHelper.dispatch(hs, null);
                           //stateMachine.publishSync(null, hs, null);
                           //staticSSLStateMachine.dispatch(hs, null);
                           break;
@@ -108,7 +108,7 @@ public class SSLSessionConfig
             IOUtil.close(remoteChannel);
             selectorController.cancelSelectionKey(sslChannel);
             selectorController.cancelSelectionKey(remoteChannel);
-            IOUtil.close((AutoCloseable) sslDispatcher);
+            IOUtil.close((AutoCloseable) sslConnectionHelper);
             ByteBufferUtil.cache(inSSLNetData, inAppData, outSSLNetData, inRemoteData);
             IOUtil.close(sslOutputStream);
 

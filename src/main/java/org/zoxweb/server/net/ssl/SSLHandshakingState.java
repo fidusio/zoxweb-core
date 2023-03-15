@@ -194,7 +194,7 @@ public class SSLHandshakingState extends State {
             {
                 // we have a SSL tunnel
                 //publishSync(POST_HANDSHAKE, config);
-                config.sslNIOSocket.createRemoteConnection();
+                config.sslConnectionHelper.createRemoteConnection();
             }
 
             if (config.inSSLNetData.position() > 0)

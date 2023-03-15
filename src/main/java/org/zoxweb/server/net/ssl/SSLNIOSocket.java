@@ -115,7 +115,7 @@ public class SSLNIOSocket
 
     public static final LogWrapper log = new LogWrapper(SSLNIOSocket.class).setEnabled(false);
 
-	private SSLDispatcher sslDispatcher = null;
+	private SSLConnectionHelper sslDispatcher = null;
 	private SSLSessionConfig config = null;
 	final public InetSocketAddressDAO remoteAddress;
 	final private SSLContextInfo sslContext;
@@ -172,6 +172,12 @@ public class SSLNIOSocket
 
 	}
 
+
+	SSLContextInfo getSSLContextInfo()
+	{
+		return sslContext;
+	}
+
 	@Override
 	public  void accept(SelectionKey key)
 	{
@@ -215,10 +221,10 @@ public class SSLNIOSocket
 
 	@Override
 	public void setupConnection(AbstractSelectableChannel asc, boolean isBlocking) throws IOException {
-		SSLStateMachine sslStateMachine = SSLStateMachine.create(sslContext, null);;
+		SSLStateMachine sslStateMachine = SSLStateMachine.create(this);
     	sslDispatcher = sslStateMachine;
 		config = sslStateMachine.getConfig();
-		config.sslNIOSocket = this;
+		//config.sslNIOSocket = this;
 //		if(remoteAddress != null)
 //			sslStateMachine.register(new State("connect-remote").register(new PostHandshake(this)));
     	config.selectorController = getSelectorController();

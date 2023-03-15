@@ -10,7 +10,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class SSLStateMachine extends StateMachine<SSLSessionConfig>
-    implements SSLDispatcher
+    implements SSLConnectionHelper
 {
 
 
@@ -19,6 +19,8 @@ public class SSLStateMachine extends StateMachine<SSLSessionConfig>
     {
         publishSync(new Trigger<SSLSessionCallback>(this, status, null, callback));
     }
+
+
 
     //private final static AtomicLong HANDSHAKE_COUNTER = new AtomicLong();
     public enum SessionState
@@ -57,7 +59,7 @@ public class SSLStateMachine extends StateMachine<SSLSessionConfig>
     static final AtomicLong counter = new AtomicLong();
 
 
-
+    private volatile SSLNIOSocket sslNIOSocket = null;
 
 
 //    private SSLStateMachine(long id, TaskSchedulerProcessor tsp) {
@@ -67,6 +69,10 @@ public class SSLStateMachine extends StateMachine<SSLSessionConfig>
         super("SSLSessionStateMachine-" + id, executor);
     }
 
+    @Override
+    public void createRemoteConnection() {
+        sslNIOSocket.createRemoteConnection();
+    }
 
 //    public void close()
 //    {
@@ -118,22 +124,30 @@ public class SSLStateMachine extends StateMachine<SSLSessionConfig>
 
 
 
+//    public static SSLStateMachine create(SSLContextInfo sslContext, Executor e)
+//    {
+//        SSLSessionConfig sslSessionConfig = new SSLSessionConfig(sslContext);
+//        return create(sslSessionConfig, e);
+//    }
+
+//    public static SSLStateMachine create(SSLNIOSocket sslnioSocket)
+//    {
+//        SSLStateMachine ret = create(sslnioSocket.getSSLContextInfo(), null);
+//        ret.sslNIOSocket = sslnioSocket;
+//        return ret;
+//    }
 
 
 
 
-    public static SSLStateMachine create(SSLContextInfo sslContext, Executor e)
-    {
-        SSLSessionConfig sslSessionConfig = new SSLSessionConfig(sslContext);
-        return create(sslSessionConfig, e);
-    }
+    public static SSLStateMachine create(SSLNIOSocket sslnioSocket){
+        SSLStateMachine sslSessionSM = new SSLStateMachine(counter.incrementAndGet(), null);
+        sslSessionSM.sslNIOSocket = sslnioSocket;
 
 
-
-    public static SSLStateMachine create(SSLSessionConfig config, Executor e){
-        SSLStateMachine sslSessionSM = new SSLStateMachine(counter.incrementAndGet(), e);
+        SSLSessionConfig config = new SSLSessionConfig(sslnioSocket.getSSLContextInfo());
         sslSessionSM.setConfig(config);
-        config.sslDispatcher = sslSessionSM;
+        config.sslConnectionHelper = sslSessionSM;
 
     TriggerConsumerInt<Void> init = new TriggerConsumer<Void>(StateInt.States.INIT) {
           @Override
