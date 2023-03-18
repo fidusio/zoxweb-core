@@ -22,11 +22,7 @@ import org.zoxweb.shared.util.InstanceCreator;
 public interface ProtocolFactory<P extends ProtocolHandler>
 extends GetName, GetNVProperties, InstanceCreator<P>
 {
-	/**
-	 * Create a new instance of the underlying protocol
-	 * @return  new instance of session protocol
-	 */
-//	P newInstance();
+
 
 	/**
 	 * True if the factory is of blocking type
@@ -34,8 +30,6 @@ extends GetName, GetNVProperties, InstanceCreator<P>
 	 */
 	boolean isBlocking();
 
-	void setBlocking(boolean blocking);
-	
 	/**
 	 * Set the filer rule manager for incoming connections
 	 * @return incoming filter manager
@@ -58,28 +52,18 @@ extends GetName, GetNVProperties, InstanceCreator<P>
 	 * @param outgoingIFRM outgoing filter
 	 */
 	void setOutgoingInetFilterRulesManager(InetFilterRulesManager outgoingIFRM);
-	
-	/**
-	 * Get the custom logger
-	 * @return custom logger
-	 */
-//	Logger getLogger();
-
-	/**
-	 * Set the logger custom logger
-	 * @param logger to be set
-	 */
-//	void setLogger(Logger logger);
 
 
 	/**
-	 *
+	 * Init the protocol factory
 	 */
 	void init();
 
 
-	//NIOChannelCleaner getNIOChannelCleaner();
-
+	/**
+	 * If true it suggest to use a thread for the connection setup if a thread pool is available
+	 * @return the setup mode
+	 */
 	boolean isComplexSetup();
 	
 }

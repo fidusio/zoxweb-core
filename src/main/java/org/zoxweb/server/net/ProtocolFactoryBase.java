@@ -26,36 +26,20 @@ public abstract class ProtocolFactoryBase<P extends ProtocolHandler>
 	private volatile InetFilterRulesManager incomingInetFilterRulesManager;
 	private volatile InetFilterRulesManager outgoingInetFilterRulesManager;
 
-	//private volatile Logger logger;
-	private volatile NVGenericMap properties = new NVGenericMap();
-	private volatile boolean blocking = false;
+	private final NVGenericMap properties = new NVGenericMap();
+
 
 	protected boolean complexSetup = false;
 	
 
 	
 
-	
-	
-//	public Logger getLogger() {
-//		return logger;
-//	}
-//
-//	public void setLogger(Logger logger) {
-//		this.logger = logger;
-//	}
 
 	@Override
 	public boolean isBlocking() {
 		// TODO Auto-generated method stub
-		return blocking;
+		return false;
 	}
-	@Override
-	public void setBlocking(boolean blocking)
-	{
-		this.blocking = blocking;
-	}
-
 
 
 	@Override

@@ -235,7 +235,8 @@ public class SSLNIOSocket
 		sslStateMachine.start(true);
 		// not sure about
 		config.beginHandshake(false);
-		getSelectorController().register(asc, SelectionKey.OP_READ, this, isBlocking);
+		getSelectorController().register(config.sslChannel, SelectionKey.OP_READ, this, isBlocking);
+
 	}
 
 

@@ -18,6 +18,7 @@ package org.zoxweb.server.net;
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.task.TaskUtil;
+import org.zoxweb.server.util.DateUtil;
 import org.zoxweb.shared.data.events.BaseEventObject;
 import org.zoxweb.shared.data.events.EventListenerManager;
 import org.zoxweb.shared.data.events.InetSocketAddressEvent;
@@ -25,19 +26,17 @@ import org.zoxweb.shared.net.InetSocketAddressDAO;
 import org.zoxweb.shared.net.SharedNetUtil;
 import org.zoxweb.shared.security.SecurityStatus;
 import org.zoxweb.shared.util.Const.TimeInMillis;
-import org.zoxweb.shared.util.DaemonController;
-import org.zoxweb.shared.util.RateCounter;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.*;
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.InetSocketAddress;
 import java.nio.channels.*;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.Executor;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * NIO Socket 
@@ -51,15 +50,17 @@ public class NIOSocket
 	private boolean live = true;
 	private final SelectorController selectorController;
 	private final Executor executor;
-	private final AtomicLong connectionCount = new AtomicLong();
+	private  long connectionCount = 0;
 
 
+	private long notSelectableCounter = 0;
 	private long selectedCountTotal = 0;
 	private long statLogCounter = 0;
-	private final AtomicLong attackTotalCount = new AtomicLong();
+	private long attackTotalCount = 0;
 	private final long startTime = System.currentTimeMillis();
 	private EventListenerManager<BaseEventObject<?>,?> eventListenerManager = null;
-	private final RateCounter callsCounter = new RateCounter("NIO-CALLS-COUNTER");
+	private final RateCounter callsCounter = new RateCounter("nio-calls-counter");
+
 	
 
 	
@@ -171,16 +172,17 @@ public class NIOSocket
 						    try
 						    {
 
-						    	if (key.isValid()
-									&& key.channel().isOpen()
-									&& key.isReadable())
+						    	if (key.isReadable()
+									&& key.isValid()
+									&& key.channel().isOpen())
 							    {
-							    	ProtocolHandler currentPP = (ProtocolHandler)ska.attachment();
+							    	ProtocolHandler currentPP = ska.attachment();
 									if(logger.isEnabled()) logger.getLogger().info(ska.attachment() + " ska is selectable: " + ska.isSelectable() + " for reading # " + selectedCount + "," + selectorController.keysCount());
 							    	if (ska.isSelectable() && currentPP != null)
 							    	{
 							    		// very,very,very crucial setup prior to processing
 										ska.setSelectable(false);
+										//key.cancel();
 
 							    		// a channel is ready for reading
 								    	if (executor != null)
@@ -190,6 +192,7 @@ public class NIOSocket
 								    			try
 												{
 													currentPP.accept(key);
+													//currentPP.registerReadOperation(false);
 												}
 								    			catch (Exception e)
 												{
@@ -197,6 +200,7 @@ public class NIOSocket
 												}
 								    			// very crucial setup
 												ska.setSelectable(true);
+
 											});
 								    	}
 								    	else
@@ -204,31 +208,37 @@ public class NIOSocket
 											try
 											{
 												currentPP.accept(key);
+												//currentPP.registerReadOperation(false);
 											}
 											catch (Exception e){}
 											// very crucial setup
 											ska.setSelectable(true);
 								    	}
 							    	}
+									else
+									{
+										notSelectableCounter++;
+										//logger.getLogger().info(key + " is not selectable counts: " + notSelectableCounter);
+									}
 							    } 
-						    	else if(key.isValid()
-										&& key.channel().isOpen()
-										&& key.isAcceptable())
+						    	else if(key.isAcceptable()
+										&& key.isValid()
+										&& key.channel().isOpen())
 							    {
 							        // a connection was accepted by a ServerSocketChannel.
 							    	
 							    	SocketChannel sc = ((ServerSocketChannel)key.channel()).accept();
 
-							    	ProtocolFactory<?> protocolFactory = (ProtocolFactory<?>) ska.attachment();
+							    	ProtocolFactory<?> protocolFactory = ska.attachment();
 									if(logger.isEnabled()) logger.getLogger().info("Accepted: " + sc + " psf:" + protocolFactory);
 							    	// check if the incoming connection is allowed
 
 
-							    	if (NetUtil.checkSecurityStatus(protocolFactory.getIncomingInetFilterRulesManager(), sc.getRemoteAddress(), null) !=  SecurityStatus.ALLOW)
+							    	if (NetUtil.checkSecurityStatus(protocolFactory.getIncomingInetFilterRulesManager(), sc, null) !=  SecurityStatus.ALLOW)
 							    	{
 							    		try
 							    		{ 	
-							    			long currentAttackCount = attackTotalCount.incrementAndGet();
+							    			long currentAttackCount = ++attackTotalCount;
 							    			if (attackTimestamp == 0)
 							    			{
 							    				attackTimestamp = System.currentTimeMillis();
@@ -300,23 +310,23 @@ public class NIOSocket
 										{
 											protocolHandler.setupConnection(sc, protocolFactory.isBlocking());
 										}
-								    	connectionCount.incrementAndGet();
+								    	connectionCount++;
 								    
 							    	}
 	
 							    } 
-							    else if (key.isValid()
-										&& key.channel().isOpen()
-										&& key.isConnectable())
-							    {
-							        // a connection was established with a remote server.
-							    } 
-							    else if (key.isValid()
-										&& key.channel().isOpen()
-										&& key.isWritable())
-							    {
-							        // a channel is ready for writing
-							    }
+//							    else if (key.isValid()
+//										&& key.channel().isOpen()
+//										&& key.isConnectable())
+//							    {
+//							        // a connection was established with a remote server.
+//							    }
+//							    else if (key.isValid()
+//										&& key.channel().isOpen()
+//										&& key.isWritable())
+//							    {
+//							        // a channel is ready for writing
+//							    }
 							   
 						    }
 						    catch(Exception e)
@@ -402,7 +412,7 @@ public class NIOSocket
 	
 	public long totalConnections()
 	{
-		return connectionCount.get();
+		return connectionCount;
 	}
 	
 	public long getStatLogCounter()
@@ -415,6 +425,17 @@ public class NIOSocket
 		this.statLogCounter = statLogCounter;
 	}
 
-	
+	public NVGenericMap getStats()
+	{
+		NVGenericMap ret = new NVGenericMap("nio_socket");
+		ret.add("time_stamp", DateUtil.DEFAULT_JAVA_FORMAT.format(new Date()));
+		ret.add(new NVLong("connection_counts", totalConnections()));
+		ret.add(new NVLong("not_selectable_counts", notSelectableCounter));
+		ret.add(new NVLong("select_calls_counts", selectedCountTotal));
+		ret.add(new NVLong("attack_counts", attackTotalCount));
+
+		ret.add(callsCounter);
+		return ret;
+	}
 	
 }

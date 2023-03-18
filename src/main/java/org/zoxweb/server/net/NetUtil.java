@@ -25,6 +25,7 @@ import java.io.Closeable;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.*;
+import java.nio.channels.SocketChannel;
 import java.util.*;
 
 public class NetUtil 
@@ -65,8 +66,21 @@ public class NetUtil
 				IOUtil.close(sc);
 			}
 		}
-		
-		
+
+		return ret;
+	}
+
+	public static SecurityStatus checkSecurityStatus(InetFilterRulesManager ifrm, SocketChannel channel, Closeable sc) throws IOException {
+		SecurityStatus ret =  SecurityStatus.ALLOW;
+		if (ifrm != null)
+		{
+			ret = ifrm.lookupSecurityStatus(channel.getRemoteAddress());
+			if (sc!=null && ret != SecurityStatus.ALLOW)
+			{
+				IOUtil.close(sc);
+			}
+		}
+
 		return ret;
 	}
 	
