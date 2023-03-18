@@ -76,24 +76,14 @@ public abstract class ProtocolHandler
 	{
 		this.selectorController = selectorController;
 	}
-	
-
-
-//	protected void setupConnection(NIOChannelCleaner ncc, AbstractSelectableChannel asc, boolean isBlocking) throws IOException {
-//		selectorController.register(ncc,  asc, SelectionKey.OP_READ, this, isBlocking);
-//	}
 
 
 	public void setupConnection(AbstractSelectableChannel asc, boolean isBlocking) throws IOException
 	{
 		phSChannel = (SocketChannel) asc;
 		getSelectorController().register(phSChannel, SelectionKey.OP_READ, this, isBlocking);
+
 	}
-
-
-
-
-
 
 
 	public InetFilterRulesManager getOutgoingInetFilterRulesManager() 

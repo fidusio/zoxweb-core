@@ -70,24 +70,25 @@ public class NIOPlainSocket
 		try
     	{
 
-			if(phSK == null)
+
+			if(sessionCallback.getConfig() == null)
 			{
-				synchronized (this)
+				//synchronized (this)
 				{
-					if(phSK == null)
+					//if(phSK == null)
 					{
 						//phSChannel = (SocketChannel) key.channel();
-						phSK = key;
+						//phSK = key;
 						sessionCallback.setConfig(phSChannel);
 					}
 				}
 			}
 
-			int read = 0 ;
+			int read;
     		do
             {
 				((Buffer) phBB).clear();
-				read = phSChannel.read(phBB);
+				read = phSChannel.isConnected()? phSChannel.read(phBB) : -1;
 
     			if (read > 0)
     			{

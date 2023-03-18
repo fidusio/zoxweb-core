@@ -182,6 +182,7 @@ public class NIOSocket
 							    	{
 							    		// very,very,very crucial setup prior to processing
 										ska.setSelectable(false);
+										//selectorController.cancelSelectionKey(key);
 										//key.cancel();
 
 							    		// a channel is ready for reading
@@ -192,7 +193,6 @@ public class NIOSocket
 								    			try
 												{
 													currentPP.accept(key);
-													//currentPP.registerReadOperation(false);
 												}
 								    			catch (Exception e)
 												{

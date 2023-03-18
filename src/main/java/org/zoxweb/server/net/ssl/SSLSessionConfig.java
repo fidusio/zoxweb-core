@@ -66,7 +66,7 @@ public class SSLSessionConfig
 
         if (!isClosed.getAndSet(true))
         {
-            //log.getLogger().info("SSLSessionConfig-NOT-CLOSED-YET " +Thread.currentThread() + " " + sslChannel);
+//            log.getLogger().info("SSLSessionConfig-NOT-CLOSED-YET " +Thread.currentThread() + " " + sslChannel);
 //            try
 //            {
 //                connectionRemoteAddress = sslChannel.getRemoteAddress();

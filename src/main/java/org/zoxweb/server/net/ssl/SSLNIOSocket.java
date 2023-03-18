@@ -188,22 +188,22 @@ public class SSLNIOSocket
 			//config.beginHandshake(false);
 
 			if (log.isEnabled()) log.getLogger().info("AcceptNewData: " + key);
-			if (key.channel() == config.sslChannel && key.channel().isOpen())
+			if (key.channel() == config.sslChannel && config.sslChannel.isConnected())
 			{
 				sslDispatcher.dispatch(config.getHandshakeStatus(), sessionCallback);
 			}
-			else if (key.channel() == config.remoteChannel && key.channel().isOpen())
+			else if (key.channel() == config.remoteChannel && config.remoteChannel.isConnected())
 			{
 				// this is the tunnel section
 				int bytesRead;
 				do {
-					bytesRead = config.remoteChannel.read(config.inRemoteData);
+					bytesRead = config.remoteChannel.isConnected() ? config.remoteChannel.read(config.inRemoteData) : -1;
 					if (bytesRead > 0 ) config.sslOutputStream.write(config.inRemoteData);
 				}while(bytesRead > 0);
 
 				if (bytesRead == -1) {
 					if (log.isEnabled())
-						log.getLogger().info("SSLCHANNEL-CLOSED-NEED_UNWRAP: " + config.getHandshakeStatus() + " bytesread: " + bytesRead);
+						log.getLogger().info("SSL-CHANNEL-CLOSED-NEED_UNWRAP: " + config.getHandshakeStatus() + " bytesRead: " + bytesRead);
 					close();
 				}
 			}
@@ -224,9 +224,6 @@ public class SSLNIOSocket
 		SSLStateMachine sslStateMachine = SSLStateMachine.create(this);
     	sslDispatcher = sslStateMachine;
 		config = sslStateMachine.getConfig();
-		//config.sslNIOSocket = this;
-//		if(remoteAddress != null)
-//			sslStateMachine.register(new State("connect-remote").register(new PostHandshake(this)));
     	config.selectorController = getSelectorController();
 		config.sslChannel = (SocketChannel) asc;
 		config.remoteAddress = remoteAddress;
@@ -235,8 +232,7 @@ public class SSLNIOSocket
 		sslStateMachine.start(true);
 		// not sure about
 		config.beginHandshake(false);
-		getSelectorController().register(config.sslChannel, SelectionKey.OP_READ, this, isBlocking);
-
+		getSelectorController().register(asc, SelectionKey.OP_READ, this, isBlocking);
 	}
 
 
@@ -253,7 +249,8 @@ public class SSLNIOSocket
 //		// not sure about
 //		// start the handshake here
 //		config.beginHandshake(false);
-//		getSelectorController().register(asc, SelectionKey.OP_READ, this, isBlocking);
+//		phSChannel = (SocketChannel) asc;
+//		registerReadable(isBlocking);
 //	}
 
 
