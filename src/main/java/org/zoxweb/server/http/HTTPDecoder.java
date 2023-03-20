@@ -1,14 +1,17 @@
 package org.zoxweb.server.http;
 
-import java.util.List;
-import java.util.logging.Logger;
-
 import org.zoxweb.server.io.UByteArrayOutputStream;
 import org.zoxweb.server.util.GSONUtil;
-import org.zoxweb.shared.http.*;
+import org.zoxweb.shared.http.HTTPAttribute;
+import org.zoxweb.shared.http.HTTPMessageConfigInterface;
+import org.zoxweb.shared.http.HTTPMimeType;
+import org.zoxweb.shared.http.HTTPResponseData;
 import org.zoxweb.shared.protocol.ProtocolDelimiter;
 import org.zoxweb.shared.util.*;
 import org.zoxweb.shared.util.SharedBase64.Base64Type;
+
+import java.util.List;
+import java.util.logging.Logger;
 
 
 public final class HTTPDecoder {
@@ -54,7 +57,7 @@ public final class HTTPDecoder {
         {
           if (HTTPMimeType.lookup(hmci.getContentType()) == HTTPMimeType.APPLICATION_WWW_URL_ENC) {
             int index = hrm.endOfHeadersIndex() + ProtocolDelimiter.CRLFCRLF.getBytes().length;
-            HTTPUtil.parseQuery(hmci.getParameters().asArrayValuesString(), hrm.getInternalBAOS().getString(index),false);
+            HTTPUtil.parseQuery(hmci.getParameters().asArrayValuesString(), hrm.getDataStream().getString(index),false);
             return hmci;
           }
         }
@@ -87,7 +90,7 @@ public final class HTTPDecoder {
               // we need to parse the payload next
               index = hrm.endOfHeadersIndex() + ProtocolDelimiter.CRLFCRLF.getBytes().length;
 
-              UByteArrayOutputStream ubaos = hrm.getInternalBAOS();
+              UByteArrayOutputStream ubaos = hrm.getDataStream();
               while((index = ubaos.indexOf(index, NAME_EQUAL_DOUBLE_QUOTE)) != -1)
               {
                 index += NAME_EQUAL_DOUBLE_QUOTE.length;

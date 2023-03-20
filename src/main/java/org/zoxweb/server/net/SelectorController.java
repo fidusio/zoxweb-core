@@ -81,7 +81,8 @@ public class SelectorController
 
 			// configure the selection mode for the channel ###
 			ch.configureBlocking(blocking);
-			ret = ch.register(selector, ops, new SKAttachment(attachment));
+//			ret = ch.register(selector, ops, new SKAttachment(attachment));
+			ret = ch.register(selector, ops, attachment);
 			// ################################################
 		}
 		finally
@@ -160,7 +161,15 @@ public class SelectorController
 				selectLock.unlock();
 			}
 		}
+	}
 
+	public void wakeup()
+	{
+		//lock.lock();
+		selector.wakeup();
+		//selectLock.lock();
+		//lock.unlock();
+		//selectLock.unlock();
 	}
 
 	/**

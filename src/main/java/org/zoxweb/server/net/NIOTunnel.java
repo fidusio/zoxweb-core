@@ -146,7 +146,10 @@ public class NIOTunnel
 			SocketChannel readChannel;
 			SocketChannel writeChannel;
 			ByteBuffer currentBB;
+			int read;
 
+			// based on the source set
+			// the destination
 			if (key.channel() == phSChannel)
 			{
 				readChannel = phSChannel;
@@ -159,13 +162,13 @@ public class NIOTunnel
 				writeChannel = phSChannel;
 				currentBB = destinationBB;
 			}
-			int read = 0;
+
     		do
             {
-    			{
-					((Buffer)currentBB).clear();
-    				read = readChannel.read(currentBB);
-    			}
+
+				((Buffer)currentBB).clear();
+				read = readChannel.read(currentBB);
+
     			if (read > 0)
     			{
     				ByteBufferUtil.write(writeChannel, currentBB);

@@ -53,7 +53,6 @@ public class NIOSocket
 	private  long connectionCount = 0;
 
 
-	private long notSelectableCounter = 0;
 	private long selectedCountTotal = 0;
 	private long statLogCounter = 0;
 	private long attackTotalCount = 0;
@@ -154,8 +153,6 @@ public class NIOSocket
 				int selectedCount = 0;
 				if (selectorController.isOpen())
 				{
-
-					//currentTotalKeys = selectorController.getSelector().keys().size();
 					selectedCount = selectorController.select();
 					long delta = System.nanoTime();
 					if (selectedCount > 0)
@@ -168,22 +165,19 @@ public class NIOSocket
 						{	    
 						    SelectionKey key = keyIterator.next();
 						    keyIterator.remove();
-							SKAttachment ska = (SKAttachment) key.attachment();
+
 						    try
 						    {
-
 						    	if (key.isReadable()
 									&& key.isValid()
 									&& key.channel().isOpen())
 							    {
-							    	ProtocolHandler currentPP = ska.attachment();
-									if(logger.isEnabled()) logger.getLogger().info(ska.attachment() + " ska is selectable: " + ska.isSelectable() + " for reading # " + selectedCount + "," + selectorController.keysCount());
-							    	if (ska.isSelectable() && currentPP != null)
+							    	ProtocolHandler currentPP = (ProtocolHandler) key.attachment();
+									if (currentPP != null)
 							    	{
 							    		// very,very,very crucial setup prior to processing
-										ska.setSelectable(false);
-										//selectorController.cancelSelectionKey(key);
-										//key.cancel();
+										int keyOPs = key.interestOps();
+										key.interestOps(0);
 
 							    		// a channel is ready for reading
 								    	if (executor != null)
@@ -198,28 +192,34 @@ public class NIOSocket
 												{
 								    				e.printStackTrace();
 												}
-								    			// very crucial setup
-												ska.setSelectable(true);
-
+								    			// very crucial step
+												if(key.isValid())
+												{
+													key.interestOps(keyOPs);
+													selectorController.wakeup();
+												}
 											});
 								    	}
 								    	else
 										{
+											// no executor set so the current thread must process the incoming data
 											try
 											{
 												currentPP.accept(key);
-												//currentPP.registerReadOperation(false);
 											}
-											catch (Exception e){}
-											// very crucial setup
-											ska.setSelectable(true);
+											catch (Exception e)
+											{
+												e.printStackTrace();
+											}
+											// very crucial step
+											if(key.isValid())
+											{
+												key.interestOps(keyOPs);
+												selectorController.wakeup();
+											}
 								    	}
 							    	}
-									else
-									{
-										notSelectableCounter++;
-										//logger.getLogger().info(key + " is not selectable counts: " + notSelectableCounter);
-									}
+
 							    } 
 						    	else if(key.isAcceptable()
 										&& key.isValid()
@@ -229,7 +229,8 @@ public class NIOSocket
 							    	
 							    	SocketChannel sc = ((ServerSocketChannel)key.channel()).accept();
 
-							    	ProtocolFactory<?> protocolFactory = ska.attachment();
+//							    	ProtocolFactory<?> protocolFactory = ska.attachment();
+									ProtocolFactory<?> protocolFactory = (ProtocolFactory<?>) key.attachment();
 									if(logger.isEnabled()) logger.getLogger().info("Accepted: " + sc + " psf:" + protocolFactory);
 							    	// check if the incoming connection is allowed
 
@@ -319,13 +320,13 @@ public class NIOSocket
 //										&& key.channel().isOpen()
 //										&& key.isConnectable())
 //							    {
-//							        // a connection was established with a remote server.
+//							        a connection was established with a remote server.
 //							    }
 //							    else if (key.isValid()
 //										&& key.channel().isOpen()
 //										&& key.isWritable())
 //							    {
-//							        // a channel is ready for writing
+//							         a channel is ready for writing
 //							    }
 							   
 						    }
@@ -430,7 +431,6 @@ public class NIOSocket
 		NVGenericMap ret = new NVGenericMap("nio_socket");
 		ret.add("time_stamp", DateUtil.DEFAULT_JAVA_FORMAT.format(new Date()));
 		ret.add(new NVLong("connection_counts", totalConnections()));
-		ret.add(new NVLong("not_selectable_counts", notSelectableCounter));
 		ret.add(new NVLong("select_calls_counts", selectedCountTotal));
 		ret.add(new NVLong("attack_counts", attackTotalCount));
 

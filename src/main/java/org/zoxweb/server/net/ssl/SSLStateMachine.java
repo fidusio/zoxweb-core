@@ -17,7 +17,8 @@ public class SSLStateMachine extends StateMachine<SSLSessionConfig>
     @Override
     public void dispatch(SSLEngineResult.HandshakeStatus status, SSLSessionCallback callback)
     {
-        publishSync(new Trigger<SSLSessionCallback>(this, status, null, callback));
+        if (!isClosed())
+            publishSync(new Trigger<SSLSessionCallback>(this, status, null, callback));
     }
 
 

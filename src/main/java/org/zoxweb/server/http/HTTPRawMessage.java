@@ -16,7 +16,6 @@
 package org.zoxweb.server.http;
 
 import org.zoxweb.server.io.UByteArrayOutputStream;
-import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.shared.http.HTTPMessageConfig;
 import org.zoxweb.shared.http.HTTPMessageConfigInterface;
 import org.zoxweb.shared.http.HTTPMethod;
@@ -30,11 +29,10 @@ import java.util.Arrays;
 
 public class HTTPRawMessage 
 {
-	public final static LogWrapper log = new LogWrapper(HTTPRawMessage.class);
+	//public final static LogWrapper log = new LogWrapper(HTTPRawMessage.class);
 	private final UByteArrayOutputStream ubaos;
 	private int endOfHeadersIndex = -1;
 	private int parseIndex = 0;
-
 	private String firstLine = null;
 	private final HTTPMessageConfigInterface hmci = new HTTPMessageConfig();
 
@@ -70,7 +68,7 @@ public class HTTPRawMessage
 	}
 
 
-	public UByteArrayOutputStream getInternalBAOS()
+	public UByteArrayOutputStream getDataStream()
 	{
 		return ubaos;
 	}
@@ -246,6 +244,14 @@ public class HTTPRawMessage
 //		return null;
 //	}
 
+
+	public synchronized void reset()
+	{
+		endOfHeadersIndex = -1;
+		parseIndex = 0;
+		firstLine = null;
+		ubaos.reset();
+	}
 
 	public HTTPMessageConfigInterface getHTTPMessageConfig() {
 		return hmci;
