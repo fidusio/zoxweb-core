@@ -117,8 +117,6 @@ public class  ChannelRelayTunnel
 			{
 				((Buffer)sBuffer).clear();
 				read = ((SocketChannel)currentSK.channel()).read(sBuffer);
-				
-//				SSLSessionData outputSSLSessionData = getOutputSSLSessionData();
 				if (read > 0)
 				{
 					ByteBufferUtil.write(writeDestination, sBuffer);
@@ -147,7 +145,6 @@ public class  ChannelRelayTunnel
 	
 	public synchronized void waitThenStopReading(SelectionKey sk)
 	{
-		//SKAttachment ska = (SKAttachment) sk.attachment();
 		while(sk.isValid() && !sk.isReadable() && sk.channel().isOpen())
 		{
 			try 

@@ -38,7 +38,7 @@ public class SSLDataReadyState
                         int bytesRead = config.sslChannel.read(config.inSSLNetData);
                         if (bytesRead == -1)
                         {
-                            log.getLogger().info("SSLCHANNEL-CLOSED-NOT_HANDSHAKING: " + config.getHandshakeStatus() + " bytesread: " + bytesRead);
+                            log.getLogger().info("SSLCHANNEL-CLOSED-NOT_HANDSHAKING: " + config.getHandshakeStatus() + " bytesRead: " + bytesRead);
                             config.close();
                         }
                         else
@@ -50,7 +50,7 @@ public class SSLDataReadyState
 
 
                             if (log.isEnabled())
-                                log.getLogger().info("AFTER-NOT_HANDSHAKING-PROCESSING: " + result + " bytesread: " + bytesRead + " callback: " + callback);
+                                log.getLogger().info("AFTER-NOT_HANDSHAKING-PROCESSING: " + result + " bytesRead: " + bytesRead + " callback: " + callback);
                             switch (result.getStatus())
                             {
                                 case BUFFER_UNDERFLOW:
@@ -67,7 +67,7 @@ public class SSLDataReadyState
                                     break;
                                 case CLOSED:
                                     // check result here
-                                    if(log.isEnabled()) log.getLogger().info("CLOSED-DURING-NOT_HANDSHAKING: " + result + " bytesread: " + bytesRead);
+                                    if(log.isEnabled()) log.getLogger().info("CLOSED-DURING-NOT_HANDSHAKING: " + result + " bytesRead: " + bytesRead);
 
                                     config.close();
                                     break;
