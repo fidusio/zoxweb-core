@@ -228,8 +228,6 @@ public class NIOSocket
 							        // a connection was accepted by a ServerSocketChannel.
 							    	
 							    	SocketChannel sc = ((ServerSocketChannel)key.channel()).accept();
-
-//							    	ProtocolFactory<?> protocolFactory = ska.attachment();
 									ProtocolFactory<?> protocolFactory = (ProtocolFactory<?>) key.attachment();
 									if(logger.isEnabled()) logger.getLogger().info("Accepted: " + sc + " psf:" + protocolFactory);
 							    	// check if the incoming connection is allowed

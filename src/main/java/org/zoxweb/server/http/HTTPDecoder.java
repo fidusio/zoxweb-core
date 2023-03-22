@@ -6,7 +6,7 @@ import org.zoxweb.shared.http.HTTPAttribute;
 import org.zoxweb.shared.http.HTTPMessageConfigInterface;
 import org.zoxweb.shared.http.HTTPMimeType;
 import org.zoxweb.shared.http.HTTPResponseData;
-import org.zoxweb.shared.protocol.ProtocolDelimiter;
+import org.zoxweb.shared.protocol.Delimiter;
 import org.zoxweb.shared.util.*;
 import org.zoxweb.shared.util.SharedBase64.Base64Type;
 
@@ -56,7 +56,7 @@ public final class HTTPDecoder {
         if (hrm.isMessageComplete())
         {
           if (HTTPMimeType.lookup(hmci.getContentType()) == HTTPMimeType.APPLICATION_WWW_URL_ENC) {
-            int index = hrm.endOfHeadersIndex() + ProtocolDelimiter.CRLFCRLF.getBytes().length;
+            int index = hrm.endOfHeadersIndex() + Delimiter.CRLFCRLF.getBytes().length;
             HTTPUtil.parseQuery(hmci.getParameters().asArrayValuesString(), hrm.getDataStream().getString(index),false);
             return hmci;
           }
@@ -88,7 +88,7 @@ public final class HTTPDecoder {
               String boundary = SharedStringUtil.trimOrNull(hmci.getContentType().substring(index+boundaryName.length()));
               hmci.setBoundary(boundary);
               // we need to parse the payload next
-              index = hrm.endOfHeadersIndex() + ProtocolDelimiter.CRLFCRLF.getBytes().length;
+              index = hrm.endOfHeadersIndex() + Delimiter.CRLFCRLF.getBytes().length;
 
               UByteArrayOutputStream ubaos = hrm.getDataStream();
               while((index = ubaos.indexOf(index, NAME_EQUAL_DOUBLE_QUOTE)) != -1)
@@ -96,9 +96,9 @@ public final class HTTPDecoder {
                 index += NAME_EQUAL_DOUBLE_QUOTE.length;
                 int indexEnd = ubaos.indexOf(index, DOUBLE_QUOTE);
                 String name = ubaos.getString(index, indexEnd - index);
-                index = ubaos.indexOf(indexEnd, ProtocolDelimiter.CRLFCRLF.getBytes());
-                index += ProtocolDelimiter.CRLFCRLF.getBytes().length;
-                indexEnd = ubaos.indexOf(index, ProtocolDelimiter.CRLF.getBytes());
+                index = ubaos.indexOf(indexEnd, Delimiter.CRLFCRLF.getBytes());
+                index += Delimiter.CRLFCRLF.getBytes().length;
+                indexEnd = ubaos.indexOf(index, Delimiter.CRLF.getBytes());
                 String value = ubaos.getString(index, indexEnd - index);
                 hmci.getParameters().add(new NVPair(name, value));
               }

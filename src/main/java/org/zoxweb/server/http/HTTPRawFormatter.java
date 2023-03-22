@@ -19,7 +19,7 @@ import java.util.List;
 
 import org.zoxweb.server.io.UByteArrayOutputStream;
 import org.zoxweb.shared.http.HTTPRequestLine;
-import org.zoxweb.shared.protocol.ProtocolDelimiter;
+import org.zoxweb.shared.protocol.Delimiter;
 import org.zoxweb.shared.util.GetNameValue;
 
 public class HTTPRawFormatter 
@@ -49,13 +49,13 @@ public class HTTPRawFormatter
 		{
 			ubaos = new UByteArrayOutputStream();
 			ubaos.write(firstLine);
-			ubaos.write(ProtocolDelimiter.CRLF.getBytes());
+			ubaos.write(Delimiter.CRLF.getBytes());
 			if (headers != null)
 			{
 				for (GetNameValue<String> gnv : headers)
 				{
 					ubaos.write(gnv.getName());
-					ubaos.write(ProtocolDelimiter.COLON.getBytes());
+					ubaos.write(Delimiter.COLON.getBytes());
 					String value = gnv.getValue();
 
 					if (value != null && value.length() > 0)
@@ -67,11 +67,11 @@ public class HTTPRawFormatter
 
 						ubaos.write( value);
 					}
-					ubaos.write(ProtocolDelimiter.CRLF.getBytes());
+					ubaos.write(Delimiter.CRLF.getBytes());
 				}
 			}
 
-			ubaos.write(ProtocolDelimiter.CRLF.getBytes());
+			ubaos.write(Delimiter.CRLF.getBytes());
 			
 			if (content != null)
 			{

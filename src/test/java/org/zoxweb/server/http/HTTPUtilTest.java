@@ -3,11 +3,10 @@ package org.zoxweb.server.http;
 import org.junit.jupiter.api.Test;
 import org.zoxweb.server.io.UByteArrayOutputStream;
 import org.zoxweb.shared.data.AddressDAO;
-import org.zoxweb.shared.data.TimeStampDAO;
 import org.zoxweb.shared.data.UUIDInfoDAO;
 import org.zoxweb.shared.http.HTTPMessageConfigInterface;
 import org.zoxweb.shared.http.HTTPStatusCode;
-import org.zoxweb.shared.protocol.ProtocolDelimiter;
+import org.zoxweb.shared.protocol.Delimiter;
 import org.zoxweb.shared.util.*;
 
 import java.io.IOException;
@@ -50,12 +49,12 @@ public class HTTPUtilTest {
     @Test
     public void parseHTTPRaw()
     {
-        String message = "GET /timestamp?a=b&c=d HTTP/1.1" + ProtocolDelimiter.CRLF
-                + "Content-Type: application/json" + ProtocolDelimiter.CRLF
-                + "User-Agent: Java/11.0.13" + ProtocolDelimiter.CRLF
-                + "Host: localhost:8443" + ProtocolDelimiter.CRLF
-                + "Accept: text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2" + ProtocolDelimiter.CRLF
-                + "Connection: keep-alive" + ProtocolDelimiter.CRLFCRLF
+        String message = "GET /timestamp?a=b&c=d HTTP/1.1" + Delimiter.CRLF
+                + "Content-Type: application/json" + Delimiter.CRLF
+                + "User-Agent: Java/11.0.13" + Delimiter.CRLF
+                + "Host: localhost:8443" + Delimiter.CRLF
+                + "Accept: text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2" + Delimiter.CRLF
+                + "Connection: keep-alive" + Delimiter.CRLFCRLF
                 ;
 
         HTTPRawMessage hrm = new HTTPRawMessage(message);

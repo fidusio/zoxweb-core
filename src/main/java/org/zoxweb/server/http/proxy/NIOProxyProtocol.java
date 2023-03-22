@@ -25,7 +25,7 @@ import org.zoxweb.server.net.*;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.shared.http.*;
 import org.zoxweb.shared.net.InetSocketAddressDAO;
-import org.zoxweb.shared.protocol.ProtocolDelimiter;
+import org.zoxweb.shared.protocol.Delimiter;
 import org.zoxweb.shared.security.SecurityStatus;
 import org.zoxweb.shared.util.NVBoolean;
 import org.zoxweb.shared.util.NVPair;
@@ -64,10 +64,10 @@ public class NIOProxyProtocol
 			remoteAddress = HTTPUtil.parseHost(hmci.getURI());
 			//if (hmci.getContentLength() > 0)
 			{
-				payloadIndex = ubaos.indexOf(ProtocolDelimiter.CRLFCRLF.getBytes());
+				payloadIndex = ubaos.indexOf(Delimiter.CRLFCRLF.getBytes());
 				if (payloadIndex > 0)
 				{
-					payloadIndex += ProtocolDelimiter.CRLFCRLF.getBytes().length;
+					payloadIndex += Delimiter.CRLFCRLF.getBytes().length;
 				}
 				else
 				{
@@ -429,10 +429,10 @@ public class NIOProxyProtocol
     			requestRawBuffer.reset();
 
 
-    			requestRawBuffer.write(requestMCCI.getHTTPVersion().getValue() + " 200 Connection established" + ProtocolDelimiter.CRLF);
+    			requestRawBuffer.write(requestMCCI.getHTTPVersion().getValue() + " 200 Connection established" + Delimiter.CRLF);
 				//requestRawBuffer.write(HTTPVersion.HTTP_1_0.getValue() + " 200 Connection established" + ProtocolDelimiter.CRLF);
     			//if (requestInfo.remoteAddress.getPort() != 80)
-    				requestRawBuffer.write(HTTPHeader.PROXY_AGENT + ": " +getName() + ProtocolDelimiter.CRLFCRLF);
+    				requestRawBuffer.write(HTTPHeader.PROXY_AGENT + ": " +getName() + Delimiter.CRLFCRLF);
     			//else
     			//	requestRawBuffer.write(ProtocolDelimiter.CRLF.getBytes());
     			

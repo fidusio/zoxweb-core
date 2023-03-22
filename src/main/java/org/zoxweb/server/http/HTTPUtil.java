@@ -29,7 +29,7 @@ import org.zoxweb.shared.data.SimpleMessage;
 import org.zoxweb.shared.http.*;
 import org.zoxweb.shared.net.InetSocketAddressDAO;
 import org.zoxweb.shared.protocol.MessageStatus;
-import org.zoxweb.shared.protocol.ProtocolDelimiter;
+import org.zoxweb.shared.protocol.Delimiter;
 import org.zoxweb.shared.util.*;
 
 import java.io.IOException;
@@ -135,7 +135,7 @@ public class HTTPUtil
 		if(hv == null)
 			hv = HTTPVersion.HTTP_1_1;
 		// write the first line
-		ubaos.write(hv.getValue() + " " + hcc.getHTTPStatusCode().CODE + " " +hcc.getHTTPStatusCode().REASON + ProtocolDelimiter.CRLF.getValue());
+		ubaos.write(hv.getValue() + " " + hcc.getHTTPStatusCode().CODE + " " +hcc.getHTTPStatusCode().REASON + Delimiter.CRLF.getValue());
 		// set content length if available
 		if (hcc.getContent() != null && hcc.getContent().length > 0)
 		{
@@ -147,10 +147,10 @@ public class HTTPUtil
 			// header.getName() + ": " + header.getValue())
 			ubaos.write(HTTPHeader.toBytes(header));
 			// header end of line
-		    ubaos.write(ProtocolDelimiter.CRLF.getValue());
+		    ubaos.write(Delimiter.CRLF.getValue());
 		}
 		// header separator
-		ubaos.write(ProtocolDelimiter.CRLF.getValue().getBytes());
+		ubaos.write(Delimiter.CRLF.getValue().getBytes());
 
 		if (hcc.getContent() != null && hcc.getContent().length > 0)
 		{
@@ -173,7 +173,7 @@ public class HTTPUtil
 
 		HTTPStatusCode hsc = HTTPStatusCode.statusByCode(rd.getStatus());
 		// write the first line
-		ubaos.write(HTTPVersion.HTTP_1_1.getValue() + " " + hsc.CODE + " " +hsc.REASON + ProtocolDelimiter.CRLF.getValue());
+		ubaos.write(HTTPVersion.HTTP_1_1.getValue() + " " + hsc.CODE + " " +hsc.REASON + Delimiter.CRLF.getValue());
 		// write headers
 
 		Set<Map.Entry<String, List<String>>> set = rd.getHeaders().entrySet();
@@ -199,11 +199,11 @@ public class HTTPUtil
 					firstPass = true;
 				}
 
-				ubaos.write(ProtocolDelimiter.CRLF.getValue().getBytes());
+				ubaos.write(Delimiter.CRLF.getValue().getBytes());
 			}
 		}
 
-		ubaos.write(ProtocolDelimiter.CRLF.getValue().getBytes());
+		ubaos.write(Delimiter.CRLF.getValue().getBytes());
 		ubaos.write(rd.getData());
 
 		return ubaos;
@@ -237,7 +237,7 @@ public class HTTPUtil
 		}
 
 		// first line http request
-		ubaos.write(hcc.getMethod().getName() + " " + hcc.getURI() + " " + hcc.getHTTPVersion().getValue() + ProtocolDelimiter.CRLF.getValue());
+		ubaos.write(hcc.getMethod().getName() + " " + hcc.getURI() + " " + hcc.getHTTPVersion().getValue() + Delimiter.CRLF.getValue());
 		// headers
 		if (hcc.getContent() != null && hcc.getContent().length > 0)
 		{
@@ -246,10 +246,10 @@ public class HTTPUtil
 		//hcc.getHeaderParameters().remove(HTTPHeaderName.HOST.getName());
 		for (GetNameValue<String> header : hcc.getHeaders().asArrayValuesString().values())
 		{
-			ubaos.write(header.getName() + ": " + header.getValue() + ProtocolDelimiter.CRLF.getValue());
+			ubaos.write(header.getName() + ": " + header.getValue() + Delimiter.CRLF.getValue());
 		}
 		// header termination
-		ubaos.write(ProtocolDelimiter.CRLF.getBytes());
+		ubaos.write(Delimiter.CRLF.getBytes());
 
 		// content if available
 		if (hcc.getContent() != null && hcc.getContent().length > 0)
@@ -665,7 +665,7 @@ public class HTTPUtil
 
 	public static String parseURI(String url)
 	{
-		int index = url.indexOf(ProtocolDelimiter.COLON_PATH.getValue());
+		int index = url.indexOf(Delimiter.COLON_PATH.getValue());
 		int hostStart;
 		if (index == -1)
 		{
@@ -673,7 +673,7 @@ public class HTTPUtil
 		}
 		else
 		{
-			hostStart = index + ProtocolDelimiter.COLON_PATH.getValue().getBytes().length;
+			hostStart = index + Delimiter.COLON_PATH.getValue().getBytes().length;
 		}
 		int hostEnd;
 		index = url.indexOf('/', hostStart);
@@ -698,7 +698,7 @@ public class HTTPUtil
 	}
 	public static InetSocketAddressDAO parseHost(String url, int defaultPort)
 	{
-		int index = url.indexOf(ProtocolDelimiter.COLON_PATH.getValue());
+		int index = url.indexOf(Delimiter.COLON_PATH.getValue());
 		int hostStart;
 		if (index == -1)
 		{
@@ -706,7 +706,7 @@ public class HTTPUtil
 		}
 		else
 		{
-			hostStart = index + ProtocolDelimiter.COLON_PATH.getValue().getBytes().length;
+			hostStart = index + Delimiter.COLON_PATH.getValue().getBytes().length;
 		}
 
 		// check if there is a user:password@
@@ -1083,7 +1083,7 @@ public class HTTPUtil
 		throws NullPointerException, IllegalArgumentException
 	{
 		// locate the end of headers
-		int endOfHeadersIndex = ubaos.indexOf(ProtocolDelimiter.CRLFCRLF.getBytes());
+		int endOfHeadersIndex = ubaos.indexOf(Delimiter.CRLFCRLF.getBytes());
 
 		if (endOfHeadersIndex > 0 && (hmci == null || hmci.getHeaders().size() == 0))
 		{
@@ -1091,7 +1091,7 @@ public class HTTPUtil
 			int lineCounter = 0;
 			for(int i=0; i < endOfHeadersIndex;)
 			{
-				int endOfCurrentLine = ubaos.indexOf(i, ProtocolDelimiter.CRLF.getBytes(), 0, ProtocolDelimiter.CRLF.getBytes().length);
+				int endOfCurrentLine = ubaos.indexOf(i, Delimiter.CRLF.getBytes(), 0, Delimiter.CRLF.getBytes().length);
 
 				if (endOfCurrentLine != -1 )
 				{
@@ -1127,13 +1127,13 @@ public class HTTPUtil
 					}
 				}
 
-				i=endOfCurrentLine+ProtocolDelimiter.CRLF.getBytes().length;
+				i=endOfCurrentLine+ Delimiter.CRLF.getBytes().length;
 			}
 		}
 
 		if (!headerOnly && hmci != null && endOfHeadersIndex !=-1)
 		{
-			byte[] content = Arrays.copyOfRange(ubaos.getInternalBuffer(), endOfHeadersIndex + ProtocolDelimiter.CRLFCRLF.getBytes().length , ubaos.size());
+			byte[] content = Arrays.copyOfRange(ubaos.getInternalBuffer(), endOfHeadersIndex + Delimiter.CRLFCRLF.getBytes().length , ubaos.size());
 
 			if (content != null && content.length > 0)
 			{

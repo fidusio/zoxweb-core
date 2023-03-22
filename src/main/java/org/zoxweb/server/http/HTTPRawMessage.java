@@ -20,7 +20,7 @@ import org.zoxweb.shared.http.HTTPMessageConfig;
 import org.zoxweb.shared.http.HTTPMessageConfigInterface;
 import org.zoxweb.shared.http.HTTPMethod;
 import org.zoxweb.shared.http.HTTPMimeType;
-import org.zoxweb.shared.protocol.ProtocolDelimiter;
+import org.zoxweb.shared.protocol.Delimiter;
 import org.zoxweb.shared.util.GetNameValue;
 import org.zoxweb.shared.util.SharedStringUtil;
 import org.zoxweb.shared.util.SharedUtil;
@@ -80,7 +80,7 @@ public class HTTPRawMessage
 			int lineCounter =0;
 			while (parseIndex < endOfHeadersIndex)
 			{
-				int endOfCurrentLine = ubaos.indexOf(parseIndex, ProtocolDelimiter.CRLF.getBytes());//, 0, ProtocolDelimiter.CRLF.getBytes().length);
+				int endOfCurrentLine = ubaos.indexOf(parseIndex, Delimiter.CRLF.getBytes());//, 0, ProtocolDelimiter.CRLF.getBytes().length);
 				
 				if (endOfCurrentLine != -1)
 				{
@@ -118,13 +118,34 @@ public class HTTPRawMessage
 							}
 						}
 					}
-					parseIndex = endOfCurrentLine+ProtocolDelimiter.CRLF.getBytes().length;
+					parseIndex = endOfCurrentLine+ Delimiter.CRLF.getBytes().length;
 				}
 
 
 			}
 		}
 		
+	}
+
+
+	private HTTPMethod  parseHTTPMethod()
+	{
+		int firstSpaceIndex = ubaos.indexOf(0, Delimiter.SPACE.getBytes());
+		if (firstSpaceIndex != -1)
+		{
+			String maybeHttpMethod = ubaos.getString(0, firstSpaceIndex);
+			// try to parse the method
+			HTTPMethod ret =  HTTPMethod.lookup(ubaos.getString(0, firstSpaceIndex));
+			if (ret == null)
+			{
+				throw new IllegalArgumentException("Invalid HTTP method " + maybeHttpMethod);
+			}
+		}
+		else if(ubaos.size() > 25)
+		{
+			throw new IllegalArgumentException("HTTP method name too big");
+		}
+		return null;
 	}
 	
 	public synchronized boolean isMessageComplete()
@@ -133,7 +154,7 @@ public class HTTPRawMessage
 		{
 			if (hmci.getContentLength() !=-1)
 			{
-				return ((endOfHeadersIndex + hmci.getContentLength()  + ProtocolDelimiter.CRLFCRLF.getBytes().length) == endOfMessageIndex());
+				return ((endOfHeadersIndex + hmci.getContentLength()  + Delimiter.CRLFCRLF.getBytes().length) == endOfMessageIndex());
 			}
 			return true;
 		}
@@ -165,14 +186,18 @@ public class HTTPRawMessage
 
 	public synchronized HTTPMessageConfigInterface parse(boolean client)
 	{
+		if(client)
+			parseHTTPMethod();
+
 		if (endOfHeadersIndex() == -1) {
 			// detect end of message
-			endOfHeadersIndex = ubaos.indexOf(ProtocolDelimiter.CRLFCRLF.getBytes());
+			endOfHeadersIndex = ubaos.indexOf(Delimiter.CRLFCRLF.getBytes());
 
 			if (endOfHeadersIndex != -1) {
 				parseRawHeaders(client);
 			}
 		}
+
 		if (client && isMessageComplete())
 		{
 
@@ -204,7 +229,7 @@ public class HTTPRawMessage
 						case TEXT_YAML:
 
 						case APPLICATION_JSON:
-							hmci.setContent(ubaos.copyBytes(endOfHeadersIndex +ProtocolDelimiter.CRLFCRLF.getBytes().length));
+							hmci.setContent(ubaos.copyBytes(endOfHeadersIndex + Delimiter.CRLFCRLF.getBytes().length));
 							break;
 						case IMAGE_BMP:
 							break;

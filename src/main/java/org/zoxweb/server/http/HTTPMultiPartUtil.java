@@ -27,7 +27,7 @@ import java.util.logging.Logger;
 
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.shared.http.*;
-import org.zoxweb.shared.protocol.ProtocolDelimiter;
+import org.zoxweb.shared.protocol.Delimiter;
 import org.zoxweb.shared.util.ArrayValues;
 
 import org.zoxweb.shared.util.NVPair;
@@ -84,7 +84,7 @@ public final class HTTPMultiPartUtil
 	 */
 	public static String formatStartBoundary(String boundary)
 	{
-		return HTTPAttribute.BOUNDARY_EDGE+ boundary + ProtocolDelimiter.CRLF;
+		return HTTPAttribute.BOUNDARY_EDGE+ boundary + Delimiter.CRLF;
 	}
 	
 	
@@ -95,7 +95,7 @@ public final class HTTPMultiPartUtil
 	 */
 	public static String formatEndBoundary(String boundary)
 	{
-		return HTTPAttribute.BOUNDARY_EDGE + boundary + HTTPAttribute.BOUNDARY_EDGE + ProtocolDelimiter.CRLF;
+		return HTTPAttribute.BOUNDARY_EDGE + boundary + HTTPAttribute.BOUNDARY_EDGE + Delimiter.CRLF;
 	}
 	
 	
@@ -118,10 +118,10 @@ public final class HTTPMultiPartUtil
 			if (gnv.getName() != null && gnv.getValue() != null)
 			{
 				sb.append( gnv.getName());
-				sb.append( ProtocolDelimiter.EQUAL);
-				sb.append( ProtocolDelimiter.DOUBLE_QUOTE);
+				sb.append( Delimiter.EQUAL);
+				sb.append( Delimiter.DOUBLE_QUOTE);
 				sb.append( gnv.getValue());
-				sb.append( ProtocolDelimiter.DOUBLE_QUOTE);
+				sb.append( Delimiter.DOUBLE_QUOTE);
 			}
 			else if (gnv.getName() == null && gnv.getValue() != null)
 			{
@@ -138,19 +138,19 @@ public final class HTTPMultiPartUtil
 		{
 			ArrayList<GetNameValue<String>> contentDisposition = headers.get(HTTPHeader.CONTENT_DISPOSITION.getName());
 
-			sb.append(HTTPHeader.CONTENT_DISPOSITION.getName()+ProtocolDelimiter.COLON+ProtocolDelimiter.SPACE+
-					   HTTPAttribute.FORM_DATA+ProtocolDelimiter.SEMICOLON+ProtocolDelimiter.SPACE+ HTTPAttribute.NAME+ProtocolDelimiter.EQUAL +
+			sb.append(HTTPHeader.CONTENT_DISPOSITION.getName()+ Delimiter.COLON+ Delimiter.SPACE+
+					   HTTPAttribute.FORM_DATA+ Delimiter.SEMICOLON+ Delimiter.SPACE+ HTTPAttribute.NAME+ Delimiter.EQUAL +
 					   "\"" + hmpp.getName() + "\"" );
 			
 			if (hmpp.getFileName() != null)
 			{
-				sb.append( ProtocolDelimiter.SEMICOLON);
-				sb.append( ProtocolDelimiter.SPACE);
+				sb.append( Delimiter.SEMICOLON);
+				sb.append( Delimiter.SPACE);
 				sb.append( HTTPAttribute.FILENAME );
-				sb.append( ProtocolDelimiter.EQUAL);
-				sb.append( ProtocolDelimiter.DOUBLE_QUOTE);
+				sb.append( Delimiter.EQUAL);
+				sb.append( Delimiter.DOUBLE_QUOTE);
 				sb.append( hmpp.getFileName());
-				sb.append( ProtocolDelimiter.DOUBLE_QUOTE);
+				sb.append( Delimiter.DOUBLE_QUOTE);
 			}
 			
 			if (contentDisposition != null)
@@ -159,18 +159,18 @@ public final class HTTPMultiPartUtil
 				{
 					//if ( !"name".equalsIgnoreCase( gnv.getName()))
 					{
-						sb.append( ProtocolDelimiter.SEMICOLON);
-						sb.append( ProtocolDelimiter.SPACE);
+						sb.append( Delimiter.SEMICOLON);
+						sb.append( Delimiter.SPACE);
 						appendNameValue(sb, gnv);
 						
 					}
 				}
-				sb.append( ProtocolDelimiter.CRLF);
+				sb.append( Delimiter.CRLF);
 				
 			}
 			else
 			{
-				sb.append( ProtocolDelimiter.CRLF);
+				sb.append( Delimiter.CRLF);
 			}
 			
 			Set<Map.Entry<String, ArrayList<GetNameValue<String>>>> allHeaders = headers.entrySet();
@@ -180,8 +180,8 @@ public final class HTTPMultiPartUtil
 				if (me.getValue() != contentDisposition)
 				{
 					sb.append( me.getKey());
-					sb.append( ProtocolDelimiter.COLON);
-					sb.append( ProtocolDelimiter.SPACE);
+					sb.append( Delimiter.COLON);
+					sb.append( Delimiter.SPACE);
 					ArrayList<GetNameValue<String>> headersParameters = me.getValue();
 
 					if (headersParameters!= null)
@@ -190,26 +190,26 @@ public final class HTTPMultiPartUtil
 						{
 							if (i > 0)
 							{
-								sb.append( ProtocolDelimiter.SEMICOLON);
-								sb.append( ProtocolDelimiter.SPACE);
+								sb.append( Delimiter.SEMICOLON);
+								sb.append( Delimiter.SPACE);
 							}
 
 							appendNameValue(sb, headersParameters.get(i));
 						}
 
-						sb.append( ProtocolDelimiter.CRLF);
+						sb.append( Delimiter.CRLF);
 					}
 					else
 					{
-						sb.append( ProtocolDelimiter.CRLF);	
+						sb.append( Delimiter.CRLF);
 					}
 					
 				}
 			}
 					   // we need to add all the extra fields and headers  here
 
-			sb.append( ProtocolDelimiter.CRLF + 
-					   hmpp.getValue() +ProtocolDelimiter.CRLF);
+			sb.append( Delimiter.CRLF +
+					   hmpp.getValue() + Delimiter.CRLF);
 		}
 
 		return sb.toString();
@@ -217,10 +217,10 @@ public final class HTTPMultiPartUtil
 
 	public static String formatMultiPartNameValue(String name, String value)
 	{
-		return HTTPHeader.CONTENT_DISPOSITION.getName() + ProtocolDelimiter.COLON+ProtocolDelimiter.SPACE +
-			   HTTPAttribute.FORM_DATA + ProtocolDelimiter.SEMICOLON + ProtocolDelimiter.SPACE +
-			   HTTPAttribute.NAME + ProtocolDelimiter.EQUAL + "\"" + name + "\"" +
-			   ProtocolDelimiter.CRLFCRLF + value + ProtocolDelimiter.CRLF;
+		return HTTPHeader.CONTENT_DISPOSITION.getName() + Delimiter.COLON+ Delimiter.SPACE +
+			   HTTPAttribute.FORM_DATA + Delimiter.SEMICOLON + Delimiter.SPACE +
+			   HTTPAttribute.NAME + Delimiter.EQUAL + "\"" + name + "\"" +
+			   Delimiter.CRLFCRLF + value + Delimiter.CRLF;
 	}
 
 	/**
@@ -307,19 +307,19 @@ public final class HTTPMultiPartUtil
 			ArrayList<GetNameValue<String>> contentDisposition = headers.get(HTTPHeader.CONTENT_DISPOSITION.getName());
 			
 			
-			sb.append(HTTPHeader.CONTENT_DISPOSITION.getName()+ProtocolDelimiter.COLON+ProtocolDelimiter.SPACE+
-					   HTTPAttribute.FORM_DATA+ProtocolDelimiter.SEMICOLON+ProtocolDelimiter.SPACE+ HTTPAttribute.NAME+ProtocolDelimiter.EQUAL +
+			sb.append(HTTPHeader.CONTENT_DISPOSITION.getName()+ Delimiter.COLON+ Delimiter.SPACE+
+					   HTTPAttribute.FORM_DATA+ Delimiter.SEMICOLON+ Delimiter.SPACE+ HTTPAttribute.NAME+ Delimiter.EQUAL +
 					   "\"" + hmpp.getName() + "\"" );
 			
 			if (hmpp.getFileName() != null)
 			{
-				sb.append( ProtocolDelimiter.SEMICOLON);
-				sb.append( ProtocolDelimiter.SPACE);
+				sb.append( Delimiter.SEMICOLON);
+				sb.append( Delimiter.SPACE);
 				sb.append( HTTPAttribute.FILENAME );
-				sb.append( ProtocolDelimiter.EQUAL);
-				sb.append( ProtocolDelimiter.DOUBLE_QUOTE);
+				sb.append( Delimiter.EQUAL);
+				sb.append( Delimiter.DOUBLE_QUOTE);
 				sb.append( hmpp.getFileName());
-				sb.append( ProtocolDelimiter.DOUBLE_QUOTE);
+				sb.append( Delimiter.DOUBLE_QUOTE);
 			}
 			
 			if (contentDisposition != null)
@@ -328,17 +328,17 @@ public final class HTTPMultiPartUtil
 				{
 					//if ( !"name".equalsIgnoreCase( gnv.getName()))
 					{
-						sb.append( ProtocolDelimiter.SEMICOLON);
-						sb.append( ProtocolDelimiter.SPACE);
+						sb.append( Delimiter.SEMICOLON);
+						sb.append( Delimiter.SPACE);
 						appendNameValue(sb, gnv);
 					}
 				}
 
-				sb.append( ProtocolDelimiter.CRLF);
+				sb.append( Delimiter.CRLF);
 			}
 			else
 			{
-				sb.append( ProtocolDelimiter.CRLF);
+				sb.append( Delimiter.CRLF);
 			}
 			
 			Set<Map.Entry<String, ArrayList<GetNameValue<String>>>> allHeaders = headers.entrySet();
@@ -348,8 +348,8 @@ public final class HTTPMultiPartUtil
 				if (me.getValue() != contentDisposition)
 				{
 					sb.append( me.getKey());
-					sb.append( ProtocolDelimiter.COLON);
-					sb.append( ProtocolDelimiter.SPACE);
+					sb.append( Delimiter.COLON);
+					sb.append( Delimiter.SPACE);
 					ArrayList<GetNameValue<String>> headersParameters = me.getValue();
 
 					if (headersParameters!= null)
@@ -358,18 +358,18 @@ public final class HTTPMultiPartUtil
 						{
 							if (i > 0)
 							{
-								sb.append( ProtocolDelimiter.SEMICOLON);
-								sb.append( ProtocolDelimiter.SPACE);
+								sb.append( Delimiter.SEMICOLON);
+								sb.append( Delimiter.SPACE);
 								
 							}
 							appendNameValue(sb, headersParameters.get(i));
 						}
 
-						sb.append( ProtocolDelimiter.CRLF);
+						sb.append( Delimiter.CRLF);
 					}
 					else
 					{
-						sb.append( ProtocolDelimiter.CRLF);	
+						sb.append( Delimiter.CRLF);
 					}
 				}
 			}
@@ -377,7 +377,7 @@ public final class HTTPMultiPartUtil
 			//log.info(sb.toString());
 			os.write(sb.toString().getBytes());
 					   
-			os.write(ProtocolDelimiter.CRLF.getBytes());
+			os.write(Delimiter.CRLF.getBytes());
 			
 			//hmpp.getValue()
 			if (hmpp.getInputStreamValue() != null)
@@ -411,7 +411,7 @@ public final class HTTPMultiPartUtil
 				//log.info("Value: " + hmpp.getValue());
 			}
 					   
-			os.write( ProtocolDelimiter.CRLF.getBytes());
+			os.write( Delimiter.CRLF.getBytes());
 						
 		}
 	}
