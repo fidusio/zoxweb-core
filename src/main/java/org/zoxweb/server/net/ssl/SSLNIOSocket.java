@@ -185,7 +185,7 @@ public class SSLNIOSocket
 		try
     	{
 			// begin handshake will be called once subsequent calls are ignored
-			//config.beginHandshake(false);
+			config.beginHandshake(false);
 
 			if (log.isEnabled()) log.getLogger().info("AcceptNewData: " + key);
 			if (key.channel() == config.sslChannel && config.sslChannel.isConnected())
@@ -231,7 +231,7 @@ public class SSLNIOSocket
 		sessionCallback.setConfig(config);
 		sslStateMachine.start(true);
 		// not sure about
-		config.beginHandshake(false);
+		//config.beginHandshake(false);
 		getSelectorController().register(asc, SelectionKey.OP_READ, this, isBlocking);
 	}
 

@@ -18,7 +18,7 @@ public class SSLNIOSocketFactory
 
     public SSLNIOSocketFactory()
     {
-        complexSetup = true;
+        complexSetup = false;
     }
     public SSLNIOSocketFactory(SSLContextInfo sslContext, InstanceCreator<SSLSessionCallback> instanceCreator)
     {
