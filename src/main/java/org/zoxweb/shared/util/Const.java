@@ -15,6 +15,7 @@
  */
 package org.zoxweb.shared.util;
 
+import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.shared.db.QueryMarker;
 
 import java.util.Date;
@@ -131,6 +132,9 @@ public class Const {
     LOW("low", false),
     YES("yes", true),
     NO("no", false),
+    ONE("1", true),
+    ZERO("0", false),
+
 
     ;
     private final boolean value;
@@ -163,6 +167,11 @@ public class Const {
       }
 
       return ret.value;
+    }
+
+    public static int toInt(String str)
+    {
+      return lookupValue(str) ? 1 : 0;
     }
 
     public static boolean lookupValue(int val)
@@ -402,6 +411,18 @@ public class Const {
     AS_IS,// as is
   }
 
+  /**
+   * Define the executor pool type
+   */
+  public enum ExecPool
+  {
+    // no executor
+    NO_EXEC,
+    // TaskUtil.getDefaultTaskProcessor()
+    DEFAULT,
+    // Java executor pool service
+    JAVA,
+  }
 
 
 
