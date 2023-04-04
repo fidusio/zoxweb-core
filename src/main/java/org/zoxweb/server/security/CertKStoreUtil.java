@@ -33,7 +33,7 @@ public class CertKStoreUtil {
         info.set(X509CertInfo.ISSUER, owner);
         info.set(X509CertInfo.KEY, new CertificateX509Key(pair.getPublic()));
         info.set(X509CertInfo.VERSION, new CertificateVersion(CertificateVersion.V3));
-        AlgorithmId algo = new AlgorithmId(AlgorithmId.md5WithRSAEncryption_oid);
+        AlgorithmId algo = new AlgorithmId(AlgorithmId.SHA256_oid);
         info.set(X509CertInfo.ALGORITHM_ID, new CertificateAlgorithmId(algo));
 
         // Sign the cert to identify the algorithm that's used.
