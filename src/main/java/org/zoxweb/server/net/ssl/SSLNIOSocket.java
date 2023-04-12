@@ -236,7 +236,6 @@ public class SSLNIOSocket
 		getSelectorController().register(asc, SelectionKey.OP_READ, this, isBlocking);
 	}
 
-
 //	@Override
 //	public void setupConnection(AbstractSelectableChannel asc, boolean isBlocking) throws IOException
 //	{
