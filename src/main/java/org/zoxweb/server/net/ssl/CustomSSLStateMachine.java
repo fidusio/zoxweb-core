@@ -10,10 +10,9 @@ import org.zoxweb.shared.util.SharedUtil;
 import javax.net.ssl.SSLEngineResult;
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
+
 
 import static javax.net.ssl.SSLEngineResult.HandshakeStatus.*;
 
@@ -43,7 +42,17 @@ class CustomSSLStateMachine
     {
         return counter.get();
     }
-    private final Map<Enum<?>, Consumer<SSLSessionCallback>> statesCallback = new LinkedHashMap<Enum<?>, Consumer<SSLSessionCallback>>();
+//    private static final Map<Enum<?>, BiConsumer<SSLSessionConfig, SSLSessionCallback>>
+//            statesCallback = new LinkedHashMap<Enum<?>, BiConsumer<SSLSessionConfig, SSLSessionCallback>>();
+//
+//    static
+//    {
+//        statesCallback.put(NEED_WRAP, new NeedWrap());
+//        statesCallback.put(NEED_UNWRAP, new NeedUnwrap());
+//        statesCallback.put(FINISHED, new Finished());
+//        statesCallback.put(NEED_TASK,  new NeedTask());
+//        statesCallback.put(NOT_HANDSHAKING, new NotHandshaking());
+//    }
     CustomSSLStateMachine(SSLNIOSocket sslns)
     {
         this.sslns = sslns;
@@ -51,11 +60,11 @@ class CustomSSLStateMachine
 
 
 
-        statesCallback.put(NEED_WRAP, new NeedWrap());
-        statesCallback.put(NEED_UNWRAP, new NeedUnwrap());
-        statesCallback.put(FINISHED, new Finished());
-        statesCallback.put(NEED_TASK,  new NeedTask());
-        statesCallback.put(NOT_HANDSHAKING, new NotHandshaking());
+//        statesCallback.put(NEED_WRAP, new NeedWrap());
+//        statesCallback.put(NEED_UNWRAP, new NeedUnwrap());
+//        statesCallback.put(FINISHED, new Finished());
+//        statesCallback.put(NEED_TASK,  new NeedTask());
+//        statesCallback.put(NOT_HANDSHAKING, new NotHandshaking());
         this.config.sslConnectionHelper = this;
         id = counter.incrementAndGet();
     }
@@ -71,10 +80,11 @@ class CustomSSLStateMachine
         return id;
     }
 
-    class NeedWrap implements Consumer<SSLSessionCallback>
+    static class NeedWrap implements BiConsumer<SSLSessionConfig, SSLSessionCallback>
     {
+        static final NeedWrap DEFAULT = new NeedWrap();
         @Override
-        public void accept(SSLSessionCallback callback) {
+        public void accept(SSLSessionConfig config, SSLSessionCallback callback) {
             long ts = System.currentTimeMillis();
 
             if (config.getHandshakeStatus() == NEED_WRAP) {
@@ -94,7 +104,7 @@ class CustomSSLStateMachine
                             int written = ByteBufferUtil.smartWrite(null, config.sslChannel, config.outSSLNetData);
                             if (log.isEnabled())
                                 log.getLogger().info(result.getHandshakeStatus() + " After writing data HANDSHAKING-NEED_WRAP: " + config.outSSLNetData + " written:" + written);
-                            dispatch(result.getHandshakeStatus(), callback);
+                            config.sslConnectionHelper.dispatch(result.getHandshakeStatus(), callback);
                             break;
                         case CLOSED:
                             config.close();
@@ -113,10 +123,11 @@ class CustomSSLStateMachine
     }
 
 
-     class NeedUnwrap implements Consumer<SSLSessionCallback>
+     static class NeedUnwrap implements BiConsumer<SSLSessionConfig, SSLSessionCallback>
      {
+         static final NeedUnwrap DEFAULT = new NeedUnwrap();
         @Override
-        public void accept(SSLSessionCallback callback) {
+        public void accept(SSLSessionConfig config, SSLSessionCallback callback) {
 
             long ts = System.currentTimeMillis();
             if (log.isEnabled()) log.getLogger().info("Entry: " + config.getHandshakeStatus());
@@ -157,7 +168,7 @@ class CustomSSLStateMachine
                                 throw new IllegalStateException("NEED_UNWRAP should never happen: " + result.getStatus());
                                 // this should never happen
                             case OK:
-                                dispatch(result.getHandshakeStatus(), callback);
+                                config.sslConnectionHelper.dispatch(result.getHandshakeStatus(), callback);
                                 break;
                             case CLOSED:
                                 // check result here
@@ -178,10 +189,11 @@ class CustomSSLStateMachine
         }
     }
 
-    class NeedTask implements Consumer<SSLSessionCallback>
+    static class NeedTask implements BiConsumer<SSLSessionConfig, SSLSessionCallback>
     {
+        static final NeedTask DEFAULT = new NeedTask();
         @Override
-        public void accept(SSLSessionCallback callback)
+        public void accept(SSLSessionConfig config, SSLSessionCallback callback)
         {
             long ts = System.currentTimeMillis();
 
@@ -197,16 +209,17 @@ class CustomSSLStateMachine
             if (log.isEnabled())
                 log.getLogger().info("After run: " + status);
             rcNeedTask.register(ts);
-            dispatch(status, callback);
+            config.sslConnectionHelper.dispatch(status, callback);
 
         }
     }
 
 
-    class Finished implements Consumer<SSLSessionCallback>
+    static class  Finished implements BiConsumer<SSLSessionConfig, SSLSessionCallback>
     {
+        static final Finished DEFAULT = new Finished();
         @Override
-        public void accept(SSLSessionCallback callback)
+        public void accept(SSLSessionConfig config, SSLSessionCallback callback)
         {
             long ts = System.currentTimeMillis();
 
@@ -216,7 +229,7 @@ class CustomSSLStateMachine
         if(config.remoteAddress != null)
         {
             // we have a SSL tunnel
-            createRemoteConnection();
+            config.sslConnectionHelper.createRemoteConnection();
         }
 
             if (config.inSSLNetData.position() > 0)
@@ -227,7 +240,7 @@ class CustomSSLStateMachine
                 // ||-----------------------||
                 // The buffer has app data that needs to be decrypted
                 //**************************************************
-                dispatch(config.getHandshakeStatus(), callback);
+                config.sslConnectionHelper.dispatch(config.getHandshakeStatus(), callback);
             }
 
             ts = System.currentTimeMillis() - ts;
@@ -236,10 +249,11 @@ class CustomSSLStateMachine
         }
     }
 
-     class NotHandshaking implements Consumer<SSLSessionCallback>
+    static class NotHandshaking implements BiConsumer<SSLSessionConfig, SSLSessionCallback>
     {
+        static final NotHandshaking DEFAULT = new NotHandshaking();
         @Override
-        public void accept(SSLSessionCallback callback)
+        public void accept(SSLSessionConfig config, SSLSessionCallback callback)
         {
             long ts = System.currentTimeMillis();
             if(log.isEnabled()) log.getLogger().info("" + config.getHandshakeStatus());
@@ -297,7 +311,7 @@ class CustomSSLStateMachine
                     }
                 }
                 else
-                    dispatch(config.getHandshakeStatus(), callback);
+                    config.sslConnectionHelper.dispatch(config.getHandshakeStatus(), callback);
 
             }
             ts = System.currentTimeMillis() - ts;
@@ -308,30 +322,30 @@ class CustomSSLStateMachine
 
     public void dispatch(SSLEngineResult.HandshakeStatus status, SSLSessionCallback callback)
     {
-        Consumer<SSLSessionCallback> function = statesCallback.get(status);
-        if(function != null)
-            function.accept(callback);
+//        BiConsumer<SSLSessionConfig, SSLSessionCallback> function = statesCallback.get(status);
+//        if(function != null)
+//            function.accept(config, callback);
 
 
-//        switch(status)
-//        {
-//
-//            case NOT_HANDSHAKING:
-//                notHandshaking.accept(callback);
-//                break;
-//            case FINISHED:
-//                finished.accept(callback);
-//                break;
-//            case NEED_TASK:
-//                needTask.accept(callback);
-//                break;
-//            case NEED_WRAP:
-//                needWrap.accept(callback);
-//                break;
-//            case NEED_UNWRAP:
-//                needUnwrap.accept(callback);
-//                break;
-//        }
+        switch(status)
+        {
+
+            case NOT_HANDSHAKING:
+                NotHandshaking.DEFAULT.accept(config, callback);
+                break;
+            case FINISHED:
+                Finished.DEFAULT.accept(config, callback);
+                break;
+            case NEED_TASK:
+                NeedTask.DEFAULT.accept(config, callback);
+                break;
+            case NEED_WRAP:
+                NeedWrap.DEFAULT.accept(config, callback);
+                break;
+            case NEED_UNWRAP:
+                NeedUnwrap.DEFAULT.accept(config, callback);
+                break;
+        }
     }
 
     @Override

@@ -220,7 +220,8 @@ public class SSLNIOSocket
 
 
 	@Override
-	public void setupConnection(AbstractSelectableChannel asc, boolean isBlocking) throws IOException {
+	public void setupConnection(AbstractSelectableChannel asc, boolean isBlocking) throws IOException
+	{
 		SSLStateMachine sslStateMachine = SSLStateMachine.create(this);
     	sslDispatcher = sslStateMachine;
 		config = sslStateMachine.getConfig();
@@ -236,8 +237,9 @@ public class SSLNIOSocket
 	}
 
 
-
-//	public void setupConnection(AbstractSelectableChannel asc, boolean isBlocking) throws IOException {
+//	@Override
+//	public void setupConnection(AbstractSelectableChannel asc, boolean isBlocking) throws IOException
+//	{
 //		config = new SSLSessionConfig(sslContext);//sslStateMachine.getConfig();
 //		config.selectorController = getSelectorController();
 //		config.sslChannel = (SocketChannel) asc;
@@ -245,7 +247,6 @@ public class SSLNIOSocket
 //		config.sslOutputStream = new SSLChannelOutputStream(config, 512 );
 //		sessionCallback.setConfig(config);
 //		sslDispatcher = new CustomSSLStateMachine(this);
-//		//sslStateMachine.start(true);
 //		// not sure about
 //		// start the handshake here
 //		//config.beginHandshake(false);
