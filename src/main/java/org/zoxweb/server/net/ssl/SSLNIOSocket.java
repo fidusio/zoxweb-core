@@ -248,9 +248,8 @@ public class SSLNIOSocket
 //		//sslStateMachine.start(true);
 //		// not sure about
 //		// start the handshake here
-//		config.beginHandshake(false);
-//		phSChannel = (SocketChannel) asc;
-//		registerReadable(isBlocking);
+//		//config.beginHandshake(false);
+//		getSelectorController().register(asc, SelectionKey.OP_READ, this, isBlocking);
 //	}
 
 

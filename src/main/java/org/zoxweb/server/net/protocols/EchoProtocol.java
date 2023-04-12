@@ -70,9 +70,9 @@ public class EchoProtocol
         {
 
             // Plain socket port not encrypted
-            int port = 1024;
+            int port = 1025;
             // Secure socket port encrypted port
-            int sPort = 1025;
+            int sPort = 1026;
             // Socket backlog
             int backlog = 128;
             // Creating the NIOSocket with and executor object

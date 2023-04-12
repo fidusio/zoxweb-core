@@ -34,7 +34,7 @@ public class HTTPRawMessage
 	private int endOfHeadersIndex = -1;
 	private int parseIndex = 0;
 	private String firstLine = null;
-	private final HTTPMessageConfigInterface hmci = new HTTPMessageConfig();
+	private HTTPMessageConfigInterface hmci = new HTTPMessageConfig();
 
 	public HTTPRawMessage(String msg)
 	{
@@ -143,7 +143,7 @@ public class HTTPRawMessage
 		}
 		else if(ubaos.size() > 25)
 		{
-			throw new IllegalArgumentException("HTTP method name too big");
+			throw new IllegalArgumentException("HTTP method token too big");
 		}
 		return null;
 	}
@@ -276,6 +276,8 @@ public class HTTPRawMessage
 		parseIndex = 0;
 		firstLine = null;
 		ubaos.reset();
+		hmci = new HTTPMessageConfig();
+
 	}
 
 	public HTTPMessageConfigInterface getHTTPMessageConfig() {
