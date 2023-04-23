@@ -278,26 +278,44 @@ class CustomSSLStateMachine
 
     public void dispatch(SSLEngineResult.HandshakeStatus status, SSLSessionCallback callback)
     {
-
-        switch(status.name())
+        switch(status)
         {
 
-            case "NOT_HANDSHAKING":
+            case NOT_HANDSHAKING:
                 notHandshaking(callback);
                 break;
-            case "FINISHED":
+            case FINISHED:
                 finished(callback);
                 break;
-            case "NEED_TASK":
+            case NEED_TASK:
                 needTask(callback);
                 break;
-            case "NEED_WRAP":
+            case NEED_WRAP:
                 needWrap(callback);
                 break;
-            case "NEED_UNWRAP":
+            case NEED_UNWRAP:
                 needUnwrap(callback);
                 break;
         }
+//        switch(status.name())
+//        {
+//
+//            case "NOT_HANDSHAKING":
+//                notHandshaking(callback);
+//                break;
+//            case "FINISHED":
+//                finished(callback);
+//                break;
+//            case "NEED_TASK":
+//                needTask(callback);
+//                break;
+//            case "NEED_WRAP":
+//                needWrap(callback);
+//                break;
+//            case "NEED_UNWRAP":
+//                needUnwrap(callback);
+//                break;
+//        }
     }
 
     @Override

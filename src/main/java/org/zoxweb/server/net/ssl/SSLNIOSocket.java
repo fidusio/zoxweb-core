@@ -235,11 +235,11 @@ public class SSLNIOSocket
 //		//config.beginHandshake(false);
 //		getSelectorController().register(asc, SelectionKey.OP_READ, this, isBlocking);
 //	}
-//
+
 	@Override
 	public void setupConnection(AbstractSelectableChannel asc, boolean isBlocking) throws IOException
 	{
-		config = new SSLSessionConfig(sslContext);//sslStateMachine.getConfig();
+		config = new SSLSessionConfig(sslContext);
 		config.selectorController = getSelectorController();
 		config.sslChannel = (SocketChannel) asc;
 		config.remoteAddress = remoteAddress;
