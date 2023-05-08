@@ -20,7 +20,7 @@ import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.http.HTTPMessageConfig;
 import org.zoxweb.shared.http.HTTPMessageConfigInterface;
-import org.zoxweb.shared.http.HTTPMimeType;
+import org.zoxweb.shared.http.HTTPMediaType;
 import org.zoxweb.shared.http.HTTPResponseData;
 
 
@@ -74,14 +74,14 @@ public class HTTPCallTest {
       HTTPMessageConfig multiHCC = new HTTPMessageConfig();
       System.out.println("Empty:" + multiHCC.isMultiPartEncoding());
 
-      multiHCC.setContentType(HTTPMimeType.TEXT_PLAIN.getValue());
+      multiHCC.setContentType(HTTPMediaType.TEXT_PLAIN.getValue());
       System.out.println("Text:" + multiHCC.isMultiPartEncoding());
       System.out.println(multiHCC);
 
-      multiHCC.setContentType(HTTPMimeType.MULTIPART_FORM_DATA);
+      multiHCC.setContentType(HTTPMediaType.MULTIPART_FORM_DATA);
       System.out.println("MULTIPART:" + multiHCC.isMultiPartEncoding());
 
-      System.out.println(HTTPMimeType.lookup("Application/JSon ; charset=utf-8"));
+      System.out.println(HTTPMediaType.lookup("Application/JSon ; charset=utf-8"));
       System.out.println(multiHCC);
     }
     catch(Exception e)

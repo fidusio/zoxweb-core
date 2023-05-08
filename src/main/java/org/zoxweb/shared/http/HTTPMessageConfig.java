@@ -136,7 +136,7 @@ public class HTTPMessageConfig
 		//GetNameValue<String> mp = getHeaders().get(HTTPHeaderName.CONTENT_TYPE.getName());
 		if (mp != null)// && mp.getValue() != null)
 		{
-			return SharedStringUtil.contains(mp, HTTPMimeType.MULTIPART_FORM_DATA.getValue(), true);
+			return SharedStringUtil.contains(mp, HTTPMediaType.MULTIPART_FORM_DATA.getValue(), true);
 		}
 		
 		return false;//lookupValue(Params.MULTI_PART_ENCODING);

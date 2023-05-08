@@ -115,7 +115,7 @@ public class HTTPCallTool implements Runnable
                 hmci.setPassword(password);
                 hmci.setHTTPErrorAsException(errorAsException);
 
-                hmci.setContentType(HTTPMimeType.APPLICATION_JSON);
+                hmci.setContentType(HTTPMediaType.APPLICATION_JSON);
                 hmci.setSecureCheckEnabled(certCheckEnabled);
                 hmci.setURLEncodingEnabled(false);
                 hmci.setHTTPParameterFormatter(null);
@@ -127,6 +127,9 @@ public class HTTPCallTool implements Runnable
                 // vm warmup
                 new HTTPCall(hmci).sendRequest();
             }
+
+
+            log.getLogger().info("HTTP request counts: " + repeat + " per url");
 
 
             long ts = System.currentTimeMillis();

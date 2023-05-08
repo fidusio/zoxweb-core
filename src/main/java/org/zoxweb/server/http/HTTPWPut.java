@@ -69,7 +69,7 @@ public class HTTPWPut
 		hcc.setURL(destURL.getProtocol() +"://"+ destURL.getHost() );
 		hcc.setURI(destURL.getPath());
 		if(isMultiPart)
-			hcc.setContentType(HTTPMimeType.MULTIPART_FORM_DATA);
+			hcc.setContentType(HTTPMediaType.MULTIPART_FORM_DATA);
 		//hcc.setMultiPartEncoding(isMutliPart);
 
 		if (headers != null)

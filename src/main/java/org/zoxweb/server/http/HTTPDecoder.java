@@ -4,7 +4,7 @@ import org.zoxweb.server.io.UByteArrayOutputStream;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.http.HTTPAttribute;
 import org.zoxweb.shared.http.HTTPMessageConfigInterface;
-import org.zoxweb.shared.http.HTTPMimeType;
+import org.zoxweb.shared.http.HTTPMediaType;
 import org.zoxweb.shared.http.HTTPResponseData;
 import org.zoxweb.shared.protocol.Delimiter;
 import org.zoxweb.shared.util.*;
@@ -55,7 +55,7 @@ public final class HTTPDecoder {
       default:
         if (hrm.isMessageComplete())
         {
-          if (HTTPMimeType.lookup(hmci.getContentType()) == HTTPMimeType.APPLICATION_WWW_URL_ENC) {
+          if (HTTPMediaType.lookup(hmci.getContentType()) == HTTPMediaType.APPLICATION_WWW_URL_ENC) {
             int index = hrm.endOfHeadersIndex() + Delimiter.CRLFCRLF.getBytes().length;
             HTTPUtil.parseQuery(hmci.getParameters().asArrayValuesString(), hrm.getDataStream().getString(index),false);
             return hmci;
@@ -77,7 +77,7 @@ public final class HTTPDecoder {
       default:
         if (hrm.isMessageComplete())
         {
-          if (HTTPMimeType.lookup(hmci.getContentType()) == HTTPMimeType.MULTIPART_FORM_DATA)
+          if (HTTPMediaType.lookup(hmci.getContentType()) == HTTPMediaType.MULTIPART_FORM_DATA)
           {
             String boundaryName = HTTPAttribute.BOUNDARY.getValue() + "=";
 

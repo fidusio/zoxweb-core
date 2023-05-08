@@ -69,6 +69,8 @@
 
     <junit.version>5.9.0</junit.version>
 
+    <bc.version>1.73</bc.version>
+
 
   </properties>
 
@@ -252,6 +254,18 @@
       <artifactId>cache-api</artifactId>
       <version>${javax-cache.version}</version>
       <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.bouncycastle</groupId>
+      <artifactId>bcprov-jdk18on</artifactId>
+      <version>${bc.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.bouncycastle</groupId>
+      <artifactId>bcprov-ext-jdk18on</artifactId>
+      <version>${bc.version}</version>
     </dependency>
 
 

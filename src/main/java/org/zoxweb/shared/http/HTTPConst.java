@@ -13,6 +13,9 @@ public final class HTTPConst
     {
         CONNECTION_CLOSE(HTTPHeader.CONNECTION, "close"),
         CONNECTION_KEEP_ALIVE(HTTPHeader.CONNECTION, "keep-alive"),
+
+        CONNECTION_UPGRADE(HTTPHeader.CONNECTION, "upgrade"),
+        UPGRADE_WEBSOCKET(HTTPHeader.UPGRADE, "websocket"),
         ;
         private final String name;
         private final String value;

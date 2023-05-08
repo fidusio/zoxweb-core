@@ -73,7 +73,7 @@ public class HTTPUtil
 	{
 		HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit(null, null, (HTTPMethod) null);
 		hmci.setHTTPStatusCode(statusCode);
-		hmci.setContentType(HTTPMimeType.APPLICATION_JSON.format(HTTPConst.CHARSET_UTF_8));
+		hmci.setContentType(HTTPMediaType.APPLICATION_JSON.format(HTTPConst.CHARSET_UTF_8));
 		return hmci;
 	}
 
@@ -82,7 +82,7 @@ public class HTTPUtil
 	{
 		HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit(null, null, (HTTPMethod) null);
 		hmci.setHTTPStatusCode(statusCode);
-		hmci.setContentType(HTTPMimeType.APPLICATION_JSON.format(HTTPConst.CHARSET_UTF_8));
+		hmci.setContentType(HTTPMediaType.APPLICATION_JSON.format(HTTPConst.CHARSET_UTF_8));
 		hmci.setContent(GSONUtil.toJSON(nve,false, false, true));
 		return hmci;
 	}
@@ -104,7 +104,7 @@ public class HTTPUtil
 	{
 		HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit(null, null, (HTTPMethod) null);
 		hmci.setHTTPStatusCode(statusCode);
-		hmci.setContentType(HTTPMimeType.APPLICATION_JSON.format(HTTPConst.CHARSET_UTF_8));
+		hmci.setContentType(HTTPMediaType.APPLICATION_JSON.format(HTTPConst.CHARSET_UTF_8));
 		hmci.setContent(content);
 		return hmci;
 	}
@@ -114,7 +114,7 @@ public class HTTPUtil
 	{
 		HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit(null, null, (HTTPMethod) null);
 		hmci.setHTTPStatusCode(statusCode);
-		hmci.setContentType(HTTPMimeType.APPLICATION_JSON.format(HTTPConst.CHARSET_UTF_8));
+		hmci.setContentType(HTTPMediaType.APPLICATION_JSON.format(HTTPConst.CHARSET_UTF_8));
 		hmci.setContent(GSONUtil.toJSONGenericMap(nvgm,false, false, true));
 		return hmci;
 	}
@@ -950,10 +950,10 @@ public class HTTPUtil
 			String formEncoding = element.attr("enctype");
 			String formName = element.attr("name");
 			//String formID = element.attr("id");
-			HTTPMimeType encoding = HTTPMimeType.lookup(formEncoding);
+			HTTPMediaType encoding = HTTPMediaType.lookup(formEncoding);
 			if ( encoding == null)
 			{
-				encoding = HTTPMimeType.APPLICATION_WWW_URL_ENC;
+				encoding = HTTPMediaType.APPLICATION_WWW_URL_ENC;
 			}
 
 
@@ -994,9 +994,9 @@ public class HTTPUtil
 				}
 			}
 
-			if (encoding == HTTPMimeType.MULTIPART_FORM_DATA)
+			if (encoding == HTTPMediaType.MULTIPART_FORM_DATA)
 			{
-				ret.setContentType(HTTPMimeType.MULTIPART_FORM_DATA);
+				ret.setContentType(HTTPMediaType.MULTIPART_FORM_DATA);
 				//ret.setMultiPartEncoding( true);
 			}
 			//ret.setParameters(params);

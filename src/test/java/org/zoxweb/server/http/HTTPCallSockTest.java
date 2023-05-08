@@ -4,7 +4,7 @@ package org.zoxweb.server.http;
 import org.zoxweb.shared.http.HTTPMessageConfig;
 import org.zoxweb.shared.http.HTTPMessageConfigInterface;
 import org.zoxweb.shared.http.HTTPMethod;
-import org.zoxweb.shared.http.HTTPMimeType;
+import org.zoxweb.shared.http.HTTPMediaType;
 
 
 public class HTTPCallSockTest {
@@ -20,7 +20,7 @@ public class HTTPCallSockTest {
       //InetSocketAddressDAO proxy = new InetSocketAddressDAO("10.0.0.20", 2375, ProxyType.SOCKS);
       HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit(url, uri, httpMethod);
       //hmci.setProxyAddress(proxy);
-      hmci.setContentType(HTTPMimeType.APPLICATION_JSON);
+      hmci.setContentType(HTTPMediaType.APPLICATION_JSON);
       HTTPCall hc = new HTTPCall(hmci);
       System.out.println(hc.sendRequest());
 

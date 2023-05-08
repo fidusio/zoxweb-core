@@ -19,7 +19,7 @@ import org.zoxweb.server.io.UByteArrayOutputStream;
 import org.zoxweb.shared.http.HTTPMessageConfig;
 import org.zoxweb.shared.http.HTTPMessageConfigInterface;
 import org.zoxweb.shared.http.HTTPMethod;
-import org.zoxweb.shared.http.HTTPMimeType;
+import org.zoxweb.shared.http.HTTPMediaType;
 import org.zoxweb.shared.protocol.Delimiter;
 import org.zoxweb.shared.util.GetNameValue;
 import org.zoxweb.shared.util.SharedStringUtil;
@@ -203,7 +203,7 @@ public class HTTPRawMessage
 
 			if (hmci.getMethod() != HTTPMethod.GET) {
 
-				HTTPMimeType hmt = HTTPMimeType.lookup(hmci.getContentType());
+				HTTPMediaType hmt = HTTPMediaType.lookup(hmci.getContentType());
 				if (hmt != null) {
 					switch (hmt) {
 

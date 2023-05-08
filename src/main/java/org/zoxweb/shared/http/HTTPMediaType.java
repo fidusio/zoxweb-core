@@ -24,12 +24,13 @@ import org.zoxweb.shared.util.SharedUtil;
 /**
  *
  */
-public enum HTTPMimeType
+public enum HTTPMediaType
 	implements GetValue<String>
 {
 	APPLICATION_WWW_URL_ENC("application/x-www-form-urlencoded"),
+	APPLICATION_JOSE("application/jose"),
+	APPLICATION_JOSE_JSON("application/jose+json"),
 	APPLICATION_JSON("application/json", "json"),
-	//APPLICATION_JAVA_SCRIPT("application/x-javascript", "js"),
 	APPLICATION_OCTET_STREAM("application/octet-stream"),
 	MULTIPART_FORM_DATA("multipart/form-data"),
 	TEXT_CSV("text/csv", "csv"),
@@ -51,7 +52,7 @@ public enum HTTPMimeType
 	private final String[] extensions;
 	
 	
-	HTTPMimeType(String value, String ...extensions)
+	HTTPMediaType(String value, String ...extensions)
 	{
 		this.value = value;
 		this.extensions = extensions;
@@ -85,19 +86,19 @@ public enum HTTPMimeType
 		return ret.toString();
 	}
 	
-	public static HTTPMimeType lookup(String str)
+	public static HTTPMediaType lookup(String str)
 	{
-		return (HTTPMimeType) SharedUtil.matchingEnumContent(HTTPMimeType.values(), str);
+		return (HTTPMediaType) SharedUtil.matchingEnumContent(HTTPMediaType.values(), str);
 	}
 	
-	public static HTTPMimeType lookupByExtension(String str)
+	public static HTTPMediaType lookupByExtension(String str)
 	{
 		str = SharedStringUtil.trimOrNull(str);
 		
 		if (str != null)
 		{
 			String ext = SharedStringUtil.valueAfterRightToken(str, ".").toLowerCase();
-			for (HTTPMimeType mt : HTTPMimeType.values())
+			for (HTTPMediaType mt : HTTPMediaType.values())
 			{
 				if (mt.extensions != null)
 				{

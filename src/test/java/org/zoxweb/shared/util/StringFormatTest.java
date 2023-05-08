@@ -15,7 +15,7 @@
  */
 package org.zoxweb.shared.util;
 
-import org.zoxweb.shared.http.HTTPMimeType;
+import org.zoxweb.shared.http.HTTPMediaType;
 import org.zoxweb.shared.http.HTTPAttribute;
 
 import java.util.Arrays;
@@ -25,7 +25,7 @@ public class StringFormatTest {
 	public static void main(String[] args) {
 		try {
 			String[][] params = {
-					{HTTPMimeType.APPLICATION_JSON.getValue(), HTTPAttribute.CHARSET_UTF8.getValue()},
+					{HTTPMediaType.APPLICATION_JSON.getValue(), HTTPAttribute.CHARSET_UTF8.getValue()},
 					null,
 					{"", "mara", "fdr", " ", "test"},
 			};
@@ -38,7 +38,7 @@ public class StringFormatTest {
 				}
 			}
 			
-			System.out.println(SharedStringUtil.formatStringValues("; ", HTTPMimeType.APPLICATION_JSON, HTTPAttribute.CHARSET_UTF8));
+			System.out.println(SharedStringUtil.formatStringValues("; ", HTTPMediaType.APPLICATION_JSON, HTTPAttribute.CHARSET_UTF8));
 
 			String toBeParsed[] = {
 					"User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; rv:44.0) Gecko/20100101 Firefox/44.0",

@@ -15,26 +15,14 @@
  */
 package org.zoxweb.server.http;
 
-import java.util.List;
-
 import org.zoxweb.server.io.FileInfoStreamSource;
 import org.zoxweb.server.security.CryptoUtil;
-import org.zoxweb.shared.http.HTTPAuthorization;
-import org.zoxweb.shared.http.HTTPAuthorizationBasic;
-import org.zoxweb.shared.http.HTTPAuthorizationBearer;
-import org.zoxweb.shared.http.HTTPAuthScheme;
-import org.zoxweb.shared.http.HTTPHeader;
-import org.zoxweb.shared.http.HTTPMimeType;
+import org.zoxweb.shared.http.*;
 import org.zoxweb.shared.security.JWT;
 import org.zoxweb.shared.security.JWTToken;
-import org.zoxweb.shared.util.AppIDURI;
-import org.zoxweb.shared.util.ArrayValues;
-import org.zoxweb.shared.util.GetNameValue;
-import org.zoxweb.shared.util.NVGetNameValueList;
-import org.zoxweb.shared.util.NVPairGetNameMap;
-import org.zoxweb.shared.util.OutputDataDecoder;
-import org.zoxweb.shared.util.SharedStringUtil;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.*;
+
+import java.util.List;
 
 public class HTTPRequestAttributes 
 {
@@ -243,9 +231,9 @@ public class HTTPRequestAttributes
 	}
 	
 	
-	public HTTPMimeType getContentMimeType()
+	public HTTPMediaType getContentMimeType()
 	{
-		return HTTPMimeType.lookup(getContentType());
+		return HTTPMediaType.lookup(getContentType());
 	}
 	
 	/**

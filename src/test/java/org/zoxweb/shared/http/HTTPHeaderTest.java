@@ -11,7 +11,7 @@ public class HTTPHeaderTest {
     @Test
     public void testHeaderName()
     {
-        System.out.println(HTTPHeader.toString(HTTPHeader.toHTTPHeader(HTTPHeader.ACCESS_CONTROL_ALLOW_CREDENTIALS, HTTPMimeType.APPLICATION_JSON)));
+        System.out.println(HTTPHeader.toString(HTTPHeader.toHTTPHeader(HTTPHeader.ACCESS_CONTROL_ALLOW_CREDENTIALS, HTTPMediaType.APPLICATION_JSON)));
     }
     @Test
     public void testHeaderFormat()

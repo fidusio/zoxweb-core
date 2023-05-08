@@ -1,15 +1,13 @@
 package org.zoxweb.server.security;
 
+import org.bouncycastle.jce.ECPointUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.zoxweb.shared.util.SharedBase64;
 import org.zoxweb.shared.util.SharedUtil;
 
 import java.math.BigInteger;
-import java.security.KeyFactory;
-import java.security.KeyPair;
-import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
+import java.security.*;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.*;
 
@@ -55,5 +53,26 @@ public class CryptoKeyTest {
         System.out.println(bi);
         System.out.println(SharedBase64.decodeAsString(SharedBase64.Base64Type.URL, "6NSq2eBuy80My3Ew0zWhKRtDOlbzud8-ZJwiU3q7PQQ"));
 
+    }
+
+
+    @Test
+    public void generatePKECC() throws NoSuchAlgorithmException, InvalidParameterSpecException, InvalidKeySpecException {
+        KeyPair kp = CryptoUtil.generateKeyPair("ec", 256);
+        byte[] pubKey = kp.getPublic().getEncoded();
+
+
+        BigInteger x = new BigInteger(1, pubKey, 1, 32);
+        BigInteger y = new BigInteger(1, pubKey, 32, 32);
+
+
+        ECGenParameterSpec ecGenParameterSpec = new ECGenParameterSpec("secp256r1");
+        AlgorithmParameters algorithmParameters = AlgorithmParameters.getInstance("EC");
+        algorithmParameters.init(ecGenParameterSpec);
+        ECParameterSpec ecParameterSpec = algorithmParameters.getParameterSpec(ECParameterSpec.class);
+        ECPoint point = ECPointUtil.decodePoint(ecParameterSpec.getCurve(), pubKey);
+        KeyFactory keyFactory = KeyFactory.getInstance("EC");
+        ECPublicKeySpec ecPublicKeySpec = new ECPublicKeySpec(point, ecParameterSpec);
+        ECPublicKey ecPublicKey = (ECPublicKey) keyFactory.generatePublic(ecPublicKeySpec);
     }
 }
