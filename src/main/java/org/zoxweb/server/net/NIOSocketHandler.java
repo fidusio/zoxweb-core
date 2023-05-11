@@ -25,17 +25,19 @@ import java.net.InetSocketAddress;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
+import java.nio.channels.SocketChannel;
+import java.nio.channels.spi.AbstractSelectableChannel;
 
 
-public class NIOPlainSocket
+public class NIOSocketHandler
     extends ProtocolHandler
 {
-    private static final LogWrapper log = new LogWrapper(NIOPlainSocket.class).setEnabled(false);
+    private static final LogWrapper log = new LogWrapper(NIOSocketHandler.class).setEnabled(false);
 	private volatile ByteBuffer phBB = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.DIRECT, 1024);
 
-	private final PlainSessionCallback sessionCallback;
+	private PlainSessionCallback sessionCallback;
 
-	public NIOPlainSocket(PlainSessionCallback psc)
+	public NIOSocketHandler(PlainSessionCallback psc)
 	{
 		this.sessionCallback = psc;
 	}
@@ -73,15 +75,7 @@ public class NIOPlainSocket
 
 			if(sessionCallback.getConfig() == null)
 			{
-				//synchronized (this)
-				{
-					//if(phSK == null)
-					{
-						//phSChannel = (SocketChannel) key.channel();
-						//phSK = key;
-						sessionCallback.setConfig(phSChannel);
-					}
-				}
+				sessionCallback.setConfig(phSChannel);
 			}
 
 			int read;
@@ -114,7 +108,31 @@ public class NIOPlainSocket
     		
     	}
 	}
-	
+
+	public void setupConnection(AbstractSelectableChannel asc, boolean isBlocking) throws IOException
+	{
+		phSChannel = (SocketChannel) asc;
+		getSelectorController().register(phSChannel, SelectionKey.OP_READ, this, isBlocking);
+		sessionCallback.setProtocolHandler(this);
+
+	}
+
+	@Override
+	public void setSessionCallback(BaseSessionCallback<?> sessionCallback) {
+		if(!(sessionCallback instanceof PlainSessionCallback))
+		{
+			throw new IllegalArgumentException("sessionCallback is not instance of PlainSessionCallback");
+		}
+
+		this.sessionCallback = (PlainSessionCallback) sessionCallback;
+		if(this.sessionCallback.getConfig() == null)
+		{
+			this.sessionCallback.setConfig(phSChannel);
+			sessionCallback.setProtocolHandler(this);
+		}
+	}
+
+
 	@SuppressWarnings("resource")
     public static void main(String... args)
     {
@@ -126,7 +144,7 @@ public class NIOPlainSocket
 			TaskUtil.setThreadMultiplier(8);
 			
 			
-			new NIOSocket(new InetSocketAddress(port), 128, new NIOPlainSocketFactory(clazz), TaskUtil.getDefaultTaskProcessor());
+			new NIOSocket(new InetSocketAddress(port), 128, new NIOSocketHandlerFactory(clazz), TaskUtil.getDefaultTaskProcessor());
 		}
 		catch(Exception e)
 		{
@@ -135,5 +153,6 @@ public class NIOPlainSocket
 			TaskUtil.getDefaultTaskProcessor().close();
 		}
 	}
+
 
 }

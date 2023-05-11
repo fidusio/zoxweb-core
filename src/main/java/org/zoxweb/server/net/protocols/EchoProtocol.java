@@ -3,11 +3,11 @@ package org.zoxweb.server.net.protocols;
 import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.io.UByteArrayOutputStream;
-import org.zoxweb.server.net.NIOPlainSocketFactory;
+import org.zoxweb.server.net.NIOSocketHandlerFactory;
 import org.zoxweb.server.net.NIOSocket;
 import org.zoxweb.server.net.PlainSessionCallback;
 import org.zoxweb.server.net.ssl.SSLContextInfo;
-import org.zoxweb.server.net.ssl.SSLNIOSocketFactory;
+import org.zoxweb.server.net.ssl.SSLNIOSocketHandlerFactory;
 import org.zoxweb.server.net.ssl.SSLSessionCallback;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.shared.util.InstanceCreator;
@@ -79,7 +79,7 @@ public class EchoProtocol
             NIOSocket nioSocket = new NIOSocket(TaskUtil.getDefaultTaskProcessor());
             // Adding the plain socket factory to process non encrypted data
             // The echoPIC is the plain socket instance creator for the EchoSession class
-            nioSocket.addSeverSocket(port, backlog, new NIOPlainSocketFactory(echoPIC));
+            nioSocket.addSeverSocket(port, backlog, new NIOSocketHandlerFactory(echoPIC));
 
 
 
@@ -91,7 +91,7 @@ public class EchoProtocol
                 // NEVER USE IT in production
                 SSLContextInfo sslContextInfo = org.zoxweb.server.security.CertKStoreUtil.generateRandomSSLContextInfo("ec", "SHA256withECDSA");
                 // The echoSIC is the secure socket instance creator for the SSLEchoSession class
-                SSLNIOSocketFactory sslnioSocketFactory = new SSLNIOSocketFactory(sslContextInfo, echoSIC);
+                SSLNIOSocketHandlerFactory sslnioSocketFactory = new SSLNIOSocketHandlerFactory(sslContextInfo, echoSIC);
                 //Registering the socket and port
                 nioSocket.addSeverSocket(sPort, backlog, sslnioSocketFactory);
             }

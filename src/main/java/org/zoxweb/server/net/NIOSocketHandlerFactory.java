@@ -3,22 +3,22 @@ package org.zoxweb.server.net;
 
 import org.zoxweb.shared.util.InstanceCreator;
 
-public class NIOPlainSocketFactory
-        extends ProtocolFactoryBase<NIOPlainSocket>
+public class NIOSocketHandlerFactory
+        extends ProtocolFactoryBase<NIOSocketHandler>
 {
 
     private  Class<? extends BaseSessionCallback> cbClass;
     private InstanceCreator<PlainSessionCallback> instanceCreator;
 
-    public NIOPlainSocketFactory(){}
+    public NIOSocketHandlerFactory(){}
 
 
-    public NIOPlainSocketFactory(Class<? extends BaseSessionCallback> cbClass)
+    public NIOSocketHandlerFactory(Class<? extends BaseSessionCallback> cbClass)
     {
         this.cbClass = cbClass;
 
     }
-    public NIOPlainSocketFactory(InstanceCreator<PlainSessionCallback> instanceCreator)
+    public NIOSocketHandlerFactory(InstanceCreator<PlainSessionCallback> instanceCreator)
     {
         this.instanceCreator = instanceCreator;
     }
@@ -26,7 +26,7 @@ public class NIOPlainSocketFactory
 
 
     @Override
-    public NIOPlainSocket newInstance()
+    public NIOSocketHandler newInstance()
     {
         PlainSessionCallback sc = null;
         try
@@ -40,7 +40,7 @@ public class NIOPlainSocketFactory
         {
             e.printStackTrace();
         }
-        return new NIOPlainSocket(sc);
+        return new NIOSocketHandler(sc);
     }
 
     @Override

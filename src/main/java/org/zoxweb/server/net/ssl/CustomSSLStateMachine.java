@@ -27,7 +27,7 @@ class CustomSSLStateMachine
 
     private static final AtomicLong counter = new AtomicLong();
     private final SSLSessionConfig config;
-    private final SSLNIOSocket sslns;
+    private final SSLNIOSocketHandler sslns;
     private final long id;
 
 
@@ -36,7 +36,7 @@ class CustomSSLStateMachine
         return counter.get();
     }
 
-    CustomSSLStateMachine(SSLNIOSocket sslns)
+    CustomSSLStateMachine(SSLNIOSocketHandler sslns)
     {
         this.sslns = sslns;
         this.config = sslns.getConfig();

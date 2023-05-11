@@ -7,8 +7,8 @@ import org.zoxweb.shared.data.ConfigDAO;
 import org.zoxweb.shared.net.InetSocketAddressDAO;
 import org.zoxweb.shared.util.InstanceCreator;
 
-public class SSLNIOSocketFactory
-        extends ProtocolFactoryBase<SSLNIOSocket>
+public class SSLNIOSocketHandlerFactory
+        extends ProtocolFactoryBase<SSLNIOSocketHandler>
 {
 
     private InetSocketAddressDAO remoteAddress;
@@ -16,18 +16,18 @@ public class SSLNIOSocketFactory
     private Class<? extends BaseSessionCallback> scClass;
     private InstanceCreator<SSLSessionCallback> instanceCreator;
 
-    public SSLNIOSocketFactory()
+    public SSLNIOSocketHandlerFactory()
     {
         complexSetup = false;
     }
-    public SSLNIOSocketFactory(SSLContextInfo sslContext, InstanceCreator<SSLSessionCallback> instanceCreator)
+    public SSLNIOSocketHandlerFactory(SSLContextInfo sslContext, InstanceCreator<SSLSessionCallback> instanceCreator)
     {
         this();
         this.sslContext = sslContext;
         this.instanceCreator = instanceCreator;
     }
 
-    public SSLNIOSocketFactory(SSLContextInfo sslContext,  Class<? extends BaseSessionCallback> scClass)
+    public SSLNIOSocketHandlerFactory(SSLContextInfo sslContext, Class<? extends BaseSessionCallback> scClass)
     {
         this();
         this.sslContext = sslContext;
@@ -35,7 +35,7 @@ public class SSLNIOSocketFactory
     }
 
 
-    public SSLNIOSocketFactory(SSLContextInfo sslContext, InetSocketAddressDAO ra)
+    public SSLNIOSocketHandlerFactory(SSLContextInfo sslContext, InetSocketAddressDAO ra)
     {
         this();
         this.sslContext = sslContext;
@@ -49,7 +49,7 @@ public class SSLNIOSocketFactory
 
 
     @Override
-    public SSLNIOSocket newInstance()
+    public SSLNIOSocketHandler newInstance()
     {
         SSLSessionCallback sc = null;
         try
@@ -65,7 +65,7 @@ public class SSLNIOSocketFactory
         {
             e.printStackTrace();
         }
-        return new SSLNIOSocket(sslContext, sc, remoteAddress);
+        return new SSLNIOSocketHandler(sslContext, sc, remoteAddress);
     }
 
     @Override

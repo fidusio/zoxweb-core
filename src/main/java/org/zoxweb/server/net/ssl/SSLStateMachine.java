@@ -60,7 +60,7 @@ public class SSLStateMachine extends StateMachine<SSLSessionConfig>
     static final AtomicLong counter = new AtomicLong();
 
 
-    private volatile SSLNIOSocket sslNIOSocket = null;
+    private volatile SSLNIOSocketHandler sslNIOSocket = null;
 
 
 //    private SSLStateMachine(long id, TaskSchedulerProcessor tsp) {
@@ -141,7 +141,7 @@ public class SSLStateMachine extends StateMachine<SSLSessionConfig>
 
 
 
-    public static SSLStateMachine create(SSLNIOSocket sslnioSocket){
+    public static SSLStateMachine create(SSLNIOSocketHandler sslnioSocket){
         SSLStateMachine sslSessionSM = new SSLStateMachine(counter.incrementAndGet(), null);
         sslSessionSM.sslNIOSocket = sslnioSocket;
 

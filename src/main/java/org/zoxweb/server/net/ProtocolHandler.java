@@ -44,6 +44,8 @@ public abstract class ProtocolHandler
 	protected volatile SelectionKey phSK;
 
 
+
+
 	private volatile NVGenericMap properties = null;
 	protected volatile Executor executor;
 	protected final AtomicBoolean isClosed = new AtomicBoolean(false);
@@ -119,5 +121,8 @@ public abstract class ProtocolHandler
 
 
 
+	public void setSessionCallback(BaseSessionCallback<?> sessionCallback) {
+		throw new UnsupportedOperationException("Can't set session callback");
+	}
 
 }

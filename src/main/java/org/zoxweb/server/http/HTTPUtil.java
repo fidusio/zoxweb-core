@@ -22,19 +22,22 @@ import org.jsoup.parser.Parser;
 import org.jsoup.select.Elements;
 import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.server.io.UByteArrayOutputStream;
+import org.zoxweb.server.security.HashUtil;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.server.util.ReflectionUtil;
 import org.zoxweb.server.util.RuntimeUtil;
 import org.zoxweb.shared.data.SimpleMessage;
 import org.zoxweb.shared.http.*;
 import org.zoxweb.shared.net.InetSocketAddressDAO;
-import org.zoxweb.shared.protocol.MessageStatus;
 import org.zoxweb.shared.protocol.Delimiter;
+import org.zoxweb.shared.protocol.MessageStatus;
 import org.zoxweb.shared.util.*;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.*;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
@@ -48,12 +51,35 @@ public class HTTPUtil
 	private static final Lock LOCK = new ReentrantLock();
 	private static final AtomicBoolean extraMethodAdded =  new AtomicBoolean();
 
+	public static final  String WEB_SOCKECT_STRING =  "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
+	private static Lock lock = new ReentrantLock();
+	private static final MessageDigest SHA_1 = HashUtil.createMessageDigestSilent("SHA-1");
+
 	/**
 	 * The constructor is declared private to prevent instantiation.
 	 */
 	private HTTPUtil()
 	{
 
+	}
+
+
+
+
+	public static String toWebSocketAccept(String secWebSocketKey) throws NoSuchAlgorithmException {
+
+		byte[] secWebSocketAcceptBytes = null;
+		try
+		{
+			lock.lock();
+			secWebSocketAcceptBytes = SHA_1.digest(SharedStringUtil.getBytes(secWebSocketKey + WEB_SOCKECT_STRING));
+		}
+		finally
+		{
+			lock.unlock();
+		}
+		String secWebSocketAccept = SharedBase64.encodeAsString(SharedBase64.Base64Type.DEFAULT, secWebSocketAcceptBytes);
+		return secWebSocketAccept;
 	}
 
 	/**

@@ -162,6 +162,14 @@ public class HashUtil {
     return MessageDigest.getInstance(algorithm);
   }
 
+  public static MessageDigest createMessageDigestSilent(String algorithm) {
+    try {
+      return MessageDigest.getInstance(algorithm);
+    } catch (NoSuchAlgorithmException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
 
 
   public static BCryptHash toBCryptHash(String bCryptCanonicalID)

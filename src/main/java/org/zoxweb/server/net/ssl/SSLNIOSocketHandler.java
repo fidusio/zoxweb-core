@@ -21,6 +21,7 @@ import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.logging.LoggerUtil;
+import org.zoxweb.server.net.BaseSessionCallback;
 import org.zoxweb.server.net.NIOSocket;
 import org.zoxweb.server.net.ProtocolHandler;
 import org.zoxweb.server.security.CryptoUtil;
@@ -38,7 +39,7 @@ import java.nio.channels.SocketChannel;
 import java.nio.channels.spi.AbstractSelectableChannel;
 
 
-public class SSLNIOSocket
+public class SSLNIOSocketHandler
     extends ProtocolHandler
 {
 
@@ -113,13 +114,13 @@ public class SSLNIOSocket
 
 
 
-    public static final LogWrapper log = new LogWrapper(SSLNIOSocket.class).setEnabled(false);
+    public static final LogWrapper log = new LogWrapper(SSLNIOSocketHandler.class).setEnabled(false);
 
 	private SSLConnectionHelper sslDispatcher = null;
 	private SSLSessionConfig config = null;
 	final public InetSocketAddressDAO remoteAddress;
 	final private SSLContextInfo sslContext;
-	private final SSLSessionCallback sessionCallback;
+	private SSLSessionCallback sessionCallback;
 	///private StaticSSLStateMachine staticSSLStateMachine = null;
 
 //	public SSLNIOSocket(SSLContextInfo sslContext, InetSocketAddressDAO ra)
@@ -128,12 +129,12 @@ public class SSLNIOSocket
 //		this(sslContext, ra, new TunnelCallback());
 //	}
 
-	public SSLNIOSocket(SSLContextInfo sslContext, SSLSessionCallback sessionCallback)
+	public SSLNIOSocketHandler(SSLContextInfo sslContext, SSLSessionCallback sessionCallback)
 	{
 		this(sslContext, sessionCallback, null);
 	}
 
-	public SSLNIOSocket(SSLContextInfo sslContext, SSLSessionCallback sessionCallback, InetSocketAddressDAO ra)
+	public SSLNIOSocketHandler(SSLContextInfo sslContext, SSLSessionCallback sessionCallback, InetSocketAddressDAO ra)
 	{
 		SharedUtil.checkIfNulls("context  can't be null", sslContext);
 		this.sslContext = sslContext;
@@ -230,6 +231,7 @@ public class SSLNIOSocket
 //		config.remoteAddress = remoteAddress;
 //		config.sslOutputStream = new SSLChannelOutputStream(config, 512 );
 //		sessionCallback.setConfig(config);
+//		sessionCallback.setProtocolHandler(this);
 //		sslStateMachine.start(true);
 //		// not sure about
 //		//config.beginHandshake(false);
@@ -246,6 +248,7 @@ public class SSLNIOSocket
 		config.sslOutputStream = new SSLChannelOutputStream(config, 512 );
 		sessionCallback.setConfig(config);
 		sslDispatcher = new CustomSSLStateMachine(this);
+		sessionCallback.setProtocolHandler(this);
 		// not sure about
 		// start the handshake here
 		//config.beginHandshake(false);
@@ -253,6 +256,18 @@ public class SSLNIOSocket
 	}
 
 
+	@Override
+	public void setSessionCallback(BaseSessionCallback<?> sessionCallback) {
+		//if it is a tunnel we should throw exception
+		if(!(sessionCallback instanceof SSLSessionCallback))
+		{
+			throw new IllegalArgumentException("sessionCallback is not instance of SSLSessionCallback");
+		}
+
+		this.sessionCallback = (SSLSessionCallback) sessionCallback;
+		this.sessionCallback.setConfig(config);
+		this.sessionCallback.setProtocolHandler(this);
+	}
 
 
 
@@ -285,7 +300,7 @@ public class SSLNIOSocket
 			//TaskUtil.setThreadMultiplier(4);
 			SSLContext sslContext = CryptoUtil.initSSLContext(keystore, ksType, ksPassword.toCharArray(), null, null ,null);
 
-			new NIOSocket(new InetSocketAddress(port), 512, new SSLNIOSocketFactory(new SSLContextInfo(sslContext), remoteAddress), TaskUtil.getDefaultTaskProcessor());
+			new NIOSocket(new InetSocketAddress(port), 512, new SSLNIOSocketHandlerFactory(new SSLContextInfo(sslContext), remoteAddress), TaskUtil.getDefaultTaskProcessor());
 		}
 		catch(Exception e)
 		{
