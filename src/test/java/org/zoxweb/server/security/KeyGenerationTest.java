@@ -1,10 +1,6 @@
 package org.zoxweb.server.security;
 
 
-import java.security.Key;
-import java.security.KeyPair;
-import java.security.PrivateKey;
-import java.security.PublicKey;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.crypto.CryptoConst;
 import org.zoxweb.shared.crypto.CryptoConst.SignatureAlgo;
@@ -16,6 +12,11 @@ import org.zoxweb.shared.util.SharedBase64;
 import org.zoxweb.shared.util.SharedBase64.Base64Type;
 import org.zoxweb.shared.util.SharedStringUtil;
 import org.zoxweb.shared.util.SharedUtil;
+
+import java.security.Key;
+import java.security.KeyPair;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 
 
 public class KeyGenerationTest {
@@ -63,7 +64,7 @@ public class KeyGenerationTest {
           System.out.println("Encrypted by bob based64 [" + encrypted.length + "]:" + SharedBase64
               .encodeAsString(Base64Type.URL, encrypted));
 
-          Key aesKey = CryptoUtil.generateKey(CryptoUtil.AES, 256);
+          Key aesKey = CryptoUtil.generateKey(CryptoConst.CryptoAlgo.AES, 256);
           System.out.println(CryptoUtil.toString(aesKey));
 
           encrypted = CryptoUtil.encrypt(aliceKey.getPublic(), SharedStringUtil.getBytes(json));
@@ -85,7 +86,7 @@ public class KeyGenerationTest {
     try {
       long ts = System.currentTimeMillis();
       for (int i = 0; i < loopSize; i++) {
-        keys[i] = CryptoUtil.generateKey(CryptoUtil.AES, i % 2 == 0 ? 256 : 128);
+        keys[i] = CryptoUtil.generateKey(CryptoConst.CryptoAlgo.AES, i % 2 == 0 ? 256 : 128);
       }
       ts = System.currentTimeMillis() - ts;
       for (Key k : keys) {

@@ -22,23 +22,74 @@ import org.zoxweb.shared.util.*;
 
 public final class CryptoConst
 {
+    /**
+     * AES 256 bits key size in bytes(32)
+     */
+    public static final int AES_256_KEY_SIZE = 32;
+	/**
+	 * AES block size in bits 128 (16 bytes);
+	 */
+	public static final int AES_BLOCK_SIZE = 16;
 
 	private CryptoConst()
-    {
+	{
 
+	}
+	public static final String PKCS12 = "PKCS12";
+//	public static final String HMAC_SHA_256 = "HmacSHA256";
+//	public static final String HMAC_SHA_512 = "HmacSHA512";
+	public static final String KEY_STORE_TYPE = "JCEKS";
+	//public static final String AES = "AES";
+
+
+	public static final String AES_ENCRYPTION_CBC_NO_PADDING = "AES/CBC/NoPadding";
+
+
+//	public static final String MD5 = "MD5";
+//	public static final String SHA_1 = "SHA-1";
+//	public static final String SHA_224 = "SHA-1";
+//	public static final String SHA_256 = "SHA-256";
+//	public static final String SHA_384 = "SHA-384";
+//	public static final String SHA_512 = "SHA-512";
+
+	public enum CryptoAlgo
+		implements GetName
+	{
+		AES("AES"),
+		DSA("DSA"),
+		EC("EC"),
+		RSA("RSA"),
+		;
+
+
+		private final String javaName;
+		CryptoAlgo(String javaName)
+		{
+			this.javaName = javaName;
+		}
+
+		@Override
+		public String getName() {
+			return javaName;
+		}
+
+		public String toString()
+		{
+			return getName();
+		}
 	}
 
 	public enum HASHType
             implements GetName
     {
-		MD5("md5"),
-		SHA_1("sha-1"),
-		SHA_224("sha-224"),
-		SHA_256("sha-256"),
-		SHA_384("sha-384"),
-		SHA_512("sha-512"),
+		MD5("MD5"),
+		SHA_1("SHA_1"),
+		SHA_224("SHA-224"),
+		SHA_256("SHA-256"),
+		SHA_384("SHA-384"),
+		SHA_512("SHA-512"),
 
-		BCRYPT("bcrypt")
+		BCRYPT("BCRYPT")
 
         ;
 
@@ -119,25 +170,36 @@ public final class CryptoConst
 	public enum SignatureAlgo
 			implements GetName
 	{
-		SHA1_DSA("SHA1withDSA"),
-		SHA1_RSA("SHA1withRSA"),
-		SHA256_RSA("SHA256withRSA"),
-		SHA384_RSA("SHA384withRSA"),
-		SHA512_RSA("SHA512withRSA"),
-		SHA256_EC("SHA256withECDSA"),
-		SHA384_EC("SHA384withECDSA"),
-    	SHA512_EC("SHA512withECDSA"),
+
+		HMAC_SHA_256(CryptoAlgo.AES, "HmacSHA256"),
+		HMAC_SHA_384(CryptoAlgo.AES,"HmacSHA384"),
+		HMAC_SHA_512(CryptoAlgo.AES,"HmacSHA512"),
+		SHA1_DSA(CryptoAlgo.DSA, "SHA1withDSA"),
+		SHA1_RSA(CryptoAlgo.RSA,"SHA1withRSA"),
+		SHA256_RSA(CryptoAlgo.RSA,"SHA256withRSA"),
+		SHA384_RSA(CryptoAlgo.RSA,"SHA384withRSA"),
+		SHA512_RSA(CryptoAlgo.RSA,"SHA512withRSA"),
+		SHA256_EC(CryptoAlgo.EC,"SHA256withECDSA"),
+		SHA384_EC(CryptoAlgo.EC,"SHA384withECDSA"),
+    	SHA512_EC(CryptoAlgo.EC,"SHA512withECDSA"),
 		
 		;
 		private final String name;
-		SignatureAlgo(String name)
+		private final CryptoAlgo cryptoAlgo;
+		SignatureAlgo(CryptoAlgo cryptoAlgo, String name)
 		{
+			this.cryptoAlgo = cryptoAlgo;
 			this.name = name;
 		}
 
 		public String getName()
 		{
 			return name;
+		}
+
+		public CryptoAlgo getCryptoAlgo()
+		{
+			return cryptoAlgo;
 		}
 	}
 
@@ -291,35 +353,84 @@ public final class CryptoConst
 
 	}
 
-	public enum JWTAlgorithm
+	public enum JWTAlgo
 		implements GetName
 	{
-		none("none"),
-		HS256("HS256"),
-		HS512("HS512"),
-		RS256("RS256"),
-		RS512("RS512"),
-		ES256("ES256"),
-        ES512("ES512"),
+//		none("none", null),
+//		HS256("HS256", "SHA-256"),
+//		HS512("HS512", "SHA-512"),
+//		RS256("RS256", "RSASSA-PKCS1-v1_5"),
+//		RS512("RS512", "RSASSA-PKCS1-v1_5"),
+//		ES256("ES256", "P-256", "secp256r1"),
+//		ES384("ES3", "P-256", "secp256r1"),
+//        ES512("ES512", "P-521", "secp521r1"),
+		none(null, null),
+		HS256(SignatureAlgo.HMAC_SHA_256, null),
+		HS384(SignatureAlgo.HMAC_SHA_384, null),
+		HS512(SignatureAlgo.HMAC_SHA_512, null),
+		RS256(SignatureAlgo.SHA256_RSA, null),
+		RS384(SignatureAlgo.SHA384_RSA, null),
+		RS512(SignatureAlgo.SHA512_RSA, null),
+		ES256(SignatureAlgo.SHA256_EC,  "secp256r1", "P-256"),
+		ES384(SignatureAlgo.SHA384_EC, "secp256r1", "P-256"),
+		ES512(SignatureAlgo.SHA512_EC, "secp521r1", "P-521"),
 		;
 
-		private final String name;
+		private final SignatureAlgo signatureAlgo;
+		private final String paramSpec;
+		private final String altName;
 
-		JWTAlgorithm(String name)
+		JWTAlgo(SignatureAlgo signatureAlgo, String paramSpec)
 		{
-			this.name = name;
+			this(signatureAlgo, paramSpec, null);
 		}
 
-		public String toString()
+		JWTAlgo(SignatureAlgo signatureAlgo, String paramSpec, String altName)
 		{
-			return getName();
+			this.signatureAlgo = signatureAlgo;
+			this.paramSpec = paramSpec;
+			this.altName = altName;
 		}
+
 
 
 		public String getName()
 		{
-			return name;
+			return name();
 		}
+		public SignatureAlgo getSignatureAlgo()
+		{
+			return signatureAlgo;
+		}
+
+		public String getAltName()
+		{
+			return altName;
+		}
+
+		public String getParamSpec()
+		{
+			return paramSpec;
+		}
+
+
+		public static JWTAlgo lookup(String algo)
+		{
+			JWTAlgo ret = SharedUtil.lookupEnum(algo, JWTAlgo.values());
+			if (ret == null && algo != null)
+			{
+				for (JWTAlgo jwta : JWTAlgo.values())
+				{
+					if (algo.equalsIgnoreCase(jwta.getParamSpec()) || algo.equalsIgnoreCase(jwta.getAltName()))
+					{
+						ret = jwta;
+						break;
+					}
+				}
+			}
+			return ret;
+		}
+
 	}
 
 	/**

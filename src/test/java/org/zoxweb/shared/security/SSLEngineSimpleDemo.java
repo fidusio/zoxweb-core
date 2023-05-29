@@ -72,6 +72,7 @@ package org.zoxweb.shared.security;
  */
 
 import org.zoxweb.server.security.CryptoUtil;
+import org.zoxweb.shared.crypto.CryptoConst;
 
 import javax.net.ssl.*;
 import javax.net.ssl.SSLEngineResult.*;
@@ -161,7 +162,7 @@ public class SSLEngineSimpleDemo {
 //        sslCtx.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
 //
 //        sslc = sslCtx;
-        sslc = CryptoUtil.initSSLContext(keyStoreFile, CryptoUtil.PKCS12, passwd.toCharArray(), null, null,null);
+        sslc = CryptoUtil.initSSLContext(keyStoreFile, CryptoConst.PKCS12, passwd.toCharArray(), null, null,null);
     }
 
     /*

@@ -15,7 +15,6 @@
  */
 package org.zoxweb.shared.security;
 
-import org.zoxweb.shared.crypto.CryptoConst;
 import org.zoxweb.shared.data.SetNameDescriptionDAO;
 import org.zoxweb.shared.util.GetNVConfig;
 import org.zoxweb.shared.util.GetNVProperties;
@@ -26,7 +25,7 @@ import org.zoxweb.shared.util.NVConfigEntityLocal;
 import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.NVGenericMap;
 import org.zoxweb.shared.util.SharedUtil;
-import org.zoxweb.shared.crypto.CryptoConst.JWTAlgorithm;
+import org.zoxweb.shared.crypto.CryptoConst.JWTAlgo;
 
 
 public class JWTHeader
@@ -36,7 +35,7 @@ implements GetNVProperties
 	public enum Param
 	    implements GetNVConfig, GetName
 	{
-		ALG(NVConfigManager.createNVConfig("alg", "Algorithm", "Alg", true, true, JWTAlgorithm.class)),
+		ALG(NVConfigManager.createNVConfig("alg", "Algorithm", "Alg", true, true, JWTAlgo.class)),
 		CTY(NVConfigManager.createNVConfig("cty", "Content Type", "ContentType", false, false, String.class)),
 		TYP(NVConfigManager.createNVConfig("typ", "Token type", "TokenType",false, false, String.class)),
 		KID(NVConfigManager.createNVConfig("kid", "Key ID", "KeyID",false, false, String.class)),
@@ -83,12 +82,12 @@ implements GetNVProperties
 		
 	}
 	
-	public JWTAlgorithm getJWTAlgorithm()
+	public JWTAlgo getJWTAlgorithm()
 	{
-		return CryptoConst.JWTAlgorithm.valueOf((String)nvgm.getValue((GetName)Param.ALG));
+		return JWTAlgo.valueOf((String)nvgm.getValue((GetName)Param.ALG));
 	}
 	
-	public void setJWTAlgorithm(JWTAlgorithm type)
+	public void setJWTAlgorithm(JWTAlgo type)
 	{
 		nvgm.add(Param.ALG, type.name());
 		

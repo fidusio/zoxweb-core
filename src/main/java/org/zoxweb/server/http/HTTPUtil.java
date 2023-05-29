@@ -53,7 +53,7 @@ public class HTTPUtil
 
 	public static final  String WEB_SOCKECT_STRING =  "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
 	private static Lock lock = new ReentrantLock();
-	private static final MessageDigest SHA_1 = HashUtil.createMessageDigestSilent("SHA-1");
+	private static final MessageDigest SHA_1 = HashUtil.getMessageDigestSilent("SHA-1");
 
 	/**
 	 * The constructor is declared private to prevent instantiation.

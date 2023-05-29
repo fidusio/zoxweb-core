@@ -1,9 +1,5 @@
 package org.zoxweb.server.api;
 
-import java.io.IOException;
-
-//import org.junit.Before;
-//import org.junit.Test;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.zoxweb.server.security.JWTProvider;
@@ -18,6 +14,8 @@ import org.zoxweb.shared.security.JWTHeader;
 import org.zoxweb.shared.security.JWTPayload;
 import org.zoxweb.shared.security.SubjectAPIKey;
 import org.zoxweb.shared.util.SharedBase64.Base64Type;
+
+import java.io.IOException;
 
 public class APIAppManagerTest {
 
@@ -56,7 +54,7 @@ public class APIAppManagerTest {
 		JWT jwt = new JWT();
 		JWTHeader header = jwt.getHeader();
 		
-		header.setJWTAlgorithm(CryptoConst.JWTAlgorithm.HS256);
+		header.setJWTAlgorithm(CryptoConst.JWTAlgo.HS256);
 		header.setTokenType("JWT");
 		
 		JWTPayload payload =jwt.getPayload();

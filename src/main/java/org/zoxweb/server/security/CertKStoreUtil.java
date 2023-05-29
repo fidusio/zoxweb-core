@@ -1,6 +1,7 @@
 package org.zoxweb.server.security;
 
 import org.zoxweb.server.net.ssl.SSLContextInfo;
+import org.zoxweb.shared.crypto.CryptoConst;
 import org.zoxweb.shared.util.Const;
 import sun.security.x509.*;
 //import sun.security.x509.*;
@@ -66,7 +67,7 @@ public class CertKStoreUtil {
     {
         KeyPair keyPair = CryptoUtil.generateKeyPair(keyType, keySizeInBits);
         X509Certificate certificate = generateSelfCertificate(commonName, keyPair, 30, signAlgoName);
-        return generateKeyStore(certificate, "tempo", keyPair.getPrivate(), ksPassword, CryptoUtil.PKCS12);
+        return generateKeyStore(certificate, "tempo", keyPair.getPrivate(), ksPassword, CryptoConst.PKCS12);
     }
 
     public static SSLContextInfo generateRandomSSLContextInfo(String keyType, String signAlgo) throws GeneralSecurityException, IOException {

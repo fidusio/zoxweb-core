@@ -16,7 +16,7 @@ public class WebSocketProtocol {
     @Test
     public void testSecWebSocketAccept() throws NoSuchAlgorithmException {
         String webSecKey ="dGhlIHNhbXBsZSBub25jZQ==";
-        MessageDigest sha1 = HashUtil.createMessageDigest("sha-1");
+        MessageDigest sha1 = HashUtil.getMessageDigest("sha-1");
         byte[] expected = sha1.digest(SharedStringUtil.getBytes(webSecKey + webSocketTag));
 
         String secWebSocketAccept = SharedBase64.encodeAsString(SharedBase64.Base64Type.DEFAULT, expected);

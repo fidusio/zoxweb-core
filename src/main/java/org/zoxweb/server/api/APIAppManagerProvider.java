@@ -125,7 +125,7 @@ public class APIAppManagerProvider
 
         if (subjectAPIKey.getAPIKey() == null) {
             try {
-                subjectAPIKey.setAPIKey(CryptoUtil.generateKey(CryptoUtil.AES, 256).getEncoded());
+                subjectAPIKey.setAPIKey(CryptoUtil.generateKey(CryptoConst.CryptoAlgo.AES, 256).getEncoded());
             } catch (NoSuchAlgorithmException e) {
                 e.printStackTrace();
             }
@@ -304,7 +304,7 @@ public class APIAppManagerProvider
 			userIDCredentials.setUserStatus(userIDStatus);
 			userIDCredentials.setCanonicalID(userID.getSubjectID());
 			
-			PasswordDAO passwordDAO = HashUtil.toPassword(HASHType.SHA_512, 0, 8196, password);
+			PasswordDAO passwordDAO = HashUtil.toPassword(HASHType.BCRYPT, 0, 10, password);
 			passwordDAO.setUserID(userID.getReferenceID());
 			passwordDAO.setReferenceID(userID.getReferenceID());
 			passwordDAO.setGlobalID(userID.getGlobalID());

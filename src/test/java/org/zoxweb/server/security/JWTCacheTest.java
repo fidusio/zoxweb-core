@@ -29,7 +29,7 @@ public class JWTCacheTest {
             JWT jwt = null;
             for(int i=0; i < count; i++)
             {
-                jwt = JWT.createJWT(CryptoConst.JWTAlgorithm.HS256, subject, "xlogistx.io", "test");
+                jwt = JWT.createJWT(CryptoConst.JWTAlgo.HS256, subject, "xlogistx.io", "test");
                 sizeOfAllTockens += CryptoUtil.encodeJWT(password, jwt, true).length();
                 cache.map(jwt);
             }

@@ -16,6 +16,7 @@
 package org.zoxweb.server.security;
 
 import org.zoxweb.server.util.GSONUtil;
+import org.zoxweb.shared.crypto.CryptoConst;
 import org.zoxweb.shared.crypto.CryptoConst.HASHType;
 import org.zoxweb.shared.crypto.CryptoConst.SecureRandomType;
 import org.zoxweb.shared.crypto.EncryptedDAO;
@@ -45,7 +46,7 @@ public class EncryptedContentTest {
     if (f.exists() && f.canRead()) {
       SecretKeySpec k = (SecretKeySpec) CryptoUtil
           .getKeyFromKeyStore(new FileInputStream("/home/fidus-store/ssl/fidus-store-test.jck"),
-              CryptoUtil.KEY_STORE_TYPE, "changeit", "fidus-store-mk", "changeit");
+              CryptoConst.KEY_STORE_TYPE, "changeit", "fidus-store-mk", "changeit");
 
       System.out.println(k.getAlgorithm() + ":" + k.getFormat() + ":" + SharedStringUtil
           .bytesToHex(k.getEncoded()));
@@ -54,18 +55,18 @@ public class EncryptedContentTest {
 
       CryptoUtil.updateKeyPasswordInKeyStore(
           new FileInputStream("/home/fidus-store/ssl/fidus-store-test.jck"),
-          CryptoUtil.KEY_STORE_TYPE,
+          CryptoConst.KEY_STORE_TYPE,
           "changeit", "fidus-store-mk", "changeit",
           new FileOutputStream(fNewStore), "password", "fidus-store-mk", "password");
 
       k = (SecretKeySpec) CryptoUtil
-          .getKeyFromKeyStore(new FileInputStream(fNewStore), CryptoUtil.KEY_STORE_TYPE, "password",
+          .getKeyFromKeyStore(new FileInputStream(fNewStore), CryptoConst.KEY_STORE_TYPE, "password",
               "fidus-store-mk", "password");
       System.out.println(k.getAlgorithm() + ":" + k.getFormat() + ":" + SharedStringUtil
           .bytesToHex(k.getEncoded()));
 
       KeyStore ks = CryptoUtil
-          .loadKeyStore(new FileInputStream(fNewStore), CryptoUtil.KEY_STORE_TYPE,
+          .loadKeyStore(new FileInputStream(fNewStore), CryptoConst.KEY_STORE_TYPE,
               "password".toCharArray());
 
       char[] aliasPassword = "password".toCharArray();
@@ -162,11 +163,11 @@ public class EncryptedContentTest {
 
         System.out.println("rekeyed         key:" + SharedStringUtil.bytesToHex(key));
 
-        MessageDigest digest = MessageDigest.getInstance(CryptoUtil.SHA_256);
+        MessageDigest digest = HashUtil.getMessageDigest(CryptoConst.HASHType.SHA_256);
 
         for (int i = 0; i < 10; i++) {
           long ts = System.nanoTime();
-          SecretKey sk = CryptoUtil.generateKey(CryptoUtil.AES, 256);
+          SecretKey sk = CryptoUtil.generateKey(CryptoConst.CryptoAlgo.AES, 256);
           ts = System.nanoTime() - ts;
           System.out.print("[" + ts + " ns]");
           System.out.println(sk.getAlgorithm() + "," + sk.getFormat() + "," + SharedStringUtil
@@ -174,7 +175,7 @@ public class EncryptedContentTest {
 
           ts = System.nanoTime();
           byte[] randomBytes = CryptoUtil
-              .generateRandomHashedBytes(digest, CryptoUtil.AES_256_KEY_SIZE,
+              .generateRandomHashedBytes(digest, CryptoConst.AES_256_KEY_SIZE,
                   CryptoUtil.DEFAULT_ITERATION);
           ts = System.nanoTime() - ts;
           System.out.print("[" + ts + " ns]");
@@ -248,7 +249,7 @@ public class EncryptedContentTest {
       }
 
       try {
-        SecretKey sk = CryptoUtil.generateKey(CryptoUtil.AES, 256);
+        SecretKey sk = CryptoUtil.generateKey(CryptoConst.CryptoAlgo.AES, 256);
 
         byte[] data = "Marwan NAEL is the best of the b".getBytes(StandardCharsets.UTF_8);
 

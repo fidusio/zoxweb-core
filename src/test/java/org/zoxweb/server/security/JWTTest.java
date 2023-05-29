@@ -1,26 +1,23 @@
 package org.zoxweb.server.security;
 
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.zoxweb.server.util.GSONUtil;
+import org.zoxweb.shared.crypto.CryptoConst.JWTAlgo;
+import org.zoxweb.shared.security.JWT;
+import org.zoxweb.shared.security.JWTHeader;
+import org.zoxweb.shared.security.JWTPayload;
+import org.zoxweb.shared.util.BytesValue;
+import org.zoxweb.shared.util.NVPair;
+import org.zoxweb.shared.util.SharedBase64.Base64Type;
+import org.zoxweb.shared.util.SharedStringUtil;
+
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-//import org.junit.Assert;
-//import org.junit.Before;
-//import org.junit.Test;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.zoxweb.server.util.GSONUtil;
-import org.zoxweb.shared.crypto.CryptoConst;
-import org.zoxweb.shared.security.JWT;
-import org.zoxweb.shared.security.JWTHeader;
-import org.zoxweb.shared.security.JWTPayload;
-import org.zoxweb.shared.crypto.CryptoConst.JWTAlgorithm;
-import org.zoxweb.shared.util.BytesValue;
-import org.zoxweb.shared.util.NVPair;
-import org.zoxweb.shared.util.SharedBase64.Base64Type;
-import org.zoxweb.shared.util.SharedStringUtil;
 
 public class JWTTest {
 
@@ -36,7 +33,7 @@ public class JWTTest {
     jwtHS256 = new JWT();
     JWTHeader header = jwtHS256.getHeader();
 
-    header.setJWTAlgorithm(CryptoConst.JWTAlgorithm.HS256);
+    header.setJWTAlgorithm(JWTAlgo.HS256);
     header.setTokenType("JWT");
 
     JWTPayload payload = jwtHS256.getPayload();
@@ -48,7 +45,7 @@ public class JWTTest {
 
     jwtNONE = new JWT();
     header = jwtNONE.getHeader();
-    header.setJWTAlgorithm(CryptoConst.JWTAlgorithm.none);
+    header.setJWTAlgorithm(JWTAlgo.none);
 
     payload = jwtNONE.getPayload();
     payload.setDomainID("xlogistx.io");
@@ -61,7 +58,7 @@ public class JWTTest {
 
     header = jwtHS512.getHeader();
 
-    header.setJWTAlgorithm(CryptoConst.JWTAlgorithm.HS512);
+    header.setJWTAlgorithm(JWTAlgo.HS512);
     header.setTokenType("JWT");
 
     payload = jwtHS512.getPayload();
@@ -190,7 +187,7 @@ public class JWTTest {
 
     System.out.println("--------------------------------------------------------------");
     JWT jwtES256 = new JWT();
-    jwtES256.getHeader().setJWTAlgorithm(CryptoConst.JWTAlgorithm.ES256);
+    jwtES256.getHeader().setJWTAlgorithm(JWTAlgo.ES256);
     jwtES256.getHeader().setTokenType("JWT");
 
     JWTPayload payload = jwtES256.getPayload();
@@ -322,11 +319,11 @@ public class JWTTest {
     KeyPair ecKP = CryptoUtil.generateKeyPair("EC", 521);
     KeyPair rsaKP = CryptoUtil.generateKeyPair("RSA", 2048);
 
-    JWTAlgorithm[] list = {
-        CryptoConst.JWTAlgorithm.ES256, CryptoConst.JWTAlgorithm.ES512, CryptoConst.JWTAlgorithm.RS256, CryptoConst.JWTAlgorithm.RS512
+    JWTAlgo[] list = {
+        JWTAlgo.ES256, JWTAlgo.ES512, JWTAlgo.RS256, JWTAlgo.RS512
     };
 
-    for (JWTAlgorithm algo : list) {
+    for (JWTAlgo algo : list) {
       jwt.getHeader().setJWTAlgorithm(algo);
       KeyPair kp = null;
       switch (algo) {
@@ -371,7 +368,7 @@ public class JWTTest {
 
   @Test
   public void sequenceHashTest() throws NoSuchAlgorithmException, CloneNotSupportedException {
-    MessageDigest md = HashUtil.createMessageDigest("sha-256");
+    MessageDigest md = HashUtil.getMessageDigest("sha-256");
 
 
     int sum = 0;
@@ -381,10 +378,16 @@ public class JWTTest {
 
       MessageDigest md2 = (MessageDigest)md.clone();
       System.out.println(SharedStringUtil.bytesToHex(md2.digest()));
-      System.out.println(SharedStringUtil.bytesToHex(HashUtil.createMessageDigest("sha-256").digest(BytesValue.INT.toBytes(i))));
+      System.out.println(SharedStringUtil.bytesToHex(HashUtil.getMessageDigest("sha-256").digest(BytesValue.INT.toBytes(i))));
       System.out.println(md == md2);
     }
   }
 
+
+  @Test
+  public void testAlgoLookup()
+  {
+    System.out.println(JWTAlgo.lookup("p-256"));
+  }
 
 }

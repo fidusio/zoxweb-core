@@ -27,13 +27,14 @@
  */
 package org.zoxweb.server.security;
 
+import org.zoxweb.shared.crypto.BCryptHash;
 import org.zoxweb.shared.crypto.CryptoConst;
 import org.zoxweb.shared.crypto.PasswordDAO;
 import org.zoxweb.shared.security.AccessException;
-import org.zoxweb.shared.crypto.BCryptHash;
 import org.zoxweb.shared.util.SharedStringUtil;
 import org.zoxweb.shared.util.SharedUtil;
 
+import javax.crypto.Mac;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import java.security.MessageDigest;
@@ -158,13 +159,25 @@ public class HashUtil {
     return hashSequence(algorithm, SharedStringUtil.getBytesArray(seqs));
   }
 
-  public static MessageDigest createMessageDigest(String algorithm) throws NoSuchAlgorithmException {
+
+  public static MessageDigest getMessageDigest(CryptoConst.HASHType hashType) throws NoSuchAlgorithmException {
+    return getMessageDigest(hashType.getName());
+  }
+  public static MessageDigest getMessageDigest(String algorithm) throws NoSuchAlgorithmException {
     return MessageDigest.getInstance(algorithm);
   }
 
-  public static MessageDigest createMessageDigestSilent(String algorithm) {
+  public static Mac getMac(CryptoConst.SignatureAlgo algo) throws NoSuchAlgorithmException {
+    return Mac.getInstance(algo.getName());
+  }
+
+  public static Mac getMac(String algo) throws NoSuchAlgorithmException {
+    return Mac.getInstance(algo);
+  }
+
+  public static MessageDigest getMessageDigestSilent(String algorithm) {
     try {
-      return MessageDigest.getInstance(algorithm);
+      return getMessageDigest(algorithm);
     } catch (NoSuchAlgorithmException e) {
       throw new RuntimeException(e);
     }
@@ -213,18 +226,18 @@ public class HashUtil {
     return toPassword(algo, saltLength, saltIteration, SharedStringUtil.getBytes(password));
   }
 
-  public static PasswordDAO toBCryptPassword(int logRounds, String password)
-          throws NoSuchAlgorithmException
-  {
-    return toPassword(CryptoConst.HASHType.BCRYPT, 0, logRounds, password);
-  }
+//  public static PasswordDAO toBCryptPassword(int logRounds, String password)
+//          throws NoSuchAlgorithmException
+//  {
+//    return toPassword(CryptoConst.HASHType.BCRYPT, 0, logRounds, password);
+//  }
 
 
-  public static PasswordDAO toBCryptPassword(int logRounds, byte[] password)
-          throws NoSuchAlgorithmException
-  {
-    return toPassword(CryptoConst.HASHType.BCRYPT, 0, logRounds, password);
-  }
+//  public static PasswordDAO toBCryptPassword(int logRounds, byte[] password)
+//          throws NoSuchAlgorithmException
+//  {
+//    return toPassword(CryptoConst.HASHType.BCRYPT, 0, logRounds, password);
+//  }
 
   public static PasswordDAO toPassword(CryptoConst.HASHType algo, int saltLength, int saltIteration,
                                        byte[] password)

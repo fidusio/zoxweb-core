@@ -1,13 +1,15 @@
 package org.zoxweb.server.util;
 
-import java.security.NoSuchAlgorithmException;
-import java.util.UUID;
 import org.zoxweb.server.security.CryptoUtil;
 import org.zoxweb.server.security.HashUtil;
+import org.zoxweb.shared.crypto.CryptoConst;
 import org.zoxweb.shared.util.Const;
 import org.zoxweb.shared.util.IDGenerator;
 import org.zoxweb.shared.util.SharedBase64;
 import org.zoxweb.shared.util.SharedBase64.Base64Type;
+
+import java.security.NoSuchAlgorithmException;
+import java.util.UUID;
 
 public class IDGeneratorUtil 
 {
@@ -74,7 +76,7 @@ public class IDGeneratorUtil
             do 
             {
                 try {
-                  ret = SharedBase64.encodeAsString(Base64Type.URL, CryptoUtil.generateKey(CryptoUtil.AES, (Const.TypeInBytes.BYTE.sizeInBits(CryptoUtil.AES_256_KEY_SIZE))).getEncoded());
+                  ret = SharedBase64.encodeAsString(Base64Type.URL, CryptoUtil.generateKey(CryptoConst.CryptoAlgo.AES, (Const.TypeInBytes.BYTE.sizeInBits(CryptoConst.AES_256_KEY_SIZE))).getEncoded());
                 } catch (NoSuchAlgorithmException e) {
                   // TODO Auto-generated catch block
                   e.printStackTrace();
@@ -98,7 +100,7 @@ public class IDGeneratorUtil
           
           do {
             try {
-              ret = SharedBase64.encode(Base64Type.URL, CryptoUtil.generateKey(CryptoUtil.AES, (Const.TypeInBytes.BYTE.sizeInBits(CryptoUtil.AES_256_KEY_SIZE))).getEncoded());
+              ret = SharedBase64.encode(Base64Type.URL, CryptoUtil.generateKey(CryptoConst.CryptoAlgo.AES, (Const.TypeInBytes.BYTE.sizeInBits(CryptoConst.AES_256_KEY_SIZE))).getEncoded());
             } catch (NoSuchAlgorithmException e) {
               // TODO Auto-generated catch block
               e.printStackTrace();

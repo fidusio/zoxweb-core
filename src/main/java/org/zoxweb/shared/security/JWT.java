@@ -127,11 +127,11 @@ extends SetNameDescriptionDAO
 		setValue(Param.JWT_HASH, hash);
 	}
 
-    public static JWT createJWT(CryptoConst.JWTAlgorithm algorithm, String subjectID, AppID<String> appID) {
+    public static JWT createJWT(CryptoConst.JWTAlgo algorithm, String subjectID, AppID<String> appID) {
 	    return createJWT(algorithm, subjectID, appID.getDomainID(), appID.getAppID());
     }
 
-	public static JWT createJWT(CryptoConst.JWTAlgorithm algorithm, String subjectID, String domainID, String appID) {
+	public static JWT createJWT(CryptoConst.JWTAlgo algorithm, String subjectID, String domainID, String appID) {
 		
 		JWT jwt = new JWT();
         JWTHeader jwtHeader = jwt.getHeader();

@@ -21,7 +21,6 @@ import org.zoxweb.server.io.UByteArrayOutputStream;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.crypto.CryptoConst;
 import org.zoxweb.shared.crypto.CryptoConst.SecureRandomType;
-import org.zoxweb.shared.crypto.CryptoConst.SignatureAlgo;
 import org.zoxweb.shared.crypto.EncryptedDAO;
 import org.zoxweb.shared.crypto.EncryptedKeyDAO;
 import org.zoxweb.shared.filters.BytesValueFilter;
@@ -39,11 +38,14 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import javax.net.ssl.*;
 import java.io.*;
+import java.math.BigInteger;
 import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.RSAPublicKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -60,26 +62,11 @@ public class CryptoUtil {
   //private static final Logger  log = Logger.getLogger(CryptoUtil.class.getName());
 
 
-  /**
-   * AES 256 bits key size in bytes(32)
-   */
-  public static final int AES_256_KEY_SIZE = 32;
-  /**
-   * AES block size in bits 128 (16 bytes);
-   */
-  public static final int AES_BLOCK_SIZE = 16;
   public static final int MIN_KEY_BYTES = 6;
 
-  public static final String KEY_STORE_TYPE = "JCEKS";
-  public static final String PKCS12 = "PKCS12";
-  public static final String HMAC_SHA_256 = "HmacSHA256";
-  public static final String HMAC_SHA_512 = "HmacSHA512";
-  public static final String SHA_256 = "SHA-256";
-  public static final String AES = "AES";
-  public static final String AES_ENCRYPTION_CBC_NO_PADDING = "AES/CBC/NoPadding";
   public static final int DEFAULT_ITERATION = 8196;
 
-  public static final int SALT_LENGTH = 32;
+  //public static final int SALT_LENGTH = 32;
 
   public static byte[] generateRandomBytes(SecureRandom sr, int size)
       throws NullPointerException, IllegalArgumentException, NoSuchAlgorithmException {
@@ -125,8 +112,8 @@ public class CryptoUtil {
 
   public static byte[] hmacSHA256(byte[] secret, byte[] data)
       throws NoSuchAlgorithmException, InvalidKeyException {
-    Mac sha256HMAC = Mac.getInstance(HMAC_SHA_256);
-    SecretKeySpec secret_key = new SecretKeySpec(secret, HMAC_SHA_256);
+    Mac sha256HMAC = HashUtil.getMac(CryptoConst.SignatureAlgo.HMAC_SHA_256);
+    SecretKeySpec secret_key = new SecretKeySpec(secret, CryptoConst.SignatureAlgo.HMAC_SHA_256.getName());
     sha256HMAC.init(secret_key);
     return sha256HMAC.doFinal(data);
   }
@@ -324,21 +311,21 @@ public class CryptoUtil {
     }
 
     //EncryptedDAO ret = ekd ;
-    ekd.setName(AES + "-" + Const.TypeInBytes.BYTE.sizeInBits(AES_256_KEY_SIZE));
-    ekd.setDescription(AES_ENCRYPTION_CBC_NO_PADDING);
-    ekd.setHMACAlgoName(HMAC_SHA_256);
+    ekd.setName(CryptoConst.CryptoAlgo.AES.getName() + "-" + Const.TypeInBytes.BYTE.sizeInBits(CryptoConst.AES_256_KEY_SIZE));
+    ekd.setDescription(CryptoConst.AES_ENCRYPTION_CBC_NO_PADDING);
+    ekd.setHMACAlgoName(CryptoConst.SignatureAlgo.HMAC_SHA_256.getName());
 
     // create iv vector
-    MessageDigest digest = MessageDigest.getInstance(SHA_256);
+    MessageDigest digest = HashUtil.getMessageDigest(CryptoConst.HASHType.SHA_256);
     //IvParameterSpec ivSpec = new IvParameterSpec(generateRandomHashedBytes(digest, AES_BLOCK_SIZE, DEFAULT_ITERATION));
     IvParameterSpec ivSpec = new IvParameterSpec(
-        generateKey(AES, (Const.TypeInBytes.BYTE.sizeInBits(AES_256_KEY_SIZE) / 2)).getEncoded());
+        generateKey(CryptoConst.CryptoAlgo.AES, (Const.TypeInBytes.BYTE.sizeInBits(CryptoConst.AES_256_KEY_SIZE) / 2)).getEncoded());
     SecretKeySpec aesKey = new SecretKeySpec(
-        hashWithIterations(digest, ivSpec.getIV(), key, hashIteration, true), AES);
-    Cipher cipher = Cipher.getInstance(AES_ENCRYPTION_CBC_NO_PADDING);
+        hashWithIterations(digest, ivSpec.getIV(), key, hashIteration, true), CryptoConst.CryptoAlgo.AES.getName());
+    Cipher cipher = Cipher.getInstance(CryptoConst.AES_ENCRYPTION_CBC_NO_PADDING);
     cipher.init(Cipher.ENCRYPT_MODE, aesKey, ivSpec);
-    Mac hmac = Mac.getInstance(HMAC_SHA_256);
-    hmac.init(new SecretKeySpec(aesKey.getEncoded(), HMAC_SHA_256));
+    Mac hmac = HashUtil.getMac(CryptoConst.SignatureAlgo.HMAC_SHA_256);
+    hmac.init(new SecretKeySpec(aesKey.getEncoded(), CryptoConst.SignatureAlgo.HMAC_SHA_256.getName()));
     // the initialization vector first
     hmac.update(ivSpec.getIV());
 
@@ -357,7 +344,7 @@ public class CryptoUtil {
     }
 
     if (data == null) {
-      data = generateKey(AES, Const.TypeInBytes.BYTE.sizeInBits(AES_256_KEY_SIZE)).getEncoded();
+      data = generateKey(CryptoConst.CryptoAlgo.AES, Const.TypeInBytes.BYTE.sizeInBits(CryptoConst.AES_256_KEY_SIZE)).getEncoded();
     }
 
     ekd.setDataLength(data.length);
@@ -370,11 +357,11 @@ public class CryptoUtil {
     // create a loop to read the data in the size of 16 bytes
     // write the output to a byteoputput stream
 
-    if (data.length % AES_BLOCK_SIZE != 0 || data.length == 0) {
+    if (data.length % CryptoConst.AES_BLOCK_SIZE != 0 || data.length == 0) {
       UByteArrayOutputStream baos = new UByteArrayOutputStream();
       baos.write(data);
 
-      while ((baos.size() % AES_BLOCK_SIZE) != 0 || baos.size() == 0) {
+      while ((baos.size() % CryptoConst.AES_BLOCK_SIZE) != 0 || baos.size() == 0) {
         // padding
         // instead of zero
         // add the size
@@ -442,14 +429,14 @@ public class CryptoUtil {
       BadPaddingException,
       SignatureException {
     // create iv vector
-    MessageDigest digest = MessageDigest.getInstance(SHA_256);
+    MessageDigest digest = HashUtil.getMessageDigest(CryptoConst.HASHType.SHA_256);
     IvParameterSpec ivSpec = new IvParameterSpec(ekd.getIV());
     SecretKeySpec aesKey = new SecretKeySpec(
-        hashWithIterations(digest, ivSpec.getIV(), key, hashIteration, true), AES);
-    Cipher cipher = Cipher.getInstance(AES_ENCRYPTION_CBC_NO_PADDING);
+        hashWithIterations(digest, ivSpec.getIV(), key, hashIteration, true), CryptoConst.CryptoAlgo.AES.getName());
+    Cipher cipher = Cipher.getInstance(CryptoConst.AES_ENCRYPTION_CBC_NO_PADDING);
     cipher.init(Cipher.DECRYPT_MODE, aesKey, ivSpec);
-    Mac hmac = Mac.getInstance(HMAC_SHA_256);
-    hmac.init(new SecretKeySpec(aesKey.getEncoded(), HMAC_SHA_256));
+    Mac hmac = HashUtil.getMac(CryptoConst.SignatureAlgo.HMAC_SHA_256.getName());
+    hmac.init(new SecretKeySpec(aesKey.getEncoded(), CryptoConst.SignatureAlgo.HMAC_SHA_256.getName()));
     hmac.update(ivSpec.getIV());
     // create a new key and encrypted with the key
     hmac.update(SharedStringUtil.getBytes(ekd.getName().toLowerCase()));
@@ -678,7 +665,7 @@ public class CryptoUtil {
       throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
     try {
       if (keyStoreType == null) {
-        keyStoreType = KEY_STORE_TYPE;
+        keyStoreType = CryptoConst.KEY_STORE_TYPE;
       }
       KeyStore keystore = KeyStore.getInstance(keyStoreType);
       keystore.load(keyStoreIS, keyStorePassword);
@@ -741,12 +728,72 @@ public class CryptoUtil {
     return bytes;
   }
 
+
+
+  public static PublicKey generatePublicKey(String type, String publicKey)
+          throws GeneralSecurityException
+  {
+    String publicKeyPEM = SharedStringUtil.filterString(publicKey, "BEGIN PUBLIC KEY", "END PUBLIC KEY", "-", "\n");
+    // Use Base64Type.DEFAULT DO NOT USE Base64Type.URL because of - char
+    return generatePublicKey(type, SharedBase64.decode(Base64Type.DEFAULT, publicKeyPEM));
+  }
   public static PublicKey generatePublicKey(String type, byte[] keys)
-      throws GeneralSecurityException {
+      throws GeneralSecurityException
+  {
     X509EncodedKeySpec publicSpec = new X509EncodedKeySpec(keys);
     KeyFactory keyFactory = KeyFactory.getInstance(type);
     return  keyFactory.generatePublic(publicSpec);
   }
+
+
+  public static PublicKey convertRSAJwkToPublicKey(String n, String e) {
+    try {
+      // Base64 decode the values
+      byte[] decodedN = SharedBase64.decode(Base64Type.URL,n);
+      byte[] decodedE = SharedBase64.decode(Base64Type.URL,e);
+
+      BigInteger modulus = new BigInteger(1, decodedN);
+      BigInteger exponent = new BigInteger(1, decodedE);
+
+      // Use the RSA key spec to generate the key
+      RSAPublicKeySpec keySpec = new RSAPublicKeySpec(modulus, exponent);
+      KeyFactory kf = KeyFactory.getInstance("RSA");
+
+      return kf.generatePublic(keySpec);
+    } catch (NoSuchAlgorithmException | InvalidKeySpecException ex) {
+      throw new RuntimeException("Failed to convert JWK to PublicKey", ex);
+    }
+  }
+
+//  public static PublicKey convertECJwkToPublicKey(String x, String y) {
+//    try {
+//      // Base64 decode the values
+//      byte[] decodedX = SharedBase64.decode(Base64Type.URL, x);
+//      byte[] decodedY = SharedBase64.decode(Base64Type.URL, y);
+//
+//      BigInteger bigIntegerX = new BigInteger(1, decodedX);
+//      BigInteger bigIntegerY = new BigInteger(1, decodedY);
+//
+//      // Create the ECPoint from the X and Y coordinates
+//      ECPoint ecPoint = new ECPoint(bigIntegerX, bigIntegerY);
+//
+//      // Use the P-256 curve parameters. Java refers to P-256 as secp256r1.
+//      ECGenParameterSpec ecParameterSpec = new ECGenParameterSpec("secp256r1");
+//
+//
+//
+//      AlgorithmParameters parameters = AlgorithmParameters.getInstance("EC");
+//      parameters.init(new java.security.spec.NamedParameterSpec("secp256r1"));
+//      ECParameterSpec ecParameterSpec = parameters.getParameterSpec(ECParameterSpec.class);
+//      // Use the EC key spec to generate the key
+//      ECPublicKeySpec keySpec = new ECPublicKeySpec(ecPoint, ecParameterSpec);
+//      KeyFactory kf = KeyFactory.getInstance("EC");
+//
+//      return kf.generatePublic(keySpec);
+//    } catch (NoSuchAlgorithmException | InvalidKeySpecException ex) {
+//      throw new RuntimeException("Failed to convert JWK to PublicKey", ex);
+//    }
+//  }
 
   public static PrivateKey generatePrivateKey(String type, byte[] keys)
       throws GeneralSecurityException {
@@ -790,57 +837,33 @@ public class CryptoUtil {
 
     String b64Hash = null;
 
-    switch (jwt.getHeader().getJWTAlgorithm()) {
+    CryptoConst.JWTAlgo jwtAlgo = jwt.getHeader().getJWTAlgorithm();
+    switch (jwtAlgo) {
       case HS256:
-        SharedUtil.checkIfNulls("Null key", key);
-        Mac sha256_HMAC = Mac.getInstance(HMAC_SHA_256);
-        SecretKeySpec secret_key = new SecretKeySpec(key, HMAC_SHA_256);
-        sha256_HMAC.init(secret_key);
-        b64Hash = SharedBase64.encodeAsString(Base64Type.URL,
-            sha256_HMAC.doFinal(SharedStringUtil.getBytes(sb.toString())));
-        break;
+      case HS384:
       case HS512:
         SharedUtil.checkIfNulls("Null key", key);
-        Mac sha512_HMAC = Mac.getInstance(HMAC_SHA_512);
-        secret_key = new SecretKeySpec(key, HMAC_SHA_512);
-        sha512_HMAC.init(secret_key);
+        Mac hmac = HashUtil.getMac(jwtAlgo.getSignatureAlgo());
+        SecretKeySpec secret_key = new SecretKeySpec(key, jwtAlgo.getSignatureAlgo().getName());
+        hmac.init(secret_key);
         b64Hash = SharedBase64.encodeAsString(Base64Type.URL,
-            sha512_HMAC.doFinal(SharedStringUtil.getBytes(sb.toString())));
+            hmac.doFinal(SharedStringUtil.getBytes(sb.toString())));
         break;
       case none:
         break;
       case RS256:
-        SharedUtil.checkIfNulls("Null key", key);
-        PrivateKey rs256 = CryptoUtil.generatePrivateKey("RSA",key);
-        b64Hash = SharedBase64.encodeAsString(Base64Type.URL,
-            CryptoUtil
-                .sign(SignatureAlgo.SHA256_RSA, rs256, SharedStringUtil.getBytes(sb.toString())));
-
-        break;
+      case RS384:
       case RS512:
-        SharedUtil.checkIfNulls("Null key", key);
-        PrivateKey rs512 = CryptoUtil.generatePrivateKey("RSA", key);
-        b64Hash = SharedBase64.encodeAsString(Base64Type.URL,
-            CryptoUtil
-                .sign(SignatureAlgo.SHA512_RSA, rs512, SharedStringUtil.getBytes(sb.toString())));
-        break;
       case ES256:
-        SharedUtil.checkIfNulls("Null key", key);
-        PrivateKey es256 = CryptoUtil.generatePrivateKey("EC",key);
-        b64Hash = SharedBase64.encodeAsString(Base64Type.URL,
-            CryptoUtil
-                .sign(SignatureAlgo.SHA256_EC, es256, SharedStringUtil.getBytes(sb.toString())));
-
-        break;
+      case ES384:
       case ES512:
         SharedUtil.checkIfNulls("Null key", key);
-        PrivateKey es512 = CryptoUtil.generatePrivateKey("EC", key);
+        PrivateKey privateKey = CryptoUtil.generatePrivateKey(jwtAlgo.getSignatureAlgo().getCryptoAlgo().getName(), key);
         b64Hash = SharedBase64.encodeAsString(Base64Type.URL,
-            CryptoUtil
-                .sign(SignatureAlgo.SHA512_EC, es512, SharedStringUtil.getBytes(sb.toString())));
+                                              CryptoUtil.sign(jwtAlgo.getSignatureAlgo(),
+                                                              privateKey,
+                                                              SharedStringUtil.getBytes(sb.toString())));
         break;
-
-
     }
 
     sb.append(".");
@@ -876,39 +899,22 @@ public class CryptoUtil {
 
 
     String[] tokens = token.trim().split("\\.");
-    switch (jwt.getHeader().getJWTAlgorithm()) {
+    CryptoConst.JWTAlgo jwtAlgo = jwt.getHeader().getJWTAlgorithm();
+    switch (jwtAlgo) {
       case HS256:
-        SharedUtil.checkIfNulls("Null key", key);
-        if (tokens.length != JWTField.values().length) {
-          throw new SecurityException("Invalid token");
-        }
-        Mac sha256HMAC = Mac.getInstance(HMAC_SHA_256);
-        SecretKeySpec secret_key = new SecretKeySpec(key, HMAC_SHA_256);
-        sha256HMAC.init(secret_key);
-        sha256HMAC.update(SharedStringUtil.getBytes(tokens[JWTField.HEADER.ordinal()]));
-
-        sha256HMAC.update((byte) '.');
-        byte[] b64Hash = sha256HMAC
-            .doFinal(SharedStringUtil.getBytes(tokens[JWTField.PAYLOAD.ordinal()]));
-
-        if (!SharedBase64.encodeAsString(Base64Type.URL, b64Hash).equals(jwt.getHash())) {
-          throw new SecurityException(
-              "Invalid tokens:" + SharedBase64.encodeAsString(Base64Type.URL, b64Hash) + "," + jwt
-                  .getHash());
-        }
-        break;
+      case HS384:
       case HS512:
         SharedUtil.checkIfNulls("Null key", key);
         if (tokens.length != JWTField.values().length) {
           throw new SecurityException("Invalid token");
         }
-        Mac sha512HMAC = Mac.getInstance(HMAC_SHA_512);
-        secret_key = new SecretKeySpec(key, HMAC_SHA_512);
-        sha512HMAC.init(secret_key);
-        sha512HMAC.update(SharedStringUtil.getBytes(tokens[JWTField.HEADER.ordinal()]));
+        Mac shaHMAC = HashUtil.getMac(jwtAlgo.getSignatureAlgo());
+        SecretKeySpec secret_key = new SecretKeySpec(key, jwtAlgo.getSignatureAlgo().getName());
+        shaHMAC.init(secret_key);
+        shaHMAC.update(SharedStringUtil.getBytes(tokens[JWTField.HEADER.ordinal()]));
 
-        sha512HMAC.update((byte) '.');
-        b64Hash = sha512HMAC.doFinal(SharedStringUtil.getBytes(tokens[JWTField.PAYLOAD.ordinal()]));
+        shaHMAC.update((byte) '.');
+        byte[] b64Hash = shaHMAC.doFinal(SharedStringUtil.getBytes(tokens[JWTField.PAYLOAD.ordinal()]));
 
         if (!SharedBase64.encodeAsString(Base64Type.URL, b64Hash).equals(jwt.getHash())) {
           throw new SecurityException("Invalid token");
@@ -921,55 +927,18 @@ public class CryptoUtil {
         }
         break;
       case RS256:
-        SharedUtil.checkIfNulls("Null key", key);
-        if (tokens.length != JWTField.values().length) {
-          throw new SecurityException("Invalid token");
-        }
-        PublicKey rs256PK = generatePublicKey("RSA", key);
-
-        if (!CryptoUtil.verify(SignatureAlgo.SHA256_RSA, rs256PK,
-            SharedStringUtil.getBytes(
-                tokens[JWTField.HEADER.ordinal()] + "." + tokens[JWTField.PAYLOAD.ordinal()]),
-            SharedBase64.decode(Base64Type.URL, jwt.getHash()))) {
-          throw new SecurityException("Invalid token");
-        }
-        break;
+      case RS384:
       case RS512:
-        SharedUtil.checkIfNulls("Null key", key);
-        if (tokens.length != JWTField.values().length) {
-          throw new SecurityException("Invalid token");
-        }
-        PublicKey rs512PK = generatePublicKey("RSA",key);
-
-        if (!CryptoUtil.verify(SignatureAlgo.SHA512_RSA, rs512PK,
-            SharedStringUtil.getBytes(
-                tokens[JWTField.HEADER.ordinal()] + "." + tokens[JWTField.PAYLOAD.ordinal()]),
-            SharedBase64.decode(Base64Type.URL, jwt.getHash()))) {
-          throw new SecurityException("Invalid token");
-        }
-        break;
       case ES256:
-        SharedUtil.checkIfNulls("Null key", key);
-        if (tokens.length != JWTField.values().length) {
-          throw new SecurityException("Invalid token");
-        }
-        PublicKey es256PK = generatePublicKey("EC", key);
-
-        if (!CryptoUtil.verify(SignatureAlgo.SHA256_EC, es256PK,
-            SharedStringUtil.getBytes(
-                tokens[JWTField.HEADER.ordinal()] + "." + tokens[JWTField.PAYLOAD.ordinal()]),
-            SharedBase64.decode(Base64Type.URL, jwt.getHash()))) {
-          throw new SecurityException("Invalid token");
-        }
-        break;
+      case ES384:
       case ES512:
         SharedUtil.checkIfNulls("Null key", key);
         if (tokens.length != JWTField.values().length) {
           throw new SecurityException("Invalid token");
         }
-        PublicKey es512PK = generatePublicKey("EC",key);
+        PublicKey publicKey = generatePublicKey(jwtAlgo.getSignatureAlgo().getCryptoAlgo().getName(),key);
 
-        if (!CryptoUtil.verify(SignatureAlgo.SHA512_EC, es512PK,
+        if (!CryptoUtil.verify(jwtAlgo.getSignatureAlgo(), publicKey,
             SharedStringUtil.getBytes(
                 tokens[JWTField.HEADER.ordinal()] + "." + tokens[JWTField.PAYLOAD.ordinal()]),
             SharedBase64.decode(Base64Type.URL, jwt.getHash()))) {
@@ -981,9 +950,6 @@ public class CryptoUtil {
 
     return jwt;
   }
-
-
-
 
 
 
@@ -1042,6 +1008,11 @@ public class CryptoUtil {
     }
 
     return ret;
+  }
+
+  public static SecretKey generateKey(CryptoConst.CryptoAlgo type, int keySizeInBits)
+          throws NoSuchAlgorithmException {
+    return generateKey(type.getName(), keySizeInBits);
   }
 
 
@@ -1130,11 +1101,11 @@ public class CryptoUtil {
     KeyStoreInfoDAO ret = new KeyStoreInfoDAO();
     ret.setKeyStore(keyStoreName);
     ret.setAlias(alias);
-    ret.setKeyStorePassword(generateKey(AES, AES_256_KEY_SIZE * 8).getEncoded());
-    if (PKCS12.equalsIgnoreCase(keyStoreType)) {
+    ret.setKeyStorePassword(generateKey(CryptoConst.CryptoAlgo.AES, CryptoConst.AES_256_KEY_SIZE * 8).getEncoded());
+    if (CryptoConst.PKCS12.equalsIgnoreCase(keyStoreType)) {
       ret.setAliasPassword(ret.getKeyStorePassword());
     } else {
-      ret.setAliasPassword(generateKey(AES, AES_256_KEY_SIZE * 8).getEncoded());
+      ret.setAliasPassword(generateKey(CryptoConst.CryptoAlgo.AES, CryptoConst.AES_256_KEY_SIZE * 8).getEncoded());
     }
     ret.setKeyStoreType(keyStoreType);
     return ret;
