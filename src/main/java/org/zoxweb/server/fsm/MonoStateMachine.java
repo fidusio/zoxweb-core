@@ -1,15 +1,20 @@
 package org.zoxweb.server.fsm;
 
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
 public class MonoStateMachine<T, P>
 {
 
-    protected Map<T, Consumer<P>> stateMap = new LinkedHashMap<>();
+    protected final Map<T, Consumer<P>> stateMap = new HashMap<>();
 
+    private final boolean notSync;
 
+    public MonoStateMachine(boolean sync)
+    {
+        this.notSync = !sync;
+    }
     public void map(T type, Consumer<P> consumer)
     {
         stateMap.put(type, consumer);
@@ -22,6 +27,14 @@ public class MonoStateMachine<T, P>
 
     public void dispatch(T t, P param)
     {
-        stateMap.get(t).accept(param);
+        if (notSync)
+            stateMap.get(t).accept(param);
+        else
+            synchronized (this)
+            {
+                stateMap.get(t).accept(param);
+            }
+
     }
+
 }

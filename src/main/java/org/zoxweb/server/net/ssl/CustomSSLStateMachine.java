@@ -38,6 +38,7 @@ class CustomSSLStateMachine extends MonoStateMachine<SSLEngineResult.HandshakeSt
 
     CustomSSLStateMachine(SSLNIOSocketHandler sslns)
     {
+        super(false);
         this.sslns = sslns;
         this.config = sslns.getConfig();
         this.config.sslConnectionHelper = this;
