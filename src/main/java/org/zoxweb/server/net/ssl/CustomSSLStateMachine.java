@@ -1,5 +1,6 @@
 package org.zoxweb.server.net.ssl;
 
+import org.zoxweb.server.fsm.MonoStateMachine;
 import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.shared.util.Identifier;
@@ -14,7 +15,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import static javax.net.ssl.SSLEngineResult.HandshakeStatus.*;
 
-class CustomSSLStateMachine
+class CustomSSLStateMachine extends MonoStateMachine<SSLEngineResult.HandshakeStatus, SSLSessionCallback>
     implements SSLConnectionHelper, Closeable, Identifier<Long>
 {
     public static final LogWrapper log = new LogWrapper(CustomSSLStateMachine.class).setEnabled(false);
@@ -30,7 +31,6 @@ class CustomSSLStateMachine
     private final SSLNIOSocketHandler sslns;
     private final long id;
 
-
     public static long getIDCount()
     {
         return counter.get();
@@ -42,6 +42,14 @@ class CustomSSLStateMachine
         this.config = sslns.getConfig();
         this.config.sslConnectionHelper = this;
         id = counter.incrementAndGet();
+        map(NOT_HANDSHAKING, this::notHandshaking);
+        map(NEED_WRAP, this::needWrap);
+        map(NEED_UNWRAP, this::needUnwrap);
+        map(FINISHED, this::finished);
+        map(NEED_TASK, this::needTask);
+
+
+
     }
 
     @Override
@@ -132,6 +140,7 @@ class CustomSSLStateMachine
                             // no incoming data available we need to wait for more socket data
                             // return and let the NIOSocket or the data handler call back
                             // config.sslChannelSelectableStatus.set(true);
+                            // config.sslChannelSelectableStatus.set(true);
                             // config.sslRead.set(true);
                             return;
                         case BUFFER_OVERFLOW:
@@ -175,7 +184,6 @@ class CustomSSLStateMachine
             log.getLogger().info("After run: " + status);
         rcNeedTask.register(ts);
         config.sslConnectionHelper.dispatch(status, callback);
-
     }
 
 
@@ -276,47 +284,29 @@ class CustomSSLStateMachine
     }
 
 
-    public void dispatch(SSLEngineResult.HandshakeStatus status, SSLSessionCallback callback)
-    {
-        switch(status)
-        {
-
-            case NOT_HANDSHAKING:
-                notHandshaking(callback);
-                break;
-            case FINISHED:
-                finished(callback);
-                break;
-            case NEED_TASK:
-                needTask(callback);
-                break;
-            case NEED_WRAP:
-                needWrap(callback);
-                break;
-            case NEED_UNWRAP:
-                needUnwrap(callback);
-                break;
-        }
-//        switch(status.name())
+//    public void dispatch(SSLEngineResult.HandshakeStatus status, SSLSessionCallback callback)
+//    {
+//        //stateMap.get(status).accept(callback);
+//        switch(status)
 //        {
 //
-//            case "NOT_HANDSHAKING":
+//            case NOT_HANDSHAKING:
 //                notHandshaking(callback);
 //                break;
-//            case "FINISHED":
+//            case FINISHED:
 //                finished(callback);
 //                break;
-//            case "NEED_TASK":
+//            case NEED_TASK:
 //                needTask(callback);
 //                break;
-//            case "NEED_WRAP":
+//            case NEED_WRAP:
 //                needWrap(callback);
 //                break;
-//            case "NEED_UNWRAP":
+//            case NEED_UNWRAP:
 //                needUnwrap(callback);
 //                break;
 //        }
-    }
+//    }
 
     @Override
     public void createRemoteConnection()

@@ -195,6 +195,15 @@ public class Const {
     SUSPENDED,
   }
 
+
+  public enum ActionStatus {
+    CONTINUE,
+    ERROR,
+    FINISHED,
+    PARTIAL
+
+  }
+
   public enum ResourceType {
     FILE,
     FOLDER,
