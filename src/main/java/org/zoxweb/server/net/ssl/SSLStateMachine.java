@@ -18,7 +18,7 @@ public class SSLStateMachine extends StateMachine<SSLSessionConfig>
     public void dispatch(SSLEngineResult.HandshakeStatus status, SSLSessionCallback callback)
     {
         if (!isClosed())
-            publishSync(new Trigger<SSLSessionCallback>(this, status, null, callback));
+            publishSync(new Trigger<SSLSessionCallback>(this, status, getCurrentState(), callback));
     }
 
 

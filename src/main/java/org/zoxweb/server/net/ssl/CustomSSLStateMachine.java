@@ -43,11 +43,11 @@ class CustomSSLStateMachine extends MonoStateMachine<SSLEngineResult.HandshakeSt
         this.config = sslns.getConfig();
         this.config.sslConnectionHelper = this;
         id = counter.incrementAndGet();
-        map(NOT_HANDSHAKING, this::notHandshaking);
-        map(NEED_WRAP, this::needWrap);
-        map(NEED_UNWRAP, this::needUnwrap);
-        map(FINISHED, this::finished);
-        map(NEED_TASK, this::needTask);
+        register(NOT_HANDSHAKING, this::notHandshaking);
+        register(NEED_WRAP, this::needWrap);
+        register(NEED_UNWRAP, this::needUnwrap);
+        register(FINISHED, this::finished);
+        register(NEED_TASK, this::needTask);
 
 
 

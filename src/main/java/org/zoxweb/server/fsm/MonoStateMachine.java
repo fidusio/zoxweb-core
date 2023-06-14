@@ -1,13 +1,20 @@
 package org.zoxweb.server.fsm;
 
-import java.util.HashMap;
-import java.util.Map;
+import org.zoxweb.shared.util.Registrar;
+import org.zoxweb.shared.util.RegistrarMap;
+
 import java.util.function.Consumer;
 
-public class MonoStateMachine<T, P>
+/**
+ * This is a very simple state machine class
+ * @param <K>
+ * @param <V>
+ */
+public class MonoStateMachine<K, V>
+    implements Registrar<K, Consumer<V>>
 {
 
-    protected final Map<T, Consumer<P>> stateMap = new HashMap<>();
+    protected final RegistrarMap<K, Consumer<V>> registrarMap = new RegistrarMap<>();
 
     private final boolean notSync;
 
@@ -15,24 +22,29 @@ public class MonoStateMachine<T, P>
     {
         this.notSync = !sync;
     }
-    public void map(T type, Consumer<P> consumer)
+    public void register(K type, Consumer<V> consumer)
     {
-        stateMap.put(type, consumer);
+        registrarMap.register(type, consumer);
     }
 
-    public void unmap(T type)
+    public Consumer<V> unregister(K type)
     {
-        stateMap.remove(type);
+        return registrarMap.unregister(type);
     }
 
-    public void dispatch(T t, P param)
+    public Consumer<V> lookup(K key)
+    {
+        return registrarMap.lookup(key);
+    }
+
+    public void dispatch(K key, V param)
     {
         if (notSync)
-            stateMap.get(t).accept(param);
+            lookup(key).accept(param);
         else
             synchronized (this)
             {
-                stateMap.get(t).accept(param);
+                lookup(key).accept(param);
             }
 
     }

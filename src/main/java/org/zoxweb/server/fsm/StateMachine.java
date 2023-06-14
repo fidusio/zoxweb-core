@@ -13,6 +13,7 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 public class StateMachine<C>
     implements StateMachineInt<C>
@@ -179,7 +180,7 @@ public class StateMachine<C>
         }
         else
         {
-            TriggerConsumerInt<?> tci = current.lookupTriggerConsumer(trigger.getCanonicalID());
+            Consumer<?> tci = current.lookupTriggerConsumer(trigger.getCanonicalID());
             if (tci != null) {
                 SupplierConsumerTask sct =  new SupplierConsumerTask(trigger, new TriggerConsumerHolder<>(tci));
                 if (isScheduledTaskEnabled())

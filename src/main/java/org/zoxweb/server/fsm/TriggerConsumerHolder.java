@@ -7,6 +7,7 @@ public class TriggerConsumerHolder<T>
 {
     private Consumer inner;
 
+
     TriggerConsumerHolder(Consumer<?> inner)
     {
         this.inner = inner;

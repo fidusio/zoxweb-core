@@ -8,6 +8,7 @@ import org.zoxweb.shared.util.SharedUtil;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 
 
 public class State<P>
@@ -20,7 +21,7 @@ public class State<P>
     private final NVGenericMap data = new NVGenericMap();
     private volatile StateMachineInt stateMachine;
 
-    private final  Map<String, TriggerConsumerInt<?>> triggerConsumers = new LinkedHashMap<String, TriggerConsumerInt<?>> ();
+    private final  Map<String, Consumer<?>> triggerConsumers = new LinkedHashMap<String, Consumer<?>> ();
     public State(String name, NVBase<?> ...props)
     {
         this.name = name;
@@ -43,6 +44,15 @@ public class State<P>
 
     @Override
     public TriggerConsumerInt<?> lookupTriggerConsumer(String canonicalID) {
+
+        Consumer<?> ret = lookupConsumer(canonicalID);
+        if (ret instanceof TriggerConsumerInt)
+            return (TriggerConsumerInt<?>) ret;
+        return null;
+    }
+
+    public Consumer<?> lookupConsumer(String canonicalID)
+    {
         return triggerConsumers.get(canonicalID);
     }
 
@@ -63,6 +73,16 @@ public class State<P>
         tc.setSate(this);
         return this;
     }
+
+    public synchronized StateInt register(Consumer<?> consumer, String ...canIDs)
+    {
+        TriggerConsumerHolder<?> tch = new TriggerConsumerHolder<>(consumer);
+        for(String canID : canIDs)
+            triggerConsumers.put(canID, tch);
+        return this;
+    }
+
+
 
     @Override
     public StateMachineInt getStateMachine() {
