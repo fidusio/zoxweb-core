@@ -87,7 +87,7 @@ public class SSLSessionConfig
                         case NEED_WRAP:
                         case NEED_UNWRAP:
                           //stateMachine.publishSync(new Trigger<SSLSessionCallback>(this, hs,null,null));
-                          sslConnectionHelper.dispatch(hs, null);
+                          sslConnectionHelper.publish(hs, null);
                           //stateMachine.publishSync(null, hs, null);
                           //staticSSLStateMachine.dispatch(hs, null);
                           break;

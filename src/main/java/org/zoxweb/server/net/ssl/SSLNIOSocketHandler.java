@@ -191,7 +191,7 @@ public class SSLNIOSocketHandler
 			if (log.isEnabled()) log.getLogger().info("AcceptNewData: " + key);
 			if (key.channel() == config.sslChannel && config.sslChannel.isConnected())
 			{
-				sslDispatcher.dispatch(config.getHandshakeStatus(), sessionCallback);
+				sslDispatcher.publish(config.getHandshakeStatus(), sessionCallback);
 			}
 			else if (key.channel() == config.remoteChannel && config.remoteChannel.isConnected())
 			{

@@ -48,9 +48,6 @@ class CustomSSLStateMachine extends MonoStateMachine<SSLEngineResult.HandshakeSt
         register(NEED_UNWRAP, this::needUnwrap);
         register(FINISHED, this::finished);
         register(NEED_TASK, this::needTask);
-
-
-
     }
 
     @Override
@@ -88,7 +85,7 @@ class CustomSSLStateMachine extends MonoStateMachine<SSLEngineResult.HandshakeSt
                         int written = ByteBufferUtil.smartWrite(null, config.sslChannel, config.outSSLNetData);
                         if (log.isEnabled())
                             log.getLogger().info(result.getHandshakeStatus() + " After writing data HANDSHAKING-NEED_WRAP: " + config.outSSLNetData + " written:" + written);
-                        config.sslConnectionHelper.dispatch(result.getHandshakeStatus(), callback);
+                        config.sslConnectionHelper.publish(result.getHandshakeStatus(), callback);
                         break;
                     case CLOSED:
                         config.close();
@@ -148,7 +145,7 @@ class CustomSSLStateMachine extends MonoStateMachine<SSLEngineResult.HandshakeSt
                             throw new IllegalStateException("NEED_UNWRAP should never happen: " + result.getStatus());
                             // this should never happen
                         case OK:
-                            config.sslConnectionHelper.dispatch(result.getHandshakeStatus(), callback);
+                            config.sslConnectionHelper.publish(result.getHandshakeStatus(), callback);
                             break;
                         case CLOSED:
                             // check result here
@@ -184,7 +181,7 @@ class CustomSSLStateMachine extends MonoStateMachine<SSLEngineResult.HandshakeSt
         if (log.isEnabled())
             log.getLogger().info("After run: " + status);
         rcNeedTask.register(ts);
-        config.sslConnectionHelper.dispatch(status, callback);
+        config.sslConnectionHelper.publish(status, callback);
     }
 
 
@@ -212,7 +209,7 @@ class CustomSSLStateMachine extends MonoStateMachine<SSLEngineResult.HandshakeSt
             // ||-----------------------||
             // The buffer has app data that needs to be decrypted
             //**************************************************
-            config.sslConnectionHelper.dispatch(config.getHandshakeStatus(), callback);
+            config.sslConnectionHelper.publish(config.getHandshakeStatus(), callback);
         }
 
         ts = System.currentTimeMillis() - ts;
@@ -277,7 +274,7 @@ class CustomSSLStateMachine extends MonoStateMachine<SSLEngineResult.HandshakeSt
                 }
             }
             else
-                config.sslConnectionHelper.dispatch(config.getHandshakeStatus(), callback);
+                config.sslConnectionHelper.publish(config.getHandshakeStatus(), callback);
 
         }
         ts = System.currentTimeMillis() - ts;

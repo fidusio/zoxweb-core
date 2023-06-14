@@ -7,7 +7,7 @@ import javax.net.ssl.SSLEngineResult;
 public interface SSLConnectionHelper
     extends GetConfig<SSLSessionConfig>
 {
-    void dispatch(SSLEngineResult.HandshakeStatus status, SSLSessionCallback callback);
+    void publish(SSLEngineResult.HandshakeStatus status, SSLSessionCallback callback);
     void createRemoteConnection();
 
     SSLSessionConfig getConfig();
