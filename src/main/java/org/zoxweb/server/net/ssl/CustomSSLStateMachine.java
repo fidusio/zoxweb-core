@@ -3,10 +3,7 @@ package org.zoxweb.server.net.ssl;
 import org.zoxweb.server.fsm.MonoStateMachine;
 import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.server.logging.LogWrapper;
-import org.zoxweb.shared.util.Identifier;
-import org.zoxweb.shared.util.RateCounter;
-import org.zoxweb.shared.util.SharedStringUtil;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.*;
 
 import javax.net.ssl.SSLEngineResult;
 import java.io.Closeable;
@@ -43,11 +40,12 @@ class CustomSSLStateMachine extends MonoStateMachine<SSLEngineResult.HandshakeSt
         this.config = sslns.getConfig();
         this.config.sslConnectionHelper = this;
         id = counter.incrementAndGet();
-        register(NOT_HANDSHAKING, this::notHandshaking);
-        register(NEED_WRAP, this::needWrap);
-        register(NEED_UNWRAP, this::needUnwrap);
-        register(FINISHED, this::finished);
-        register(NEED_TASK, this::needTask);
+        register(NOT_HANDSHAKING, this::notHandshaking)
+                .register(NEED_WRAP, this::needWrap)
+                .register(NEED_UNWRAP, this::needUnwrap)
+                .register(FINISHED, this::finished)
+                .register(NEED_TASK, this::needTask)
+        ;
     }
 
     @Override

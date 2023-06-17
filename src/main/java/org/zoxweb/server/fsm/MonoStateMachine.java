@@ -10,7 +10,7 @@ import java.util.function.Consumer;
  * @param <V>
  */
 public class MonoStateMachine<K, V>
-    extends RegistrarMap<K, Consumer<V>>
+    extends RegistrarMap<K, Consumer<V>, MonoStateMachine<K,V>>
 {
 
     private final boolean notSync;
@@ -28,7 +28,6 @@ public class MonoStateMachine<K, V>
             {
                 lookup(key).accept(param);
             }
-
     }
 
 }

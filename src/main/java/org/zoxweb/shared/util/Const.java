@@ -199,9 +199,8 @@ public class Const {
   public enum ActionStatus {
     CONTINUE,
     ERROR,
-    FINISHED,
+    COMPLETED,
     PARTIAL
-
   }
 
   public enum ResourceType {

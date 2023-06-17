@@ -76,7 +76,7 @@ public class State<P>
 
     public synchronized StateInt register(Consumer<?> consumer, String ...canIDs)
     {
-        TriggerConsumerHolder<?> tch = new TriggerConsumerHolder<>(consumer);
+        Consumer<?> tch = consumer instanceof TriggerConsumerHolder ? consumer : new TriggerConsumerHolder<>(consumer);
         for(String canID : canIDs)
             triggerConsumers.put(canID, tch);
         return this;

@@ -1,8 +1,8 @@
 package org.zoxweb.shared.util;
 
-public interface Registrar<K, V>
+public interface Registrar<K, V, T>
 {
-    void register(K key,V value);
+    T register(K key,V value);
     V unregister(K key);
     V lookup(K key);
 }

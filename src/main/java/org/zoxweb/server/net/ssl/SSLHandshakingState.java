@@ -230,7 +230,7 @@ public class SSLHandshakingState extends State {
                 .register(new NeedWrap())
                 .register(new NeedUnwrap())
                 .register(new Finished())
-                ;
+        ;
 
     }
 
