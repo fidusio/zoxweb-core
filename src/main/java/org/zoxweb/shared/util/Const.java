@@ -196,7 +196,7 @@ public class Const {
   }
 
 
-  public enum ActionStatus {
+  public enum FunctionStatus {
     CONTINUE,
     ERROR,
     COMPLETED,
