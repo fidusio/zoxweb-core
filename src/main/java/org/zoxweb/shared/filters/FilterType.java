@@ -15,12 +15,12 @@
  */
 package org.zoxweb.shared.filters;
 
-import java.math.BigDecimal;
-
 import org.zoxweb.shared.data.DataConst;
 import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.SharedStringUtil;
 import org.zoxweb.shared.util.SharedUtil;
+
+import java.math.BigDecimal;
 
 /**
  * The filter type enum that implements ValueFilter which is has string set as 
@@ -587,7 +587,60 @@ public enum FilterType
 			return false;
 		}
 	},
-    TEXT_NOT_EMTY
+	/**
+	 * Prime number filter
+	 */
+	PRIME
+	{
+		// /^1?$|^(11+?)\1+$/
+		// prime number detector to be tested
+		public static final String
+
+
+				REGEX ="^1?$|^(11+?)\\1+$";
+
+
+		/**
+		 * Validates the given value.
+		 * @param in value to be validated
+		 * @return validated acceptable value
+		 * @throws NullPointerException if in is null
+		 * @throws IllegalArgumentException if in is invalid
+		 */
+		public String validate(String in)
+				throws  NullPointerException, IllegalArgumentException
+		{
+			in = SharedStringUtil.trimOrNull(in);
+			SharedUtil.checkIfNulls("Password null or empty", in);
+
+			if (in.matches(REGEX))
+			{
+				return in;
+			}
+			else
+			{
+				throw new IllegalArgumentException("Invalid password: " + in);
+			}
+		}
+
+		/**
+		 * Checks if the given value is valid.
+		 * @param in value to be checked
+		 * @return true if valid false if not
+		 */
+		public boolean isValid(String in)
+		{
+			in = SharedStringUtil.trimOrNull(in);
+
+			if (in != null)
+			{
+				return in.matches(REGEX);
+			}
+
+			return false;
+		}
+	},
+    TEXT_NOT_EMPTY
     {
 		public String validate(String in)
 				throws  NullPointerException, IllegalArgumentException

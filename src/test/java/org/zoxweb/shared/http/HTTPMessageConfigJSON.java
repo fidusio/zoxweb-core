@@ -18,7 +18,7 @@ public class HTTPMessageConfigJSON
 			NVPair nvp = new NVPair("email", null, FilterType.EMAIL);
 			
 			hmc.getParameters().add(nvp);
-			hmc.getParameters().add(new NVPair("name", null, FilterType.TEXT_NOT_EMTY));
+			hmc.getParameters().add(new NVPair("name", null, FilterType.TEXT_NOT_EMPTY));
 			String json = GSONUtil.toJSON(hmc, true);
 			System.out.println(json);
 			hmc = GSONUtil.fromJSON(json);

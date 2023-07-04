@@ -208,7 +208,8 @@ public class Const {
     FOLDER,
     FORM,
     TEMP_FILE,
-    NVENTITY
+    NV_ENTITY,
+    NV_GENERIC_MAP
   }
 
   public enum ParamSource

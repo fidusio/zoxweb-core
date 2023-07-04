@@ -147,7 +147,7 @@ public class NVPair
 		}
 		else
 		{
-			if (getValueFilter() == FilterType.TEXT_NOT_EMTY)
+			if (getValueFilter() == FilterType.TEXT_NOT_EMPTY)
 			{
 				value = getValueFilter().validate(v);
 			}
