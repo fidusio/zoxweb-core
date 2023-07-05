@@ -21,13 +21,16 @@ public class MonoStateMachine<K, V>
     }
     public void publish(K key, V param)
     {
-        if (notSync)
-            lookup(key).accept(param);
-        else
-            synchronized (this)
-            {
-                lookup(key).accept(param);
-            }
+
+        Consumer<V> c = lookup(key);
+        if (c != null) {
+            if (notSync)
+                c.accept(param);
+            else
+                synchronized (this) {
+                    c.accept(param);
+                }
+        }
     }
 
 }

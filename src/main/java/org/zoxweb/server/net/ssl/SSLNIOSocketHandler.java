@@ -220,40 +220,40 @@ public class SSLNIOSocketHandler
 
 
 
-//	@Override
-//	public void setupConnection(AbstractSelectableChannel asc, boolean isBlocking) throws IOException
-//	{
-//		SSLStateMachine sslStateMachine = SSLStateMachine.create(this);
-//    	sslDispatcher = sslStateMachine;
-//		config = sslStateMachine.getConfig();
-//    	config.selectorController = getSelectorController();
-//		config.sslChannel = (SocketChannel) asc;
-//		config.remoteAddress = remoteAddress;
-//		config.sslOutputStream = new SSLChannelOutputStream(config, 512 );
-//		sessionCallback.setConfig(config);
-//		sessionCallback.setProtocolHandler(this);
-//		sslStateMachine.start(true);
-//		// not sure about
-//		//config.beginHandshake(false);
-//		getSelectorController().register(asc, SelectionKey.OP_READ, this, isBlocking);
-//	}
-
 	@Override
 	public void setupConnection(AbstractSelectableChannel asc, boolean isBlocking) throws IOException
 	{
-		config = new SSLSessionConfig(sslContext);
-		config.selectorController = getSelectorController();
+		SSLStateMachine sslStateMachine = SSLStateMachine.create(this);
+    	sslDispatcher = sslStateMachine;
+		config = sslStateMachine.getConfig();
+    	config.selectorController = getSelectorController();
 		config.sslChannel = (SocketChannel) asc;
 		config.remoteAddress = remoteAddress;
 		config.sslOutputStream = new SSLChannelOutputStream(config, 512 );
 		sessionCallback.setConfig(config);
-		sslDispatcher = new CustomSSLStateMachine(this);
 		sessionCallback.setProtocolHandler(this);
+		sslStateMachine.start(true);
 		// not sure about
-		// start the handshake here
 		//config.beginHandshake(false);
 		getSelectorController().register(asc, SelectionKey.OP_READ, this, isBlocking);
 	}
+
+//	@Override
+//	public void setupConnection(AbstractSelectableChannel asc, boolean isBlocking) throws IOException
+//	{
+//		config = new SSLSessionConfig(sslContext);
+//		config.selectorController = getSelectorController();
+//		config.sslChannel = (SocketChannel) asc;
+//		config.remoteAddress = remoteAddress;
+//		config.sslOutputStream = new SSLChannelOutputStream(config, 512 );
+//		sessionCallback.setConfig(config);
+//		sslDispatcher = new CustomSSLStateMachine(this);
+//		sessionCallback.setProtocolHandler(this);
+//		// not sure about
+//		// start the handshake here
+//		//config.beginHandshake(false);
+//		getSelectorController().register(asc, SelectionKey.OP_READ, this, isBlocking);
+//	}
 
 
 	@Override
