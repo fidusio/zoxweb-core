@@ -121,6 +121,7 @@ public class SSLNIOSocketHandler
 	final public InetSocketAddressDAO remoteAddress;
 	final private SSLContextInfo sslContext;
 	private SSLSessionCallback sessionCallback;
+	private final boolean simpleStateMachine;
 	///private StaticSSLStateMachine staticSSLStateMachine = null;
 
 //	public SSLNIOSocket(SSLContextInfo sslContext, InetSocketAddressDAO ra)
@@ -131,14 +132,16 @@ public class SSLNIOSocketHandler
 
 	public SSLNIOSocketHandler(SSLContextInfo sslContext, SSLSessionCallback sessionCallback)
 	{
-		this(sslContext, sessionCallback, null);
+		this(sslContext, sessionCallback, true, null);
 	}
 
-	public SSLNIOSocketHandler(SSLContextInfo sslContext, SSLSessionCallback sessionCallback, InetSocketAddressDAO ra)
+	public SSLNIOSocketHandler(SSLContextInfo sslContext, SSLSessionCallback sessionCallback, boolean simpleStateMachine,
+							   InetSocketAddressDAO ra)
 	{
 		SharedUtil.checkIfNulls("context  can't be null", sslContext);
 		this.sslContext = sslContext;
 		remoteAddress = ra;
+		this.simpleStateMachine = simpleStateMachine;
 		if(remoteAddress != null && sessionCallback == null)
 		{
 			//this.sessionCallback = new TunnelCallback();
@@ -223,16 +226,36 @@ public class SSLNIOSocketHandler
 	@Override
 	public void setupConnection(AbstractSelectableChannel asc, boolean isBlocking) throws IOException
 	{
-		SSLStateMachine sslStateMachine = SSLStateMachine.create(this);
-    	sslDispatcher = sslStateMachine;
-		config = sslStateMachine.getConfig();
-    	config.selectorController = getSelectorController();
-		config.sslChannel = (SocketChannel) asc;
-		config.remoteAddress = remoteAddress;
-		config.sslOutputStream = new SSLChannelOutputStream(config, 512 );
-		sessionCallback.setConfig(config);
-		sessionCallback.setProtocolHandler(this);
-		sslStateMachine.start(true);
+		if(simpleStateMachine)
+		{
+			// CustomSSLStateMachine mode
+			config = new SSLSessionConfig(sslContext);
+			config.selectorController = getSelectorController();
+			config.sslChannel = (SocketChannel) asc;
+			config.remoteAddress = remoteAddress;
+			config.sslOutputStream = new SSLChannelOutputStream(config, 512 );
+			sessionCallback.setConfig(config);
+			sslDispatcher = new CustomSSLStateMachine(this);
+			sessionCallback.setProtocolHandler(this);
+			// not sure about
+			// start the handshake here
+			//log.getLogger().info("CustomSSLStateMachine");
+		}
+		else
+		{
+			// SSLStateMachineMode
+			SSLStateMachine sslStateMachine = SSLStateMachine.create(this);
+			sslDispatcher = sslStateMachine;
+			config = sslStateMachine.getConfig();
+			config.selectorController = getSelectorController();
+			config.sslChannel = (SocketChannel) asc;
+			config.remoteAddress = remoteAddress;
+			config.sslOutputStream = new SSLChannelOutputStream(config, 512);
+			sessionCallback.setConfig(config);
+			sessionCallback.setProtocolHandler(this);
+			sslStateMachine.start(true);
+			//log.getLogger().info("SSLStateMachine");
+		}
 		// not sure about
 		//config.beginHandshake(false);
 		getSelectorController().register(asc, SelectionKey.OP_READ, this, isBlocking);

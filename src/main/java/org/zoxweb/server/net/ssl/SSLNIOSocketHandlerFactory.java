@@ -65,7 +65,7 @@ public class SSLNIOSocketHandlerFactory
         {
             e.printStackTrace();
         }
-        return new SSLNIOSocketHandler(sslContext, sc, remoteAddress);
+        return new SSLNIOSocketHandler(sslContext, sc, getProperties().getValue("simple_state_machine", true), remoteAddress);
     }
 
     @Override
