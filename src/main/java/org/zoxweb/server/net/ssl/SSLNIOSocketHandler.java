@@ -239,7 +239,7 @@ public class SSLNIOSocketHandler
 			sessionCallback.setProtocolHandler(this);
 			// not sure about
 			// start the handshake here
-			//log.getLogger().info("CustomSSLStateMachine");
+			if(log.isEnabled()) log.getLogger().info("CustomSSLStateMachine");
 		}
 		else
 		{
@@ -254,7 +254,7 @@ public class SSLNIOSocketHandler
 			sessionCallback.setConfig(config);
 			sessionCallback.setProtocolHandler(this);
 			sslStateMachine.start(true);
-			//log.getLogger().info("SSLStateMachine");
+			if(log.isEnabled()) log.getLogger().info("SSLStateMachine");
 		}
 		// not sure about
 		//config.beginHandshake(false);

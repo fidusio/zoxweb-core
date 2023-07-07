@@ -4,8 +4,11 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class ResourceManager
+	implements Registrar<Object, Object, ResourceManager>
 {
-	
+
+
+
 	public enum Resource
 		implements GetName
 	{
@@ -16,7 +19,8 @@ public class ResourceManager
 		JWT_CACHE("JWTCache"),
 		AUTH_TOKEN("AuthToken"),
 		HTTP_SERVER("HttpServer"),
-		PROXY_SERVER("ProxyServer")
+		PROXY_SERVER("ProxyServer"),
+		SYSTEM_INFO("SystemInfo"),
 		
 		;
 
@@ -40,21 +44,17 @@ public class ResourceManager
 	
 	private ResourceManager()
 	{
-		
+		register(Resource.SYSTEM_INFO, new NVGenericMap(Resource.SYSTEM_INFO.getName()));
 	}
 
 	
-	@SuppressWarnings("unchecked")
-	public <V> V lookup(Object k)
-    {
-        return (V) resources.get(keyMap(k));
-    }
 
-	public synchronized <V> ResourceManager map(Object k, V res)
-	{
-		resources.put(keyMap(k), res);
-		return this;
-	}
+
+//	public synchronized <V> ResourceManager map(Object k, V res)
+//	{
+//		resources.put(keyMap(k), res);
+//		return this;
+//	}
 
 	public synchronized Object [] resources()
 	{
@@ -62,10 +62,10 @@ public class ResourceManager
 	}
 	
 	@SuppressWarnings("unchecked")
-    public synchronized <V> V remove(Object key)
-	{
-		return (V) resources.remove(keyMap(key));
-	}
+//    public synchronized <V> V remove(Object key)
+//	{
+//		return (V) resources.remove(keyMap(key));
+//	}
 
 	private Object keyMap(Object key)
 	{
@@ -73,4 +73,30 @@ public class ResourceManager
 			return ((GetName) key).getName();
 		return key;
 	}
+	@Override
+	public synchronized ResourceManager register(Object key, Object value) {
+		resources.put(keyMap(key), value);
+		return this;
+	}
+
+	@Override
+	public synchronized Object unregister(Object key) {
+		return (Object) resources.remove(keyMap(key));
+	}
+
+	@Override
+	public Object lookup(Object key) {
+		return resources.get(keyMap(key));
+	}
+
+
+	@SuppressWarnings("unchecked")
+	public static <V> V lookupResource(Object k)
+	{
+		return (V) SINGLETON.lookup(k);
+	}
+
+
+
+
 }

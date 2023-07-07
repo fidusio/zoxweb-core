@@ -1,22 +1,21 @@
 package org.zoxweb.server.util;
 
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.logging.Logger;
-
-
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.net.NIOConfig;
 import org.zoxweb.server.net.NIOSocket;
 import org.zoxweb.server.net.security.IPBlockerListener;
 import org.zoxweb.server.task.TaskUtil;
-import org.zoxweb.shared.data.ConfigDAO;
 import org.zoxweb.shared.data.ApplicationConfigDAO;
 import org.zoxweb.shared.data.ApplicationConfigDAO.ApplicationDefaultParam;
+import org.zoxweb.shared.data.ConfigDAO;
 import org.zoxweb.shared.security.IPBlockerConfig;
 import org.zoxweb.shared.util.ResourceManager;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.logging.Logger;
 
 public class ServiceManager
 	implements AutoCloseable
@@ -28,7 +27,7 @@ public class ServiceManager
 		
 	}
 	
-	private static final transient Logger log = Logger.getLogger(ServiceManager.class.getName());
+	private static final Logger log = Logger.getLogger(ServiceManager.class.getName());
 	
 	
 	public static void close(Object obj)
@@ -55,7 +54,7 @@ public class ServiceManager
 				log.info("" + configDAO);
 				NIOConfig nioConfig = new NIOConfig(configDAO);
 				NIOSocket nioSocket = nioConfig.createApp();
-				ResourceManager.SINGLETON.map(NIOConfig.RESOURCE_NAME, nioConfig);
+				ResourceManager.SINGLETON.register(NIOConfig.RESOURCE_NAME, nioConfig);
 				
 				return nioSocket;
 			}
@@ -73,7 +72,7 @@ public class ServiceManager
 		ApplicationConfigDAO acd = ApplicationConfigManager.SINGLETON.loadDefault();
 		if (acd != null)
 		{
-			ResourceManager.SINGLETON.map(ApplicationConfigDAO.RESOURCE_NAME, acd);
+			ResourceManager.SINGLETON.register(ApplicationConfigDAO.RESOURCE_NAME, acd);
 		}
 
 		IPBlockerListener ipBlocker = null;
@@ -98,7 +97,7 @@ public class ServiceManager
 				//log.info("\n" + GSONUtil.toJSON(appConfig, true, false, false));
 				c.setAppConfig(appConfig);
 				ipBlocker = c.createApp();
-				ResourceManager.SINGLETON.map(IPBlockerListener.RESOURCE_NAME, ipBlocker);
+				ResourceManager.SINGLETON.register(IPBlockerListener.RESOURCE_NAME, ipBlocker);
 			}
 			catch(Exception e)
 			{
@@ -124,7 +123,7 @@ public class ServiceManager
 				NIOSocket nioSocket = nioConfig.createApp();
 				if(ipBlocker != null)
 					nioSocket.setEventManager(TaskUtil.getDefaultEventManager());
-				ResourceManager.SINGLETON.map(NIOConfig.RESOURCE_NAME, nioConfig);
+				ResourceManager.SINGLETON.register(NIOConfig.RESOURCE_NAME, nioConfig);
 			}
 			catch(Exception e)
 			{

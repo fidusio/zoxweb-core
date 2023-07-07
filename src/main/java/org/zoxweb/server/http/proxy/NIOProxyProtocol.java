@@ -1,3 +1,4 @@
+
 /*
  * Copyright (c) 2012-2017 ZoxWeb.com LLC.
  *
@@ -42,7 +43,8 @@ import java.nio.channels.SocketChannel;
 public class NIOProxyProtocol 
 	extends ProtocolHandler
 {
-	public final static String NIO_PROXY = ResourceManager.SINGLETON.map(ResourceManager.Resource.PROXY_SERVER, "NIOHTTPProxy").lookup(ResourceManager.Resource.PROXY_SERVER);
+	public final static String NIO_PROXY = ResourceManager.SINGLETON.register(ResourceManager.Resource.PROXY_SERVER, "NIOHTTPProxy")
+			.lookupResource(ResourceManager.Resource.PROXY_SERVER);
 
 	public final static LogWrapper log = new LogWrapper(NIOProxyProtocol.class).setEnabled(false);
 
