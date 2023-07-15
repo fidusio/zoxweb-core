@@ -196,6 +196,11 @@ public class TaskUtil
 		return (tp == null ? false : tp.isBusy()) || (tsp == null ? false : tsp.isBusy());
 	}
 
+	public static long waitIfBusy()
+	{
+		return waitIfBusy(100, getDefaultTaskProcessor(), getDefaultTaskScheduler());
+	}
+
 	public static long waitIfBusy(long durationInMillis)
 	{
 		return waitIfBusy(durationInMillis, getDefaultTaskProcessor(), getDefaultTaskScheduler());

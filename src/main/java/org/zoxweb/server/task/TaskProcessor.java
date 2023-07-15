@@ -377,6 +377,12 @@ public class TaskProcessor
 		return workersQueue.size();
 	}
 
+
+	public int workersThreadCapacity()
+	{
+		return workersQueue.capacity();
+	}
+
 	
 	public void close()
 	{
