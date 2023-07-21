@@ -29,6 +29,8 @@ public class TaskUtil
 	private static TaskSchedulerProcessor TASK_SCHEDULER = null;
 	private static TaskSchedulerProcessor TASK_SIMPLE_SCHEDULER = null;
 	private static EventListenerManager<BaseEventObject<?>,?> EV_MANAGER = null;
+
+	private static Thread mainThread;
 	private static final Lock LOCK = new ReentrantLock();
 	
 	private static int maxTasks = 1000;
@@ -308,6 +310,60 @@ public class TaskUtil
 	public static String info()
 	{
 		return getDefaultTaskScheduler().toString();
+	}
+
+
+	/**
+	 * This method check if the current thread is the registered main thread
+	 * if it hasn't been set it will throw IllegalStateException
+	 * @return true if the main Thread.currentThread == registered mainThread
+	 * @throws IllegalStateException if the main thread is not registered yet
+	 */
+	public static boolean isMainThread()
+		throws IllegalStateException
+	{
+		if (mainThread == null)
+			throw new IllegalStateException("Main thread haven't been registered");
+		return Thread.currentThread() == mainThread;
+	}
+
+	/**
+	 * This method will try to register the Thread.currentThread() as the main thread
+	 * if it is successful it is register and return the registered thread, if unsuccessful
+	 * it returns the actual registered main thread meaning once this function can be called
+	 * once any subsequent calls are ignored.
+	 * @return the successfully registered main thread
+	 */
+	public static Thread registerMainThread()
+	{
+		return registerMainThread(Thread.currentThread());
+	}
+
+	/**
+	 * This method will try to register the Thread.currentThread() as the main thread
+	 * if it is successful it is register and return the registered thread, if unsuccessful
+	 * it returns the actual registered main thread meaning once this function can be called
+	 * once any subsequent calls are ignored.
+	 * @param thread to be registered as the main thread
+	 * @return he successfully registered main thread
+	 */
+	public static Thread registerMainThread(Thread thread)
+	{
+		if (mainThread == null)
+		{
+			LOCK.lock();
+			try
+			{
+				if (mainThread == null)
+					mainThread = thread;
+			}
+			finally
+			{
+				LOCK.unlock();
+			}
+		}
+
+		return mainThread;
 	}
 	
 }
