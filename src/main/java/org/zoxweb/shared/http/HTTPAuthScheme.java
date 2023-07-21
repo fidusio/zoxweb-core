@@ -112,12 +112,42 @@ public enum HTTPAuthScheme
 			{
 				@Override
 				public GetNameValue<String> toHTTPHeader(String... args) {
-					return  new NVPair(HTTPHeader.AUTHORIZATION, SSWS.getName() + " " + args[0]);
+					return new NVPair(HTTPHeader.AUTHORIZATION, SSWS.getName() + " " + args[0]);
 				}
 
 				@Override
 				public HTTPAuthorization toHTTPAuthentication(String token) {
 					return new HTTPAuthorizationToken(SSWS, token);
+				}
+			},
+	GENERIC("GENERIC")
+			{
+				@Override
+				public GetNameValue<String> toHTTPHeader(String... args)
+				{
+
+					StringBuilder value = new StringBuilder();
+					for(String t : args)
+					{
+						t = SharedStringUtil.trimOrNull(t);
+						if (t != null)
+						{
+							if (value.length() > 0)
+							{
+								value.append(" ");
+							}
+							value.append(t);
+						}
+					}
+					if(value.length() > 0)
+						return new NVPair(HTTPHeader.AUTHORIZATION, value.toString());
+
+					return null;
+				}
+
+				@Override
+				public HTTPAuthorization toHTTPAuthentication(String token ) {
+					return new HTTPAuthorizationToken(GENERIC, token);
 				}
 			},
 

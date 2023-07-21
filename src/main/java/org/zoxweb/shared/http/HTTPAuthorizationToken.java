@@ -22,9 +22,42 @@ public class HTTPAuthorizationToken
     public HTTPAuthorizationToken(HTTPAuthScheme authScheme, String token)
     {
         this();
-        setToken(token);
+        SharedUtil.checkIfNulls("Null name or token", authScheme, token);
         setValue(NVC_AUTH_SCHEME, authScheme);
+        switch (getAuthScheme())
+        {
+            case SSWS:
+                setToken(token);
+                break;
+            case GENERIC:
+                String[] parsed = SharedStringUtil.parseString(token, " ", true);
+                if (parsed.length != 2)
+                {
+                    throw new IllegalArgumentException("Invalid token: " + token);
+                }
+                setName(parsed[0]);
+                setToken(parsed[1]);
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid generic token: " + token);
+        }
     }
+
+
+    public HTTPAuthorizationToken(HTTPAuthScheme authScheme, String name, String token)
+    {
+        this();
+        if (authScheme != HTTPAuthScheme.GENERIC)
+        {
+            throw new IllegalArgumentException("Must be generic type");
+        }
+        SharedUtil.checkIfNulls("Null name or token", name, token);
+        setValue(NVC_AUTH_SCHEME, authScheme);
+        setName(name);
+        setToken(token);
+
+    }
+
     /**
      * @return the token
      */
@@ -49,6 +82,9 @@ public class HTTPAuthorizationToken
 
     public GetNameValue<String> toHTTPHeader()
     {
+        if (getAuthScheme() == HTTPAuthScheme.GENERIC)
+            return getAuthScheme().toHTTPHeader(getName(), getToken());
+
         return getAuthScheme().toHTTPHeader(getToken());
     }
 
