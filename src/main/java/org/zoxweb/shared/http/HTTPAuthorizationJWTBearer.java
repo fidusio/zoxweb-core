@@ -46,6 +46,7 @@ extends HTTPAuthorization
 	public HTTPAuthorizationJWTBearer()
 	{
 		super(NVC_HTTP_AUTHORIZATION_JWT_BEARER, HTTPAuthScheme.BEARER);
+		setName(HTTPAuthScheme.BEARER.getName());
 	}
 	
 	public HTTPAuthorizationJWTBearer(JWTEncoder encoder, byte[] key, JWT jwt)

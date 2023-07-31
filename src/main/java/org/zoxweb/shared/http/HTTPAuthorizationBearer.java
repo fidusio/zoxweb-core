@@ -42,6 +42,7 @@ extends HTTPAuthorization
 	public HTTPAuthorizationBearer()
 	{
 		super(NVC_HTTP_AUTHORIZATION_BEARER, HTTPAuthScheme.BEARER);
+		setName(HTTPAuthScheme.BEARER.getName());
 	}
 	
 	public HTTPAuthorizationBearer(String token)

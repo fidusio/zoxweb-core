@@ -40,6 +40,7 @@ extends HTTPAuthorization
 	public HTTPAuthorizationBasic()
 	{
 		super(NVC_HTTP_AUTHORIZATION_BASIC, HTTPAuthScheme.BASIC);
+		setName(HTTPAuthScheme.BASIC.getName());
 	}
 	
 	

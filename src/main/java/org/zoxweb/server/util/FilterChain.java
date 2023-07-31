@@ -19,18 +19,19 @@ implements Function<T, FunctionStatus>
 
     public FilterChain(List<Function<T, FunctionStatus >> filters, Consumer<T> handler)
     {
-        filtersIter = filters.listIterator();
+        filtersIter = filters != null ? filters.listIterator() : null;
         this.handler = handler;
     }
 
     public FunctionStatus apply(T data)
     {
-        if (filtersIter.hasNext()) {
+        if (filtersIter != null && filtersIter.hasNext()) {
             FunctionStatus fs = filtersIter.next().apply(data);
             switch (fs)
             {
 
                 case PARTIAL:
+                    return FunctionStatus.PARTIAL;
                 case CONTINUE:
                 case COMPLETED:
                     apply(data);
@@ -41,7 +42,7 @@ implements Function<T, FunctionStatus>
             }
 
         }
-        else
+        else if (handler != null)
             handler.accept(data);
 
         return FunctionStatus.COMPLETED;

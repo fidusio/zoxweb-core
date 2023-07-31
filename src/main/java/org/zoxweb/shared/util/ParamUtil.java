@@ -365,6 +365,15 @@ public class ParamUtil {
              
         }
 
+        public GetNameValue<String> asNVPair(String name)
+        {
+            List<String> ret = map.get(name);
+            if (ret != null && ret.size() > 0)
+                return new NVPair(name, ret.get(0));
+
+            return null;
+        }
+
         public String[] namelessValues(String ...toAppend)
         {
             List<String> ret = new ArrayList<String>();

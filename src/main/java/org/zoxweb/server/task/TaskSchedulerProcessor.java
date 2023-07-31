@@ -15,11 +15,12 @@
  */
 package org.zoxweb.server.task;
 
+import org.zoxweb.shared.util.*;
+
 import java.util.Comparator;
 import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.atomic.AtomicLong;
-import org.zoxweb.shared.util.*;
 
 public class TaskSchedulerProcessor
     implements Runnable, DaemonController, GetNVProperties
@@ -192,16 +193,28 @@ public class TaskSchedulerProcessor
 //		return null;
 //	}
 
+
 	/**
-	 * Execute a runnable i
-	 * @param delayInMillis
-	 * @param command
-	 * @return
+	 * Schedule a task based on the nextDelay() of the rate controller.
+	 * @param rateController to be applied with nextDelay()
+	 * @param task to be executed
+	 * @return Appointment object associated with the task
 	 */
-	public Appointment queue(long delayInMillis, Runnable command)
+	public Appointment queue(RateController rateController, Runnable task)
+	{
+		return queue(rateController.nextDelay(), task);
+	}
+
+	/**
+	 * Schedule a task based on the current delay in millis from now
+	 * @param delayInMillis if delay is < 0 the task will execute now
+	 * @param task to be executed
+	 * @return Appointment object associated with the task
+	 */
+	public Appointment queue(long delayInMillis, Runnable task)
     {
-        if (command != null)
-            return queue(new AppointmentDefault(delayInMillis, System.nanoTime()), new TaskEvent(this, new RunnableTaskContainer(command)));
+        if (task != null)
+            return queue(new AppointmentDefault(delayInMillis, System.nanoTime()), new TaskEvent(this, new RunnableTaskContainer(task)));
         
         return null;
     }
