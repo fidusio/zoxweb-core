@@ -33,7 +33,7 @@ public class SecurityModel
 	public final static String PERM_UPDATE_ROLE = "role:update";
 	public final static String PERM_CREATE_APP_ID = "app:create";
 	public final static String PERM_DELETE_APP_ID = "app:delete";
-	public final static String PERM_UPDATE_APP_ID = "app:delete";
+	public final static String PERM_UPDATE_APP_ID = "app:update";
 	public final static String PERM_ADD_USER = "user:create";
 	public final static String PERM_DELETE_USER = "user:delete";
 	public final static String PERM_READ_USER = "user:read";
