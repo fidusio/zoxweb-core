@@ -14,7 +14,7 @@ public class HTTPAuthorizationToken
 
 
     //private String token;
-    protected HTTPAuthorizationToken()
+    public HTTPAuthorizationToken()
     {
         super(NVC_HTTP_AUTHORIZATION_TOKEN);
     }
