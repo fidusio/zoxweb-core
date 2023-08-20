@@ -15,13 +15,11 @@
  */
 package org.zoxweb.shared.http;
 
-import java.util.List;
-
-
 import org.zoxweb.shared.data.SetNameDescriptionDAO;
 import org.zoxweb.shared.net.InetSocketAddressDAO;
 import org.zoxweb.shared.util.*;
 import org.zoxweb.shared.util.NVConfigEntity.ArrayType;
+import java.util.List;
 
 /**
  * This class is configuration object that contains all the required parameters to perform 
@@ -195,14 +193,10 @@ public class HTTPMessageConfig
 		return (NVGenericMap) lookup(Params.HEADERS);
 	}
 
-//	@Override
-//	public NVGenericMap getHeadersNVGM() {
-//		return (NVGenericMap) lookup(Params.HEADER_PARAMETERS);
-//	}
 
 	/**
-	 * Get the HTTP request parameters
-	 * @param headerParams
+	 * Set the HTTP request parameters
+	 * @param headerParams as list
 	 */
 	@SuppressWarnings("unchecked")
 	public synchronized void setHeaders(List<GetNameValue<String>> headerParams)

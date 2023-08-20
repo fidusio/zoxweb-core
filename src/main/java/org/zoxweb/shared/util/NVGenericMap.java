@@ -15,11 +15,11 @@
  */
 package org.zoxweb.shared.util;
 
+import org.zoxweb.shared.filters.FilterType;
+
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.zoxweb.shared.filters.FilterType;
 
 /**
  * NVGenericMap is a data generic container the jack of all trades.
@@ -29,7 +29,6 @@ public class NVGenericMap
     extends NVBase<Map<GetName, GetNameValue<?>>>
     implements ArrayValues<GetNameValue<?>>
 {
-
 	public NVGenericMap()
 	{
 		this(null, new LinkedHashMap<GetName, GetNameValue<?>>());
@@ -242,5 +241,7 @@ public class NVGenericMap
 	{
 		return (ArrayValues<GetNameValue<String>>)((Object)this);
 	}
+
+
 
 }
