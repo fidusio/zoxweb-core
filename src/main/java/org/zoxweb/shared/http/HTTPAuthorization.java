@@ -16,30 +16,64 @@
 package org.zoxweb.shared.http;
 
 import org.zoxweb.shared.data.SetNameDAO;
-import org.zoxweb.shared.util.GetNameValue;
-import org.zoxweb.shared.util.NVConfig;
-import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
-import org.zoxweb.shared.util.NVConfigManager;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.*;
 
 /**
  * @author mnael
  *
  */
 @SuppressWarnings("serial")
-public abstract class HTTPAuthorization
+public class HTTPAuthorization
 extends SetNameDAO
 {
 
+
 	public static final NVConfig NVC_AUTH_SCHEME = NVConfigManager.createNVConfig("auth_scheme", null,"HTTPAuthScheme", false, true, HTTPAuthScheme.class);
+	public static final NVConfig NVC_TOKEN = NVConfigManager.createNVConfig("token", null,"Token", false, true, String.class);
 	//public static final NVConfig NVC_AUTH_SCHEME_OVERRIDE = NVConfigManager.createNVConfig("auth_scheme_override", null,"Token type override", false, true, String.class);
-	public static final NVConfigEntity NVC_HTTP_AUTHORIZATION = new NVConfigEntityLocal(null, null , null, true, false, false, false, HTTPAuthorization.class, SharedUtil.toNVConfigList(NVC_AUTH_SCHEME), null, false, SetNameDAO.NVC_NAME_DAO);
-	
-	protected HTTPAuthorization(NVConfigEntity nvce, HTTPAuthScheme type)
+	public static final NVConfigEntity NVC_HTTP_AUTHORIZATION = new NVConfigEntityLocal("http_authorization", null , null, true, false, false, false, HTTPAuthorization.class, SharedUtil.toNVConfigList(NVC_AUTH_SCHEME, NVC_TOKEN), null, false, SetNameDAO.NVC_NAME_DAO);
+
+
+
+	public HTTPAuthorization()
 	{
-		super(nvce);
-		setValue(NVC_AUTH_SCHEME, type);
+		super(NVC_HTTP_AUTHORIZATION);
+	}
+
+	public HTTPAuthorization(HTTPAuthScheme type)
+	{
+		this();
+		setAuthScheme(type);
+	}
+
+
+	public HTTPAuthorization(String type, String token)
+	{
+		this(HTTPAuthScheme.GENERIC);
+		setName(type);
+		setToken(token);
+	}
+
+
+	public HTTPAuthorization(String typePlusToken)
+	{
+		this(HTTPAuthScheme.GENERIC);
+
+		String[] parsed = SharedStringUtil.parseString(typePlusToken, " ", true);
+		if (parsed.length != 2)
+		{
+			throw new IllegalArgumentException("Invalid token: " + typePlusToken);
+		}
+		setName(parsed[0]);
+		setToken(parsed[1]);
+	}
+
+
+
+	public HTTPAuthorization(HTTPAuthScheme type, String token)
+	{
+		this(type);
+		setToken(token);
 	}
 
 	protected HTTPAuthorization(NVConfigEntity nvce)
@@ -47,23 +81,65 @@ extends SetNameDAO
 		super(nvce);
 	}
 
+	protected HTTPAuthorization(NVConfigEntity nvce, HTTPAuthScheme type)
+	{
+		super(nvce);
+		setAuthScheme(type);
+	}
+
+
+	/**
+	 * @return the token
+	 */
+	public String getToken()
+	{
+		return lookupValue(NVC_TOKEN);
+	}
+	/**
+	 * @param token the token to set
+	 */
+	public void setToken(String token)
+	{
+		setValue(NVC_TOKEN, token);
+	}
+
+
+
 
 	
 	public HTTPAuthScheme getAuthScheme()
 	{
 		return lookupValue(NVC_AUTH_SCHEME);
 	}
-//	public String getAuthSchemeOverride()
+
+	public GetNameValue<String> toHTTPHeader()
+	{
+		return getAuthScheme().toHTTPHeader(getName(), getToken());
+	}
+
+
+	protected void setAuthScheme(HTTPAuthScheme type)
+	{
+		setValue(NVC_AUTH_SCHEME, type);
+		if(type != HTTPAuthScheme.GENERIC)
+			setName(type.getName());
+	}
+
+	public String toString()
+	{
+		return toHTTPHeader().getValue();
+	}
+
+//	public static HTTPAuthorization createBearer()
 //	{
-//		return lookupValue(NVC_AUTH_SCHEME_OVERRIDE);
+//		return new HTTPAuthorization(HTTPAuthScheme.BEARER);
 //	}
 //
-//	public void setAuthSchemeOverride(String tokenType)
+//
+//	public static HTTPAuthorization createBearer(String token)
 //	{
-//		setValue(NVC_AUTH_SCHEME_OVERRIDE, tokenType);
+//		return new HTTPAuthorization(HTTPAuthScheme.BEARER, token);
 //	}
-	
-	abstract public GetNameValue<String> toHTTPHeader();
-	
+
 	
 }

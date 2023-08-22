@@ -38,7 +38,7 @@ extends HTTPAuthorization
 	public static final NVConfig NVC_KEY = NVConfigManager.createNVConfig("key", null,"Token", false, true, byte[].class);
 	public static final NVConfig NVC_JWT = NVConfigManager.createNVConfigEntity("jwt", "jwt token", "JWT", false, true, JWT.class, ArrayType.NOT_ARRAY);
 	
-	public static final NVConfigEntity NVC_HTTP_AUTHORIZATION_JWT_BEARER = new NVConfigEntityLocal("http_authorization_jwt_bearer", null , null, true, false, false, false, HTTPAuthorizationJWTBearer.class, SharedUtil.toNVConfigList(NVC_KEY, NVC_JWT), null, false, HTTPAuthorizationJWTBearer.NVC_HTTP_AUTHORIZATION);
+	public static final NVConfigEntity NVC_HTTP_AUTHORIZATION_JWT_BEARER = new NVConfigEntityLocal("http_authorization_jwt_bearer", null , null, true, false, false, false, HTTPAuthorizationJWTBearer.class, SharedUtil.toNVConfigList(NVC_KEY, NVC_JWT), null, false, HTTPAuthorization.NVC_HTTP_AUTHORIZATION);
 	
 	private transient JWTEncoder jwtEncoder = null;
 	
@@ -46,7 +46,6 @@ extends HTTPAuthorization
 	public HTTPAuthorizationJWTBearer()
 	{
 		super(NVC_HTTP_AUTHORIZATION_JWT_BEARER, HTTPAuthScheme.BEARER);
-		setName(HTTPAuthScheme.BEARER.getName());
 	}
 	
 	public HTTPAuthorizationJWTBearer(JWTEncoder encoder, byte[] key, JWT jwt)

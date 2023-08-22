@@ -15,10 +15,10 @@
  */
 package org.zoxweb.shared.http;
 
-import java.util.List;
-
 import org.zoxweb.shared.net.InetSocketAddressDAO;
 import org.zoxweb.shared.util.*;
+
+import java.util.List;
 
 /**
  *
@@ -244,24 +244,24 @@ extends ReferenceID<String>, SetName, SetDescription
 	 * 
 	 * @return the user
 	 */
-	String getUser();
-	
-	/**
-	 * Set the user
-	 * @param user
-	 */
-	void setUser(String user);
-	
-	/**
-	 * @return user password
-	 */
-	String getPassword();
-	
-	/**
-	 * Set user password
-	 * @param password
-	 */
-	void setPassword(String password);
+//	String getUser();
+//
+//	/**
+//	 * Set the user
+//	 * @param user
+//	 */
+//	void setUser(String user);
+//
+//	/**
+//	 * @return user password
+//	 */
+//	String getPassword();
+//
+//	/**
+//	 * Set user password
+//	 * @param password
+//	 */
+//	void setPassword(String password);
 
 
 	

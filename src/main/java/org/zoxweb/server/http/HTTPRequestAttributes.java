@@ -113,14 +113,14 @@ public class HTTPRequestAttributes
 		{
 			HTTPAuthorization temp = HTTPAuthScheme.parse((GetNameValue<String>) SharedUtil.lookup(headers, HTTPHeader.AUTHORIZATION));
 			
-			if (temp != null && temp instanceof HTTPAuthorizationBearer)
+			if (temp != null && temp.getAuthScheme() == HTTPAuthScheme.BEARER)
 			{
 				try
 				{
-					JWT jwt = CryptoUtil.parseJWT(((HTTPAuthorizationBearer)temp).getToken());
+					JWT jwt = CryptoUtil.parseJWT(temp.getToken());
 					jwtToken = new JWTToken();
 					jwtToken.setJWT(jwt);
-					jwtToken.setToken(((HTTPAuthorizationBearer)temp).getToken());
+					jwtToken.setToken(temp.getToken());
 					subjectID = jwt.getPayload().getSubjectID();
 				}
 				catch (Exception e)

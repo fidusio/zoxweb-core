@@ -34,13 +34,12 @@ extends HTTPAuthorization
 	public static final NVConfig NVC_USER = NVConfigManager.createNVConfig("user", null, "User", false, true, String.class);
 	public static final NVConfig NVC_PASSWORD = NVConfigManager.createNVConfig("password", null, "Password", false, true, String.class);
 	
-	public static final NVConfigEntity NVC_HTTP_AUTHORIZATION_BASIC = new NVConfigEntityLocal("http_authorization_basic", null , null, true, false, false, false, HTTPAuthorizationBasic.class, SharedUtil.toNVConfigList(NVC_USER, NVC_PASSWORD), null, false, HTTPAuthorizationBearer.NVC_HTTP_AUTHORIZATION);
+	public static final NVConfigEntity NVC_HTTP_AUTHORIZATION_BASIC = new NVConfigEntityLocal("http_authorization_basic", null , null, true, false, false, false, HTTPAuthorizationBasic.class, SharedUtil.toNVConfigList(NVC_USER, NVC_PASSWORD), null, false, HTTPAuthorization.NVC_HTTP_AUTHORIZATION);
 	
 
 	public HTTPAuthorizationBasic()
 	{
 		super(NVC_HTTP_AUTHORIZATION_BASIC, HTTPAuthScheme.BASIC);
-		setName(HTTPAuthScheme.BASIC.getName());
 	}
 	
 	

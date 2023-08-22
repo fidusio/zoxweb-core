@@ -4,26 +4,64 @@ import org.junit.jupiter.api.Test;
 import org.zoxweb.server.http.HTTPCall;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.util.GetNameValue;
+import org.zoxweb.shared.util.NVConfigEntity;
 
 public class HTTPAuthorizationTest {
 
     @Test
     public void basic()
     {
+        HTTPAuthorization authToken = new HTTPAuthorizationBasic("user", "password");
+        GetNameValue<String> nvs = authToken.toHTTPHeader();
+        System.out.println(nvs);
 
+
+        authToken = HTTPAuthScheme.BASIC.toHTTPAuthentication(nvs.getValue());//new HTTPAuthorizationToken(HTTPAuthScheme.GENERIC, nvs.getValue());
+
+        nvs = authToken.toHTTPHeader();
+        System.out.println(nvs);
+
+
+        HTTPMessageConfigInterface hmci =  HTTPMessageConfig.createAndInit("https://iot.xlogistx.io", "login", HTTPMethod.GET);
+        hmci.setAuthorization(authToken);
+        hmci.setAccept(HTTPMediaType.APPLICATION_JSON);
+        hmci.setContentType(HTTPMediaType.APPLICATION_JSON);
+
+        System.out.println(GSONUtil.toJSONDefault(hmci, true));
     }
     @Test
     public void bearer()
     {
+        HTTPAuthorization authToken = new HTTPAuthorization(HTTPAuthScheme.BEARER);
+        authToken.setToken("dskjfdljfdksajgfhdsgjhjkhgfd");
 
+        GetNameValue<String> nvs = authToken.toHTTPHeader();
+        System.out.println(nvs);
+
+
+        authToken = HTTPAuthScheme.BEARER.toHTTPAuthentication(nvs.getValue());//new HTTPAuthorizationToken(HTTPAuthScheme.GENERIC, nvs.getValue());
+        nvs = authToken.toHTTPHeader();
+        System.out.println(nvs);
+
+        HTTPMessageConfigInterface hmci =  HTTPMessageConfig.createAndInit("https://iot.xlogistx.io", "login", HTTPMethod.GET);
+        hmci.setAuthorization(authToken);
+        hmci.setAccept(HTTPMediaType.APPLICATION_JSON);
+        hmci.setContentType(HTTPMediaType.APPLICATION_JSON);
+
+        System.out.println(GSONUtil.toJSONDefault(hmci, true));
     }
 
     @Test
     public void generic()
     {
-        HTTPAuthorization authToken = new HTTPAuthorizationToken(HTTPAuthScheme.GENERIC, "xlogistx-key", "key1232ljkwerjew3lr5jk342j5243");
+        HTTPAuthorization authToken = new HTTPAuthorization("xlogistx-key", "key1232ljkwerjew3lr5jk342j5243");
         GetNameValue<String> nvs = authToken.toHTTPHeader();
         System.out.println(nvs);
+        System.out.println(authToken.getNVConfig());
+        System.out.println(((NVConfigEntity)authToken.getNVConfig()).getAttributes());
+
+
+        System.out.println("attributes:" + authToken.getAttributes());
 
 
         authToken = HTTPAuthScheme.GENERIC.toHTTPAuthentication(nvs.getValue());//new HTTPAuthorizationToken(HTTPAuthScheme.GENERIC, nvs.getValue());
@@ -36,8 +74,11 @@ public class HTTPAuthorizationTest {
         hmci.setAccept(HTTPMediaType.APPLICATION_JSON);
         hmci.setContentType(HTTPMediaType.APPLICATION_JSON);
 
-        System.out.println(GSONUtil.toJSONDefault(hmci, true));
+        authToken = hmci.getAuthorization();
 
+
+        System.out.println(GSONUtil.toJSONDefault(hmci, true));
+        System.out.println(((NVConfigEntity)authToken.getNVConfig()).getAttributes());
 
         try
         {

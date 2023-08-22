@@ -60,9 +60,9 @@ public class HTTPMessageConfig
 		HTTP_STATUS_CODE(NVConfigManager.createNVConfig("http_status_code", "The http status code", "HTTPStatusCode", false, true, HTTPStatusCode.class)),
 		HEADERS(NVConfigManager.createNVConfig("headers", "The header parameters", "HeaderParameters", false, true, NVGenericMap.class)),
 		REASON(NVConfigManager.createNVConfig("reason", "The server reason", "Reason", false, true, String.class)),
-		USER(NVConfigManager.createNVConfig("user", "The user name", "User", false, true, String.class)),
-		PASSWORD(NVConfigManager.createNVConfig("password", "The user name password", "Password", false, true, String.class)),
-		AUTHORIZATION(NVConfigManager.createNVConfigEntity("authorization", "The http authorization header", "HTTPAuthorization", false, true, HTTPAuthorization.class, ArrayType.NOT_ARRAY)),
+//		USER(NVConfigManager.createNVConfig("user", "The user name", "User", false, true, String.class)),
+//		PASSWORD(NVConfigManager.createNVConfig("password", "The user name password", "Password", false, true, String.class)),
+		AUTHORIZATION(NVConfigManager.createNVConfigEntity("http_authorization", "The http authorization header", "HTTPAuthorization", false, true, HTTPAuthorization.class, ArrayType.NOT_ARRAY)),
 		//PARAMETERS(NVConfigManager.createNVConfig("parameters", "parameters", "Parameters", false, true, false, String[].class, null)),
 		PARAMETERS(NVConfigManager.createNVConfig("parameters", "parameters", "Parameters", false, true, NVGenericMap.class)),
 		PROXY_ADDRESS(NVConfigManager.createNVConfigEntity("proxy_address", "The proxy address if not null","ProxyAddress",true, false, InetSocketAddressDAO.class, ArrayType.NOT_ARRAY)),
@@ -202,7 +202,7 @@ public class HTTPMessageConfig
 	public synchronized void setHeaders(List<GetNameValue<String>> headerParams)
 	{
 		ArrayValues<GetNameValue<String>> headerParameters = ((ArrayValues<GetNameValue<String>>)lookup(Params.HEADERS));
-		if (headerParams == null || headerParams.size() == 0)
+		if (headerParams == null || headerParams.isEmpty())
 		{
 			headerParameters.clear();
 			return;
@@ -378,8 +378,8 @@ public class HTTPMessageConfig
 				+ isRedirectEnabled() + ", getConnectTimeout()="
 				+ getConnectTimeout() + ", getReadTimeout()="
 				+ getReadTimeout() + ", getCharset()=" + getCharset()
-				+ ", getProxyAddress()=" + getProxyAddress() + ", getUser()="
-				+ getUser() + ", getPassword()=" + getPassword()
+				+ ", getProxyAddress()=" + getProxyAddress()
+//				", getUser()=" + getUser() + ", getPassword()=" + getPassword()
 				+ ", getAuthentication()=" + getAuthorization() + "]";
 	}
 
@@ -491,47 +491,46 @@ public class HTTPMessageConfig
 
 
 
-	/**
-	 */
-	@Override
-	public String getUser() {
-		
-		return lookupValue(Params.USER);
-	}
 
-
-
-	/**
-	 */
-	@Override
-	public void setUser(String user) 
-	{
-		
-		setValue(Params.USER, user);
-	}
-
-
-
-	/**
-	 * @see org.zoxweb.shared.http.HTTPMessageConfigInterface#getPassword()
-	 */
-	@Override
-	public String getPassword() {
-		
-		return lookupValue(Params.PASSWORD);
-	}
-
-
-
-	/**
-	 * @see org.zoxweb.shared.http.HTTPMessageConfigInterface#setPassword(java.lang.String)
-	 */
-	@Override
-	public void setPassword(String password) {
-		
-		setValue(Params.PASSWORD, password);
-		
-	}
+//	@Override
+//	public String getUser() {
+//
+//		return lookupValue(Params.USER);
+//	}
+//
+//
+//
+//	/**
+//	 */
+//	@Override
+//	public void setUser(String user)
+//	{
+//
+//		setValue(Params.USER, user);
+//	}
+//
+//
+//
+//	/**
+//	 * @see org.zoxweb.shared.http.HTTPMessageConfigInterface#getPassword()
+//	 */
+//	@Override
+//	public String getPassword() {
+//
+//		return lookupValue(Params.PASSWORD);
+//	}
+//
+//
+//
+//	/**
+//	 * @see org.zoxweb.shared.http.HTTPMessageConfigInterface#setPassword(java.lang.String)
+//	 */
+//	@Override
+//	public void setPassword(String password) {
+//
+//		setValue(Params.PASSWORD, password);
+//
+//	}
 
 	
 

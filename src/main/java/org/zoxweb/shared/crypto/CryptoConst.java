@@ -251,7 +251,7 @@ public final class CryptoConst
 		HOBA("HOBA"),
 		NONE("None"),
 		OAUTH("OAuth"),
-		SSWS("SSWS"),
+		//SSWS("SSWS"),
 		;
 
 		private final String name;

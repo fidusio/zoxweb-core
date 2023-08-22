@@ -5,6 +5,6 @@ import org.zoxweb.shared.util.DataEncoder;
 public interface JWTEncoder 
 	extends DataEncoder<JWTEncoderData, String>
 {
-	public String encode(byte[] key, JWT jwt)
+	String encode(byte[] key, JWT jwt)
 			throws AccessSecurityException;
 }

@@ -1164,16 +1164,27 @@ final public class GSONUtil
 		return fromJSONGenericMap(SharedStringUtil.toString(data), nvce, btype);
 	}
 
+	public static NVGenericMap fromJSONGenericMap(byte[] data, NVConfigEntity nvce, Base64Type btype, boolean nvgPrimitiveAsString)
+	{
+		return fromJSONGenericMap(SharedStringUtil.toString(data), nvce, btype, nvgPrimitiveAsString);
+	}
+
 	
 	public static NVGenericMap fromJSONGenericMap(String json, NVConfigEntity nvce, Base64Type btype)
 	{
+		return fromJSONGenericMap(json, nvce, btype, false);
+	}
+
+
+	public static NVGenericMap fromJSONGenericMap(String json, NVConfigEntity nvce, Base64Type btype, boolean nvgPrimitiveAsString)
+	{
 		JsonElement je = JsonParser.parseString(json);
-		
+
 		if (je instanceof JsonObject)
 		{
-			return fromJSONGenericMap((JsonObject)je, nvce, btype, false);
+			return fromJSONGenericMap((JsonObject)je, nvce, btype, nvgPrimitiveAsString);
 		}
-		
+
 		return null;
 	}
 	

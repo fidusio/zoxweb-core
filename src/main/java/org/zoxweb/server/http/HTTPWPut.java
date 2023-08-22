@@ -15,21 +15,17 @@
  */
 package org.zoxweb.server.http;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.zoxweb.server.net.ssl.SSLCheckDisabler;
 import org.zoxweb.shared.http.*;
 import org.zoxweb.shared.util.GetNameValue;
 import org.zoxweb.shared.util.NVPair;
 import org.zoxweb.shared.util.SharedStringUtil;
 import org.zoxweb.shared.util.SharedUtil;
+
+import java.io.*;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * JMPut: java mput is a command line form processor
@@ -61,8 +57,8 @@ public class HTTPWPut
 				 					 	List<GetNameValue<String>> params) throws IOException
 	{
 		HTTPMessageConfig hcc = new HTTPMessageConfig();
-		hcc.setUser(username);
-		hcc.setPassword(password);
+
+		hcc.setAuthorization(new HTTPAuthorizationBasic(username, password));
 		hcc.setMethod(HTTPMethod.POST);
 		hcc.setParameters(params);
 		

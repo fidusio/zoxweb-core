@@ -111,8 +111,8 @@ public class HTTPCallTool implements Runnable
             for(String url : urls) {
                 HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit(url, null, httpMethod);
                 hmci.setProxyAddress(proxyAddress);
-                hmci.setUser(user);
-                hmci.setPassword(password);
+                if (user != null && password !=null)
+                    hmci.setAuthorization(new HTTPAuthorizationBasic(user, password));
                 hmci.setHTTPErrorAsException(errorAsException);
 
                 hmci.setContentType(HTTPMediaType.APPLICATION_JSON);

@@ -65,7 +65,16 @@ public enum HTTPAuthScheme
 		@Override
 		public HTTPAuthorization toHTTPAuthentication(String value)
 		{
-			String fullToken = SharedStringUtil.toString((SharedBase64.decode(SharedStringUtil.getBytes(value))));
+			String[] tokens = SharedStringUtil.parseString(value, " ", true);
+			if(tokens.length > 1)
+			{
+				if (!BASIC.name().equalsIgnoreCase(tokens[0]))
+					throw new IllegalArgumentException("Not a basic authentication type " + tokens[0]);
+
+				value = tokens[1];
+			}
+
+			String fullToken = SharedStringUtil.toString((SharedBase64.decode(SharedBase64.Base64Type.DEFAULT, SharedStringUtil.getBytes(value))));
 			
 			
 			int columnIndex = fullToken.indexOf(':');
@@ -91,9 +100,19 @@ public enum HTTPAuthScheme
 		@Override
 		public GetNameValue<String> toHTTPHeader(String ...args)
 		{
-			if (args.length == 1)
-			// TODO Auto-generated method stub
-				return new NVPair(HTTPHeader.AUTHORIZATION, BEARER.getName()+ " " + args[0]);
+			if (args.length == 1) {
+				// TODO Auto-generated method stub
+				String token = args[0];
+				String[] tokens = SharedStringUtil.parseString(token, " ", true);
+				if(tokens.length > 1)
+				{
+					if (!BEARER.name().equalsIgnoreCase(tokens[0]))
+						throw new IllegalArgumentException("Not a bearer authentication type " + tokens[0]);
+
+					token = tokens[1];
+				}
+				return new NVPair(HTTPHeader.AUTHORIZATION, BEARER.getName() + " " + token);
+			}
 			else if (args.length > 1)
 				return new NVPair(HTTPHeader.AUTHORIZATION, args[0]+ " " + args[1]);
 			
@@ -104,22 +123,10 @@ public enum HTTPAuthScheme
 		public HTTPAuthorization toHTTPAuthentication(String value)
 		{
 			// TODO Auto-generated method stub
-			return new HTTPAuthorizationBearer(value);
+			return new HTTPAuthorization(HTTPAuthScheme.BEARER, value);
 		}
 		
 	},
-	SSWS(CryptoConst.AuthenticationType.SSWS.getName())
-			{
-				@Override
-				public GetNameValue<String> toHTTPHeader(String... args) {
-					return new NVPair(HTTPHeader.AUTHORIZATION, SSWS.getName() + " " + args[0]);
-				}
-
-				@Override
-				public HTTPAuthorization toHTTPAuthentication(String token) {
-					return new HTTPAuthorizationToken(SSWS, token);
-				}
-			},
 	GENERIC("GENERIC")
 			{
 				@Override
@@ -146,8 +153,8 @@ public enum HTTPAuthScheme
 				}
 
 				@Override
-				public HTTPAuthorization toHTTPAuthentication(String token ) {
-					return new HTTPAuthorizationToken(GENERIC, token);
+				public HTTPAuthorization toHTTPAuthentication(String token) {
+					return new HTTPAuthorization(token);
 				}
 			},
 
