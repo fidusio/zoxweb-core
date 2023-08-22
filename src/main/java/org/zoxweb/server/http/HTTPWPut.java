@@ -16,7 +16,10 @@
 package org.zoxweb.server.http;
 
 import org.zoxweb.server.net.ssl.SSLCheckDisabler;
-import org.zoxweb.shared.http.*;
+import org.zoxweb.shared.http.HTTPMediaType;
+import org.zoxweb.shared.http.HTTPMessageConfig;
+import org.zoxweb.shared.http.HTTPMethod;
+import org.zoxweb.shared.http.HTTPResponseData;
 import org.zoxweb.shared.util.GetNameValue;
 import org.zoxweb.shared.util.NVPair;
 import org.zoxweb.shared.util.SharedStringUtil;
@@ -57,8 +60,7 @@ public class HTTPWPut
 				 					 	List<GetNameValue<String>> params) throws IOException
 	{
 		HTTPMessageConfig hcc = new HTTPMessageConfig();
-
-		hcc.setAuthorization(new HTTPAuthorizationBasic(username, password));
+		hcc.setBasicAuthorization(username, password);
 		hcc.setMethod(HTTPMethod.POST);
 		hcc.setParameters(params);
 		

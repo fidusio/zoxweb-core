@@ -240,28 +240,7 @@ extends ReferenceID<String>, SetName, SetDescription
 	 */
 	void setCharset(String charset);
 	
-	/**
-	 * 
-	 * @return the user
-	 */
-//	String getUser();
-//
-//	/**
-//	 * Set the user
-//	 * @param user
-//	 */
-//	void setUser(String user);
-//
-//	/**
-//	 * @return user password
-//	 */
-//	String getPassword();
-//
-//	/**
-//	 * Set user password
-//	 * @param password
-//	 */
-//	void setPassword(String password);
+
 
 
 	
@@ -272,6 +251,8 @@ extends ReferenceID<String>, SetName, SetDescription
 	HTTPAuthorization getAuthorization();
 	
 	void setAuthorization(HTTPAuthorization httpAuthentication);
+
+	void setBasicAuthorization(String user, String password);
 	
 	/**
 	 * @return the proxy address null if not set

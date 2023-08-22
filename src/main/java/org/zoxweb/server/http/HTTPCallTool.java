@@ -112,7 +112,7 @@ public class HTTPCallTool implements Runnable
                 HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit(url, null, httpMethod);
                 hmci.setProxyAddress(proxyAddress);
                 if (user != null && password !=null)
-                    hmci.setAuthorization(new HTTPAuthorizationBasic(user, password));
+                    hmci.setBasicAuthorization(user, password);
                 hmci.setHTTPErrorAsException(errorAsException);
 
                 hmci.setContentType(HTTPMediaType.APPLICATION_JSON);

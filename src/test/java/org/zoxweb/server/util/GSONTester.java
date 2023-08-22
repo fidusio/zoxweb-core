@@ -2,8 +2,6 @@ package org.zoxweb.server.util;
 
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.shared.filters.FilterType;
-import org.zoxweb.shared.http.HTTPAuthorization;
-import org.zoxweb.shared.http.HTTPAuthorizationBasic;
 import org.zoxweb.shared.http.HTTPMessageConfig;
 import org.zoxweb.shared.util.NVEntity;
 import org.zoxweb.shared.util.NVEnum;
@@ -24,7 +22,7 @@ public class GSONTester {
         hmc.setMethod("post");
         hmc.getParameters().add(new NVPair("email", null, FilterType.EMAIL));
         hmc.getParameters().add(new NVEnum("time_unit", TimeUnit.MINUTES));
-        hmc.setAuthorization(new HTTPAuthorizationBasic("marwan", "batata"));
+        hmc.setBasicAuthorization("marwan", "batata");
         String json = GSONUtil.toJSONDefault(hmc, true);
         HTTPMessageConfig hmcDeserialized = GSONUtil.fromJSONDefault(json, HTTPMessageConfig.class);
         String jsonSerialized = GSONUtil.toJSONDefault(hmcDeserialized, true);

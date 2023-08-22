@@ -554,6 +554,11 @@ public class HTTPMessageConfig
 		setValue(Params.AUTHORIZATION, httpAuthentication);
 	}
 
+	@Override
+	public void setBasicAuthorization(String user, String password)
+	{
+		setAuthorization(new HTTPAuthorizationBasic(user, password));
+	}
 
 
 	/**
