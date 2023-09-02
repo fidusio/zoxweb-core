@@ -108,8 +108,8 @@ public class RateCounter
 
     public synchronized RateCounter register(long delta, long inc)
     {
-       setValue(Param.DELTAS, getDeltas() + delta);
-       setValue(Param.COUNTS, getCounts() + inc);
+       setValue(Param.DELTAS, (getDeltas() + delta));
+       setValue(Param.COUNTS,  (getCounts() + inc));
        return this;
     }
 

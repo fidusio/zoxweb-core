@@ -15,12 +15,11 @@
  */
 package org.zoxweb.shared.filters;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.zoxweb.shared.util.GetValue;
 import org.zoxweb.shared.util.SharedStringUtil;
-import org.zoxweb.shared.util.SharedUtil;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @SuppressWarnings("serial")
 public class MatchPatternFilter
@@ -60,8 +59,7 @@ public class MatchPatternFilter
 	private boolean isRecursive = false;
 	private boolean isCaseSensitive = true;
 	private List<String> matchPatterns = new ArrayList<String>();
-	//private static final String DEFAULT_PATTERN_PREFIX = "([\\\\]?[a-zA-Z0-9!#$%&'()+,-.;=@^_'~{}\\]\\[]+[\\\\]{0,1})*";
-	
+//	private static final String DEFAULT_PATTERN_PREFIX = "([\\\\]?[a-zA-Z0-9!#$%&'()+,-.;=@^_'~{}\\]\\[]+[\\\\]{0,1})*";
 //	private static final String DEFAULT_PATTERN_PREFIX = "([\u0000-\uFFFFa-zA-Z0-9\\s!#$%&'()+,-.;=@^_'~{}\\]\\[\"\\.\\*:<>?|////\\\\])*";
 //	private static final String SINGLE_PATTERN_OCCURANCE_VALUE = "{1}";
 //	private static final String SINGLE_CHARACTER_PATTERN = "[\u0000-\uFFFFa-zA-Z0-9\\s!#$%&'()+,-.;=@^_'~{}\\[\\]]{1}";
@@ -90,8 +88,8 @@ public class MatchPatternFilter
 	}
 	
 	/**
-	 * Checks whether pattern is case sensitive.
-	 * @return true if case sensitive
+	 * Checks whether pattern is casesensitive.
+	 * @return true if casesensitive
 	 */
 	public boolean isCaseSensitive()
     {
@@ -100,7 +98,7 @@ public class MatchPatternFilter
 	
 	/**
 	 * Matches the given string value to all match patterns.
-	 * @param value
+	 * @param value to match
 	 * @return true if match found
 	 */
 	public boolean match(String value)
@@ -195,7 +193,8 @@ public class MatchPatternFilter
 	 * @return pattern filter
 	 */
 	public static MatchPatternFilter createMatchFilter(String... matchCriteria)
-    {
+	{
+
 		if (matchCriteria.length == 1)
 		{
 			matchCriteria = matchCriteria[0].split(" ");

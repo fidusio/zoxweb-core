@@ -15,14 +15,15 @@
  */
 package org.zoxweb.shared.filters;
 
-import java.io.FileInputStream;
-
 import org.zoxweb.server.io.IOUtil;
-import org.zoxweb.shared.filters.MatchPatternFilter;
 import org.zoxweb.shared.util.Const;
 import org.zoxweb.shared.util.SharedStringUtil;
 
-public class MatchPatternFilterTest {
+import java.io.FileInputStream;
+
+public class MatchPatternFilterTest
+{
+
 
 	public static void main(String[] args) {
 

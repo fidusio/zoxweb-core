@@ -69,7 +69,7 @@
 
     <junit.version>5.9.0</junit.version>
 
-    <bc.version>1.73</bc.version>
+    <!--<bc.version>1.73</bc.version>-->
 
 
   </properties>

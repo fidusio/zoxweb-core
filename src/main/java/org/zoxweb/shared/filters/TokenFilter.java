@@ -33,7 +33,7 @@ public class TokenFilter
         if(sep != null)
         {
             int index = value.indexOf(sep);
-            if(index != -1 && index > 0)
+            if(index > 0)
                 value = value.substring(0, index);
             if(index == 0)
                 throw new IllegalArgumentException("value can't start with separator " + sep);
@@ -53,20 +53,15 @@ public class TokenFilter
     }
 
     @Override
-    public boolean isValid(String value) {
+    public boolean isValid(String value)
+    {
         value = SharedStringUtil.trimOrNull(value);
-        if(value == null)
+        if(value != null && sep != null)
         {
-            return false;
+
+            return (value.indexOf(sep) != 0);
         }
-        if(sep != null)
-        {
-            int index = value.indexOf(sep);
-            if(index == 0){
-                return false;
-            }
-        }
-        return true;
+        return false;
     }
 
     @Override

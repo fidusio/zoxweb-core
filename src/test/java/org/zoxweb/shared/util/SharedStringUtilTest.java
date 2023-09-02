@@ -43,6 +43,8 @@ public class SharedStringUtilTest {
 	public void testSplit()
 	{
 		System.out.println("After right:" + SharedStringUtil.valueAfterRightToken("john.smith.dickson", "."));
+		System.out.println("After right:" + SharedStringUtil.valueAfterRightToken("john/smith/dickson", "/"));
+		System.out.println("After right:" + SharedStringUtil.valueAfterRightToken("john.smith/dickson", "/"));
 		System.out.println("Before right:" + SharedStringUtil.valueBeforeRightToken("john.smith.dickson", "."));
 		System.out.println("Before left:" + SharedStringUtil.valueBeforeLeftToken("john.smith.dickson", "."));
 		System.out.println("After left:" + SharedStringUtil.valueAfterLeftToken("john.smith.dickson", "."));

@@ -15,14 +15,7 @@
  */
 package org.zoxweb.shared.data;
 
-import org.zoxweb.shared.data.DataConst.DataParam;
-import org.zoxweb.shared.util.NVConfig;
-import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
-import org.zoxweb.shared.util.NVConfigManager;
-import org.zoxweb.shared.util.SetCanonicalID;
-import org.zoxweb.shared.util.SharedStringUtil;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.*;
 
 /**
  * This class is used to define parameters used by devices 
@@ -33,18 +26,17 @@ import org.zoxweb.shared.util.SharedUtil;
  */
 @SuppressWarnings("serial")
 public class DataDAO
-    extends TimeStampDAO
-    implements SetCanonicalID
+    extends PropertyDAO
 {
 	
-	//private static final NVConfig NVC_TIME_STAMP =  NVConfigManager.createNVConfig("time_stamp", "This is the time stamp for when the message was generated.","TimeStampInterface",true, false, Long.class);
+
 	private static final NVConfig NVC_DATA =  NVConfigManager.createNVConfig("data", "This is the raw message in byte array format.","Data",true, false, byte[].class);
 	private static final NVConfig NVC_SOURCE_ID =  NVConfigManager.createNVConfig("source_id", "This is the source ID to identify the device within the system.","SourceID",true, false, String.class);
-	//private static final NVConfig NVC_SYSTEM_ID =  NVConfigManager.createNVConfig("system_id", "This is the system ID is the container of the source ID.","SystemID",true, false, String.class);
+	private static final NVConfig NVC_FULL_NAME =  NVConfigManager.createNVConfig("full_name", "This is  the source full name.","FullName",true, false, String.class);
 	
 		
 	
-	public static final NVConfigEntity NVC_DATA_DAO = new NVConfigEntityLocal("data_dao", null , "DataDAO", true, false, false, false, DataDAO.class, SharedUtil.toNVConfigList(NVC_DATA, NVC_SOURCE_ID, DataParam.CANONICAL_ID.getNVConfig()), null, false, TimeStampDAO.NVC_TIME_STAMP_DAO);
+	public static final NVConfigEntity NVC_DATA_DAO = new NVConfigEntityLocal("data_dao", null , "DataDAO", true, false, false, false, DataDAO.class, SharedUtil.toNVConfigList(NVC_DATA, NVC_SOURCE_ID, NVC_FULL_NAME), null, false, PropertyDAO.NVC_PROPERTY_DAO);
 	
 	/**
 	 * This constructor creates a MessageBase object
@@ -144,22 +136,23 @@ public class DataDAO
 		return lookupValue(NVC_SOURCE_ID);
 	}
 
-	@Override
-	public String toCanonicalID() {
-		return getCanonicalID();
+
+	/**
+	 * This method sets the source ID.
+	 * @param fullname of the data source
+	 */
+	public void setFullName(String fullname)
+	{
+		setValue(NVC_FULL_NAME, fullname);
 	}
 
-	@Override
-	public String getCanonicalID() 
+	/**
+	 * Get the fullname of the data source
+	 * @return the data source full name
+	 */
+	public String getFullName()
 	{
-		return lookupValue(DataParam.CANONICAL_ID);
+		return lookupValue(NVC_FULL_NAME);
 	}
-
-	@Override
-	public void setCanonicalID(String id)
-	{
-		setValue(DataParam.CANONICAL_ID, id);
-	}
-	
 
 }

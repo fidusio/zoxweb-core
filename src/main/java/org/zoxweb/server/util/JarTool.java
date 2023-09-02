@@ -15,23 +15,20 @@
  */
 package org.zoxweb.server.util;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import org.zoxweb.server.io.IOUtil;
+import org.zoxweb.server.io.UByteArrayOutputStream;
+import org.zoxweb.shared.data.DataDAO;
+import org.zoxweb.shared.filters.MatchPatternFilter;
+import org.zoxweb.shared.util.*;
+
+import java.io.*;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-
-import org.zoxweb.server.io.IOUtil;
-import org.zoxweb.shared.filters.MatchPatternFilter;
-import org.zoxweb.shared.util.SharedStringUtil;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 public class JarTool {
 	
@@ -39,8 +36,7 @@ public class JarTool {
 		
 	}
 	
-	public static URL findClassJarURL( Class<?> entryPointClass)
-        throws IOException
+	public static URL findClassJarURL(Class<?> entryPointClass)
     {
 		return entryPointClass.getProtectionDomain().getCodeSource().getLocation();
 	}
@@ -202,6 +198,177 @@ public class JarTool {
 		else
         {
 			return new URLClassLoader( all, parent);
+		}
+	}
+
+
+
+
+	public static String[] zipList(String zipFilename, String ...patterns)
+			throws IOException
+	{
+		return zipList(new File(zipFilename), patterns);
+	}
+
+	public static String[] zipList(File zipFile, String ...patterns)
+			throws IOException
+	{
+		FileInputStream fis = null;
+		try
+		{
+			fis = new FileInputStream(zipFile);
+			return zipList(fis, patterns);
+		}
+		finally
+		{
+			IOUtil.close(fis);
+		}
+	}
+
+
+
+
+
+	public static String[] zipList(InputStream zipStream, String ...patterns)
+			throws IOException
+	{
+		List<String> ret = new ArrayList<>();
+		try(ZipInputStream zipIs = zipStream instanceof ZipInputStream ? (ZipInputStream) zipStream : new ZipInputStream(zipStream)) {
+			ZipEntry ze = null;
+			MatchPatternFilter mpf = patterns != null && patterns.length > 0 && patterns[0]  != null ? MatchPatternFilter.createMatchFilter(patterns) : null;
+
+			while ((ze = zipIs.getNextEntry()) != null)
+			{
+				if (!ze.isDirectory()) {
+
+					if (mpf != null)
+					{
+						if (!mpf.match(ze.getName()))
+							continue; // no match found
+					}
+					ret.add(ze.getName());
+				}
+			}
+		}
+		return ret.toArray(new String[0]);
+	}
+
+	public static DataDAO[] loadContents(String zipFilename, String ...patterns)
+			throws IOException
+	{
+		return loadContents(new File(zipFilename), patterns);
+	}
+
+	public static DataDAO[] loadContents(File zipFile, String ...patterns)
+			throws IOException
+	{
+		FileInputStream fis = null;
+		try
+		{
+			fis = new FileInputStream(zipFile);
+			return loadContents(fis, patterns);
+		}
+		finally
+		{
+			IOUtil.close(fis);
+		}
+	}
+
+
+
+	public static DataDAO[] loadContents(InputStream zipStream, String ...patterns)
+			throws IOException
+	{
+		List<DataDAO> ret = new ArrayList<>();
+		try(ZipInputStream zipIs = zipStream instanceof ZipInputStream ? (ZipInputStream) zipStream : new ZipInputStream(zipStream)) {
+			ZipEntry ze = null;
+			MatchPatternFilter mpf = patterns != null && patterns.length > 0 && patterns[0]  != null ? MatchPatternFilter.createMatchFilter(patterns) : null;
+			UByteArrayOutputStream ubaos = new UByteArrayOutputStream();
+			byte[] buffer = new byte[1024];
+			while ((ze = zipIs.getNextEntry()) != null)
+			{
+				if (!ze.isDirectory()) {
+
+					if (mpf != null)
+					{
+						if (!mpf.match(ze.getName()))
+							continue; // no match found
+					}
+
+					ubaos.reset();
+					int read;
+					while((read = zipIs.read(buffer)) > 0)
+					{
+						ubaos.write(buffer, 0 , read);
+					}
+					DataDAO toAdd = new DataDAO();
+
+					toAdd.setFullName(ze.getName());
+					toAdd.setName(SharedStringUtil.valueAfterRightToken(ze.getName(), "/"));
+					toAdd.setDescription(ze.getComment());
+					toAdd.setData(ubaos.toByteArray());
+
+
+					ret.add(toAdd);
+				}
+			}
+		}
+		return ret.toArray(new DataDAO[0]);
+	}
+
+
+	public static void main(String ...args)
+	{
+		try
+		{
+			ParamUtil.ParamMap paramMap = ParamUtil.parse("=", args);
+
+			System.out.println(paramMap);
+			System.out.println("files: " + Arrays.toString(paramMap.namelessValues()));
+			String pattern = paramMap.stringValue("pattern", null, true);
+
+
+
+			RateCounter rc = new RateCounter("ZipExtraction");
+			long ts = System.currentTimeMillis();
+
+			for (String zipFile : paramMap.namelessValues())
+			{
+
+
+				GetNameValue<String> load = paramMap.asNVPair("load");
+				if (load != null)
+				{
+					DataDAO[] matches = loadContents(zipFile, pattern);
+					System.out.println("Zip File: " + zipFile + " matches found: " + matches.length);
+
+					for (DataDAO matched : matches) {
+						rc.inc();
+						System.out.println("\t\t" + SharedUtil.toCanonicalID(':', matched.getName(), matched.getFullName(), matched.getData().length));
+						System.out.println(SharedStringUtil.toString(matched.getData()));
+					}
+				}
+				else
+				{
+					String[] matches = zipList(zipFile, pattern);
+					System.out.println("Zip File: " + zipFile + " matches found: " + matches.length);
+
+					for (String matched : matches) {
+						rc.inc();
+						System.out.println("\t\t" + matched);
+					}
+				}
+			}
+
+			rc.registerTimeStamp(ts);
+			System.out.println(rc + " " + Const.TimeInMillis.toString(rc.getDeltas()));
+
+
+
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
 		}
 	}
 
