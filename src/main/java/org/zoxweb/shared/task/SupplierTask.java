@@ -1,4 +1,4 @@
-package org.zoxweb.server.task;
+package org.zoxweb.shared.task;
 
 import java.util.function.Supplier;
 

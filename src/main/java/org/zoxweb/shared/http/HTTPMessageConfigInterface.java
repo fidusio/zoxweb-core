@@ -355,8 +355,4 @@ extends ReferenceID<String>, SetName, SetDescription
 	 */
 	void setHTTPErrorAsException(boolean errorAsException);
 
-
-
-	
-	
 }

@@ -19,6 +19,7 @@ import org.zoxweb.shared.data.SetNameDescriptionDAO;
 import org.zoxweb.shared.net.InetSocketAddressDAO;
 import org.zoxweb.shared.util.*;
 import org.zoxweb.shared.util.NVConfigEntity.ArrayType;
+
 import java.util.List;
 
 /**
@@ -60,8 +61,6 @@ public class HTTPMessageConfig
 		HTTP_STATUS_CODE(NVConfigManager.createNVConfig("http_status_code", "The http status code", "HTTPStatusCode", false, true, HTTPStatusCode.class)),
 		HEADERS(NVConfigManager.createNVConfig("headers", "The header parameters", "HeaderParameters", false, true, NVGenericMap.class)),
 		REASON(NVConfigManager.createNVConfig("reason", "The server reason", "Reason", false, true, String.class)),
-//		USER(NVConfigManager.createNVConfig("user", "The user name", "User", false, true, String.class)),
-//		PASSWORD(NVConfigManager.createNVConfig("password", "The user name password", "Password", false, true, String.class)),
 		AUTHORIZATION(NVConfigManager.createNVConfigEntity("http_authorization", "The http authorization header", "HTTPAuthorization", false, true, HTTPAuthorization.class, ArrayType.NOT_ARRAY)),
 		//PARAMETERS(NVConfigManager.createNVConfig("parameters", "parameters", "Parameters", false, true, false, String[].class, null)),
 		PARAMETERS(NVConfigManager.createNVConfig("parameters", "parameters", "Parameters", false, true, NVGenericMap.class)),
@@ -100,7 +99,7 @@ public class HTTPMessageConfig
 																					  SharedUtil.extractNVConfigs(Params.values()), null, false, SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO);
 		
 	
-	
+
 	
 	/**
 	 * Explicit definition to make the class a java bean
@@ -756,6 +755,8 @@ public class HTTPMessageConfig
 		setValue(Params.ERROR_AS_EXCEPTION, errorAsException);
 	}
 
+
+
 	@Override
 	public void setHTTPStatusCode(HTTPStatusCode hStatus) 
 	{
@@ -796,7 +797,5 @@ public class HTTPMessageConfig
 		// TODO Auto-generated method stub
 		setValue(Params.ENABLE_ENCODING, value);
 	}
-
-
 
 }

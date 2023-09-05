@@ -1,7 +1,7 @@
 package org.zoxweb.server.fsm;
 
 import org.zoxweb.server.logging.LogWrapper;
-import org.zoxweb.server.task.SupplierConsumerTask;
+import org.zoxweb.shared.task.SupplierConsumerTask;
 import org.zoxweb.server.task.TaskSchedulerProcessor;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.shared.util.SharedUtil;

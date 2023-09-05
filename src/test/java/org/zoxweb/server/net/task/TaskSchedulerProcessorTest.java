@@ -24,6 +24,7 @@ import java.util.logging.Logger;
 
 
 import org.zoxweb.server.task.*;
+import org.zoxweb.shared.task.SupplierConsumerTask;
 import org.zoxweb.shared.util.Const;
 import org.zoxweb.shared.util.Appointment;
 import org.zoxweb.shared.util.AppointmentDefault;

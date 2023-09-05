@@ -52,8 +52,17 @@ import java.util.logging.Logger;
  * It uses Gson from google 
  * @author mnael
  */
-final public class GSONUtil 
+public final class GSONUtil
 {
+
+	public static final DataDecoder<byte[], NVGenericMap> NVGenericMapDecoder = new DataDecoder<byte[], NVGenericMap>() {
+		@Override
+		public NVGenericMap decode(byte[] input)
+		{
+			return fromJSONDefault(input, NVGenericMap.class);
+		}
+	};
+
 
 	private static final Logger log = Logger.getLogger(Const.LOGGER_NAME);
 

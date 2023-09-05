@@ -1,6 +1,5 @@
-package org.zoxweb.server.task;
+package org.zoxweb.shared.task;
 
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
@@ -9,8 +8,8 @@ import java.util.function.Supplier;
  * @param <S> Supplier data type
  */
 
-public interface TaskCallback<C, S>
-        extends Consumer<C>, Supplier<S>
+public interface ConsumerSupplierCallback<C, S>
+        extends ConsumerCallback<C>, Supplier<S>
 {
     void exception(Exception e);
 }

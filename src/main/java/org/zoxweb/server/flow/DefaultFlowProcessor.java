@@ -1,6 +1,6 @@
 package org.zoxweb.server.flow;
 
-import org.zoxweb.server.task.SupplierConsumerTask;
+import org.zoxweb.shared.task.SupplierConsumerTask;
 import org.zoxweb.server.task.TaskSchedulerProcessor;
 
 import java.util.concurrent.atomic.AtomicLong;

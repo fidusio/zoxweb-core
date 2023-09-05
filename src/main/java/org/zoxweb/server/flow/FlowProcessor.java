@@ -1,6 +1,6 @@
 package org.zoxweb.server.flow;
 
-import org.zoxweb.shared.queue.Publisher;
+import org.zoxweb.shared.task.Publisher;
 
 import java.io.Closeable;
 import java.util.function.Consumer;

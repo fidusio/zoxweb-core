@@ -1,4 +1,4 @@
-package org.zoxweb.shared.queue;
+package org.zoxweb.shared.task;
 
 public interface Publisher<T>
 {

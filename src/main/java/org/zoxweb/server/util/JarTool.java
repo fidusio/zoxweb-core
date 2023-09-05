@@ -345,7 +345,7 @@ public class JarTool {
 					for (DataDAO matched : matches) {
 						rc.inc();
 						System.out.println("\t\t" + SharedUtil.toCanonicalID(':', matched.getName(), matched.getFullName(), matched.getData().length));
-						System.out.println(SharedStringUtil.toString(matched.getData()));
+						//System.out.println(SharedStringUtil.toString(matched.getData()));
 					}
 				}
 				else
