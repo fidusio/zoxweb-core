@@ -64,16 +64,18 @@ public class AsyncHTTPCallTest
             RateController rc = new RateController("test", rate);
             LoggerUtil.enableDefaultLogger("org.zoxweb");
             HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit(url, null, HTTPMethod.GET, false);
-            AsyncHTTPCall<NVGenericMap> asyncHC = new AsyncHTTPCall<>(callback, GSONUtil.NVGenericMapDecoder);
+            AsyncHTTPCall<NVGenericMap> asyncHC = new AsyncHTTPCall<NVGenericMap>(callback, GSONUtil.NVGenericMapDecoder)
+                    .setTaskScheduler(rc, TaskUtil.getDefaultTaskScheduler());
             for(int i =0; i < repeat; i++)
             {
-                asyncHC.asyncSend(hmci, rc);
+                asyncHC.asyncSend(hmci);
             }
-            AsyncHTTPCall<HTTPResponseData> asyncHRD = new AsyncHTTPCall<>(callbackOnly);
+            AsyncHTTPCall<HTTPResponseData> asyncHRD = new AsyncHTTPCall<HTTPResponseData>(callbackOnly).setExecutor(TaskUtil.getDefaultTaskProcessor());
+
             ///log.getLogger().info("**************************************************************************************");
             for(int i =0; i < repeat; i++)
             {
-                asyncHRD.asyncSend(hmci, rc);
+                asyncHRD.asyncSend(hmci, TaskUtil.getDefaultTaskProcessor());
             }
 
             TaskUtil.waitIfBusyThenClose(100);

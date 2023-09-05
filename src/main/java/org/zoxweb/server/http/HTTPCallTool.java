@@ -24,6 +24,7 @@ import org.zoxweb.shared.http.*;
 
 import org.zoxweb.shared.net.InetSocketAddressDAO;
 import org.zoxweb.shared.net.ProxyType;
+import org.zoxweb.shared.task.ConsumerCallback;
 import org.zoxweb.shared.util.Const;
 import org.zoxweb.shared.util.ParamUtil;
 import org.zoxweb.shared.util.RateCounter;
@@ -34,48 +35,78 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 
-public class HTTPCallTool implements Runnable
+public final class HTTPCallTool //implements Runnable
 {
     private static final LogWrapper log = new LogWrapper(HTTPCallTool.class);
     private static final AtomicLong failCounter = new AtomicLong();
 
 
-    private final HTTPMessageConfigInterface hmci;
-    private final boolean printResult;
+//    private final HTTPMessageConfigInterface hmci;
+    private static boolean printResult;
 
-    public HTTPCallTool(HTTPMessageConfigInterface hmci, boolean printResult)
-    {
-        this.hmci = hmci;
-        this.printResult = printResult;
-    }
 
-    public void run()
-    {
-        HTTPResponseData rd = null;
-        try
+
+    private static final ConsumerCallback<HTTPResponseData>  callbackResult = new ConsumerCallback<HTTPResponseData>() {
+        @Override
+        public void exception(Exception e)
         {
-            rd = HTTPCall.send(hmci);
-
-        }
-        catch(Exception e)
-        {
+            failCounter.incrementAndGet();
             e.printStackTrace();
             if(e instanceof HTTPCallException)
             {
-                rd = ((HTTPCallException) e).getResponseData();
+                HTTPResponseData rd = ((HTTPCallException) e).getResponseData();
             }
         }
-        if(rd.getStatus() != HTTPStatusCode.OK.CODE)
+
+        @Override
+        public void accept(HTTPResponseData hrd)
         {
-            failCounter.incrementAndGet();
+            if(hrd.getStatus() != HTTPStatusCode.OK.CODE)
+            {
+                failCounter.incrementAndGet();
+            }
+
+            if(printResult) {
+                log.getLogger().info("Total: " + HTTPCall.HTTP_CALLS.getCounts() + " Fail: " + failCounter + " status: " + hrd.getStatus() + " length: " + hrd.getData().length);
+                log.getLogger().info(hrd.getDataAsString());
+            }
         }
+    };
+//    public HTTPCallTool(HTTPMessageConfigInterface hmci)
+//    {
+//        this.hmci = hmci;
+//    }
 
 
-        if(printResult) {
-            log.getLogger().info("Total: " + HTTPCall.HTTP_CALLS.getCounts() + " Fail: " + failCounter + " status: " + rd.getStatus() + " length: " + rd.getData().length);
-            log.getLogger().info(rd.getDataAsString());
-        }
-    }
+
+
+//    public void run()
+//    {
+//        HTTPResponseData rd = null;
+//        try
+//        {
+//            rd = HTTPCall.send(hmci);
+//
+//        }
+//        catch(Exception e)
+//        {
+//            e.printStackTrace();
+//            if(e instanceof HTTPCallException)
+//            {
+//                rd = ((HTTPCallException) e).getResponseData();
+//            }
+//        }
+//        if(rd.getStatus() != HTTPStatusCode.OK.CODE)
+//        {
+//            failCounter.incrementAndGet();
+//        }
+//
+//
+//        if(printResult) {
+//            log.getLogger().info("Total: " + HTTPCall.HTTP_CALLS.getCounts() + " Fail: " + failCounter + " status: " + rd.getStatus() + " length: " + rd.getData().length);
+//            log.getLogger().info(rd.getDataAsString());
+//        }
+//    }
 
     public static void main(String ...args)
     {
@@ -95,7 +126,7 @@ public class HTTPCallTool implements Runnable
             HTTPMethod httpMethod = HTTPMethod.lookup(params.stringValue("-m", "GET"));
             String contentFilename = params.stringValue("-c", true);
             String content = contentFilename != null ? IOUtil.inputStreamToString(contentFilename) : null;
-            boolean printResult = params.nameExists("-pr");
+            printResult = params.nameExists("-pr");
             String proxy = params.stringValue("-p", true);
             int cap = params.intValue("-cap", 0);
             String user = params.stringValue("-user", true);
@@ -128,7 +159,7 @@ public class HTTPCallTool implements Runnable
                 new HTTPCall(hmci).sendRequest();
             }
 
-
+            AsyncHTTPCall<HTTPResponseData> asyncHTTPCall = new AsyncHTTPCall<HTTPResponseData>(callbackResult).setExecutor(TaskUtil.getDefaultTaskProcessor());
             log.getLogger().info("HTTP request counts: " + repeat + " per url");
 
 
@@ -136,8 +167,10 @@ public class HTTPCallTool implements Runnable
 
             for(int i = 0; i < repeat; i++)
             {
-                for(HTTPMessageConfigInterface hmci : hmcis) {
-                    TaskUtil.getDefaultTaskProcessor().execute(new HTTPCallTool(hmci, printResult));
+                for(HTTPMessageConfigInterface hmci : hmcis)
+                {
+                    asyncHTTPCall.asyncSend(hmci);
+                    //TaskUtil.getDefaultTaskProcessor().execute(new HTTPCallTool(hmci));
                 }
             }
             ts = TaskUtil.waitIfBusyThenClose(25) - ts;
