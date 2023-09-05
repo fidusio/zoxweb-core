@@ -18,7 +18,7 @@ public class RateController
     private Const.TimeInMillis tim;
     private long deltaInMillis;
     private long nextTime;
-    private long transactions;
+    private long callCounts;
 
     private RCType type = RCType.TIME;
     private int counter = 0;
@@ -111,9 +111,9 @@ public class RateController
         return deltaInMillis;
     }
 
-    public long getTransactions()
+    public long getCallCounts()
     {
-        return transactions;
+        return callCounts;
     }
 
     /**
@@ -176,7 +176,7 @@ public class RateController
                 break;
         }
 
-        transactions++;
+        callCounts++;
         return delay;
     }
 
@@ -216,7 +216,8 @@ public class RateController
             {
                 deltaInMillis = (long)floatDelta;
             }
-            else {
+            else
+            {
                 deltaInMillis = (long)floatDelta + 1;
             }
             duration = deltaInMillis*(long)rate;
@@ -237,7 +238,7 @@ public class RateController
                 ", unit=" + unit +
                 ", deltaInMillis=" + deltaInMillis +
                 ", nextTime=" + nextTime +
-                ", transactions=" + transactions +
+                ", transactions=" + callCounts +
                 ", type=" + type +
                 ", counter=" + counter +
                 ", counterEndTime=" + counterEndTime +

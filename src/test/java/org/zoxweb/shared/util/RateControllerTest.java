@@ -155,4 +155,18 @@ public class RateControllerTest {
         ts = System.currentTimeMillis() - ts;
         System.out.println(controller.nextDelay() + " delta " + ts);
     }
+
+    @Test
+    public void bellowMillis()
+    {
+        RateController rc = new RateController("BellowMillis", "4000/s");
+        List<Long> list = new ArrayList<>();
+        for (int i=0; i < 1000; i++)
+        {
+            list.add(rc.nextDelay());
+        }
+
+        System.out.println(list);
+        System.out.println(rc);
+    }
 }
