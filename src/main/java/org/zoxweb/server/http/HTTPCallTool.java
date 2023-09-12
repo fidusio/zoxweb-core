@@ -21,14 +21,9 @@ import org.zoxweb.server.logging.LoggerUtil;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.http.*;
-
 import org.zoxweb.shared.net.InetSocketAddressDAO;
 import org.zoxweb.shared.net.ProxyType;
-import org.zoxweb.shared.task.ConsumerCallback;
-import org.zoxweb.shared.util.Const;
-import org.zoxweb.shared.util.ParamUtil;
-import org.zoxweb.shared.util.RateCounter;
-
+import org.zoxweb.shared.util.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,7 +41,7 @@ public final class HTTPCallTool //implements Runnable
 
 
 
-    private static final ConsumerCallback<HTTPResponseData>  callbackResult = new ConsumerCallback<HTTPResponseData>() {
+    private static final HTTPCallBack<Void, byte[]> callback = new HTTPCallBack<Void, byte[]>() {
         @Override
         public void exception(Exception e)
         {
@@ -59,7 +54,7 @@ public final class HTTPCallTool //implements Runnable
         }
 
         @Override
-        public void accept(HTTPResponseData hrd)
+        public void accept(HTTPAPIResult<byte[]> hrd)
         {
             if(hrd.getStatus() != HTTPStatusCode.OK.CODE)
             {
@@ -67,8 +62,8 @@ public final class HTTPCallTool //implements Runnable
             }
 
             if(printResult) {
-                log.getLogger().info("Total: " + HTTPCall.HTTP_CALLS.getCounts() + " Fail: " + failCounter + " status: " + hrd.getStatus() + " length: " + hrd.getData().length);
-                log.getLogger().info(hrd.getDataAsString());
+                log.getLogger().info("Total: " + HTTPCall.HTTP_CALLS.getCounts() + " Fail: " + failCounter + " status: " + hrd.getStatus());
+                log.getLogger().info(SharedStringUtil.toString(hrd.getData()));
             }
         }
     };
@@ -138,7 +133,7 @@ public final class HTTPCallTool //implements Runnable
             log.getLogger().info("proxy: " + proxy);
             InetSocketAddressDAO proxyAddress = proxy != null ? InetSocketAddressDAO.parse(proxy, ProxyType.HTTP) : null;
 
-            List<HTTPMessageConfigInterface> hmcis = new ArrayList<>();
+            List<HTTPAPIEndPoint<Void, byte[]>> endpoints = new ArrayList<>();
             for(String url : urls) {
                 HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit(url, null, httpMethod);
                 hmci.setProxyAddress(proxyAddress);
@@ -154,12 +149,15 @@ public final class HTTPCallTool //implements Runnable
                 if (content != null)
                     hmci.setContent(content);
                 log.getLogger().info(GSONUtil.toJSON((HTTPMessageConfig) hmci, true, false, false));
-                hmcis.add(hmci);
+                HTTPAPIEndPoint<Void, byte[]> endpoint = new HTTPAPIEndPoint<Void, byte[]>(hmci)
+                        .setExecutor(TaskUtil.getDefaultTaskProcessor());
+
+                endpoints.add(endpoint);
                 // vm warmup
                 new HTTPCall(hmci).sendRequest();
             }
 
-            AsyncHTTPCall<HTTPResponseData> asyncHTTPCall = new AsyncHTTPCall<HTTPResponseData>(callbackResult).setExecutor(TaskUtil.getDefaultTaskProcessor());
+
             log.getLogger().info("HTTP request counts: " + repeat + " per url");
 
 
@@ -167,9 +165,9 @@ public final class HTTPCallTool //implements Runnable
 
             for(int i = 0; i < repeat; i++)
             {
-                for(HTTPMessageConfigInterface hmci : hmcis)
+                for(HTTPAPIEndPoint<Void, byte[]>   endPoint : endpoints)
                 {
-                    asyncHTTPCall.asyncSend(hmci);
+                    endPoint.asyncCall(callback);
                     //TaskUtil.getDefaultTaskProcessor().execute(new HTTPCallTool(hmci));
                 }
             }

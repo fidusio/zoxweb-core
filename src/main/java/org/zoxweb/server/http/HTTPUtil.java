@@ -48,6 +48,14 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class HTTPUtil 
 {
+
+	public static final DataDecoder<HTTPResponseData, NVGenericMap> NVGM_DECODER = new DataDecoder<HTTPResponseData, NVGenericMap>() {
+		@Override
+		public NVGenericMap decode(HTTPResponseData input)
+		{
+			return GSONUtil.fromJSONDefault(input.getData(), NVGenericMap.class);
+		}
+	};
 	private static final Lock LOCK = new ReentrantLock();
 	private static final AtomicBoolean extraMethodAdded =  new AtomicBoolean();
 
@@ -1170,10 +1178,10 @@ public class HTTPUtil
 		return hmci;
 	}
 
-	public static <O> HTTPResponseObject<O> toHTTPResponseObject(HTTPResponseData httpResponseData, Class<?> clazz)
+	public static <O> HTTPAPIResult<O> toHTTPResponseObject(HTTPResponseData httpResponseData, Class<?> clazz)
 	{
 		O object = (httpResponseData.getData() != null && clazz != null) ? (O) GSONUtil.fromJSONDefault(httpResponseData.getData(), clazz) : null;
-		return new HTTPResponseObject(httpResponseData.getStatus(), httpResponseData.getHeaders(), object!= null ? object : httpResponseData.getData());
+		return new HTTPAPIResult(httpResponseData.getStatus(), httpResponseData.getHeaders(), object!= null ? object : httpResponseData.getData());
 	}
 
 

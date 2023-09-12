@@ -404,7 +404,7 @@ public class HTTPCall
 		return ret;
 	}
 
-	public static <O> HTTPResponseObject<O> send(HTTPMessageConfigInterface hmci, Class<?> clazz)
+	public static <O> HTTPAPIResult<O> send(HTTPMessageConfigInterface hmci, Class<?> clazz)
 			throws IOException
 	{
 		long ts = System.currentTimeMillis();
@@ -420,7 +420,31 @@ public class HTTPCall
 			HTTP_CALLS.register(ts);
 			throw e;
 		}
-		HTTPResponseObject<O> ret =  HTTPUtil.toHTTPResponseObject(hrd, clazz);
+		HTTPAPIResult<O> ret =  HTTPUtil.toHTTPResponseObject(hrd, clazz);
+		ts = System.currentTimeMillis() - ts;
+		ret.setDuration(ts);
+		HTTP_CALLS.register(ts);
+		return ret;
+	}
+
+	public static <O> HTTPAPIResult<O> send(HTTPMessageConfigInterface hmci, DataDecoder<HTTPResponseData, O> decoder)
+			throws IOException
+	{
+		long ts = System.currentTimeMillis();
+		HTTPResponseData hrd = null;
+		try {
+			hrd = new HTTPCall(hmci).sendRequest();
+		}
+		catch(HTTPCallException e)
+		{
+			ts = System.currentTimeMillis() - ts;
+			if(e.getResponseData() != null)
+				e.getResponseData().setDuration(ts);
+			HTTP_CALLS.register(ts);
+			throw e;
+		}
+		O result = decoder.decode(hrd);
+		HTTPAPIResult<O> ret = new HTTPAPIResult<O>(hrd.getStatus(), hrd.getHeaders(), result) ;
 		ts = System.currentTimeMillis() - ts;
 		ret.setDuration(ts);
 		HTTP_CALLS.register(ts);

@@ -11,5 +11,4 @@ import java.util.function.Supplier;
 public interface ConsumerSupplierCallback<C, S>
         extends ConsumerCallback<C>, Supplier<S>
 {
-    void exception(Exception e);
 }

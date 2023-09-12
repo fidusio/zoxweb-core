@@ -24,7 +24,7 @@ import java.util.Map;
 
 @SuppressWarnings("serial")
 public class HTTPResponseData
-extends HTTPResponseObject<byte[]>
+extends HTTPAPIResult<byte[]>
 	implements Serializable
 
 {

@@ -3,12 +3,7 @@ package org.zoxweb.server.http;
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.logging.LoggerUtil;
 import org.zoxweb.server.task.TaskUtil;
-import org.zoxweb.server.util.GSONUtil;
-import org.zoxweb.shared.http.HTTPMessageConfig;
-import org.zoxweb.shared.http.HTTPMessageConfigInterface;
-import org.zoxweb.shared.http.HTTPMethod;
-import org.zoxweb.shared.http.HTTPResponseData;
-import org.zoxweb.shared.task.ConsumerCallback;
+import org.zoxweb.shared.http.*;
 import org.zoxweb.shared.util.NVGenericMap;
 import org.zoxweb.shared.util.ParamUtil;
 import org.zoxweb.shared.util.RateController;
@@ -21,37 +16,25 @@ public class AsyncHTTPCallTest
     private static final LogWrapper log = new LogWrapper(AsyncHTTPCallTest.class);
     static final AtomicLong error = new AtomicLong();
     static final AtomicLong success = new AtomicLong();
-    private static final ConsumerCallback<NVGenericMap> callback = new ConsumerCallback<NVGenericMap>()
-    {
-
+    private static final HTTPCallBack<Void, NVGenericMap> callback = new HTTPCallBack<Void, NVGenericMap>() {
         @Override
         public void exception(Exception e)
         {
+            e.printStackTrace();
             log.getLogger().info("Error: " + error.incrementAndGet() + e);
         }
 
         @Override
-        public void accept(NVGenericMap nvGenericMap)
+        public void accept(HTTPAPIResult<NVGenericMap> nvGenericMap)
         {
-            log.getLogger().info("*[" + success.incrementAndGet() + "] NVGenericMap Success " + nvGenericMap);
+            log.getLogger().info("*[" + success.incrementAndGet() + "] NVGenericMap Success " + nvGenericMap.getData());
         }
     };
 
 
-    private static final ConsumerCallback<HTTPResponseData> callbackOnly = new ConsumerCallback<HTTPResponseData>()
-    {
-        @Override
-        public void exception(Exception e)
-        {
-            log.getLogger().info("Error: " + error.incrementAndGet() + e);
-        }
 
-        @Override
-        public void accept(HTTPResponseData hrd)
-        {
-            log.getLogger().info("**[" + success.incrementAndGet() + "] HTTPResponseData Success " + hrd.getDataAsString());
-        }
-    };
+
+
 
     public static void main(String ...args)
     {
@@ -64,19 +47,33 @@ public class AsyncHTTPCallTest
             RateController rc = new RateController("test", rate);
             LoggerUtil.enableDefaultLogger("org.zoxweb");
             HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit(url, null, HTTPMethod.GET, false);
-            AsyncHTTPCall<NVGenericMap> asyncHC = new AsyncHTTPCall<NVGenericMap>(callback, GSONUtil.NVGenericMapDecoder)
-                    .setTaskScheduler(rc, TaskUtil.getDefaultTaskScheduler());
-            for(int i =0; i < repeat; i++)
-            {
-                asyncHC.asyncSend(hmci);
-            }
-            AsyncHTTPCall<HTTPResponseData> asyncHRD = new AsyncHTTPCall<HTTPResponseData>(callbackOnly).setExecutor(TaskUtil.getDefaultTaskProcessor());
+
+
+
+            HTTPAPIEndPoint<Void, NVGenericMap> testEndPoint = new HTTPAPIEndPoint<Void, NVGenericMap>(hmci)
+                    .setDataDecoder(HTTPUtil.NVGM_DECODER)
+                    .setExecutor(TaskUtil.getDefaultTaskProcessor())
+                    .setRateController(rc)
+                    .setScheduler(TaskUtil.getDefaultTaskScheduler());
+
+
+
+
 
             ///log.getLogger().info("**************************************************************************************");
             for(int i =0; i < repeat; i++)
             {
-                asyncHRD.asyncSend(hmci, TaskUtil.getDefaultTaskProcessor());
+                testEndPoint.asyncCall(callback);
             }
+
+
+            for(int i =0; i < repeat; i++)
+            {
+                NVGenericMap result = testEndPoint.syncCall(null);
+                System.out.println(result);
+            }
+
+
 
             TaskUtil.waitIfBusyThenClose(100);
 

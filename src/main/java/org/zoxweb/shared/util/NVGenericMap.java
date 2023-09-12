@@ -243,5 +243,61 @@ public class NVGenericMap
 	}
 
 
+	public static NVGenericMap copy(NVGenericMap from, NVGenericMap to, boolean deep)
+	{
+		for(GetNameValue<?> gnv: from.values())
+		{
+			if (deep)
+			{
+				if(gnv instanceof NVPair)
+				{
+					to.add(gnv.getName(), (String)gnv.getValue());
+				}
+				else if(gnv instanceof NVBoolean)
+				{
+					to.add(new NVBoolean(gnv.getName(), ((NVBoolean) gnv).value));
+				}
+				else if(gnv instanceof NVInt)
+				{
+					to.add(new NVInt(gnv.getName(), ((NVInt) gnv).getValue()));
+				}
+				else if(gnv instanceof NVLong)
+				{
+					to.add(new NVLong(gnv.getName(), ((NVLong) gnv).getValue()));
+				}
+				else if(gnv instanceof NVFloat)
+				{
+					to.add(new NVFloat(gnv.getName(), ((NVFloat) gnv).getValue()));
+				}
+				else if(gnv instanceof NVDouble)
+				{
+					to.add(new NVDouble(gnv.getName(), ((NVDouble) gnv).getValue()));
+				}
+				// TO DO must add the rest
+				else if (gnv instanceof NVGenericMap)
+				{
+					to.add(copy((NVGenericMap) gnv, new NVGenericMap(gnv.getName()), deep));
+				}
+				else
+					to.add(gnv);
+			}
+			else
+				to.add(gnv);
+		}
+
+		return to;
+	}
+
+
+	public static NVGenericMap merge(NVGenericMap from, NVGenericMap to)
+	{
+		for(GetNameValue<?> gnv: from.values())
+		{
+			to.add(gnv);
+		}
+		return to;
+	}
+
+
 
 }

@@ -55,13 +55,13 @@ import java.util.logging.Logger;
 public final class GSONUtil
 {
 
-	public static final DataDecoder<byte[], NVGenericMap> NVGenericMapDecoder = new DataDecoder<byte[], NVGenericMap>() {
-		@Override
-		public NVGenericMap decode(byte[] input)
-		{
-			return fromJSONDefault(input, NVGenericMap.class);
-		}
-	};
+//	public static final DataDecoder<byte[], NVGenericMap> NVGenericMapDecoder = new DataDecoder<byte[], NVGenericMap>() {
+//		@Override
+//		public NVGenericMap decode(byte[] input)
+//		{
+//
+//		}
+//	};
 
 
 	private static final Logger log = Logger.getLogger(Const.LOGGER_NAME);
