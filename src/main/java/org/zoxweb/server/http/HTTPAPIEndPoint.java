@@ -2,10 +2,7 @@ package org.zoxweb.server.http;
 
 import org.zoxweb.server.task.TaskSchedulerProcessor;
 import org.zoxweb.shared.http.*;
-import org.zoxweb.shared.util.DataDecoder;
-import org.zoxweb.shared.util.DataEncoder;
-import org.zoxweb.shared.util.NVGenericMap;
-import org.zoxweb.shared.util.RateController;
+import org.zoxweb.shared.util.*;
 
 import java.io.IOException;
 import java.util.concurrent.Executor;
@@ -27,7 +24,7 @@ public class HTTPAPIEndPoint<I,O>
         {
             try
             {
-                HTTPResponseData hrd = HTTPCall.send(merge(dataEncoder != null ? dataEncoder.encode(callback.get()) : null, authorization));
+                HTTPResponseData hrd = HTTPCall.send(createHMCI(callback.get(), authorization));
                 if (dataDecoder != null) {
                     HTTPAPIResult<O> hapir = new HTTPAPIResult<O>(hrd.getStatus(), hrd.getHeaders(), dataDecoder.decode(hrd));
                     callback.accept(hapir);
@@ -46,7 +43,7 @@ public class HTTPAPIEndPoint<I,O>
 
     private HTTPMessageConfigInterface config;
     private RateController rateController;
-    private DataEncoder<I, HTTPMessageConfigInterface> dataEncoder;
+    private BiDataEncoder<HTTPMessageConfigInterface, I, HTTPMessageConfigInterface> dataEncoder;
     private DataDecoder<HTTPResponseData, O> dataDecoder;
     private Executor executor;
     private TaskSchedulerProcessor tsp;
@@ -78,7 +75,7 @@ public class HTTPAPIEndPoint<I,O>
         return this;
     }
 
-    public HTTPAPIEndPoint<I,O> setDataEncoder(DataEncoder<I, HTTPMessageConfigInterface>  dataEncoder)
+    public HTTPAPIEndPoint<I,O> setDataEncoder(BiDataEncoder<HTTPMessageConfigInterface, I, HTTPMessageConfigInterface> dataEncoder)
     {
         this.dataEncoder = dataEncoder;
         return this;
@@ -110,7 +107,7 @@ public class HTTPAPIEndPoint<I,O>
 
     public O syncCall(I input, HTTPAuthorization authorization) throws IOException
     {
-        HTTPResponseData hrd = HTTPCall.send(merge(dataEncoder != null ? dataEncoder.encode(input) : null, authorization));
+        HTTPResponseData hrd = HTTPCall.send(createHMCI(input, authorization));
         if(dataDecoder != null)
             return dataDecoder.decode(hrd);
         else
@@ -118,26 +115,46 @@ public class HTTPAPIEndPoint<I,O>
     }
 
 
-    private HTTPMessageConfigInterface merge(HTTPMessageConfigInterface hmci, HTTPAuthorization authorization)
+
+    protected HTTPMessageConfigInterface createHMCI(I input, HTTPAuthorization authorization)
     {
+        if(dataEncoder != null)
+        {
+            HTTPMessageConfigInterface ret = HTTPMessageConfig.createAndInit(config.getURL(), config.getURI(), config.getMethod(), config.isSecureCheckEnabled());
+            NVGenericMap.copy(config.getHeaders(), ret.getHeaders(), true);
+            NVGenericMap.copy(config.getParameters(), ret.getParameters(), true);
 
-        if(hmci == null)
-            return config;
+            ret = dataEncoder.encode(ret, input);
+            if (authorization != null)
+                ret.setAuthorization(authorization);
 
-        if (config != null) {
-            hmci.setURL(config.getURL());
-            hmci.setURI(config.getURI());
-            hmci.setSecureCheckEnabled(config.isSecureCheckEnabled());
-            hmci.setMethod(config.getMethod());
-            NVGenericMap.merge(config.getHeaders(), hmci.getHeaders());
-            NVGenericMap.merge(config.getParameters(), hmci.getParameters());
+            return ret;
         }
 
-        if (authorization != null)
-            hmci.setAuthorization(authorization);
-
-        return hmci;
+        return config;
     }
+
+//    private HTTPMessageConfigInterface merge(HTTPMessageConfigInterface hmci, HTTPAuthorization authorization)
+//    {
+//
+//        if(hmci == null)
+//            return config;
+//
+//        if (config != null) {
+//            hmci.setURL(config.getURL());
+//            if (hmci.getURI() != null)
+//                hmci.setURI(config.getURI());
+//            hmci.setSecureCheckEnabled(config.isSecureCheckEnabled());
+//            hmci.setMethod(config.getMethod());
+//            NVGenericMap.merge(config.getHeaders(), hmci.getHeaders());
+//            NVGenericMap.merge(config.getParameters(), hmci.getParameters());
+//        }
+//
+//        if (authorization != null)
+//            hmci.setAuthorization(authorization);
+//
+//        return hmci;
+//    }
 
 
     public void asyncCall(HTTPCallBack<I,O> callback)
@@ -164,14 +181,4 @@ public class HTTPAPIEndPoint<I,O>
             throw new IllegalArgumentException("No executor or scheduler found can't execute");
 
     }
-
-
-
-
-
-
-
-
-
-
 }

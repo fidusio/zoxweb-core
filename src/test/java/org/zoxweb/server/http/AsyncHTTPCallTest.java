@@ -4,6 +4,7 @@ import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.logging.LoggerUtil;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.shared.http.*;
+import org.zoxweb.shared.util.BiDataEncoder;
 import org.zoxweb.shared.util.NVGenericMap;
 import org.zoxweb.shared.util.ParamUtil;
 import org.zoxweb.shared.util.RateController;
@@ -42,16 +43,27 @@ public class AsyncHTTPCallTest
         {
             ParamUtil.ParamMap params = ParamUtil.parse("=", args);
             String url = params.stringValue("url");
+            String uri = params.stringValue("uri", null);
             String rate = params.stringValue("rate");
             int repeat = params.intValue("repeat");
             RateController rc = new RateController("test", rate);
             LoggerUtil.enableDefaultLogger("org.zoxweb");
-            HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit(url, null, HTTPMethod.GET, false);
+            HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit(url, uri, HTTPMethod.GET, false);
+            BiDataEncoder<HTTPMessageConfigInterface, Void, HTTPMessageConfigInterface> dataEncoder = new BiDataEncoder<HTTPMessageConfigInterface, Void, HTTPMessageConfigInterface>() {
+                @Override
+                public HTTPMessageConfigInterface encode(HTTPMessageConfigInterface hmci, Void unused) {
 
+                    if("ping".equalsIgnoreCase(hmci.getURI()))
+                        hmci.setURI("ping/detailed");
+
+                    return hmci;
+                }
+            };
 
 
             HTTPAPIEndPoint<Void, NVGenericMap> testEndPoint = new HTTPAPIEndPoint<Void, NVGenericMap>(hmci)
                     .setDataDecoder(HTTPUtil.NVGM_DECODER)
+                    .setDataEncoder(dataEncoder)
                     .setExecutor(TaskUtil.getDefaultTaskProcessor())
                     .setRateController(rc)
                     .setScheduler(TaskUtil.getDefaultTaskScheduler());
