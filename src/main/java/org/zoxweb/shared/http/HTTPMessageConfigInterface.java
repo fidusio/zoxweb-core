@@ -27,14 +27,10 @@ public interface HTTPMessageConfigInterface
 extends ReferenceID<String>, SetName, SetDescription
 {
 	/**
-	 * @return true if mutli part encoding
+	 * @return true if multipart encoding
 	 */
 	boolean isMultiPartEncoding();
 
-	/**
-	 * @param multiPartEncoding true to enable multi part encoding
-	 */
-	//void setMultiPartEncoding(boolean multiPartEncoding);
 	
 	
 	/**
@@ -168,8 +164,8 @@ extends ReferenceID<String>, SetName, SetDescription
 	String getBoundary();
 
 	/**
-	 * This is a optional parameter that is set by the http call 
-	 * in case of mutlitpart post
+	 * This is an optional parameter that is set by the http call
+	 * in case of a multipart post
 	 * @param boundary
 	 */
 	void setBoundary(String boundary);
@@ -195,7 +191,7 @@ extends ReferenceID<String>, SetName, SetDescription
 
 	/**
 	 * If true ssl check will be enabled, if the connection is a secure connection the remote server certificate will be checked.
-	 * If false ssl check will be disabled, this mode should be used for selfsigned server certificate connections
+	 * If false ssl check will be disabled, this mode should be used for a self-signed server certificate connections
 	 * @return true if enabled, false disabled
 	 */
 	boolean isSecureCheckEnabled();

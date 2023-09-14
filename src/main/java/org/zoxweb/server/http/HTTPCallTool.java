@@ -182,6 +182,7 @@ public final class HTTPCallTool //implements Runnable
         {
             e.printStackTrace();
             System.err.println("usage: -url url-value  [-r repeat-count] [-m http method default get] [-c content file name] [-pr true(print result)]");
+            TaskUtil.waitIfBusyThenClose(25);
         }
     }
 

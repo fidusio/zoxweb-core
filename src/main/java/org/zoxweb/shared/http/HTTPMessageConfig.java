@@ -491,49 +491,6 @@ public class HTTPMessageConfig
 
 
 
-//	@Override
-//	public String getUser() {
-//
-//		return lookupValue(Params.USER);
-//	}
-//
-//
-//
-//	/**
-//	 */
-//	@Override
-//	public void setUser(String user)
-//	{
-//
-//		setValue(Params.USER, user);
-//	}
-//
-//
-//
-//	/**
-//	 * @see org.zoxweb.shared.http.HTTPMessageConfigInterface#getPassword()
-//	 */
-//	@Override
-//	public String getPassword() {
-//
-//		return lookupValue(Params.PASSWORD);
-//	}
-//
-//
-//
-//	/**
-//	 * @see org.zoxweb.shared.http.HTTPMessageConfigInterface#setPassword(java.lang.String)
-//	 */
-//	@Override
-//	public void setPassword(String password) {
-//
-//		setValue(Params.PASSWORD, password);
-//
-//	}
-
-	
-
-
 	/**
 	 * @see org.zoxweb.shared.http.HTTPMessageConfigInterface#getAuthorization()
 	 */

@@ -12,6 +12,10 @@ public abstract class HTTPCallBack<I,O>
         set(input);
     }
 
+    public HTTPCallBack()
+    {
+    }
+
     @Override
     public void exception(Exception e) {
        e.printStackTrace();

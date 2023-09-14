@@ -153,6 +153,10 @@ public class HTTPAPIEndPoint<I,O>
             HTTPMessageConfigInterface ret = HTTPMessageConfig.createAndInit(config.getURL(), config.getURI(), config.getMethod(), config.isSecureCheckEnabled());
             NVGenericMap.copy(config.getHeaders(), ret.getHeaders(), true);
             NVGenericMap.copy(config.getParameters(), ret.getParameters(), true);
+            ret.setProxyAddress(config.getProxyAddress());
+            ret.setRedirectEnabled(config.isRedirectEnabled());
+            ret.setHTTPErrorAsException(config.isHTTPErrorAsException());
+            ret.setCharset(config.getCharset());
 
             ret = dataEncoder.encode(ret, input);
             if (authorization != null)
@@ -165,28 +169,6 @@ public class HTTPAPIEndPoint<I,O>
 
         return config;
     }
-
-//    private HTTPMessageConfigInterface merge(HTTPMessageConfigInterface hmci, HTTPAuthorization authorization)
-//    {
-//
-//        if(hmci == null)
-//            return config;
-//
-//        if (config != null) {
-//            hmci.setURL(config.getURL());
-//            if (hmci.getURI() != null)
-//                hmci.setURI(config.getURI());
-//            hmci.setSecureCheckEnabled(config.isSecureCheckEnabled());
-//            hmci.setMethod(config.getMethod());
-//            NVGenericMap.merge(config.getHeaders(), hmci.getHeaders());
-//            NVGenericMap.merge(config.getParameters(), hmci.getParameters());
-//        }
-//
-//        if (authorization != null)
-//            hmci.setAuthorization(authorization);
-//
-//        return hmci;
-//    }
 
 
     public void asyncCall(HTTPCallBack<I,O> callback)
