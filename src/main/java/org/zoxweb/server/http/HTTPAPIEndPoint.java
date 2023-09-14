@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.concurrent.Executor;
 
 public class HTTPAPIEndPoint<I,O>
+
 {
     private class ToRun
             implements Runnable
@@ -47,6 +48,7 @@ public class HTTPAPIEndPoint<I,O>
     private DataDecoder<HTTPResponseData, O> dataDecoder;
     private Executor executor;
     private TaskSchedulerProcessor tsp;
+    private NamedDescription namedDescription = new NamedDescription();
 
 
 
@@ -83,6 +85,31 @@ public class HTTPAPIEndPoint<I,O>
 
 
 
+    public HTTPAPIEndPoint<I,O> setName(String name)
+    {
+        namedDescription.setName(name);
+        return this;
+    }
+
+    public HTTPAPIEndPoint<I,O> setDescription(String desciption)
+    {
+        namedDescription.setDescription(desciption);
+        return this;
+    }
+
+    public String getName()
+    {
+        return namedDescription.getName();
+    }
+
+    public String getDescription()
+    {
+        return namedDescription.getDescription();
+    }
+
+
+
+
     public HTTPAPIEndPoint<I,O> setExecutor(Executor exec)
     {
         this.executor = exec;
@@ -98,20 +125,23 @@ public class HTTPAPIEndPoint<I,O>
 
 
 
-    public O syncCall(I input)
+    public HTTPAPIResult<O> syncCall(I input)
             throws IOException
     {
         return syncCall(input, null);
     }
 
 
-    public O syncCall(I input, HTTPAuthorization authorization) throws IOException
+    public HTTPAPIResult<O> syncCall(I input, HTTPAuthorization authorization) throws IOException
     {
         HTTPResponseData hrd = HTTPCall.send(createHMCI(input, authorization));
-        if(dataDecoder != null)
-            return dataDecoder.decode(hrd);
+        if(dataDecoder != null) {
+            HTTPAPIResult<O> hapir = new HTTPAPIResult<O>(hrd.getStatus(), hrd.getHeaders(), dataDecoder.decode(hrd));
+            return hapir;
+        }
         else
-            return (O) hrd.getData();
+            return (HTTPAPIResult<O>) new HTTPAPIResult<byte[]>(hrd.getStatus(), hrd.getHeaders(), hrd.getData());
+
     }
 
 
@@ -127,6 +157,8 @@ public class HTTPAPIEndPoint<I,O>
             ret = dataEncoder.encode(ret, input);
             if (authorization != null)
                 ret.setAuthorization(authorization);
+            else
+                ret.setAuthorization(config.getAuthorization());
 
             return ret;
         }

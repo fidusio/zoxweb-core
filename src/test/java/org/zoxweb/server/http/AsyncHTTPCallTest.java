@@ -81,7 +81,7 @@ public class AsyncHTTPCallTest
 
             for(int i =0; i < repeat; i++)
             {
-                NVGenericMap result = testEndPoint.syncCall(null);
+                HTTPAPIResult<NVGenericMap> result = testEndPoint.syncCall(null);
                 System.out.println(result);
             }
 

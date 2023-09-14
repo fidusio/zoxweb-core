@@ -365,7 +365,7 @@ public class ParamUtil {
              
         }
 
-        public GetNameValue<String> asNVPair(String name)
+        public NVPair asNVPair(String name)
         {
             List<String> ret = map.get(name);
             if (ret != null && ret.size() > 0)

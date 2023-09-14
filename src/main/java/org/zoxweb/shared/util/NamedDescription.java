@@ -17,7 +17,13 @@ public class NamedDescription
     }
 
 
-    public NamedDescription(String name){
+    public NamedDescription()
+    {
+
+    }
+
+    public NamedDescription(String name)
+    {
         this(name, null);
     }
     public NamedDescription(String name, String description){

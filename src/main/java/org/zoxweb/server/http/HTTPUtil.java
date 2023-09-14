@@ -53,7 +53,7 @@ public class HTTPUtil
 		@Override
 		public NVGenericMap decode(HTTPResponseData input)
 		{
-			return GSONUtil.fromJSONDefault(input.getData(), NVGenericMap.class);
+			return GSONUtil.fromJSONDefault(input.getDataAsString(), NVGenericMap.class, true);
 		}
 	};
 	private static final Lock LOCK = new ReentrantLock();
