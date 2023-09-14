@@ -41,7 +41,7 @@ public final class HTTPCallTool //implements Runnable
 
 
 
-    private static final HTTPCallBack<Void, byte[]> callback = new HTTPCallBack<Void, byte[]>() {
+    private static final HTTPCallBack<Void, byte[]> callback = new HTTPCallBack<Void, byte[]>(null) {
         @Override
         public void exception(Exception e)
         {

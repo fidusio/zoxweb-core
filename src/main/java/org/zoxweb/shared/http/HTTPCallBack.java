@@ -7,7 +7,10 @@ public abstract class HTTPCallBack<I,O>
 {
 
     protected I input;
-
+    public HTTPCallBack(I input)
+    {
+        set(input);
+    }
 
     @Override
     public void exception(Exception e) {
