@@ -25,6 +25,7 @@ public enum HTTPStatusCode
      * 101 Switching Protocol
      */
 	SWITCHING_PROTOCOLS(101, "Switching Protocols"),
+    PROCESSING(102, "Processing"),
     /**
      * 103
      */
@@ -59,6 +60,24 @@ public enum HTTPStatusCode
      * 206 Partial Content
      */
     PARTIAL_CONTENT(206, "Partial Content"),
+    /**
+     * 207
+     */
+    MULTI_STATUS(207, "Multi-Status"),
+    /**
+     * 208
+     */
+    AlREADY_REPORTED(208, "Already Reported"),
+    /**
+     * 226
+     */
+    IM_USED(226, "IM Used"),
+
+
+    /**
+     * 300
+     */
+    MULTIPLE_CHOICES(300, "Multiple Choices"),
 
 
     /**
@@ -85,7 +104,6 @@ public enum HTTPStatusCode
      * 307 Temporary Redirect.
      */
     TEMPORARY_REDIRECT(307, "Temporary Redirect"),
-
     /**
      * 308 Permanent Redirect.
      */
@@ -169,9 +187,21 @@ public enum HTTPStatusCode
      */
     TEAPOT(418, "I'm a teapot"),
     /**
+     * 421
+     */
+    MISDIRECTED_REQUEST(421, "Misdirected Request"),
+    /**
      * 422
      */
-    UPROCESSABLE_ENTITY(422, "Unprocessable Entity"),
+    UNPROCESSABLE_ENTITY(422, " Unprocessable Entity"),
+    /**
+     * 423
+     */
+    LOCKED(423, "Locked"),
+    /**
+     * 424
+     */
+    FAILED_DEPENDENCY(424, "Failed Dependency"),
     /**
      * 425
      */
@@ -248,7 +278,7 @@ public enum HTTPStatusCode
 	
 	;
 	
-	public enum Family {INFORMATIONAL, SUCCESSFUL, REDIRECTION, CLIENT_ERROR, SERVER_ERROR, OTHER};
+	public enum Family {INFORMATIONAL, SUCCESSFUL, REDIRECTION, CLIENT_ERROR, SERVER_ERROR, OTHER}
 	
 	public final int CODE;
 	public final String REASON;
@@ -258,15 +288,6 @@ public enum HTTPStatusCode
 		CODE = value;
 		REASON = reason;
 		FAMILY = familyByCode(value);
-//		switch(CODE/100) 
-//		{
-//        case 1:  FAMILY = Family.INFORMATIONAL; break;
-//        case 2:  FAMILY = Family.SUCCESSFUL; break;
-//        case 3:  FAMILY = Family.REDIRECTION; break;
-//        case 4:  FAMILY = Family.CLIENT_ERROR; break;
-//        case 5:  FAMILY = Family.SERVER_ERROR; break;
-//        default: FAMILY = Family.OTHER; break;
-//		}
 	}
 	
 	public static HTTPStatusCode statusByCode(int val)

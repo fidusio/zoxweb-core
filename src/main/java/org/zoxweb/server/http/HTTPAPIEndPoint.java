@@ -146,6 +146,16 @@ public class HTTPAPIEndPoint<I,O>
 
 
 
+    public void syncCall(HTTPCallBack<I,O> callback, HTTPAuthorization authorization)
+    {
+
+        ToRun toRun = new ToRun(callback, authorization);
+        toRun.run();
+
+    }
+
+
+
     protected HTTPMessageConfigInterface createHMCI(I input, HTTPAuthorization authorization)
     {
         if(dataEncoder != null)
