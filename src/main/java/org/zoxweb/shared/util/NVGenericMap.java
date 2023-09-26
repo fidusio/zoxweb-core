@@ -243,6 +243,12 @@ public class NVGenericMap
 	}
 
 
+
+	public static NVGenericMap copy(NVGenericMap from, boolean deep)
+	{
+		return copy(from, new NVGenericMap(from.getName()), deep);
+	}
+
 	public static NVGenericMap copy(NVGenericMap from, NVGenericMap to, boolean deep)
 	{
 		for(GetNameValue<?> gnv: from.values())
@@ -286,6 +292,38 @@ public class NVGenericMap
 		}
 
 		return to;
+	}
+
+
+
+	public <V extends GetNameValue<?>> V lookup(String fullyQualifiedName)
+	{
+		GetNameValue<?> ret = get(fullyQualifiedName);
+
+		if (ret == null && fullyQualifiedName.indexOf('.') != -1)
+		{
+			String[] subNames = fullyQualifiedName.split("\\.");
+			if (subNames.length > 1)
+			{
+				ret = this;
+				for (int i = 0; i < subNames.length; i++)
+				{
+					if (ret instanceof NVGenericMap)
+						ret = ((NVGenericMap) ret).get(subNames[i]);
+					else if (ret instanceof NVEntity)
+						ret = (((NVEntity) ret).lookup(subNames[i]));
+					else if (ret instanceof NVPairGetNameMap)
+						ret = ((NVPairGetNameMap) ret).get(subNames[i]);
+					else
+						ret = null;
+
+					if (ret == null)
+						break;
+				}
+			}
+		}
+
+		return (V)ret;
 	}
 
 

@@ -62,7 +62,7 @@ public class AsyncHTTPCallTest
 
 
             HTTPAPIEndPoint<Void, NVGenericMap> testEndPoint = new HTTPAPIEndPoint<Void, NVGenericMap>(hmci)
-                    .setDataDecoder(HTTPUtil.NVGM_DECODER)
+                    .setDataDecoder(HTTPAPIBuilder.NVGM_DECODER)
                     .setDataEncoder(dataEncoder)
                     .setExecutor(TaskUtil.getDefaultTaskProcessor())
                     .setRateController(rc)

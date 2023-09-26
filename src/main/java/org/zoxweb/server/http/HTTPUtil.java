@@ -49,13 +49,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class HTTPUtil 
 {
 
-	public static final DataDecoder<HTTPResponseData, NVGenericMap> NVGM_DECODER = new DataDecoder<HTTPResponseData, NVGenericMap>() {
-		@Override
-		public NVGenericMap decode(HTTPResponseData input)
-		{
-			return GSONUtil.fromJSONDefault(input.getDataAsString(), NVGenericMap.class, true);
-		}
-	};
+
 	private static final Lock LOCK = new ReentrantLock();
 	private static final AtomicBoolean extraMethodAdded =  new AtomicBoolean();
 

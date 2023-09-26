@@ -78,7 +78,7 @@ public final class GSONUtil
 			.create();
 
 
-	private final static Gson DEFAULT_GSON_PRIMITIVE_AS_STRING = new GsonBuilder()
+	private final static Gson DEFAULT_GSON_NVGM_PRIMITIVE_AS_STRING = new GsonBuilder()
 			.registerTypeAdapter(NVGenericMap.class, new NVGenericMapPrimitiveAsStringSerDeserializer())
 			.registerTypeHierarchyAdapter(NVEntity.class, new NVEntityNVGMPrimitiveAsStringSerDeserializer())
 			.registerTypeAdapter(Date.class, new DateSerDeserializer())
@@ -247,7 +247,7 @@ public final class GSONUtil
 	public static <T> T fromJSONDefault(String json, Class<T> classOfT, boolean primitiveAsString)
 	{
 		counter.incrementAndGet();
-		T ret = primitiveAsString ? DEFAULT_GSON_PRIMITIVE_AS_STRING.fromJson(json, classOfT) : DEFAULT_GSON.fromJson(json, classOfT);
+		T ret = primitiveAsString ? DEFAULT_GSON_NVGM_PRIMITIVE_AS_STRING.fromJson(json, classOfT) : DEFAULT_GSON.fromJson(json, classOfT);
 		return ret;
 	}
 
@@ -1258,7 +1258,7 @@ public final class GSONUtil
 				}
 				else if (jne.isJsonPrimitive())
 				{
-					ret.add(guessPrimitive(element.getKey(), nvce != null ? nvce.lookup(element.getKey()) : null,(JsonPrimitive) jne, nvgmPrimitiveAsString));
+					ret.add(guessPrimitive(element.getKey(), nvce != null ? nvce.lookup(element.getKey()) : null, (JsonPrimitive) jne, nvgmPrimitiveAsString));
 				}
 				else if (jne.isJsonObject())
 				{
@@ -1458,7 +1458,7 @@ public final class GSONUtil
 
 	}
 	
-	private static NVBase<?> guessPrimitive(String name, NVConfig nvc, JsonPrimitive jp, boolean stringValue)
+	private static NVBase<?> guessPrimitive(String name, NVConfig nvc, JsonPrimitive jp, boolean stringAsValue)
 	{
 
 		GNVType gnvType = nvc != null ? GNVType.toGNVType(nvc) : null;
@@ -1548,8 +1548,10 @@ public final class GSONUtil
 				
 			}
 
-
-			if(stringValue)
+			// if true we will not guess the string value
+			// like parsing a long or guessing a long value as date
+			//
+			if(stringAsValue)
 			{
 				return new NVPair(name, jp.getAsString());
 			}

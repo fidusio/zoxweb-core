@@ -1,15 +1,15 @@
 package org.zoxweb.shared.util;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-
 import org.junit.jupiter.api.Test;
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.data.AddressDAO;
 import org.zoxweb.shared.http.HTTPEndPoint;
 import org.zoxweb.shared.util.SharedBase64.Base64Type;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public class NVGenericMapTest
 {
@@ -51,6 +51,35 @@ public class NVGenericMapTest
 			nvgm = (NVGenericMap) nvgm.get("modem");
 			System.out.println("" + nvgm);
 			System.out.println("state:" + nvgm.getValue("state"));
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+
+
+	@Test
+	public void lookup() throws IOException {
+		try {
+			String json = IOUtil.inputStreamToString(NVGenericMapTest.class.getResourceAsStream("/NVGenericMap.json"), true);
+			NVGenericMap nvgm = GSONUtil.fromJSONDefault(json, NVGenericMap.class);
+			System.out.println(nvgm);
+			String[] lookups = {
+					"properties",
+					"properties.gpios-map",
+					"properties.gpios-init",
+					"properties.gpios-init.modem",
+					"properties.batata",
+					"bean",
+					"bean.batata"
+			};
+
+			for (String lookup: lookups)
+			{
+				System.out.println(lookup + ": " + nvgm.lookup(lookup));
+			}
+
 		}
 		catch(Exception e)
 		{
@@ -123,6 +152,9 @@ public class NVGenericMapTest
 			
 			json = GSONUtil.toJSONDefault(tc);
             System.out.println(json);
+
+
+			System.out.println();
 			
 		}
 		catch(Exception e)
