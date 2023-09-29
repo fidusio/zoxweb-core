@@ -18,13 +18,13 @@ public class RateControllerTest {
 
         TaskUtil.sleep(1000);
 
-        System.out.println(controller + " " + controller.nextDelay());
+        System.out.println(controller + " " + controller.nextWait());
         TaskUtil.sleep(1000);
 
         List<Long> vals = new ArrayList<>();
 
         for(int i = 0; i < 100; i++)
-            vals.add(controller.nextDelay());
+            vals.add(controller.nextWait());
         System.out.println(vals);
 
 
@@ -38,10 +38,10 @@ public class RateControllerTest {
 
         TaskUtil.sleep(500);
 
-        System.out.println(controller + " " + controller.nextDelay()  + " " + (controller.getNextTime() - System.currentTimeMillis()));
+        System.out.println(controller + " " + controller.nextWait()  + " " + (controller.getNextTime() - System.currentTimeMillis()));
 
         TaskUtil.sleep(1100);
-        System.out.println(controller + " " + controller.nextDelay()  + " " + (controller.getNextTime() - System.currentTimeMillis()));
+        System.out.println(controller + " " + controller.nextWait()  + " " + (controller.getNextTime() - System.currentTimeMillis()));
     }
 
     @Test
@@ -51,7 +51,7 @@ public class RateControllerTest {
         List<Long> vals = new ArrayList<>();
         long ts = System.currentTimeMillis();
         for(int i = 0; i < 100; i++)
-            vals.add(controller.nextDelay());
+            vals.add(controller.nextWait());
 
         System.out.println(vals);
 
@@ -65,7 +65,7 @@ public class RateControllerTest {
         System.out.println("Zero Delay: "  + vals);
         System.out.println("Zero Delay: "  + controller);
         ts = System.currentTimeMillis() - ts;
-        System.out.println(controller.nextDelay() + " delta " + ts);
+        System.out.println(controller.nextWait() + " delta " + ts);
 
     }
 
@@ -99,13 +99,13 @@ public class RateControllerTest {
         RateController controller = new RateController("test", "0/min");
         System.out.println(controller);
 
-        IllegalArgumentException e = Assertions.assertThrows(IllegalArgumentException.class, controller::nextDelay);
+        IllegalArgumentException e = Assertions.assertThrows(IllegalArgumentException.class, controller::nextWait);
 
         System.out.println("Exception: " + e + " tps asLong " + controller.getTPSAsLong());
         controller.setRate("1000/min");
         TaskUtil.waitIfBusyThenClose(controller.getDeltaInMillis());
 
-        System.out.println("tps asLong " + controller.getTPSAsLong() + " " + controller.getTPS() + " " + controller.nextDelay() + " " + controller.nextDelay());
+        System.out.println("tps asLong " + controller.getTPSAsLong() + " " + controller.getTPS() + " " + controller.nextWait() + " " + controller.nextWait());
 
 
     }
@@ -134,26 +134,26 @@ public class RateControllerTest {
         List<Long> vals = new ArrayList<>();
         long ts = System.currentTimeMillis();
         for(int i = 0; i < 100; i++)
-            vals.add(controller.nextDelay());
+            vals.add(controller.nextWait());
         System.out.println(vals);
 
 
         TaskUtil.sleep(5000);
         for(int i = 0; i < 100; i++)
-            vals.add(controller.nextDelay());
+            vals.add(controller.nextWait());
 
         System.out.println(vals);
         TaskUtil.sleep(15500);
         vals.clear();
         for(int i = 0; i < 100; i++)
-            vals.add(controller.nextDelay());
+            vals.add(controller.nextWait());
         System.out.println(vals);
 
 
 
 
         ts = System.currentTimeMillis() - ts;
-        System.out.println(controller.nextDelay() + " delta " + ts);
+        System.out.println(controller.nextWait() + " delta " + ts);
     }
 
     @Test
@@ -163,7 +163,7 @@ public class RateControllerTest {
         List<Long> list = new ArrayList<>();
         for (int i=0; i < 1000; i++)
         {
-            list.add(rc.nextDelay());
+            list.add(rc.nextWait());
         }
 
         System.out.println(list);

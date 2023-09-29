@@ -15,7 +15,7 @@ public class RateCounterTest {
         for(int j=0; j<10; j++) {
             long ts = System.currentTimeMillis();
             for (int i = 0; i < 10000; i++) {
-                rateController.nextDelay();
+                rateController.nextWait();
             }
 
             ts = System.currentTimeMillis() - ts;

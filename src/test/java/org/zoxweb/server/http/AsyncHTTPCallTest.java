@@ -9,6 +9,7 @@ import org.zoxweb.shared.util.NVGenericMap;
 import org.zoxweb.shared.util.ParamUtil;
 import org.zoxweb.shared.util.RateController;
 
+import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class AsyncHTTPCallTest
@@ -62,12 +63,16 @@ public class AsyncHTTPCallTest
 
 
             HTTPAPIEndPoint<Void, NVGenericMap> testEndPoint = new HTTPAPIEndPoint<Void, NVGenericMap>(hmci)
-                    .setDataDecoder(HTTPAPIBuilder.NVGM_DECODER)
+                    .setDataDecoder(HTTPAPIManager.NVGM_DECODER)
                     .setDataEncoder(dataEncoder)
                     .setExecutor(TaskUtil.getDefaultTaskProcessor())
                     .setRateController(rc)
-                    .setScheduler(TaskUtil.getDefaultTaskScheduler());
+                    .setScheduler(TaskUtil.getDefaultTaskScheduler())
+                    .setName("test")
+                    .setDomain("domain-test");
 
+
+            HTTPAPIManager.SINGLETON.register(testEndPoint);
 
 
 
@@ -75,19 +80,24 @@ public class AsyncHTTPCallTest
             ///log.getLogger().info("**************************************************************************************");
             for(int i =0; i < repeat; i++)
             {
-                testEndPoint.asyncCall(callback);
+
+                HTTPAPIEndPoint<Void, NVGenericMap> endPoint = HTTPAPIManager.SINGLETON.lookup("domain-test.test");
+                endPoint.asyncCall(callback);
             }
 
 
             for(int i =0; i < repeat; i++)
             {
-                HTTPAPIResult<NVGenericMap> result = testEndPoint.syncCall(null);
+
+                HTTPAPIEndPoint<Void, NVGenericMap> endPoint = HTTPAPIManager.SINGLETON.lookup("domain-test.test");
+                HTTPAPIResult<NVGenericMap> result = endPoint.syncCall(null);
                 System.out.println(result);
             }
 
 
 
             TaskUtil.waitIfBusyThenClose(100);
+            System.out.println(Arrays.toString(HTTPAPIManager.SINGLETON.getAllIDs()));
 
         }
         catch(Exception e)

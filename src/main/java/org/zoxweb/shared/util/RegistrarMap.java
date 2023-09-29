@@ -10,14 +10,6 @@ public class RegistrarMap<K, V, T>
 
     private final Map<K,V> map = new HashMap<>();
 
-//    @Override
-//    public RegistrarMap register(K key, V value)
-//    {
-//        map.put(key, value);
-//        return this;
-//
-//    }
-
     @Override
     public T register(K key, V value)
     {

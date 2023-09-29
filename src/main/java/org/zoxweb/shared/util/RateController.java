@@ -4,7 +4,7 @@ package org.zoxweb.shared.util;
 import java.util.concurrent.TimeUnit;
 
 public class RateController
-    implements GetName
+    implements GetName, WaitTime<RateController>
 {
 
     public enum RCType
@@ -116,11 +116,20 @@ public class RateController
         return callCounts;
     }
 
+
+
+     public RateController get()
+     {
+         return this;
+     }
+
+
+
     /**
      *
      * @return the next delay based on the set rate
      */
-    public synchronized long nextDelay()
+    public synchronized long nextWait()
     {
         if(rate == 0)
         {

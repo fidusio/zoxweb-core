@@ -6,8 +6,10 @@ import org.zoxweb.shared.util.*;
 
 import java.io.IOException;
 import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class HTTPAPIEndPoint<I,O>
+    implements CanonicalID
 
 {
     private class ToRun
@@ -35,7 +37,9 @@ public class HTTPAPIEndPoint<I,O>
                     HTTPAPIResult<byte[]> hapir = new HTTPAPIResult<byte[]>(hrd.getStatus(), hrd.getHeaders(), hrd.getData());
                     callback.accept((HTTPAPIResult<O>) hapir);
                 }
+                successCounter.incrementAndGet();
             } catch (Exception e) {
+                failedCoutner.incrementAndGet();
                 if (callback != null)
                     callback.exception(e);
             }
@@ -49,6 +53,11 @@ public class HTTPAPIEndPoint<I,O>
     private Executor executor;
     private TaskSchedulerProcessor tsp;
     private NamedDescription namedDescription = new NamedDescription();
+    private String domain;
+
+
+    private AtomicLong successCounter = new AtomicLong();
+    private AtomicLong failedCoutner = new AtomicLong();
 
 
 
@@ -83,6 +92,27 @@ public class HTTPAPIEndPoint<I,O>
         return this;
     }
 
+    public String getDomain()
+    {
+        return domain;
+    }
+
+    public HTTPAPIEndPoint<I,O> setDomain(String domain)
+    {
+        domain = SharedStringUtil.trimOrNull(domain);
+        if (domain != null)
+        {
+            if (domain.endsWith("."))
+                domain = domain.substring(0, domain.length() -1);
+        }
+        this.domain = domain;
+        return this;
+    }
+
+    public String toCanonicalID()
+    {
+        return SharedUtil.toCanonicalID(true, '.', domain, getName());
+    }
 
 
     public HTTPAPIEndPoint<I,O> setName(String name)
@@ -135,13 +165,14 @@ public class HTTPAPIEndPoint<I,O>
     public HTTPAPIResult<O> syncCall(I input, HTTPAuthorization authorization) throws IOException
     {
         HTTPResponseData hrd = HTTPCall.send(createHMCI(input, authorization));
-        if(dataDecoder != null) {
-            HTTPAPIResult<O> hapir = new HTTPAPIResult<O>(hrd.getStatus(), hrd.getHeaders(), dataDecoder.decode(hrd));
-            return hapir;
-        }
+        HTTPAPIResult<O> hapir = null;
+        if(dataDecoder != null)
+            hapir = new HTTPAPIResult<O>(hrd.getStatus(), hrd.getHeaders(), dataDecoder.decode(hrd));
         else
-            return (HTTPAPIResult<O>) new HTTPAPIResult<byte[]>(hrd.getStatus(), hrd.getHeaders(), hrd.getData());
+            hapir = (HTTPAPIResult<O>) new HTTPAPIResult<byte[]>(hrd.getStatus(), hrd.getHeaders(), hrd.getData());
 
+        successCounter.incrementAndGet();
+        return hapir;
     }
 
 
@@ -183,12 +214,12 @@ public class HTTPAPIEndPoint<I,O>
 
     public void asyncCall(HTTPCallBack<I,O> callback)
     {
-        asyncCall(callback, null, rateController != null ? rateController.nextDelay() : 0);
+        asyncCall(callback, null, rateController != null ? rateController.nextWait() : 0);
     }
 
     public void asyncCall(HTTPCallBack<I,O> callback, HTTPAuthorization authorization)
     {
-        asyncCall(callback, authorization, rateController != null ? rateController.nextDelay() : 0);
+        asyncCall(callback, authorization, rateController != null ? rateController.nextWait() : 0);
     }
 
 
@@ -204,5 +235,16 @@ public class HTTPAPIEndPoint<I,O>
         else
             throw new IllegalArgumentException("No executor or scheduler found can't execute");
 
+    }
+
+
+    public long successCount()
+    {
+        return successCounter.get();
+    }
+
+    public long failCount()
+    {
+        return failedCoutner.get();
     }
 }

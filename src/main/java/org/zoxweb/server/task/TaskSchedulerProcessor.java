@@ -202,7 +202,7 @@ public class TaskSchedulerProcessor
 	 */
 	public Appointment queue(RateController rateController, Runnable task)
 	{
-		return queue(rateController.nextDelay(), task);
+		return queue(rateController.nextWait(), task);
 	}
 
 	/**

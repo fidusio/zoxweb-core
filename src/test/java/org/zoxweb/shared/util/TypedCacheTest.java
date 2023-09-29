@@ -11,9 +11,9 @@ public class TypedCacheTest {
         TypedCache cache = new TypedCache();
         cache.addObject("RC", new RateController("n1", "10/s"));
         RateController rc =  cache.lookupObject("RC", "n1");
-        rc.nextDelay();
-        rc.nextDelay();
-        rc.nextDelay();
+        rc.nextWait();
+        rc.nextWait();
+        rc.nextWait();
         System.out.println(rc);
         RateController[] rcAll = cache.getValues("RC").toArray(new RateController[0]);
         System.out.println(Arrays.toString(rcAll));
