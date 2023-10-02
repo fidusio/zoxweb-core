@@ -26,5 +26,5 @@ public interface IsEditable {
 	 * Checks if property is editable.
 	 * @return true if editable
 	 */
-	public boolean isEditable(); 
+	boolean isEditable();
 }

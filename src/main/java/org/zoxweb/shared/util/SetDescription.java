@@ -27,6 +27,6 @@ public interface SetDescription
 	 * Set description property.
 	 * @param str
 	 */
-	public void setDescription(String str);
+	void setDescription(String str);
 
 }

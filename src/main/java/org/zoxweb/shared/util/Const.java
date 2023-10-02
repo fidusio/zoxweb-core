@@ -15,7 +15,6 @@
  */
 package org.zoxweb.shared.util;
 
-import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.shared.db.QueryMarker;
 
 import java.util.Date;
@@ -54,6 +53,8 @@ public class Const {
     VER_17("17", "17", 61, 0),
     VER_18("18", "18", 62, 0),
     VER_19("19", "19", 63, 0),
+    VER_20("20", "20", 64, 0),
+    VER_21("21", "21", 65, 0),
     ;
 
     public final String VERSION;
@@ -933,22 +934,23 @@ public class Const {
 
 
   public enum GNVType
-      implements GetName {
-    NVBLOB("byte[]"),
-    NVBOOLEAN("boolean"),
-    NVINT("int"),
-    NVLONG("long"),
-    NVFLOAT("float"),
-    NVDOUBLE("double"),
-//		NVString("String"),
-//    NVDATE("date"),
-
+      implements GetName,
+                 GetMetaType
+  {
+    NVBLOB("byte[]", byte[].class),
+    NVBOOLEAN("boolean", boolean.class),
+    NVINT("int", int.class),
+    NVLONG("long", long.class),
+    NVFLOAT("float", float.class),
+    NVDOUBLE("double", double.class),
     ;
 
     private final String name;
+    private final Class<?> clazz;
 
-    GNVType(String name) {
+    GNVType(String name, Class<?> clazz) {
       this.name = name;
+      this.clazz = clazz;
     }
 
     public String getName() {
@@ -974,7 +976,7 @@ public class Const {
 
 
     public static GNVTypeName toGNVTypeName(char sep, String name) {
-      String[] tokens = name.split("\\" + sep);
+      String[] tokens = name.split(new StringBuilder().append('\\').append(sep).toString());
       if (tokens.length > 1) {
         GNVType type = SharedUtil.lookupEnum(tokens[0], GNVType.values());
         if (type != null) {
@@ -1068,6 +1070,10 @@ public class Const {
 
     }
 
+    @Override
+    public Class<?> getMetaType() {
+      return clazz;
+    }
   }
 
   public enum DayOfWeek

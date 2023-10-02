@@ -22,6 +22,6 @@ public interface SetValueFilter<I, O>
     extends GetValueFilter<I, O>
 {
 
-	public void setValueFilter(ValueFilter<I,O> valueFilter);
+	void setValueFilter(ValueFilter<I,O> valueFilter);
 
 }

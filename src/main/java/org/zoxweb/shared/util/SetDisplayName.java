@@ -27,6 +27,6 @@ public interface SetDisplayName
 	 * Set display name property.
 	 * @param displayName
 	 */
-	public void setDisplayName(String displayName);
+	void setDisplayName(String displayName);
 
 }

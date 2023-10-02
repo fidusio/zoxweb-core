@@ -15,13 +15,9 @@
  */
 package org.zoxweb.shared.util;
 
-import java.io.Serializable;
-
 import org.zoxweb.shared.filters.SetValueFilter;
-import org.zoxweb.shared.util.SetDescription;
-import org.zoxweb.shared.util.SetDisplayName;
-import org.zoxweb.shared.util.SetEditable;
-import org.zoxweb.shared.util.SetMandatory;
+
+import java.io.Serializable;
 
 /**
  * The NVConfig interface declares methods to set and return the meta type
@@ -37,6 +33,7 @@ public interface NVConfig
 	extends	SetName,
 			SetDescription,
 			SetMandatory,
+			SetMetaType,
 			SetEditable,
 			SetDisplayName,
 			SetUnique,
@@ -44,47 +41,23 @@ public interface NVConfig
 			SetValueFilter,
 			Serializable
 {
-	/**
-	 * Returns the class type of NVConfig.
-	 * @return class meta type
-	 */
-	public Class<?> getMetaType();
-	
-	/**
-	 * @return base meta type if the meta type is array
-	 */
-	public Class<?> getMetaTypeBase();
-	
-	
-	public void setArray(boolean array);
-	public boolean isArray();
-	
-	public boolean isEnum();
-	
-	public boolean isTypeReferenceID();
-	
-	public boolean isStatic();
-	
-	public void setTypeReferenceID(boolean type);
 
-	/**
-	 * Sets the class type of NVConfig.
-	 * @param type is of generic class type
-	 */
-	public void setMetaType(Class<?> type);
 	
 	/**
-	 * Returns the value filter.
-	 * @return
+	 * @return base meta type if the meta type is an array
 	 */
-	//public ValueFilter<?,?> getValueFilter();
+	Class<?> getMetaTypeBase();
 	
-	/**
-	 * This method sets the value filter.
-	 * @param vf is of type ValueFilter interface which 
-	 * takes the following parameters: input value and an 
-	 * output filtered value
-	 */
-	//public void setValueFilter(ValueFilter<?,?> vf);
 	
+	void setArray(boolean array);
+	boolean isArray();
+	
+	boolean isEnum();
+	
+	boolean isTypeReferenceID();
+	
+	boolean isStatic();
+	
+	void setTypeReferenceID(boolean type);
+
 }

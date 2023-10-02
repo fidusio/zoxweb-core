@@ -16,6 +16,8 @@ public class GNVTypeName
 	}
 
 
+
+
 	@Override
 	public String getName() {
 		// TODO Auto-generated method stub
@@ -25,5 +27,13 @@ public class GNVTypeName
 	public GNVType getType()
 	{
 		return type;
+	}
+
+	@Override
+	public String toString() {
+		return "GNVTypeName{" +
+				"type=" + type +
+				", name='" + name + '\'' +
+				'}';
 	}
 }

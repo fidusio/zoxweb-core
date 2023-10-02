@@ -27,6 +27,6 @@ public interface SetEditable
 	 * Set editable property.
 	 * @param val
 	 */
-	public void setEditable(boolean val);
+	void setEditable(boolean val);
 
 }

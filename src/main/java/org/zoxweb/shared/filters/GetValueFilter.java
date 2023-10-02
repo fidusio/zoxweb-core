@@ -18,6 +18,6 @@ package org.zoxweb.shared.filters;
 public interface GetValueFilter<I, O>
 {
 
-	public ValueFilter<I,O> getValueFilter();
+	ValueFilter<I,O> getValueFilter();
 
 }

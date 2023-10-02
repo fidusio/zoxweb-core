@@ -25,6 +25,6 @@ public interface IsUnique
 	 * Check if value is unique within its set.
 	 * @return true if unique
 	 */
-	public boolean isUnique();
+	boolean isUnique();
 
 }
