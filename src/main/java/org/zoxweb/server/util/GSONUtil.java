@@ -79,6 +79,7 @@ public final class GSONUtil
 
 
 	private final static Gson DEFAULT_GSON_NVGM_PRIMITIVE_AS_STRING = new GsonBuilder()
+
 			.registerTypeAdapter(NVGenericMap.class, new NVGenericMapPrimitiveAsStringSerDeserializer())
 			.registerTypeHierarchyAdapter(NVEntity.class, new NVEntityNVGMPrimitiveAsStringSerDeserializer())
 			.registerTypeAdapter(Date.class, new DateSerDeserializer())
@@ -104,7 +105,7 @@ public final class GSONUtil
       public JsonElement serialize(NVGenericMap src, Type typeOfSrc,
           JsonSerializationContext context) {
         // TODO Auto-generated method stub
-       
+
         
         JsonTreeWriter jtw = new JsonTreeWriter();
         try {
@@ -126,6 +127,23 @@ public final class GSONUtil
       }
 	  
 	}
+
+//	public static class MetaTypeInterfaceSerDeserializer
+//		implements JsonSerializer<MetaTypeInterface>, JsonDeserializer<MetaTypeInterface>
+//	{
+//
+//		@Override
+//		public MetaTypeInterface deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
+//			System.out.println("deserialize :" + jsonElement);
+//			return null;
+//		}
+//
+//		@Override
+//		public JsonElement serialize(MetaTypeInterface metaTypeInterface, Type type, JsonSerializationContext jsonSerializationContext) {
+//			System.out.println("serialize :" + metaTypeInterface);
+//			return null;
+//		}
+//	}
 
 	public static class NVGenericMapPrimitiveAsStringSerDeserializer implements JsonSerializer<NVGenericMap>,JsonDeserializer<NVGenericMap>
 	{

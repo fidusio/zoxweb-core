@@ -45,7 +45,7 @@ public class APIAppManagerProvider
     private volatile APISecurityManager<?> apiSecurityManager;
 
     //private HashMap<String, SubjectAPIKey> cache = new HashMap<String, SubjectAPIKey>();
-	private static final LogWrapper log = new LogWrapper(APIAppManagerProvider.class);
+	public static final LogWrapper log = new LogWrapper(APIAppManagerProvider.class);
 	private static final NVConfigEntity[] USER_NVCs =
 		{
 			UserIDCredentialsDAO.NVC_USER_ID_CREDENTIALS_DAO,

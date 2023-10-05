@@ -30,7 +30,7 @@ public class HTTPRequestAttributes
     public static final String HRA = "HRA";
 
 	//private final List<GetNameValue<String>> headers;
-	private final NVPairGetNameMap headers;
+	private final NVGenericMap  headers;
 	private final NVGetNameValueList parameters;
 	//private final List<GetNameValue<String>> parameters;
 	
@@ -102,7 +102,11 @@ public class HTTPRequestAttributes
 	    this.uri = uri;
 		this.pathInfo = pathInfo;
 		this.isMultiPart = isMultiPart;
-		this.headers = new NVPairGetNameMap("headers", headers);
+		this.headers = new NVGenericMap("headers");
+		for (GetNameValue<String> gnvs: headers)
+		{
+			this.headers.add(gnvs);
+		}
 		this.parameters = new NVGetNameValueList ("parameters", parameters);
 		this.streamList = streamList;
 		this.content = content;
@@ -157,7 +161,7 @@ public class HTTPRequestAttributes
 	 * 
 	 * @return the headers
 	 */
-	public ArrayValues<GetNameValue<String>> getHeaders()
+	public ArrayValues<GetNameValue<?>> getHeaders()
 	{
 		return headers;
 	}

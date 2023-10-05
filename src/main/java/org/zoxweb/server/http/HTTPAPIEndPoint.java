@@ -50,8 +50,8 @@ public class HTTPAPIEndPoint<I,O>
     private RateController rateController;
     private BiDataEncoder<HTTPMessageConfigInterface, I, HTTPMessageConfigInterface> dataEncoder;
     private DataDecoder<HTTPResponseData, O> dataDecoder;
-    private Executor executor;
-    private TaskSchedulerProcessor tsp;
+    private transient Executor executor;
+    private transient TaskSchedulerProcessor tsp;
     private NamedDescription namedDescription = new NamedDescription();
     private String domain;
 

@@ -112,16 +112,16 @@ public class NVPairGetNameMap
 	 * @see org.zoxweb.shared.util.ArrayValues#add(java.lang.Object[], boolean)
 	 */
 	@Override
-	public void add(GetNameValue<String>[] vals, boolean clear) 
+	public void add(GetNameValue<String>[] values, boolean clear)
 	{
 		if (clear)
 		{
 		    clear();
 		}
 		
-		if (vals != null)
+		if (values != null)
 		{
-			for (GetNameValue<String> nvp : vals)
+			for (GetNameValue<String> nvp : values)
 			{
 				add(nvp);
 			}

@@ -1,5 +1,7 @@
 package org.zoxweb.server.http;
 
+import org.zoxweb.server.logging.LogWrapper;
+import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.http.HTTPMessageConfigInterface;
 import org.zoxweb.shared.http.HTTPResponseData;
@@ -10,22 +12,65 @@ import java.util.*;
 public final class HTTPAPIManager
 {
 
+
+    public static final LogWrapper log = new LogWrapper(HTTPAPIManager.class);
+
     public static final HTTPAPIManager SINGLETON = new HTTPAPIManager();
     private final Map<String, HTTPAPIEndPoint<?,?>> map = new LinkedHashMap<String, HTTPAPIEndPoint<?,?>>();
 
 
-    public static final DataDecoder<HTTPResponseData, NVGenericMap> NVGM_DECODER = new DataDecoder<HTTPResponseData, NVGenericMap>() {
-        @Override
-        public NVGenericMap decode(HTTPResponseData input)
-        {
-            return GSONUtil.fromJSONDefault(input.getDataAsString(), NVGenericMap.class, true);
-        }
-    };
+    public static final DataDecoder<HTTPResponseData, NVGenericMap> NVGM_DECODER = (input)->
+            GSONUtil.fromJSONDefault(input.getDataAsString(), NVGenericMap.class, true);
+
+
+
 
 
     private HTTPAPIManager()
     {
 
+    }
+
+
+    public HTTPAPIEndPoint<NVGenericMap, NVGenericMap> buildEndPoint(NVGenericMap nvgm) throws ClassNotFoundException {
+        HTTPMessageConfigInterface config = nvgm.getValue("hmci_config");
+        String domain = nvgm.getValue("domain");
+        NVGenericMap encoderMeta = (NVGenericMap) nvgm.get("data_encoder");
+        if(log.isEnabled())
+        {
+            log.getLogger().info("encoder config: " + encoderMeta);
+            log.getLogger().info("domain: " + domain);
+            log.getLogger().info("hmci: " + config);
+        }
+
+        HTTPNVGMBiEncoder encoder = buildCodec(encoderMeta);//(HTTPNVGMBiEncoder) GSONUtil.fromJSONDefault(json, Class.forName(metaType));
+        DataDecoder decoder = buildCodec((NVGenericMap)nvgm.get("data_decoder"));
+        NVGenericMap nvgmRateController = (NVGenericMap)nvgm.get("rate_controller");
+        RateController rateController = null;
+        if (nvgmRateController != null)
+        {
+            rateController = new RateController(nvgmRateController.getValue("name"), nvgmRateController.getValue("rate"));
+        }
+
+        return HTTPAPIManager.SINGLETON.buildEndPoint(config, encoder, decoder)
+                .setRateController(rateController)
+                .setScheduler(TaskUtil.getDefaultTaskScheduler())
+                .setDomain(domain);
+    }
+
+
+    public <V extends Codec> V buildCodec(NVGenericMap nvgm) throws ClassNotFoundException
+    {
+        GetNameValue<String> id = nvgm.lookup("id");
+        if (id != null)
+        {
+            if ("NVGM_DECODER".equals(id.getValue()))
+                return (V) NVGM_DECODER;
+        }
+
+        String metaType = nvgm.getValue("meta_type");
+        String json = nvgm.getValue("content");
+        return (V)GSONUtil.fromJSONDefault(json, Class.forName(metaType));
     }
 
 
