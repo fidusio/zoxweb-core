@@ -961,6 +961,22 @@ public class SharedUtil
 		return map.get(key);
 	}
 
+	public static <K,V> V lookupMapSmart(Map<K,V> map, K key)
+	{
+		V ret = map.get(key);
+		if(ret == null && key != null && key instanceof String)
+		{
+			String keyAsString = (String) key;
+			ret = map.get(keyAsString.toLowerCase());
+			if (ret == null)
+			{
+				ret = map.get(keyAsString.toUpperCase());
+			}
+		}
+
+		return ret;
+	}
+
 	@SuppressWarnings("unchecked")
 	public static  <V> List<V> search(GetName[] list, String... name)
     {
