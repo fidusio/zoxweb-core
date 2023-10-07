@@ -69,7 +69,13 @@ public final class HTTPAPIManager
         }
 
         String metaType = nvgm.getValue("meta_type");
-        String json = nvgm.getValue("content");
+
+        // since content by default will be processed as NVGenericMap
+        NVGenericMap content = nvgm.lookup("content");
+        // reconvert content as string
+        String json = GSONUtil.toJSONDefault(content);
+
+        // convert json string to actual codec
         return (V)GSONUtil.fromJSONDefault(json, Class.forName(metaType));
     }
 
