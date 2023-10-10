@@ -151,7 +151,6 @@ public class HTTPMessageConfig
 	 * The parameters sequence should be preserved during invocation 
 	 * @return parameters 
 	 */
-	@SuppressWarnings("unchecked")
 	public NVGenericMap getParameters()
 	{
 		return (NVGenericMap) lookup(Params.PARAMETERS);
@@ -170,7 +169,7 @@ public class HTTPMessageConfig
 	public synchronized void setParameters(List<GetNameValue<String>> params) 
 	{
 		ArrayValues<GetNameValue<String>> parameters = ((ArrayValues<GetNameValue<String>>)lookup(Params.PARAMETERS));
-		if (params == null || params.size() == 0)
+		if (params == null || params.isEmpty())
 		{
 			parameters.clear();
 			return;
@@ -186,7 +185,6 @@ public class HTTPMessageConfig
 	 * Set the HTTP request parameters
 	 * @return headers
 	 */
-	@SuppressWarnings("unchecked")
 	public NVGenericMap getHeaders()
 	{
 		return (NVGenericMap) lookup(Params.HEADERS);
@@ -248,7 +246,7 @@ public class HTTPMessageConfig
 	
 	/**
 	 * Set the URI extension
-	 * @param uri
+	 * @param uri part of the request or path
 	 */
 	public void setURI(String uri) 
 	{
@@ -348,20 +346,7 @@ public class HTTPMessageConfig
 		ret.setSecureCheckEnabled(sslCheck);
 		return ret;
 	}
-	
-//	@Override
-//	public String toString() 
-//	{
-//		return "HTTPCallConfig [isMultiPartEncoding()=" + isMultiPartEncoding()
-//				+ ", getParameters()=" + getParameters() + ", getMethod()="
-//				+ getMethod() + ", getURI()=" + getURI() + ", getURL()="
-//				+ getURL() + ", getHeaderParameters()=" + getHeaderParameters()
-//				+ ", getContent()=" + (getContent() != null ? new String(getContent()) : "null")
-//				+ ", getBoundary()=" + getBoundary() + ", getName()="
-//				+ getName() + ", isRedirectEnabled()=" + isRedirectEnabled()
-//				+ ", getConnectTimeout()=" + getConnectTimeout()
-//				+ ", getReadTimeout()=" + getReadTimeout() + "]";
-//	}
+
 	
 	
 	
@@ -557,7 +542,7 @@ public class HTTPMessageConfig
 	public void setContentType(String contentType)
 	{
 		
-		getHeaders().add(HTTPHeader.toHTTPHeader(HTTPHeader.CONTENT_TYPE, contentType));
+		getHeaders().add(HTTPConst.toHTTPHeader(HTTPHeader.CONTENT_TYPE, contentType));
 	}
 
 	@Override
@@ -566,23 +551,25 @@ public class HTTPMessageConfig
 	}
 
 	@Override
-	public void setAccept(String accept) {
-		getHeaders().add(HTTPHeader.toHTTPHeader(HTTPHeader.ACCEPT, accept));
+	public void setAccept(String ...accept) {
+		getHeaders().add(HTTPConst.toHTTPHeader(HTTPHeader.ACCEPT, accept));
 	}
 
 	@Override
-	public void setAccept(GetValue<String> accept) {
-		getHeaders().add(HTTPHeader.toHTTPHeader(HTTPHeader.ACCEPT, accept));
+	public void setAccept(GetValue<String> ...accept) {
+		getHeaders().add(HTTPConst.toHTTPHeader(HTTPHeader.ACCEPT, accept));
 	}
+
 
 	/**
-	 * @see org.zoxweb.shared.http.HTTPMessageConfigInterface#setContentType(org.zoxweb.shared.util.GetValue)
+	 * Set the content type
+	 * @param contentType
 	 */
 	@Override
-	public void setContentType(GetValue<String> contentType)
+	public void setContentType(GetValue<String> ...contentType)
 	{
 		
-		getHeaders().add(HTTPHeader.toHTTPHeader(HTTPHeader.CONTENT_TYPE, contentType));
+		getHeaders().add(HTTPConst.toHTTPHeader(HTTPHeader.CONTENT_TYPE, contentType));
 	}
 
 
@@ -606,7 +593,7 @@ public class HTTPMessageConfig
 	public void setCookie(String cookieValue)
 	{
 		
-		getHeaders().add(HTTPHeader.toHTTPHeader(HTTPHeader.COOKIE, cookieValue));
+		getHeaders().add(HTTPConst.toHTTPHeader(HTTPHeader.COOKIE, cookieValue));
 	}
 
 
@@ -618,7 +605,7 @@ public class HTTPMessageConfig
 	public void setCookie(GetValue<String> cookieValue)
 	{
 		
-		getHeaders().add(HTTPHeader.toHTTPHeader(HTTPHeader.COOKIE, cookieValue));
+		getHeaders().add(HTTPConst.toHTTPHeader(HTTPHeader.COOKIE, cookieValue));
 		
 	}
 
@@ -661,7 +648,7 @@ public class HTTPMessageConfig
 		}
 		else
 		{
-			getHeaders().add(HTTPHeader.toHTTPHeader(HTTPHeader.CONTENT_LENGTH, "" + length));
+			getHeaders().add(HTTPConst.toHTTPHeader(HTTPHeader.CONTENT_LENGTH, "" + length));
 		}
 		
 	}
@@ -680,7 +667,6 @@ public class HTTPMessageConfig
 	@Override
 	public void setHTTPVersion(String version)
 	{
-		
 		setHTTPVersion(HTTPVersion.lookup(version));
 	}
 
@@ -689,14 +675,12 @@ public class HTTPMessageConfig
 	@Override
 	public void setHTTPVersion(HTTPVersion version) 
 	{
-		
 		setValue(Params.HTTP_VERSION, version);
 	}
 	
 	@Override
 	public HTTPStatusCode getHTTPStatusCode()
 	{
-		
 		return lookupValue(Params.HTTP_STATUS_CODE);
 	}
 
@@ -717,7 +701,6 @@ public class HTTPMessageConfig
 	@Override
 	public void setHTTPStatusCode(HTTPStatusCode hStatus) 
 	{
-		
 		setValue(Params.HTTP_STATUS_CODE, hStatus);
 	}
 
@@ -726,33 +709,118 @@ public class HTTPMessageConfig
 
 
 	@Override
-	public String getReason() {
-		
+	public String getReason()
+	{
 		return lookupValue(Params.REASON);
 	}
 
 
 
 	@Override
-	public void setReason(String reason) {
-		
+	public void setReason(String reason)
+	{
 		setValue(Params.REASON, reason);
 	}
 
 
 
 	@Override
-	public boolean isURLEncodingEnabled() {
-		// TODO Auto-generated method stub
+	public boolean isURLEncodingEnabled()
+	{
 		return  lookupValue(Params.ENABLE_ENCODING);
 	}
 
 
 
 	@Override
-	public void setURLEncodingEnabled(boolean value) {
-		// TODO Auto-generated method stub
+	public void setURLEncodingEnabled(boolean value)
+	{
 		setValue(Params.ENABLE_ENCODING, value);
 	}
 
+
+	public void setUserAgent(String ...userAgent)
+	{
+		getHeaders().add(HTTPConst.toHTTPHeader(HTTPHeader.USER_AGENT, userAgent));
+	}
+
+	public String getUserAgent()
+	{
+		return getHeaders().getValue(HTTPHeader.USER_AGENT);
+	}
+
+
+	public HTTPMessageConfigInterface setHeader(String headerName, String ...values)
+	{
+		getHeaders().add(HTTPConst.toHTTPHeader(headerName, values));
+		return this;
+	}
+
+	public HTTPMessageConfigInterface setHeader(String headerName, GetValue<String> ...values)
+	{
+		getHeaders().add(HTTPConst.toHTTPHeader(headerName, values));
+		return this;
+	}
+
+	public HTTPMessageConfigInterface setHeader(GetName headerName, String ...values)
+	{
+		return setHeader(headerName.getName(), values);
+	}
+	public HTTPMessageConfigInterface setHeader(GetName headerName, GetValue<String> ...values)
+	{
+		getHeaders().add(HTTPConst.toHTTPHeader(headerName, values));
+		return this;
+	}
+
+	public <V> HTTPMessageConfigInterface setParameter(String name, V value)
+	{
+		NVGenericMap parameters = getParameters();
+		if (name != null)
+		{
+			if (value != null)
+			{
+				if(value instanceof String)
+				{
+					parameters.add(name, (String) value);
+				}
+				else if (value instanceof Integer)
+				{
+					parameters.add(new NVInt(name, (Integer) value));
+				}
+				else if (value instanceof Long)
+				{
+					parameters.add(new NVLong(name, (Long) value));
+				}
+				else if (value instanceof Boolean)
+				{
+					parameters.add(new NVBoolean(name, (Boolean) value));
+				}
+				else if (value instanceof Float)
+				{
+					parameters.add(new NVFloat(name, (Float) value));
+				}
+				else if (value instanceof Double)
+				{
+					parameters.add(new NVDouble(name, (Double) value));
+				}
+				else if (value instanceof GetNameValue)
+				{
+					if(value instanceof SetName)
+					{
+						((SetName) value).setName(name);
+					}
+					parameters.add((GetNameValue<?>) value);
+				}
+				else
+				{
+					throw new IllegalArgumentException("Unsupported value type " + value.getClass() + " for parameter name: " + name);
+				}
+			}
+			else
+				parameters.add(name, (String)value);
+		}
+
+
+		return this;
+	}
 }

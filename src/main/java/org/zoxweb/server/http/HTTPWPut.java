@@ -147,7 +147,7 @@ public class HTTPWPut
 
 							if (tempFile.exists() && tempFile.isFile())
 							{
-								tempIS  = new BufferedInputStream( new FileInputStream( tempFile));
+								tempIS  = new BufferedInputStream(new FileInputStream( tempFile));
 							}
 
 							multipart = true;

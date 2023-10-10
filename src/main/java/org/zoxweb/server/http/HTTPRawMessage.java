@@ -29,7 +29,6 @@ import java.util.Arrays;
 
 public class HTTPRawMessage 
 {
-	//public final static LogWrapper log = new LogWrapper(HTTPRawMessage.class);
 	private final UByteArrayOutputStream ubaos;
 	private int endOfHeadersIndex = -1;
 	private int parseIndex = 0;

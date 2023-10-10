@@ -1,14 +1,12 @@
 package org.zoxweb.server.http;
 
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.BiConsumer;
-
-import java.util.logging.Logger;
-
 import org.zoxweb.server.net.ssl.SSLCheckDisabler;
-
 import org.zoxweb.shared.http.HTTPMessageConfigInterface;
 import org.zoxweb.shared.http.HTTPResponseData;
+
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiConsumer;
+import java.util.logging.Logger;
 
 public class HTTPWebCaller
 		implements Runnable
@@ -17,7 +15,7 @@ public class HTTPWebCaller
 	public static AtomicInteger SUCCESS_COUNTER = new AtomicInteger();
 	public static AtomicInteger FAILED_COUNTER = new AtomicInteger();
 	
-	private static AtomicInteger counter = new AtomicInteger();
+	private static final AtomicInteger counter = new AtomicInteger();
 	
 	
 	public final int id = counter.incrementAndGet();
@@ -76,21 +74,21 @@ public class HTTPWebCaller
 	
 	
 	
-	public static void waitFor(int count)
-	{
-		do
-		{
-			try 
-			{
-				Thread.sleep(100);
-			} 
-			catch (InterruptedException e)
-			{
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}while (HTTPWebCaller.TOTAL_COUNTER.get() != count);
-	}
+//	public static void waitFor(int count)
+//	{
+//		do
+//		{
+//			try
+//			{
+//				Thread.sleep(100);
+//			}
+//			catch (InterruptedException e)
+//			{
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//		}while (HTTPWebCaller.TOTAL_COUNTER.get() != count);
+//	}
 	
 	
 	

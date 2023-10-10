@@ -44,7 +44,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * Contains HTTP utitlty methods.
+ * Contains HTTP utility functionalities.
  */
 public class HTTPUtil 
 {
@@ -101,7 +101,7 @@ public class HTTPUtil
 	{
 		HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit(null, null, (HTTPMethod) null);
 		hmci.setHTTPStatusCode(statusCode);
-		hmci.setContentType(HTTPMediaType.APPLICATION_JSON.format(HTTPConst.CHARSET_UTF_8));
+		hmci.setContentType(HTTPMediaType.APPLICATION_JSON, HTTPConst.CHARSET_UTF_8);
 		return hmci;
 	}
 
@@ -110,7 +110,7 @@ public class HTTPUtil
 	{
 		HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit(null, null, (HTTPMethod) null);
 		hmci.setHTTPStatusCode(statusCode);
-		hmci.setContentType(HTTPMediaType.APPLICATION_JSON.format(HTTPConst.CHARSET_UTF_8));
+		hmci.setContentType(HTTPMediaType.APPLICATION_JSON, HTTPConst.CHARSET_UTF_8);
 		hmci.setContent(GSONUtil.toJSON(nve,false, false, true));
 		return hmci;
 	}
@@ -132,7 +132,7 @@ public class HTTPUtil
 	{
 		HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit(null, null, (HTTPMethod) null);
 		hmci.setHTTPStatusCode(statusCode);
-		hmci.setContentType(HTTPMediaType.APPLICATION_JSON.format(HTTPConst.CHARSET_UTF_8));
+		hmci.setContentType(HTTPMediaType.APPLICATION_JSON, HTTPConst.CHARSET_UTF_8);
 		hmci.setContent(content);
 		return hmci;
 	}
@@ -142,7 +142,7 @@ public class HTTPUtil
 	{
 		HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit(null, null, (HTTPMethod) null);
 		hmci.setHTTPStatusCode(statusCode);
-		hmci.setContentType(HTTPMediaType.APPLICATION_JSON.format(HTTPConst.CHARSET_UTF_8));
+		hmci.setContentType(HTTPMediaType.APPLICATION_JSON, HTTPConst.CHARSET_UTF_8);
 		hmci.setContent(GSONUtil.toJSONGenericMap(nvgm,false, false, true));
 		return hmci;
 	}

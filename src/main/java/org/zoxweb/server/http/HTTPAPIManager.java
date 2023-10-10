@@ -18,12 +18,8 @@ public final class HTTPAPIManager
     public static final HTTPAPIManager SINGLETON = new HTTPAPIManager();
     private final Map<String, HTTPAPIEndPoint<?,?>> map = new LinkedHashMap<String, HTTPAPIEndPoint<?,?>>();
 
-
     public static final DataDecoder<HTTPResponseData, NVGenericMap> NVGM_DECODER = (input)->
             GSONUtil.fromJSONDefault(input.getDataAsString(), NVGenericMap.class, true);
-
-
-
 
 
     private HTTPAPIManager()
@@ -75,7 +71,7 @@ public final class HTTPAPIManager
         // reconvert content as string
         String json = GSONUtil.toJSONDefault(content);
 
-        // convert json string to actual codec
+        // convert json string to actual codec Object
         return (V)GSONUtil.fromJSONDefault(json, Class.forName(metaType));
     }
 

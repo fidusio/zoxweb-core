@@ -141,10 +141,19 @@ public final class HTTPCallTool //implements Runnable
                     hmci.setBasicAuthorization(user, password);
                 hmci.setHTTPErrorAsException(errorAsException);
 
-                hmci.setContentType(HTTPMediaType.APPLICATION_JSON);
+
+
                 hmci.setSecureCheckEnabled(certCheckEnabled);
                 hmci.setURLEncodingEnabled(false);
                 hmci.setHTTPParameterFormatter(null);
+
+//                hmci.setContentType(HTTPMediaType.APPLICATION_JSON);
+//                hmci.setAccept(HTTPMediaType.APPLICATION_JSON);
+//                hmci.setUserAgent("TiziOuzou", "zib hmar");
+
+                hmci.setContentType(HTTPMediaType.APPLICATION_JSON, HTTPConst.CHARSET_UTF_8);
+                hmci.setHeader(HTTPHeader.ACCEPT, HTTPMediaType.APPLICATION_JSON, HTTPConst.CHARSET_UTF_8)
+                        .setHeader(HTTPHeader.USER_AGENT, "TiziOuzou", "zib hmar");
 
                 if (content != null)
                     hmci.setContent(content);

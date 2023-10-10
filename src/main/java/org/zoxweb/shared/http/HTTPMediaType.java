@@ -66,26 +66,7 @@ public enum HTTPMediaType
 	{
 		return value;
 	}
-	public String format(GetNameValue<String> ...gnvs)
-	{
-		StringBuilder ret = new StringBuilder(value);
-		for (GetNameValue<String> gnv : gnvs)
-		{
-			if(gnv != null && gnv.getValue() != null)
-			{
-				ret.append("; ");
-				if(gnv.getName() != null)
-				{
-					ret.append(gnv.getName());
-					ret.append('=');
-				}
-				ret.append(gnv.getValue());
-			}
-		}
 
-		return ret.toString();
-	}
-	
 	public static HTTPMediaType lookup(String str)
 	{
 		return (HTTPMediaType) SharedUtil.matchingEnumContent(HTTPMediaType.values(), str);

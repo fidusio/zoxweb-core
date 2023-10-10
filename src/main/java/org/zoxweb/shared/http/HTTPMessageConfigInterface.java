@@ -42,7 +42,7 @@ extends ReferenceID<String>, SetName, SetDescription
 
 	/**
 	 * Set the action parameters list
-	 * @param params
+	 * @param params parameters list
 	 */
 	void setParameters(List<GetNameValue<String>> params);
 
@@ -54,13 +54,13 @@ extends ReferenceID<String>, SetName, SetDescription
 	
 	/**
 	 * Set the action type
-	 * @param httpMethod
+	 * @param httpMethod GET, POST ...
 	 */
 	void setMethod(HTTPMethod httpMethod);
 	
 	/**
 	 * Set the action type
-	 * @param httpMethod
+	 * @param httpMethod GET, POST ...
 	 */
 	void setMethod(String httpMethod);
 	
@@ -72,7 +72,7 @@ extends ReferenceID<String>, SetName, SetDescription
 	
 	/**
 	 * Set the URI extension
-	 * @param uri
+	 * @param uri part of the http path
 	 */
 	void setURI(String uri);
 	
@@ -85,7 +85,7 @@ extends ReferenceID<String>, SetName, SetDescription
 	
 	/**
 	 * Set the URL
-	 * @param url
+	 * @param url url part of the http path or the full one
 	 */
 	void setURL(String url);
 
@@ -95,23 +95,27 @@ extends ReferenceID<String>, SetName, SetDescription
 	 */
 	//ArrayValues<GetNameValue<String>> getHeaders();
 
+	/**
+	 *
+	 * @return the header collection
+	 */
 	NVGenericMap getHeaders();
 	//NVGenericMap getHeadersNVGM();
 
 	/**
 	 * Get the HTTP request parameters
-	 * @param headerParams
+	 * @param headerParams the header parameters as list
 	 */
 	void setHeaders(List<GetNameValue<String>> headerParams);
 	
 	/**
-	 * @return true if url encoding is enabled
+	 * @return yhe formatting encoder if available
 	 */
 	HTTPEncoder getHTTPParameterFormatter();
 	
 	/**
 	 * enable url encoding
-	 * @param value
+	 * @param value of hte HTTPEncoder
 	 */
 	void setHTTPParameterFormatter(HTTPEncoder value);
 	
@@ -123,7 +127,7 @@ extends ReferenceID<String>, SetName, SetDescription
 	
 	/**
 	 * enable url encoding
-	 * @param value
+	 * @param value true enable URL Encoding
 	 */
 	void setURLEncodingEnabled(boolean value);
 	
@@ -131,13 +135,13 @@ extends ReferenceID<String>, SetName, SetDescription
 	
 	/**
 	 * Set the request payload or content
-	 * @param payload
+	 * @param payload as bytes of the http message
 	 */
 	void setContent(byte[] payload);
 
 	/**
 	 * Set the request payload or content
-	 * @param payload
+	 * @param payload as string
 	 */
 	void setContent(String payload);
 	
@@ -154,7 +158,7 @@ extends ReferenceID<String>, SetName, SetDescription
 	int getContentLength();
 	/**
 	 * Set the content length
-	 * @param length
+	 * @param length in bytes
 	 */
 	void setContentLength(int length);
 
@@ -166,7 +170,7 @@ extends ReferenceID<String>, SetName, SetDescription
 	/**
 	 * This is an optional parameter that is set by the http call
 	 * in case of a multipart post
-	 * @param boundary
+	 * @param boundary separator for multipart message
 	 */
 	void setBoundary(String boundary);
 	
@@ -177,7 +181,7 @@ extends ReferenceID<String>, SetName, SetDescription
 
 	/**
 	 * If true allow request redirection
-	 * @param redirectEnabled
+	 * @param redirectEnabled true
 	 */
 	void setRedirectEnabled(boolean redirectEnabled);
 	
@@ -198,7 +202,7 @@ extends ReferenceID<String>, SetName, SetDescription
 
 	/**
 	 * Set the ssl check status
-	 * @param sslCheck
+	 * @param sslCheck false ssl check will be disabled, true ssl check will validate the ssl certificate
 	 */
 	void setSecureCheckEnabled(boolean sslCheck);
 
@@ -285,9 +289,9 @@ extends ReferenceID<String>, SetName, SetDescription
 
 
 	String getAccept();
-	void setAccept(String accept);
+	void setAccept(String ...accept);
 
-	void setAccept(GetValue<String> accept);
+	void setAccept(GetValue<String> ...accept);
 	
 	/**
 	 * 
@@ -295,7 +299,7 @@ extends ReferenceID<String>, SetName, SetDescription
 	 * 
 	 * @param contentType
 	 */
-	void setContentType(GetValue<String> contentType);
+	void setContentType(GetValue<String> ...contentType);
 	
 	/**
 	 * Return the Cookie header value
@@ -350,5 +354,28 @@ extends ReferenceID<String>, SetName, SetDescription
 	 * @param errorAsException set the status of http error as exception
 	 */
 	void setHTTPErrorAsException(boolean errorAsException);
+
+
+	/**
+	 * Set the user agent of the caller
+	 * @param userAgent to be set
+	 */
+	void setUserAgent(String ...userAgent);
+
+	/**
+	 * Return the user agent
+	 * @return user agent
+	 */
+	String getUserAgent();
+
+
+	HTTPMessageConfigInterface setHeader(String headerName, String ...values);
+
+	HTTPMessageConfigInterface setHeader(GetName headerName, String ...values);
+
+	HTTPMessageConfigInterface setHeader(String headerName, GetValue<String> ...values);
+
+	HTTPMessageConfigInterface setHeader(GetName headerName, GetValue<String> ...values);
+
 
 }
