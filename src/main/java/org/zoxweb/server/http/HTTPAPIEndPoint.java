@@ -5,6 +5,9 @@ import org.zoxweb.shared.http.*;
 import org.zoxweb.shared.util.*;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -55,6 +58,7 @@ public class HTTPAPIEndPoint<I,O>
     private NamedDescription namedDescription = new NamedDescription();
     private String domain;
 
+    private Map<Integer, HTTPStatusCode> positiveResults = new HashMap<>();
 
     private AtomicLong successCounter = new AtomicLong();
     private AtomicLong failedCoutner = new AtomicLong();
@@ -243,8 +247,55 @@ public class HTTPAPIEndPoint<I,O>
         return successCounter.get();
     }
 
-    public long failCount()
+    public long failedCount()
     {
         return failedCoutner.get();
+    }
+
+
+
+    public HTTPAPIEndPoint<I,O> setPositiveResults(int ...httpStatusCodes) {
+        if (httpStatusCodes != null)
+        {
+            for (int statusCode : httpStatusCodes)
+            {
+                HTTPStatusCode hsc = HTTPStatusCode.statusByCode(statusCode);
+                if (hsc != null)
+                    positiveResults.put(statusCode, hsc);
+            }
+        }
+        return this;
+    }
+
+    public HTTPAPIEndPoint<I,O> setPositiveResults(List<Integer> httpStatusCodes) {
+        if (httpStatusCodes != null)
+        {
+            for (int statusCode : httpStatusCodes)
+            {
+                HTTPStatusCode hsc = HTTPStatusCode.statusByCode(statusCode);
+                if (hsc != null)
+                    positiveResults.put(statusCode, hsc);
+            }
+        }
+        return this;
+    }
+
+    public HTTPAPIEndPoint<I,O> setPositiveResults(HTTPStatusCode ...httpStatusCodes)
+    {
+        if(httpStatusCodes != null)
+        {
+            for (HTTPStatusCode statusCode : httpStatusCodes)
+            {
+                positiveResults.put(statusCode.CODE, statusCode);
+            }
+        }
+        return this;
+    }
+
+
+
+    public HTTPStatusCode lookupPositiveResult(int statusCode)
+    {
+        return positiveResults.get(statusCode);
     }
 }

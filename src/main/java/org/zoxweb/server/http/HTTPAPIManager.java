@@ -48,10 +48,14 @@ public final class HTTPAPIManager
             rateController = new RateController(nvgmRateController.getValue("name"), nvgmRateController.getValue("rate"));
         }
 
+
+
+
         return HTTPAPIManager.SINGLETON.buildEndPoint(config, encoder, decoder)
                 .setRateController(rateController)
                 .setScheduler(TaskUtil.getDefaultTaskScheduler())
-                .setDomain(domain);
+                .setDomain(domain)
+                .setPositiveResults((List<Integer>) nvgm.getValue("positive_result_codes"));
     }
 
 
@@ -85,10 +89,10 @@ public final class HTTPAPIManager
 
     public  HTTPAPIEndPoint<NVGenericMap, NVGenericMap> buildEndPoint(String name,
                                                                       String domain,
-                                                                    String description,
-                                                                    HTTPMessageConfigInterface config,
-                                                                    BiDataEncoder<HTTPMessageConfigInterface, NVGenericMap, HTTPMessageConfigInterface> encoder,
-                                                                    DataDecoder<HTTPResponseData, NVGenericMap> decoder)
+                                                                      String description,
+                                                                      HTTPMessageConfigInterface config,
+                                                                      BiDataEncoder<HTTPMessageConfigInterface, NVGenericMap, HTTPMessageConfigInterface> encoder,
+                                                                      DataDecoder<HTTPResponseData, NVGenericMap> decoder)
     {
         return  new HTTPAPIEndPoint<NVGenericMap, NVGenericMap>(config)
                 .setName(name)

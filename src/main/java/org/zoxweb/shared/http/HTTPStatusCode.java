@@ -294,7 +294,7 @@ public enum HTTPStatusCode
 	{	
 		for(HTTPStatusCode temp :  HTTPStatusCode.values())
 		{
-			if ( val == temp.CODE)
+			if (val == temp.CODE)
 			{
 				return temp;
 			}
