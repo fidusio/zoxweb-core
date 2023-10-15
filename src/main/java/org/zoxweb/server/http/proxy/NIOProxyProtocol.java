@@ -54,10 +54,10 @@ public class NIOProxyProtocol
 
 	private static class RequestInfo
 	{
-		HTTPMessageConfigInterface hmci = null;
+		final HTTPMessageConfigInterface hmci;
 		int payloadIndex = -1;
 		int payloadSent = 0;
-		InetSocketAddressDAO remoteAddress = null;
+		final InetSocketAddressDAO remoteAddress;
 		boolean headerNotSent = true;
 		
 		RequestInfo(HTTPMessageConfigInterface hmci, UByteArrayOutputStream ubaos)
@@ -303,7 +303,6 @@ public class NIOProxyProtocol
 		+ "<HR size=\"4\">\r"
 		+ "<p class=\"i25\"><A HREF=\"http://www.zoxweb.com/\">ProxyNIO</A> HTTP Proxy, Version " + NIO_PROXY
 		+"</p>\r"
-		//+"<p class=\"i25\"><A HREF=\"http://" + localhost + "/\">jHTTPp2 local website</A> <A HREF=\"http://" + localhost + "/" + server.WEB_CONFIG_FILE + "\">Configuration</A></p>"
 		+ "</BODY></HTML>";
 		hcc.setContent(SharedStringUtil.getBytes(msg));
 		

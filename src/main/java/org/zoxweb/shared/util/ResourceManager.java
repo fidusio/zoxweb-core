@@ -81,7 +81,7 @@ public class ResourceManager
 
 	@Override
 	public synchronized Object unregister(Object key) {
-		return (Object) resources.remove(keyMap(key));
+		return resources.remove(keyMap(key));
 	}
 
 	@Override

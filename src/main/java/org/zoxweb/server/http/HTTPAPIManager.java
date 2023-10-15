@@ -10,6 +10,7 @@ import org.zoxweb.shared.util.*;
 import java.util.*;
 
 public final class HTTPAPIManager
+    implements Registrar<String, HTTPAPIEndPoint, HTTPAPIManager>
 {
 
 
@@ -55,7 +56,8 @@ public final class HTTPAPIManager
                 .setRateController(rateController)
                 .setScheduler(TaskUtil.getDefaultTaskScheduler())
                 .setDomain(domain)
-                .setPositiveResults((List<Integer>) nvgm.getValue("positive_result_codes"));
+                .setProperties(nvgm.lookup("properties"));
+//                .setPositiveResults((List<Integer>) nvgm.getValue("positive_result_codes"));
     }
 
 
@@ -108,30 +110,43 @@ public final class HTTPAPIManager
     {
         if (apiEndPoint.toCanonicalID() != null)
         {
+            return register(apiEndPoint.toCanonicalID(), apiEndPoint);
+
+        }
+        return this;
+    }
+
+    @Override
+    public HTTPAPIManager register(String key, HTTPAPIEndPoint value)
+    {
+
+        if (key != null && value != null)
+        {
             synchronized (this)
             {
-                map.put(apiEndPoint.toCanonicalID(), apiEndPoint);
+                map.put(key, value);
             }
         }
 
         return this;
     }
 
-    public HTTPAPIManager unregister(String name)
+    public HTTPAPIEndPoint unregister(String name)
     {
         if (name != null)
         {
             synchronized (this)
             {
-                map.remove(name);
+                return map.remove(name);
             }
         }
 
-        return this;
+        return null;
     }
 
 
-    public HTTPAPIManager unregister(String name, String domain)
+
+    public HTTPAPIEndPoint unregister(String name, String domain)
     {
         domain = SharedStringUtil.trimOrNull(domain);
         if (name != null)
@@ -139,26 +154,21 @@ public final class HTTPAPIManager
             return unregister(domain != null ? SharedUtil.toCanonicalID('.', domain, name) : name);
         }
 
-        return this;
+        return null;
     }
 
 
-    public <I,O> HTTPAPIManager unregister(HTTPAPIEndPoint<I,O> apiEndPoint)
+    public HTTPAPIEndPoint unregister(HTTPAPIEndPoint apiEndPoint)
     {
-        if (apiEndPoint.toCanonicalID() != null)
-        {
-            synchronized (this)
-            {
-                map.remove(apiEndPoint.toCanonicalID(), apiEndPoint);
-            }
-        }
 
-        return this;
+        if (apiEndPoint != null)
+            return unregister(apiEndPoint.toCanonicalID());
+        return null;
     }
 
-    public <I,O> HTTPAPIEndPoint<I,O> lookup(String name)
+    public HTTPAPIEndPoint lookup(String name)
     {
-        return (HTTPAPIEndPoint<I, O>) map.get(name);
+        return map.get(name);
     }
 
     public HTTPAPIEndPoint[] getAll()

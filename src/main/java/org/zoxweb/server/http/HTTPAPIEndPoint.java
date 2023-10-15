@@ -12,7 +12,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class HTTPAPIEndPoint<I,O>
-    implements CanonicalID
+    implements CanonicalID, GetNVProperties
 
 {
     private class ToRun
@@ -62,6 +62,7 @@ public class HTTPAPIEndPoint<I,O>
 
     private AtomicLong successCounter = new AtomicLong();
     private AtomicLong failedCoutner = new AtomicLong();
+    private NVGenericMap properties = new NVGenericMap();
 
 
 
@@ -233,7 +234,9 @@ public class HTTPAPIEndPoint<I,O>
         ToRun toRun = new ToRun(callback, authorization);
 
         if(tsp != null)
+        {
             tsp.queue(delayInMillis, toRun);
+        }
         else if(executor != null)
             executor.execute(toRun);
         else
@@ -267,9 +270,10 @@ public class HTTPAPIEndPoint<I,O>
         return this;
     }
 
-    public HTTPAPIEndPoint<I,O> setPositiveResults(List<Integer> httpStatusCodes) {
+    public synchronized HTTPAPIEndPoint<I,O>  setPositiveResults(List<Integer> httpStatusCodes) {
         if (httpStatusCodes != null)
         {
+            positiveResults.clear();
             for (int statusCode : httpStatusCodes)
             {
                 HTTPStatusCode hsc = HTTPStatusCode.statusByCode(statusCode);
@@ -292,7 +296,21 @@ public class HTTPAPIEndPoint<I,O>
         return this;
     }
 
+    public NVGenericMap getProperties()
+    {
+        return properties;
+    }
 
+    public HTTPAPIEndPoint<I,O> setProperties(NVGenericMap properties)
+    {
+        this.properties = properties;
+        if(properties != null)
+        {
+            setPositiveResults((List<Integer>) properties.getValue("positive_result_codes"));
+        }
+
+        return this;
+    }
 
     public HTTPStatusCode lookupPositiveResult(int statusCode)
     {
