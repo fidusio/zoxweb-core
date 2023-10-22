@@ -387,7 +387,8 @@ public class HTTPCall
 	{
 		long ts = System.currentTimeMillis();
 		HTTPResponseData ret;
-		try {
+		try
+		{
 			ret = new HTTPCall(hmci).sendRequest();
 		}
 		catch(HTTPCallException e)
@@ -409,7 +410,8 @@ public class HTTPCall
 	{
 		long ts = System.currentTimeMillis();
 		HTTPResponseData hrd = null;
-		try {
+		try
+		{
 			hrd = new HTTPCall(hmci).sendRequest();
 		}
 		catch(HTTPCallException e)
@@ -432,7 +434,8 @@ public class HTTPCall
 	{
 		long ts = System.currentTimeMillis();
 		HTTPResponseData hrd = null;
-		try {
+		try
+		{
 			hrd = new HTTPCall(hmci).sendRequest();
 		}
 		catch(HTTPCallException e)
@@ -444,7 +447,7 @@ public class HTTPCall
 			throw e;
 		}
 		O result = decoder.decode(hrd);
-		HTTPAPIResult<O> ret = new HTTPAPIResult<O>(hrd.getStatus(), hrd.getHeaders(), result) ;
+		HTTPAPIResult<O> ret = new HTTPAPIResult<O>(hrd.getStatus(), hrd.getHeaders(), result, hrd.getDuration());
 		ts = System.currentTimeMillis() - ts;
 		ret.setDuration(ts);
 		HTTP_CALLS.register(ts);

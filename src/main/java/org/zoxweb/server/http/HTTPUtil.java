@@ -1175,7 +1175,10 @@ public class HTTPUtil
 	public static <O> HTTPAPIResult<O> toHTTPResponseObject(HTTPResponseData httpResponseData, Class<?> clazz)
 	{
 		O object = (httpResponseData.getData() != null && clazz != null) ? (O) GSONUtil.fromJSONDefault(httpResponseData.getData(), clazz) : null;
-		return new HTTPAPIResult(httpResponseData.getStatus(), httpResponseData.getHeaders(), object!= null ? object : httpResponseData.getData());
+		return new HTTPAPIResult(httpResponseData.getStatus(),
+				httpResponseData.getHeaders(),
+				object!= null ? object : httpResponseData.getData(),
+				httpResponseData.getDuration());
 	}
 
 

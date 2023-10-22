@@ -81,7 +81,7 @@ public abstract class HTTPResponse
 
     /**
      * If set return the total call duration in millis
-     * @return
+     * @return the duration of req-->resp in millis
      */
     public long getDuration() {
         return duration;

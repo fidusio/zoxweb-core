@@ -15,6 +15,7 @@
  */
 package org.zoxweb.shared.http;
 
+import org.zoxweb.shared.util.Const;
 import org.zoxweb.shared.util.SharedStringUtil;
 
 import java.io.Serializable;
@@ -35,7 +36,8 @@ extends HTTPAPIResult<byte[]>
 	public String toString() {
 		return "ResponseData [status=" + getStatus() + ", data="
 				+ (getData() != null ? getDataAsString() : "null") + ", headers="
-				+ getHeaders()+"]";
+				+ getHeaders()+
+				"duration: " + Const.TimeInMillis.toString(getDuration()) + "]";
 	}
 	
 	
@@ -53,9 +55,9 @@ extends HTTPAPIResult<byte[]>
 	 * @param data response data.
 	 * @param rh response headers.
 	 */
-	public HTTPResponseData( int stat, Map<String, List<String>> rh, byte[] data)
+	public HTTPResponseData(int stat, Map<String, List<String>> rh, byte[] data)
 	{
-		super(stat, rh, data);
+		super(stat, rh, data, 0);
 
 
 	}

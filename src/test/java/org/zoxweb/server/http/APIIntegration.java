@@ -12,10 +12,26 @@ import org.zoxweb.shared.util.RateController;
 
 public class APIIntegration
 {
+
+    public static void createXlogistXLoginEndPoint()
+    {
+        // configuring the base http message object
+        // the URL https://api.xlogistx.io
+        // the URI /login
+        HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit("https://api.xlogistx.io", "/login", HTTPMethod.GET);
+        hmci.setName("login");
+        HTTPAPIEndPoint<NVGenericMap, NVGenericMap> loginEP = HTTPAPIManager.SINGLETON.buildEndPoint(hmci, null, null);
+        loginEP.setDomain("api.xlogistx.io")
+        .setRateController(new RateController(loginEP.toCanonicalID(), "500/s"))
+        .setScheduler(TaskUtil.getDefaultTaskScheduler());
+        HTTPAPIManager.SINGLETON.register(loginEP);
+    }
+
     public static void main(String ...args)
     {
         try {
 
+            createXlogistXLoginEndPoint();
             HTTPNVGMBiEncoder encoder = null;
             DataDecoder<HTTPResponseData, NVGenericMap> decoder = null;
             ParamUtil.ParamMap params = ParamUtil.parse("=", args);
@@ -111,8 +127,6 @@ public class APIIntegration
                     .setDomain(domain);
            // System.out.println(GSONUtil.toJSONDefault(new RateController("klavio", "75/min")));
             HTTPCallBack<NVGenericMap, NVGenericMap> callback = new HTTPCallBack<NVGenericMap, NVGenericMap>(parameters) {
-
-                HTTPAPIEndPoint<NVGenericMap, NVGenericMap> fUserAPI;
                 
                 @Override
                 public void exception(Exception e)
@@ -138,7 +152,7 @@ public class APIIntegration
                 @Override
                 public void accept(HTTPAPIResult<NVGenericMap> apiResult)
                 {
-                    System.out.println(apiResult.getData());
+                    System.out.println(apiResult);
                 }
             };
             callback.setEndPoint(userAPI);
@@ -149,6 +163,28 @@ public class APIIntegration
 
 
 
+            String username = params.stringValue("user", true);
+            String password = params.stringValue("password", true);
+
+            if(username != null && password != null)
+            {
+
+                HTTPCallBack<NVGenericMap, NVGenericMap> loginCallback = new HTTPCallBack<NVGenericMap, NVGenericMap>() {
+
+                    @Override
+                    public void accept(HTTPAPIResult<NVGenericMap> apiResult)
+                    {
+                        System.out.println(apiResult);
+                    }
+                };
+
+                System.out.println("Try to login for " + username);
+                HTTPAuthorizationBasic basicAuth = new HTTPAuthorizationBasic(username, password);
+                HTTPAPIEndPoint loginEP = HTTPAPIManager.SINGLETON.lookup("api.xlogistx.io.login");
+                callback.setEndPoint(loginEP);
+                loginEP.syncCall(loginCallback, basicAuth);
+
+            }
 
 
 

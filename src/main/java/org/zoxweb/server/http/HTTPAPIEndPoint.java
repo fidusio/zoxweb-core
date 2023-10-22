@@ -32,12 +32,12 @@ public class HTTPAPIEndPoint<I,O>
             {
                 HTTPResponseData hrd = HTTPCall.send(createHMCI(callback.get(), authorization));
                 if (dataDecoder != null) {
-                    HTTPAPIResult<O> hapir = new HTTPAPIResult<O>(hrd.getStatus(), hrd.getHeaders(), dataDecoder.decode(hrd));
+                    HTTPAPIResult<O> hapir = new HTTPAPIResult<O>(hrd.getStatus(), hrd.getHeaders(), dataDecoder.decode(hrd), hrd.getDuration());
                     callback.accept(hapir);
                 }
                 else
                 {
-                    HTTPAPIResult<byte[]> hapir = new HTTPAPIResult<byte[]>(hrd.getStatus(), hrd.getHeaders(), hrd.getData());
+                    HTTPAPIResult<byte[]> hapir = new HTTPAPIResult<byte[]>(hrd.getStatus(), hrd.getHeaders(), hrd.getData(), hrd.getDuration());
                     callback.accept((HTTPAPIResult<O>) hapir);
                 }
                 successCounter.incrementAndGet();
@@ -172,9 +172,9 @@ public class HTTPAPIEndPoint<I,O>
         HTTPResponseData hrd = HTTPCall.send(createHMCI(input, authorization));
         HTTPAPIResult<O> hapir = null;
         if(dataDecoder != null)
-            hapir = new HTTPAPIResult<O>(hrd.getStatus(), hrd.getHeaders(), dataDecoder.decode(hrd));
+            hapir = new HTTPAPIResult<O>(hrd.getStatus(), hrd.getHeaders(), dataDecoder.decode(hrd), hrd.getDuration());
         else
-            hapir = (HTTPAPIResult<O>) new HTTPAPIResult<byte[]>(hrd.getStatus(), hrd.getHeaders(), hrd.getData());
+            hapir = (HTTPAPIResult<O>) new HTTPAPIResult<byte[]>(hrd.getStatus(), hrd.getHeaders(), hrd.getData(), hrd.getDuration());
 
         successCounter.incrementAndGet();
         return hapir;
@@ -182,11 +182,12 @@ public class HTTPAPIEndPoint<I,O>
 
 
 
-    public void syncCall(HTTPCallBack<I,O> callback, HTTPAuthorization authorization)
+    public HTTPAPIEndPoint<I,O> syncCall(HTTPCallBack<I,O> callback, HTTPAuthorization authorization)
     {
 
         ToRun toRun = new ToRun(callback, authorization);
         toRun.run();
+        return this;
 
     }
 
@@ -194,41 +195,41 @@ public class HTTPAPIEndPoint<I,O>
 
     protected HTTPMessageConfigInterface createHMCI(I input, HTTPAuthorization authorization)
     {
-        if(dataEncoder != null)
-        {
-            HTTPMessageConfigInterface ret = HTTPMessageConfig.createAndInit(config.getURL(), config.getURI(), config.getMethod(), config.isSecureCheckEnabled());
-            NVGenericMap.copy(config.getHeaders(), ret.getHeaders(), true);
-            NVGenericMap.copy(config.getParameters(), ret.getParameters(), true);
-            ret.setProxyAddress(config.getProxyAddress());
-            ret.setRedirectEnabled(config.isRedirectEnabled());
-            ret.setHTTPErrorAsException(config.isHTTPErrorAsException());
-            ret.setCharset(config.getCharset());
 
+        HTTPMessageConfigInterface ret = HTTPMessageConfig.createAndInit(config.getURL(), config.getURI(), config.getMethod(), config.isSecureCheckEnabled());
+        NVGenericMap.copy(config.getHeaders(), ret.getHeaders(), true);
+        NVGenericMap.copy(config.getParameters(), ret.getParameters(), true);
+        ret.setProxyAddress(config.getProxyAddress());
+        ret.setRedirectEnabled(config.isRedirectEnabled());
+        ret.setHTTPErrorAsException(config.isHTTPErrorAsException());
+        ret.setCharset(config.getCharset());
+
+        if (authorization != null)
+            ret.setAuthorization(authorization);
+        else
+            ret.setAuthorization(config.getAuthorization());
+
+        if (dataDecoder != null)
             ret = dataEncoder.encode(ret, input);
-            if (authorization != null)
-                ret.setAuthorization(authorization);
-            else
-                ret.setAuthorization(config.getAuthorization());
 
-            return ret;
-        }
 
-        return config;
+        return ret;
+
     }
 
 
-    public void asyncCall(HTTPCallBack<I,O> callback)
+    public HTTPAPIEndPoint<I,O> asyncCall(HTTPCallBack<I,O> callback)
     {
-        asyncCall(callback, null, rateController != null ? rateController.nextWait() : 0);
+        return asyncCall(callback, null, rateController != null ? rateController.nextWait() : 0);
     }
 
-    public void asyncCall(HTTPCallBack<I,O> callback, HTTPAuthorization authorization)
+    public HTTPAPIEndPoint<I,O>  asyncCall(HTTPCallBack<I,O> callback, HTTPAuthorization authorization)
     {
-        asyncCall(callback, authorization, rateController != null ? rateController.nextWait() : 0);
+        return asyncCall(callback, authorization, rateController != null ? rateController.nextWait() : 0);
     }
 
 
-    public void asyncCall(HTTPCallBack<I,O> callback, HTTPAuthorization authorization, long delayInMillis)
+    public HTTPAPIEndPoint<I,O> asyncCall(HTTPCallBack<I,O> callback, HTTPAuthorization authorization, long delayInMillis)
     {
 
         ToRun toRun = new ToRun(callback, authorization);
@@ -241,6 +242,8 @@ public class HTTPAPIEndPoint<I,O>
             executor.execute(toRun);
         else
             throw new IllegalArgumentException("No executor or scheduler found can't execute");
+
+        return this;
 
     }
 
