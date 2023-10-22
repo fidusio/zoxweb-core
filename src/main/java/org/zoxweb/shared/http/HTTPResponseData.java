@@ -30,7 +30,21 @@ extends HTTPAPIResult<byte[]>
 
 {
 
-	
+	/**
+	 * Main constructor
+	 * @param stat response status.
+	 * @param data response data.
+	 * @param rh response headers.
+	 */
+	public HTTPResponseData(int stat, Map<String, List<String>> rh, byte[] data, long duration)
+	{
+		super(stat, rh, data, duration);
+
+
+	}
+
+
+
 
 	@Override
 	public String toString() {
@@ -39,30 +53,6 @@ extends HTTPAPIResult<byte[]>
 				+ getHeaders()+
 				"duration: " + Const.TimeInMillis.toString(getDuration()) + "]";
 	}
-	
-	
-	
-
-
-
-
-
-
-
-	/**
-	 * Main constructor
-	 * @param stat response status.
-	 * @param data response data.
-	 * @param rh response headers.
-	 */
-	public HTTPResponseData(int stat, Map<String, List<String>> rh, byte[] data)
-	{
-		super(stat, rh, data, 0);
-
-
-	}
-
-
 
 	public String getDataAsString()
 	{

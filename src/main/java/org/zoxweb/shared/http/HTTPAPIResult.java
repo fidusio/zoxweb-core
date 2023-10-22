@@ -13,9 +13,8 @@ extends HTTPResponse
 
     public HTTPAPIResult(int status, Map<String, List<String>> headers, O data, long duration)
     {
-        super(status, headers);
+        super(status, headers, duration);
         this.data = data;
-        setDuration(duration);
     }
 
 

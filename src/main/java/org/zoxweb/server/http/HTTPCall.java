@@ -300,7 +300,7 @@ public class HTTPCall
 			{
 				ret  = IOUtil.inputStreamToByteArray(isError, false);
 				respHeaders = con.getHeaderFields();
-				HTTPResponseData hrd = new HTTPResponseData(status, respHeaders, ret.toByteArray());
+				HTTPResponseData hrd = new HTTPResponseData(status, respHeaders, ret.toByteArray(), System.currentTimeMillis() -ts );
 				if (hcc.isHTTPErrorAsException())
 					throw new HTTPCallException(con.getResponseMessage(),  hrd);
 				else
@@ -326,7 +326,7 @@ public class HTTPCall
 					
 					if (contentAsIS != null)
 					{
-						throw new HTTPCallException("Can not forward with ContentAsIS set",  new HTTPResponseData(status, con.getHeaderFields(), null));
+						throw new HTTPCallException("Can not forward with ContentAsIS set",  new HTTPResponseData(status, con.getHeaderFields(), null, System.currentTimeMillis() -ts));
 					}
 					HTTPCall hccRedirect = new HTTPCall(hcc, ssp, urlOverride, uriFilter, osBypass, contentAsIS);
 					return hccRedirect.sendRequest();
@@ -374,7 +374,7 @@ public class HTTPCall
 		}
 		
 		
-		HTTPResponseData hrd = new HTTPResponseData(status, respHeaders, ret != null ? ret.toByteArray() : null);
+		HTTPResponseData hrd = new HTTPResponseData(status, respHeaders, ret != null ? ret.toByteArray() : null, System.currentTimeMillis() - ts);
 
 
 		return hrd;
@@ -385,7 +385,6 @@ public class HTTPCall
 	public static HTTPResponseData send(HTTPMessageConfigInterface hmci)
 			throws IOException
 	{
-		long ts = System.currentTimeMillis();
 		HTTPResponseData ret;
 		try
 		{
@@ -393,64 +392,50 @@ public class HTTPCall
 		}
 		catch(HTTPCallException e)
 		{
-			ts = System.currentTimeMillis() - ts;
-			if(e.getResponseData() != null)
-				e.getResponseData().setDuration(ts);
-			HTTP_CALLS.register(ts);
+			HTTP_CALLS.register(e.getResponseData().getDuration());
 			throw e;
 		}
-		ts = System.currentTimeMillis() - ts;
-		ret.setDuration(ts);
-		HTTP_CALLS.register(ts);
+		HTTP_CALLS.register(ret.getDuration());
 		return ret;
 	}
 
 	public static <O> HTTPAPIResult<O> send(HTTPMessageConfigInterface hmci, Class<?> clazz)
 			throws IOException
 	{
-		long ts = System.currentTimeMillis();
-		HTTPResponseData hrd = null;
+
+		HTTPResponseData hrd;
 		try
 		{
 			hrd = new HTTPCall(hmci).sendRequest();
 		}
 		catch(HTTPCallException e)
 		{
-			ts = System.currentTimeMillis() - ts;
-			if(e.getResponseData() != null)
-				e.getResponseData().setDuration(ts);
-			HTTP_CALLS.register(ts);
+
+			HTTP_CALLS.register(e.getResponseData().getDuration());
 			throw e;
 		}
 		HTTPAPIResult<O> ret =  HTTPUtil.toHTTPResponseObject(hrd, clazz);
-		ts = System.currentTimeMillis() - ts;
-		ret.setDuration(ts);
-		HTTP_CALLS.register(ts);
+		HTTP_CALLS.register(hrd.getDuration());
 		return ret;
 	}
 
 	public static <O> HTTPAPIResult<O> send(HTTPMessageConfigInterface hmci, DataDecoder<HTTPResponseData, O> decoder)
 			throws IOException
 	{
-		long ts = System.currentTimeMillis();
-		HTTPResponseData hrd = null;
+		HTTPResponseData hrd ;
 		try
 		{
 			hrd = new HTTPCall(hmci).sendRequest();
 		}
 		catch(HTTPCallException e)
 		{
-			ts = System.currentTimeMillis() - ts;
-			if(e.getResponseData() != null)
-				e.getResponseData().setDuration(ts);
-			HTTP_CALLS.register(ts);
+
+			HTTP_CALLS.register(e.getResponseData().getDuration());
 			throw e;
 		}
 		O result = decoder.decode(hrd);
 		HTTPAPIResult<O> ret = new HTTPAPIResult<O>(hrd.getStatus(), hrd.getHeaders(), result, hrd.getDuration());
-		ts = System.currentTimeMillis() - ts;
-		ret.setDuration(ts);
-		HTTP_CALLS.register(ts);
+		HTTP_CALLS.register(ret.getDuration());
 		return ret;
 	}
 

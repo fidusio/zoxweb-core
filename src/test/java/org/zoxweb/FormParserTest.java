@@ -15,22 +15,22 @@
  */
 package org.zoxweb;
 
-import java.io.FileInputStream;
-import java.util.HashMap;
-import java.util.List;
-
 import org.zoxweb.server.http.HTTPUtil;
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.shared.http.HTTPMessageConfigInterface;
 import org.zoxweb.shared.http.HTTPResponseData;
 import org.zoxweb.shared.util.SharedStringUtil;
 
+import java.io.FileInputStream;
+import java.util.HashMap;
+import java.util.List;
+
 public class FormParserTest {
 
 	public static void main(String[] args) {
 		try {
 			String str = IOUtil.inputStreamToString(new FileInputStream("/temp/test.html"), true);
-			HTTPResponseData rd = new HTTPResponseData(200, new HashMap<String, List<String>>(), str.getBytes(SharedStringUtil.UTF_8));
+			HTTPResponseData rd = new HTTPResponseData(200, new HashMap<String, List<String>>(), str.getBytes(SharedStringUtil.UTF_8), 0);
 
 			for (HTTPMessageConfigInterface hcci : HTTPUtil.extractFormsContent(rd, 0)) {
                 System.out.println(hcci);

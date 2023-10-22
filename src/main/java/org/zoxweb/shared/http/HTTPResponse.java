@@ -10,13 +10,14 @@ public abstract class HTTPResponse
 
 
 
-    private long duration = 0;
+    private final long duration;
 
 
-    protected HTTPResponse (int status, Map<String, List<String>> headers)
+    protected HTTPResponse (int status, Map<String, List<String>> headers, long duration)
     {
         this.status = status;
         this.headers = headers;
+        this.duration = duration;
 
     }
 
@@ -38,7 +39,7 @@ public abstract class HTTPResponse
     public String headerValue(String headerName)
     {
         List<String> headerValue = headers.get(headerName);
-        if (headerName != null && headerValue.size() > 0)
+        if (headerName != null && !headerValue.isEmpty())
             return headerValue.get(0);
 
         return null;
@@ -85,10 +86,6 @@ public abstract class HTTPResponse
      */
     public long getDuration() {
         return duration;
-    }
-
-    public void setDuration(long duration) {
-        this.duration = duration;
     }
 
 }
