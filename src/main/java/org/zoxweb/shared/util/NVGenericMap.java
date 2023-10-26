@@ -327,6 +327,37 @@ public class NVGenericMap
 	}
 
 
+	public NVGenericMap build(GetNameValue<?> gnv)
+	{
+		add(gnv);
+		return this;
+	}
+
+	public NVGenericMap build(String name, String value, FilterType ft)
+	{
+		add(name, value, ft);
+		return this;
+	}
+
+	public NVGenericMap build(String name, String value)
+	{
+		add(name, value);
+		return this;
+	}
+
+	public NVGenericMap build(NVEntity entity)
+	{
+		add(entity);
+		return this;
+	}
+
+	public NVGenericMap build(GetName name, String value)
+	{
+		add(name, value);
+		return this;
+	}
+
+
 	public static NVGenericMap merge(NVGenericMap from, NVGenericMap to)
 	{
 		for(GetNameValue<?> gnv: from.values())

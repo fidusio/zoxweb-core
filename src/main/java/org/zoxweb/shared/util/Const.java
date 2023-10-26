@@ -475,8 +475,8 @@ public class Const {
     DAY(HOUR.MILLIS * 24, TimeUnit.DAYS,"days", "day","d"),
 
     // One week in milliseconds
-    WEEK(DAY.MILLIS * 7, null, "weeks", "week", "w");
-
+    WEEK(DAY.MILLIS * 7, null, "weeks", "week", "w"),
+    YEAR(DAY.MILLIS*365, null, "years", "year", "y");
     public final long MILLIS;
     public final TimeUnit UNIT;
     private final String[] tokens;
