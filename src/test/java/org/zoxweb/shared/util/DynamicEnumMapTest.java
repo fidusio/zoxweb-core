@@ -15,13 +15,12 @@
  */
 package org.zoxweb.shared.util;
 
-import java.util.ArrayList;
-import java.util.List;
-
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.zoxweb.shared.accounting.Currency;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class DynamicEnumMapTest {
@@ -84,7 +83,7 @@ public class DynamicEnumMapTest {
 		dem.addEnumValue(new NVPair("PA", "Pennsylvania"));
 		dem.addEnumValue(new NVPair("RI", "Rhode Island"));
 		dem.addEnumValue(new NVPair("SC", "South Carolina"));
-		dem.addEnumValue(new NVPair("SD", "Sout Dakota"));
+		dem.addEnumValue(new NVPair("SD", "South Dakota"));
 		dem.addEnumValue(new NVPair("TN", "Tennessee"));
 		dem.addEnumValue(new NVPair("TX", "Texas"));
 		dem.addEnumValue(new NVPair("UT", "Utah"));

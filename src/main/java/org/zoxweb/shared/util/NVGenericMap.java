@@ -170,9 +170,7 @@ public class NVGenericMap
 		return value.remove(new GetNameKey(name, true));
 	}
 	
-	/**
-	 * @see org.zoxweb.shared.util.ArrayValues#remove(java.lang.Object)
-	 */
+
 	@Override
 	public synchronized GetNameValue<?> remove(GetNameValue<?> v)
 	{
@@ -324,6 +322,41 @@ public class NVGenericMap
 		}
 
 		return (V)ret;
+	}
+
+
+	public <V extends GetNameValue<?>> V lookupContainer(String fullyQualifiedName)
+	{
+		GetNameValue<?> ret = get(fullyQualifiedName);
+		if (ret != null)
+		{
+			return (V) this;
+		}
+		else if (fullyQualifiedName.indexOf('.') != -1)
+		{
+			String[] subNames = fullyQualifiedName.split("\\.");
+			if (subNames.length > 1)
+			{
+				ret = this;
+				for (int i = 0; i < (subNames.length -1); i++)
+				{
+
+					if (ret instanceof NVGenericMap)
+						ret = ((NVGenericMap) ret).get(subNames[i]);
+					else if (ret instanceof NVEntity)
+						ret = (((NVEntity) ret).lookup(subNames[i]));
+					else if (ret instanceof NVPairGetNameMap)
+						ret = ((NVPairGetNameMap) ret).get(subNames[i]);
+					else
+						ret = null;
+
+					if (ret == null)
+						break;
+				}
+			}
+		}
+
+		return (V) ret;
 	}
 
 

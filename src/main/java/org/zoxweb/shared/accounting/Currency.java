@@ -27,17 +27,15 @@ public enum Currency
 	//	United States dollar
 	USD("$"),
 	//	Euro
-	EUR("�"),
+	EUR("€"),
 	//	Canadian dollar
 	CAD("$"),
 	//	Japanese yen
-	JPY("�"),
+	JPY("¥"),
 	//	Pound sterling
-	GBP("�"),
+	GBP("£"),
 	//	Swiss franc 
 	CHF("Fr"),
-	
-	
 	;
 
 	private String value;

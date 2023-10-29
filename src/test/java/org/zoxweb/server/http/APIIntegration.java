@@ -5,10 +5,7 @@ import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.http.*;
-import org.zoxweb.shared.util.DataDecoder;
-import org.zoxweb.shared.util.NVGenericMap;
-import org.zoxweb.shared.util.ParamUtil;
-import org.zoxweb.shared.util.RateController;
+import org.zoxweb.shared.util.*;
 
 public class APIIntegration
 {
@@ -30,6 +27,8 @@ public class APIIntegration
     public static void main(String ...args)
     {
         try {
+
+            HTTPNVGMBiEncoder.log.setEnabled(true);
 
             createXlogistXLoginEndPoint();
             HTTPNVGMBiEncoder encoder = null;
@@ -91,14 +90,14 @@ public class APIIntegration
 
 
 
-            System.out.println(GSONUtil.toJSONDefault(config, true ));
-            NVGenericMap contentConfig = new NVGenericMap();
-            NVGenericMap data = new NVGenericMap("data");
-            contentConfig.add(data);
-            NVGenericMap attributes = new NVGenericMap("attributes");
-            data.add("type", "profile");
-            data.add(attributes);
-            System.out.println(GSONUtil.toJSONDefault(contentConfig));
+//            System.out.println(GSONUtil.toJSONDefault(config, true ));
+//            NVGenericMap contentConfig = new NVGenericMap();
+//            NVGenericMap data = new NVGenericMap("data");
+//            contentConfig.add(data);
+//            NVGenericMap attributes = new NVGenericMap("attributes");
+//            data.add("type", "profile");
+//            data.add(attributes);
+//            System.out.println(GSONUtil.toJSONDefault(contentConfig));
 
 
 
@@ -106,11 +105,18 @@ public class APIIntegration
 
             NVGenericMap parameters = new NVGenericMap("Parameters");
 
-            parameters.add(params.asNVPair("email"));
-            parameters.add(params.asNVPair("first_name"));
+            parameters.build(params.asNVPair("email"))
+                    .build(params.asNVPair("name"))
+                    .build("bogus", "noval");
 
             if (params.nameExists("last_name"))
-                parameters.add(params.asNVPair("last_name"));
+            {
+                NVPair lastName = params.asNVPair("last_name");
+                lastName.setName("data.attributes." + lastName.getName());
+                System.out.println(lastName.getName());
+                parameters.build(lastName);
+
+            }
 
 
 //            if ( encoder == null) {
@@ -141,6 +147,7 @@ public class APIIntegration
 
                             System.out.println("Duplicate user " + get());
                             System.out.println("Error Code:" + exception.getStatusCode());
+                            e.printStackTrace();
 
                         }
                         else

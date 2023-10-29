@@ -92,9 +92,9 @@ public class NVPair
 	
 	/**
 	 * This constructor instantiates NVPair based on parameters set for name, value, and filter type. 
-	 * @param name
-	 * @param value
-	 * @param filter
+	 * @param name of the parameter
+	 * @param value as string of the parameter
+	 * @param filter to be applier
 	 */
 	public NVPair(String name, String value, ValueFilter<String, String> filter)
 	{
@@ -126,16 +126,6 @@ public class NVPair
 	 */
 	public synchronized void setValueFilter(ValueFilter<String, String> valueFilter) 
 	{
-//		if (filterType instanceof DynamicEnumMap)
-//		{
-//			ValueFilter<String, String> dem = DynamicEnumMapManager.SINGLETON.lookup(filterType.toCanonicalID());
-//			
-//			if ( dem != null)
-//			{
-//				filterType = DynamicEnumMapManager.SINGLETON.lookup(filterType.toCanonicalID());
-//			}
-//		}
-		
 		this.valueFilter = valueFilter;
 	}
 	

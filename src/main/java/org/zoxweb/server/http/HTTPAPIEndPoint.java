@@ -42,7 +42,7 @@ public class HTTPAPIEndPoint<I,O>
                 }
                 successCounter.incrementAndGet();
             } catch (Exception e) {
-                failedCoutner.incrementAndGet();
+                failedCounter.incrementAndGet();
                 if (callback != null)
                     callback.exception(e);
             }
@@ -61,7 +61,7 @@ public class HTTPAPIEndPoint<I,O>
     private Map<Integer, HTTPStatusCode> positiveResults = new HashMap<>();
 
     private AtomicLong successCounter = new AtomicLong();
-    private AtomicLong failedCoutner = new AtomicLong();
+    private AtomicLong failedCounter = new AtomicLong();
     private NVGenericMap properties = new NVGenericMap();
 
 
@@ -209,7 +209,7 @@ public class HTTPAPIEndPoint<I,O>
         else
             ret.setAuthorization(config.getAuthorization());
 
-        if (dataDecoder != null)
+        if (dataEncoder != null)
             ret = dataEncoder.encode(ret, input);
 
 
@@ -255,7 +255,7 @@ public class HTTPAPIEndPoint<I,O>
 
     public long failedCount()
     {
-        return failedCoutner.get();
+        return failedCounter.get();
     }
 
 

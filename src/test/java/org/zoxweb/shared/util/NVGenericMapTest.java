@@ -89,6 +89,37 @@ public class NVGenericMapTest
 
 
 	@Test
+	public void lookupContainer() throws IOException {
+		try {
+			String json = IOUtil.inputStreamToString(NVGenericMapTest.class.getResourceAsStream("/NVGenericMap.json"), true);
+			NVGenericMap nvgm = GSONUtil.fromJSONDefault(json, NVGenericMap.class);
+			System.out.println(nvgm);
+			String[] lookups = {
+					"properties",
+					"properties.gpios-map",
+					"properties.gpios-init",
+					"properties.gpios-init.modem",
+					"properties.gpios-init.modem.state",
+					"properties.batata",
+					"bean",
+					"bean.batata.harra"
+			};
+
+			for (String lookup: lookups)
+			{
+				GetNameValue<?> found = nvgm.lookupContainer(lookup);
+				System.out.println(lookup + ": " + found);
+			}
+
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+
+
+	@Test
 	public void test()
 	{
 		try
