@@ -190,7 +190,7 @@ public class SSLHandshakingState extends State {
             // ********************************************
             // Very crucial steps
             // ********************************************
-            if(config.remoteAddress != null)
+            if(config.remoteConnection != null)
             {
                 // we have a SSL tunnel
                 //publishSync(POST_HANDSHAKE, config);

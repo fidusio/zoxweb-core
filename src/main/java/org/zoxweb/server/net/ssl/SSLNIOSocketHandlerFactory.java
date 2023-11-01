@@ -11,7 +11,7 @@ public class SSLNIOSocketHandlerFactory
         extends ProtocolFactoryBase<SSLNIOSocketHandler>
 {
 
-    private InetSocketAddressDAO remoteAddress;
+    private InetSocketAddressDAO remoteConnection;
     private SSLContextInfo sslContext;
     private Class<? extends BaseSessionCallback> scClass;
     private InstanceCreator<SSLSessionCallback> instanceCreator;
@@ -35,11 +35,11 @@ public class SSLNIOSocketHandlerFactory
     }
 
 
-    public SSLNIOSocketHandlerFactory(SSLContextInfo sslContext, InetSocketAddressDAO ra)
+    public SSLNIOSocketHandlerFactory(SSLContextInfo sslContext, InetSocketAddressDAO rc)
     {
         this();
         this.sslContext = sslContext;
-        remoteAddress = ra;
+        remoteConnection = rc;
     }
 
     public SSLContextInfo getSSLContext()
@@ -65,7 +65,7 @@ public class SSLNIOSocketHandlerFactory
         {
             e.printStackTrace();
         }
-        return new SSLNIOSocketHandler(sslContext, sc, getProperties().getValue("simple_state_machine", true), remoteAddress);
+        return new SSLNIOSocketHandler(sslContext, sc, getProperties().getValue("simple_state_machine", true), remoteConnection);
     }
 
     @Override
@@ -77,7 +77,7 @@ public class SSLNIOSocketHandlerFactory
     public void init()
     {
         if(getProperties().getValue("remote_host") != null)
-            setRemoteAddress(new InetSocketAddressDAO(getProperties().getValue("remote_host")));
+            setRemoteConnection(new InetSocketAddressDAO(getProperties().getValue("remote_host")));
         sslContext = (SSLContextInfo) ((ConfigDAO)getProperties().getValue("ssl_engine")).attachment();
         try
         {
@@ -93,12 +93,12 @@ public class SSLNIOSocketHandlerFactory
 
     }
 
-    public void setRemoteAddress(InetSocketAddressDAO rAddress)
+    public void setRemoteConnection(InetSocketAddressDAO rConnection)
     {
-        remoteAddress = rAddress;
+        remoteConnection = rConnection;
     }
 
-    public InetSocketAddressDAO getRemoteAddress(){ return remoteAddress; }
+    public InetSocketAddressDAO getRemoteConnection(){ return remoteConnection; }
 
 
 //    @Override

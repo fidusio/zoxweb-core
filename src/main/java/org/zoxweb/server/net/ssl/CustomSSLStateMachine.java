@@ -193,7 +193,7 @@ class CustomSSLStateMachine extends MonoStateMachine<SSLEngineResult.HandshakeSt
         // ********************************************
         // Very crucial steps
         // ********************************************
-        if(config.remoteAddress != null)
+        if(config.remoteConnection != null)
         {
             // we have a SSL tunnel
             config.sslConnectionHelper.createRemoteConnection();

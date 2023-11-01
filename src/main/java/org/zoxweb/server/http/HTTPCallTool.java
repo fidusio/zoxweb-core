@@ -157,7 +157,7 @@ public final class HTTPCallTool //implements Runnable
 
                 if (content != null)
                     hmci.setContent(content);
-                log.getLogger().info(GSONUtil.toJSON((HTTPMessageConfig) hmci, true, false, false));
+                log.getLogger().info(GSONUtil.toJSONDefault(hmci,true));
                 HTTPAPIEndPoint<Void, byte[]> endpoint = new HTTPAPIEndPoint<Void, byte[]>(hmci)
                         .setExecutor(TaskUtil.getDefaultTaskProcessor());
 

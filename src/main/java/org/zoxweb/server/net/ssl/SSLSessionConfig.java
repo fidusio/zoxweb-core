@@ -39,7 +39,7 @@ public class SSLSessionConfig
     volatile ByteBuffer inRemoteData = null;
     volatile SSLConnectionHelper sslConnectionHelper = null;
     volatile boolean forcedClose = false;
-    volatile InetSocketAddressDAO remoteAddress = null;
+    volatile InetSocketAddressDAO remoteConnection = null;
 
     // used for remote connection creation only
 
