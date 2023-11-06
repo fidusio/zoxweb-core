@@ -25,7 +25,7 @@ public class StateMachine<C>
     private final String name;
     private final TaskSchedulerProcessor tsp;
     private final Map<String, Set<TriggerConsumerInt<?>>> tcMap = new LinkedHashMap<String, Set<TriggerConsumerInt<?>>>();
-    private final Map<String, StateInt> states = new LinkedHashMap<String, StateInt>();
+    private final Map<String, StateInt<?>> states = new LinkedHashMap<String, StateInt<?>>();
     private C config;
     private final Executor executor;
     protected final AtomicBoolean isClosed = new AtomicBoolean(false);
@@ -59,7 +59,7 @@ public class StateMachine<C>
     }
 
     @Override
-    public synchronized StateMachineInt<C> register(StateInt state)
+    public synchronized StateMachineInt<C> register(StateInt<?> state)
     {
         if(state != null)
         {
@@ -96,7 +96,7 @@ public class StateMachine<C>
 
 
     @Override
-    public StateMachineInt publish(TriggerInt trigger)
+    public StateMachineInt<C> publish(TriggerInt<?> trigger)
     {
         if(isClosed())
             throw new IllegalStateException("State machine closed");
@@ -120,14 +120,14 @@ public class StateMachine<C>
     }
 
     @Override
-    public <D> StateMachineInt publish(StateInt state, String canID, D data) {
+    public <D> StateMachineInt<C> publish(StateInt<?> state, String canID, D data) {
         if(canID != null)
             publish(new Trigger(this, canID, state, data));
         return this;
     }
 
     @Override
-    public <D> StateMachineInt publish(StateInt state, Enum<?> canID, D data)
+    public <D> StateMachineInt<C> publish(StateInt<?> state, Enum<?> canID, D data)
     {
         if(canID != null)
             publish(new Trigger(this, canID, state, data));
@@ -136,7 +136,7 @@ public class StateMachine<C>
 
 
     @Override
-    public StateMachineInt publishSync(TriggerInt trigger)
+    public StateMachineInt<C> publishSync(TriggerInt<?> trigger)
     {
         if(isClosed())
             throw new IllegalStateException("State machine closed");
@@ -155,21 +155,21 @@ public class StateMachine<C>
     }
 
     @Override
-    public <D> StateMachineInt publishSync(StateInt state, String canID, D data) {
+    public <D> StateMachineInt<C> publishSync(StateInt<?> state, String canID, D data) {
         if(canID != null)
             publishSync(new Trigger(this, canID, state, data));
         return this;
     }
 
     @Override
-    public <D> StateMachineInt publishSync(StateInt state, Enum<?> canID, D data) {
+    public <D> StateMachineInt<C> publishSync(StateInt<?> state, Enum<?> canID, D data) {
         if(canID != null)
             publishSync(new Trigger(this, canID, state, data));
         return this;
     }
 
     @Override
-    public StateMachineInt publishToCurrentState(TriggerInt trigger) {
+    public StateMachineInt<C> publishToCurrentState(TriggerInt<?> trigger) {
         if(isClosed())
             throw new IllegalStateException("State machine closed");
 
@@ -182,7 +182,7 @@ public class StateMachine<C>
         {
             Consumer<?> tci = current.lookupTriggerConsumer(trigger.getCanonicalID());
             if (tci != null) {
-                SupplierConsumerTask sct =  new SupplierConsumerTask(trigger, new TriggerConsumerHolder<>(tci));
+                SupplierConsumerTask<?> sct =  new SupplierConsumerTask(trigger, new TriggerConsumerHolder<>(tci));
                 if (isScheduledTaskEnabled())
                     tsp.queue(0, sct);
                 else if(executor != null)
@@ -202,7 +202,7 @@ public class StateMachine<C>
     }
 
     @Override
-    public StateMachineInt setConfig(C config)
+    public StateMachineInt<C> setConfig(C config)
     {
         this.config = config;
         return this;
@@ -250,24 +250,24 @@ public class StateMachine<C>
     }
 
     @Override
-    public StateInt lookupState(String name)
+    public StateInt<?> lookupState(String name)
     {
         return states.get(name);
     }
 
     @Override
-    public StateInt lookupState(Enum<?> name)
+    public StateInt<?>  lookupState(Enum<?> name)
     {
         return lookupState(SharedUtil.enumName(name));
     }
 
     @Override
-    public StateInt getCurrentState() {
+    public StateInt<?>  getCurrentState() {
         return currentState.get();
     }
 
     @Override
-    public void setCurrentState(StateInt stateInt) {
+    public void setCurrentState(StateInt<?> stateInt) {
         currentState.set(stateInt);
     }
 

@@ -11,22 +11,22 @@ public interface StateMachineInt<C>
 extends GetName, AutoCloseable, GetConfig<C>
 {
 
-    StateMachineInt register(StateInt state);
+    StateMachineInt<C> register(StateInt<?> state);
 
-    StateMachineInt publish(TriggerInt trigger);
-    public <D>StateMachineInt publish(StateInt state, String canID, D data);
+    StateMachineInt<C> publish(TriggerInt<?> trigger);
+    <D>StateMachineInt<C> publish(StateInt<?> state, String canID, D data);
 
-    public <D>StateMachineInt publish(StateInt state, Enum<?> canID, D data);
-    StateMachineInt publishSync(TriggerInt trigger);
+    <D>StateMachineInt<C> publish(StateInt<?> state, Enum<?> canID, D data);
+    StateMachineInt<C> publishSync(TriggerInt<?> trigger);
 
-    public <D>StateMachineInt publishSync(StateInt state, String canID, D data);
+     <D>StateMachineInt<C> publishSync(StateInt<?> state, String canID, D data);
 
-    public <D>StateMachineInt publishSync(StateInt state, Enum<?> canID, D data);
-    StateMachineInt publishToCurrentState(TriggerInt trigger);
+     <D>StateMachineInt<C> publishSync(StateInt<?> state, Enum<?> canID, D data);
+    StateMachineInt<C> publishToCurrentState(TriggerInt<?> trigger);
 
 
 
-    StateMachineInt setConfig(C config);
+    StateMachineInt<C> setConfig(C config);
 
     void start(boolean sync);
 
@@ -35,12 +35,12 @@ extends GetName, AutoCloseable, GetConfig<C>
     TaskSchedulerProcessor getScheduler();
     Executor getExecutor();
     boolean isScheduledTaskEnabled();
-    StateInt lookupState(String name);
-    StateInt lookupState(Enum<?> name);
+    StateInt<?> lookupState(String name);
+    StateInt<?> lookupState(Enum<?> name);
 
 
-    StateInt getCurrentState();
+    StateInt<?> getCurrentState();
 
-    void setCurrentState(StateInt state);
+    void setCurrentState(StateInt<?> state);
 
 }
