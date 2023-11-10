@@ -104,6 +104,7 @@ public class Range<T extends Comparable<T>>
     );
 
 
+
     public Range() {
         super(NVC_RANGE);
     }
@@ -176,9 +177,9 @@ public class Range<T extends Comparable<T>>
      *@return
      *false for any value of t, if this.start equals this.end
      */
-    public boolean contains(T t) {
+    public boolean within(T t) {
 
-        return contains(t, getInclusive());
+        return within(t, getInclusive());
     }
 
     /**
@@ -191,7 +192,7 @@ public class Range<T extends Comparable<T>>
      *@return
      *false for any value of t, if this.start equals this.end
      */
-    public boolean contains(T t, Inclusive inclusive) {
+    public boolean within(T t, Inclusive inclusive) {
 
         if(t == null) {
 
@@ -222,9 +223,9 @@ public class Range<T extends Comparable<T>>
      * @return
      * false for any value of range, if this.start equals this.end
      */
-    public boolean contains(Range<T> range) {
+    public boolean within(Range<T> range) {
 
-        return contains(range.getStart()) && contains(range.getEnd());
+        return within(range.getStart()) && within(range.getEnd());
     }
 
     /**
@@ -235,7 +236,7 @@ public class Range<T extends Comparable<T>>
      */
     public boolean intersects(Range<T> range) {
 
-        return contains(range.getStart()) || contains(range.getEnd());
+        return within(range.getStart()) || within(range.getEnd());
     }
 
     /**
@@ -362,7 +363,36 @@ public class Range<T extends Comparable<T>>
             //this.start = start;
             setValue(Param.START, start);
         }
+
+
         return this;
+    }
+
+
+    public int getLoopStart()
+    {
+        int loopStart = ((Number) getStart()).intValue();
+        switch (getInclusive())
+        {
+            case END:
+            case NONE:
+                loopStart++;
+                break;
+        }
+       return loopStart;
+    }
+
+    public int getLoopEnd()
+    {
+        int loopEnd = ((Number) getEnd()).intValue();
+        switch (getInclusive())
+        {
+            case BOTH:
+            case END:
+                loopEnd++;
+                break;
+        }
+        return loopEnd;
     }
 
     /**
@@ -387,6 +417,7 @@ public class Range<T extends Comparable<T>>
             setValue(Param.END, end);
             //this.end = end;
         }
+
         return this;
     }
 

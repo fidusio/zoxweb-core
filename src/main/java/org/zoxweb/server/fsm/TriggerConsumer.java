@@ -58,9 +58,9 @@ implements TriggerConsumerInt<T>
         this.state = state;
     }
 
-   public<R> TriggerConsumerInt<T> setFunction(Function<T, R> function)
+   public<R> TriggerConsumerInt<T> setFunction(Function<?, R> function)
    {
-       this.function = function;
+       this.function = (Function<T, ?>) function;
        return this;
    }
 

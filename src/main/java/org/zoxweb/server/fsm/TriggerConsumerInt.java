@@ -13,7 +13,7 @@ public interface TriggerConsumerInt<T>
 
     void setSate(StateInt state);
 
-    <R> TriggerConsumerInt setFunction(Function<T, R> function);
+    <R> TriggerConsumerInt<?> setFunction(Function<?, R> function);
     <R> Function<T, R> getFunction();
 
 

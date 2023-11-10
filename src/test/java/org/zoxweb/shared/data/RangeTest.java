@@ -3,6 +3,7 @@ package org.zoxweb.shared.data;
 
 import org.junit.jupiter.api.Test;
 import org.zoxweb.server.util.GSONUtil;
+import org.zoxweb.shared.util.SharedUtil;
 
 import java.io.IOException;
 
@@ -19,11 +20,11 @@ public class RangeTest {
         System.out.println(json);
         assert(intRange.getStart() instanceof Integer);
         assert(intRange.getEnd() instanceof Integer);
-        assert(!intRange.contains(500));
-        assert(!intRange.contains(0));
-        assert(intRange.contains(50));
-        assert(intRange.contains(99));
-        assert(intRange.contains(1));
+        assert(!intRange.within(500));
+        assert(!intRange.within(0));
+        assert(intRange.within(50));
+        assert(intRange.within(99));
+        assert(intRange.within(1));
 
         System.out.println(intRange);
     }
@@ -45,6 +46,7 @@ public class RangeTest {
             Range r = Range.toRange(value);
             Range rr = Range.toRange(r.toString());
             System.out.println(value+":" + Range.Inclusive.match(value) + " " + r +","  + rr);
+            System.out.println(SharedUtil.toCanonicalID(':',rr.getInclusive(), rr, rr.getStart(), rr.getEnd(), rr.getLoopStart(), rr.getLoopEnd()));
 
         }
     }

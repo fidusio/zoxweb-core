@@ -21,6 +21,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.spi.AbstractSelectableChannel;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -34,6 +35,7 @@ public class SelectorController
 	private final Selector selector;
 	private final Lock selectLock = new ReentrantLock();
 	private final Lock lock = new ReentrantLock();
+	private final AtomicLong registrationCounter = new AtomicLong();
 	
 	
 	/**
@@ -83,6 +85,7 @@ public class SelectorController
 			ch.configureBlocking(blocking);
 //			ret = ch.register(selector, ops, new SKAttachment(attachment));
 			ret = ch.register(selector, ops, attachment);
+			registrationCounter.incrementAndGet();
 			// ################################################
 		}
 		finally
@@ -181,6 +184,18 @@ public class SelectorController
 		if(ch != null){
 			cancelSelectionKey(ch.keyFor(selector));
 		}
+	}
+	public int selectionKeysCount()
+	{
+		int ret = selector.keys().size();
+		wakeup();
+		return ret;
+	}
+
+
+	public long registrationCount()
+	{
+		return registrationCounter.get();
 	}
 
 

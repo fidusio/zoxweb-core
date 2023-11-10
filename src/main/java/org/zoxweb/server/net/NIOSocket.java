@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.InetSocketAddress;
 import java.nio.channels.*;
+import java.nio.channels.spi.AbstractSelectableChannel;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Set;
@@ -109,7 +110,24 @@ public class NIOSocket
 		
 		return addDatagramChannel(dc, psf);
 	}
-	
+
+
+	public SelectionKey addClientSocket(InetSocketAddress sa, ProtocolFactory<?> psf) throws IOException
+	{
+		return addClientSocket(sa, psf, null);
+	}
+
+	public SelectionKey addClientSocket(InetSocketAddress sa, ProtocolFactory<?> psf, RateController rateController) throws IOException
+	{
+		SocketChannel sc = SocketChannel.open();
+
+		SelectionKey ret = selectorController.register(sc, SelectionKey.OP_CONNECT, psf, false);
+		sc.connect(sa);
+		return ret;
+	}
+
+
+
 	public SelectionKey addDatagramChannel(DatagramChannel dc,  ProtocolFactory<?> psf) throws IOException
 	{
 		SharedUtil.checkIfNulls("Null values", dc, psf);
@@ -119,12 +137,12 @@ public class NIOSocket
 		return sk;
 	}
 	
-	public SelectionKey addSeverSocket(InetSocketAddressDAO sa, int backlog, ProtocolFactory<?> psf) throws IOException
+	public SelectionKey addServerSocket(InetSocketAddressDAO sa, int backlog, ProtocolFactory<?> psf) throws IOException
 	{
 		return addServerSocket(new InetSocketAddress(sa.getPort()), backlog, psf);
 	}
 	
-	public SelectionKey addSeverSocket(int port, int backlog, ProtocolFactory<?> psf) throws IOException
+	public SelectionKey addServerSocket(int port, int backlog, ProtocolFactory<?> psf) throws IOException
 	{
 		return addServerSocket(new InetSocketAddress(port), backlog, psf);
 	}
@@ -168,14 +186,20 @@ public class NIOSocket
 
 						    try
 						    {
+
+
 						    	if (key.isReadable()
 									&& key.isValid()
 									&& key.channel().isOpen())
 							    {
+									// channel has data to read
+									// this is the reading part of the process
 							    	ProtocolHandler currentPP = (ProtocolHandler) key.attachment();
 									if (currentPP != null)
 							    	{
 							    		// very,very,very crucial setup prior to processing
+										// we are disabling the key operations by the selector
+										// for the current selection key
 										int keyOPs = key.interestOps();
 										key.interestOps(0);
 
@@ -195,6 +219,7 @@ public class NIOSocket
 								    			// very crucial step
 												if(key.isValid())
 												{
+													// restoring selection ops for the selection key
 													key.interestOps(keyOPs);
 													selectorController.wakeup();
 												}
@@ -314,12 +339,75 @@ public class NIOSocket
 							    	}
 	
 							    } 
-//							    else if (key.isValid()
-//										&& key.channel().isOpen()
-//										&& key.isConnectable())
-//							    {
-//							        a connection was established with a remote server.
-//							    }
+							    else if (key.isValid()
+										&& key.channel().isOpen()
+										&&  key.isConnectable())
+							    {
+
+									connectionCount++;
+									ProtocolFactory<?> protocolFactory = (ProtocolFactory<?>) key.attachment();
+									ProtocolHandler ph = protocolFactory.newInstance();
+									ph.setSelectorController(selectorController);
+									ph.setupConnection((AbstractSelectableChannel) key.channel(), false);
+									key.attach(ph);
+
+
+									int keyOPs = key.interestOps();
+									key.interestOps(0);
+
+									// a channel is ready for reading
+									if (executor != null)
+									{
+										executor.execute(()->
+										{
+											try
+											{
+												ph.accept(key);
+											}
+											catch (Exception e)
+											{
+												e.printStackTrace();
+											}
+											// very crucial step
+											if(key.isValid())
+											{
+												key.interestOps(keyOPs);
+												selectorController.wakeup();
+											}
+										});
+									}
+									else
+									{
+										// no executor set so the current thread must process the incoming data
+										try
+										{
+											ph.accept(key);
+										}
+										catch (Exception e)
+										{
+											e.printStackTrace();
+										}
+										// very crucial step
+										if(key.isValid())
+										{
+											key.interestOps(keyOPs);
+											selectorController.wakeup();
+										}
+									}
+
+
+
+//									key.attachment()
+//									if (((SocketChannel) key.channel()).isConnectionPending()) {
+//										((SocketChannel) key.channel()).finishConnect();
+//									}
+//									logger.getLogger().info("connectable:" + key);
+//									selectorController.cancelSelectionKey(key);
+//									IOUtil.close(key.channel());
+
+
+
+							    }
 //							    else if (key.isValid()
 //										&& key.channel().isOpen()
 //										&& key.isWritable())
@@ -428,11 +516,12 @@ public class NIOSocket
 	{
 		NVGenericMap ret = new NVGenericMap("nio_socket");
 		ret.add("time_stamp", DateUtil.DEFAULT_JAVA_FORMAT.format(new Date()));
-		ret.add(new NVLong("connection_counts", totalConnections()));
-		ret.add(new NVLong("select_calls_counts", selectedCountTotal));
-		ret.add(new NVLong("attack_counts", attackTotalCount));
-
-		ret.add(callsCounter);
+		ret.build(new NVLong("connection_counts", totalConnections())).
+				build(new NVLong("select_calls_counts", selectedCountTotal)).
+				build(new NVLong("attack_counts", attackTotalCount)).
+				build(new NVLong("selection_key_registration_count", selectorController.registrationCount())).
+				build(new NVLong("total_selection_keys", selectorController.selectionKeysCount())).
+				build(callsCounter);
 		return ret;
 	}
 	

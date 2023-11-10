@@ -79,7 +79,7 @@ public class EchoProtocol
             NIOSocket nioSocket = new NIOSocket(TaskUtil.getDefaultTaskProcessor());
             // Adding the plain socket factory to process non encrypted data
             // The echoPIC is the plain socket instance creator for the EchoSession class
-            nioSocket.addSeverSocket(port, backlog, new NIOSocketHandlerFactory(echoPIC));
+            nioSocket.addServerSocket(port, backlog, new NIOSocketHandlerFactory(echoPIC));
 
 
 
@@ -93,7 +93,7 @@ public class EchoProtocol
                 // The echoSIC is the secure socket instance creator for the SSLEchoSession class
                 SSLNIOSocketHandlerFactory sslnioSocketFactory = new SSLNIOSocketHandlerFactory(sslContextInfo, echoSIC);
                 //Registering the socket and port
-                nioSocket.addSeverSocket(sPort, backlog, sslnioSocketFactory);
+                nioSocket.addServerSocket(sPort, backlog, sslnioSocketFactory);
             }
             catch(Exception e)
             {

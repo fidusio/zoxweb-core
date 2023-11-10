@@ -84,7 +84,6 @@ public abstract class ProtocolHandler
 	{
 		phSChannel = (SocketChannel) asc;
 		getSelectorController().register(phSChannel, SelectionKey.OP_READ, this, isBlocking);
-
 	}
 
 
