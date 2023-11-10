@@ -101,7 +101,7 @@ extends AppCreatorDefault<NIOSocket, ConfigDAO>
 	public synchronized NIOSocket createApp() throws IOException
 	{
 		if(nioSocket == null)
-			nioSocket = new NIOSocket(TaskUtil.getDefaultTaskProcessor());
+			nioSocket = new NIOSocket(TaskUtil.defaultTaskProcessor(),TaskUtil.defaultTaskScheduler());
 		services.add(nioSocket);
 		
 		for (NVEntity nve : getAppConfig().getContent().values())

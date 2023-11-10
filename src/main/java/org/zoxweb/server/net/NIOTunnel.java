@@ -182,14 +182,14 @@ public class NIOTunnel
 
     			close();
 
-				if (log.isEnabled()) log.getLogger().info(key + ":" + key.isValid()+ " " + Thread.currentThread() + " " + TaskUtil.getDefaultTaskProcessor().availableExecutorThreads());
+				if (log.isEnabled()) log.getLogger().info(key + ":" + key.isValid()+ " " + Thread.currentThread() + " " + TaskUtil.defaultTaskProcessor().availableExecutorThreads());
     		}
     	}
     	catch(Exception e)
     	{
     		if (log.isEnabled()) e.printStackTrace();
     		IOUtil.close(this);
-			if (log.isEnabled()) log.getLogger().info(System.currentTimeMillis() + ":Connection end " + key + ":" + key.isValid()+ " " + Thread.currentThread() + " " + TaskUtil.getDefaultTaskProcessor().availableExecutorThreads());
+			if (log.isEnabled()) log.getLogger().info(System.currentTimeMillis() + ":Connection end " + key + ":" + key.isValid()+ " " + Thread.currentThread() + " " + TaskUtil.defaultTaskProcessor().availableExecutorThreads());
     		
     	}
 	}
@@ -204,13 +204,14 @@ public class NIOTunnel
 			TaskUtil.setThreadMultiplier(4);
 			
 			
-			new NIOSocket(new InetSocketAddress(port), 128, new NIOTunnelFactory(remoteAddress), TaskUtil.getDefaultTaskProcessor());
+			new NIOSocket(TaskUtil.defaultTaskProcessor(), TaskUtil.getSimpleTaskScheduler()).
+					addServerSocket(new InetSocketAddress(port), 128, new NIOTunnelFactory(remoteAddress));
 		}
 		catch(Exception e)
 		{
 			e.printStackTrace();
-			TaskUtil.getDefaultTaskScheduler().close();
-			TaskUtil.getDefaultTaskProcessor().close();
+			TaskUtil.defaultTaskScheduler().close();
+			TaskUtil.defaultTaskProcessor().close();
 		}
 	}
 

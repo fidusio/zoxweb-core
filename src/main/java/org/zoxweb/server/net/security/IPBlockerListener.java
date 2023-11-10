@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Logger;
@@ -35,7 +34,6 @@ import org.zoxweb.shared.data.events.*;
 import org.zoxweb.shared.net.InetSocketAddressDAO;
 import org.zoxweb.shared.security.IPBlockerConfig;
 import org.zoxweb.shared.util.Const.TimeInMillis;
-import org.zoxweb.shared.app.AppCreator;
 import org.zoxweb.shared.util.NVPair;
 import org.zoxweb.shared.util.SharedStringUtil;
 import org.zoxweb.shared.util.SharedUtil;
@@ -82,10 +80,10 @@ public class IPBlockerListener
 			// TODO Auto-generated method stub
 			EventListenerManager tlm = TaskUtil.getDefaultEventManager();
 			
-			IPBlockerListener ipbl = new IPBlockerListener(getAppConfig(), TaskUtil.getDefaultTaskScheduler());
+			IPBlockerListener ipbl = new IPBlockerListener(getAppConfig(), TaskUtil.defaultTaskScheduler());
 			tlm.addEventListener(ipbl);
 			ipbl.fileMonitor = new FileMonitor(getAppConfig().getAuthFile(), tlm, true);
-			TaskUtil.getDefaultTaskScheduler().queue(TimeInMillis.MINUTE.MILLIS, new Runnable(){
+			TaskUtil.defaultTaskScheduler().queue(TimeInMillis.MINUTE.MILLIS, new Runnable(){
 				public void run()
 				{
 
@@ -123,7 +121,7 @@ public class IPBlockerListener
 		if (tsp != null)
 			return tsp;
 		
-		return TaskUtil.getDefaultTaskScheduler();
+		return TaskUtil.defaultTaskScheduler();
 	}
 	
 	

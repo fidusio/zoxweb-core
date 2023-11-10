@@ -311,7 +311,7 @@ public class SMTPProvider
 			break;
 			
 		case QUEUED:
-			TaskUtil.getDefaultTaskScheduler().queue(0, smtpSenderTask);
+			TaskUtil.defaultTaskScheduler().queue(0, smtpSenderTask);
 		default:
 			break;
 		}

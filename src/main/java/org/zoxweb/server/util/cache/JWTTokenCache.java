@@ -50,7 +50,7 @@ implements KVMapStore<String, JWT>
 	
 	public JWTTokenCache()
 	{
-		this(5*TimeInMillis.MINUTE.MILLIS, TaskUtil.getDefaultTaskScheduler());
+		this(5*TimeInMillis.MINUTE.MILLIS, TaskUtil.defaultTaskScheduler());
 	}
 	
 	public JWTTokenCache(long expirationPeriod, TaskSchedulerProcessor tsp)

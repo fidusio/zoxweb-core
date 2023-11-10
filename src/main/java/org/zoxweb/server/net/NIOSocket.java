@@ -17,6 +17,7 @@ package org.zoxweb.server.net;
 
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.logging.LogWrapper;
+import org.zoxweb.server.task.TaskSchedulerProcessor;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.server.util.DateUtil;
 import org.zoxweb.shared.data.events.BaseEventObject;
@@ -51,6 +52,7 @@ public class NIOSocket
 	private boolean live = true;
 	private final SelectorController selectorController;
 	private final Executor executor;
+	private final TaskSchedulerProcessor tsp;
 	private  long connectionCount = 0;
 
 
@@ -66,20 +68,19 @@ public class NIOSocket
 	
 	
 	
-	public NIOSocket(Executor tsp) throws IOException
-	{
-		this(null, 0, null, tsp);
-	}
+//	public NIOSocket(Executor exec, TaskSchedulerProcessor tsp) throws IOException
+//	{
+//		this(null, 0, null, exec);
+//	}
 	
 	
 	
-	public NIOSocket(InetSocketAddress sa, int backlog, ProtocolFactory<?> psf, Executor exec) throws IOException
+	public NIOSocket(Executor exec, TaskSchedulerProcessor tsp) throws IOException
 	{
 		logger.getLogger().info("Executor: " + exec);
 		selectorController = new SelectorController(Selector.open());
 		this.executor = exec;
-		if (sa != null)
-			addServerSocket(sa, backlog, psf);
+		this.tsp = tsp;
 
 		TaskUtil.startRunnable(this, "NIO-SOCKET");
 	}

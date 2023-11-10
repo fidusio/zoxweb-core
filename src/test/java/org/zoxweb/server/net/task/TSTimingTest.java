@@ -12,21 +12,21 @@ public class TSTimingTest {
     @Test
     public void testPrecision()
     {
-        System.out.println(Const.TimeInMillis.toString(TaskUtil.getDefaultTaskScheduler().waitTime()) + " " + TaskUtil.getDefaultTaskScheduler().pendingTasks());
-        TaskUtil.getDefaultTaskScheduler().queue(Const.TimeInMillis.SECOND.MILLIS*2, new Runnable() {
+        System.out.println(Const.TimeInMillis.toString(TaskUtil.defaultTaskScheduler().waitTime()) + " " + TaskUtil.defaultTaskScheduler().pendingTasks());
+        TaskUtil.defaultTaskScheduler().queue(Const.TimeInMillis.SECOND.MILLIS*2, new Runnable() {
             @Override
             public void run() {
 
             }
         });
-        System.out.println(Const.TimeInMillis.toString(TaskUtil.getDefaultTaskScheduler().waitTime()) + " " + TaskUtil.getDefaultTaskScheduler().pendingTasks());
-        TaskUtil.getDefaultTaskScheduler().queue(Const.TimeInMillis.SECOND.MILLIS, new Runnable() {
+        System.out.println(Const.TimeInMillis.toString(TaskUtil.defaultTaskScheduler().waitTime()) + " " + TaskUtil.defaultTaskScheduler().pendingTasks());
+        TaskUtil.defaultTaskScheduler().queue(Const.TimeInMillis.SECOND.MILLIS, new Runnable() {
             @Override
             public void run() {
 
             }
         });
-        System.out.println(Const.TimeInMillis.toString(TaskUtil.getDefaultTaskScheduler().waitTime()) + " " + TaskUtil.getDefaultTaskScheduler().pendingTasks());
+        System.out.println(Const.TimeInMillis.toString(TaskUtil.defaultTaskScheduler().waitTime()) + " " + TaskUtil.defaultTaskScheduler().pendingTasks());
         TaskUtil.waitIfBusyThenClose(250);
     }
 }

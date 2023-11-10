@@ -20,7 +20,7 @@ public class APIIntegration
         HTTPAPIEndPoint<NVGenericMap, NVGenericMap> loginEP = HTTPAPIManager.SINGLETON.buildEndPoint(hmci, null, null);
         loginEP.setDomain("api.xlogistx.io")
         .setRateController(new RateController(loginEP.toCanonicalID(), "500/s"))
-        .setScheduler(TaskUtil.getDefaultTaskScheduler());
+        .setScheduler(TaskUtil.defaultTaskScheduler());
         HTTPAPIManager.SINGLETON.register(loginEP);
     }
 
@@ -129,7 +129,7 @@ public class APIIntegration
             if (userAPI == null)
                 userAPI = HTTPAPIManager.SINGLETON.buildEndPoint(config, encoder, decoder)
                     .setRateController(new RateController("klaviyo", "75/min"))
-                    .setScheduler(TaskUtil.getDefaultTaskScheduler())
+                    .setScheduler(TaskUtil.defaultTaskScheduler())
                     .setDomain(domain);
            // System.out.println(GSONUtil.toJSONDefault(new RateController("klavio", "75/min")));
             HTTPCallBack<NVGenericMap, NVGenericMap> callback = new HTTPCallBack<NVGenericMap, NVGenericMap>(parameters) {

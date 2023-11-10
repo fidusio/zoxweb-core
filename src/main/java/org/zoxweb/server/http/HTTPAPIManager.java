@@ -54,7 +54,7 @@ public final class HTTPAPIManager
 
         return HTTPAPIManager.SINGLETON.buildEndPoint(config, encoder, decoder)
                 .setRateController(rateController)
-                .setScheduler(TaskUtil.getDefaultTaskScheduler())
+                .setScheduler(TaskUtil.defaultTaskScheduler())
                 .setDomain(domain)
                 .setProperties(nvgm.lookup("properties"));
 //                .setPositiveResults((List<Integer>) nvgm.getValue("positive_result_codes"));

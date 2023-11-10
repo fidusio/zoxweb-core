@@ -58,7 +58,7 @@ implements Runnable
 		this.command = command;
 		
 		this.taskListener = taskListener;
-		TaskUtil.getDefaultTaskScheduler().queue(delay, this);
+		TaskUtil.defaultTaskScheduler().queue(delay, this);
 		
 		taskListener.started(this);
 	}
@@ -88,7 +88,7 @@ implements Runnable
 			return;
 		}
 		//Appointment a = new AppointmentDefault(delay);
-		TaskUtil.getDefaultTaskScheduler().queue(delay, this);
+		TaskUtil.defaultTaskScheduler().queue(delay, this);
 	}
 		
 	

@@ -21,16 +21,16 @@ public class FutureTest {
             {
                 e.printStackTrace();
             }
-            System.out.println(Thread.currentThread() + ":" + TaskUtil.getDefaultTaskProcessor().availableExecutorThreads());
+            System.out.println(Thread.currentThread() + ":" + TaskUtil.defaultTaskProcessor().availableExecutorThreads());
             //throw new  RuntimeException("tata");
             return "batata";
-        }, TaskUtil.getDefaultTaskProcessor());
+        }, TaskUtil.defaultTaskProcessor());
         cf.handleAsync(( str, e)->
         {
-            System.out.println(Thread.currentThread() + ":" + TaskUtil.getDefaultTaskProcessor().availableExecutorThreads());
+            System.out.println(Thread.currentThread() + ":" + TaskUtil.defaultTaskProcessor().availableExecutorThreads());
             System.out.println("str:" + str + " e:" + e);
             return str;
-        },TaskUtil.getDefaultTaskProcessor());
+        },TaskUtil.defaultTaskProcessor());
 
         System.out.println("Done");
         TaskUtil.waitIfBusyThenClose(50);

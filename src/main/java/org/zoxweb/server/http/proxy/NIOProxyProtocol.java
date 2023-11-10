@@ -635,7 +635,8 @@ public class NIOProxyProtocol
 			factory.setIncomingInetFilterRulesManager(clientIFRM);
 			
 			
-			NIOSocket nios = new NIOSocket(new InetSocketAddress(port), 256, factory, TaskUtil.getDefaultTaskProcessor());
+			NIOSocket nios = new NIOSocket(TaskUtil.defaultTaskProcessor(), TaskUtil.defaultTaskScheduler());
+			nios.addServerSocket(new InetSocketAddress(port), 256, factory);
 			nios.setStatLogCounter(0);
 			Runnable cleaner = new Runnable()
 					{
@@ -652,8 +653,8 @@ public class NIOProxyProtocol
 							long ts = System.nanoTime();
 							// TODO Auto-generated method stub
 							IOUtil.close(toClose);
-							TaskUtil.getDefaultTaskScheduler().close();
-							TaskUtil.getDefaultTaskProcessor().close();
+							TaskUtil.defaultTaskScheduler().close();
+							TaskUtil.defaultTaskProcessor().close();
 							ts = System.nanoTime() - ts;
 							log.getLogger().info("Cleanup took:" + ts);
 						}
@@ -668,8 +669,8 @@ public class NIOProxyProtocol
 		{
 			e.printStackTrace();
 			System.err.println("HTTPProxy <port>");
-			TaskUtil.getDefaultTaskScheduler().close();
-			TaskUtil.getDefaultTaskProcessor().close();
+			TaskUtil.defaultTaskScheduler().close();
+			TaskUtil.defaultTaskProcessor().close();
 		}
 	}
 

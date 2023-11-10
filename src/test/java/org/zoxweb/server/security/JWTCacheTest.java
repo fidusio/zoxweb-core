@@ -20,10 +20,10 @@ public class JWTCacheTest {
             int count = Integer.parseInt(args[index++]);
 
             long ttl = index < args.length ? Const.TimeInMillis.toMillis(args[index++]) : Const.TimeInMillis.SECOND.MILLIS*45;
-            TaskUtil.getDefaultTaskProcessor();
+            TaskUtil.defaultTaskProcessor();
 
             LoggerUtil.enableDefaultLogger("org.zoxweb");
-            JWTTokenCache cache = new JWTTokenCache(ttl, TaskUtil.getDefaultTaskScheduler());
+            JWTTokenCache cache = new JWTTokenCache(ttl, TaskUtil.defaultTaskScheduler());
             long sizeOfAllTockens = 0;
             long ts = System.currentTimeMillis();
             JWT jwt = null;

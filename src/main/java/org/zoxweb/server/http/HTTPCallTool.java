@@ -159,7 +159,7 @@ public final class HTTPCallTool //implements Runnable
                     hmci.setContent(content);
                 log.getLogger().info(GSONUtil.toJSONDefault(hmci,true));
                 HTTPAPIEndPoint<Void, byte[]> endpoint = new HTTPAPIEndPoint<Void, byte[]>(hmci)
-                        .setExecutor(TaskUtil.getDefaultTaskProcessor());
+                        .setExecutor(TaskUtil.defaultTaskProcessor());
 
                 endpoints.add(endpoint);
                 // vm warmup

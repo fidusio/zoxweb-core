@@ -35,7 +35,7 @@ public class StateMachine<C>
 
     public StateMachine(String name)
     {
-        this(name, TaskUtil.getDefaultTaskScheduler());
+        this(name, TaskUtil.defaultTaskScheduler());
     }
 
     public StateMachine(String name, TaskSchedulerProcessor taskSchedulerProcessor)

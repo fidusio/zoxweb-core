@@ -108,7 +108,7 @@ public class TaskUtil
 	}
 
 
-	public static TaskProcessor getDefaultTaskProcessor() {
+	public static TaskProcessor defaultTaskProcessor() {
 		if (TASK_PROCESSOR == null) {
 			try {
 				LOCK.lock();
@@ -132,13 +132,13 @@ public class TaskUtil
 		return TASK_PROCESSOR;
 	}
 	
-	public static TaskSchedulerProcessor getDefaultTaskScheduler() {
+	public static TaskSchedulerProcessor defaultTaskScheduler() {
 		if (TASK_SCHEDULER == null) {
 			try {
 				LOCK.lock();
 				
 				if (TASK_SCHEDULER == null) {
-					TASK_SCHEDULER = new TaskSchedulerProcessor(getDefaultTaskProcessor());
+					TASK_SCHEDULER = new TaskSchedulerProcessor(defaultTaskProcessor());
 				}
 			} finally {
 				LOCK.unlock();
@@ -187,7 +187,7 @@ public class TaskUtil
 	
 	public static boolean isBusy()
 	{
-	    return isBusy(getDefaultTaskProcessor(), getDefaultTaskScheduler());
+	    return isBusy(defaultTaskProcessor(), defaultTaskScheduler());
 		// getDefaultTaskScheduler().pendingTasks() != 0 || getDefaultTaskProcessor().isBusy();
 	}
 
@@ -200,12 +200,12 @@ public class TaskUtil
 
 	public static long waitIfBusy()
 	{
-		return waitIfBusy(100, getDefaultTaskProcessor(), getDefaultTaskScheduler());
+		return waitIfBusy(100, defaultTaskProcessor(), defaultTaskScheduler());
 	}
 
 	public static long waitIfBusy(long durationInMillis)
 	{
-		return waitIfBusy(durationInMillis, getDefaultTaskProcessor(), getDefaultTaskScheduler());
+		return waitIfBusy(durationInMillis, defaultTaskProcessor(), defaultTaskScheduler());
 	}
 
 	public static long waitIfBusy(long durationInMillis, TaskProcessor tp, TaskSchedulerProcessor tsp)
@@ -241,7 +241,7 @@ public class TaskUtil
 			} while (TASK_SIMPLE_SCHEDULER.isBusy());//pendingTasks() != 0 );
 			TASK_SIMPLE_SCHEDULER.close();
 		}
-		return waitIfBusyThenClose(durationInMillis, getDefaultTaskProcessor(), getDefaultTaskScheduler());
+		return waitIfBusyThenClose(durationInMillis, defaultTaskProcessor(), defaultTaskScheduler());
 	}
 
 
@@ -301,15 +301,15 @@ public class TaskUtil
 
 	public static void close()
 	{
-		getDefaultTaskScheduler().close();
-		getDefaultTaskProcessor().close();
+		defaultTaskScheduler().close();
+		defaultTaskProcessor().close();
 		getSimpleTaskScheduler().close();
 		getDefaultEventManager().close();
 	}
 
 	public static String info()
 	{
-		return getDefaultTaskScheduler().toString();
+		return defaultTaskScheduler().toString();
 	}
 
 

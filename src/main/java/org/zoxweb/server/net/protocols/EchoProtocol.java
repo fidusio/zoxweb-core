@@ -76,7 +76,7 @@ public class EchoProtocol
             // Socket backlog
             int backlog = 128;
             // Creating the NIOSocket with and executor object
-            NIOSocket nioSocket = new NIOSocket(TaskUtil.getDefaultTaskProcessor());
+            NIOSocket nioSocket = new NIOSocket(TaskUtil.defaultTaskProcessor(), TaskUtil.defaultTaskScheduler());
             // Adding the plain socket factory to process non encrypted data
             // The echoPIC is the plain socket instance creator for the EchoSession class
             nioSocket.addServerSocket(port, backlog, new NIOSocketHandlerFactory(echoPIC));

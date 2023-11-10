@@ -16,7 +16,7 @@ extends EventListenerManager<BaseEventObject<?>, EventHandlerListener<BaseEventO
 
     public DefaultEvenManager()
     {
-        this(TaskUtil.getDefaultTaskScheduler());
+        this(TaskUtil.defaultTaskScheduler());
     }
     public DefaultEvenManager(TaskSchedulerProcessor tsp)
     {

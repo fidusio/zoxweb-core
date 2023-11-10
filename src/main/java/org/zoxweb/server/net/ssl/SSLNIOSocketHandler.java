@@ -325,13 +325,14 @@ public class SSLNIOSocketHandler
 			//TaskUtil.setThreadMultiplier(4);
 			SSLContext sslContext = CryptoUtil.initSSLContext(keystore, ksType, ksPassword.toCharArray(), null, null ,null);
 
-			new NIOSocket(new InetSocketAddress(port), 512, new SSLNIOSocketHandlerFactory(new SSLContextInfo(sslContext), remoteAddress), TaskUtil.getDefaultTaskProcessor());
+			new NIOSocket(TaskUtil.defaultTaskProcessor(), TaskUtil.defaultTaskScheduler()).
+					addServerSocket(new InetSocketAddress(port), 512, new SSLNIOSocketHandlerFactory(new SSLContextInfo(sslContext), remoteAddress));
 		}
 		catch(Exception e)
 		{
 			e.printStackTrace();
-			TaskUtil.getDefaultTaskScheduler().close();
-			TaskUtil.getDefaultTaskProcessor().close();
+			TaskUtil.defaultTaskScheduler().close();
+			TaskUtil.defaultTaskProcessor().close();
 		}
 	}
 

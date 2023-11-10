@@ -96,14 +96,14 @@ public class TaskProcessorTest
 
 
 
-    TaskProcessor te = TaskUtil.getDefaultTaskProcessor();
+    TaskProcessor te = TaskUtil.defaultTaskProcessor();
     log.info("Java version: " + System.getProperty("java.version") + " number of task " + numberOfTasks +
-            " Available Threads: " + TaskUtil.getDefaultTaskProcessor().availableExecutorThreads() );
+            " Available Threads: " + TaskUtil.defaultTaskProcessor().availableExecutorThreads() );
     count(numberOfTasks);
     log.info("serial inc " + numberOfTasks + " took " + Const.TimeInMillis.toString(count(numberOfTasks)));
     runTest(te, new TaskProcessorTest(), numberOfTasks);
-    log.info("DONE " + TaskUtil.isBusy() + " thread count " + TaskUtil.getDefaultTaskProcessor().availableExecutorThreads() +
-            " pending task "  + TaskUtil.getDefaultTaskProcessor().pendingTasks());
+    log.info("DONE " + TaskUtil.isBusy() + " thread count " + TaskUtil.defaultTaskProcessor().availableExecutorThreads() +
+            " pending task "  + TaskUtil.defaultTaskProcessor().pendingTasks());
     TaskUtil.close();
   }
 
