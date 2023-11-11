@@ -671,6 +671,20 @@ public class Const {
       return convertTo(date.getTime());
     }
 
+    /**
+     * multiply MILLIS*val
+     * @param val to multiplied with
+     * @return MILLIS*val
+     */
+    public long mult(int val)
+    {
+      return MILLIS*val;
+    }
+    public long mult(long val)
+    {
+      return MILLIS*val;
+    }
+
 
     public long convertTo(long timeInMillis)
     {

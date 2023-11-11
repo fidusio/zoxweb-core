@@ -122,7 +122,7 @@ public class ServiceManager
 				NIOConfig nioConfig = new NIOConfig(configDAO);
 				NIOSocket nioSocket = nioConfig.createApp();
 				if(ipBlocker != null)
-					nioSocket.setEventManager(TaskUtil.getDefaultEventManager());
+					nioSocket.setEventManager(TaskUtil.defaultEventManager());
 				ResourceManager.SINGLETON.register(NIOConfig.RESOURCE_NAME, nioConfig);
 			}
 			catch(Exception e)

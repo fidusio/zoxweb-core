@@ -378,7 +378,7 @@ extends AppCreatorDefault<NIOSocket, ConfigDAO>
 				//if(log.isEnabled()) log.getLogger().info("\n" + GSONUtil.toJSON(appConfig, true, false, false));
 				c.setAppConfig(ipBlockerConfig);
 				c.createApp();
-				nioSocket.setEventManager(TaskUtil.getDefaultEventManager());
+				nioSocket.setEventManager(TaskUtil.defaultEventManager());
 
 			}
 		}

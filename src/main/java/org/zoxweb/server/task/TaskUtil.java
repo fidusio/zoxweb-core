@@ -148,7 +148,7 @@ public class TaskUtil
 		return TASK_SCHEDULER;
 	}
 
-	public static EventListenerManager<BaseEventObject<?>,?> getDefaultEventManager()
+	public static EventListenerManager<BaseEventObject<?>,?> defaultEventManager()
 	{
 		if (EV_MANAGER == null) {
 			try {
@@ -169,7 +169,7 @@ public class TaskUtil
 	 * Return the default single threaded task scheduler
 	 * @return
 	 */
-	public static TaskSchedulerProcessor getSimpleTaskScheduler() {
+	public static TaskSchedulerProcessor simpleTaskScheduler() {
 		if (TASK_SIMPLE_SCHEDULER == null) {
 			try {
 				LOCK.lock();
@@ -303,8 +303,8 @@ public class TaskUtil
 	{
 		defaultTaskScheduler().close();
 		defaultTaskProcessor().close();
-		getSimpleTaskScheduler().close();
-		getDefaultEventManager().close();
+		simpleTaskScheduler().close();
+		defaultEventManager().close();
 	}
 
 	public static String info()

@@ -230,7 +230,7 @@ public class TaskSchedulerProcessorTest {
 //		});
 
 
-		TaskUtil.getSimpleTaskScheduler().queue(0, new SupplierConsumerTask(new Supplier<String>()
+		TaskUtil.simpleTaskScheduler().queue(0, new SupplierConsumerTask(new Supplier<String>()
 				{
 					String str;
 					Supplier<String> init(String str)

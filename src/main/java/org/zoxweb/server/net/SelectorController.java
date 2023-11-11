@@ -15,6 +15,7 @@
  */
 package org.zoxweb.server.net;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
@@ -30,7 +31,8 @@ import java.util.concurrent.locks.ReentrantLock;
  * @author mnael
  *
  */
-public class SelectorController 
+public class SelectorController
+	implements Closeable
 {
 	private final Selector selector;
 	private final Lock selectLock = new ReentrantLock();
@@ -83,8 +85,8 @@ public class SelectorController
 
 			// configure the selection mode for the channel ###
 			ch.configureBlocking(blocking);
-//			ret = ch.register(selector, ops, new SKAttachment(attachment));
 			ret = ch.register(selector, ops, attachment);
+
 			registrationCounter.incrementAndGet();
 			// ################################################
 		}
@@ -99,6 +101,50 @@ public class SelectorController
 		
 		return ret;
 	}
+
+
+
+
+	public SelectionKey update(SelectionKey sk,
+							   int ops,
+							   Object attachment) throws IOException
+	{
+
+		try
+		{
+			// register function global lock
+			lock.lock();
+			// wakeup the selector if it is in select mode
+			selector.wakeup();
+			// lock the selectLock to prevent it from entering select mode
+			selectLock.lock();
+
+			// configure the selection mode for the channel ###
+
+
+			if(selector.keys().contains(sk))
+			{
+				sk.interestOps(ops);
+				sk.attach(attachment);
+			}
+			else
+			{
+				return null;
+			}
+			// ################################################
+		}
+		finally
+		{
+			// unlock the function global lock
+			lock.unlock();
+			// unlock the selectLock to allow the selector entering select mode
+			selectLock.unlock();
+
+		}
+
+		return sk;
+	}
+
 
 
 	
@@ -185,6 +231,14 @@ public class SelectorController
 			cancelSelectionKey(ch.keyFor(selector));
 		}
 	}
+
+	public SelectionKey channelSelectionKey(SelectableChannel channel)
+	{
+		if(channel != null){
+			return channel.keyFor(selector);
+		}
+		return null;
+	}
 	public int selectionKeysCount()
 	{
 		int ret = selector.keys().size();
@@ -219,4 +273,8 @@ public class SelectorController
 		return selector.keys().size();
 	}
 
+	@Override
+	public void close() throws IOException {
+		selector.close();
+	}
 }

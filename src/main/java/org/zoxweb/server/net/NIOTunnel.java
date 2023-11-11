@@ -204,7 +204,7 @@ public class NIOTunnel
 			TaskUtil.setThreadMultiplier(4);
 			
 			
-			new NIOSocket(TaskUtil.defaultTaskProcessor(), TaskUtil.getSimpleTaskScheduler()).
+			new NIOSocket(TaskUtil.defaultTaskProcessor(), TaskUtil.simpleTaskScheduler()).
 					addServerSocket(new InetSocketAddress(port), 128, new NIOTunnelFactory(remoteAddress));
 		}
 		catch(Exception e)

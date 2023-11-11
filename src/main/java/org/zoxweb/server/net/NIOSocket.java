@@ -39,6 +39,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * NIO Socket 
@@ -49,7 +50,7 @@ public class NIOSocket
 {
 	public static final LogWrapper logger = new LogWrapper(NIOSocket.class).setEnabled(false);
 	//public static boolean debug = false;
-	private boolean live = true;
+	private AtomicBoolean live = new AtomicBoolean(true);
 	private final SelectorController selectorController;
 	private final Executor executor;
 	private final TaskSchedulerProcessor tsp;
@@ -115,15 +116,47 @@ public class NIOSocket
 
 	public SelectionKey addClientSocket(InetSocketAddress sa, ProtocolFactory<?> psf) throws IOException
 	{
-		return addClientSocket(sa, psf, null);
+		return addClientSocket(sa, psf, 10, null);
 	}
 
-	public SelectionKey addClientSocket(InetSocketAddress sa, ProtocolFactory<?> psf, RateController rateController) throws IOException
+	public SelectionKey addClientSocket(InetSocketAddress sa, ProtocolFactory<?> psf, int timeoutInSec, RateController rateController) throws IOException
 	{
 		SocketChannel sc = SocketChannel.open();
 
 		SelectionKey ret = selectorController.register(sc, SelectionKey.OP_CONNECT, psf, false);
-		sc.connect(sa);
+		if(rateController != null)
+		{
+			tsp.queue(rateController.nextWait(), new Runnable() {
+						private InetSocketAddress isa;
+						private long timeout;
+						Runnable setInetSocketAddress(InetSocketAddress isa, long timeout)
+						{
+							this.isa = isa;
+							this.timeout = timeout;
+							return this;
+						}
+						@Override
+						public void run() {
+							try
+							{
+								sc.connect(isa);
+								tsp.queue(timeout, new NIOChannelMonitor(ret, selectorController));
+							}
+							catch (Exception e)
+							{
+								e.printStackTrace();
+							}
+						}
+					}.setInetSocketAddress(sa, TimeInMillis.SECOND.mult(timeoutInSec))
+
+			);
+		}
+		else
+		{
+			sc.connect(sa);
+			tsp.queue(TimeInMillis.SECOND.mult(timeoutInSec), new NIOChannelMonitor(ret, selectorController));
+		}
+
 		return ret;
 	}
 
@@ -165,14 +198,14 @@ public class NIOSocket
 		long snapTime = System.currentTimeMillis();
 		long attackTimestamp = 0;
 
-		while(live)
+		while(live.get())
 		{
 			try 
 			{
 				int selectedCount = 0;
 				if (selectorController.isOpen())
 				{
-					selectedCount = selectorController.select();
+					selectedCount = selectorController.select(0);
 					long delta = System.nanoTime();
 					if (selectedCount > 0)
 					{
@@ -350,7 +383,7 @@ public class NIOSocket
 									ProtocolHandler ph = protocolFactory.newInstance();
 									ph.setSelectorController(selectorController);
 									ph.setupConnection((AbstractSelectableChannel) key.channel(), false);
-									key.attach(ph);
+
 
 
 									int keyOPs = key.interestOps();
@@ -472,27 +505,26 @@ public class NIOSocket
 	public boolean isClosed()
 	{
 		// TODO Auto-generated method stub
-		return live;
+		return live.get();
 	}
 
 	@Override
 	public void close() throws IOException 
 	{
 		// TODO Auto-generated method stub
-		live = false;
-		
-		Set<SelectionKey>  keys = selectorController.keys();
-		for (SelectionKey sk : keys)
-		{
-			if (sk.channel() != null)
-				IOUtil.close(sk.channel());
-			try
-			{
-				selectorController.cancelSelectionKey(sk);
+
+		if(live.getAndSet(false)) {
+			Set<SelectionKey> keys = selectorController.keys();
+			for (SelectionKey sk : keys) {
+				if (sk.channel() != null)
+					IOUtil.close(sk.channel());
+				try {
+					selectorController.cancelSelectionKey(sk);
+				} catch (Exception e) {
+				}
 			}
-			catch(Exception e)
-			{
-			}
+
+			IOUtil.close(selectorController);
 		}
 
 	}

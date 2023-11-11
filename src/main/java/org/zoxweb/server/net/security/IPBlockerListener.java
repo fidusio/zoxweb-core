@@ -78,7 +78,7 @@ public class IPBlockerListener
 		@Override
 		public IPBlockerListener createApp() throws NullPointerException, IllegalArgumentException, IOException {
 			// TODO Auto-generated method stub
-			EventListenerManager tlm = TaskUtil.getDefaultEventManager();
+			EventListenerManager tlm = TaskUtil.defaultEventManager();
 			
 			IPBlockerListener ipbl = new IPBlockerListener(getAppConfig(), TaskUtil.defaultTaskScheduler());
 			tlm.addEventListener(ipbl);
