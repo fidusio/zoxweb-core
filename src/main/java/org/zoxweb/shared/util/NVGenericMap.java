@@ -293,6 +293,14 @@ public class NVGenericMap
 	}
 
 
+	public <V> V lookupValue(String fullyQualifiedName)
+	{
+		GetNameValue<V> ret = lookup(fullyQualifiedName);
+		if (ret != null)
+			return ret.getValue();
+		return null;
+	}
+
 
 	public <V extends GetNameValue<?>> V lookup(String fullyQualifiedName)
 	{

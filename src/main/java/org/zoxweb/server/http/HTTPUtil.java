@@ -53,8 +53,8 @@ public class HTTPUtil
 	private static final Lock LOCK = new ReentrantLock();
 	private static final AtomicBoolean extraMethodAdded =  new AtomicBoolean();
 
-	public static final  String WEB_SOCKECT_STRING =  "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
-	private static Lock lock = new ReentrantLock();
+	//public static final  String WEB_SOCKECT_STRING =  "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
+	private static final Lock lock = new ReentrantLock();
 	private static final MessageDigest SHA_1 = HashUtil.getMessageDigestSilent("SHA-1");
 
 	/**
@@ -68,20 +68,19 @@ public class HTTPUtil
 
 
 
-	public static String toWebSocketAccept(String secWebSocketKey) throws NoSuchAlgorithmException {
+	public static String toWebSocketAcceptValue(String secWebSocketKey) throws NoSuchAlgorithmException {
 
 		byte[] secWebSocketAcceptBytes = null;
 		try
 		{
 			lock.lock();
-			secWebSocketAcceptBytes = SHA_1.digest(SharedStringUtil.getBytes(secWebSocketKey + WEB_SOCKECT_STRING));
+			secWebSocketAcceptBytes = SHA_1.digest(SharedStringUtil.getBytes(secWebSocketKey + HTTPConst.WEB_SOCKET_UUID));
 		}
 		finally
 		{
 			lock.unlock();
 		}
-		String secWebSocketAccept = SharedBase64.encodeAsString(SharedBase64.Base64Type.DEFAULT, secWebSocketAcceptBytes);
-		return secWebSocketAccept;
+		return SharedBase64.encodeAsString(SharedBase64.Base64Type.DEFAULT, secWebSocketAcceptBytes);
 	}
 
 	/**
@@ -145,6 +144,19 @@ public class HTTPUtil
 		hmci.setContentType(HTTPMediaType.APPLICATION_JSON, HTTPConst.CHARSET_UTF_8);
 		hmci.setContent(GSONUtil.toJSONGenericMap(nvgm,false, false, true));
 		return hmci;
+	}
+
+
+	public static UByteArrayOutputStream formatResponse(HTTPCallException e, UByteArrayOutputStream ubaos)
+	{
+		if (e.getMessageConfig() != null)
+		{
+			return formatResponse(e.getMessageConfig(), ubaos);
+		}
+		else
+		{
+			return formatResponse(e.getResponseData(), ubaos);
+		}
 	}
 
 

@@ -24,17 +24,19 @@ extends IOException
 	
 	private final HTTPStatusCode statusCode;
 	private final HTTPResponseData responseData;
+
+	private final HTTPMessageConfigInterface hmci;
 	
 	public HTTPCallException()
 	{
-		this(null, null, null);
+		this(null, null, (HTTPResponseData)null);
 	}
 	
 
 
 	public HTTPCallException(String reason)
 	{
-		this(reason, null, null);
+		this(reason, null, (HTTPResponseData)null);
 	}
 
 	public HTTPCallException(String reason, HTTPResponseData rd)
@@ -44,18 +46,33 @@ extends IOException
 
 	public HTTPCallException(String reason, HTTPStatusCode statusCode)
 	{
-		this(reason, statusCode, null);
+		this(reason, statusCode, (HTTPResponseData)null);
 	}
 
 	public HTTPCallException(String reason, HTTPStatusCode statusCode, HTTPResponseData rd)
 	{
-		super( reason);
-		responseData = rd;
+		super(reason);
+		this.responseData = rd;
+		this.hmci = null;
 		if (statusCode == null && responseData != null)
 			this.statusCode = HTTPStatusCode.statusByCode(rd.getStatus());
 		else
 			this.statusCode = statusCode;
 	}
+
+	public HTTPCallException(String reason, HTTPMessageConfigInterface hmci)
+	{
+		this(reason, null, hmci);
+	}
+
+	public HTTPCallException(String reason, HTTPStatusCode statusCode, HTTPMessageConfigInterface hmci)
+	{
+		super(reason);
+		this.responseData = null;
+		this.hmci = hmci;
+		this.statusCode =  statusCode != null ? statusCode : hmci.getHTTPStatusCode();
+	}
+
 	
 	@Override
 	public String toString() {
@@ -66,6 +83,10 @@ extends IOException
 	public HTTPResponseData getResponseData() 
 	{
 		return responseData;
+	}
+	public HTTPMessageConfigInterface getMessageConfig()
+	{
+		return hmci;
 	}
 
 	public HTTPStatusCode getStatusCode()

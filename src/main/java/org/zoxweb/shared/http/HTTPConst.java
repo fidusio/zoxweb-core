@@ -6,6 +6,8 @@ public final class HTTPConst
 {
     private HTTPConst(){}
 
+    public static final String WEB_SOCKET_UUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
+
     public enum CommonHeader
             implements GetNameValue<String>
     {
@@ -92,13 +94,13 @@ public final class HTTPConst
 
         if(values != null)
         {
-            for(int i=0; i<values.length; i++)
+            for(String value: values)
             {
                 if (headerValue.length() > 0)
                     headerValue.append("; ");
 
-                if (!SharedStringUtil.isEmpty(values[i]))
-                    headerValue.append(values[i]);
+                if (!SharedStringUtil.isEmpty(value))
+                    headerValue.append(value);
 
             }
         }
@@ -120,18 +122,18 @@ public final class HTTPConst
 
         if(gnvs != null)
         {
-            for(int i=0; i<gnvs.length; i++)
+            for(GetNameValue<?> gnv: gnvs)
             {
                 if (headerValue.length() > 0)
                     headerValue.append("; ");
 
-                if (gnvs[i] !=null && !SharedStringUtil.isEmpty(gnvs[i].getName()))
+                if (gnv !=null && !SharedStringUtil.isEmpty(gnv.getName()))
                 {
-                    headerValue.append(gnvs[i].getName());
-                    if(gnvs[i].getValue() != null)
+                    headerValue.append(gnv.getName());
+                    if(gnv.getValue() != null)
                     {
                         headerValue.append('=');
-                        headerValue.append(gnvs[i].getValue());
+                        headerValue.append(gnv.getValue());
                     }
                 }
 

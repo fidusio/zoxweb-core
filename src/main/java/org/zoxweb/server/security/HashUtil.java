@@ -31,6 +31,7 @@ import org.zoxweb.shared.crypto.BCryptHash;
 import org.zoxweb.shared.crypto.CryptoConst;
 import org.zoxweb.shared.crypto.PasswordDAO;
 import org.zoxweb.shared.security.AccessException;
+import org.zoxweb.shared.util.SharedBase64;
 import org.zoxweb.shared.util.SharedStringUtil;
 import org.zoxweb.shared.util.SharedUtil;
 
@@ -347,6 +348,31 @@ public class HashUtil {
           throws NullPointerException, IllegalArgumentException, AccessException {
     SharedUtil.checkIfNulls("Null values", passwordDAO, password);
     validatePassword(passwordDAO, password.toCharArray());
+  }
+
+
+  public static String hashAsBase64(String algo, byte[] data) throws NoSuchAlgorithmException {
+    return SharedBase64.encodeAsString(SharedBase64.Base64Type.DEFAULT, hash(algo,data));
+  }
+
+  public static String hashAsBase64(String algo, String msg) throws NoSuchAlgorithmException {
+    return SharedBase64.encodeAsString(SharedBase64.Base64Type.DEFAULT, hash(algo, SharedStringUtil.getBytes(msg)));
+  }
+
+
+  public static String hashAsBase64(CryptoConst.HASHType algo, byte[] data) throws NoSuchAlgorithmException {
+    return SharedBase64.encodeAsString(SharedBase64.Base64Type.DEFAULT, hash(algo,data));
+  }
+
+  public static String hashAsBase64(CryptoConst.HASHType algo, String msg) throws NoSuchAlgorithmException {
+    return SharedBase64.encodeAsString(SharedBase64.Base64Type.DEFAULT, hash(algo, SharedStringUtil.getBytes(msg)));
+  }
+
+  public static byte[] hash(CryptoConst.HASHType algo, byte[] data) throws NoSuchAlgorithmException {
+    return hash(algo.getName(), data);
+  }
+  public static byte[] hash(String algo, byte[] data) throws NoSuchAlgorithmException {
+    return hashSequence(algo, data);
   }
 
 
