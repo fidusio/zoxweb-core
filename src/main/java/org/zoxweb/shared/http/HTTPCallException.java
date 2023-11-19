@@ -76,7 +76,7 @@ extends IOException
 	
 	@Override
 	public String toString() {
-		return super.toString()+"\n" + getResponseData();
+		return super.toString()+  " " +statusCode + "\n" + (getResponseData() != null ? getResponseData() : getMessageConfig());
 	}
 
 

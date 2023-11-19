@@ -11,7 +11,7 @@ public class HTTPHeaderTest {
     @Test
     public void testHeaderName()
     {
-        System.out.println(HTTPHeader.toString(HTTPConst.toHTTPHeader(HTTPHeader.ACCESS_CONTROL_ALLOW_CREDENTIALS, HTTPMediaType.APPLICATION_JSON)));
+        System.out.println(HTTPConst.toString(HTTPConst.toHTTPHeader(HTTPHeader.ACCESS_CONTROL_ALLOW_CREDENTIALS, HTTPMediaType.APPLICATION_JSON)));
     }
     @Test
     public void testHeaderFormat()
@@ -22,7 +22,7 @@ public class HTTPHeaderTest {
                 new NVPair("preload", (String) null),
         };
 
-        System.out.println(HTTPHeader.toString(HTTPConst.toHTTPHeader(HTTPHeader.STRICT_TRANSPORT_SECURITY, gnvs)));
+        System.out.println(HTTPConst.toString(HTTPConst.toHTTPHeader(HTTPHeader.STRICT_TRANSPORT_SECURITY, gnvs)));
 
     }
 }

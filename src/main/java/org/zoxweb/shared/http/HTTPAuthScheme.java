@@ -219,7 +219,7 @@ public enum HTTPAuthScheme
 		HTTPAuthScheme type = SharedUtil.lookupEnum(typeStr, HTTPAuthScheme.values());
 		if (type == null)
 		{
-			throw new IllegalArgumentException("Invalid authentication value " + value );
+			return new HTTPAuthorization(typeStr, tokens[index++]);
 		}
 		
 		return type.toHTTPAuthentication(tokens[index++]);

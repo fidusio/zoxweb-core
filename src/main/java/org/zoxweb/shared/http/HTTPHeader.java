@@ -86,8 +86,21 @@ public enum HTTPHeader
 	{
 		return name;
 	}
-	
-	
+
+////	public GetNameValue<String> toHTTPHeader(GetValue<String> ...values)
+////	{
+////		return toHTTPHeader(this, values);
+////	}
+////	public GetNameValue<String> toHTTPHeader(String ...values)
+////	{
+////		return toHTTPHeader(this, values);
+////	}
+//
+//
+//
+//
+//
+//
 //	public static GetNameValue<String> toHTTPHeader(GetName gn, GetValue<String> ...values)
 //	{
 //		return toHTTPHeader(gn.getName(), values);
@@ -150,7 +163,7 @@ public enum HTTPHeader
 //
 //		return new NVPair(name, headerValue.toString());
 //	}
-
+//
 //	public static GetNameValue<String> toHTTPHeader(GetName name, GetNameValue<?> ...gnvs)
 //	{
 //
@@ -185,14 +198,6 @@ public enum HTTPHeader
 //		return new NVPair(name, headerValue.toString());
 //	}
 
-	public static String toString(GetNameValue<?> gnv)
-	{
-		return gnv.getName() + ": " + gnv.getValue();
-	}
 
-	public static byte[] toBytes(GetNameValue<?> gnv)
-	{
-		return SharedStringUtil.getBytes(gnv.getName() + ": " + gnv.getValue());
-	}
 
 }

@@ -185,7 +185,7 @@ public class HTTPUtil
 		for (GetNameValue<String> header : hcc.getHeaders().asArrayValuesString().values())
 		{
 			// header.getName() + ": " + header.getValue())
-			ubaos.write(HTTPHeader.toBytes(header));
+			ubaos.write(HTTPConst.toBytes(header));
 			// header end of line
 		    ubaos.write(Delimiter.CRLF.getValue());
 		}

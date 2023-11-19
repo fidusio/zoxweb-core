@@ -2790,6 +2790,29 @@ public class SharedUtil
 		
 		return false;
 	}
+
+
+	public static <V> boolean contains(V match, V ...vals)
+	{
+		if (match != null)
+		{
+			for (V toFind : vals)
+			{
+				if (toFind != null)
+				{
+					if (match == toFind)
+						return true;
+
+					if (toFind instanceof String && match instanceof String) {
+						if (((String) toFind).equalsIgnoreCase((String) match))
+							return true;
+					}
+				}
+			}
+		}
+
+		return false;
+	}
 	
 	
 	public static NVStringList toNVStringList(String name, String[] values, boolean skipEmptyOrNull)

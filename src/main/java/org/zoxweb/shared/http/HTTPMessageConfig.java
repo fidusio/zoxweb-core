@@ -480,9 +480,21 @@ public class HTTPMessageConfig
 	 * @see org.zoxweb.shared.http.HTTPMessageConfigInterface#getAuthorization()
 	 */
 	@Override
-	public HTTPAuthorization getAuthorization() {
+	public synchronized HTTPAuthorization getAuthorization() {
 		
-		return lookupValue(Params.AUTHORIZATION);
+		HTTPAuthorization  authorization = lookupValue(Params.AUTHORIZATION);
+		if (authorization == null)
+		{
+			GetNameValue<String> authorizationHeader = getHeaders().lookup(HTTPHeader.AUTHORIZATION);
+			if (authorizationHeader != null)
+			{
+				authorization = HTTPAuthScheme.parse(authorizationHeader);
+				if(authorization != null)
+					setAuthorization(authorization);
+			}
+		}
+
+		return  authorization;
 	}
 
 
@@ -490,7 +502,8 @@ public class HTTPMessageConfig
 	/**
 	 */
 	@Override
-	public void setAuthorization(HTTPAuthorization httpAuthentication) {
+	public synchronized void setAuthorization(HTTPAuthorization httpAuthentication)
+	{
 		
 		setValue(Params.AUTHORIZATION, httpAuthentication);
 	}

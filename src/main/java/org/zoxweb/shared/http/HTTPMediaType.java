@@ -15,9 +15,7 @@
  */
 package org.zoxweb.shared.http;
 
-import org.zoxweb.shared.util.GetNameValue;
 import org.zoxweb.shared.util.GetValue;
-import org.zoxweb.shared.util.NVPair;
 import org.zoxweb.shared.util.SharedStringUtil;
 import org.zoxweb.shared.util.SharedUtil;
 
@@ -91,21 +89,18 @@ public enum HTTPMediaType
 				}
 			}
 		}
-		
 		return null;
-		
-		
 	}
 	
-	public static GetNameValue<String> toContentType(GetValue<String> contentType)
-	{
-		return new NVPair(HTTPHeader.CONTENT_TYPE, contentType);
-	}
-	
-	
-	public static GetNameValue<String> toContentType(String contentType)
-	{
-		return new NVPair(HTTPHeader.CONTENT_TYPE, contentType);
-	}
+//	public static GetNameValue<String> toContentType(GetValue<String> contentType)
+//	{
+//		return new NVPair(HTTPHeader.CONTENT_TYPE, contentType);
+//	}
+//
+//
+//	public static GetNameValue<String> toContentType(String contentType)
+//	{
+//		return new NVPair(HTTPHeader.CONTENT_TYPE, contentType);
+//	}
 
 }

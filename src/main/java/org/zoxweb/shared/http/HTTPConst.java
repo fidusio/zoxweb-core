@@ -7,6 +7,8 @@ public final class HTTPConst
     private HTTPConst(){}
 
     public static final String WEB_SOCKET_UUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
+    public static final GetNameValue<String> CHARSET_UTF_8 = new NVPair("charset", "utf-8");
+
 
     public enum CommonHeader
             implements GetNameValue<String>
@@ -16,6 +18,7 @@ public final class HTTPConst
 
         CONNECTION_UPGRADE(HTTPHeader.CONNECTION, "upgrade"),
         UPGRADE_WEBSOCKET(HTTPHeader.UPGRADE, "websocket"),
+        WWW_AUTHENTICATE(HTTPHeader.WWW_AUTHENTICATE, "Basic realm=\"xlogistx\""),
         ;
         private final String name;
         private final String value;
@@ -39,10 +42,6 @@ public final class HTTPConst
             return value;
         }
     }
-
-    public static final GetNameValue<String> CHARSET_UTF_8 = new NVPair("charset", "utf-8");
-
-
 
 
     public static GetNameValue<String> toHTTPHeader(GetName gn, GetValue<String>...values)
@@ -110,7 +109,6 @@ public final class HTTPConst
 
     public static GetNameValue<String> toHTTPHeader(GetName name, GetNameValue<?> ...gnvs)
     {
-
         return toHTTPHeader(name.getName(), gnvs);
     }
 
@@ -142,4 +140,14 @@ public final class HTTPConst
         return new NVPair(name, headerValue.toString());
     }
 
+
+    public static String toString(GetNameValue<?> gnv)
+    {
+        return gnv.getName() + ": " + gnv.getValue();
+    }
+
+    public static byte[] toBytes(GetNameValue<?> gnv)
+    {
+        return SharedStringUtil.getBytes(gnv.getName() + ": " + gnv.getValue());
+    }
 }
