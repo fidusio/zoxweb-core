@@ -15,12 +15,12 @@
  */
 package org.zoxweb;
 
-import java.io.ByteArrayOutputStream;
-import java.util.zip.GZIPOutputStream;
-
-import org.zoxweb.server.util.ZIPUtil;
+import org.zoxweb.server.util.JarTool;
 import org.zoxweb.shared.util.QuickLZ;
 import org.zoxweb.shared.util.SharedStringUtil;
+
+import java.io.ByteArrayOutputStream;
+import java.util.zip.GZIPOutputStream;
 
 public class QuickLZTest {
 
@@ -51,8 +51,8 @@ public class QuickLZTest {
       System.out.println(newStr.equals(str) + " new str " + newStr);
 
       // gzip test
-      byte zipBuffer[] = ZIPUtil.gzip(str);
-      String gunzipStr = SharedStringUtil.toString(ZIPUtil.gunzip(zipBuffer));
+      byte[] zipBuffer = JarTool.gzip(str);
+      String gunzipStr = SharedStringUtil.toString(JarTool.gunzip(zipBuffer));
       System.out.println(str.equals(gunzipStr) + " zipBuffer " + zipBuffer.length);
     } catch (Exception e) {
       e.printStackTrace();

@@ -3,13 +3,34 @@ package org.zoxweb.shared.security.shiro;
 import org.zoxweb.shared.data.PropertyDAO;
 import org.zoxweb.shared.util.*;
 
-import java.util.List;
+import java.util.*;
 
 @SuppressWarnings("serial")
 public class ShiroSubjectData
 extends PropertyDAO
 implements AppGlobalID<String>, SubjectID<String>
 {
+  public enum ExtraParam
+    implements GetName
+  {
+    REALM("realm"),
+    SESSION_TIMEOUT("session_timeout"),
+    SESSION_ID("session_id"),
+
+    ;
+    private final String name;
+    ExtraParam(String name)
+    {
+      this.name = name;
+    }
+
+    public String getName()
+    {
+      return name;
+    }
+  }
+
+
   public enum Param
   implements GetNVConfig, GetName
   {
@@ -42,15 +63,13 @@ implements AppGlobalID<String>, SubjectID<String>
   public ShiroSubjectData() {
     super(NVC_SUBJECT_DATA);
     // TODO Auto-generated constructor stubs
-//    getProperties().add(SharedUtil.metaConfigToNVBase(Param.ROLES.getNVConfig()));
-//    getProperties().add(SharedUtil.metaConfigToNVBase(Param.PERMISSIONS.getNVConfig()));
   }
 
   public List<String> getPermissions()
   {
     return lookupValue((GetName)Param.PERMISSIONS);
   }
-  
+
   public List<String> getRoles()
   {
     return lookupValue((GetName)Param.ROLES);
@@ -80,5 +99,29 @@ implements AppGlobalID<String>, SubjectID<String>
     // TODO Auto-generated method stub
     setValue(Param.SUBJECT_ID, id);
   }
+
+
+  public Set<String> permissions()
+  {
+    return Collections.unmodifiableSet(new HashSet<String>(lookupValue((GetName)Param.PERMISSIONS)));
+  }
+
+  public Set<String> roles()
+  {
+    return Collections.unmodifiableSet(new HashSet<String>(lookupValue((GetName)Param.ROLES)));
+  }
+
+
+  public String realm()
+  {
+    return getProperties().lookupValue(ExtraParam.REALM);
+  }
+
+  public long sessionTimeout()
+  {
+    return getProperties().lookupValue(ExtraParam.SESSION_TIMEOUT);
+  }
+
+  public String sessionID(){ return getProperties().lookupValue(ExtraParam.SESSION_ID);}
 
 }

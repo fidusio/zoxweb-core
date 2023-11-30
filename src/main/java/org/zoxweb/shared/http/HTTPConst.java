@@ -15,13 +15,20 @@ public final class HTTPConst
     {
         CONNECTION_CLOSE(HTTPHeader.CONNECTION, "close"),
         CONNECTION_KEEP_ALIVE(HTTPHeader.CONNECTION, "keep-alive"),
-
         CONNECTION_UPGRADE(HTTPHeader.CONNECTION, "upgrade"),
         UPGRADE_WEBSOCKET(HTTPHeader.UPGRADE, "websocket"),
         WWW_AUTHENTICATE(HTTPHeader.WWW_AUTHENTICATE, "Basic realm=\"xlogistx\""),
+        X_CONTENT_TYPE_OPTIONS_NO_SNIFF("X-Content-Type-Options", " nosniff"),
+        CONTENT_TYPE_JSON_UTF8(toHTTPHeader(HTTPHeader.CONTENT_TYPE, HTTPMediaType.APPLICATION_JSON, HTTPConst.CHARSET_UTF_8)),
         ;
         private final String name;
         private final String value;
+
+        CommonHeader(GetNameValue<String> gnv)
+        {
+            this.name = gnv.getName();
+            this.value = gnv.getValue();
+        }
 
         CommonHeader(GetName name, String value)
         {

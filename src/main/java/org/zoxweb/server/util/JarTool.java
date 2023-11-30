@@ -27,6 +27,8 @@ import java.net.URLClassLoader;
 import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -369,6 +371,62 @@ public class JarTool {
 		catch(Exception e)
 		{
 			e.printStackTrace();
+		}
+	}
+
+	public static byte[] gzip(String str)
+			throws NullPointerException, IllegalArgumentException, IOException
+	{
+		return gzip(SharedStringUtil.getBytes(str));
+	}
+
+	public static byte[] gzip(byte[] content)
+			throws NullPointerException, IllegalArgumentException, IOException
+	{
+		SharedUtil.checkIfNulls("Can't zip null content", content);
+
+		if (content.length == 0)
+		{
+			throw new IllegalArgumentException("Content is empty");
+		}
+
+		ByteArrayOutputStream output = null;
+		GZIPOutputStream gzipOutputStream = null;
+
+		try
+		{
+			output = new ByteArrayOutputStream(content.length);
+			gzipOutputStream = new GZIPOutputStream(output);
+			gzipOutputStream.write(content);
+			gzipOutputStream.flush();
+			gzipOutputStream.finish();
+			return output.toByteArray();
+		}
+		finally
+		{
+			IOUtil.close(gzipOutputStream);
+		}
+	}
+
+	public static byte[] gunzip(byte[] content)
+			throws NullPointerException, IllegalArgumentException, IOException
+	{
+		SharedUtil.checkIfNulls("Can't zip null content", content);
+
+		if (content.length == 0)
+		{
+			throw new IllegalArgumentException("Content is empty");
+		}
+
+		GZIPInputStream gzipInputStream = null;
+
+		try
+		{
+			return IOUtil.inputStreamToByteArray(new GZIPInputStream(new ByteArrayInputStream(content)), false).toByteArray();
+		}
+		finally
+		{
+			IOUtil.close(gzipInputStream);
 		}
 	}
 
