@@ -242,6 +242,7 @@ public final class CryptoConst
 	implements GetName
 	{
 		ALL("All"),
+		API_KEY("ApiKey"), // custom authentication like opaque key SSWS etc
 		BASIC("Basic"),
 		BEARER("Bearer"),
 		DIGEST("Digest"),

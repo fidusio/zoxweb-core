@@ -22,6 +22,6 @@ public interface AuthenticationHandler<I, O>
     extends IsSecure
 {
 
-	public void authenticate(I input, O output) throws AccessException;
+	void authenticate(I input, O output) throws AccessException;
 
 }

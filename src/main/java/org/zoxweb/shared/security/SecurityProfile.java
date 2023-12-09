@@ -11,7 +11,10 @@ import java.util.List;
 
 public class SecurityProfile
 extends PropertyDAO
+implements ResourceSecurity
 {
+
+
     public enum Param
             implements GetNVConfig
     {
@@ -35,7 +38,10 @@ extends PropertyDAO
         }
     }
 
-
+    private String[] permissions = null;
+    private String[] roles = null;
+    private String[] restrictions  = null;
+    AuthenticationType[] authenticationTypes = null;
 
     /**
      * This NVConfigEntity type constant is set to an instantiation of a NVConfigEntityLocal object based on DataContentDAO.
@@ -71,6 +77,7 @@ extends PropertyDAO
 
     public void setPermissions(String ...permissions)
     {
+        this.permissions = null;
         ((NVStringList)lookup(Param.PERMISSIONS)).setValues(permissions);
     }
 
@@ -81,7 +88,9 @@ extends PropertyDAO
 
     public void setRoles(String ...roles)
     {
+        this.roles = null;
         ((NVStringList)lookup(Param.ROLES)).setValues(roles);
+
     }
 
     public String[] getRestrictions()
@@ -91,7 +100,9 @@ extends PropertyDAO
 
     public void setRestrictions(String ...restrictions)
     {
+        this.restrictions = null;
         ((NVStringList)lookup(Param.RESTRICTIONS)).setValues(restrictions);
+
     }
 
     public AuthenticationType[] getAuthenticationTypes()
@@ -101,7 +112,67 @@ extends PropertyDAO
 
     public void setAuthenticationTypes(CryptoConst.AuthenticationType...authTypes)
     {
+        this.authenticationTypes = null;
         NVEnumList el = (NVEnumList) lookup(Param.AUTHENTICATIONS);
         el.setValues(authTypes);
+    }
+
+    @Override
+    public String[] permissions()
+    {
+        if (permissions == null)
+        {
+            synchronized (this)
+            {
+                if(permissions == null)
+                    permissions = getPermissions();
+            }
+        }
+        return permissions;
+    }
+
+    @Override
+    public String[] roles() {
+
+        if (roles == null)
+        {
+            synchronized (this)
+            {
+                if(roles == null)
+                    roles = getRoles();
+            }
+        }
+
+        return roles;
+
+    }
+
+    @Override
+    public String[] restrictions() {
+        if (restrictions == null)
+        {
+            synchronized (this)
+            {
+                if(restrictions == null)
+                    restrictions = getRestrictions();
+            }
+        }
+
+        return restrictions;
+    }
+
+    @Override
+    public AuthenticationType[] authenticationTypes() {
+        if (authenticationTypes == null)
+        {
+            synchronized (this)
+            {
+                if(authenticationTypes == null)
+                {
+                    authenticationTypes = getAuthenticationTypes();
+                }
+            }
+        }
+        return authenticationTypes;
     }
 }
