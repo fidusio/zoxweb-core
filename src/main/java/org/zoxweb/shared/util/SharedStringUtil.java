@@ -561,6 +561,11 @@ public final class SharedStringUtil
     	return toString(array, 0, array.length);
 	}
 
+	public static String toString(char[] array)
+	{
+		return new String(array);
+	}
+
 
 	/**
 	 * Return the String based on the byte array  using encoding UTF-8.
