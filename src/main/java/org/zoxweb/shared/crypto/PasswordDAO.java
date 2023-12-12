@@ -78,7 +78,7 @@ public class PasswordDAO
 
 		if (mdt == null)
 		{
-			throw new IllegalArgumentException("Unssupported Message Digest:" + name);
+			throw new IllegalArgumentException("Unsupported Message Digest:" + name);
 		}
 		
 		super.setName(mdt.getName());

@@ -1,5 +1,6 @@
 package org.zoxweb.shared.annotation;
-import org.zoxweb.shared.crypto.CryptoConst;
+
+import org.zoxweb.shared.crypto.CryptoConst.AuthenticationType;
 import org.zoxweb.shared.http.URIScheme;
 import org.zoxweb.shared.util.Const;
 
@@ -15,7 +16,11 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface SecurityProp
 {
-    CryptoConst.AuthenticationType[] authentications();
+    /**
+     *
+     * @return array of authentication types
+     */
+    AuthenticationType[] authentications() default {};
 
     /**
      * List of permissions to be applied to the current function
@@ -36,14 +41,14 @@ public @interface SecurityProp
 
     /**
      * List of custom restrictions such as localhost
-     * @return list of restrictions
+     * @return array of restrictions
      */
     String[] restrictions() default {};
 
 
     /**
      * List of NetProtocols to be assigned HTTPS, NetProtocol.HTTP ...
-     * @return list of HTTPMethod
+     * @return array of URIScheme
      */
     URIScheme[] protocols() default {};
 
