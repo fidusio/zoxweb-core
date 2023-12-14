@@ -55,13 +55,13 @@ public class HTTPAPIEndPoint<I,O>
     private DataDecoder<HTTPResponseData, O> dataDecoder;
     private transient Executor executor;
     private transient TaskSchedulerProcessor tsp;
-    private NamedDescription namedDescription = new NamedDescription();
+    private final NamedDescription namedDescription = new NamedDescription();
     private String domain;
 
-    private Map<Integer, HTTPStatusCode> positiveResults = new HashMap<>();
+    private final Map<Integer, HTTPStatusCode> positiveResults = new HashMap<>();
 
-    private AtomicLong successCounter = new AtomicLong();
-    private AtomicLong failedCounter = new AtomicLong();
+    private final AtomicLong successCounter = new AtomicLong();
+    private final AtomicLong failedCounter = new AtomicLong();
     private NVGenericMap properties = new NVGenericMap();
 
 

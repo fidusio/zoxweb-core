@@ -3,23 +3,22 @@ package org.zoxweb.server.http;
 import org.zoxweb.server.io.UByteArrayOutputStream;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.http.HTTPAttribute;
-import org.zoxweb.shared.http.HTTPMessageConfigInterface;
 import org.zoxweb.shared.http.HTTPMediaType;
+import org.zoxweb.shared.http.HTTPMessageConfigInterface;
 import org.zoxweb.shared.http.HTTPResponseData;
 import org.zoxweb.shared.protocol.Delimiter;
 import org.zoxweb.shared.util.*;
 import org.zoxweb.shared.util.SharedBase64.Base64Type;
 
 import java.util.List;
-import java.util.logging.Logger;
 
 
-public final class HTTPDecoder {
+public final class HTTPDecoders {
   public static final byte[] NAME_EQUAL_DOUBLE_QUOTE = SharedStringUtil.getBytes("name=\"");
   public static final byte[] DOUBLE_QUOTE = {'\"'};
-  private final static Logger log = Logger.getLogger(HTTPDecoder.class.getName());
+  //public final static Logger log = Logger.getLogger(HTTPDecoder.class.getName());
 
-  private HTTPDecoder() {
+  private HTTPDecoders() {
   }
 
   public static final DataDecoder<byte[], NVGenericMap> BytesToNVGM = (input) -> {

@@ -113,7 +113,7 @@ public class HTTPRawMessage
 							}
 							if(hmci.getMethod() == HTTPMethod.GET)
 							{
-								HTTPDecoder.WWW_URL_ENC.decode(this);
+								HTTPDecoders.WWW_URL_ENC.decode(this);
 							}
 						}
 					}
@@ -207,13 +207,13 @@ public class HTTPRawMessage
 					switch (hmt) {
 
 						case APPLICATION_WWW_URL_ENC:
-							HTTPDecoder.WWW_URL_ENC.decode(this);
+							HTTPDecoders.WWW_URL_ENC.decode(this);
 							break;
 
 						case APPLICATION_OCTET_STREAM:
 							break;
 						case MULTIPART_FORM_DATA:
-							HTTPDecoder.MULTIPART_FORM_DATA.decode(this);
+							HTTPDecoders.MULTIPART_FORM_DATA.decode(this);
 							break;
 						case TEXT_CSV:
 
