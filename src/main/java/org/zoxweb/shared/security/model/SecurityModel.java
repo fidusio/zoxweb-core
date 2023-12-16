@@ -46,6 +46,7 @@ public class SecurityModel
 	public final static String PERM_DELETE_RESOURCE = "resource:delete";
 	public final static String PERM_READ_RESOURCE = "resource:read";
 	public final static String PERM_UPDATE_RESOURCE = "resource:update";
+	public final static String PERM_RESOURCE_ANY = "any";
 	public final static String PERM_ASSIGN = "assign";
 	public final static String PERM_ASSIGN_PERMISSION = "assign:permission";
 	public final static String PERM_ASSIGN_ROLE = "assign:role";
@@ -107,6 +108,7 @@ public class SecurityModel
 		USER_UPDATE("user_update", "Permission to update a user", PERM_UPDATE_USER),
 		USER_READ("user_read", "Permission to update a user", PERM_UPDATE_USER),
 		RESOURCE_ADD("resource_add", "Permission to add a resource", PERM_ADD_RESOURCE, TOK_APP_ID),
+		RESOURCE_ANY("resource_any", "Any permission applicable", PERM_RESOURCE_ANY),
 		
 		RESOURCE_DELETE("resource_delete", "Permission to delete a resource", PERM_DELETE_RESOURCE, TOK_APP_ID),
 		RESOURCE_UPDATE("resource_update", "Permission to update a resource", PERM_UPDATE_RESOURCE, TOK_APP_ID),

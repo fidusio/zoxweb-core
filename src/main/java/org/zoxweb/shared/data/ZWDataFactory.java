@@ -1063,19 +1063,19 @@ public class ZWDataFactory
 				return ShiroPermissionDAO.NVC_SHIRO_PERMISSION_DAO;
 			}
 		},
-		SHIRO_SUBJECT_DATA(ShiroSubjectData.class.getName())
+		SHIRO_SESSION_DATA(ShiroSessionData.class.getName())
         {
             @SuppressWarnings("unchecked")
             @Override
-            public ShiroSubjectData newInstance()
+            public ShiroSessionData newInstance()
             {
-                return new ShiroSubjectData();
+                return new ShiroSessionData();
             }
 
             @Override
             public NVConfigEntity getNVConfigEntity() 
             {
-                return ShiroSubjectData.NVC_SUBJECT_DATA;
+                return ShiroSessionData.NVC_SESSION_DATA;
             }
         },
 		STAT_COUNTER(StatCounter.class.getName())

@@ -7,7 +7,7 @@ import java.io.IOException;
 import org.junit.jupiter.api.Test;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.data.ZWDataFactory.NVEntityTypeClass;
-import org.zoxweb.shared.security.shiro.ShiroSubjectData;
+import org.zoxweb.shared.security.shiro.ShiroSessionData;
 import org.zoxweb.shared.util.NVEntity;
 import org.zoxweb.shared.util.NVEntityInstance;
 
@@ -85,7 +85,7 @@ public class DataTest {
   @Test
   public void testSubjectData() throws IOException
   {
-    ShiroSubjectData ssd = new ShiroSubjectData();
+    ShiroSessionData ssd = new ShiroSessionData();
     
     ssd.setSubjectID("xlogistx");
     ssd.setAppGID("xlogistx.com-xlogistx");
@@ -93,7 +93,7 @@ public class DataTest {
     ssd.getRoles().add("r-all");
     
     String json = GSONUtil.toJSON(ssd, true, false, true);
-    ShiroSubjectData ssd1 = GSONUtil.fromJSON(json);
+    ShiroSessionData ssd1 = GSONUtil.fromJSON(json);
     String json1 = GSONUtil.toJSON(ssd1, true, false, true);
     
     assert(json.equals(json1));
