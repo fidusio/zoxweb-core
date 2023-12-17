@@ -112,6 +112,44 @@ implements AppGlobalID<String>, SubjectID<String>
   }
 
 
+  public synchronized void setPermissions(Collection<String> permissionsToSet)
+  {
+    List<String> permissions = lookupValue(Param.PERMISSIONS.getName());
+    permissions.clear();
+    if(permissionsToSet != null)
+      permissions.addAll(permissionsToSet);
+  }
+
+  public synchronized ShiroSessionData addPermissions(String ...permissionsToAdd)
+  {
+    List<String> permissions = lookupValue(Param.PERMISSIONS.getName());
+    for (String permission : permissionsToAdd)
+    {
+      permissions.add(permission);
+    }
+    return this;
+  }
+
+
+  public synchronized ShiroSessionData addRoles(String ...rolesToAdd)
+  {
+    List<String> roles = lookupValue(Param.ROLES.getName());
+    for (String role : rolesToAdd)
+    {
+      roles.add(role);
+    }
+    return this;
+  }
+
+  public synchronized void setRoles(Collection<String> rolesToSet)
+  {
+    List<String> roles = lookupValue(Param.ROLES.getName());
+    roles.clear();
+    if(rolesToSet != null)
+      roles.addAll(rolesToSet);
+  }
+
+
   public String realm()
   {
     return getProperties().lookupValue(ExtraParam.REALM);

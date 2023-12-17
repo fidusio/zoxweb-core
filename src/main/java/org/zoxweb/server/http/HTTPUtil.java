@@ -153,9 +153,20 @@ public class HTTPUtil
 		{
 			return formatResponse(e.getMessageConfig(), ubaos);
 		}
-		else
+		else if (e.getResponseData() != null)
 		{
 			return formatResponse(e.getResponseData(), ubaos);
+		}
+		else
+		{
+			HTTPMessageConfigInterface hmci = new HTTPMessageConfig();
+			hmci.setHTTPStatusCode(e.getStatusCode() != null ? e.getStatusCode() : HTTPStatusCode.BAD_REQUEST);
+			hmci.getHeaders().build(HTTPConst.CommonHeader.CONTENT_TYPE_JSON_UTF8);
+			SimpleMessage simpleMessage = new SimpleMessage();
+			simpleMessage.setError(e.getMessage());
+			simpleMessage.setStatus(hmci.getHTTPStatusCode().CODE);
+			hmci.setContent(GSONUtil.toJSONDefault(simpleMessage));
+			return formatResponse(hmci, ubaos);
 		}
 	}
 

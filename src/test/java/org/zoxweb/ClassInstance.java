@@ -15,9 +15,22 @@ public class ClassInstance {
         assert(NVEntity.class.isAssignableFrom(AddressDAO.class));
     }
 
+    @Test
     public void testInstanceOf()
     {
         assert(new AddressDAO() instanceof NVEntity);
+    }
+
+
+    @Test
+    public void nullInstanceOf()
+    {
+        Object tst = "jkjksd";
+        assert(tst instanceof CharSequence);
+        tst = null;
+        assert(!(tst instanceof CharSequence));
+
+
     }
 
 }
