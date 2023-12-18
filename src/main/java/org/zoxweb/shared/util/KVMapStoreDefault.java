@@ -1,6 +1,7 @@
 package org.zoxweb.shared.util;
 
 
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -14,7 +15,12 @@ implements KVMapStore<K,V>
 	protected final Set<K> exclusionFilter;
 	protected final DataSizeReader<V> sizeReader;
 	protected final AtomicLong dataSize = new AtomicLong();
-	
+
+
+	public KVMapStoreDefault(Map<K,V> map)
+	{
+		this(map, null, null);
+	}
 	
 	public KVMapStoreDefault(Map<K,V> map, Set<K> eFilter)
 	{
@@ -23,9 +29,9 @@ implements KVMapStore<K,V>
 
 	public KVMapStoreDefault(Map<K,V> map, Set<K> eFilter, DataSizeReader<V> sizeReader)
 	{
-		SharedUtil.checkIfNulls("Values can't be null", map, eFilter);
+		SharedUtil.checkIfNulls("Values can't be null", map);
 		this.mapCache = map;
-		this.exclusionFilter = eFilter;
+		this.exclusionFilter = eFilter != null ? eFilter : new HashSet<K>();
 		this.sizeReader = sizeReader;
 	}
 
@@ -36,7 +42,6 @@ implements KVMapStore<K,V>
 		{
 			if (!exclusionFilter.contains(key))
 			{
-
 				V oldValue = mapCache.put(key, value);
 				if(sizeReader != null) {
 					long toSubtract = sizeReader.size(oldValue);
@@ -106,10 +111,9 @@ implements KVMapStore<K,V>
 	}
 
 	@Override
-	public synchronized void addExclusion(K exclusion) {
-		if(exclusion != null)
-			exclusionFilter.add(exclusion);
-		
+	public synchronized void addExclusion(K exclusion)
+	{
+		exclusionFilter.add(exclusion);
 	}
 
 	@Override
