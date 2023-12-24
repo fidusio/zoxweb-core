@@ -50,7 +50,8 @@ public class SecurityModel
 	public final static String PERM_ASSIGN = "assign";
 	public final static String PERM_ASSIGN_PERMISSION = "assign:permission";
 	public final static String PERM_ASSIGN_ROLE = "assign:role";
-	
+
+	public final static String PERM_ACCESS = "access";
 	
 	
 	

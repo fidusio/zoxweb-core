@@ -38,4 +38,19 @@ public enum DisplayUnit
 		return name;
 	}
 
+
+	public static DisplayUnit parseUnit(String str) {
+		if (!SharedStringUtil.isEmpty(str)) {
+			str = str.toLowerCase();
+
+			for (DisplayUnit unit : values()) {
+				if (str.endsWith(unit.getName())) {
+					return unit;
+				}
+			}
+		}
+
+		return null;
+	}
+
 }

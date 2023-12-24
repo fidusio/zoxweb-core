@@ -79,6 +79,18 @@ implements KVMapStore<K,V>
 		return (oldValue != null);
 	}
 
+
+	public synchronized V removeGet(K key) {
+		// TODO Auto-generated method stub
+		V oldValue = mapCache.remove(key);
+		if(sizeReader != null) {
+			long toSubtract = sizeReader.size(oldValue);
+
+			dataSize.getAndAdd(-toSubtract);
+		}
+		return oldValue;
+	}
+
 	@Override
 	public synchronized void clear(boolean all) {
 		// TODO Auto-generated method stub
@@ -101,6 +113,12 @@ implements KVMapStore<K,V>
 	{
 		// TODO Auto-generated method stub
 		return mapCache.values().iterator();
+	}
+
+
+	public synchronized Set<Map.Entry<K, V>> entrySet()
+	{
+		return mapCache.entrySet();
 	}
 
 	@Override

@@ -2,6 +2,7 @@ package org.zoxweb.server.fsm;
 
 import org.zoxweb.shared.util.RegistrarMap;
 
+import java.util.LinkedHashMap;
 import java.util.function.Consumer;
 
 /**
@@ -17,6 +18,7 @@ public class MonoStateMachine<K, V>
 
     public MonoStateMachine(boolean sync)
     {
+        super(new LinkedHashMap<>());
         this.notSync = !sync;
     }
     public void publish(K key, V param)
@@ -27,7 +29,8 @@ public class MonoStateMachine<K, V>
             if (notSync)
                 c.accept(param);
             else
-                synchronized (this) {
+                synchronized (this)
+                {
                     c.accept(param);
                 }
         }

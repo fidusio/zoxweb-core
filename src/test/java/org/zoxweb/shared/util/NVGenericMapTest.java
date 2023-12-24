@@ -120,7 +120,7 @@ public class NVGenericMapTest
 
 
 	@Test
-	public void test()
+	public void composedtest()
 	{
 		try
 		{
@@ -130,6 +130,9 @@ public class NVGenericMapTest
 			nvgm.add(new NVDouble("doubleValue", 567.45));
 			nvgm.add(new NVBoolean("booleanValue", true));
 			nvgm.add(new NVPair("aname", "value"));
+			ValueWithUnit<Float, String> uvw = new ValueWithUnit<Float, String>((float)123.45, ":", "m");
+			uvw.setName("value_with_meter");
+			nvgm.build(uvw);
 			
 			
 			AddressDAO address = new AddressDAO();
@@ -146,7 +149,7 @@ public class NVGenericMapTest
 			nvgm.add(nvp);
 			
 	
-			NVLongList nvll = new NVLongList("nvll", new ArrayList<Long>());
+			NVLongList nvll = new NVLongList("NVLL", new ArrayList<Long>());
 			nvll.getValue().add((long) 1);
 			nvll.getValue().add((long) 2);
 			nvgm.add(nvll);
@@ -169,7 +172,7 @@ public class NVGenericMapTest
 			NVEntityReferenceList nvl = new NVEntityReferenceList("nves");
 			nvl.add(address);
 			nvgm.add(nvl);
-			json = GSONUtil.toJSONGenericMap(nvgm, true, false, false);
+			json = GSONUtil.toJSONDefault(nvgm, true);//GSONUtil.toJSONGenericMap(nvgm, true, false, false);
 			System.out.println(json);
 			//nvgm = GSONUtil.fromJSONGenericMap(json, null, Base64Type.URL);
 			

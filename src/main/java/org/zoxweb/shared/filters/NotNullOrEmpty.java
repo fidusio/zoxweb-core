@@ -53,7 +53,7 @@ public class NotNullOrEmpty
 		}
 		else
         {
-			throw new IllegalArgumentException("Empty or null value: " + in);
+			throw new NullPointerException("Empty or null value: " + in);
 		}
 	}
 

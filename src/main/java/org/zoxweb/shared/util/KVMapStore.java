@@ -16,6 +16,8 @@
 package org.zoxweb.shared.util;
 
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 public interface KVMapStore<K,V>
 {
@@ -27,6 +29,8 @@ public interface KVMapStore<K,V>
 	V get(K key);
 
 	boolean remove(K key);
+
+	V removeGet(K key);
 	
 	void clear(boolean all);
 
@@ -34,8 +38,11 @@ public interface KVMapStore<K,V>
 	
 	Iterator<V> values();
 	Iterator<K> keys();
-	
+
+	Set<Map.Entry<K, V>> entrySet();
+
 	void addExclusion(K exclusion);
+
 
 	/**
 	 * Return the count og object stored by the key value store

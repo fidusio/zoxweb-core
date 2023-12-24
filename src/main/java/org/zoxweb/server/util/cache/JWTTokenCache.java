@@ -1,13 +1,5 @@
 package org.zoxweb.server.util.cache;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-import java.util.logging.Logger;
-
 import org.zoxweb.server.task.TaskDefault;
 import org.zoxweb.server.task.TaskEvent;
 import org.zoxweb.server.task.TaskSchedulerProcessor;
@@ -19,6 +11,11 @@ import org.zoxweb.shared.util.Const.TimeInMillis;
 import org.zoxweb.shared.util.KVMapStore;
 import org.zoxweb.shared.util.KVMapStoreDefault;
 import org.zoxweb.shared.util.SharedUtil;
+
+import java.util.*;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.logging.Logger;
 
 public class JWTTokenCache
 implements KVMapStore<String, JWT>
@@ -136,6 +133,12 @@ implements KVMapStore<String, JWT>
 	}
 
 	@Override
+	public JWT removeGet(String jwtHash) {
+		// TODO Auto-generated method stub
+		return cache.removeGet(jwtHash);
+	}
+
+	@Override
 	public void clear(boolean all) {
 		// TODO Auto-generated method stub
 		cache.clear(all);
@@ -157,6 +160,11 @@ implements KVMapStore<String, JWT>
 	public Iterator<String> keys() {
 		// TODO Auto-generated method stub
 		return cache.keys();
+	}
+
+	@Override
+	public Set<Map.Entry<String, JWT>> entrySet() {
+		return cache.entrySet();
 	}
 
 	@Override

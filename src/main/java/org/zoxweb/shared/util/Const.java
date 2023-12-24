@@ -233,40 +233,40 @@ public class Const {
     RESOURCE,
   }
 
-  public enum Unit
-      implements GetName {
-
-    EM("em"),
-    PIXEL("px"),
-    PERCENT("%"),
-
-    ;
-
-    private final String name;
-
-    Unit(String name) {
-      this.name = name;
-    }
-
-    @Override
-    public String getName() {
-      return name;
-    }
-
-    public static Unit parseUnit(String str) {
-      if (!SharedStringUtil.isEmpty(str)) {
-        str = str.toLowerCase();
-
-        for (Unit unit : Unit.values()) {
-          if (str.endsWith(unit.getName())) {
-            return unit;
-          }
-        }
-      }
-
-      return null;
-    }
-  }
+//  public enum Unit
+//      implements GetName {
+//
+//    EM("em"),
+//    PIXEL("px"),
+//    PERCENT("%"),
+//
+//    ;
+//
+//    private final String name;
+//
+//    Unit(String name) {
+//      this.name = name;
+//    }
+//
+//    @Override
+//    public String getName() {
+//      return name;
+//    }
+//
+//    public static Unit parseUnit(String str) {
+//      if (!SharedStringUtil.isEmpty(str)) {
+//        str = str.toLowerCase();
+//
+//        for (Unit unit : Unit.values()) {
+//          if (str.endsWith(unit.getName())) {
+//            return unit;
+//          }
+//        }
+//      }
+//
+//      return null;
+//    }
+//  }
 
   public enum DeviceType
       implements GetName {

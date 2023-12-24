@@ -1,31 +1,34 @@
 
 package org.zoxweb.shared.util;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class RegistrarMap<K, V, T>
+    extends KVMapStoreDefault<K,V>
     implements Registrar<K, V, T>
 {
 
-    private final Map<K,V> map = new HashMap<>();
+    public RegistrarMap(Map<K,V> map)
+    {
+        super(map);
+    }
 
     @Override
     public T register(K key, V value)
     {
-        map.put(key, value);
+        put(key, value);
         return (T) this;
     }
 
     @Override
     public V unregister(K key)
     {
-        return map.remove(key);
+        return removeGet(key);
     }
 
     @Override
-    public V lookup(K key)
+    public<VAL extends V> VAL lookup(K key)
     {
-        return map.get(key);
+        return (VAL)get(key);
     }
 }

@@ -10,14 +10,15 @@ import org.zoxweb.shared.util.*;
 import java.util.*;
 
 public final class HTTPAPIManager
-    implements Registrar<String, HTTPAPIEndPoint, HTTPAPIManager>
+    extends RegistrarMap<String, HTTPAPIEndPoint<?,?>, HTTPAPIManager>
+    //implements Registrar<String, HTTPAPIEndPoint, HTTPAPIManager>
 {
 
 
     public static final LogWrapper log = new LogWrapper(HTTPAPIManager.class);
 
     public static final HTTPAPIManager SINGLETON = new HTTPAPIManager();
-    private final Map<String, HTTPAPIEndPoint<?,?>> map = new LinkedHashMap<String, HTTPAPIEndPoint<?,?>>();
+    //private final Map<String, HTTPAPIEndPoint<?,?>> map = new LinkedHashMap<String, HTTPAPIEndPoint<?,?>>();
 
     public static final DataDecoder<HTTPResponseData, NVGenericMap> NVGM_DECODER = (input)->
             GSONUtil.fromJSONDefault(input.getDataAsString(), NVGenericMap.class, true);
@@ -25,7 +26,7 @@ public final class HTTPAPIManager
 
     private HTTPAPIManager()
     {
-
+        super(new LinkedHashMap<String, HTTPAPIEndPoint<?,?>>());
     }
 
 
@@ -110,26 +111,12 @@ public final class HTTPAPIManager
     {
         if (apiEndPoint.toCanonicalID() != null)
         {
-            return register(apiEndPoint.toCanonicalID(), apiEndPoint);
+            return super.register(apiEndPoint.toCanonicalID(), apiEndPoint);
 
         }
         return this;
     }
 
-    @Override
-    public HTTPAPIManager register(String key, HTTPAPIEndPoint value)
-    {
-
-        if (key != null && value != null)
-        {
-            synchronized (this)
-            {
-                map.put(key, value);
-            }
-        }
-
-        return this;
-    }
 
     public HTTPAPIEndPoint unregister(String name)
     {
@@ -137,7 +124,7 @@ public final class HTTPAPIManager
         {
             synchronized (this)
             {
-                return map.remove(name);
+                return super.unregister(name);
             }
         }
 
@@ -166,20 +153,17 @@ public final class HTTPAPIManager
         return null;
     }
 
-    public HTTPAPIEndPoint lookup(String name)
-    {
-        return map.get(name);
-    }
+
 
     public HTTPAPIEndPoint[] getAll()
     {
-        return map.values().toArray(new HTTPAPIEndPoint[0]);
+        return mapCache.values().toArray(new HTTPAPIEndPoint[0]);
     }
 
 
     public String[] getAllIDs()
     {
-        return map.keySet().toArray(new String[0]);
+        return mapCache.keySet().toArray(new String[0]);
     }
 
 
@@ -192,8 +176,8 @@ public final class HTTPAPIManager
         if (domain != null) {
             domain = domain.endsWith(".") ? domain : domain + ".";
             synchronized (this) {
-                Set<Map.Entry<String, HTTPAPIEndPoint<?, ?>>> entries = map.entrySet();
-                for (Map.Entry<String, HTTPAPIEndPoint<?, ?>> entry : entries) {
+                Set<Map.Entry<String, HTTPAPIEndPoint<?,?>>> entries = entrySet();
+                for (Map.Entry<String, HTTPAPIEndPoint<?,?>> entry : entries) {
                     if (entry.getKey().startsWith(domain))
                         ret.add(entry.getValue());
                 }

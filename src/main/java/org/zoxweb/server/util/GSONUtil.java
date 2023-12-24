@@ -1124,6 +1124,12 @@ public final class GSONUtil
 			}
 			writer.endArray();
 		}
+		else if (gnv instanceof ValueUnit)
+		{
+			writer.name(gnv.getName());
+			writer.value(gnv.getValue() + ((ValueUnit) gnv).getSeparator() + ((ValueUnit) gnv).getUnit());
+		}
+
 		//else if (gnv instanceof NVIntList || gnv instanceof NVLongList || gnv instanceof NVFloatList || gnv instanceof NVDoubleList)
 		else if (MetaToken.isPrimitiveArray((NVBase<?>) gnv))
 		{
