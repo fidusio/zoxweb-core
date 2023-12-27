@@ -1030,15 +1030,17 @@ public final class GSONUtil
 		}
 		else if (gnv instanceof NVEnum)
 		{
-			//writer.name(name).value(((Enum<?>)gnv.getValue()).name());
+
 			Enum<?> enumValue = (Enum<?>) gnv.getValue();
 			if (enumValue == null)
 				return writer;
 
-			writer.name(name).beginObject()
-					.name(MetaToken.VALUE.getName()).value(enumValue.name())
-					.name(MetaToken.ENUM_TYPE.getName()).value(enumValue.getClass().getName())
-					.endObject();
+			writer.name(name).value(((Enum<?>)gnv.getValue()).name());
+
+//			writer.name(name).beginObject()
+//					.name(MetaToken.VALUE.getName()).value(enumValue.name())
+//					.name(MetaToken.ENUM_TYPE.getName()).value(enumValue.getClass().getName())
+//					.endObject();
 		}
 		else if (gnv instanceof  NVInt || gnv instanceof NVLong || gnv instanceof NVFloat || gnv instanceof NVDouble)
 		{
