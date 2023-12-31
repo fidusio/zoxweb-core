@@ -77,7 +77,7 @@ public enum MetaToken
 	META_TYPE("meta_type"),
 	// enum type (enum class name)
 	ENUM_TYPE("enum_type"),
-	
+	UNIT("unit"),
 	
 	;
 	

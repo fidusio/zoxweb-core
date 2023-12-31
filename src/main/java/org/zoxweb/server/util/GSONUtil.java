@@ -64,6 +64,8 @@ public final class GSONUtil
 //	};
 
 
+
+	public static boolean SIMPLE_FORMAT = false;
 	private static final Logger log = Logger.getLogger(Const.LOGGER_NAME);
 
 	private static final AtomicLong counter = new AtomicLong();
@@ -1035,12 +1037,15 @@ public final class GSONUtil
 			if (enumValue == null)
 				return writer;
 
-			writer.name(name).value(((Enum<?>)gnv.getValue()).name());
-
-//			writer.name(name).beginObject()
-//					.name(MetaToken.VALUE.getName()).value(enumValue.name())
-//					.name(MetaToken.ENUM_TYPE.getName()).value(enumValue.getClass().getName())
-//					.endObject();
+			if (SIMPLE_FORMAT)
+				writer.name(name).value(((Enum<?>)gnv.getValue()).name());
+			else
+			{
+				writer.name(name).beginObject()
+						.name(MetaToken.VALUE.getName()).value(enumValue.name())
+						.name(MetaToken.ENUM_TYPE.getName()).value(enumValue.getClass().getName())
+						.endObject();
+			}
 		}
 		else if (gnv instanceof  NVInt || gnv instanceof NVLong || gnv instanceof NVFloat || gnv instanceof NVDouble)
 		{
@@ -1128,8 +1133,27 @@ public final class GSONUtil
 		}
 		else if (gnv instanceof ValueUnit)
 		{
-			writer.name(gnv.getName());
-			writer.value(gnv.getValue() + ((ValueUnit) gnv).getSeparator() + ((ValueUnit) gnv).getUnit());
+			if (SIMPLE_FORMAT)
+			{
+				writer.name(gnv.getName());
+				writer.value(gnv.getValue() + ((ValueUnit) gnv).getSeparator() + ((ValueUnit) gnv).getUnit());
+			}
+			else
+			{
+				writer.name(name).beginObject();
+				if(gnv.getValue() instanceof Number)
+					writer.name(MetaToken.VALUE.getName()).value((Number)gnv.getValue());
+				else if(gnv.getValue() instanceof String)
+					writer.name(MetaToken.VALUE.getName()).value((String)gnv.getValue());
+				else if(gnv.getValue() instanceof Boolean)
+					writer.name(MetaToken.VALUE.getName()).value((Boolean)gnv.getValue());
+				else if(gnv.getValue() instanceof Enum)
+					writer.name(MetaToken.VALUE.getName()).value(((Enum)gnv.getValue()).name());
+				else
+					writer.name(MetaToken.VALUE.getName()).value(""+gnv.getValue());
+				writer.name(MetaToken.UNIT.getName()).value(""+ ((ValueUnit<?, ?>) gnv).getUnit());
+				writer.endObject();
+			}
 		}
 
 		//else if (gnv instanceof NVIntList || gnv instanceof NVLongList || gnv instanceof NVFloatList || gnv instanceof NVDoubleList)
