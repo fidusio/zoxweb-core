@@ -21,11 +21,9 @@ package org.zoxweb.shared.util;
  */
 public interface IsMandatory
 {
-
 	/**
 	 * Checks if property is mandatory.
 	 * @return true if mandatory
 	 */
 	boolean isMandatory();
-
 }
