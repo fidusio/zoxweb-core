@@ -73,7 +73,7 @@ implements CredentialHasher<PasswordDAO>
             if(iteration < 4 || iteration > 31)
                 throw new IllegalArgumentException("Invalid Bcrypt cost factor " + iteration);
         }
-        if(iteration < 64 || iteration > 8196)
+        if(iteration < 1 || iteration > 8196)
             throw new IllegalArgumentException("Iteration out of range " + iteration);
 
 
