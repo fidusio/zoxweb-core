@@ -86,7 +86,7 @@ implements CredentialHasher<PasswordDAO>
     }
 
     public PasswordDAOHasher setHashType(CryptoConst.HASHType hashType) {
-        SharedUtil.checkIfNulls("Null hashtype", hashType);
+        SharedUtil.checkIfNulls("Null hash type", hashType);
         this.hashType = hashType;
         return this;
     }
