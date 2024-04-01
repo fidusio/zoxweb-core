@@ -65,7 +65,7 @@
     <!--<javax-mail.version>1.6.7</javax-mail.version> -->
     <jakarta-mail.version>2.0.1</jakarta-mail.version>
     <jsoup.version>1.17.2</jsoup.version>
-    <junit.version>5.9.2</junit.version>
+    <junit.version>5.10.2</junit.version>
   </properties>
 
 
