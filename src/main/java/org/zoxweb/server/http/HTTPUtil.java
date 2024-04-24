@@ -95,67 +95,78 @@ public class HTTPUtil
 	}
 
 
-	public static HTTPMessageConfigInterface formatResponse(HTTPStatusCode statusCode)
-			throws IOException
+	public static HTTPMessageConfigInterface formatResponse(HTTPStatusCode statusCode, GetNameValue<?> ...headers)
 	{
 		HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit(null, null, (HTTPMethod) null);
 		hmci.setHTTPStatusCode(statusCode);
+		if( headers != null)
+			for (GetNameValue<?> header : headers)
+				hmci.getHeaders().add(header);
 		hmci.setContentType(HTTPMediaType.APPLICATION_JSON, HTTPConst.CHARSET_UTF_8);
 		return hmci;
 	}
 
-	public static HTTPMessageConfigInterface formatResponse(NVEntity nve, HTTPStatusCode statusCode)
+	public static HTTPMessageConfigInterface formatResponse(NVEntity nve, HTTPStatusCode statusCode, GetNameValue<?> ...headers)
 			throws IOException
 	{
 		HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit(null, null, (HTTPMethod) null);
 		hmci.setHTTPStatusCode(statusCode);
 		hmci.setContentType(HTTPMediaType.APPLICATION_JSON, HTTPConst.CHARSET_UTF_8);
+		if( headers != null)
+			for (GetNameValue<?> header : headers)
+				hmci.getHeaders().add(header);
 		hmci.setContent(GSONUtil.toJSON(nve,false, false, true));
 		return hmci;
 	}
 
 
 
-	public static HTTPMessageConfigInterface formatErrorResponse(String msg, HTTPStatusCode hsc)
+	public static HTTPMessageConfigInterface formatErrorResponse(String msg, HTTPStatusCode hsc, GetNameValue<?> ...headers)
 	{
 		SimpleMessage sem = new SimpleMessage(msg, hsc.CODE, hsc.REASON);
 		sem.setCreationTime(System.currentTimeMillis());
-		return formatResponse(GSONUtil.toJSONDefault(sem), hsc);
+		return formatResponse(GSONUtil.toJSONDefault(sem), hsc, headers);
 	}
 
 
 
 
 
-	public static HTTPMessageConfigInterface formatResponse(String content, HTTPStatusCode statusCode)
+	public static HTTPMessageConfigInterface formatResponse(String content, HTTPStatusCode statusCode, GetNameValue<?> ...headers)
 	{
 		HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit(null, null, (HTTPMethod) null);
 		hmci.setHTTPStatusCode(statusCode);
 		hmci.setContentType(HTTPMediaType.APPLICATION_JSON, HTTPConst.CHARSET_UTF_8);
 		hmci.setContent(content);
+		if( headers != null)
+			for (GetNameValue<?> header : headers)
+				hmci.getHeaders().add(header);
 		return hmci;
 	}
 
-	public static HTTPMessageConfigInterface formatResponse(NVGenericMap nvgm, HTTPStatusCode statusCode)
+	public static HTTPMessageConfigInterface formatResponse(NVGenericMap nvgm, HTTPStatusCode statusCode, GetNameValue<?> ...headers)
 			throws IOException
 	{
 		HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit(null, null, (HTTPMethod) null);
 		hmci.setHTTPStatusCode(statusCode);
 		hmci.setContentType(HTTPMediaType.APPLICATION_JSON, HTTPConst.CHARSET_UTF_8);
 		hmci.setContent(GSONUtil.toJSONGenericMap(nvgm,false, false, true));
+		if( headers != null)
+			for (GetNameValue<?> header : headers)
+				hmci.getHeaders().add(header);
 		return hmci;
 	}
 
 
-	public static UByteArrayOutputStream formatResponse(HTTPCallException e, UByteArrayOutputStream ubaos)
+	public static UByteArrayOutputStream formatResponse(HTTPCallException e, UByteArrayOutputStream ubaos, GetNameValue<?> ...headers)
 	{
 		if (e.getMessageConfig() != null)
 		{
-			return formatResponse(e.getMessageConfig(), ubaos);
+			return formatResponse(e.getMessageConfig(), ubaos, headers);
 		}
 		else if (e.getResponseData() != null)
 		{
-			return formatResponse(e.getResponseData(), ubaos);
+			return formatResponse(e.getResponseData(), ubaos, headers);
 		}
 		else
 		{
@@ -166,12 +177,12 @@ public class HTTPUtil
 			simpleMessage.setError(e.getMessage());
 			simpleMessage.setStatus(hmci.getHTTPStatusCode().CODE);
 			hmci.setContent(GSONUtil.toJSONDefault(simpleMessage));
-			return formatResponse(hmci, ubaos);
+			return formatResponse(hmci, ubaos, headers);
 		}
 	}
 
 
-	public static UByteArrayOutputStream formatResponse(HTTPMessageConfigInterface hcc, UByteArrayOutputStream ubaos)
+	public static UByteArrayOutputStream formatResponse(HTTPMessageConfigInterface hmci, UByteArrayOutputStream ubaos, GetNameValue<?> ...headers)
 	{
 		if (ubaos == null)
 		{
@@ -182,18 +193,23 @@ public class HTTPUtil
 			ubaos.reset();
 		}
 
-		HTTPVersion hv = hcc.getHTTPVersion();
+
+		if( headers != null)
+			for (GetNameValue<?> header : headers)
+				hmci.getHeaders().add(header);
+
+		HTTPVersion hv = hmci.getHTTPVersion();
 		if(hv == null)
 			hv = HTTPVersion.HTTP_1_1;
 		// write the first line
-		ubaos.write(hv.getValue() + " " + hcc.getHTTPStatusCode().CODE + " " +hcc.getHTTPStatusCode().REASON + Delimiter.CRLF.getValue());
+		ubaos.write(hv.getValue() + " " + hmci.getHTTPStatusCode().CODE + " " +hmci.getHTTPStatusCode().REASON + Delimiter.CRLF.getValue());
 		// set content length if available
-		if (hcc.getContent() != null && hcc.getContent().length > 0)
+		if (hmci.getContent() != null && hmci.getContent().length > 0)
 		{
-			hcc.setContentLength(hcc.getContent().length);
+			hmci.setContentLength(hmci.getContent().length);
 		}
 		// write headers
-		for (GetNameValue<String> header : hcc.getHeaders().asArrayValuesString().values())
+		for (GetNameValue<String> header : hmci.getHeaders().asArrayValuesString().values())
 		{
 			// header.getName() + ": " + header.getValue())
 			ubaos.write(HTTPConst.toBytes(header));
@@ -203,15 +219,15 @@ public class HTTPUtil
 		// header separator
 		ubaos.write(Delimiter.CRLF.getValue().getBytes());
 
-		if (hcc.getContent() != null && hcc.getContent().length > 0)
+		if (hmci.getContent() != null && hmci.getContent().length > 0)
 		{
-			ubaos.write(hcc.getContent());
+			ubaos.write(hmci.getContent());
 		}
 
 		return ubaos;
 	}
 
-	public static UByteArrayOutputStream formatResponse(HTTPResponseData rd, UByteArrayOutputStream ubaos)
+	public static UByteArrayOutputStream formatResponse(HTTPResponseData rd, UByteArrayOutputStream ubaos, GetNameValue<?> ...headers)
 	{
 		if (ubaos == null)
 		{
@@ -221,6 +237,8 @@ public class HTTPUtil
 		{
 			ubaos.reset();
 		}
+
+
 
 		HTTPStatusCode hsc = HTTPStatusCode.statusByCode(rd.getStatus());
 		// write the first line
@@ -253,6 +271,16 @@ public class HTTPUtil
 				ubaos.write(Delimiter.CRLF.getValue().getBytes());
 			}
 		}
+
+		if( headers != null)
+			for (GetNameValue<?> header : headers)
+			{
+				if (header.getName() != null && header.getValue() != null)
+				{
+					ubaos.write(header.getName() + ": " + header.getValue());
+					ubaos.write(Delimiter.CRLF.getValue().getBytes());
+				}
+			}
 
 		ubaos.write(Delimiter.CRLF.getValue().getBytes());
 		ubaos.write(rd.getData());

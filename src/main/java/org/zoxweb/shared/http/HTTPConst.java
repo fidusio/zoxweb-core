@@ -10,6 +10,27 @@ public final class HTTPConst
     public static final GetNameValue<String> CHARSET_UTF_8 = new NVPair("charset", "utf-8");
 
 
+    public enum HTTPValue
+        implements GetValue<String>
+    {
+        CLOSE("close"),
+        KEEP_ALIVE("keep-alive"),
+        NO_CACHE("no-cache"),
+        NO_STORE("no-store"),
+        UPGRADE("upgrade")
+        ;
+        private final String value;
+        HTTPValue(String value)
+        {
+            this.value = value;
+        }
+
+        public String getValue()
+        {
+            return value;
+        }
+    }
+
     public enum CommonHeader
             implements GetNameValue<String>
     {
@@ -17,6 +38,7 @@ public final class HTTPConst
         CONNECTION_KEEP_ALIVE(HTTPHeader.CONNECTION, "keep-alive"),
         CONNECTION_UPGRADE(HTTPHeader.CONNECTION, "upgrade"),
         UPGRADE_WEBSOCKET(HTTPHeader.UPGRADE, "websocket"),
+        EXPIRES_ZERO(toHTTPHeader(HTTPHeader.EXPIRES, "Thu, 01 Jan 1970 00:00:00 GMT")),
         WWW_AUTHENTICATE(HTTPHeader.WWW_AUTHENTICATE, "Basic realm=\"xlogistx\""),
         X_CONTENT_TYPE_OPTIONS_NO_SNIFF("X-Content-Type-Options", " nosniff"),
         CONTENT_TYPE_JSON_UTF8(toHTTPHeader(HTTPHeader.CONTENT_TYPE, HTTPMediaType.APPLICATION_JSON, HTTPConst.CHARSET_UTF_8)),
