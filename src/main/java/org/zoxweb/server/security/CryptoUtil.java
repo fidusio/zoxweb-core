@@ -39,6 +39,8 @@ import javax.crypto.spec.SecretKeySpec;
 import javax.net.ssl.*;
 import java.io.*;
 import java.math.BigInteger;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
@@ -658,6 +660,13 @@ public class CryptoUtil {
     }
 
     return ret;
+  }
+
+
+  public static KeyStore loadKeyStore(final String filename, String keyStoreType, final char[] keyStorePassword)
+          throws IOException, CertificateException, KeyStoreException, NoSuchAlgorithmException
+  {
+    return loadKeyStore(Files.newInputStream(Paths.get(filename)), keyStoreType, keyStorePassword);
   }
 
   public static KeyStore loadKeyStore(final InputStream keyStoreIS, String keyStoreType,

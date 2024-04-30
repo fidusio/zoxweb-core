@@ -9,7 +9,7 @@ import java.security.SecureRandom;
 import java.util.HashSet;
 
 public class CryptoPerf {
-    static class Result
+    public static class Result
     {
         final long delta;
         final String message;
