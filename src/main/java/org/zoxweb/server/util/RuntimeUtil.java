@@ -15,26 +15,36 @@
  */
 package org.zoxweb.server.util;
 
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Date;
-
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.shared.data.RuntimeResultDAO;
+import org.zoxweb.shared.data.RuntimeResultDAO.ResultAttribute;
 import org.zoxweb.shared.data.VMInfoDAO;
 import org.zoxweb.shared.util.Const;
 import org.zoxweb.shared.util.Const.JavaClassVersion;
 import org.zoxweb.shared.util.SharedStringUtil;
 import org.zoxweb.shared.util.SharedUtil;
-import org.zoxweb.shared.data.RuntimeResultDAO.ResultAttribute;
+
+import java.io.*;
+import java.util.Date;
 
 public class RuntimeUtil
 {
+
+	public static class PIOs
+	{
+		public final Process process;
+		public final BufferedWriter stdOut;
+		public final BufferedReader stdIn;
+		public final BufferedReader stdErr;
+
+		public PIOs(Process process)
+		{
+			this.process = process;
+			this.stdIn = new BufferedReader(new InputStreamReader(process.getInputStream()));
+			this.stdErr = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+			this.stdOut = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()));
+		}
+	}
 
 	private RuntimeUtil()
     {
@@ -44,12 +54,12 @@ public class RuntimeUtil
 	/**
 	 * Get the output of the command as string. IT will block until the
 	 * executing process closes the stream.
-	 * @param p 
-	 * @param ra 
+	 * @param p process is question
+	 * @param ra result attribute type
 	 * 
 	 * @return the output of the command. If there is no output, "" is returned.
-	 * @throws IOException 
-	 * @throws InterruptedException 
+	 * @throws IOException  in case an io exception occurs
+	 * @throws InterruptedException  if the process got interrupted
 	 */
 	public static String getRuntimeResponse(Process p, ResultAttribute ra ) 
         throws IOException, InterruptedException
@@ -80,14 +90,36 @@ public class RuntimeUtil
 		return IOUtil.inputStreamToString(is, false);
 	}
 
+
+	public static PIOs runCommand(File f) throws IOException {
+		return runCommand(f.getCanonicalPath());
+	}
+
+	public static PIOs runCommand(String command) throws IOException
+	{
+		return new PIOs(Runtime.getRuntime().exec(command));
+	}
+
+
+	public static File createScript(String script, File f)
+			throws IOException
+	{
+		if (f.createNewFile() && f.setExecutable(true))
+		{
+			IOUtil.writeToFile(f, script);
+			return f;
+		}
+		throw new IOException("file setup failed " + f);
+	}
+
 	/**
 	 * This will execute a system command till it finishes.
 	 * 
 	 * @param command to be executed.
 	 * @param params command parameters.
 	 * @return The execution result the process exit code and the output stream
-	 * @throws InterruptedException 
-	 * @throws IOException 
+	 * @throws IOException  in case an io exception occurs
+	 * @throws InterruptedException  if the process got interrupted
 	 */
 	public static RuntimeResultDAO runAndFinish(String command, String ...params)
         throws InterruptedException, IOException
@@ -106,12 +138,11 @@ public class RuntimeUtil
 	/**
 	 * This will execute a system command till it finishes.
 	 * 
-	 * @param command
-	 *            to be executed.
-	 * @param ra 
+	 * @param command to be executed.
+	 * @param ra type
 	 * @return The execution result the process exit code and the output stream
-	 * @throws InterruptedException 
-	 * @throws IOException 
+	 * @throws IOException  in case an io exception occurs
+	 * @throws InterruptedException  if the process got interrupted
 	 */
 	public static RuntimeResultDAO runAndFinish(String command, ResultAttribute ra)
         throws InterruptedException, IOException
@@ -126,19 +157,21 @@ public class RuntimeUtil
 	/**
 	 * This method will create an executable file scripts based on the command and f on the file system 
 	 * and then execute it and command line.
-	 * @param command
-	 * @param f
+	 * @param script to be executed
+	 * @param f the executable  file
 	 * @return RuntimeResultDAO
-	 * @throws InterruptedException
-	 * @throws IOException
+	 * @throws IOException  in case an io exception occurs
+	 * @throws InterruptedException  if the process got interrupted
 	 */
-	public static RuntimeResultDAO runAndFinish(String command, File f)
+	public static RuntimeResultDAO runAndFinish(String script, File f)
         throws InterruptedException, IOException
     {
-		f.createNewFile();
-		f.setExecutable(true);
-		IOUtil.writeToFile(f, command);
-		return runAndFinish(f.getCanonicalPath());
+		if (f.createNewFile() && f.setExecutable(true))
+		{
+			IOUtil.writeToFile(f, script);
+			return runAndFinish(f.getCanonicalPath());
+		}
+		throw new IOException("file setup failed " + f);
 	}
 
 

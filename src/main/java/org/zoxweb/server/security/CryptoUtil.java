@@ -45,10 +45,7 @@ import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.RSAPublicKeySpec;
-import java.security.spec.X509EncodedKeySpec;
+import java.security.spec.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -1035,10 +1032,41 @@ public class CryptoUtil {
 
 
   public static KeyPair generateKeyPair(String type, int keySizeInBits)
-      throws NoSuchAlgorithmException {
+      throws NoSuchAlgorithmException
+  {
     KeyPairGenerator kg = KeyPairGenerator.getInstance(type);
     kg.initialize(keySizeInBits);//, (SecureRandom)defaultSecureRandom());
     return kg.generateKeyPair();
+  }
+
+
+  public static KeyPair generateKeyPair(String key)
+          throws NoSuchAlgorithmException, InvalidAlgorithmParameterException
+  {
+
+
+    String[] parsed = key.split("[ ,:]");
+    if (parsed.length != 2)
+    {
+      throw new IllegalArgumentException("invalid key " + key + " ie:  rsa 2048 or ec:secp256r1 or use , as separator");
+    }
+    String keyType = parsed[0].toUpperCase();
+    String keySize = parsed[1];
+    KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(keyType);
+    if ("RSA".equals(keyType))
+    {
+      keyPairGenerator.initialize(Integer.parseInt(keySize), defaultSecureRandom());
+    }
+    else if ("EC".equals(keyType))
+    {
+      keyPairGenerator.initialize(new ECGenParameterSpec(keySize), defaultSecureRandom());
+    }
+    else
+    {
+      throw new IllegalArgumentException("Unsupported key type: " + keyType);
+    }
+
+    return keyPairGenerator.generateKeyPair();
   }
 
   public static byte[] encrypt(PublicKey receiver, byte[] data)
