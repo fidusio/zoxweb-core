@@ -1043,6 +1043,12 @@ public class CryptoUtil {
   public static KeyPair generateKeyPair(String key)
           throws NoSuchAlgorithmException, InvalidAlgorithmParameterException
   {
+    return generateKeyPair(key, defaultSecureRandom());
+  }
+
+  public static KeyPair generateKeyPair(String key, SecureRandom sr)
+          throws NoSuchAlgorithmException, InvalidAlgorithmParameterException
+  {
 
 
     String[] parsed = key.split("[ ,:]");
@@ -1052,14 +1058,16 @@ public class CryptoUtil {
     }
     String keyType = parsed[0].toUpperCase();
     String keySize = parsed[1];
+    if(sr == null)
+      sr = defaultSecureRandom(); // get the default secure random
     KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(keyType);
     if ("RSA".equals(keyType))
     {
-      keyPairGenerator.initialize(Integer.parseInt(keySize), defaultSecureRandom());
+      keyPairGenerator.initialize(Integer.parseInt(keySize), sr);
     }
     else if ("EC".equals(keyType))
     {
-      keyPairGenerator.initialize(new ECGenParameterSpec(keySize), defaultSecureRandom());
+      keyPairGenerator.initialize(new ECGenParameterSpec(keySize), sr);
     }
     else
     {
