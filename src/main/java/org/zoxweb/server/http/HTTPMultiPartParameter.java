@@ -15,6 +15,10 @@
  */
 package org.zoxweb.server.http;
 
+import org.zoxweb.shared.util.GetName;
+import org.zoxweb.shared.util.GetNameValue;
+import org.zoxweb.shared.util.SetNameValue;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -22,10 +26,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.zoxweb.shared.util.GetName;
-import org.zoxweb.shared.util.GetNameValue;
-import org.zoxweb.shared.util.SetNameValue;
 
 public class HTTPMultiPartParameter
 	implements SetNameValue<String>
@@ -70,7 +70,7 @@ public class HTTPMultiPartParameter
 		 
 		 for (GetNameValue<String>  gnv: gnvs)
 		 {
-			 list.add( gnv);
+			 list.add(gnv);
 		 }
 	}
 	

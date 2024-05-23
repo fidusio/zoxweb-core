@@ -28,36 +28,36 @@ public interface TimeStampInterface
 	 * Returns the time when the file was created or uploaded into a system or domain (milliseconds).
 	 * @return creation time in milliseconds
 	 */
-	public long getCreationTime();
+	long getCreationTime();
 	
 	/**
 	 * Sets the time when the file was created or uploaded into a system or domain (milliseconds).
 	 * @param ts creation time in milliseconds
 	 */
-	public void setCreationTime(long ts);
+	void setCreationTime(long ts);
 	
 	/**
 	 * Returns the last time the file was updated (milliseconds).
 	 * @return last time updated in milliseconds
 	 */
-	public long getLastTimeUpdated();
+	long getLastTimeUpdated();
 	
 	/**
 	 * Sets the last time the file was updated (milliseconds).
 	 * @param ts last time updated in milliseconds
 	 */
-	public void setLastTimeUpdated(long ts);
+	void setLastTimeUpdated(long ts);
 	
 	/**
 	 * Returns the last time the file was read (milliseconds).
 	 * @return last time read in milliseconds
 	 */
-	public long getLastTimeRead();
+	long getLastTimeRead();
 	
 	/**
 	 * Sets the last time the file was read (milliseconds).
 	 * @param ts last time read in milliseconds
 	 */
-	public void setLastTimeRead(long ts);
+	void setLastTimeRead(long ts);
 
 }

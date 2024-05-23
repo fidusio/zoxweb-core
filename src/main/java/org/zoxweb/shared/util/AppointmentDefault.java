@@ -15,9 +15,9 @@
  */
 package org.zoxweb.shared.util;
 
-import java.io.Serializable;
-
 import org.zoxweb.shared.util.Const.TimeInMillis;
+
+import java.io.Serializable;
 
 @SuppressWarnings("serial")
 public class AppointmentDefault
@@ -123,9 +123,15 @@ public class AppointmentDefault
 		isClosed = true;
 	}
 
+	@Override
+	public void reset(boolean runOnce) {
+
+	}
+
 	public boolean isClosed()
 	{
 		return isClosed;
 	}
+
 
 }

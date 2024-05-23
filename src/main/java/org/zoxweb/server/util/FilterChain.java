@@ -14,19 +14,19 @@ implements Function<T, FunctionStatus>
 
 
 
-    private final ListIterator<Function<T, FunctionStatus>> filtersIter;
+    private final ListIterator<Function<T, FunctionStatus>> filtersIterator;
     private final Consumer<T> handler;
 
     public FilterChain(List<Function<T, FunctionStatus >> filters, Consumer<T> handler)
     {
-        filtersIter = filters != null ? filters.listIterator() : null;
+        filtersIterator = filters != null ? filters.listIterator() : null;
         this.handler = handler;
     }
 
     public FunctionStatus apply(T data)
     {
-        if (filtersIter != null && filtersIter.hasNext()) {
-            FunctionStatus fs = filtersIter.next().apply(data);
+        if (filtersIterator != null && filtersIterator.hasNext()) {
+            FunctionStatus fs = filtersIterator.next().apply(data);
             switch (fs)
             {
 

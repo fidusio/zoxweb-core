@@ -15,6 +15,17 @@
  */
 package org.zoxweb.server.http;
 
+import org.zoxweb.server.io.IOUtil;
+import org.zoxweb.shared.http.HTTPAttribute;
+import org.zoxweb.shared.http.HTTPHeader;
+import org.zoxweb.shared.http.HTTPMessageConfigInterface;
+import org.zoxweb.shared.http.HTTPMethod;
+import org.zoxweb.shared.protocol.Delimiter;
+import org.zoxweb.shared.util.ArrayValues;
+import org.zoxweb.shared.util.GetNameValue;
+import org.zoxweb.shared.util.NVPair;
+import org.zoxweb.shared.util.SharedStringUtil;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -23,24 +34,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Logger;
-
-import org.zoxweb.server.io.IOUtil;
-import org.zoxweb.shared.http.*;
-import org.zoxweb.shared.protocol.Delimiter;
-import org.zoxweb.shared.util.ArrayValues;
-
-import org.zoxweb.shared.util.NVPair;
-import org.zoxweb.shared.util.GetNameValue;
-import org.zoxweb.shared.util.SharedStringUtil;
 
 public final class HTTPMultiPartUtil
 {
 
 	public static final GetNameValue<String> MULTI_PART_HEADER_CONTENT_TYPE = new NVPair(HTTPHeader.CONTENT_TYPE.getName(), "multipart/form-data; boundary=");
-	private final static Logger log = Logger.getLogger(HTTPMultiPartUtil.class.getName());
+	//private final static Logger log = Logger.getLogger(HTTPMultiPartUtil.class.getName());
 	private HTTPMultiPartUtil(){
-		log.info("Default ctr");
+
 	}
 	
 	/**

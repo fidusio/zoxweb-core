@@ -19,8 +19,10 @@ import org.zoxweb.shared.util.SharedStringUtil;
 import org.zoxweb.shared.util.SharedUtil;
 
 import java.io.*;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -28,6 +30,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 public class IOUtil 
 {
@@ -38,16 +42,20 @@ public class IOUtil
 	
 	/**
 	 * Close an AutoCloseable object if c is null the action is discarded, while closing catch any exception silently
-	 * @param acs
+	 * @param acs auto closable array
 	 */
 	public static void close(AutoCloseable ...acs)
 	{
 		if (acs != null)
 		{
-			for (AutoCloseable c : acs) {
-				try {
+			for (AutoCloseable c : acs)
+			{
+				try
+				{
 					c.close();
-				} catch (Exception e) {
+				}
+				catch (Exception e)
+				{
 
 				}
 			}
@@ -87,7 +95,7 @@ public class IOUtil
 
 	/**
 	 * 
-	 * @param c
+	 * @param c closable
 	 * @return IOException or null if none generated
 	 */
 	public static IOException close(Closeable c)
@@ -111,12 +119,12 @@ public class IOUtil
 	 * This method will read all the response part of the url connection
 	 * @param url to be read
 	 * @return ByteArrayOutputStream.
-	 * @throws IOException
+	 * @throws IOException in case of an io exception
 	 */
 	public static ByteArrayOutputStream readAllURLResponse(URL url)
 		throws IOException
 	{
-		URLConnection con = (URLConnection) url.openConnection();
+		URLConnection con = url.openConnection();
 		con.setDoInput(true);
 		con.setDoOutput(true);
 		
@@ -147,7 +155,68 @@ public class IOUtil
 		return ret;
 	}
 
-    /**
+	/**
+	 * Delete a directory recursively
+	 * @param path to be deleted
+	 * @throws IOException in case of an error encountered
+	 */
+	public static void deleteDirectoryRecursively(Path path)
+			throws IOException
+	{
+		if (Files.isDirectory(path))
+		{
+			try (DirectoryStream<Path> entries = Files.newDirectoryStream(path))
+			{
+				for (Path entry : entries)
+				{
+					deleteDirectoryRecursively(entry);
+				}
+			}
+		}
+
+		Files.delete(path);
+	}
+
+	public static List<URL> listMatches(Path rootDir, String filterPattern, String filterExclusion)
+			throws IOException
+	{
+
+		List<URL> ret = new ArrayList<>();
+
+		Predicate<Path> composition = null;
+		Predicate<Path> pattern = p -> p.toString().matches(filterPattern);
+		if(SharedStringUtil.isEmpty(filterExclusion))
+		{
+			Predicate<Path> exclusion = p -> p.toString().matches(filterExclusion);
+			composition = pattern.and(exclusion.negate());
+		}
+		else
+		{
+			composition = pattern;
+		}
+
+		try (Stream<Path> paths = Files.walk(rootDir))
+		{
+			paths.filter(Files::isRegularFile)
+					.filter(composition)
+					.forEach(p ->
+					{
+						try
+						{
+							ret.add(p.toUri().toURL());
+						}
+						catch (MalformedURLException e)
+						{
+							e.printStackTrace();
+						}
+					});
+		}
+
+		return ret;
+	}
+
+
+	/**
      *
      * @param is
      * @param charsetEncoding

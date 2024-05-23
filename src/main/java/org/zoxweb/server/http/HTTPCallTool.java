@@ -122,6 +122,7 @@ public final class HTTPCallTool //implements Runnable
             String contentFilename = params.stringValue("-c", true);
             String content = contentFilename != null ? IOUtil.inputStreamToString(contentFilename) : null;
             printResult = params.nameExists("-pr");
+            boolean disableKeepAlive = params.nameExists("-noKeepAlive");
             String proxy = params.stringValue("-p", true);
             int cap = params.intValue("-cap", 0);
             String user = params.stringValue("-user", true);
@@ -153,7 +154,8 @@ public final class HTTPCallTool //implements Runnable
 
                 hmci.setContentType(HTTPMediaType.APPLICATION_JSON, HTTPConst.CHARSET_UTF_8);
                 hmci.setHeader(HTTPHeader.ACCEPT, HTTPMediaType.APPLICATION_JSON, HTTPConst.CHARSET_UTF_8);
-                        //.setHeader(HTTPHeader.USER_AGENT, "TiziOuzou", "zib hmar");
+                if(disableKeepAlive)
+                    hmci.setHeader(HTTPHeader.CONNECTION, "Close");
 
                 if (content != null)
                     hmci.setContent(content);

@@ -75,7 +75,7 @@ public class HTTPWPut
 			hcc.setHeaders(headers);
 		}
 
-		HTTPCall hc = new HTTPCall( hcc, disableSSLCheck ? SSLCheckDisabler.SINGLETON : null);
+		HTTPCall hc = new HTTPCall(hcc, disableSSLCheck ? SSLCheckDisabler.SINGLETON : null);
 		
 		//System.out.println( hcc);
 		return hc.sendRequest();

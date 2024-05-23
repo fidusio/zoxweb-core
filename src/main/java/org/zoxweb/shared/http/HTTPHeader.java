@@ -88,7 +88,7 @@ public enum HTTPHeader
 		return HTTPConst.toHTTPHeader(name, values);
 	}
 
-	public GetNameValue<String> toHTTPHeader(GetValue<String> ...values)
+	public GetNameValue<String> toHTTPHeader(GetValue<?> ...values)
 	{
 		return HTTPConst.toHTTPHeader(name, values);
 	}

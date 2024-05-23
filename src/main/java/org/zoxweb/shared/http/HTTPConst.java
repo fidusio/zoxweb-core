@@ -73,7 +73,7 @@ public final class HTTPConst
     }
 
 
-    public static GetNameValue<String> toHTTPHeader(GetName gn, GetValue<String>...values)
+    public static GetNameValue<String> toHTTPHeader(GetName gn, GetValue<?>...values)
     {
         return toHTTPHeader(gn.getName(), values);
     }
@@ -85,23 +85,23 @@ public final class HTTPConst
     }
 
 
-    public static GetNameValue<String> toHTTPHeader(String name, GetValue<String> ...values)
+    public static GetNameValue<String> toHTTPHeader(String name, GetValue<?> ...values)
     {
         StringBuilder headerValue = new StringBuilder();
 
         if(values != null)
         {
-            for(GetValue<String> value: values)
+            for(GetValue<?> value: values)
             {
                 if (headerValue.length() > 0)
                     headerValue.append("; ");
 
-                if (value != null && !SharedStringUtil.isEmpty(value.getValue()))
+                if (value != null && value.getValue() != null)
                 {
 
                     if (value instanceof GetNameValue)
                     {
-                        headerValue.append(((GetNameValue<String>) value).getName());
+                        headerValue.append(((GetNameValue<?>)value).getName());
                         headerValue.append("=");
                         headerValue.append(value.getValue());
                     }

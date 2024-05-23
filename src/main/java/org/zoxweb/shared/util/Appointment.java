@@ -65,5 +65,11 @@ public interface Appointment
 
 
 	void close();
+
+	/**
+	 * reset the appointment
+	 * @param runOnce if true appointment is executed once if false it will repeat
+	 */
+	void reset(boolean runOnce);
 	
 }

@@ -100,6 +100,11 @@ public class TaskSchedulerProcessor
 				appointment.close();
 			}
 		}
+		public void reset(boolean runOnce)
+		{
+			if(!isClosed() && (remove(this) || !runOnce))
+				queue(this);
+		}
 
 		public boolean isClosed()
 		{
