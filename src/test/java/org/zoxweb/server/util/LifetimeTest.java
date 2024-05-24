@@ -1,8 +1,9 @@
-package org.zoxweb.shared.util;
+package org.zoxweb.server.util;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.zoxweb.server.task.TaskUtil;
+import org.zoxweb.shared.util.Const;
 
 public class LifetimeTest
 {

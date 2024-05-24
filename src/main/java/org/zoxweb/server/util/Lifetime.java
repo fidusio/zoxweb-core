@@ -1,4 +1,6 @@
-package org.zoxweb.shared.util;
+package org.zoxweb.server.util;
+
+import org.zoxweb.shared.util.*;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -200,13 +202,13 @@ public class Lifetime
     @Override
     public String toString() {
         return "Lifetime{" +
-                "id=" + id +
-                ", creationTimestamp=" + creationTimestamp +
-                ", lastUseTimestamp=" + lastUseTimestamp +
-                ", delayBetweenUsage=" + delayBetweenUsage +
-                ", maxUse=" + maxUse +
-                ", usageCounter=" + usageCounter +
-                ", closed=" + closed +
+                "id= " + id +
+                ", creationTimestamp= " + DateUtil.DEFAULT_DATE_FORMAT_TZ.format(creationTimestamp) +
+                ", lastUseTimestamp= " + DateUtil.DEFAULT_DATE_FORMAT_TZ.format(lastUseTimestamp) +
+                ", delayBetweenUsage= " + Const.TimeInMillis.toString(delayBetweenUsage) +
+                ", maxUse= " + maxUse +
+                ", usageCounter= " + usageCounter +
+                ", closed= " + closed +
                 '}';
     }
 }

@@ -26,13 +26,14 @@ public class TaskSchedulerProcessor
     implements Runnable, DaemonController, GetNVProperties {
 
 	public final class TaskSchedulerAppointment
-			implements Appointment {
+			implements Appointment
+	{
 
 		private final Appointment appointment;
-		//private Appointment appointment;
-		private TaskEvent taskEvent;
+		private final TaskEvent taskEvent;
 
-		private TaskSchedulerAppointment(Appointment appointment, TaskEvent te) {
+		private TaskSchedulerAppointment(Appointment appointment, TaskEvent te)
+		{
 			this.appointment = appointment;
 			this.taskEvent = te;
 		}
@@ -79,26 +80,22 @@ public class TaskSchedulerProcessor
 			return appointment.hashCode();
 		}
 
-		public synchronized void close() {
+		public synchronized void close()
+		{
 			if (!appointment.isClosed()) {
 				cancel();
 				appointment.close();
 			}
 		}
 
-		public boolean reset(boolean runOnce)
+		public synchronized boolean reset(boolean runOnce)
 		{
-			if (runOnce && taskEvent.execCount() > 0)
+			if (runOnce && taskEvent.execCount() > 0 || isClosed())
 				return false;
+			// this is the right logic
+			setDelayInNanos(appointment.getDelayInMillis(), System.nanoTime());
+			return true;
 
-			if (!isClosed())
-			{
-				remove(this);
-				queue(this);
-				return true;
-			}
-
-			return false;
 		}
 
 

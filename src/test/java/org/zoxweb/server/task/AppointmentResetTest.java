@@ -20,12 +20,17 @@ public class AppointmentResetTest {
 
 
         long delta = System.currentTimeMillis();
-        Appointment appointment = TaskUtil.defaultTaskScheduler().queue(500, ()-> System.out.println("**********pikaboooo******* " + Thread.currentThread()));
-        System.out.println("Cancel :" + appointment.cancel()  + " exec.count: " + appointment.execCount());
+        Appointment appointment = TaskUtil.defaultTaskScheduler().queue(50, ()-> System.out.println("**********peek a boo******* " + Thread.currentThread()));
+        assert appointment.cancel();
+        System.out.println("isClosed :" + appointment.isClosed()  + " exec.count: " + appointment.execCount());
         assert appointment.reset(true);
         assert appointment.cancel();
+        assert !appointment.cancel();
         System.out.println("isClosed :" + appointment.isClosed() + " exec.count: " + appointment.execCount());
+        long sleepDelta = System.currentTimeMillis();
         TaskUtil.sleep(100);
+        sleepDelta = System.currentTimeMillis() - sleepDelta;
+        System.out.println("sleepDelta: " + Const.TimeInMillis.toString(sleepDelta));
 
         assert appointment.reset(true);
         TaskUtil.waitIfBusy(25);

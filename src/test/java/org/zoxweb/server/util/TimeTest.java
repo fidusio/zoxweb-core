@@ -13,10 +13,8 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.zoxweb;
+package org.zoxweb.server.util;
 
-import org.zoxweb.server.util.DateUtil;
-import org.zoxweb.server.util.ServerUtil;
 import org.zoxweb.shared.util.Const;
 
 import java.util.Date;
@@ -49,6 +47,8 @@ public class TimeTest {
 		Date date = new Date();
 		System.out.println(DateUtil.DEFAULT_GMT_MILLIS.format(date));
 		System.out.println(DateUtil.DEFAULT_ZULU_MILLIS.format(date));
+		System.out.println(DateUtil.DEFAULT_JAVA_FORMAT.format(date));
+		System.out.println(DateUtil.DEFAULT_DATE_FORMAT_TZ.format(date));
 
 
 		long millis = System.currentTimeMillis();
