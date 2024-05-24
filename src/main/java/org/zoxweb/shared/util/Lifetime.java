@@ -2,18 +2,22 @@ package org.zoxweb.shared.util;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class Lifetime
     implements WaitTime<Lifetime>,
-        IsClosed
+        IsClosed, Identifier<Long>
 {
 
+    private static final AtomicLong INSTANCE_COUNTER = new AtomicLong();
+    private final long id = INSTANCE_COUNTER.incrementAndGet();
     private final long creationTimestamp;
-    private long usageCounter = 0;
     private long lastUseTimestamp = 0;
-    private final long maxUse;
     private final long delayBetweenUsage;
+    private final long maxUse;
+    private long usageCounter = 0;
     private final AtomicBoolean closed = new AtomicBoolean(false);
+
 
     /**
      * Create a Lifetime object.
@@ -149,8 +153,6 @@ public class Lifetime
         return maxUse;
     }
 
-
-
     /**
      * @return last time incUsage called, 0 never
      */
@@ -176,17 +178,6 @@ public class Lifetime
     }
 
     @Override
-    public String toString() {
-        return "Lifetime{" +
-                "creationTimestamp=" + creationTimestamp +
-                ", usageCounter=" + usageCounter +
-                ", lastUseTimestamp=" + lastUseTimestamp +
-                ", maxUse=" + maxUse +
-                ", delayInMillis=" + delayBetweenUsage +
-                '}';
-    }
-
-    @Override
     public void close()
     {
         closed.set(true);
@@ -196,5 +187,26 @@ public class Lifetime
     @Override
     public boolean isClosed() {
         return closed.get() || isMaxUsed() || nextWait() < 0;
+    }
+
+    /**
+     * @return the instance id
+     */
+    @Override
+    public Long getID() {
+        return id;
+    }
+
+    @Override
+    public String toString() {
+        return "Lifetime{" +
+                "id=" + id +
+                ", creationTimestamp=" + creationTimestamp +
+                ", lastUseTimestamp=" + lastUseTimestamp +
+                ", delayBetweenUsage=" + delayBetweenUsage +
+                ", maxUse=" + maxUse +
+                ", usageCounter=" + usageCounter +
+                ", closed=" + closed +
+                '}';
     }
 }

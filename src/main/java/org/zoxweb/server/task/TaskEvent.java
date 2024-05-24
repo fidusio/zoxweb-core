@@ -15,9 +15,10 @@
  */
 package org.zoxweb.server.task;
 
-import java.util.EventObject;
-
 import org.zoxweb.shared.util.ReferenceID;
+
+import java.util.EventObject;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * This event is used to encapsulate the content of a Task Execution, it is mainly used by the TaskProcessor object.
@@ -33,19 +34,23 @@ public class TaskEvent
 	private final Object[] params;
 	private Object executionResult = null;
 	private String refID = null;
+	private final AtomicLong execCount = new AtomicLong();
 
 	/**
-	 * Create a task event
-	 * @param source generating the event
-	 * @param te the implementation that will execute the event
-	 * @param taskExecutorParams the task executor parameters
+	 * Create a task event with appointment
+	 * @param source of the event
+	 * @param te the task executor
+	 * @param taskExecutorParams task parameters
 	 */
-	public TaskEvent(Object source, TaskExecutor te, Object... taskExecutorParams) {
+	public TaskEvent(Object source, TaskExecutor te, Object... taskExecutorParams)
+	{
 		super(source);
 		this.te = te;
 		this.params = taskExecutorParams;
-		
 	}
+
+
+
 	
 	/**
 	 * Return the TaskExecutor object, this method is used exclusively by the ExecutorThread to  
@@ -98,4 +103,13 @@ public class TaskEvent
 		this.refID = customRef;
 	}
 
+	public long execCount()
+	{
+		return execCount.get();
+	}
+
+	protected long incExecCount()
+	{
+		return execCount.incrementAndGet();
+	}
 }

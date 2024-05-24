@@ -29,6 +29,7 @@ public class AppointmentDefault
 	private long expirationInMicros;
 	private boolean isClosed = false;
 
+
 	public AppointmentDefault()
     {
 		this(0);
@@ -124,8 +125,18 @@ public class AppointmentDefault
 	}
 
 	@Override
-	public void reset(boolean runOnce) {
+	public boolean reset(boolean runOnce) {
+		return false;
+	}
 
+
+	/**
+	 * @return
+	 */
+	@Override
+	public long execCount()
+	{
+		return 0;
 	}
 
 	public boolean isClosed()

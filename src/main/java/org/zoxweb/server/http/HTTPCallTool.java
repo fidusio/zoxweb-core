@@ -122,7 +122,7 @@ public final class HTTPCallTool //implements Runnable
             String contentFilename = params.stringValue("-c", true);
             String content = contentFilename != null ? IOUtil.inputStreamToString(contentFilename) : null;
             printResult = params.nameExists("-pr");
-            boolean disableKeepAlive = params.nameExists("-noKeepAlive");
+            boolean disableKeepAlive = params.nameExists("-noKA");
             String proxy = params.stringValue("-p", true);
             int cap = params.intValue("-cap", 0);
             String user = params.stringValue("-user", true);

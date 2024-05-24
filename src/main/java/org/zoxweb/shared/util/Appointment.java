@@ -70,6 +70,12 @@ public interface Appointment
 	 * reset the appointment
 	 * @param runOnce if true appointment is executed once if false it will repeat
 	 */
-	void reset(boolean runOnce);
+	boolean reset(boolean runOnce);
+
+
+	/**
+	 * @return the execution count
+	 */
+	long execCount();
 	
 }

@@ -13,7 +13,12 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.zoxweb.server.net.task;
+package org.zoxweb.server.task;
+
+import org.zoxweb.shared.task.SupplierConsumerTask;
+import org.zoxweb.shared.util.Appointment;
+import org.zoxweb.shared.util.AppointmentDefault;
+import org.zoxweb.shared.util.Const;
 
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
@@ -21,13 +26,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
-
-
-import org.zoxweb.server.task.*;
-import org.zoxweb.shared.task.SupplierConsumerTask;
-import org.zoxweb.shared.util.Const;
-import org.zoxweb.shared.util.Appointment;
-import org.zoxweb.shared.util.AppointmentDefault;
 
 public class TaskSchedulerProcessorTest {
 
@@ -251,8 +249,15 @@ public class TaskSchedulerProcessorTest {
 
 
 
+
+
+
+
 		TaskUtil.waitIfBusyThenClose(23, tp, tsp);
-		TaskUtil.waitIfBusyThenClose(25);
+
+
+		TaskUtil.waitIfBusy(250);
+
 
 		System.out.println("TaskSchedulerProcessor 1 :" + tsp.pendingTasks() + " TaskProcessor:" + tp.pendingTasks());
 		//tp.close();

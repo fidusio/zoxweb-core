@@ -31,9 +31,9 @@ import java.util.concurrent.atomic.AtomicLong;
  *
  */
 public class TaskProcessor
-		implements Runnable, DaemonController, Executor, GetNVProperties {
+		implements Runnable, DaemonController, Executor, GetNVProperties
+{
 
-	//private static final transient Logger log = Logger.getLogger(TaskProcessor.class.getName());
 	public final static LogWrapper log = new LogWrapper(TaskProcessor.class);
 
 	public static final long WAIT_TIME = TimeUnit.MILLISECONDS.toMillis(500);
@@ -81,41 +81,50 @@ public class TaskProcessor
 		}
 
 		@Override
-		public void run() {
+		public void run()
+		{
 			// as long as the TaskProcessor is a live 
 			// the ExecutorThread thread will live
-			while(innerLive) {
-				if (event != null) {
+			while(innerLive)
+			{
+				if (event != null)
+				{
 					// do the work
 					TaskExecutor te = event.getTaskExecutor();
-					//TaskTerminationListener tel = event.getTaskTerminationListener();
 					long delta = System.currentTimeMillis();
 					
 					
 					//execute the task;
-					if (te != null) {
+					if (te != null)
+					{
 						try {
 							te.executeTask(event);
-						} catch(Throwable e) {
+						} catch (Throwable e) {
 							e.printStackTrace();
 						}
-						
+
 						if (executorNotify) {
 							synchronized (te) {
 								te.notify();
 							}
 						}
-					}
-					
-					// call the task finish task method
-					try {
-						te.finishTask(event);
-					} catch( Throwable e) {
-						e.printStackTrace();
+
+
+						// call the task finish task method
+						try {
+							te.finishTask(event);
+						} catch (Throwable e) {
+							e.printStackTrace();
+						} finally {
+							event.incExecCount();
+						}
 					}
 
-					if (executorNotify) {
-						synchronized (te) {
+
+					if (executorNotify)
+					{
+						synchronized (te)
+						{
 							te.notify();
 						}
 					}
@@ -127,13 +136,18 @@ public class TaskProcessor
 					queueInternalTask(null);
 				}
 				
-				synchronized(this) {
+				synchronized(this)
+				{
 					// if the event is null
-					if (event == null) {
-						try {
+					if (event == null)
+					{
+						try
+						{
 							// wait to be awaken by the TaskProcessor 
 							wait(WAIT_TIME);
-						} catch (InterruptedException e) {
+						}
+						catch (InterruptedException e)
+						{
 							e.printStackTrace();
 						}
 					}
@@ -145,8 +159,10 @@ public class TaskProcessor
 		 * This method will queue one task
 		 * @param event if null it will reset the task can only be set to null by the ExecutorThread
 		 */
-		protected  void queueInternalTask(TaskEvent event) {
-			synchronized(this) {
+		protected  void queueInternalTask(TaskEvent event)
+		{
+			synchronized(this)
+			{
 				this.event = event;
 				
 				if (event == null) {
@@ -157,8 +173,8 @@ public class TaskProcessor
 					
 					// we need to notify the TaskProcessor that
 					// we are ready for work
-					synchronized(workersQueue) {
-
+					synchronized(workersQueue)
+					{
 						// notify the TaskProcessor thread
 						workersQueue.notify();
 					}
@@ -248,7 +264,7 @@ public class TaskProcessor
 	{	
 		if( !live)
 		{
-			throw new IllegalArgumentException("Can't queue task with a termiated TaskProcessor");
+			throw new IllegalArgumentException("Can't queue task with a terminated TaskProcessor");
 		}
 		
 		// if the task is not null
@@ -419,7 +435,7 @@ public class TaskProcessor
 	public void execute(Runnable command) 
 	{
 		if (command != null)
-			queueTask(new TaskEvent(this, new RunnableTaskContainer(command)));
+			queueTask(new TaskEvent(this, new RunnableTaskContainer(command), null));
 	}
 
 //	public <T> void execute(Supplier<T> supplier, Consumer<T> consumer)

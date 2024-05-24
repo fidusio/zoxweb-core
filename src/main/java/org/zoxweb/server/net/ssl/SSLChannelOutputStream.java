@@ -3,6 +3,7 @@ package org.zoxweb.server.net.ssl;
 
 import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.server.net.BaseChannelOutputStream;
+import org.zoxweb.shared.util.SharedUtil;
 
 import javax.net.ssl.SSLEngineResult;
 import javax.net.ssl.SSLException;
@@ -35,12 +36,12 @@ public class SSLChannelOutputStream extends BaseChannelOutputStream {
             SSLEngineResult result = config.smartWrap(bb, config.outSSLNetData); // at handshake stage, data in appOut won't be
             if(log.isEnabled())
                 log.getLogger().info("AFTER-NEED_WRAP-PROCESSING: " + result);
-
             switch (result.getStatus())
             {
                 case BUFFER_UNDERFLOW:
                 case BUFFER_OVERFLOW:
-                    throw new IOException(result.getStatus() + " invalid state context");
+                    throw new IOException(result.getStatus() + " invalid state context buffer size " +
+                            SharedUtil.toCanonicalID(',', config.outSSLNetData.capacity(),config.outSSLNetData.limit(),config.outSSLNetData.position()));
                 case OK:
                    written = ByteBufferUtil.smartWrite(null, outChannel, config.outSSLNetData);
                     break;

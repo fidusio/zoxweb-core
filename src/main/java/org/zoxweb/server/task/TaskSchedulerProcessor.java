@@ -23,23 +23,17 @@ import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class TaskSchedulerProcessor
-    implements Runnable, DaemonController, GetNVProperties
-{
+    implements Runnable, DaemonController, GetNVProperties {
 
 	public final class TaskSchedulerAppointment
-			implements Appointment
-	{
+			implements Appointment {
 
-		private Appointment appointment;
+		private final Appointment appointment;
+		//private Appointment appointment;
 		private TaskEvent taskEvent;
 
-		private TaskSchedulerAppointment(Appointment ts, TaskEvent te) {
-			SharedUtil.checkIfNulls("TaskScheduler can't be null", ts);
-			if( ts instanceof TaskSchedulerAppointment)
-            {
-                throw new IllegalArgumentException("Appointment must be different than " + TaskSchedulerAppointment.class.getName());
-            }
-			appointment = ts;
+		private TaskSchedulerAppointment(Appointment appointment, TaskEvent te) {
+			this.appointment = appointment;
 			this.taskEvent = te;
 		}
 
@@ -49,31 +43,26 @@ public class TaskSchedulerProcessor
 		}
 
 		@Override
-		public void setDelayInMillis(long delayInMillis) 
-		{
-		  setDelayInNanos(delayInMillis, System.nanoTime());
+		public void setDelayInMillis(long delayInMillis) {
+			setDelayInNanos(delayInMillis, System.nanoTime());
 		}
 
 		@Override
-		public long getExpirationInMillis()
-		{
+		public long getExpirationInMillis() {
 			return appointment.getExpirationInMillis();
 		}
 
 		@Override
-		public boolean cancel()
-		{
+		public boolean cancel() {
 			return remove(this);
 		}
 
-		public boolean equals(Object o)
-		{
+		public boolean equals(Object o) {
 			return appointment.equals(o);
 		}
 
 		@Override
-		public void setDelayInNanos(long delayInMillis, long nanoOffset)
-		{
+		public void setDelayInNanos(long delayInMillis, long nanoOffset) {
 			// TODO Auto-generated method stub
 			cancel();
 			appointment.setDelayInNanos(delayInMillis, nanoOffset);
@@ -81,33 +70,47 @@ public class TaskSchedulerProcessor
 		}
 
 		@Override
-		public long getPreciseExpiration()
-		{
+		public long getPreciseExpiration() {
 			// TODO Auto-generated method stub
 			return appointment.getPreciseExpiration();
 		}
 
-		public int hashCode()
-		{
+		public int hashCode() {
 			return appointment.hashCode();
 		}
 
-		public synchronized void close()
-		{
-			if(!appointment.isClosed())
-			{
+		public synchronized void close() {
+			if (!appointment.isClosed()) {
 				cancel();
 				appointment.close();
 			}
 		}
-		public void reset(boolean runOnce)
+
+		public boolean reset(boolean runOnce)
 		{
-			if(!isClosed() && (remove(this) || !runOnce))
+			if (runOnce && taskEvent.execCount() > 0)
+				return false;
+
+			if (!isClosed())
+			{
+				remove(this);
 				queue(this);
+				return true;
+			}
+
+			return false;
 		}
 
-		public boolean isClosed()
-		{
+
+		/**
+		 * @return
+		 */
+		@Override
+		public long execCount() {
+			return taskEvent.execCount();
+		}
+
+		public boolean isClosed() {
 			return appointment.isClosed();
 		}
 
@@ -157,47 +160,25 @@ public class TaskSchedulerProcessor
 	public boolean isClosed() {
 		return !live;
 	}
+
+
+
+
 	
-	public Appointment queue(Object source,  Appointment a, TaskExecutor te, Object... params) {
-		TaskEvent tEvent = new TaskEvent(source, te, params);
-
-		if (a == null) {
-			a = new AppointmentDefault();
-		}
-
-		return queue(new TaskSchedulerAppointment(a, tEvent));
-	}
-	
-	public Appointment queue(Object source,  long timeInMillis, TaskExecutor te, Object... params) {
-      Appointment a = new AppointmentDefault(timeInMillis, System.nanoTime());
-	  TaskEvent tEvent = new TaskEvent(source, te, params);
-
-     
-      return queue(new TaskSchedulerAppointment(a, tEvent));
-  }
-
-	public Appointment queue(Appointment a, TaskEvent te) {
-		if (a == null) {
-			a = new AppointmentDefault(0, System.nanoTime());
-		}
-
-		return queue(new TaskSchedulerAppointment(a, te));
-	}
-
-
-	public TaskProcessor getExecutor()
+	public Appointment queue(Object source, Appointment a, TaskExecutor te, Object... params)
 	{
-		return taskProcessor;
+		return queue(new TaskSchedulerAppointment(a == null ? new AppointmentDefault() : a, new TaskEvent(source, te, params)));
 	}
 	
-//	public Appointment queue(Appointment a, Runnable command)
-//	{
-//		if (command != null)
-//			return queue(a, new TaskEvent(this, new RunnableTaskContainer(command),(Object[]) null));
-//
-//		return null;
-//	}
+	public Appointment queue(Object source, long timeInMillis, TaskExecutor te, Object... params)
+	{
+      return queue(new TaskSchedulerAppointment( new AppointmentDefault(timeInMillis), new TaskEvent(source, te, params)));
+  	}
 
+	public Appointment queue(Appointment a, TaskEvent te)
+	{
+		return queue(new TaskSchedulerAppointment(a == null ? new AppointmentDefault(0) : a, te));
+	}
 
 	/**
 	 * Schedule a task based on the nextDelay() of the rate controller.
@@ -207,7 +188,9 @@ public class TaskSchedulerProcessor
 	 */
 	public Appointment queue(RateController rateController, Runnable task)
 	{
-		return queue(rateController.nextWait(), task);
+		if(rateController != null && task != null)
+			return queue(rateController.nextWait(), task);
+		return null;
 	}
 
 	/**
@@ -219,29 +202,22 @@ public class TaskSchedulerProcessor
 	public Appointment queue(long delayInMillis, Runnable task)
     {
         if (task != null)
-            return queue(new AppointmentDefault(delayInMillis, System.nanoTime()), new TaskEvent(this, new RunnableTaskContainer(task)));
-        
+			return queue(new TaskSchedulerAppointment(new AppointmentDefault(delayInMillis, System.nanoTime()),
+					new TaskEvent(this, new RunnableTaskContainer(task))));
+
         return null;
     }
 
 	public Appointment queue(Appointment appointment, Runnable command)
 	{
 		if (command != null)
-			return queue(new TaskSchedulerAppointment(appointment, new TaskEvent(this, new RunnableTaskContainer(command))));
+			return queue(new TaskSchedulerAppointment(appointment == null ? new AppointmentDefault() : appointment,
+					new TaskEvent(this, new RunnableTaskContainer(command))));
 
 		return null;
 	}
-//	public <T> Appointment queue(long delayInMillis, Supplier<T> supplier, Consumer<T> consumer)
-//	{
-//		if (supplier != null && consumer != null)
-//			return queue(new AppointmentDefault(delayInMillis, System.nanoTime()), new TaskEvent(this, new SupplierConsumerTask<>(), supplier, consumer));
-//
-//		return null;
-//	}
-	
-	
-	
-	
+
+
 
 	private TaskSchedulerAppointment queue(TaskSchedulerAppointment te) {
 		if (!live) {
@@ -257,6 +233,12 @@ public class TaskSchedulerProcessor
 		}
 		
 		return te;
+	}
+
+
+	public TaskProcessor getExecutor()
+	{
+		return taskProcessor;
 	}
 	
 	private TaskSchedulerAppointment dequeue() {
@@ -292,20 +274,30 @@ public class TaskSchedulerProcessor
 					}	
 				}
 				
-				if (tSchedulerEvent != null) {
-					if (taskProcessor != null) {
+				if (tSchedulerEvent != null)
+				{
+					if (taskProcessor != null)
+					{
 						taskProcessor.queueTask(tSchedulerEvent.taskEvent);
-					} else {
+					}
+					else
+					{
 						// we need to execute task locally
-						try {
+						try
+						{
 							tSchedulerEvent.taskEvent.getTaskExecutor().executeTask(tSchedulerEvent.taskEvent);
-						} catch( Throwable e) {
+						}
+						catch( Throwable e)
+						{
 							e.printStackTrace();
 						}
 						
-						try {
+						try
+						{
 							tSchedulerEvent.taskEvent.getTaskExecutor().finishTask(tSchedulerEvent.taskEvent);
-						} catch( Throwable e) {
+						}
+						catch( Throwable e)
+						{
 							e.printStackTrace();
 						}
 					}

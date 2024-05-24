@@ -24,7 +24,8 @@ import java.util.EventListener;
  *
  */
 public interface TaskExecutor
-		extends EventListener {
+		extends EventListener
+{
 
 	/**
 	 * This method is called by the TaskProcessor ExecutorThread to execute a task
