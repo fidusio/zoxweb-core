@@ -20,13 +20,13 @@ public class HTTPUtilTest {
         address.setStreet("100 main street");
         address.setStateOrProvince("CA");
         address.setZIPOrPostalCode("90001");
-        HTTPMessageConfigInterface hmci = HTTPUtil.formatResponse(address, HTTPStatusCode.OK);
+        HTTPMessageConfigInterface hmci = HTTPUtil.buildResponse(address, HTTPStatusCode.OK);
         UByteArrayOutputStream data = HTTPUtil.formatResponse(hmci, null);
 
         System.out.println(SharedStringUtil.toString(data.getInternalBuffer(), 0, data.size()));
 
         UUIDInfoDAO uuid = new UUIDInfoDAO();
-        hmci = HTTPUtil.formatResponse(uuid, HTTPStatusCode.OK);
+        hmci = HTTPUtil.buildResponse(uuid, HTTPStatusCode.OK);
         data = HTTPUtil.formatResponse(hmci, null);
 
         System.out.println(SharedStringUtil.toString(data.getInternalBuffer(), 0, data.size()));
@@ -40,7 +40,7 @@ public class HTTPUtilTest {
         nvgm.add(new NVLong("long", 1000));
         nvgm.add(new NVBoolean("bool", true));
         nvgm.add(new NVFloat("float", (float) 12.43534));
-        HTTPMessageConfigInterface hmci = HTTPUtil.formatResponse(nvgm, HTTPStatusCode.OK);
+        HTTPMessageConfigInterface hmci = HTTPUtil.buildResponse(nvgm, HTTPStatusCode.OK);
         UByteArrayOutputStream data = HTTPUtil.formatResponse(hmci, null);
         System.out.println(SharedStringUtil.toString(data.getInternalBuffer(), 0, data.size()));
 

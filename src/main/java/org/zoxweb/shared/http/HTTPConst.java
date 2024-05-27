@@ -37,11 +37,13 @@ public final class HTTPConst
         CONNECTION_CLOSE(HTTPHeader.CONNECTION, "close"),
         CONNECTION_KEEP_ALIVE(HTTPHeader.CONNECTION, "keep-alive"),
         CONNECTION_UPGRADE(HTTPHeader.CONNECTION, "upgrade"),
+        CONTENT_TYPE_JSON_UTF8(toHTTPHeader(HTTPHeader.CONTENT_TYPE, HTTPMediaType.APPLICATION_JSON, HTTPConst.CHARSET_UTF_8)),
+        EXPIRES_ZERO(toHTTPHeader(HTTPHeader.EXPIRES, "0")),
+        NO_CACHE_CONTROL(HTTPHeader.CACHE_CONTROL, "no-store, no-cache, must-revalidate, private"),
         UPGRADE_WEBSOCKET(HTTPHeader.UPGRADE, "websocket"),
-        EXPIRES_ZERO(toHTTPHeader(HTTPHeader.EXPIRES, "Thu, 01 Jan 1970 00:00:00 GMT")),
         WWW_AUTHENTICATE(HTTPHeader.WWW_AUTHENTICATE, "Basic realm=\"xlogistx\""),
         X_CONTENT_TYPE_OPTIONS_NO_SNIFF("X-Content-Type-Options", " nosniff"),
-        CONTENT_TYPE_JSON_UTF8(toHTTPHeader(HTTPHeader.CONTENT_TYPE, HTTPMediaType.APPLICATION_JSON, HTTPConst.CHARSET_UTF_8)),
+
         ;
         private final String name;
         private final String value;

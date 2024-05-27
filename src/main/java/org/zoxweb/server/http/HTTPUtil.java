@@ -95,70 +95,131 @@ public class HTTPUtil
 	}
 
 
-	public static HTTPMessageConfigInterface formatResponse(HTTPStatusCode statusCode, GetNameValue<?> ...headers)
+	/**
+	 * Build an HTTP response
+	 * @param hmci if null, create a new one and return it
+	 * @param statusCode status code of the response
+	 * @param headers of the response
+	 * @return
+	 */
+	public static HTTPMessageConfigInterface buildResponse(HTTPMessageConfigInterface hmci,
+														   HTTPStatusCode statusCode,
+														   GetNameValue<?> ...headers)
 	{
-		HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit(null, null, (HTTPMethod) null);
+		if (hmci == null)
+			hmci = HTTPMessageConfig.createAndInit(null, null, (HTTPMethod) null);
 		hmci.setHTTPStatusCode(statusCode);
 		if( headers != null)
 			for (GetNameValue<?> header : headers)
 				hmci.getHeaders().add(header);
-		hmci.setContentType(HTTPMediaType.APPLICATION_JSON, HTTPConst.CHARSET_UTF_8);
+
 		return hmci;
+
 	}
 
-	public static HTTPMessageConfigInterface formatResponse(NVEntity nve, HTTPStatusCode statusCode, GetNameValue<?> ...headers)
+
+//	public static HTTPMessageConfigInterface formatResponse(HTTPStatusCode statusCode, GetNameValue<?> ...headers)
+//	{
+//		HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit(null, null, (HTTPMethod) null);
+//		hmci.setHTTPStatusCode(statusCode);
+//		if( headers != null)
+//			for (GetNameValue<?> header : headers)
+//				hmci.getHeaders().add(header);
+//		hmci.setContentType(HTTPMediaType.APPLICATION_JSON, HTTPConst.CHARSET_UTF_8);
+//		return hmci;
+//	}
+
+	public static HTTPMessageConfigInterface buildResponse(NVEntity nve, HTTPStatusCode statusCode, GetNameValue<?> ...headers)
 			throws IOException
 	{
-		HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit(null, null, (HTTPMethod) null);
-		hmci.setHTTPStatusCode(statusCode);
+		HTTPMessageConfigInterface hmci = buildResponse((HTTPMessageConfigInterface) null, statusCode, headers);
 		hmci.setContentType(HTTPMediaType.APPLICATION_JSON, HTTPConst.CHARSET_UTF_8);
-		if( headers != null)
-			for (GetNameValue<?> header : headers)
-				hmci.getHeaders().add(header);
 		hmci.setContent(GSONUtil.toJSON(nve,false, false, true));
 		return hmci;
 	}
 
 
 
-	public static HTTPMessageConfigInterface formatErrorResponse(String msg, HTTPStatusCode hsc, GetNameValue<?> ...headers)
+
+
+
+
+	public static HTTPMessageConfigInterface buildResponse(String content, HTTPStatusCode statusCode, GetNameValue<?> ...headers)
+	{
+		HTTPMessageConfigInterface hmci = buildResponse((HTTPMessageConfigInterface) null, statusCode, headers);
+		hmci.setContentType(HTTPMediaType.APPLICATION_JSON, HTTPConst.CHARSET_UTF_8);
+		hmci.setContent(content);
+		return hmci;
+	}
+
+	public static HTTPMessageConfigInterface buildResponse(NVGenericMap nvgm, HTTPStatusCode statusCode, GetNameValue<?> ...headers)
+	{
+		return buildResponse(GSONUtil.toJSONDefault(nvgm), statusCode, headers);
+	}
+
+
+
+	public static HTTPMessageConfigInterface buildErrorResponse(HTTPMessageConfigInterface hmci, Object content, HTTPStatusCode hsc, GetNameValue<?> ...headers)
+	{
+		hmci = buildResponse(hmci, hsc, headers);
+
+		if (content != null)
+		{
+			if(content instanceof String)
+				hmci.setContent((String) content);
+			else if (content instanceof byte[])
+				hmci.setContent((byte[])content);
+			else
+			{
+				hmci.setContent(GSONUtil.toJSONDefault(content));
+				hmci.getHeaders().build(HTTPConst.CommonHeader.CONTENT_TYPE_JSON_UTF8);
+			}
+		}
+
+		hmci.getHeaders().build(HTTPConst.CommonHeader.CONNECTION_CLOSE);
+		hmci.getHeaders().remove(HTTPHeader.KEEP_ALIVE);
+
+		return hmci;
+	}
+
+
+
+
+	public static HTTPMessageConfigInterface buildErrorResponse(String msg, HTTPStatusCode hsc, GetNameValue<?> ...headers)
 	{
 		SimpleMessage sem = new SimpleMessage(msg, hsc.CODE, hsc.REASON);
 		sem.setCreationTime(System.currentTimeMillis());
-		return formatResponse(GSONUtil.toJSONDefault(sem), hsc, headers);
+
+		return buildErrorResponse(null, sem, hsc, headers);
 	}
 
 
 
 
 
-	public static HTTPMessageConfigInterface formatResponse(String content, HTTPStatusCode statusCode, GetNameValue<?> ...headers)
+	public static HTTPMessageConfigInterface buildJSONResponse(HTTPMessageConfigInterface hmci, Object content, HTTPStatusCode statusCode, GetNameValue<?> ...headers)
 	{
-		HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit(null, null, (HTTPMethod) null);
+		SharedUtil.checkIfNulls("HTTPStatusCode null", statusCode);
+
+		if (hmci == null)
+			hmci = HTTPMessageConfig.createAndInit(null, null, (HTTPMethod) null);
+
+		String responseContent = null;
+		if (content != null)
+			responseContent = GSONUtil.toJSONDefault(content);
+
 		hmci.setHTTPStatusCode(statusCode);
-		hmci.setContentType(HTTPMediaType.APPLICATION_JSON, HTTPConst.CHARSET_UTF_8);
-		hmci.setContent(content);
-		if( headers != null)
-			for (GetNameValue<?> header : headers)
-				hmci.getHeaders().add(header);
+		hmci.getHeaders().build(HTTPConst.CommonHeader.CONTENT_TYPE_JSON_UTF8);
+		if(headers != null)
+			for(GetNameValue<?> header : headers)
+				hmci.getHeaders().build(header);
+
+		hmci.setContent(responseContent);
 		return hmci;
 	}
 
-	public static HTTPMessageConfigInterface formatResponse(NVGenericMap nvgm, HTTPStatusCode statusCode, GetNameValue<?> ...headers)
-			throws IOException
-	{
-		HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit(null, null, (HTTPMethod) null);
-		hmci.setHTTPStatusCode(statusCode);
-		hmci.setContentType(HTTPMediaType.APPLICATION_JSON, HTTPConst.CHARSET_UTF_8);
-		hmci.setContent(GSONUtil.toJSONGenericMap(nvgm,false, false, true));
-		if( headers != null)
-			for (GetNameValue<?> header : headers)
-				hmci.getHeaders().add(header);
-		return hmci;
-	}
 
-
-	public static UByteArrayOutputStream formatResponse(HTTPCallException e, UByteArrayOutputStream ubaos, GetNameValue<?> ...headers)
+	public static UByteArrayOutputStream formatErrorResponse(HTTPCallException e, UByteArrayOutputStream ubaos, GetNameValue<?> ...headers)
 	{
 		if (e.getMessageConfig() != null)
 		{
@@ -168,31 +229,16 @@ public class HTTPUtil
 		{
 			return formatResponse(e.getResponseData(), ubaos, headers);
 		}
-		else
-		{
-			HTTPMessageConfigInterface hmci = new HTTPMessageConfig();
-			hmci.setHTTPStatusCode(e.getStatusCode() != null ? e.getStatusCode() : HTTPStatusCode.BAD_REQUEST);
-			hmci.getHeaders().build(HTTPConst.CommonHeader.CONTENT_TYPE_JSON_UTF8);
-			SimpleMessage simpleMessage = new SimpleMessage();
-			simpleMessage.setError(e.getMessage());
-			simpleMessage.setStatus(hmci.getHTTPStatusCode().CODE);
-			hmci.setContent(GSONUtil.toJSONDefault(simpleMessage));
-			return formatResponse(hmci, ubaos, headers);
-		}
+		return formatResponse(buildErrorResponse(e.getMessage(), e.getStatusCode() != null ? e.getStatusCode() : HTTPStatusCode.BAD_REQUEST, headers), ubaos);
 	}
 
 
 	public static UByteArrayOutputStream formatResponse(HTTPMessageConfigInterface hmci, UByteArrayOutputStream ubaos, GetNameValue<?> ...headers)
 	{
 		if (ubaos == null)
-		{
 			ubaos = ByteBufferUtil.allocateUBAOS(256);
-		}
 		else
-		{
 			ubaos.reset();
-		}
-
 
 		if( headers != null)
 			for (GetNameValue<?> header : headers)
@@ -237,8 +283,6 @@ public class HTTPUtil
 		{
 			ubaos.reset();
 		}
-
-
 
 		HTTPStatusCode hsc = HTTPStatusCode.statusByCode(rd.getStatus());
 		// write the first line

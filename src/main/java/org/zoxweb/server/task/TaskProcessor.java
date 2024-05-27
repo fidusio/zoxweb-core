@@ -435,7 +435,7 @@ public class TaskProcessor
 	public void execute(Runnable command) 
 	{
 		if (command != null)
-			queueTask(new TaskEvent(this, new RunnableTaskContainer(command), null));
+			queueTask(new TaskEvent(this, new RunnableTaskContainer(command)));
 	}
 
 //	public <T> void execute(Supplier<T> supplier, Consumer<T> consumer)

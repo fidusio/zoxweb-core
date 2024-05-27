@@ -280,6 +280,7 @@ public class HTTPMessageConfig
 	public void setContent(byte[] content)
 	{
 		setValue(Params.CONTENT, content);
+		//setContentLength(content != null ? content.length  : 0);
 	}
 	
 	/**
@@ -542,7 +543,6 @@ public class HTTPMessageConfig
 	@Override
 	public String getContentType()
 	{
-		
 		return getHeaders().getValue(HTTPHeader.CONTENT_TYPE);
 	}
 
@@ -554,35 +554,36 @@ public class HTTPMessageConfig
 	@Override
 	public void setContentType(String contentType)
 	{
-		
 		getHeaders().add(HTTPConst.toHTTPHeader(HTTPHeader.CONTENT_TYPE, contentType));
 	}
 
 	@Override
-	public String getAccept() {
+	public String getAccept()
+	{
 		return getHeaders().getValue(HTTPHeader.ACCEPT);
 	}
 
 	@Override
-	public void setAccept(String ...accept) {
+	public void setAccept(String ...accept)
+	{
 		getHeaders().add(HTTPConst.toHTTPHeader(HTTPHeader.ACCEPT, accept));
 	}
 
 	@Override
-	public void setAccept(GetValue<String> ...accept) {
+	public void setAccept(GetValue<String> ...accept)
+	{
 		getHeaders().add(HTTPConst.toHTTPHeader(HTTPHeader.ACCEPT, accept));
 	}
 
 
 	/**
 	 * Set the content type
-	 * @param contentType
+	 * @param contentTypes list of parameters
 	 */
 	@Override
-	public void setContentType(GetValue<String> ...contentType)
+	public void setContentType(GetValue<String> ...contentTypes)
 	{
-		
-		getHeaders().add(HTTPConst.toHTTPHeader(HTTPHeader.CONTENT_TYPE, contentType));
+		getHeaders().add(HTTPConst.toHTTPHeader(HTTPHeader.CONTENT_TYPE, contentTypes));
 	}
 
 
@@ -593,7 +594,6 @@ public class HTTPMessageConfig
 	@Override
 	public String getCookie()
 	{
-		
 		return getHeaders().getValue(HTTPHeader.COOKIE);
 	}
 
@@ -605,7 +605,6 @@ public class HTTPMessageConfig
 	@Override
 	public void setCookie(String cookieValue)
 	{
-		
 		getHeaders().add(HTTPConst.toHTTPHeader(HTTPHeader.COOKIE, cookieValue));
 	}
 
@@ -617,9 +616,7 @@ public class HTTPMessageConfig
 	@Override
 	public void setCookie(GetValue<String> cookieValue)
 	{
-		
 		getHeaders().add(HTTPConst.toHTTPHeader(HTTPHeader.COOKIE, cookieValue));
-		
 	}
 
 
