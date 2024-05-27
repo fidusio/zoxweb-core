@@ -38,7 +38,7 @@ public class SSLDataReadyState
                         int bytesRead = config.sslChannel.read(config.inSSLNetData);
                         if (bytesRead == -1)
                         {
-                            log.getLogger().info("SSLCHANNEL-CLOSED-NOT_HANDSHAKING: " + config.getHandshakeStatus() + " bytesRead: " + bytesRead);
+                            if (log.isEnabled()) log.getLogger().info("SSLCHANNEL-CLOSED-NOT_HANDSHAKING: " + config.getHandshakeStatus() + " bytesRead: " + bytesRead);
                             config.close();
                         }
                         else

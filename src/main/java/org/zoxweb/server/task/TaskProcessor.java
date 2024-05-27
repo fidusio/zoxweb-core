@@ -58,7 +58,7 @@ public class TaskProcessor
 	private boolean innerLive = true;
 	private final ThreadGroup threadGroup;
 	private static final AtomicLong TP_COUNTER = new AtomicLong(0);
-
+	private AtomicLong tasksExecutedCounter = new AtomicLong();
 
 
 	/**
@@ -117,6 +117,7 @@ public class TaskProcessor
 							e.printStackTrace();
 						} finally {
 							event.incExecCount();
+							tasksExecutedCounter.getAndIncrement();
 						}
 					}
 
@@ -454,9 +455,13 @@ public class TaskProcessor
 		ret.add(new NVInt("tasks_capacity", tasksQueue.capacity()));
 		ret.add(new NVInt("tasks_capacity_threshold", tasksQueue.getThreshold()));
 		ret.add(new NVInt("tasks_pending", tasksQueue.size()));
-
-
+		ret.add(new NVLong("total_task_executed", tasksExecutedCounter.get()));
 		return ret;
+	}
+
+	public long totalExecutedTasks()
+	{
+		return tasksExecutedCounter.get();
 	}
 	
 	/**
