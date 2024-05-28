@@ -215,13 +215,13 @@ public class HTTPCall
 			
 			
 		
-			ArrayValues<GetNameValue<String>> reqHeaders = hcc.getHeaders().asArrayValuesString();
+//			ArrayValues<GetNameValue<String>> reqHeaders = hcc.getHeaders().asArrayValuesString();
 			// set the request headers
-			if (reqHeaders != null)
+			if (hcc.getHeaders() != null)
 			{
-				for (GetNameValue<String> nvp : reqHeaders.values())
+				for (GetNameValue<?> nvp : hcc.getHeaders().values())
 				{
-					con.setRequestProperty(nvp.getName(), nvp.getValue());
+					con.setRequestProperty(nvp.getName(), ""+nvp.getValue());
 				}
 			}
 			

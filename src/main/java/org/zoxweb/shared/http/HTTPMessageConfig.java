@@ -505,7 +505,6 @@ public class HTTPMessageConfig
 	@Override
 	public synchronized void setAuthorization(HTTPAuthorization httpAuthentication)
 	{
-		
 		setValue(Params.AUTHORIZATION, httpAuthentication);
 	}
 
