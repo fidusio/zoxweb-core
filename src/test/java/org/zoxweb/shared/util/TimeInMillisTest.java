@@ -1,8 +1,10 @@
 package org.zoxweb.shared.util;
 
 import org.junit.jupiter.api.Test;
+import org.zoxweb.server.util.GSONUtil;
 
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 public class TimeInMillisTest {
     @Test
@@ -37,4 +39,20 @@ public class TimeInMillisTest {
         System.out.println(Const.TimeInMillis.toString(ts) + " " + ts);
 
     }
+
+    @Test
+    public void json()
+    {
+        NVEnum nve = new NVEnum("seconds", TimeUnit.SECONDS);
+        NVGenericMap nvgm = new NVGenericMap();
+        nvgm.add(nve);
+        String json = GSONUtil.toJSONDefault(nvgm);
+        System.out.println(json);
+
+        nvgm = GSONUtil.fromJSONDefault(json, NVGenericMap.class);
+        System.out.println(nvgm);
+        System.out.println(((TimeUnit)nvgm.getValue("seconds")).getClass());
+        System.out.println(GSONUtil.toJSONDefault(nvgm));
+    }
+
 }

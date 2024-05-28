@@ -41,11 +41,15 @@ public class SSLCheckDisabler
    */
   public static final SSLCheckDisabler SINGLETON = new SSLCheckDisabler();
   private SSLSocketFactory disabledSSLFactory = null;
-
+  private TrustManager[] trustAllCerts = null;
   //private SSLSocketFactory defaultSSLFactory = null;
 
   //private HostnameVerifier defaultHostnameVerifier = null;
   private HostnameVerifier allHostsValid = null;
+
+
+  private SSLContext sc = null;
+
 
 
   private SSLCheckDisabler() {
@@ -79,16 +83,22 @@ public class SSLCheckDisabler
     }
   }
 
+  public TrustManager[] getTrustManagers()
+  {
+    return trustAllCerts;
+  }
+
   /**
    * Create a bogus SSL factory and hostname verifier
    */
   private void disableSSLValidation() throws NoSuchAlgorithmException, KeyManagementException {
     //defaultSSLFactory = HttpsURLConnection.getDefaultSSLSocketFactory();
     //defaultHostnameVerifier = HttpsURLConnection.getDefaultHostnameVerifier();
-    TrustManager[] trustAllCerts = new TrustManager[]{
+    trustAllCerts = new TrustManager[]{
         new X509TrustManager() {
+          private final X509Certificate[] certificates = new X509Certificate[]{};
           public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-            return null;
+            return certificates;
           }
 
           public void checkClientTrusted(X509Certificate[] certs, String authType) {
@@ -102,7 +112,7 @@ public class SSLCheckDisabler
     };
 
     // Install the all-trusting trust manager
-    SSLContext sc = SSLContext.getInstance("SSL");
+    sc = SSLContext.getInstance("SSL");
     sc.init(null, trustAllCerts, new SecureRandom());
     disabledSSLFactory = sc.getSocketFactory();
     // Create all-trusting host name verifier
