@@ -32,11 +32,11 @@ public class AppConfigDAOTest {
         HTTPMessageConfig hmc = (HTTPMessageConfig) HTTPMessageConfig.createAndInit(url, uri, HTTPMethod.GET);
         hmc.setName("zipcode-api-config");
         hmc.setHTTPParameterFormatter(HTTPEncoder.URI_REST_ENCODED);
-        hmc.getParameters().add(new NVPair("zip_code", zipCode));
-        hmc.getParameters().add(new NVPair("distance", distance));
-        hmc.getParameters().add(new NVPair("units", units));
+        hmc.getParameters().build(new NVPair("zip_code", zipCode))
+            .build(new NVPair("distance", distance))
+            .build(new NVPair("units", units));
 
-        appConfigDAO.getProperties().add(hmc);
+        appConfigDAO.getProperties().build(hmc);
 
         System.out.println(GSONUtil.toJSON(appConfigDAO, true, false, true));
 

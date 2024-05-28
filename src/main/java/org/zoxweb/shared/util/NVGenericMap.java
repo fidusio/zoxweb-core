@@ -120,12 +120,16 @@ public class NVGenericMap
 	}
 
 	/**
-	 * @see org.zoxweb.shared.util.ArrayValues#add(java.lang.Object)
+	 *
+	 * @param v to be added if null will not be added
+	 * @return v
 	 */
 	@Override
 	public synchronized GetNameValue<?> add(GetNameValue<?> v)
 	{
-		return value.put(new GetNameKey(v, true), v);
+		if(v != null)
+			value.put(new GetNameKey(v, true), v);
+		return v;
 	}
 	
 	

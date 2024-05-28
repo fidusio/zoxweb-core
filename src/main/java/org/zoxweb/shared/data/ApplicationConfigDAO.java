@@ -15,15 +15,10 @@
  */
 package org.zoxweb.shared.data;
 
+import org.zoxweb.shared.util.*;
+
 import java.io.Serializable;
 import java.util.Map;
-
-import org.zoxweb.shared.util.GetName;
-import org.zoxweb.shared.util.GetNameValue;
-import org.zoxweb.shared.util.NVBoolean;
-import org.zoxweb.shared.util.NVGenericMap;
-import org.zoxweb.shared.util.SharedStringUtil;
-import org.zoxweb.shared.util.SharedUtil;
 
 /**
  * This class defines the application configuration data access object.
@@ -221,7 +216,7 @@ public class ApplicationConfigDAO
 		{
 			if (nvb == null)
 			{
-				nvgProperties.add(new NVBoolean("is_secure", bool));
+				nvgProperties.build(new NVBoolean("is_secure", bool));
 			}
 			else
 			{
