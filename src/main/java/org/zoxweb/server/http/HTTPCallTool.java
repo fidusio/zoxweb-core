@@ -165,7 +165,7 @@ public final class HTTPCallTool //implements Runnable
 
                 endpoints.add(endpoint);
                 // vm warmup
-                new HTTPCall(hmci).sendRequest();
+                log.getLogger().info("Test Call: " + new HTTPCall(hmci).sendRequest());
             }
 
 
