@@ -148,10 +148,6 @@ public final class HTTPCallTool //implements Runnable
                 hmci.setURLEncodingEnabled(false);
                 hmci.setHTTPParameterFormatter(null);
 
-//                hmci.setContentType(HTTPMediaType.APPLICATION_JSON);
-//                hmci.setAccept(HTTPMediaType.APPLICATION_JSON);
-//                hmci.setUserAgent("TiziOuzou", "zib hmar");
-
                 hmci.setContentType(HTTPMediaType.APPLICATION_JSON, HTTPConst.CHARSET_UTF_8);
                 hmci.setHeader(HTTPHeader.ACCEPT, HTTPMediaType.APPLICATION_JSON, HTTPConst.CHARSET_UTF_8);
                 if(disableKeepAlive)
@@ -192,7 +188,7 @@ public final class HTTPCallTool //implements Runnable
         catch(Exception e)
         {
             e.printStackTrace();
-            System.err.println("usage: -url url-value  [-r repeat-count] [-m http method default get] [-c content file name] [-pr true(print result)]");
+            System.err.println("usage: -url url-value  [-r repeat-count] [-m http method default get] [-c content file name] [-pr true(print result)] [-noKA(disable keep alive)]");
             TaskUtil.waitIfBusyThenClose(25);
         }
     }

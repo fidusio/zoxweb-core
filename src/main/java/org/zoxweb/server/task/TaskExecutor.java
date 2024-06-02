@@ -33,7 +33,7 @@ public interface TaskExecutor
 	 * the TaskEvent.setExecutionResult() can be used 
 	 * @param event task event to be executed
 	 */
-	void executeTask(TaskEvent event);
+	void executeTask(TaskEvent event) throws Exception;
 	
 	/**
 	 * Called after returning from TaskExecutor.executeTask();

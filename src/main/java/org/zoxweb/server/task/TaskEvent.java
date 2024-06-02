@@ -33,6 +33,7 @@ public class TaskEvent
 	private final TaskExecutor te;
 	private final Object[] params;
 	private Object executionResult = null;
+	private Exception executionException = null;
 	private String refID = null;
 	private final AtomicLong execCount = new AtomicLong();
 
@@ -85,6 +86,15 @@ public class TaskEvent
 	 */
 	public void setExecutionResult(Object executionResult) {
 		this.executionResult = executionResult;
+	}
+	public synchronized void setExecutionException(Exception e)
+	{
+		executionException = e;
+	}
+
+	public synchronized Exception getExecutionException()
+	{
+		return executionException;
 	}
 	
 	/**

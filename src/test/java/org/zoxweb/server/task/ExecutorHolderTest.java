@@ -20,7 +20,7 @@ import java.util.logging.Logger;
 
 public class ExecutorHolderTest {
 
-	private static final transient Logger log = Logger.getLogger(ExecutorHolderTest.class.getName());
+	public static final Logger log = Logger.getLogger(ExecutorHolderTest.class.getName());
 
 	@SuppressWarnings("unchecked")
 	public static void main(String[] args) {

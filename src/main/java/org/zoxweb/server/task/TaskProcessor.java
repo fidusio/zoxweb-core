@@ -19,8 +19,10 @@ import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.util.ThresholdQueue;
 import org.zoxweb.shared.util.*;
 
-import java.util.concurrent.Executor;
-import java.util.concurrent.TimeUnit;
+import java.security.PrivilegedAction;
+import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 
@@ -31,7 +33,7 @@ import java.util.concurrent.atomic.AtomicLong;
  *
  */
 public class TaskProcessor
-		implements Runnable, DaemonController, Executor, GetNVProperties
+		implements Runnable, DaemonController, ExecutorService, GetNVProperties
 {
 
 	public final static LogWrapper log = new LogWrapper(TaskProcessor.class);
@@ -58,7 +60,9 @@ public class TaskProcessor
 	private boolean innerLive = true;
 	private final ThreadGroup threadGroup;
 	private static final AtomicLong TP_COUNTER = new AtomicLong(0);
-	private AtomicLong tasksExecutedCounter = new AtomicLong();
+	private final AtomicLong tasksExecutedCounter = new AtomicLong();
+
+
 
 
 	/**
@@ -97,38 +101,50 @@ public class TaskProcessor
 					//execute the task;
 					if (te != null)
 					{
-						try {
+						try
+						{
 							te.executeTask(event);
-						} catch (Throwable e) {
+						}
+						catch (Throwable e)
+						{
+							if(e instanceof Exception)
+								event.setExecutionException((Exception) e);
 							e.printStackTrace();
 						}
 
-						if (executorNotify) {
-							synchronized (te) {
+						if (executorNotify)
+						{
+							synchronized (te)
+							{
 								te.notify();
 							}
 						}
 
 
 						// call the task finish task method
-						try {
+						try
+						{
 							te.finishTask(event);
 						} catch (Throwable e) {
 							e.printStackTrace();
-						} finally {
+						}
+						finally
+						{
 							event.incExecCount();
 							tasksExecutedCounter.getAndIncrement();
 						}
-					}
 
-
-					if (executorNotify)
-					{
-						synchronized (te)
+						if (executorNotify)
 						{
-							te.notify();
+							synchronized (te)
+							{
+								te.notify();
+							}
 						}
 					}
+
+
+
 					
 					delta = System.currentTimeMillis() -  delta;
 					totalExecutionTime += delta;
@@ -263,7 +279,7 @@ public class TaskProcessor
 	public void queueTask(TaskEvent task)
 		throws IllegalArgumentException
 	{	
-		if( !live)
+		if(!live)
 		{
 			throw new IllegalArgumentException("Can't queue task with a terminated TaskProcessor");
 		}
@@ -436,14 +452,272 @@ public class TaskProcessor
 	public void execute(Runnable command) 
 	{
 		if (command != null)
-			queueTask(new TaskEvent(this, new RunnableTaskContainer(command)));
+			submit(command);
+//			queueTask(new TaskEvent(this, new RunnableTask(command)));
 	}
 
-//	public <T> void execute(Supplier<T> supplier, Consumer<T> consumer)
-//	{
-//		if(consumer != null)
-//			queueTask(new TaskEvent(this, new SupplierConsumerTask<>(), supplier, consumer));
-//	}
+	/**
+	 * Initiates an orderly shutdown in which previously submitted
+	 * tasks are executed, but no new tasks will be accepted.
+	 * Invocation has no additional effect if already shut down.
+	 *
+	 * <p>This method does not wait for previously submitted tasks to
+	 * complete execution.  Use {@link #awaitTermination awaitTermination}
+	 * to do that.
+	 *
+	 * @throws SecurityException if a security manager exists and
+	 *                           shutting down this ExecutorService may manipulate
+	 *                           threads that the caller is not permitted to modify
+	 *                           because it does not hold {@link
+	 *                           RuntimePermission}{@code ("modifyThread")},
+	 *                           or the security manager's {@code checkAccess} method
+	 *                           denies access.
+	 */
+	@Override
+	public void shutdown() {
+
+	}
+
+	/**
+	 * Attempts to stop all actively executing tasks, halts the
+	 * processing of waiting tasks, and returns a list of the tasks
+	 * that were awaiting execution.
+	 *
+	 * <p>This method does not wait for actively executing tasks to
+	 * terminate.  Use {@link #awaitTermination awaitTermination} to
+	 * do that.
+	 *
+	 * <p>There are no guarantees beyond best-effort attempts to stop
+	 * processing actively executing tasks.  For example, typical
+	 * implementations will cancel via {@link Thread#interrupt}, so any
+	 * task that fails to respond to interrupts may never terminate.
+	 *
+	 * @return list of tasks that never commenced execution
+	 * @throws SecurityException if a security manager exists and
+	 *                           shutting down this ExecutorService may manipulate
+	 *                           threads that the caller is not permitted to modify
+	 *                           because it does not hold {@link
+	 *                           RuntimePermission}{@code ("modifyThread")},
+	 *                           or the security manager's {@code checkAccess} method
+	 *                           denies access.
+	 */
+	@Override
+	public List<Runnable> shutdownNow() {
+		throw new IllegalArgumentException("Method not implemented yet");
+	}
+
+	/**
+	 * Returns {@code true} if this executor has been shut down.
+	 *
+	 * @return {@code true} if this executor has been shut down
+	 */
+	@Override
+	public boolean isShutdown() {
+		return isClosed();
+	}
+
+	/**
+	 * Returns {@code true} if all tasks have completed following shut down.
+	 * Note that {@code isTerminated} is never {@code true} unless
+	 * either {@code shutdown} or {@code shutdownNow} was called first.
+	 *
+	 * @return {@code true} if all tasks have completed following shut down
+	 */
+	@Override
+	public boolean isTerminated() {
+		return isShutdown();
+	}
+
+	/**
+	 * Blocks until all tasks have completed execution after a shutdown
+	 * request, or the timeout occurs, or the current thread is
+	 * interrupted, whichever happens first.
+	 *
+	 * @param timeout the maximum time to wait
+	 * @param unit    the time unit of the timeout argument
+	 * @return {@code true} if this executor terminated and
+	 * {@code false} if the timeout elapsed before termination
+	 * @throws InterruptedException if interrupted while waiting
+	 */
+	@Override
+	public boolean awaitTermination(long timeout, TimeUnit unit) throws InterruptedException {
+		return false;
+	}
+
+	/**
+	 * Submits a value-returning task for execution and returns a
+	 * Future representing the pending results of the task. The
+	 * Future's {@code get} method will return the task's result upon
+	 * successful completion.
+	 *
+	 * <p>
+	 * If you would like to immediately block waiting
+	 * for a task, you can use constructions of the form
+	 * {@code result = exec.submit(aCallable).get();}
+	 *
+	 * <p>Note: The {@link Executors} class includes a set of methods
+	 * that can convert some other common closure-like objects,
+	 * for example, {@link PrivilegedAction} to
+	 * {@link Callable} form so they can be submitted.
+	 *
+	 * @param task the task to submit
+	 * @return a Future representing pending completion of the task
+	 * @throws RejectedExecutionException if the task cannot be
+	 *                                    scheduled for execution
+	 * @throws NullPointerException       if the task is null
+	 */
+	@Override
+	public <T> Future<T> submit(Callable<T> task)
+	{
+		FutureCallableRunnableTask<T> cct = new FutureCallableRunnableTask<T>(task, this);
+		queueTask(cct.taskEvent);
+		return cct;
+	}
+
+	/**
+	 * Submits a Runnable task for execution and returns a Future
+	 * representing that task. The Future's {@code get} method will
+	 * return the given result upon successful completion.
+	 *
+	 * @param task   the task to submit
+	 * @param result the result to return
+	 * @return a Future representing pending completion of the task
+	 * @throws RejectedExecutionException if the task cannot be
+	 *                                    scheduled for execution
+	 * @throws NullPointerException       if the task is null
+	 */
+	@Override
+	public <T> Future<T> submit(Runnable task, T result) {
+		FutureCallableRunnableTask<T> cct = new FutureCallableRunnableTask<>(task, result, this);
+		queueTask(cct.taskEvent);
+		return cct;
+	}
+
+	/**
+	 * Submits a Runnable task for execution and returns a Future
+	 * representing that task. The Future's {@code get} method will
+	 * return {@code null} upon <em>successful</em> completion.
+	 *
+	 * @param task the task to submit
+	 * @return a Future representing pending completion of the task
+	 * @throws RejectedExecutionException if the task cannot be
+	 *                                    scheduled for execution
+	 * @throws NullPointerException       if the task is null
+	 */
+	@Override
+	public Future<?> submit(Runnable task) {
+		FutureCallableRunnableTask<?> cct = new FutureCallableRunnableTask<>(task, null, this);
+		queueTask(cct.taskEvent);
+		return cct;
+	}
+
+	/**
+	 * Executes the given tasks, returning a list of Futures holding
+	 * their status and results when all complete.
+	 * {@link Future#isDone} is {@code true} for each
+	 * element of the returned list.
+	 * Note that a <em>completed</em> task could have
+	 * terminated either normally or by throwing an exception.
+	 * The results of this method are undefined if the given
+	 * collection is modified while this operation is in progress.
+	 *
+	 * @param tasks the collection of tasks
+	 * @return a list of Futures representing the tasks, in the same
+	 * sequential order as produced by the iterator for the
+	 * given task list, each of which has completed
+	 * @throws InterruptedException       if interrupted while waiting, in
+	 *                                    which case unfinished tasks are cancelled
+	 * @throws NullPointerException       if tasks or any of its elements are {@code null}
+	 * @throws RejectedExecutionException if any task cannot be
+	 *                                    scheduled for execution
+	 */
+	@Override
+	public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks) throws InterruptedException {
+		throw new IllegalArgumentException("Method not implemented yet");
+	}
+
+	/**
+	 * Executes the given tasks, returning a list of Futures holding
+	 * their status and results
+	 * when all complete or the timeout expires, whichever happens first.
+	 * {@link Future#isDone} is {@code true} for each
+	 * element of the returned list.
+	 * Upon return, tasks that have not completed are cancelled.
+	 * Note that a <em>completed</em> task could have
+	 * terminated either normally or by throwing an exception.
+	 * The results of this method are undefined if the given
+	 * collection is modified while this operation is in progress.
+	 *
+	 * @param tasks   the collection of tasks
+	 * @param timeout the maximum time to wait
+	 * @param unit    the time unit of the timeout argument
+	 * @return a list of Futures representing the tasks, in the same
+	 * sequential order as produced by the iterator for the
+	 * given task list. If the operation did not time out,
+	 * each task will have completed. If it did time out, some
+	 * of these tasks will not have completed.
+	 * @throws InterruptedException       if interrupted while waiting, in
+	 *                                    which case unfinished tasks are cancelled
+	 * @throws NullPointerException       if tasks, any of its elements, or
+	 *                                    unit are {@code null}
+	 * @throws RejectedExecutionException if any task cannot be scheduled
+	 *                                    for execution
+	 */
+	@Override
+	public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit) throws InterruptedException {
+		throw new IllegalArgumentException("Method not implemented yet");
+	}
+
+	/**
+	 * Executes the given tasks, returning the result
+	 * of one that has completed successfully (i.e., without throwing
+	 * an exception), if any do. Upon normal or exceptional return,
+	 * tasks that have not completed are cancelled.
+	 * The results of this method are undefined if the given
+	 * collection is modified while this operation is in progress.
+	 *
+	 * @param tasks the collection of tasks
+	 * @return the result returned by one of the tasks
+	 * @throws InterruptedException       if interrupted while waiting
+	 * @throws NullPointerException       if tasks or any element task
+	 *                                    subject to execution is {@code null}
+	 * @throws IllegalArgumentException   if tasks is empty
+	 * @throws ExecutionException         if no task successfully completes
+	 * @throws RejectedExecutionException if tasks cannot be scheduled
+	 *                                    for execution
+	 */
+	@Override
+	public <T> T invokeAny(Collection<? extends Callable<T>> tasks) throws InterruptedException, ExecutionException {
+		throw new IllegalArgumentException("Method not implemented yet");
+	}
+
+	/**
+	 * Executes the given tasks, returning the result
+	 * of one that has completed successfully (i.e., without throwing
+	 * an exception), if any do before the given timeout elapses.
+	 * Upon normal or exceptional return, tasks that have not
+	 * completed are cancelled.
+	 * The results of this method are undefined if the given
+	 * collection is modified while this operation is in progress.
+	 *
+	 * @param tasks   the collection of tasks
+	 * @param timeout the maximum time to wait
+	 * @param unit    the time unit of the timeout argument
+	 * @return the result returned by one of the tasks
+	 * @throws InterruptedException       if interrupted while waiting
+	 * @throws NullPointerException       if tasks, or unit, or any element
+	 *                                    task subject to execution is {@code null}
+	 * @throws TimeoutException           if the given timeout elapses before
+	 *                                    any task successfully completes
+	 * @throws ExecutionException         if no task successfully completes
+	 * @throws RejectedExecutionException if tasks cannot be scheduled
+	 *                                    for execution
+	 */
+	@Override
+	public <T> T invokeAny(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+		return null;
+	}
+
 
 	@Override
 	public NVGenericMap getProperties() {
