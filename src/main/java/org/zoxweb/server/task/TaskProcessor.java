@@ -452,8 +452,7 @@ public class TaskProcessor
 	public void execute(Runnable command) 
 	{
 		if (command != null)
-			submit(command);
-//			queueTask(new TaskEvent(this, new RunnableTask(command)));
+			queueTask(new FutureCallableRunnableTask<>(command, null, false, this).taskEvent);
 	}
 
 	/**
@@ -588,7 +587,7 @@ public class TaskProcessor
 	 */
 	@Override
 	public <T> Future<T> submit(Runnable task, T result) {
-		FutureCallableRunnableTask<T> cct = new FutureCallableRunnableTask<>(task, result, this);
+		FutureCallableRunnableTask<T> cct = new FutureCallableRunnableTask<>(task, result, true, this);
 		queueTask(cct.taskEvent);
 		return cct;
 	}
@@ -606,7 +605,7 @@ public class TaskProcessor
 	 */
 	@Override
 	public Future<?> submit(Runnable task) {
-		FutureCallableRunnableTask<?> cct = new FutureCallableRunnableTask<>(task, null, this);
+		FutureCallableRunnableTask<?> cct = new FutureCallableRunnableTask<>(task, null, true, this);
 		queueTask(cct.taskEvent);
 		return cct;
 	}

@@ -200,7 +200,7 @@ public class TaskSchedulerProcessor
     {
         if (task != null)
 			return queue(new TaskSchedulerAppointment(new AppointmentDefault(delayInMillis, System.nanoTime()),
-					new FutureCallableRunnableTask<>(task, null, this).taskEvent));
+					new FutureCallableRunnableTask<>(task, null, true, this).taskEvent));
 //					new TaskEvent(this, new RunnableTask(task))));
 
         return null;
@@ -210,7 +210,7 @@ public class TaskSchedulerProcessor
 	{
 		if (command != null)
 			return queue(new TaskSchedulerAppointment(appointment == null ? new AppointmentDefault() : appointment,
-					new FutureCallableRunnableTask<>(command, null, this).taskEvent));
+					new FutureCallableRunnableTask<>(command, null, true, this).taskEvent));
 //					new TaskEvent(this, new RunnableTask(command))));
 
 		return null;
