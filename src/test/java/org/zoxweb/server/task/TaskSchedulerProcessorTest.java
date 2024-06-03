@@ -199,14 +199,14 @@ public class TaskSchedulerProcessorTest {
 		int index = 0;
 
 		for (index = 0; index < 20; index++) {
-			tsp.queue(new AppointmentDefault(), new TaskEvent(tsp, new TaskLockTest(), index));
+			tsp.queue(new AppointmentDefault(), new TaskEvent(tsp, true, new TaskLockTest(), index));
 		}
-		tsp.queue(new AppointmentDefault(Const.TimeInMillis.SECOND.MILLIS*21), new TaskEvent(tsp, new TaskLockTest(), index++));
+		tsp.queue(new AppointmentDefault(Const.TimeInMillis.SECOND.MILLIS*21), new TaskEvent(tsp, true, new TaskLockTest(), index++));
 		
 		
 		for (;index < 1000; index++)
 		{
-		  tsp.queue(new AppointmentDefault(Const.TimeInMillis.SECOND.MILLIS*21, System.nanoTime()), new TaskEvent(tsp, new TaskLockTest(), index++));
+		  tsp.queue(new AppointmentDefault(Const.TimeInMillis.SECOND.MILLIS*21, System.nanoTime()), new TaskEvent(tsp, true, new TaskLockTest(), index++));
 		}
 		
 

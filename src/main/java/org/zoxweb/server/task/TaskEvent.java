@@ -36,6 +36,7 @@ public class TaskEvent
 	private Exception executionException = null;
 	private String refID = null;
 	private final AtomicLong execCount = new AtomicLong();
+	private final boolean exceptionStackTrace;
 
 	/**
 	 * Create a task event with appointment
@@ -43,11 +44,12 @@ public class TaskEvent
 	 * @param te the task executor
 	 * @param taskExecutorParams task parameters
 	 */
-	public TaskEvent(Object source, TaskExecutor te, Object... taskExecutorParams)
+	public TaskEvent(Object source, boolean exceptionStackTrace, TaskExecutor te, Object... taskExecutorParams)
 	{
 		super(source);
 		this.te = te;
 		this.params = taskExecutorParams;
+		this.exceptionStackTrace = exceptionStackTrace;
 	}
 
 
@@ -76,6 +78,12 @@ public class TaskEvent
 	 */
 	public Object getExecutionResult() {
 		return executionResult;
+	}
+
+
+	public boolean isExceptionStackTraceEnabled()
+	{
+		return exceptionStackTrace;
 	}
 
 	/**

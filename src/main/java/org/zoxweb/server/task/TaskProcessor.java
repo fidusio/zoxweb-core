@@ -37,7 +37,7 @@ public class TaskProcessor
 		implements Runnable, DaemonController, ExecutorService, GetNVProperties
 {
 
-	public final static LogWrapper log = new LogWrapper(TaskProcessor.class);
+	public final static LogWrapper log = new LogWrapper(TaskProcessor.class).setEnabled(false);
 
 	public static final long WAIT_TIME = TimeUnit.MILLISECONDS.toMillis(500);
 	private static final AtomicLong instanceCounter = new AtomicLong();
@@ -111,17 +111,8 @@ public class TaskProcessor
 						{
 							if(e instanceof Exception)
 								event.setExecutionException((Exception) e);
-							e.printStackTrace();
+							if(event.isExceptionStackTraceEnabled()) e.printStackTrace();
 						}
-
-						if (executorNotify)
-						{
-							synchronized (te)
-							{
-								te.notify();
-							}
-						}
-
 
 						// call the task finish task method
 						try

@@ -164,12 +164,12 @@ public class TaskSchedulerProcessor
 	
 	public Appointment queue(Object source, Appointment a, TaskExecutor te, Object... params)
 	{
-		return queue(new TaskSchedulerAppointment(a == null ? new AppointmentDefault() : a, new TaskEvent(source, te, params)));
+		return queue(new TaskSchedulerAppointment(a == null ? new AppointmentDefault() : a, new TaskEvent(source, true, te, params)));
 	}
 	
 	public Appointment queue(Object source, long timeInMillis, TaskExecutor te, Object... params)
 	{
-      return queue(new TaskSchedulerAppointment( new AppointmentDefault(timeInMillis), new TaskEvent(source, te, params)));
+      return queue(new TaskSchedulerAppointment( new AppointmentDefault(timeInMillis), new TaskEvent(source, true, te, params)));
   	}
 
 	public Appointment queue(Appointment a, TaskEvent te)
