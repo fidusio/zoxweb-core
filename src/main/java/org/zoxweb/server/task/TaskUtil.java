@@ -18,8 +18,11 @@ package org.zoxweb.server.task;
 import org.zoxweb.server.util.DefaultEvenManager;
 import org.zoxweb.shared.data.events.BaseEventObject;
 import org.zoxweb.shared.data.events.EventListenerManager;
+import org.zoxweb.shared.util.SharedUtil;
 
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -364,6 +367,29 @@ public class TaskUtil
 		}
 
 		return mainThread;
+	}
+
+
+	public static long completeTermination(ExecutorService execService, long timeToWait)
+	{
+		SharedUtil.checkIfNulls("ExecService is null", execService);
+		if (timeToWait < 25)
+		{
+			throw new IllegalArgumentException("Invalid timeToWait < 25 millis " + timeToWait);
+		}
+		execService.shutdown();
+		boolean stat = false;
+		while(!stat)
+		{
+            try
+			{
+                stat = execService.awaitTermination(timeToWait, TimeUnit.MILLISECONDS);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+		return System.currentTimeMillis();
 	}
 	
 }

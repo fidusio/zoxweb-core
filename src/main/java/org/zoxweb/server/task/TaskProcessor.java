@@ -23,6 +23,7 @@ import java.security.PrivilegedAction;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 
@@ -42,7 +43,8 @@ public class TaskProcessor
 	private static final AtomicLong instanceCounter = new AtomicLong();
 	private final long counterID = instanceCounter.incrementAndGet();
 	private final Thread thread;
-	private boolean live = true;
+	private final AtomicBoolean live = new AtomicBoolean(true);
+	private final AtomicBoolean stopQueueing = new AtomicBoolean(false);
 	private final ThresholdQueue<TaskEvent>  tasksQueue;
 
 
@@ -279,25 +281,23 @@ public class TaskProcessor
 	public void queueTask(TaskEvent task)
 		throws IllegalArgumentException
 	{	
-		if(!live)
-		{
-			throw new IllegalArgumentException("Can't queue task with a terminated TaskProcessor");
-		}
-		
-		// if the task is not null
-		if (task != null)
-		{
-			// queue the task if it hasn't reached  tasksQueue.getHighMark()
-			// if we have reached the tasksQueue.getHighMark() we will block till we reach
-			// tasksQueue.getLowMark()
-			tasksQueue.queue(task);
-			
-			synchronized(this)
-			{
-				// notify the TaskProcessor
-				notifyAll();
+
+		if(live.get() && !stopQueueing.get()) {
+			// if the task is not null
+			if (task != null) {
+				// queue the task if it hasn't reached  tasksQueue.getHighMark()
+				// if we have reached the tasksQueue.getHighMark() we will block till we reach
+				// tasksQueue.getLowMark()
+				tasksQueue.queue(task);
+
+				synchronized (this) {
+					// notify the TaskProcessor
+					notifyAll();
+				}
 			}
 		}
+		else
+			throw new IllegalArgumentException("Can't queue task with a terminated TaskProcessor");
 	}
 
 	
@@ -307,72 +307,74 @@ public class TaskProcessor
 	@Override
 	public void run() 
 	{
-		log.getLogger().info(toString());
-		while(live)
-		{
-			TaskEvent event;
-			// check if we have task's to execute
-			while((event = tasksQueue.dequeue()) != null)
+		try {
+			log.getLogger().info(toString());
+			while (live.get())
 			{
-				
-				ExecutorThread et;
-				// if we have no executor thread
-				// we will wait till we have one
-				while ((et = workersQueue.dequeue()) == null)
+				TaskEvent event;
+				// check if we have task's to execute
+				while ((event = tasksQueue.dequeue()) != null) {
+
+					ExecutorThread et;
+					// if we have no executor thread
+					// we will wait till we have one
+					while ((et = workersQueue.dequeue()) == null) {
+						// use the workersQueue as inter-thread signal between the ExecutorThreads and TaskProcessor
+						synchronized (workersQueue) {
+							try {
+								//dbg("Executor queue "+ workersQueue.size());
+								workersQueue.wait(WAIT_TIME);
+							} catch (InterruptedException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+
+						}
+					}
+
+					// we took the first available ExecutorThread
+					// and start processing the task
+					et.queueInternalTask(event);
+				}
+
+				if (stopQueueing.get() && notWorkingAtAll())
 				{
-					// use the workersQueue as inter-thread signal between the ExecutorThreads and TaskProcessor
-					synchronized(workersQueue)
-					{
-						try 
-						{
-							//dbg("Excecutor queue "+ workersQueue.size());
-							workersQueue.wait(WAIT_TIME);
+					close();
+				}
+
+				synchronized (this) {
+					// if the tasksQueue is empty
+					// and the TaskProcessor is not terminated
+					// wait for incoming task to be awaken by the queueTask method
+					if (tasksQueue.isEmpty() && live.get()) {
+						try {
+							//dbg("will wait in the outer queue");
+							wait(WAIT_TIME);
 						} catch (InterruptedException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
-					
 					}
 				}
-				
-				// we took the first available ExecutorThread
-				// and start processing the task
-				et.queueInternalTask(event);
-				
+
 			}
-			
-			synchronized(this)
-			{
-				// if the tasksQueue is empty 
-				// and the TaskProcessor is not terminated
-				// wait for incoming task to be awaken by the queueTask method
-				if (tasksQueue.isEmpty() && live)
-				{
-					try 
-					{
-						//dbg("will wait in the outer queue");
-						wait(WAIT_TIME);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+			// the executor task is terminated
+			// notify the executor thread to terminate
+			innerLive = false;
+
+			ExecutorThread et;
+			while ((et = workersQueue.dequeue()) != null) {
+				synchronized (et) {
+					et.notify();
 				}
 			}
 		}
-		// the executor task is terminated
-		// notify the executor thread to terminate
-		innerLive = false;
-		
-		ExecutorThread et;
-		while ((et = workersQueue.dequeue()) != null)
+		catch (Exception e)
 		{
-			synchronized(et)
-			{
-				et.notify();
-			}
+			e.printStackTrace();
 		}
-		
-		
+
+		tasksQueue.clear();
 		log.getLogger().info("TaskProcessor[" +executorsCounter + "] terminated");
 	}
 	
@@ -401,6 +403,13 @@ public class TaskProcessor
 	{
 		return (tasksQueue.size() > 0 ||  workersQueue.size() < executorsCounter);
 	}
+
+
+	private boolean notWorkingAtAll()
+	{
+		if(log.isEnabled()) log.getLogger().info(SharedUtil.toCanonicalID(',', tasksQueue.size(), workersQueue.capacity(), workersQueue.size()));
+		return tasksQueue.isEmpty() && workersQueue.size() == workersQueue.capacity();
+	}
 	/**
 	 * Return the current number of available threads to do the work
 	 * @return available threads
@@ -420,9 +429,9 @@ public class TaskProcessor
 	public void close()
 	{
 		// TODO Auto-generated method stub
-		if (live)
+		if (live.getAndSet(false))
 		{
-			live = false;
+			shutdown();
 			//log.getLogger().info("TaskProcessor will be terminated.");
 			synchronized(this)
 			{
@@ -433,7 +442,7 @@ public class TaskProcessor
 	
 	public boolean isClosed()
 	{
-		return !live;
+		return !live.get();
 	}
 	
 	public int getQueueMaxSize()
@@ -474,7 +483,7 @@ public class TaskProcessor
 	 */
 	@Override
 	public void shutdown() {
-
+		stopQueueing.set(true);
 	}
 
 	/**
@@ -512,7 +521,7 @@ public class TaskProcessor
 	 */
 	@Override
 	public boolean isShutdown() {
-		return isClosed();
+		return stopQueueing.get();
 	}
 
 	/**
@@ -524,7 +533,7 @@ public class TaskProcessor
 	 */
 	@Override
 	public boolean isTerminated() {
-		return isShutdown();
+		return isClosed();
 	}
 
 	/**
