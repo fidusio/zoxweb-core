@@ -540,7 +540,17 @@ public class TaskProcessor
 	 */
 	@Override
 	public boolean awaitTermination(long timeout, TimeUnit unit) throws InterruptedException {
-		return false;
+		long deadline = System.nanoTime() + unit.toNanos(timeout);
+		synchronized (this) {
+			while (!isClosed()) {
+				long waitTime = deadline - System.nanoTime();
+				if (waitTime <= 0) {
+					return false;
+				}
+				TimeUnit.NANOSECONDS.timedWait(this, waitTime);
+			}
+			return true;
+		}
 	}
 
 	/**
@@ -604,10 +614,9 @@ public class TaskProcessor
 	 * @throws NullPointerException       if the task is null
 	 */
 	@Override
-	public Future<?> submit(Runnable task) {
-		FutureCallableRunnableTask<?> cct = new FutureCallableRunnableTask<>(task, null, true, this);
-		queueTask(cct.taskEvent);
-		return cct;
+	public Future<?> submit(Runnable task)
+	{
+		return submit(task, null);
 	}
 
 	/**
@@ -632,7 +641,8 @@ public class TaskProcessor
 	 */
 	@Override
 	public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks) throws InterruptedException {
-		throw new IllegalArgumentException("Method not implemented yet");
+		log.getLogger().info("Method not implemented yet");
+		throw new UnsupportedOperationException("Method not implemented yet");
 	}
 
 	/**
@@ -664,7 +674,8 @@ public class TaskProcessor
 	 */
 	@Override
 	public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit) throws InterruptedException {
-		throw new IllegalArgumentException("Method not implemented yet");
+		log.getLogger().info("Method not implemented yet");
+		throw new UnsupportedOperationException("Method not implemented yet");
 	}
 
 	/**
@@ -687,7 +698,8 @@ public class TaskProcessor
 	 */
 	@Override
 	public <T> T invokeAny(Collection<? extends Callable<T>> tasks) throws InterruptedException, ExecutionException {
-		throw new IllegalArgumentException("Method not implemented yet");
+		log.getLogger().info("Method not implemented yet");
+		throw new UnsupportedOperationException("Method not implemented yet");
 	}
 
 	/**
@@ -714,6 +726,7 @@ public class TaskProcessor
 	 */
 	@Override
 	public <T> T invokeAny(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+		log.getLogger().info("Method not implemented yet");
 		return null;
 	}
 

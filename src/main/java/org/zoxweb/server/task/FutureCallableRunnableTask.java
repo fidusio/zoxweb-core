@@ -14,24 +14,24 @@ public class FutureCallableRunnableTask<V>
     private final Runnable runnable;
     final TaskEvent taskEvent;
     private V result = null;
-    private final boolean sync;
+    private final boolean isFuture;
 
     FutureCallableRunnableTask(Callable<V> callable, Object source)
     {
         SharedUtil.checkIfNulls("Callable can't be null", callable);
         this.callable = callable;
         this.runnable = null;
-        this.sync = true;
+        this.isFuture = true;
         taskEvent = new TaskEvent(source, this);
     }
 
-    FutureCallableRunnableTask(Runnable runnable, V result, boolean sync, Object source)
+    FutureCallableRunnableTask(Runnable runnable, V result, boolean isFuture, Object source)
     {
         SharedUtil.checkIfNulls("Runnable can't be null", runnable);
         this.callable = null;
         this.runnable = runnable;
         this.result = result;
-        this.sync = sync;
+        this.isFuture = isFuture;
         taskEvent = new TaskEvent(source, this);
     }
     /**
@@ -41,7 +41,7 @@ public class FutureCallableRunnableTask<V>
     public void executeTask(TaskEvent event)
             throws Exception
     {
-        if(sync) {
+        if(isFuture) {
             synchronized (this) {
                 try {
                     if (runnable != null)

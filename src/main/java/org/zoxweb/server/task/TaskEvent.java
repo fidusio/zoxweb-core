@@ -107,7 +107,7 @@ public class TaskEvent
 
 	/**
 	 * Gets the custom id 
-	 * @param customRef
+	 * @param customRef reference identifier
 	 */
 	public void setReferenceID(String customRef) {
 		this.refID = customRef;
