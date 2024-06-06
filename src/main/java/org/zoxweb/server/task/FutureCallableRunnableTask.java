@@ -1,7 +1,7 @@
 package org.zoxweb.server.task;
 
 import org.zoxweb.server.logging.LogWrapper;
-import org.zoxweb.shared.task.CallableConsumerTask;
+import org.zoxweb.shared.task.ConsumerCallable;
 import org.zoxweb.shared.util.SharedUtil;
 
 import java.util.concurrent.*;
@@ -24,7 +24,7 @@ public class FutureCallableRunnableTask<V>
         this.runnable = null;
         this.isFuture = true;
         taskEvent = new TaskEvent(source,
-                (callable instanceof CallableConsumerTask) ? ((CallableConsumerTask<V>) callable).isExceptionStackTraceEnabled(): true,
+                (callable instanceof ConsumerCallable) ? ((ConsumerCallable<V>) callable).isStackTraceEnabled(): true,
                 this);
     }
 
@@ -66,12 +66,12 @@ public class FutureCallableRunnableTask<V>
     @Override
     public void finishTask(TaskEvent event)
     {
-        if (callable != null && callable instanceof CallableConsumerTask)
+        if (callable != null && callable instanceof ConsumerCallable)
         {
             if (event.getExecutionException() != null)
-                ((CallableConsumerTask<V>) callable).exception(event.getExecutionException());
+                ((ConsumerCallable<V>) callable).exception(event.getExecutionException());
             else
-                ((CallableConsumerTask<V>) callable).accept(result);
+                ((ConsumerCallable<V>) callable).accept(result);
         }
     }
 

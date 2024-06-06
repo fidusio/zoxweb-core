@@ -6,5 +6,6 @@ import java.util.function.Consumer;
 public interface ConsumerCallback<C>
     extends Consumer<C>
 {
-    void exception(Exception e);
+    default void exception(Exception e){};
+    default boolean isStackTraceEnabled(){return false;};
 }

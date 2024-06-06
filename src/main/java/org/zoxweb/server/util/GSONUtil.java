@@ -280,7 +280,6 @@ public final class GSONUtil
 	public static String toJSONDefault(Object o, boolean pretty)
 	{
 		counter.incrementAndGet();
-
 		if(pretty)
 			return DEFAULT_GSON_PRETTY.toJson(o);
 

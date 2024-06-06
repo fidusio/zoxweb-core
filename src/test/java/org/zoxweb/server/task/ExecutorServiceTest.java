@@ -1,7 +1,7 @@
 package org.zoxweb.server.task;
 
 import org.zoxweb.server.logging.LogWrapper;
-import org.zoxweb.shared.task.CallableConsumerTask;
+import org.zoxweb.shared.task.ConsumerCallable;
 import org.zoxweb.shared.util.Const;
 
 import java.util.concurrent.ExecutorService;
@@ -38,7 +38,7 @@ public class ExecutorServiceTest {
         for (int i = 0; i < max; i++)
         {
 
-            es.submit(new CallableConsumerTask<Integer>() {
+            es.submit(new ConsumerCallable<Integer>() {
                 @Override
                 public Integer call() throws Exception {
                     int ret = callableCounter.incrementAndGet();
@@ -60,22 +60,9 @@ public class ExecutorServiceTest {
                 {
                     exceptionCounter.incrementAndGet();
                 }
-//                @Override
-//                public boolean isExceptionStackTraceEnabled()
-//                {
-//                    return true;
-//                }
+
             });
-
-
-//            es.execute(()-> {
-//
-//                System.out.println(counter.incrementAndGet() + "   " + Thread.currentThread());
-//                TaskUtil.sleep(delay);
-//            });
         }
-        //
-
     }
 
     public static void main(String ...args)
