@@ -2,9 +2,11 @@ package org.zoxweb.server.task;
 
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.shared.task.ConsumerCallable;
+import org.zoxweb.shared.task.ConsumerCallback;
 import org.zoxweb.shared.util.SharedUtil;
 
 import java.util.concurrent.*;
+import java.util.function.Consumer;
 
 public class FutureCallableRunnableTask<V>
     implements TaskExecutor, Future<V>
@@ -16,6 +18,15 @@ public class FutureCallableRunnableTask<V>
     final TaskEvent taskEvent;
     private V result = null;
     private final boolean isFuture;
+
+    FutureCallableRunnableTask(TaskEvent te)
+    {
+        SharedUtil.checkIfNulls("TaskEvent can't be null", te);
+        callable = null;
+        runnable = null;
+        isFuture = false;
+        this.taskEvent = te;
+    }
 
     FutureCallableRunnableTask(Callable<V> callable, Object source)
     {
@@ -44,6 +55,7 @@ public class FutureCallableRunnableTask<V>
     public void executeTask(TaskEvent event)
             throws Exception
     {
+
         if(isFuture) {
             synchronized (this) {
                 try {
@@ -56,8 +68,11 @@ public class FutureCallableRunnableTask<V>
                 }
             }
         }
-        else
+        else if(runnable != null)
             runnable.run();
+        else
+            taskEvent.getTaskExecutor().executeTask(taskEvent);
+
     }
 
     /**
@@ -66,12 +81,13 @@ public class FutureCallableRunnableTask<V>
     @Override
     public void finishTask(TaskEvent event)
     {
-        if (callable != null && callable instanceof ConsumerCallable)
+        if (callable != null)
         {
             if (event.getExecutionException() != null)
-                ((ConsumerCallable<V>) callable).exception(event.getExecutionException());
-            else
-                ((ConsumerCallable<V>) callable).accept(result);
+                if (callable instanceof ConsumerCallback)
+                    ((ConsumerCallback<V>) callable).exception(event.getExecutionException());
+            else if (callable instanceof Consumer)
+                ((Consumer<V>) callable).accept(result);
         }
     }
 
@@ -111,10 +127,8 @@ public class FutureCallableRunnableTask<V>
      * @throws ExecutionException
      */
     @Override
-    public V get() throws InterruptedException, ExecutionException {
-        if (log.isEnabled()) log.getLogger().info("get()");
-
-
+    public V get() throws InterruptedException, ExecutionException
+    {
         synchronized (this)
         {
             if (!isDone())

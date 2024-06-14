@@ -253,10 +253,10 @@ public class TaskSchedulerProcessorTest {
 
 
 
-		TaskUtil.waitIfBusyThenClose(23, tp, tsp);
+		TaskUtil.waitIfBusyThenClose(250, tp, tsp);
 
 
-		TaskUtil.waitIfBusy(250);
+		TaskUtil.waitIfBusyThenClose(250);
 
 
 		System.out.println("TaskSchedulerProcessor 1 :" + tsp.pendingTasks() + " TaskProcessor:" + tp.pendingTasks());

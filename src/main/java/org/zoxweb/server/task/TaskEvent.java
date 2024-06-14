@@ -81,7 +81,7 @@ public class TaskEvent
 	}
 
 
-	public boolean isExceptionStackTraceEnabled()
+	public boolean isStackTraceEnabled()
 	{
 		return exceptionStackTrace;
 	}

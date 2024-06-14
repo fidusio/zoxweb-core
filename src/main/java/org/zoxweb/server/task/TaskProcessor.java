@@ -111,7 +111,7 @@ public class TaskProcessor
 						{
 							if(e instanceof Exception)
 								event.setExecutionException((Exception) e);
-							if(event.isExceptionStackTraceEnabled()) e.printStackTrace();
+							if(event.isStackTraceEnabled()) e.printStackTrace();
 						}
 
 						// call the task finish task method
@@ -119,7 +119,7 @@ public class TaskProcessor
 						{
 							te.finishTask(event);
 						} catch (Throwable e) {
-							e.printStackTrace();
+							if(event.isStackTraceEnabled()) e.printStackTrace();
 						}
 						finally
 						{
@@ -502,7 +502,7 @@ public class TaskProcessor
 	 */
 	@Override
 	public List<Runnable> shutdownNow() {
-		throw new IllegalArgumentException("Method not implemented yet");
+		throw new UnsupportedOperationException("Method not implemented yet");
 	}
 
 	/**

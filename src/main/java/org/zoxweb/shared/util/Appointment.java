@@ -16,14 +16,14 @@
 package org.zoxweb.shared.util;
 
 import java.util.Comparator;
-
+import java.util.concurrent.Delayed;
 
 
 /**
  * The appointment interface.
  */
 public interface Appointment
-	extends IsClosed
+	extends IsClosed, Delayed
 {
 	
 	Comparator<Appointment> EQUAL_COMPARATOR = new AppointmentComparator();
