@@ -35,13 +35,13 @@ public class AppointmentComparator
 	 * Note: comparators should always return sing num values otherwise sorting could get funky.
 	 * @param o1 to compare
 	 * @param o2 compare to
-	 * @return
+	 * @return -1 if o2 > o1, 0 if o1=o2, +1 if o1 > o2
 	 * @exception NullPointerException if o1 or o2 are null
 	 */
 	@Override
 	public int compare(Appointment o1, Appointment o2)
     {
-		SharedUtil.checkIfNulls("Values can not be null",o1, o2);
+		SharedUtil.checkIfNulls("Values can not be null", o1, o2);
 		return SharedUtil.signum(o1.getPreciseExpiration() - o2.getPreciseExpiration());
 	}
 

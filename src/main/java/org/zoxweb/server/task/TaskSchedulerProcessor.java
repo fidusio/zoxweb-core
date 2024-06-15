@@ -36,13 +36,6 @@ public class TaskSchedulerProcessor
 		private final Appointment appointment;
 		private final long autoRepeatDelay;
 		private final boolean fixedRate;
-		//private final FutureCallableRunnableTask<?> fcrt;
-
-//		private TaskSchedulerAppointment(Appointment appointment, FutureCallableRunnableTask<?> fcrt)
-//		{
-//			this.appointment = appointment;
-//			this.fcrt = fcrt;
-//		}
 
 		private TaskSchedulerAppointment(Appointment appointment, TaskEvent te)
 		{
@@ -97,7 +90,8 @@ public class TaskSchedulerProcessor
 			return remove(this);
 		}
 
-		public boolean equals(Object o) {
+		public boolean equals(Object o)
+		{
 			return appointment.equals(o);
 		}
 
@@ -208,55 +202,20 @@ public class TaskSchedulerProcessor
 			return isClosed();
 		}
 
-
 		@Override
 		public long execCount()
 		{
 			return taskEvent.execCount();
 		}
 
-//		/**
-//		 * Waits if necessary for the computation to complete, and then
-//		 * retrieves its result.
-//		 *
-//		 * @return the computed result
-//		 * @throws CancellationException if the computation was cancelled
-//		 * @throws ExecutionException    if the computation threw an
-//		 *                               exception
-//		 * @throws InterruptedException  if the current thread was interrupted
-//		 *                               while waiting
-//		 */
-//		@Override
-//		public V get() throws InterruptedException, ExecutionException {
-//			return (V)fcrt.get();
-//		}
-
-//		/**
-//		 * Waits if necessary for at most the given time for the computation
-//		 * to complete, and then retrieves its result, if available.
-//		 *
-//		 * @param timeout the maximum time to wait
-//		 * @param unit    the time unit of the timeout argument
-//		 * @return the computed result
-//		 * @throws CancellationException if the computation was cancelled
-//		 * @throws ExecutionException    if the computation threw an
-//		 *                               exception
-//		 * @throws InterruptedException  if the current thread was interrupted
-//		 *                               while waiting
-//		 * @throws TimeoutException      if the wait timed out
-//		 */
-//		@Override
-//		public V get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-//			return (V)fcrt.get(timeout, unit);
-//		}
 	}
 	
-	private TaskProcessor taskProcessor = null;
+	private final TaskProcessor taskProcessor;
 	private boolean live = true;
 	private static final long DEFAULT_TIMEOUT = Const.TimeInMillis.MILLI.MILLIS*500;
 	private static final AtomicLong TSP_COUNTER = new AtomicLong(0);
-	private long counterID = TSP_COUNTER.incrementAndGet();
-	private volatile ConcurrentSkipListSet<TaskSchedulerAppointment> queue = null;
+	private final long counterID = TSP_COUNTER.incrementAndGet();
+	private final ConcurrentSkipListSet<TaskSchedulerAppointment<?>> queue;
 
 	private volatile long expiryTimestamp;
 	
@@ -270,7 +229,7 @@ public class TaskSchedulerProcessor
 
 	private TaskSchedulerProcessor(Comparator<Appointment> tsc, TaskProcessor tp) {
 		SharedUtil.checkIfNulls("TaskSchedulerComparator can't be null", tsc);
-		queue =  new ConcurrentSkipListSet<TaskSchedulerAppointment>(tsc);
+		queue =  new ConcurrentSkipListSet<>(tsc);
 		taskProcessor = tp;
 		TaskUtil.startRunnable(tp != null?  tp.getThreadGroup() : null, this, "TSP-" + counterID);
 	}
@@ -292,7 +251,8 @@ public class TaskSchedulerProcessor
 	}
 
 	@Override
-	public boolean isClosed() {
+	public boolean isClosed()
+	{
 		return !live;
 	}
 
@@ -312,7 +272,7 @@ public class TaskSchedulerProcessor
 
 	public Appointment queue(Appointment a, TaskEvent te)
 	{
-		return queue(new TaskSchedulerAppointment(a == null ? new AppointmentDefault(0) : a, te));
+		return queue(new TaskSchedulerAppointment<>(a == null ? new AppointmentDefault(0) : a, te));
 	}
 
 	/**
@@ -337,7 +297,7 @@ public class TaskSchedulerProcessor
 	public Appointment queue(long delayInMillis, Runnable task)
     {
         if (task != null)
-			return queue(new TaskSchedulerAppointment(new AppointmentDefault(delayInMillis, System.nanoTime()), task, null, true));
+			return queue(new TaskSchedulerAppointment<>(new AppointmentDefault(delayInMillis, System.nanoTime()), task, null, true));
 //					new FutureCallableRunnableTask<>(task, null, true, this)));
 //					new TaskEvent(this, new RunnableTask(task))));
 
@@ -347,7 +307,7 @@ public class TaskSchedulerProcessor
 	public Appointment queue(Appointment appointment, Runnable command)
 	{
 		if (command != null)
-			return queue(new TaskSchedulerAppointment(appointment == null ? new AppointmentDefault() : appointment, command, null, true));
+			return queue(new TaskSchedulerAppointment<>(appointment == null ? new AppointmentDefault() : appointment, command, null, true));
 //					new TaskEvent(this, new RunnableTask(command))));
 
 		return null;
@@ -355,7 +315,7 @@ public class TaskSchedulerProcessor
 
 
 
-	private TaskSchedulerAppointment queue(TaskSchedulerAppointment te) {
+	private TaskSchedulerAppointment<?> queue(TaskSchedulerAppointment<?> te) {
 		if (!live) {
 			throw new IllegalArgumentException("TaskSchedulerProcessor is dead");
 		}
@@ -423,7 +383,7 @@ public class TaskSchedulerProcessor
 						{
 							tSchedulerEvent.taskEvent.getTaskExecutor().executeTask(tSchedulerEvent.taskEvent);
 						}
-						catch( Throwable e)
+						catch(Throwable e)
 						{
 							e.printStackTrace();
 						}
@@ -432,7 +392,7 @@ public class TaskSchedulerProcessor
 						{
 							tSchedulerEvent.taskEvent.getTaskExecutor().finishTask(tSchedulerEvent.taskEvent);
 						}
-						catch( Throwable e)
+						catch(Throwable e)
 						{
 							e.printStackTrace();
 						}
@@ -446,9 +406,12 @@ public class TaskSchedulerProcessor
 				timeToWait = internalWaitTime();
 				if (live && timeToWait > 0) {
 					
-					try {
+					try
+					{
 						queue.wait(timeToWait);
-					} catch (InterruptedException e) {
+					}
+					catch (InterruptedException e)
+					{
 						e.printStackTrace();
 					}
 				}
@@ -561,7 +524,7 @@ public class TaskSchedulerProcessor
 	 */
 	@Override
 	public <V> ScheduledFuture<V> schedule(Callable<V> callable, long delay, TimeUnit unit) {
-		return queue(new TaskSchedulerAppointment<>(new AppointmentDefault(TimeUnit.MILLISECONDS.convert(delay, unit)), callable));
+		return (ScheduledFuture<V>) queue(new TaskSchedulerAppointment<>(new AppointmentDefault(TimeUnit.MILLISECONDS.convert(delay, unit)), callable));
 //				new FutureCallableRunnableTask<>(callable, this)));
 	}
 
@@ -606,7 +569,7 @@ public class TaskSchedulerProcessor
 	 */
 	@Override
 	public ScheduledFuture<?> scheduleAtFixedRate(Runnable command, long initialDelay, long period, TimeUnit unit) {
-		return queue(new TaskSchedulerAppointment(new AppointmentDefault(TimeUnit.MILLISECONDS.convert(initialDelay, unit)),
+		return queue(new TaskSchedulerAppointment<>(new AppointmentDefault(TimeUnit.MILLISECONDS.convert(initialDelay, unit)),
 				command,
 				TimeUnit.MILLISECONDS.convert(period, unit),
 				true));
@@ -650,7 +613,7 @@ public class TaskSchedulerProcessor
 	@Override
 	public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, long initialDelay, long delay, TimeUnit unit)
 	{
-		return queue(new TaskSchedulerAppointment( new AppointmentDefault(TimeUnit.MILLISECONDS.convert(initialDelay, unit)),
+		return queue(new TaskSchedulerAppointment<>(new AppointmentDefault(TimeUnit.MILLISECONDS.convert(initialDelay, unit)),
 				command,
 				TimeUnit.MILLISECONDS.convert(delay, unit),
 				false));
@@ -675,7 +638,7 @@ public class TaskSchedulerProcessor
 	 */
 	@Override
 	public void shutdown() {
-
+		close();
 	}
 
 	/**
@@ -713,7 +676,7 @@ public class TaskSchedulerProcessor
 	 */
 	@Override
 	public boolean isShutdown() {
-		return false;
+		return isClosed();
 	}
 
 	/**
@@ -725,7 +688,7 @@ public class TaskSchedulerProcessor
 	 */
 	@Override
 	public boolean isTerminated() {
-		return false;
+		return isClosed();
 	}
 
 	/**
@@ -779,7 +742,7 @@ public class TaskSchedulerProcessor
 	@Override
 	public <T> Future<T> submit(Callable<T> task)
 	{
-		return queue(new TaskSchedulerAppointment<>(new AppointmentDefault(),task));
+		return (Future<T>) queue(new TaskSchedulerAppointment<>(new AppointmentDefault(),task));
 				//new FutureCallableRunnableTask<>(task, this)));
 	}
 
@@ -798,7 +761,7 @@ public class TaskSchedulerProcessor
 	@Override
 	public <T> Future<T> submit(Runnable task, T result)
 	{
-		return queue(new TaskSchedulerAppointment<>(new AppointmentDefault(), task, result, true));
+		return (Future<T>) queue(new TaskSchedulerAppointment<>(new AppointmentDefault(), task, result, true));
 				//new FutureCallableRunnableTask<>(task, result, true, this)));
 	}
 
@@ -938,7 +901,8 @@ public class TaskSchedulerProcessor
 	 * @throws NullPointerException       if command is null
 	 */
 	@Override
-	public void execute(Runnable command) {
+	public void execute(Runnable command)
+	{
 		submit(command);
 	}
 

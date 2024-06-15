@@ -9,7 +9,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class AppointmentResetTest {
+public class AppointmentTest {
 
     @AfterAll
     public static void done()
@@ -20,7 +20,7 @@ public class AppointmentResetTest {
     }
 
     @Test
-    public void test()
+    public void resetTest()
     {
         System.out.println("testing reset");
 
@@ -60,12 +60,12 @@ public class AppointmentResetTest {
         AtomicInteger ai = new AtomicInteger();
         TaskSchedulerProcessor tsp = new TaskSchedulerProcessor(TaskUtil.defaultTaskProcessor());
         long delta = System.currentTimeMillis();
-        ScheduledFuture<?> sc = tsp.scheduleWithFixedDelay(()->{System.out.println(ai.incrementAndGet() + " repeat " + (System.currentTimeMillis() - delta) );}, initialDelay, delay, TimeUnit.MILLISECONDS);
+        ScheduledFuture<?> sc = tsp.scheduleWithFixedDelay(()->System.out.println(ai.incrementAndGet() + " repeat " + (System.currentTimeMillis() - delta)), initialDelay, delay, TimeUnit.MILLISECONDS);
 
         TaskUtil.sleep(initialDelay + (delay*60));
 
         tsp.close();
-        System.out.println( "ExecCount: " + ((TaskSchedulerProcessor.TaskSchedulerAppointment)sc).execCount());
+        System.out.println( "ExecCount: " + ((TaskSchedulerProcessor.TaskSchedulerAppointment<?>)sc).execCount());
     }
 
     @Test
@@ -73,15 +73,15 @@ public class AppointmentResetTest {
     {
 
         long initialDelay = 300;
-        long delay = 100;
+        long delay = 1000;
         AtomicInteger ai = new AtomicInteger();
         TaskSchedulerProcessor tsp = new TaskSchedulerProcessor(TaskUtil.defaultTaskProcessor());
 
         long delta = System.currentTimeMillis();
-        ScheduledFuture<?> sc = tsp.scheduleAtFixedRate(()->{System.out.println(ai.incrementAndGet() + " repeat " + (System.currentTimeMillis() - delta) );}, initialDelay, delay, TimeUnit.MILLISECONDS);
+        ScheduledFuture<?> sc = tsp.scheduleAtFixedRate(()->System.out.println(ai.incrementAndGet() + " repeat " + (System.currentTimeMillis() - delta)), initialDelay, delay, TimeUnit.MILLISECONDS);
 
-        TaskUtil.sleep(initialDelay + (delay*60));
+        TaskUtil.sleep(initialDelay + (delay*20));
         tsp.close();
-        System.out.println( "ExecCount: " + ((TaskSchedulerProcessor.TaskSchedulerAppointment)sc).execCount());
+        System.out.println( "ExecCount: " + ((TaskSchedulerProcessor.TaskSchedulerAppointment<?>)sc).execCount());
     }
 }
