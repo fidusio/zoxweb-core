@@ -34,14 +34,14 @@ public class TaskSchedulerProcessor
 	{
 
 		private final Appointment appointment;
-		private final long autoRepeatDelay;
+		private final long repeatDelay;
 		private final boolean fixedRate;
 
 		private TaskSchedulerAppointment(Appointment appointment, TaskEvent te)
 		{
 			super(te);
 			this.appointment = appointment;
-			autoRepeatDelay = -1;
+			repeatDelay = -1;
 			fixedRate = false;
 		}
 
@@ -49,14 +49,14 @@ public class TaskSchedulerProcessor
 		{
 			super(callable, TaskSchedulerProcessor.this);
 			this.appointment = appointment;
-			autoRepeatDelay = -1;
+			repeatDelay = -1;
 			fixedRate = false;
 		}
 		private TaskSchedulerAppointment(Appointment appointment, Runnable runnable, V result, boolean isFuture)
 		{
 			super(runnable, result, isFuture, TaskSchedulerProcessor.this);
 			this.appointment = appointment;
-			autoRepeatDelay = -1;
+			repeatDelay = -1;
 			fixedRate = false;
 		}
 
@@ -64,7 +64,7 @@ public class TaskSchedulerProcessor
 		{
 			super(runnable, null, false, TaskSchedulerProcessor.this);
 			this.appointment = appointment;
-			autoRepeatDelay = repeatDelay;
+			this.repeatDelay = repeatDelay;
 			this.fixedRate = fixedRate;
 		}
 
@@ -124,14 +124,14 @@ public class TaskSchedulerProcessor
 		public void finishTask(TaskEvent e)
 		{
 			super.finishTask(e);
-			if(!fixedRate && autoRepeatDelay > 0)
-				setDelayInNanos(autoRepeatDelay, 0);
+			if(!fixedRate && repeatDelay > 0)
+				setDelayInNanos(repeatDelay, 0);
 		}
 
 		@Override
 		public void executeTask(TaskEvent e) throws Exception {
-			if(fixedRate && autoRepeatDelay > 0 )
-				setDelayInNanos(autoRepeatDelay, 0);
+			if(fixedRate && repeatDelay > 0 )
+				setDelayInNanos(repeatDelay, 0);
 			super.executeTask(e);
 		}
 

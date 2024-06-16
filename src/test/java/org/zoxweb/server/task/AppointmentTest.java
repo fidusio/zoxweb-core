@@ -2,6 +2,7 @@ package org.zoxweb.server.task;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
+import org.zoxweb.shared.task.CallableConsumer;
 import org.zoxweb.shared.util.Appointment;
 import org.zoxweb.shared.util.Const;
 
@@ -83,5 +84,37 @@ public class AppointmentTest {
         TaskUtil.sleep(initialDelay + (delay*20));
         tsp.close();
         System.out.println( "ExecCount: " + ((TaskSchedulerProcessor.TaskSchedulerAppointment<?>)sc).execCount());
+    }
+
+    @Test
+    public void callableConsumer()
+    {
+        AtomicInteger counter = new AtomicInteger();
+        for(int i=0; i < 20; i++)
+            TaskUtil.defaultTaskProcessor().submit(new CallableConsumer<Integer>() {
+                /**
+                 * Performs this operation on the given argument.
+                 *
+                 * @param integer the input argument
+                 */
+                @Override
+                public void accept(Integer integer) {
+                    System.out.println(Thread.currentThread() + " :" + integer);
+                }
+
+                /**
+                 * Computes a result, or throws an exception if unable to do so.
+                 *
+                 * @return computed result
+                 * @throws Exception if unable to compute a result
+                 */
+                @Override
+                public Integer call() throws Exception {
+                    System.out.println(Thread.currentThread());
+                    return counter.incrementAndGet();
+                }
+            });
+
+        TaskUtil.sleep(5000);
     }
 }

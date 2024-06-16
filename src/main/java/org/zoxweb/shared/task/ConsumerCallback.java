@@ -4,8 +4,6 @@ package org.zoxweb.shared.task;
 import java.util.function.Consumer;
 
 public interface ConsumerCallback<C>
-    extends Consumer<C>
+    extends Consumer<C>, ExceptionCallback
 {
-    default void exception(Exception e){};
-    default boolean isStackTraceEnabled(){return false;};
 }
