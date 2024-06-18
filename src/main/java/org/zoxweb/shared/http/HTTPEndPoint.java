@@ -17,6 +17,8 @@ extends SecurityProfile
         PATHS(NVConfigManager.createNVConfig("paths", "Paths", "Paths", false, true, NVStringList.class)),
         METHODS(NVConfigManager.createNVConfig("methods", "HTTP Methods", "Methods", false, true, HTTPMethod[].class)),
         PROTOCOLS(NVConfigManager.createNVConfig("protocols", "Http, Https...", "Protocols", false, true, URIScheme[].class)),
+        INPUT_CONTENT_TYPE(NVConfigManager.createNVConfig("input_content_type", "InputContentType", "IContentType", false, true, String.class)),
+        OUTPUT_CONTENT_TYPE(NVConfigManager.createNVConfig("output_content_type", "OutputContentType", "OContentType", false, true, String.class)),
         ;
         private final NVConfig nvc;
 
@@ -72,6 +74,28 @@ extends SecurityProfile
     {
         setValue(Param.BEAN, beanClassName);
     }
+
+    public String getOutputContentType()
+    {
+        return lookupValue(Param.OUTPUT_CONTENT_TYPE);
+    }
+
+    public void setOutputContentType(String outputContentType)
+    {
+        setValue(Param.OUTPUT_CONTENT_TYPE, outputContentType);
+    }
+
+    public String getInputContentType()
+    {
+        return lookupValue(Param.INPUT_CONTENT_TYPE);
+    }
+
+    public void setInputContentType(String inputContentType)
+    {
+        setValue(Param.INPUT_CONTENT_TYPE, inputContentType);
+    }
+
+
 
 
 

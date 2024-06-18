@@ -162,7 +162,7 @@ public class APIIntegration
                     System.out.println(apiResult);
                 }
             };
-            callback.setEndPoint(userAPI);
+            callback.setEndpoint(userAPI);
 
 
             userAPI.syncCall(callback, null);
@@ -188,7 +188,7 @@ public class APIIntegration
                 System.out.println("Try to login for " + username);
                 HTTPAuthorizationBasic basicAuth = new HTTPAuthorizationBasic(username, password);
                 HTTPAPIEndPoint loginEP = HTTPAPIManager.SINGLETON.lookup("api.xlogistx.io.login");
-                callback.setEndPoint(loginEP);
+                callback.setEndpoint(loginEP);
                 loginEP.syncCall(loginCallback, basicAuth);
 
             }

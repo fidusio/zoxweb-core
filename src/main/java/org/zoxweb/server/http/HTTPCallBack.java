@@ -34,17 +34,6 @@ public abstract class HTTPCallBack<I,O>
     {
     }
 
-    /**
-     * Default exception implementation
-     * @param e exception that occured
-     */
-    @Override
-    public void exception(Exception e)
-    {
-       e.printStackTrace();
-    }
-
-
 
     @Override
     public I get() 
@@ -58,7 +47,7 @@ public abstract class HTTPCallBack<I,O>
         return this;
     }
 
-    public HTTPCallBack<I,O> setEndPoint(HTTPAPIEndPoint<I,O> endpoint)
+    public HTTPCallBack<I,O> setEndpoint(HTTPAPIEndPoint<I,O> endpoint)
     {
         this.endpoint = endpoint;
         return this;

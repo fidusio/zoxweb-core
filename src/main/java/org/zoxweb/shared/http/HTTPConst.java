@@ -6,6 +6,19 @@ public final class HTTPConst
 {
     private HTTPConst(){}
 
+    public final static String APPLICATION_JSON = "application/json";
+    public final static String TEXT_CSV = "text/csv";
+    public final static String TEXT_CSS = "text/css";
+    public final static String TEXT_JAVASCRIPT = "text/javascript";
+    public final static String TEXT_HTML = "text/html";
+    public final static String TEXT_PLAIN = "text/plain";
+    public final static String TEXT_YAML = "text/yaml";
+
+
+
+
+
+
     public static final String WEB_SOCKET_UUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
     public static final GetNameValue<String> CHARSET_UTF_8 = new NVPair("charset", "utf-8");
 

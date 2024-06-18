@@ -15,18 +15,18 @@
  */
 package org.zoxweb.server.http;
 
-import java.util.List;
-
 import org.zoxweb.server.io.UByteArrayOutputStream;
 import org.zoxweb.shared.http.HTTPRequestLine;
 import org.zoxweb.shared.protocol.Delimiter;
 import org.zoxweb.shared.util.GetNameValue;
 
+import java.util.List;
+
 public class HTTPRawFormatter 
 {
-	private String firstLine;
-	private List<GetNameValue<String>> headers;
-	private byte[] content;
+	private final String firstLine;
+	private final List<GetNameValue<String>> headers;
+	private final byte[] content;
 	private UByteArrayOutputStream ubaos;
 
 	public HTTPRawFormatter (HTTPRequestLine rrl, List<GetNameValue<String>> headers, byte[] content)
@@ -58,14 +58,14 @@ public class HTTPRawFormatter
 					ubaos.write(Delimiter.COLON.getBytes());
 					String value = gnv.getValue();
 
-					if (value != null && value.length() > 0)
+					if (value != null && !value.isEmpty())
 					{
 						if (value.charAt(0) != ' ')
 						{
 							ubaos.write(' ');
 						}
 
-						ubaos.write( value);
+						ubaos.write(value);
 					}
 					ubaos.write(Delimiter.CRLF.getBytes());
 				}

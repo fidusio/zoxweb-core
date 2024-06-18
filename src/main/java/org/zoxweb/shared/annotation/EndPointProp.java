@@ -16,7 +16,7 @@
 package org.zoxweb.shared.annotation;
 
 
-
+import org.zoxweb.shared.http.HTTPConst;
 import org.zoxweb.shared.http.HTTPMethod;
 
 import java.lang.annotation.ElementType;
@@ -35,7 +35,7 @@ public @interface EndPointProp {
     /**
      * This is simplified way to represent a list of usr as one string comma separated
      * Ex: "/system/info,/system/info/detailed"
-     * This represent a list of 2 uris:
+     * This represents a list of 2 uris:
      * <ol>
      *     <li>/system/info</li>
      *     <li>/system/info/detailed</li>
@@ -49,11 +49,13 @@ public @interface EndPointProp {
 
     /**
      * List of HTTPMethod to be called GET=HTTPMethod.GET, POST=HTTPMethod.POST ...
-     * @return list of HTTPMethod
+     * @return array of HTTPMethod
      */
     HTTPMethod[] methods() default {};
 
+    String iContentType() default HTTPConst.APPLICATION_JSON + "; charset=utf-8";
 
+    String oContentType() default HTTPConst.APPLICATION_JSON + "; charset=utf-8";
 
     /**
      * Name of the handler or servlet depending on the server used

@@ -31,15 +31,11 @@ public class HTTPAPIEndPoint<I,O>
             try
             {
                 HTTPResponseData hrd = HTTPCall.send(createHMCI(callback.get(), authorization));
-                if (dataDecoder != null) {
-                    HTTPAPIResult<O> hapir = new HTTPAPIResult<O>(hrd.getStatus(), hrd.getHeaders(), dataDecoder.decode(hrd), hrd.getDuration());
-                    callback.accept(hapir);
-                }
-                else
-                {
-                    HTTPAPIResult<byte[]> hapir = new HTTPAPIResult<byte[]>(hrd.getStatus(), hrd.getHeaders(), hrd.getData(), hrd.getDuration());
-                    callback.accept((HTTPAPIResult<O>) hapir);
-                }
+                HTTPAPIResult<?> hapir = new HTTPAPIResult<>(hrd.getStatus(),
+                        hrd.getHeaders(),
+                        dataDecoder != null ?dataDecoder.decode(hrd) : hrd.getData(),
+                        hrd.getDuration());
+                callback.accept((HTTPAPIResult<O>) hapir);
                 successCounter.incrementAndGet();
             } catch (Exception e) {
                 failedCounter.incrementAndGet();

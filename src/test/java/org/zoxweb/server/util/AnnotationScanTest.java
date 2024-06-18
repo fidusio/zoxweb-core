@@ -16,7 +16,7 @@ public class AnnotationScanTest {
     @SecurityProp(authentications = {CryptoConst.AuthenticationType.DOMAIN}, roles = "admin")
     public static class ToBeTested
     {
-        @EndPointProp(uris = "/profile/{profileId}/{realm}", name = "profileReader", methods = {HTTPMethod.GET})
+        @EndPointProp(uris = "/profile/{profileId}/{realm}", name = "profileReader", methods = {HTTPMethod.GET}, oContentType = "text")
         @SecurityProp(authentications = {CryptoConst.AuthenticationType.ALL})
         public String getProfile(@ParamProp(name ="profileId") String profileId, @ParamProp(name ="realm", optional = false) String realm)
         {
@@ -28,7 +28,7 @@ public class AnnotationScanTest {
         private void notToBeReported(){}
 
 
-        @EndPointProp(uris = "/check-user/{user}", name = "CheckUser", methods = {HTTPMethod.POST})
+        @EndPointProp(uris = "/check-user/{user}", name = "CheckUser", methods = {HTTPMethod.POST}, oContentType = "boolean")
         @SecurityProp(authentications = {CryptoConst.AuthenticationType.ALL}, permissions= "self, admin")
         public static boolean checkStatus(String user, int i)
         {
@@ -43,7 +43,7 @@ public class AnnotationScanTest {
        ReflectionUtil.AnnotationMap result =  ReflectionUtil.scanClassAnnotations(ToBeTested.class, EndPointProp.class, Deprecated.class, SecurityProp.class);
        assert(result!=null);
        assert(result.getClassAnnotations() != null);
-       assert(result.getMethodsAnnotations().size() > 0);
+       assert(!result.getMethodsAnnotations().isEmpty());
        assert(result.isClassAnnotatedBy(SecurityProp.class));
 
     }
