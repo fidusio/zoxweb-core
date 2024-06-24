@@ -15,12 +15,11 @@
  */
 package org.zoxweb.shared.util;
 
+import org.zoxweb.shared.filters.ValueFilter;
+
 import java.util.Arrays;
-//import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.zoxweb.shared.filters.ValueFilter;
 
 /**
  * This is a meta defined object which can be represented as a bean object. 
@@ -102,19 +101,19 @@ public abstract class NVEntity
 	 * @param name
 	 * @return lookup matching name nvbase
 	 */
-	public NVBase<?> lookup(String name)
+	public  <V extends NVBase<?>> V lookup(String name)
     {
-		return attributes.get(name);
+		return (V)attributes.get(name);
 	}
 
-	public NVBase<?> lookup(GetNVConfig gnvc)
+	public <V extends NVBase<?>> V lookup(GetNVConfig gnvc)
     {
-		return attributes.get(gnvc.getNVConfig().getName());
+		return (V)attributes.get(gnvc.getNVConfig().getName());
 	}
 	
-	public NVBase<?> lookup(GetName gName)
+	public <V extends NVBase<?>> V lookup(GetName gName)
     {
-		return attributes.get(gName.getName());
+		return (V)attributes.get(gName.getName());
 	}
 	
 	

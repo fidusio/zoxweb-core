@@ -119,6 +119,7 @@ public class DataConst
 		DESCRIPTION(NVConfigManager.createNVConfig("description", null, "Description", false, true, String.class)),
 		DOMAIN_ID(NVConfigManager.createNVConfig("domain_id", "Domain ID", "DomainID", true, false, String.class)),
 		NAME(NVConfigManager.createNVConfig("name", null,"Name", false, true, String.class)),
+		UNIQUE_NAME(NVConfigManager.createNVConfig("name", null,"Name", true, true, true, String.class, null)),
 		;
 		
 		private NVConfig nvc;
