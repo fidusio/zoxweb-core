@@ -12,7 +12,8 @@ extends IOTBase
         MANUFACTURER(NVConfigManager.createNVConfig("manufacturer", "Manufacturer of the device", "Manufacturer", true, true, String.class)),
         MODEL(NVConfigManager.createNVConfig("model", "The model of the device", "Model", false, true, String.class)),
         VERSION(NVConfigManager.createNVConfig("version", "The version of the device", "Version", false, true, String.class)),
-        PROTOCOLS(NVConfigManager.createNVConfig("protocols", "Supported protocols by the device", "Protocols", true, true, NVGenericMap.class)),     ;
+        //PROTOCOLS(NVConfigManager.createNVConfig("protocols", "Supported protocols by the device", "Protocols", true, true, NVGenericMap.class)),
+        ;
 
         private final NVConfig nvc;
 
@@ -79,7 +80,7 @@ extends IOTBase
 
     public ProtocolInfo[] getProtocols()
     {
-        NVGenericMap protos = lookup(Param.PROTOCOLS);
+        NVGenericMap protos = lookupSubNVGM("protocols");
         ProtocolInfo[] ret = new ProtocolInfo[protos.size()];
         GetNameValue<?>[] values = protos.values();
         for(int i = 0; i < ret.length; i++)
@@ -91,14 +92,14 @@ extends IOTBase
     }
     public DeviceInfo addProtocol(ProtocolInfo protocolInfo)
     {
-        NVGenericMap protos = lookup(Param.PROTOCOLS);
+        NVGenericMap protos = lookupSubNVGM("protocols");
         protos.add(protocolInfo);
         return this;
     }
 
     public void setProtocols(ProtocolInfo ...protocols)
     {
-        NVGenericMap protos = lookup(Param.PROTOCOLS);
+        NVGenericMap protos = lookupSubNVGM("protocols");;
         for(ProtocolInfo proto: protocols)
         {
             protos.build(proto);
