@@ -27,6 +27,7 @@ import org.zoxweb.shared.util.NVPair;
 public class DataConst 
 {
 
+	public static final Object[] EMPTY_VALUES = new Object[0];
     public enum Language
         implements GetName {
 
@@ -116,6 +117,7 @@ public class DataConst
 	    implements GetNVConfig
 	{
 		CANONICAL_ID(NVConfigManager.createNVConfig("canonical_id", "Canonical ID", "CanonicalID", true, false, String.class)),
+		UNIQUE_CANONICAL_ID(NVConfigManager.createNVConfig("canonical_id", "Canonical ID", "CanonicalID", true, false, true, String.class, null)),
 		DESCRIPTION(NVConfigManager.createNVConfig("description", null, "Description", false, true, String.class)),
 		DOMAIN_ID(NVConfigManager.createNVConfig("domain_id", "Domain ID", "DomainID", true, false, String.class)),
 		NAME(NVConfigManager.createNVConfig("name", null,"Name", false, true, String.class)),

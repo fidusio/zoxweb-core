@@ -427,5 +427,27 @@ public class NVGenericMap
 	}
 
 
+	public NVGenericMap lookupSubNVMG(GetName name, boolean autoAdd)
+	{
+		return lookupSubNVMG(name.getName(), autoAdd);
+	}
+
+
+	public synchronized NVGenericMap lookupSubNVMG(String name, boolean autoAdd)
+	{
+		GetNameValue<?> subNVGM = lookup(name);
+		if (subNVGM == null && autoAdd)
+		{
+			subNVGM = new NVGenericMap(name);
+			build(subNVGM);
+		}
+		if(!(subNVGM instanceof NVGenericMap))
+		{
+			throw new IllegalArgumentException("Result not an NMGenericMap or null");
+		}
+		return (NVGenericMap) subNVGM;
+	}
+
+
 
 }

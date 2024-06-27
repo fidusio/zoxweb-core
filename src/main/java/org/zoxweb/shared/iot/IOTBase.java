@@ -1,31 +1,33 @@
 package org.zoxweb.shared.iot;
 
+import org.zoxweb.shared.data.DataConst;
 import org.zoxweb.shared.data.PropertyDAO;
-import org.zoxweb.shared.util.GetName;
-import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVGenericMap;
+import org.zoxweb.shared.util.*;
 
 public abstract class IOTBase
 extends PropertyDAO
 {
-    protected IOTBase(NVConfigEntity nvce)
+
+    public static final NVConfigEntity NVC_IOT_BASE = new NVConfigEntityLocal("iot_base",
+            null,
+            "IOTBase",
+            true,
+            false,
+            false,
+            false,
+            IOTBase.class,
+            SharedUtil.toNVConfigList(DataConst.DataParam.UNIQUE_CANONICAL_ID.getNVConfig()),
+            null,
+            false,
+            PropertyDAO.NVC_PROPERTY_DAO);
+
+
+
+
+    protected IOTBase(NVConfigEntity nvce, CanonicalIDSetter cids)
     {
-        super(nvce);
+        super(nvce, cids);
     }
 
-    protected NVGenericMap lookupSubNVGM(GetName gn)
-    {
-        return lookupSubNVGM(gn.getName());
-    }
-    protected synchronized NVGenericMap lookupSubNVGM(String name)
-    {
-        NVGenericMap ret = getProperties().lookup(name);
-        if (ret == null)
-        {
-            ret = new NVGenericMap(name);
-            getProperties().build(ret);
-        }
 
-        return ret;
-    }
 }

@@ -1,14 +1,6 @@
 package org.zoxweb.shared.data;
 
-import org.zoxweb.shared.util.GetNVProperties;
-import org.zoxweb.shared.util.GetNVConfig;
-import org.zoxweb.shared.util.NVConfig;
-import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
-import org.zoxweb.shared.util.NVConfigManager;
-import org.zoxweb.shared.util.NVGenericMap;
-import org.zoxweb.shared.util.SetCanonicalID;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.*;
 
 
 @SuppressWarnings("serial")
@@ -52,15 +44,24 @@ implements SetCanonicalID, GetNVProperties
                                                                               null,
                                                                               false,
                                                                               TimeStampDAO.NVC_TIME_STAMP_DAO);
+  private final CanonicalIDSetter cids;
   
   public PropertyDAO()
   {
     super(NVC_PROPERTY_DAO);
+    this.cids = null;
   }
   
+  protected PropertyDAO(NVConfigEntity nvce, CanonicalIDSetter cids)
+  {
+    super(nvce);
+    this.cids = cids;
+  }
+
   protected PropertyDAO(NVConfigEntity nvce)
   {
     super(nvce);
+    this.cids = null;
   }
 
   /**
@@ -92,6 +93,15 @@ implements SetCanonicalID, GetNVProperties
   
   public NVGenericMap getProperties()
   {
-    return (NVGenericMap) lookup(Param.PROPERTIES);
+    return lookup(Param.PROPERTIES);
+  }
+
+
+
+  public synchronized  <V> void setValue(String attrName, V value)
+  {
+    super.setValue(attrName, value);
+    if(cids != null)
+      cids.setCanonicalID(this, attrName);
   }
 }

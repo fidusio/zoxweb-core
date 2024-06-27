@@ -36,7 +36,7 @@ extends NVBase<List<String>>
 	public NVStringList(String name, String ...values)
 	{
 		this(name);
-		setValues( values);
+		setValues(values);
 	}
 	
 	/**
@@ -64,6 +64,12 @@ extends NVBase<List<String>>
 	public boolean contains(String val)
 	{
 		return getValue().contains(val);
+	}
+
+
+	public void add(String value)
+	{
+		this.value.add(value);
 	}
 	  
 }

@@ -2087,7 +2087,7 @@ public class SharedUtil
 	 * @param array
 	 * @return extract the nvconfig from the GetNVConfig array 
 	 */
-	public static ArrayList<NVConfig> extractNVConfigs(GetNVConfig... array)
+	public static List<NVConfig> extractNVConfigs(GetNVConfig... array)
     {
 		ArrayList<NVConfig> ret = null;
 		

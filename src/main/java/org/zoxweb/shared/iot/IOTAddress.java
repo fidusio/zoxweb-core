@@ -1,6 +1,5 @@
 package org.zoxweb.shared.iot;
 
-import org.zoxweb.shared.data.PropertyDAO;
 import org.zoxweb.shared.util.*;
 
 public class IOTAddress
@@ -11,6 +10,7 @@ public class IOTAddress
             implements GetNVConfig
     {
         ADDRESS(NVConfigManager.createNVConfig("address", "Address", "Address of the entity", true, true, String.class)),
+        VERSION(NVConfigManager.createNVConfig("version", "The version of the device", "Version", false, true, String.class)),
         ADDRESS_TYPE(NVConfigManager.createNVConfig("address_type", "Type of address", "AddressType", false, true, String.class)),
         ;
 
@@ -38,11 +38,11 @@ public class IOTAddress
             SharedUtil.extractNVConfigs(Param.values()),
             null,
             false,
-            PropertyDAO.NVC_PROPERTY_DAO);
+            IOTBase.NVC_IOT_BASE);
 
 
     public IOTAddress()
     {
-        super(NVC_IOT_ADDRESS);
+        super(NVC_IOT_ADDRESS, null);
     }
 }
