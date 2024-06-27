@@ -31,7 +31,7 @@ public interface ArrayValues<T>
 	int size();
 
 	T[] values();
-	T[] values(T[] v);
+	<V> V[] valuesAs(V[] v);
 
 	T add(T v);
 

@@ -93,7 +93,7 @@ public class NVEntityReferenceList
 	}
 
 
-	public NVEntity[] values(NVEntity[] t) {return value.toArray(t);}
+	public <V> V[] valuesAs(V[] t) {return value.toArray(t);}
 
 	/**
 	 * @see org.zoxweb.shared.util.ArrayValues#add(java.lang.Object)

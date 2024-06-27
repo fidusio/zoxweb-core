@@ -2,6 +2,7 @@ package org.zoxweb.shared.iot;
 
 import org.junit.jupiter.api.Test;
 import org.zoxweb.server.util.GSONUtil;
+import org.zoxweb.shared.util.Const;
 
 public class DeviceInfoTest
 {
@@ -39,8 +40,33 @@ public class DeviceInfoTest
 
         deviceInfo.addPort(new PortInfo("GND", "ground").setPort(14));
 
+        String regex = Const.RegEx.CONTAINS_NO_CASE.toRegEx("PB");
+        System.out.println(regex);
+        System.out.println(deviceInfo.lookupPorts(regex));
+
 
 
         System.out.println(GSONUtil.toJSONDefault(deviceInfo, true));
     }
+
+//    @Test
+//    public void regex()
+//    {
+//        String[] texts = {"{tag>content</tag>", "<TAG>CONTENT</TAG}", "<[Tag>Content</Tag>", "fail"};
+//        String tag = "tag";
+//
+//        // Construct the regex pattern in a case-insensitive manner
+//        String patternString = "(?i).*" + tag + "(.*?)";
+//
+//        for (String text : texts) {
+//            boolean matches = text.matches(patternString);
+//            System.out.println("Text: " + text + " Matches: " + matches);
+//        }
+//
+//
+//        for (String text : texts) {
+//            boolean matches = text.matches(Const.RegEx.CONTAINS_NO_CASE.toRegEx("TaG"));
+//            System.out.println("Text: " + text + " Matches: " + matches);
+//        }
+//    }
 }

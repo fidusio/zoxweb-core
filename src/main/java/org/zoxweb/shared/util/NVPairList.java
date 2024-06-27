@@ -80,7 +80,7 @@ public class NVPairList
 		return value.toArray(new NVPair[0]);
 	}
 
-	public NVPair[] values(NVPair[] t) {return values();};
+	public <V> V[] valuesAs(V[] t) {return value.toArray(t);};
 
     /**
      * @see org.zoxweb.shared.util.ArrayValues#size()

@@ -12,7 +12,7 @@ extends IOTBase
     {
         PORT(NVConfigManager.createNVConfig("port", "Port/Pin number on the device", "Port/PIN", true, true, int.class)),
         TYPE(NVConfigManager.createNVConfig("type", "Port/Pin type", "Type", false, true, String.class)),
-        TAG(NVConfigManager.createNVConfig("port_tag", "Port tag", "TAG", false, true, String.class)),
+        TAG(NVConfigManager.createNVConfig("port_tag", "Port tag", "Tag", false, true, String.class)),
         SPEEDS(NVConfigManager.createNVConfig("speeds", "Port speeds", "Speeds", false, true, NVStringList.class)),
         FUNCTIONS(NVConfigManager.createNVConfig("functions", "Port functions", "Functions", false, true, NVStringList.class)),
         ;

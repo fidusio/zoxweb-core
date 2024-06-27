@@ -28,6 +28,7 @@ import java.util.concurrent.TimeUnit;
 public class Const {
 
   public static final String LOGGER_NAME = "zoxweb-core";
+  public static final String TOKEN_TAG = "$$TAG$$";
 
   //public static final String UTF8 = "UTF-8";
 
@@ -1290,6 +1291,47 @@ public class Const {
     @Override
     public String getValue() {
       return value;
+    }
+  }
+
+  public enum RegEx
+    implements GetNameValue<String>
+  {
+    CONTAINS_NO_CASE("ContainsNoCase",  "(?i).*" + TOKEN_TAG + "(.*?)"),
+
+
+    ;
+
+
+    private final NVPair nv;
+
+    RegEx(String name, String value)
+    {
+      nv = new NVPair(name, value);
+    }
+
+
+    /**
+     * @return the name of the object
+     */
+    @Override
+    public String getName() {
+      return nv.getName();
+    }
+
+    /**
+     * Returns the value.
+     *
+     * @return typed value
+     */
+    @Override
+    public String getValue() {
+      return nv.getValue();
+    }
+
+    public String toRegEx(String toMatch)
+    {
+      return SharedStringUtil.embedText(getValue(), TOKEN_TAG, toMatch);
     }
   }
 

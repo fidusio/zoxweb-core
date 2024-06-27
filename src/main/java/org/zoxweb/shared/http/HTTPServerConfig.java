@@ -58,14 +58,14 @@ implements AppConfig
   @SuppressWarnings("unchecked")
   public ConnectionConfig[] getConnectionConfigs()
   {
-    ArrayValues<NVEntity> av = (ArrayValues<NVEntity>) lookup(Param.CONNECTIONS);
-    return (ConnectionConfig[])av.values(new ConnectionConfig[0]);
+    ArrayValues<NVEntity> av = lookup(Param.CONNECTIONS);
+    return av.valuesAs(new ConnectionConfig[0]);
   }
 
   public HTTPEndPoint[] getEndPoints()
   {
-    ArrayValues<NVEntity> av = (ArrayValues<NVEntity>) lookup(Param.ENDPOINTS);
-    return (HTTPEndPoint[])av.values(new HTTPEndPoint[0]);
+    ArrayValues<NVEntity> av = lookup(Param.ENDPOINTS);
+    return av.valuesAs(new HTTPEndPoint[0]);
   }
 
   public String getApplicationConfVar()

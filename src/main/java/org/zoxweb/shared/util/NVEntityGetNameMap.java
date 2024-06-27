@@ -84,7 +84,7 @@ public class NVEntityGetNameMap
 	{
 		return  value.values().toArray( new NVEntity[0]);
 	}
-	public NVEntity[] values(NVEntity[] t) {return value.values().toArray(t);}
+	public <V> V[] valuesAs(V[] t) {return value.values().toArray(t);}
 	
 	/**
 	 * @see org.zoxweb.shared.util.ArrayValues#clear()

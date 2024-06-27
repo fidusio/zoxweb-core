@@ -105,7 +105,7 @@ public class NVGenericMap
 		return getValue().values().toArray(new GetNameValue[0]);
 	}
 
-	public GetNameValue<?>[] values(GetNameValue<?>[] t) {return values();}
+	public <V> V[] valuesAs(V[] t) {return getValue().values().toArray(t);}
 
 
 	public Object[] nvValues()

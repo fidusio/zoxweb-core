@@ -3,6 +3,9 @@ package org.zoxweb.shared.iot;
 import org.zoxweb.shared.data.DataConst;
 import org.zoxweb.shared.util.*;
 
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 public class DeviceInfo
 extends IOTBase
 {
@@ -83,20 +86,20 @@ extends IOTBase
         setValue(Param.VERSION, version);
     }
 
-    public ArrayValues<ProtocolInfo> getProtocols()
+    public ProtocolInfo[] getProtocols()
     {
-        return lookup(Param.PROTOCOLS);
+        return ((ArrayValues<NVEntity>)lookup(Param.PROTOCOLS)).valuesAs(new ProtocolInfo[0]);
     }
     public DeviceInfo addProtocol(ProtocolInfo protocolInfo)
     {
-        getProtocols().add(protocolInfo);
+        ((ArrayValues<NVEntity>)lookup(Param.PROTOCOLS)).add(protocolInfo);
 
         return this;
     }
 
     public void setProtocols(ProtocolInfo ...protocols)
     {
-        ArrayValues<ProtocolInfo> protos =  getProtocols();
+        ArrayValues<NVEntity> protos =  lookup(Param.PROTOCOLS);
         for(ProtocolInfo proto: protocols)
         {
             protos.add(proto);
@@ -104,25 +107,41 @@ extends IOTBase
     }
 
 
-    public ArrayValues<PortInfo> getPorts()
+    public PortInfo[] getPorts()
     {
-        return lookup(Param.PORTS);
+        return ((ArrayValues<NVEntity>)lookup(Param.PORTS)).valuesAs(new PortInfo[0]);
     }
 
     public synchronized void setPorts(PortInfo ...ports)
     {
+        ArrayValues<NVEntity> portsAV = lookup(Param.PORTS);
         for(PortInfo port :  ports)
         {
-           addPort(port);
+            portsAV.add(port);
         }
     }
 
     public DeviceInfo addPort(PortInfo port)
     {
 
-        getPorts().add(port.setTag(getName()));
+        ((ArrayValues<NVEntity>)lookup(Param.PORTS)).add(port.setTag(getName()));
         //port.setTag(getName());
         return this;
+    }
+
+    public Set<PortInfo> lookupPorts(String matchCriteria)
+    {
+        Set<PortInfo> ret = new LinkedHashSet<>();
+        for(PortInfo port : getPorts())
+        {
+            for(String function : port.getFunctions())
+            {
+                if (function.matches(matchCriteria) || port.getName().matches(matchCriteria))
+                    ret.add(port);
+            }
+        }
+
+        return ret;
     }
 
 }
