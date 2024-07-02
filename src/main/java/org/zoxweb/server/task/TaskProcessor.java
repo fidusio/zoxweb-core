@@ -124,12 +124,18 @@ public class TaskProcessor
 						finally
 						{
 							event.incExecCount();
+							if(te instanceof Future)
+								synchronized (te)
+								{
+									te.notifyAll();
+								}
+
 							tasksExecutedCounter.getAndIncrement();
 						}
 
 						if (executorNotify)
 						{
-							synchronized (te)
+							synchronized(te)
 							{
 								te.notify();
 							}

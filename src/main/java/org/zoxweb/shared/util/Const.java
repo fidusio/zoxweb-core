@@ -29,6 +29,8 @@ public class Const {
 
   public static final String LOGGER_NAME = "zoxweb-core";
   public static final String TOKEN_TAG = "$$TAG$$";
+  public static final Object[] EMPTY_ARRAY = new Object[0];
+  public static final byte[] EMPTY_TYPE_ARRAY = new byte[0];
 
   //public static final String UTF8 = "UTF-8";
 
@@ -56,6 +58,7 @@ public class Const {
     VER_19("19", "19", 63, 0),
     VER_20("20", "20", 64, 0),
     VER_21("21", "21", 65, 0),
+    VER_22("22", "22", 66, 0),
     ;
 
     public final String VERSION;
@@ -1298,7 +1301,7 @@ public class Const {
     implements GetNameValue<String>
   {
     CONTAINS_NO_CASE("ContainsNoCase",  "(?i).*" + TOKEN_TAG + "(.*?)"),
-
+    EMAIL("Email","^[\\w.%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$")
 
     ;
 
@@ -1320,7 +1323,7 @@ public class Const {
     }
 
     /**
-     * Returns the value.
+     * Returns the value the actual regular expression.
      *
      * @return typed value
      */
@@ -1329,10 +1332,24 @@ public class Const {
       return nv.getValue();
     }
 
-    public String toRegEx(String toMatch)
+    /**
+     *
+     * @param token to be added to the regular expression
+     * @return regular express where $$TOKEN$$ replaced with token param if the regular expression contains the $$TOKEN$$
+     */
+    public String toRegEx(String token, boolean literal)
     {
-      return SharedStringUtil.embedText(getValue(), TOKEN_TAG, toMatch);
+      if(!SharedStringUtil.isEmpty(token) || literal)
+      {
+        token = "\\Q" + token + "\\E";
+      }
+      return SharedStringUtil.embedText(getValue(), TOKEN_TAG, token);
     }
+
+//    public boolean matches(String toMatch, String token)
+//    {
+//      return toMatch.matches(toRegEx(token));
+//    }
   }
 
   /**

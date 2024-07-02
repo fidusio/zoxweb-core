@@ -7,6 +7,7 @@ import org.zoxweb.shared.task.ExceptionCallback;
 import org.zoxweb.shared.util.SharedUtil;
 
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 public class FutureCallableRunnableTask<V>
@@ -19,6 +20,7 @@ public class FutureCallableRunnableTask<V>
     final TaskEvent taskEvent;
     private V result = null;
     private final boolean isFuture;
+    final AtomicBoolean pendingExecution = new AtomicBoolean(true);
 
     FutureCallableRunnableTask(TaskEvent te)
     {
@@ -96,6 +98,7 @@ public class FutureCallableRunnableTask<V>
                 ((Consumer<V>) callable).accept(result);
             }
         }
+        pendingExecution.set(false);
     }
 
 
@@ -125,7 +128,8 @@ public class FutureCallableRunnableTask<V>
     @Override
     public boolean isDone()
     {
-        return taskEvent.execCount() != 0;
+        // this will cause error
+        return taskEvent.execCount() != 0 && !pendingExecution.get();
     }
 
     /**
@@ -136,7 +140,7 @@ public class FutureCallableRunnableTask<V>
     @Override
     public V get() throws InterruptedException, ExecutionException
     {
-        synchronized (this)
+        synchronized(this)
         {
             if (!isDone())
             {

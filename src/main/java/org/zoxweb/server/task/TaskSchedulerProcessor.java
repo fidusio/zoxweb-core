@@ -100,6 +100,8 @@ public class TaskSchedulerProcessor
 			// TODO Auto-generated method stub
 			cancel();
 			appointment.setDelayInNanos(delayInMillis, nanoOffset);
+			if (taskEvent.getTaskExecutor() instanceof FutureCallableRunnableTask)
+				((FutureCallableRunnableTask<?>) taskEvent.getTaskExecutor()).pendingExecution.set(true);
 			queue(this);
 		}
 
@@ -109,7 +111,8 @@ public class TaskSchedulerProcessor
 			return appointment.getPreciseExpiration();
 		}
 
-		public int hashCode() {
+		public int hashCode()
+		{
 			return appointment.hashCode();
 		}
 

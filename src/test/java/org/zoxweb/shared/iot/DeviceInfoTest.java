@@ -4,16 +4,17 @@ import org.junit.jupiter.api.Test;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.util.Const;
 
+import java.util.Set;
+
 public class DeviceInfoTest
 {
     @Test
-    public void deviceInfoTest()
+    public void attiny84InfoTest()
     {
         DeviceInfo deviceInfo = new DeviceInfo();
         deviceInfo.setName("ATTINY84");
         deviceInfo.setDescription("14 pin Atmel microcontroller");
-        deviceInfo.setManufacturer("Microchip");
-        deviceInfo.setModel("PU");
+        deviceInfo.setManufacturer("Microchip").setModel("PU").setForm("DIP14/SOIC14");
 
 
         ProtocolInfo i2c = new ProtocolInfo();
@@ -39,34 +40,52 @@ public class DeviceInfoTest
 
 
         deviceInfo.addPort(new PortInfo("GND", "ground").setPort(14));
-
-        String regex = Const.RegEx.CONTAINS_NO_CASE.toRegEx("PB");
-        System.out.println(regex);
-        System.out.println(deviceInfo.lookupPorts(regex));
-
+        Set<PortInfo> ports = deviceInfo.lookupPorts(Const.RegEx.CONTAINS_NO_CASE.toRegEx("PB", true));
+        System.out.println(ports.size() + ": "  + ports);
 
 
         System.out.println(GSONUtil.toJSONDefault(deviceInfo, true));
     }
 
-//    @Test
-//    public void regex()
-//    {
-//        String[] texts = {"{tag>content</tag>", "<TAG>CONTENT</TAG}", "<[Tag>Content</Tag>", "fail"};
-//        String tag = "tag";
-//
-//        // Construct the regex pattern in a case-insensitive manner
-//        String patternString = "(?i).*" + tag + "(.*?)";
-//
-//        for (String text : texts) {
-//            boolean matches = text.matches(patternString);
-//            System.out.println("Text: " + text + " Matches: " + matches);
-//        }
-//
-//
-//        for (String text : texts) {
-//            boolean matches = text.matches(Const.RegEx.CONTAINS_NO_CASE.toRegEx("TaG"));
-//            System.out.println("Text: " + text + " Matches: " + matches);
-//        }
-//    }
+
+    @Test
+    public void attiny85InfoTest()
+    {
+        DeviceInfo deviceInfo = new DeviceInfo();
+        deviceInfo.setName("ATTINY85");
+        deviceInfo.setDescription("8 pin Atmel microcontroller");
+        deviceInfo.setManufacturer("Microchip").setForm("DIP8");
+        deviceInfo.setModel("PU");
+
+
+        ProtocolInfo i2c = new ProtocolInfo();
+        i2c.setName("I2C");
+        i2c.setDescription("Inter-Integrated Circuit Protocol");
+        deviceInfo.addProtocol(i2c);
+
+
+
+
+        deviceInfo.addPort(new PortInfo("PB5", "General pin").setPort(1).setFunctions("PCINT5", "0", "5", "RESET", "ADC0"));
+        deviceInfo.addPort(new PortInfo("PB3", "General pin").setPort(2).setFunctions("PCINT3", "3", "3", "ADC3","XTAL2"));
+        deviceInfo.addPort(new PortInfo("PB4", "General pin").setPort(3).setFunctions("PCINT4", "4", "2", "OC1B", "ADC2", "XTAL1"));
+        deviceInfo.addPort(new PortInfo("GND", "ground").setPort(4));
+
+
+        deviceInfo.addPort(new PortInfo("PB0", "General pin").setPort(5).setFunctions("PCINT0", "0", "MOSI", "DI", "SDA", "OC0A", "AIN0", "AREF", "TXD"));
+        deviceInfo.addPort(new PortInfo("PB1", "General pin").setPort(6).setFunctions("PCINT1", "1", "MISO", "DO", "OC0B", "OC1A", "AIN1", "RDX"));
+        deviceInfo.addPort(new PortInfo("PB2", "General pin").setPort(7).setFunctions("PCINT2", "2", "1", "SCK", "SCL", "INT0", "ADC1"));
+        deviceInfo.addPort(new PortInfo("VCC", "Input voltage").setPort(8));
+
+
+
+
+
+        Set<PortInfo> ports = deviceInfo.lookupPorts(Const.RegEx.CONTAINS_NO_CASE.toRegEx("PB", true));
+        System.out.println(ports.size() + ": "  + ports);
+
+
+        System.out.println(GSONUtil.toJSONDefault(deviceInfo, true));
+    }
+
 }

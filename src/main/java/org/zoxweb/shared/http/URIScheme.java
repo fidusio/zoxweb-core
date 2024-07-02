@@ -33,8 +33,8 @@ public enum URIScheme
 	
 	;
 
-	private String name;
-	private int defaultPort;
+	private final String name;
+	private final int defaultPort;
 	
 	URIScheme(String name, int port)
 	{

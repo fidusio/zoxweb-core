@@ -17,7 +17,7 @@ extends IOTBase
         VERSION(NVConfigManager.createNVConfig("version", "The version of the device", "Version", false, true, String.class)),
         PROTOCOLS(NVConfigManager.createNVConfigEntity("protocols", "Device protocols", "Protocols", true, false, ProtocolInfo.NVC_IOT_PROTOCOL, NVConfigEntity.ArrayType.GET_NAME_MAP)),
         PORTS(NVConfigManager.createNVConfigEntity("ports", "Device ports", "Ports", true, false, PortInfo.NVC_PORT_INFO, NVConfigEntity.ArrayType.GET_NAME_MAP)),
-        //PROTOCOLS(NVConfigManager.createNVConfig("protocols", "Supported protocols by the device", "Protocols", true, true, NVGenericMap.class)),
+        FORM(NVConfigManager.createNVConfig("form_factor", "Form of the device", "FormFactor", true, true, String.class)),
         ;
 
         private final NVConfig nvc;
@@ -34,7 +34,7 @@ extends IOTBase
     }
 
     private static final CanonicalIDSetter CIDS = new CanonicalIDSetter('-',DataConst.DataParam.NAME,
-            Param.MODEL, Param.VERSION);
+            Param.MODEL, Param.FORM, Param.VERSION);
 
     public static final NVConfigEntity NVC_DEVICE_INFO = new NVConfigEntityLocal("device_info",
             "IOT device information",
@@ -61,9 +61,10 @@ extends IOTBase
         return lookupValue(Param.MANUFACTURER);
     }
 
-    public void setManufacturer(String manufacturer)
+    public DeviceInfo setManufacturer(String manufacturer)
     {
         setValue(Param.MANUFACTURER, manufacturer);
+        return this;
     }
 
     public String getModel()
@@ -71,9 +72,22 @@ extends IOTBase
         return lookupValue(Param.MODEL);
     }
 
-    public void setModel(String model)
+    public DeviceInfo setModel(String model)
     {
         setValue(Param.MODEL, model);
+        return this;
+    }
+
+
+    public String getForm()
+    {
+        return lookupValue(Param.FORM);
+    }
+
+    public DeviceInfo setForm(String form)
+    {
+        setValue(Param.FORM, form);
+        return this;
     }
 
     public String getVersion()
@@ -81,9 +95,10 @@ extends IOTBase
         return lookupValue(Param.VERSION);
     }
 
-    public void setVersion(String version)
+    public DeviceInfo setVersion(String version)
     {
         setValue(Param.VERSION, version);
+        return this;
     }
 
     public ProtocolInfo[] getProtocols()
@@ -97,13 +112,15 @@ extends IOTBase
         return this;
     }
 
-    public void setProtocols(ProtocolInfo ...protocols)
+    public DeviceInfo setProtocols(ProtocolInfo ...protocols)
     {
         ArrayValues<NVEntity> protos =  lookup(Param.PROTOCOLS);
         for(ProtocolInfo proto: protocols)
         {
             protos.add(proto);
         }
+
+        return this;
     }
 
 
@@ -112,13 +129,14 @@ extends IOTBase
         return ((ArrayValues<NVEntity>)lookup(Param.PORTS)).valuesAs(new PortInfo[0]);
     }
 
-    public synchronized void setPorts(PortInfo ...ports)
+    public synchronized DeviceInfo setPorts(PortInfo ...ports)
     {
         ArrayValues<NVEntity> portsAV = lookup(Param.PORTS);
         for(PortInfo port :  ports)
         {
             portsAV.add(port);
         }
+        return this;
     }
 
     public DeviceInfo addPort(PortInfo port)
