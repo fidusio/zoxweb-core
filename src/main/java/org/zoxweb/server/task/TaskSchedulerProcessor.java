@@ -211,6 +211,21 @@ public class TaskSchedulerProcessor
 			return taskEvent.execCount();
 		}
 
+		/**
+		 * @return
+		 */
+		@Override
+		public long nextWait() {
+			return getDelayInMillis();
+		}
+
+		/**
+		 * @return
+		 */
+		@Override
+		public Appointment getType() {
+			return this;
+		}
 	}
 	
 	private final TaskProcessor taskProcessor;

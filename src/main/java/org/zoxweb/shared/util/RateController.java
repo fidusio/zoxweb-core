@@ -55,12 +55,19 @@ public class RateController
     }
 
 
-    public RCType getType()
+
+    @Override
+    public RateController getType()
+    {
+        return this;
+    }
+
+    public RCType getRCType()
     {
         return type;
     }
 
-    public RateController setType(RCType type)
+    public RateController setRCType(RCType type)
     {
         SharedUtil.checkIfNulls("Null type", type);
         this.type = type;
@@ -118,10 +125,7 @@ public class RateController
 
 
 
-     public RateController get()
-     {
-         return this;
-     }
+
 
 
 

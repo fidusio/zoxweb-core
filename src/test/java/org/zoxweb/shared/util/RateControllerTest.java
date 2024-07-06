@@ -130,7 +130,7 @@ public class RateControllerTest {
     public void counterTypeTest()
     {
         RateController controller = new RateController("test", 10, TimeUnit.SECONDS);
-        controller.setType(RateController.RCType.COUNTER);
+        controller.setRCType(RateController.RCType.COUNTER);
         List<Long> vals = new ArrayList<>();
         long ts = System.currentTimeMillis();
         for(int i = 0; i < 100; i++)

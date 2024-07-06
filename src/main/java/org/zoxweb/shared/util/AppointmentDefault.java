@@ -206,4 +206,20 @@ public class AppointmentDefault
 		// may cause error
 		return SharedUtil.signum( getDelay(TimeUnit.MILLISECONDS) - o.getDelay(TimeUnit.MILLISECONDS));
 	}
+
+	/**
+	 * @return
+	 */
+	@Override
+	public long nextWait() {
+		return getDelayInMillis();
+	}
+
+	/**
+	 * @return
+	 */
+	@Override
+	public Appointment getType() {
+		return this;
+	}
 }

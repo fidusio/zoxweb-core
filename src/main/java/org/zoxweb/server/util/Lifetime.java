@@ -141,7 +141,7 @@ public class Lifetime
     /**
      * @return this;
      */
-    public Lifetime get()
+    public Lifetime getType()
     {
         return this;
     }
