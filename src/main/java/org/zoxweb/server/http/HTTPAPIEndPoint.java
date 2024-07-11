@@ -33,7 +33,7 @@ public class HTTPAPIEndPoint<I,O>
                 HTTPResponseData hrd = HTTPCall.send(createHMCI(callback.get(), authorization));
                 HTTPAPIResult<?> hapir = new HTTPAPIResult<>(hrd.getStatus(),
                         hrd.getHeaders(),
-                        dataDecoder != null ?dataDecoder.decode(hrd) : hrd.getData(),
+                        dataDecoder != null ? dataDecoder.decode(hrd) : hrd.getData(),
                         hrd.getDuration());
                 callback.accept((HTTPAPIResult<O>) hapir);
                 successCounter.incrementAndGet();

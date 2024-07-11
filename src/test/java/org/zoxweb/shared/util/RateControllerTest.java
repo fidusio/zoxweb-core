@@ -135,19 +135,49 @@ public class RateControllerTest {
         long ts = System.currentTimeMillis();
         for(int i = 0; i < 100; i++)
             vals.add(controller.nextWait());
-        System.out.println(vals);
+        System.out.println(vals.size() + ": " + vals);
+
+
+        TaskUtil.sleep(2000);
+        for(int i = 0; i < 100; i++)
+            vals.add(controller.nextWait());
+
+        System.out.println(vals.size() + ": " + vals);
+        TaskUtil.sleep(15500);
+        vals.clear();
+        for(int i = 0; i < 100; i++)
+            vals.add(controller.nextWait());
+        System.out.println(vals.size() + ": " + vals);
+
+
+
+
+        ts = System.currentTimeMillis() - ts;
+        System.out.println(controller.nextWait() + " delta " + ts);
+    }
+
+
+    @Test
+    public void timeTypeTest()
+    {
+        RateController controller = new RateController("test", 10, TimeUnit.SECONDS);
+        controller.setRCType(RateController.RCType.TIME);
+        List<Long> vals = new ArrayList<>();
+        long ts = System.currentTimeMillis();
+        for(int i = 0; i < 100; i++)
+            vals.add(controller.nextWait());
+        System.out.println(Const.TimeInMillis.toString(System.currentTimeMillis() - ts)  + " size " + vals.size() + ": " + vals);
 
 
         TaskUtil.sleep(5000);
         for(int i = 0; i < 100; i++)
             vals.add(controller.nextWait());
 
-        System.out.println(vals);
+        System.out.println(Const.TimeInMillis.toString(System.currentTimeMillis() - ts)  + " size " + vals.size() + ": " + vals);
         TaskUtil.sleep(15500);
-        vals.clear();
         for(int i = 0; i < 100; i++)
             vals.add(controller.nextWait());
-        System.out.println(vals);
+        System.out.println(Const.TimeInMillis.toString(System.currentTimeMillis() - ts)  + " size " + vals.size() + ": " + vals);
 
 
 

@@ -18,7 +18,6 @@ package org.zoxweb.shared.util;
 import org.zoxweb.shared.util.Const.TimeInMillis;
 
 import java.io.Serializable;
-import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings("serial")
@@ -201,11 +200,11 @@ public class AppointmentDefault
 	 * @throws ClassCastException   if the specified object's type prevents it
 	 *                              from being compared to this object.
 	 */
-	@Override
-	public int compareTo(Delayed o) {
-		// may cause error
-		return SharedUtil.signum( getDelay(TimeUnit.MILLISECONDS) - o.getDelay(TimeUnit.MILLISECONDS));
-	}
+//	@Override
+//	public int compareTo(Delayed o) {
+//		// may cause error
+//		return SharedUtil.signum( getDelay(TimeUnit.MILLISECONDS) - o.getDelay(TimeUnit.MILLISECONDS));
+//	}
 
 	/**
 	 * @return
