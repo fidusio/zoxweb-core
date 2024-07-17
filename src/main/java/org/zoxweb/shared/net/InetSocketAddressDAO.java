@@ -42,17 +42,43 @@ public class InetSocketAddressDAO
     {
 		this();
 		String[] params = addressPort.split(":");
-		setInetAddress(params[0]);
-
-		if (params.length > 1) {
-            setPort(Integer.parseInt(params[1]));
-        } else {
-            setPort(-1);
-        }
-		if(params.length > 2)
+		switch (params.length)
 		{
-			setProxyType(params[2]);
+			case 1 :
+				// 2 possibilities
+				// just port or address
+				try
+				{
+					setPort(Integer.parseInt(params[0]));
+				}
+				catch (Exception e)
+				{
+					setInetAddress(params[0]);
+					setPort(-1);
+				}
+				break;
+			case 3 :
+				setProxyType(params[2]);
+			case 2:
+				setInetAddress(params[0]);
+				setPort(Integer.parseInt(params[1]));
+				break;
+			default:
+				throw new IllegalArgumentException("Invalid address " + addressPort);
 		}
+
+
+//		setInetAddress(params[0]);
+//
+//		if (params.length > 1) {
+//            setPort(Integer.parseInt(params[1]));
+//        } else {
+//            setPort(-1);
+//        }
+//		if(params.length > 2)
+//		{
+//			setProxyType(params[2]);
+//		}
 	}
 	
 	public InetSocketAddressDAO(String address, int port)

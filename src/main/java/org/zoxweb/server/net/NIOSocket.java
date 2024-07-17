@@ -173,7 +173,9 @@ public class NIOSocket
 	
 	public SelectionKey addServerSocket(InetSocketAddressDAO sa, int backlog, ProtocolFactory<?> psf) throws IOException
 	{
-		return addServerSocket(new InetSocketAddress(sa.getPort()), backlog, psf);
+		return addServerSocket(sa.getInetAddress() != null ? new InetSocketAddress(sa.getInetAddress(), sa.getPort()): new InetSocketAddress(sa.getPort()),
+				backlog,
+				psf);
 	}
 	
 	public SelectionKey addServerSocket(int port, int backlog, ProtocolFactory<?> psf) throws IOException

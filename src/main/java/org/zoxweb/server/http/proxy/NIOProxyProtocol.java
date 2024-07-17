@@ -597,9 +597,10 @@ public class NIOProxyProtocol
 		{
 			
 			int index = 0;
-			int port = Integer.parseInt(args[index++]);
+			InetSocketAddressDAO addressPort = new InetSocketAddressDAO(args[index++]);
+			int threadCount = index < args.length ? Integer.parseInt(args[index++]) : 8;
 			InetFilterRulesManager clientIFRM = null;
-			TaskUtil.setThreadMultiplier(4);
+			TaskUtil.setThreadMultiplier(threadCount);
 			
 			String filename = null;
 			
@@ -636,7 +637,7 @@ public class NIOProxyProtocol
 			
 			
 			NIOSocket nios = new NIOSocket(TaskUtil.defaultTaskProcessor(), TaskUtil.defaultTaskScheduler());
-			nios.addServerSocket(new InetSocketAddress(port), 256, factory);
+			nios.addServerSocket(addressPort, 256, factory);
 			nios.setStatLogCounter(0);
 			Runnable cleaner = new Runnable()
 					{
@@ -663,12 +664,13 @@ public class NIOProxyProtocol
 			
 			Runtime.getRuntime().addShutdownHook(new Thread(cleaner));
 
-			log.getLogger().info("Proxy Started @ port:" + port + " java version:" + System.getProperty("java.version"));
+			log.getLogger().info("Proxy Started @ " + addressPort + " java version:" + System.getProperty("java.version") +
+			 " thread count " + TaskUtil.defaultTaskProcessor().workersThreadCapacity());
 		}
 		catch(Exception e)
 		{
 			e.printStackTrace();
-			System.err.println("HTTPProxy <port>");
+			System.err.println("HTTPProxy <port> <thread-count>");
 			TaskUtil.defaultTaskScheduler().close();
 			TaskUtil.defaultTaskProcessor().close();
 		}
