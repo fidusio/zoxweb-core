@@ -30,16 +30,16 @@ public abstract class ShiroAssociationDAO
     implements ShiroDAO
 {
 
-	private static final NVConfig NVC_ASSOCIATON_TYPE = NVConfigManager.createNVConfig("association_type", "The Association Type","AssociationType", true, false, ShiroAssociationType.class);
+	private static final NVConfig NVC_ASSOCIATION_TYPE = NVConfigManager.createNVConfig("association_type", "The Association Type","AssociationType", true, false, ShiroAssociationType.class);
 	private static final NVConfig NVC_ASSOCIATION = NVConfigManager.createNVConfigEntity("association", "The Association","Association", true, false, ShiroDomainDAO.class, ArrayType.NOT_ARRAY);
 	private static final NVConfig NVC_ASSOCIATED_TO = NVConfigManager.createNVConfigEntity("associated_to", "The Associated to","AssociatedTo", true, false, ShiroDomainDAO.class, ArrayType.NOT_ARRAY);
 	
 	
-	private static final NVConfigEntity NVC_ASSOCIATON_DAO = new NVConfigEntityLocal("shiro_association_dao", null , "ShiroAssociationDAO", true, false, false, false, ShiroAssociationDAO.class, SharedUtil.toNVConfigList(NVC_ASSOCIATON_TYPE, NVC_ASSOCIATION, NVC_ASSOCIATED_TO), null, false, SetNameDAO.NVC_NAME_DAO);
+	private static final NVConfigEntity NVC_ASSOCIATION_DAO = new NVConfigEntityLocal("shiro_association_dao", null , "ShiroAssociationDAO", true, false, false, false, ShiroAssociationDAO.class, SharedUtil.toNVConfigList(NVC_ASSOCIATION_TYPE, NVC_ASSOCIATION, NVC_ASSOCIATED_TO), null, false, SetNameDAO.NVC_NAME_DAO);
 	
 	protected ShiroAssociationDAO(ShiroAssociationType type,  ShiroDomainDAO associatedTo, ShiroDomainDAO association)
 	{
-		super(NVC_ASSOCIATON_DAO);
+		super(NVC_ASSOCIATION_DAO);
 		setAssociationType(type);
 		setAssociatedTo(associatedTo);
 		setAssociation(association);
@@ -47,12 +47,12 @@ public abstract class ShiroAssociationDAO
 
 	public ShiroAssociationType getAssociationType()
     {
-		return lookupValue(NVC_ASSOCIATON_TYPE);
+		return lookupValue(NVC_ASSOCIATION_TYPE);
 	}
 
 	public void setAssociationType(ShiroAssociationType associationType)
     {
-		setValue(NVC_ASSOCIATON_TYPE, associationType);
+		setValue(NVC_ASSOCIATION_TYPE, associationType);
 		//this.associationType = associationType;
 	}
 

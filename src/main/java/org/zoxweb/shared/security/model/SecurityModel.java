@@ -12,48 +12,101 @@ import org.zoxweb.shared.util.NVPair;
 import org.zoxweb.shared.util.SharedStringUtil;
 import org.zoxweb.shared.util.SharedUtil;
 
-public class SecurityModel
+public final class SecurityModel
 {
-	
-	public final static String TOK_ALL = "*";
+	private SecurityModel()
+	{
+	}
+	public enum AuthzType
+	{
+		PERMISSION,
+		ROLE,
+		ROLE_GROUP
+	}
+
+
+
+	public final static String SEP = ":";
+
+
 	public final static String TOK_APP_ID = "$$app_id$$";
-	
+
 	public final static String TOK_REFERENCE_ID = "$$reference_id$$";
 	public final static String TOK_RESOURCE_ID = "$$resource_id$$";
-	public final static String TOK_SUBJECT_ID = "$$subject_id$$";	
+	public final static String TOK_SUBJECT_ID = "$$subject_id$$";
 	public final static String TOK_USER_ID = "$$user_id$$";
-	
-	
-	
-	public final static String PERM_ADD_PERMISSION = "permission:create";
-	public final static String PERM_DELETE_PERMISSION = "permission:delete";
-	public final static String PERM_UPDATE_PERMISSION = "permission:update";
-	public final static String PERM_ADD_ROLE = "role:create";
-	public final static String PERM_DELETE_ROLE = "role:delete";
-	public final static String PERM_UPDATE_ROLE = "role:update";
-	public final static String PERM_CREATE_APP_ID = "app:create";
-	public final static String PERM_DELETE_APP_ID = "app:delete";
-	public final static String PERM_UPDATE_APP_ID = "app:update";
-	public final static String PERM_ADD_USER = "user:create";
-	public final static String PERM_DELETE_USER = "user:delete";
-	public final static String PERM_READ_USER = "user:read";
-	public final static String PERM_UPDATE_USER = "user:update";
+
+	// cruds:
+	public final static String ALL = "*";
+	public final static String CREATE = "create";
+	public final static String READ = "read";
+	public final static String UPDATE = "update";
+	public final static String DELETE = "delete";
+
+
+	// permissions
+	public final static String PERMISSION = "permission";
+	public final static String ROLE = "role";
+	public final static String ROLE_GROUP = "role_group";
+
+	//
+	public final static String DOMAIN = "domain";
+	public final static String RESOURCE = "resource";
+	public final static String APP ="app";
+	public final static String SHARE = "share";
+	public final static String USER = "user";
+
+
+
+
+
+	public final static String PERM_ADD_PERMISSION = toSecTok(PERMISSION, CREATE);//;PERMISSION + SEP + CREATE;//"permission:create";
+	public final static String PERM_DELETE_PERMISSION = toSecTok(PERMISSION, DELETE);//PERMISSION + SEP + DELETE;//"permission:delete";
+	public final static String PERM_UPDATE_PERMISSION = toSecTok(PERMISSION, UPDATE);//PERMISSION + SEP + UPDATE;//"permission:update";
+	public final static String PERM_ADD_ROLE =  toSecTok(ROLE, CREATE);//ROLE + SEP + CREATE;//"role:create";
+	public final static String PERM_DELETE_ROLE = toSecTok(ROLE, DELETE);//ROLE + SEP + DELETE;//"role:delete";
+	public final static String PERM_UPDATE_ROLE = toSecTok(ROLE, UPDATE);//ROLE + SEP + UPDATE;//"role:update";
+	public final static String PERM_CREATE_APP_ID = toSecTok(APP, CREATE);//APP + SEP + CREATE;//"app:create";
+	public final static String PERM_DELETE_APP_ID = toSecTok(APP, DELETE);//APP + SEP + DELETE;//"app:delete";
+	public final static String PERM_UPDATE_APP_ID = toSecTok(APP, UPDATE);//APP + SEP + UPDATE;//"app:update";
+	public final static String PERM_ADD_USER = toSecTok(USER, CREATE);//"user:create";
+	public final static String PERM_DELETE_USER = toSecTok(USER, DELETE);//"user:delete";
+	public final static String PERM_READ_USER = toSecTok(USER, READ);//"user:read";
+	public final static String PERM_UPDATE_USER = toSecTok(USER, USER);//"user:update";
 	public final static String PERM_SELF = "self";
 	public final static String PERM_PRIVATE = "private";
 	public final static String PERM_PUBLIC= "public";
 	public final static String PERM_STATUS= "status";
-	public final static String PERM_ADD_RESOURCE = "resource:add";
-	public final static String PERM_DELETE_RESOURCE = "resource:delete";
-	public final static String PERM_READ_RESOURCE = "resource:read";
-	public final static String PERM_UPDATE_RESOURCE = "resource:update";
+	public final static String PERM_ADD_RESOURCE = toSecTok(RESOURCE, CREATE);//"resource:add";
+	public final static String PERM_DELETE_RESOURCE = toSecTok(RESOURCE, DELETE);//"resource:delete";
+	public final static String PERM_READ_RESOURCE = toSecTok(RESOURCE, READ);//"resource:read";
+	public final static String PERM_UPDATE_RESOURCE = toSecTok(RESOURCE, UPDATE);//"resource:update";
 	public final static String PERM_RESOURCE_ANY = "any";
-	public final static String PERM_ASSIGN = "assign";
-	public final static String PERM_ASSIGN_PERMISSION = "assign:permission";
+	//public final static String PERM_CREATE = toSecTok(PERMISSION, CREATE);
+	//public final static String PERM_ASSIGN_PERMISSION = "assign:permission";
 	public final static String PERM_ASSIGN_ROLE = "assign:role";
 
 	public final static String PERM_ACCESS = "access";
 	
-	
+
+
+
+	public static String toSecTok(String ...secTokens)
+	{
+		StringBuilder sb = new StringBuilder();
+		for(String token : secTokens)
+		{
+			token = SharedStringUtil.toTrimmedLowerCase(token);
+			if(token != null)
+			{
+				if(sb.length() > 0)
+					sb.append(SEP);
+
+				sb.append(token);
+			}
+		}
+		return sb.toString();
+	}
 	
 
 	
@@ -93,11 +146,11 @@ public class SecurityModel
 		APP_ID_CREATE("app_id_create", "Permission to create an app", PERM_CREATE_APP_ID),
 		APP_ID_DELETE("app_id_delete", "Permission to delete an app", PERM_DELETE_APP_ID),
 		APP_ID_UPDATE("app_id_update", "Permission to update an app", PERM_UPDATE_APP_ID),
-		NVE_ALL("nve_all", "Permission nventities all", "nventity", TOK_ALL),
-		NVE_READ_ALL("nve_read_all", "Permission to read all nventities", "nventity:read", TOK_ALL),
-		NVE_UPDATE_ALL("nve_update_all", "Permission to read all nventities", "nventity:update", TOK_ALL),
-		NVE_DELETE_ALL("nve_delete_all", "Permission to delete all nventities", "nventity:delete", TOK_ALL),
-		NVE_CREATE_ALL("nve_create_all", "Permission to create all nventities", "nventity:create", TOK_ALL),
+		NVE_ALL("nve_all", "Permission nventities all", "nventity", ALL),
+		NVE_READ_ALL("nve_read_all", "Permission to read all nventities", "nventity:read", ALL),
+		NVE_UPDATE_ALL("nve_update_all", "Permission to read all nventities", "nventity:update", ALL),
+		NVE_DELETE_ALL("nve_delete_all", "Permission to delete all nventities", "nventity:delete", ALL),
+		NVE_CREATE_ALL("nve_create_all", "Permission to create all nventities", "nventity:create", ALL),
 		PERMISSION_ADD("permission_add", "Permission to add a permission", PERM_ADD_PERMISSION),
 		PERMISSION_DELETE("permission_delete", "Permission to delete a permission", PERM_DELETE_PERMISSION),
 		PERMISSION_UPDATE("permission_update", "Permission to update a permission", PERM_UPDATE_PERMISSION),
@@ -113,7 +166,7 @@ public class SecurityModel
 		
 		RESOURCE_DELETE("resource_delete", "Permission to delete a resource", PERM_DELETE_RESOURCE, TOK_APP_ID),
 		RESOURCE_UPDATE("resource_update", "Permission to update a resource", PERM_UPDATE_RESOURCE, TOK_APP_ID),
-		RESOURCE_READ_ALL("resource_read_all", "Permision to read all resources", PERM_READ_RESOURCE, TOK_ALL),
+		RESOURCE_READ_ALL("resource_read_all", "Permission to read all resources", PERM_READ_RESOURCE, ALL),
 		RESOURCE_READ_PUBLIC("resource_read_public", "Permission to read a public resource", PERM_READ_RESOURCE, TOK_APP_ID, TOK_RESOURCE_ID, PERM_PUBLIC),
 		RESOURCE_READ_PRIVATE("resource_private", "Permission to read  a private resource", PERM_READ_RESOURCE, TOK_APP_ID, TOK_RESOURCE_ID, PERM_PRIVATE),
 		SELF("self", "permission granted to all users", PERM_SELF),
@@ -247,7 +300,7 @@ public class SecurityModel
 	public enum AppPermission
 		implements PermissionModel
 	{
-		ASSIGN_ROLE_APP("assign_role_app", "Assign a role to user", PERM_ASSIGN_ROLE, TOK_APP_ID),
+		ASSIGN_ROLE_APP("assign_role_app", "Assign a role to user", PERM_ADD_ROLE, TOK_APP_ID),
 		ORDER_CREATE("order_create", "Create order", "order:create", TOK_APP_ID, PERM_SELF),
 		ORDER_DELETE("order_delete", "Delete order", "order:delete", TOK_APP_ID, TOK_RESOURCE_ID),
 		ORDER_UPDATE("order_update", "Update order", "order:update", TOK_APP_ID, TOK_RESOURCE_ID),

@@ -129,8 +129,7 @@ public class AppIDDAO
     	}
     }
 
-  
-    @Deprecated
+
     public void setSubjectID(String subjectID)
             throws UnsupportedOperationException
     {

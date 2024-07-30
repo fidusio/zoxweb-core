@@ -939,7 +939,7 @@ public class APIAppManagerProvider
     public void updateSubjectRole(String subjectID, AppIDDAO appID, String roleName, CRUD crud)
 			 throws NullPointerException, IllegalArgumentException, AccessException
 	{
-		String permission = PPEncoder.SINGLETON.encode(SecurityModel.PERM_ASSIGN_ROLE, appID.getAppGID());
+		String permission = PPEncoder.SINGLETON.encode(SecurityModel.PERM_ADD_ROLE, appID.getAppGID());
 		if (log.isEnabled()) log.getLogger().info("permision to check:" + permission);
 		if (log.isEnabled()) log.getLogger().info(SharedUtil.toCanonicalID(',', subjectID, roleName));
 		getAPISecurityManager().checkPermissions(permission);

@@ -43,7 +43,11 @@ public enum ShiroAssociationType
 	 */
 	ROLEGROUP_TO_SUBJECT,
 	/**
-	 * 
+	 * Role associated to resource
 	 */
-	ROLE_TO_RESOURCE
+	ROLE_TO_RESOURCE,
+	/**
+	 * ROLEGROUP associated to resource
+	 */
+	ROLEGROUP_TO_RESOURCE
 }
