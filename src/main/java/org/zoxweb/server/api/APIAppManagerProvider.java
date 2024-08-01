@@ -25,8 +25,8 @@ import org.zoxweb.shared.security.model.SecurityModel.AppPermission;
 import org.zoxweb.shared.security.model.SecurityModel.Role;
 import org.zoxweb.shared.security.shiro.ShiroAssociationRuleDAO;
 import org.zoxweb.shared.security.shiro.ShiroAssociationType;
-import org.zoxweb.shared.security.shiro.ShiroPermissionDAO;
-import org.zoxweb.shared.security.shiro.ShiroRoleDAO;
+import org.zoxweb.shared.security.shiro.ShiroPermission;
+import org.zoxweb.shared.security.shiro.ShiroRole;
 import org.zoxweb.shared.util.*;
 import org.zoxweb.shared.util.Const.LogicalOperator;
 import org.zoxweb.shared.util.Const.RelationalOperator;
@@ -53,8 +53,8 @@ public class APIAppManagerProvider
 			AppDeviceDAO.NVC_APP_DEVICE_DAO,
 			EncryptedKeyDAO.NVCE_ENCRYPTED_KEY_DAO,
 			ShiroAssociationRuleDAO.NVC_SHIRO_ASSOCIATION_RULE_DAO,
-			ShiroPermissionDAO.NVC_SHIRO_PERMISSION_DAO,
-			ShiroRoleDAO.NVC_SHIRO_ROLE_DAO,
+			ShiroPermission.NVC_SHIRO_PERMISSION,
+			ShiroRole.NVC_SHIRO_ROLE,
 			AddressDAO.NVC_ADDRESS_DAO,
 			CreditCardDAO.NVC_CREDIT_CARD_DAO,
 			DeviceDAO.NVC_DEVICE_DAO,
@@ -804,14 +804,14 @@ public class APIAppManagerProvider
     		NVGenericMap permissions = new NVGenericMap();
     		for (AppPermission ap : AppPermission.values())
     		{
-    			ShiroPermissionDAO permission = SecurityModel.toPermission(domainID, appID, ap, appIDNVP);
+    			ShiroPermission permission = SecurityModel.toPermission(domainID, appID, ap, appIDNVP);
     			apiSecurityManager.addPermission(permission);
     			permissions.add(permission);
     		}
     		
     		
     		
-    		ShiroRoleDAO appAdminRole = SecurityModel.Role.APP_ADMIN.toRole(domainID, appID);
+    		ShiroRole appAdminRole = SecurityModel.Role.APP_ADMIN.toRole(domainID, appID);
     		PermissionModel[] adminPermissions = {
     				AppPermission.ASSIGN_ROLE_APP,
     				AppPermission.ORDER_DELETE,
@@ -833,7 +833,7 @@ public class APIAppManagerProvider
     			appAdminRole.getPermissions().add(permissions.getValue(ap));
     		}
     		
-    		ShiroRoleDAO appUserRole = SecurityModel.Role.APP_USER.toRole(domainID, appID);
+    		ShiroRole appUserRole = SecurityModel.Role.APP_USER.toRole(domainID, appID);
     		PermissionModel[] userPermissions = {
     				AppPermission.ORDER_CREATE,
     				AppPermission.ORDER_DELETE,
@@ -848,7 +848,7 @@ public class APIAppManagerProvider
     			appUserRole.getPermissions().add(permissions.getValue(ap));
     		}
     		
-    		ShiroRoleDAO appServiceProviderRole = SecurityModel.Role.APP_SERVICE_PROVIDER.toRole(domainID, appID);
+    		ShiroRole appServiceProviderRole = SecurityModel.Role.APP_SERVICE_PROVIDER.toRole(domainID, appID);
     		PermissionModel[] spPermissions =
     		{
     				AppPermission.ORDER_UPDATE_STATUS_APP,
@@ -862,7 +862,7 @@ public class APIAppManagerProvider
     			appServiceProviderRole.getPermissions().add(permissions.getValue(ap));
     		}
     		
-    		ShiroRoleDAO appResourceRole = SecurityModel.Role.RESOURCE.toRole(domainID, appID);
+    		ShiroRole appResourceRole = SecurityModel.Role.RESOURCE.toRole(domainID, appID);
     		PermissionModel[] resourcePermissions = {
     				AppPermission.RESOURCE_READ_PRIVATE,
     				AppPermission.RESOURCE_READ_PUBLIC
@@ -907,12 +907,12 @@ public class APIAppManagerProvider
     		delete(ret);
     		
     		// delete the APP-PERMISSIONS
-    		getAPIDataStore().delete(ShiroPermissionDAO.NVC_SHIRO_PERMISSION_DAO, 
+    		getAPIDataStore().delete(ShiroPermission.NVC_SHIRO_PERMISSION,
             new QueryMatch<String>(RelationalOperator.EQUAL, ret.getDomainID(), AppIDDAO.Param.DOMAIN_ID),
             LogicalOperator.AND, new QueryMatch<String>(RelationalOperator.EQUAL, ret.getAppID(), AppIDDAO.Param.APP_ID));
     		
     		// delete the APP-ROLES
-    		getAPIDataStore().delete(ShiroRoleDAO.NVC_SHIRO_ROLE_DAO, 
+    		getAPIDataStore().delete(ShiroRole.NVC_SHIRO_ROLE,
     	            new QueryMatch<String>(RelationalOperator.EQUAL, ret.getDomainID(), AppIDDAO.Param.DOMAIN_ID),
     	            LogicalOperator.AND, new QueryMatch<String>(RelationalOperator.EQUAL, ret.getAppID(), AppIDDAO.Param.APP_ID));
     		
@@ -950,7 +950,7 @@ public class APIAppManagerProvider
 			String roleSubjectID = appID.getAppGID() + "-" + roleName;
 			if (log.isEnabled()) log.getLogger().info("role:" + roleSubjectID);
 			if (log.isEnabled()) log.getLogger().info("userid:" +userID.getPrimaryEmail() + ":" + userID.getUserID());
-			ShiroRoleDAO role = getAPISecurityManager().lookupRole(roleSubjectID);
+			ShiroRole role = getAPISecurityManager().lookupRole(roleSubjectID);
 			if (role == null)
 			{
 				throw new APIException("Role not found");

@@ -4,7 +4,7 @@ import org.zoxweb.shared.security.model.SecurityModel;
 import org.zoxweb.shared.util.*;
 
 public class ShiroAuthzInfo
-extends ShiroDomainDAO
+extends ShiroDomain
 {
     public enum Param
             implements GetNVConfig
@@ -39,7 +39,7 @@ extends ShiroDomainDAO
     }
 
     public static final NVConfigEntity NVC_SHIRO_AUTHZ_INFO = new NVConfigEntityLocal("shiro_authz_info", "Shiro authorization info" , "ShiroAuthzInfo",
-            false, true, false, false, ShiroAuthzInfo.class, SharedUtil.extractNVConfigs(Param.values()), null, false, ShiroDomainDAO.NVC_APP_ID_DAO);
+            false, true, false, false, ShiroAuthzInfo.class, SharedUtil.extractNVConfigs(Param.values()), null, false, ShiroDomain.NVC_APP_ID_DAO);
 
     public ShiroAuthzInfo()
     {

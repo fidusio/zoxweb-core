@@ -1,8 +1,8 @@
 package org.zoxweb.shared.security.model;
 
-import org.zoxweb.shared.security.shiro.ShiroDAO;
-import org.zoxweb.shared.security.shiro.ShiroPermissionDAO;
-import org.zoxweb.shared.security.shiro.ShiroRoleDAO;
+import org.zoxweb.shared.security.shiro.ShiroBase;
+import org.zoxweb.shared.security.shiro.ShiroPermission;
+import org.zoxweb.shared.security.shiro.ShiroRole;
 import org.zoxweb.shared.util.AppID;
 import org.zoxweb.shared.util.GetDescription;
 import org.zoxweb.shared.util.GetName;
@@ -216,7 +216,7 @@ public final class SecurityModel
 		
 		
 		
-		public ShiroPermissionDAO toPermission(String domainID, String appID, NVPair ...tokens)
+		public ShiroPermission toPermission(String domainID, String appID, NVPair ...tokens)
 		{
 			return SecurityModel.toPermission(domainID, appID, getName(), getDescription(), getValue(), tokens);
 		}
@@ -255,29 +255,29 @@ public final class SecurityModel
 			return description;
 		}
 		
-		public ShiroRoleDAO toRole(AppID<String> appID)
+		public ShiroRole toRole(AppID<String> appID)
 		{
 			return toRole(appID.getDomainID(), appID.getAppID());
 		}
 		
-		public ShiroRoleDAO toRole(String domainID, String appID)
+		public ShiroRole toRole(String domainID, String appID)
 		{
 			return toRole(domainID, appID, name, description);
 		}
 		
 		
 		
-		public static ShiroRoleDAO toRole(AppID<String> appID, String name, String description)
+		public static ShiroRole toRole(AppID<String> appID, String name, String description)
 		{
-			return new ShiroRoleDAO(appID.getDomainID(), appID.getAppID(), name, description);
+			return new ShiroRole(appID.getDomainID(), appID.getAppID(), name, description);
 		}
 		
-		public static ShiroRoleDAO toRole(String domainID, String appID, String name, String description)
+		public static ShiroRole toRole(String domainID, String appID, String name, String description)
 		{
-			return new ShiroRoleDAO(domainID, appID, name, description);
+			return new ShiroRole(domainID, appID, name, description);
 		}
 			
-		public static ShiroRoleDAO addPermission(ShiroRoleDAO role, ShiroPermissionDAO permission)
+		public static ShiroRole addPermission(ShiroRole role, ShiroPermission permission)
 		{
 			permission.setDomainAppID(role.getDomainID(), role.getAppID());
 			role.getPermissions().add(permission);
@@ -294,7 +294,7 @@ public final class SecurityModel
 	
 	public static String toSubjectID(String domainID, String appID, String name)
 	{
-		return SharedUtil.toCanonicalID(ShiroDAO.CAN_ID_SEP, domainID, appID, name);
+		return SharedUtil.toCanonicalID(ShiroBase.CAN_ID_SEP, domainID, appID, name);
 	}
 	
 	public enum AppPermission
@@ -365,14 +365,14 @@ public final class SecurityModel
 	 * @param gnv
 	 * @return
 	 */
-	public static ShiroPermissionDAO toPermission(String domainID,  String appID, GetNameValue<String> gnv, NVPair ...tokens)
+	public static ShiroPermission toPermission(String domainID, String appID, GetNameValue<String> gnv, NVPair ...tokens)
 	{
 		return toPermission(domainID, appID, gnv.getName(), null,  gnv.getValue(), tokens);
 	}
 	
-	public static ShiroPermissionDAO toPermission(String domainID, String appID, String name, String description, String pattern, NVPair ...tokens)
+	public static ShiroPermission toPermission(String domainID, String appID, String name, String description, String pattern, NVPair ...tokens)
 	{
-		ShiroPermissionDAO ret = new ShiroPermissionDAO();
+		ShiroPermission ret = new ShiroPermission();
 		ret.setName(name);
 		ret.setDescription(description);
 		//ret.setEmbedAppIDEnabled(embedAppID);

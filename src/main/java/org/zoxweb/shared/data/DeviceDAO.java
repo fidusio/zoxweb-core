@@ -1,6 +1,6 @@
 package org.zoxweb.shared.data;
 
-import org.zoxweb.shared.security.shiro.ShiroDAO;
+import org.zoxweb.shared.security.shiro.ShiroBase;
 import org.zoxweb.shared.util.DeviceID;
 import org.zoxweb.shared.util.GetNVConfig;
 
@@ -210,9 +210,9 @@ public class DeviceDAO
 		if (subID == null)
 		{
 			if (!SharedStringUtil.isEmpty(getManufacturer()))
-				subID = SharedUtil.toCanonicalID(ShiroDAO.CAN_ID_SEP, getManufacturer(), getModel(), getVersion(), getSerialNumber(), getDeviceID());
+				subID = SharedUtil.toCanonicalID(ShiroBase.CAN_ID_SEP, getManufacturer(), getModel(), getVersion(), getSerialNumber(), getDeviceID());
 			else
-				subID = SharedUtil.toCanonicalID(ShiroDAO.CAN_ID_SEP, getModel(), getVersion(), getSerialNumber(), getDeviceID());
+				subID = SharedUtil.toCanonicalID(ShiroBase.CAN_ID_SEP, getModel(), getVersion(), getSerialNumber(), getDeviceID());
 				
 			setValue(Param.SUBJECT_ID, subID);
 		}

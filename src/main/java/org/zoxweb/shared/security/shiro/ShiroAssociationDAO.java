@@ -27,17 +27,17 @@ import org.zoxweb.shared.util.SharedUtil;
 @SuppressWarnings("serial")
 public abstract class ShiroAssociationDAO
     extends SetNameDAO
-    implements ShiroDAO
+    implements ShiroBase
 {
 
 	private static final NVConfig NVC_ASSOCIATION_TYPE = NVConfigManager.createNVConfig("association_type", "The Association Type","AssociationType", true, false, ShiroAssociationType.class);
-	private static final NVConfig NVC_ASSOCIATION = NVConfigManager.createNVConfigEntity("association", "The Association","Association", true, false, ShiroDomainDAO.class, ArrayType.NOT_ARRAY);
-	private static final NVConfig NVC_ASSOCIATED_TO = NVConfigManager.createNVConfigEntity("associated_to", "The Associated to","AssociatedTo", true, false, ShiroDomainDAO.class, ArrayType.NOT_ARRAY);
+	private static final NVConfig NVC_ASSOCIATION = NVConfigManager.createNVConfigEntity("association", "The Association","Association", true, false, ShiroDomain.class, ArrayType.NOT_ARRAY);
+	private static final NVConfig NVC_ASSOCIATED_TO = NVConfigManager.createNVConfigEntity("associated_to", "The Associated to","AssociatedTo", true, false, ShiroDomain.class, ArrayType.NOT_ARRAY);
 	
 	
 	private static final NVConfigEntity NVC_ASSOCIATION_DAO = new NVConfigEntityLocal("shiro_association_dao", null , "ShiroAssociationDAO", true, false, false, false, ShiroAssociationDAO.class, SharedUtil.toNVConfigList(NVC_ASSOCIATION_TYPE, NVC_ASSOCIATION, NVC_ASSOCIATED_TO), null, false, SetNameDAO.NVC_NAME_DAO);
 	
-	protected ShiroAssociationDAO(ShiroAssociationType type,  ShiroDomainDAO associatedTo, ShiroDomainDAO association)
+	protected ShiroAssociationDAO(ShiroAssociationType type, ShiroDomain associatedTo, ShiroDomain association)
 	{
 		super(NVC_ASSOCIATION_DAO);
 		setAssociationType(type);
@@ -56,24 +56,24 @@ public abstract class ShiroAssociationDAO
 		//this.associationType = associationType;
 	}
 
-	public ShiroDomainDAO getAssociation()
+	public ShiroDomain getAssociation()
     {
 		return lookupValue(NVC_ASSOCIATION);
 		//return association;
 	}
 
-	public void setAssociation(ShiroDomainDAO association) {
+	public void setAssociation(ShiroDomain association) {
 		setValue( NVC_ASSOCIATION, association);
 		//this.association = association;
 	}
 
-	public ShiroDomainDAO getAssociatedTo()
+	public ShiroDomain getAssociatedTo()
     {
 		return lookupValue(NVC_ASSOCIATED_TO);
 		//return associatedTo;
 	}
 
-	public void setAssociatedTo(ShiroDomainDAO associatedTo)
+	public void setAssociatedTo(ShiroDomain associatedTo)
     {
 		setValue( NVC_ASSOCIATED_TO, associatedTo);
 		//this.associatedTo = associatedTo;

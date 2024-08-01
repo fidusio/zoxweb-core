@@ -1018,49 +1018,49 @@ public class ZWDataFactory
 				return ShiroNVEntityCRUDs.NVC_SHIRO_NVENTITY_CRUDS;
 			}
 		},
-		SHIRO_ROLE_DAO(ShiroRoleDAO.class.getName())
+		SHIRO_ROLE_DAO(ShiroRole.class.getName())
 		{
 			@SuppressWarnings("unchecked")
 			@Override
-			public ShiroRoleDAO newInstance()
+			public ShiroRole newInstance()
 			{
-				return new ShiroRoleDAO();
+				return new ShiroRole();
 			}
 
 			@Override
 			public NVConfigEntity getNVConfigEntity() 
 			{
-				return ShiroRoleDAO.NVC_SHIRO_ROLE_DAO;
+				return ShiroRole.NVC_SHIRO_ROLE;
 			}
 		},
-		SHIRO_ROLE_GROUP_DAO(ShiroRoleGroupDAO.class.getName())
+		SHIRO_ROLE_GROUP_DAO(ShiroRoleGroup.class.getName())
 		{
 			@SuppressWarnings("unchecked")
 			@Override
-			public ShiroRoleGroupDAO newInstance()
+			public ShiroRoleGroup newInstance()
 			{
-				return new ShiroRoleGroupDAO();
+				return new ShiroRoleGroup();
 			}
 
 			@Override
 			public NVConfigEntity getNVConfigEntity() 
 			{
-				return ShiroRoleGroupDAO.NVC_SHIRO_ROLE_GROUP_DAO;
+				return ShiroRoleGroup.NVC_SHIRO_ROLE_GROUP;
 			}
 		},
-		SHIRO_PERMISSION_DAO(ShiroPermissionDAO.class.getName())
+		SHIRO_PERMISSION_DAO(ShiroPermission.class.getName())
 		{
 			@SuppressWarnings("unchecked")
 			@Override
-			public ShiroPermissionDAO newInstance()
+			public ShiroPermission newInstance()
 			{
-				return new ShiroPermissionDAO();
+				return new ShiroPermission();
 			}
 
 			@Override
 			public NVConfigEntity getNVConfigEntity() 
 			{
-				return ShiroPermissionDAO.NVC_SHIRO_PERMISSION_DAO;
+				return ShiroPermission.NVC_SHIRO_PERMISSION;
 			}
 		},
 		SHIRO_SESSION_DATA(ShiroSessionData.class.getName())

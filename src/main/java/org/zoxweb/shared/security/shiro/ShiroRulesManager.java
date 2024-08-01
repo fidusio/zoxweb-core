@@ -15,10 +15,10 @@
  */
 package org.zoxweb.shared.security.shiro;
 
+import org.zoxweb.shared.db.QueryMarker;
+
 import java.util.Collection;
 import java.util.List;
-
-import org.zoxweb.shared.db.QueryMarker;
 
 /**
  *

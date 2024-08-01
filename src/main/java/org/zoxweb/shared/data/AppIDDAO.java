@@ -16,7 +16,7 @@
 package org.zoxweb.shared.data;
 
 import org.zoxweb.shared.filters.FilterType;
-import org.zoxweb.shared.security.shiro.ShiroDAO;
+import org.zoxweb.shared.security.shiro.ShiroBase;
 import org.zoxweb.shared.filters.AppIDNameFilter;
 import org.zoxweb.shared.util.AppGlobalID;
 import org.zoxweb.shared.util.AppID;
@@ -209,14 +209,14 @@ public class AppIDDAO
 	
 	public static String appIDSubjectID(String domainID, String appIDName)
 	{
-		return SharedUtil.toCanonicalID(ShiroDAO.CAN_ID_SEP, FilterType.DOMAIN.validate(domainID),AppIDNameFilter.SINGLETON.validate(appIDName));
+		return SharedUtil.toCanonicalID(ShiroBase.CAN_ID_SEP, FilterType.DOMAIN.validate(domainID),AppIDNameFilter.SINGLETON.validate(appIDName));
 	}
 	
 	public static AppIDDAO toAppID(String gid)
 	{
 		gid = SharedStringUtil.trimOrNull(gid);
 		SharedUtil.checkIfNulls("Null app global ig", gid);
-		int sepIndex = gid.lastIndexOf(ShiroDAO.CAN_ID_SEP);
+		int sepIndex = gid.lastIndexOf(ShiroBase.CAN_ID_SEP);
 		if (sepIndex < 1 || sepIndex + 1 == gid.length())
 			throw new IllegalArgumentException("Illegal gid:"+ gid);
 		

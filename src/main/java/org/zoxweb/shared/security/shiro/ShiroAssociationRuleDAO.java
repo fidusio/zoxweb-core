@@ -15,19 +15,12 @@
  */
 package org.zoxweb.shared.security.shiro;
 
-import java.util.Date;
-
 import org.zoxweb.shared.data.TimeStampDAO;
-import org.zoxweb.shared.util.CRUD;
+import org.zoxweb.shared.util.*;
 import org.zoxweb.shared.util.Const.Status;
 import org.zoxweb.shared.util.NVConfigEntity.ArrayType;
-import org.zoxweb.shared.util.GetNVConfig;
-import org.zoxweb.shared.util.NVConfig;
-import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
-import org.zoxweb.shared.util.NVConfigManager;
-import org.zoxweb.shared.util.NVEntity;
-import org.zoxweb.shared.util.SharedUtil;
+
+import java.util.Date;
 
 /**
  *
@@ -49,7 +42,7 @@ public class ShiroAssociationRuleDAO
 		ASSOCIATION_TYPE(NVConfigManager.createNVConfig("association_type", "Association type", "AssociationType", true, true, ShiroAssociationType.class)),
 		EXPIRATION(NVConfigManager.createNVConfig("expiration", "Expiration date if set", "Expiration", true, true, Date.class)),
 		PATTERN(NVConfigManager.createNVConfig("pattern", "Shiro compatible pattern", "Pattern", true, true, String.class)),
-		ASSOCIATION(NVConfigManager.createNVConfigEntity("association", "The shiro association permission or role", "Association", false, false,  ShiroDomainDAO.class, ArrayType.NOT_ARRAY)),
+		ASSOCIATION(NVConfigManager.createNVConfigEntity("association", "The shiro association permission or role", "Association", false, false,  ShiroDomain.class, ArrayType.NOT_ARRAY)),
 		;
 		
 		private final NVConfig nvc;
@@ -104,7 +97,7 @@ public class ShiroAssociationRuleDAO
 	}
 	
 	
-	public ShiroAssociationRuleDAO(String name, ShiroDomainDAO associate, ShiroAssociationType at, NVEntity associateTo)
+	public ShiroAssociationRuleDAO(String name, ShiroDomain associate, ShiroAssociationType at, NVEntity associateTo)
 	{
 		this();
 		SharedUtil.checkIfNulls("Null parameters", name, associate, at, associateTo);
@@ -267,12 +260,12 @@ public class ShiroAssociationRuleDAO
 		return dynamicPattern;
 	}
 	
-	public <V extends ShiroDomainDAO> V getAssociation()
+	public <V extends ShiroDomain> V getAssociation()
 	{
 		return lookupValue(Param.ASSOCIATION);
 	}
 	
-	public <V extends ShiroDomainDAO> void setAssociation(V association)
+	public <V extends ShiroDomain> void setAssociation(V association)
 	{
 		setValue(Param.ASSOCIATION, association);
 		setAssociate(association.getReferenceID());
