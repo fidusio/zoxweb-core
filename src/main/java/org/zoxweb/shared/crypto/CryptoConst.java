@@ -41,6 +41,80 @@ public final class CryptoConst
 	public static final String KEY_STORE_TYPE = "JCEKS";
 	//public static final String AES = "AES";
 
+	public enum PKInfo
+		implements GetName, CanonicalID
+	{
+		EC_224(CryptoAlgo.EC, "secp224r1"),
+		EC_256(CryptoAlgo.EC, "secp256r1"),
+		EC_384(CryptoAlgo.EC, "secp384r1"),
+		EC_521(CryptoAlgo.EC, "secp521r1"),
+		RSA_2024(CryptoAlgo.RSA, "2048"),
+		RSA_4096(CryptoAlgo.RSA, "4096"),
+		;
+
+
+		private final String type;
+		private final String name;
+		PKInfo(CryptoAlgo cryptoAlgo, String name)
+		{
+			this.type = cryptoAlgo.getName();
+			this.name = name;
+		}
+		PKInfo(String type, String name)
+		{
+			this.type = type.toUpperCase();
+			this.name = name;
+		}
+
+		/**
+		 * @return the name of the object
+		 */
+		@Override
+		public String getName()
+		{
+			return name;
+		}
+
+		public String getType()
+		{
+			return type;
+		}
+
+		public String toCanonicalID()
+		{
+			return SharedUtil.toCanonicalID(':', type, name);
+		}
+
+		public static PKInfo parse(String keyCanonicalID)
+		{
+			for(PKInfo pkInfo : PKInfo.values())
+			{
+				if(pkInfo.getName().equalsIgnoreCase(keyCanonicalID) ||
+						pkInfo.name().equalsIgnoreCase(keyCanonicalID) ||
+						pkInfo.toCanonicalID().equalsIgnoreCase(keyCanonicalID))
+					return pkInfo;
+			}
+
+			String[] parsed = keyCanonicalID.split("[ ,:]");
+			if (parsed.length != 2)
+			{
+				throw new IllegalArgumentException("invalid key " + keyCanonicalID + " ie:  rsa 2048 or ec:secp256r1 or use , as separator");
+			}
+			String keyType = parsed[0];
+			String keyName = parsed[1];
+
+			for(PKInfo pkInfo : PKInfo.values())
+			{
+				if(pkInfo.getType().equalsIgnoreCase(keyType) && pkInfo.getName().equalsIgnoreCase(keyName))
+					return pkInfo;
+			}
+
+
+			return null;
+		}
+	}
+
+
 
 	public static final String AES_ENCRYPTION_CBC_NO_PADDING = "AES/CBC/NoPadding";
 
@@ -287,7 +361,7 @@ public final class CryptoConst
 
         ;
 
-		private NVConfig nvConfig;
+		final private NVConfig nvConfig;
 
 		OAuthParam(NVConfig config)
 		{
@@ -490,7 +564,7 @@ public final class CryptoConst
 		 * Check if the value is valid
 		 *
 		 * @param in value to be checked
-		 * @return true if valid false if not
+		 * @return true if valid false  not
 		 */
 		@Override
 		public boolean isValid(String in) {

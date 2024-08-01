@@ -51,8 +51,23 @@ public class TimeInMillisTest {
 
         nvgm = GSONUtil.fromJSONDefault(json, NVGenericMap.class);
         System.out.println(nvgm);
-        System.out.println(((TimeUnit)nvgm.getValue("seconds")).getClass());
+        System.out.println((nvgm.getValue("seconds")).getClass());
         System.out.println(GSONUtil.toJSONDefault(nvgm));
+    }
+
+    @Test
+    public void parsingTest()
+    {
+        String[] durations = {
+          "1d",
+          "1w",
+          "1y"
+        };
+
+        for (String duration : durations)
+        {
+            System.out.println(SharedUtil.toCanonicalID(',', duration, Const.TimeInMillis.toMillis(duration)));
+        }
     }
 
 }

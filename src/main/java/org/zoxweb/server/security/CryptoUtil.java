@@ -1040,38 +1040,38 @@ public class CryptoUtil {
   }
 
 
-  public static KeyPair generateKeyPair(String key)
-          throws NoSuchAlgorithmException, InvalidAlgorithmParameterException
-  {
-    return generateKeyPair(key, defaultSecureRandom());
+  public static KeyPair generateKeyPair(String keyCanonicalID)
+          throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, NoSuchProviderException {
+    return generateKeyPair(keyCanonicalID, null, defaultSecureRandom());
   }
 
-  public static KeyPair generateKeyPair(String key, SecureRandom sr)
-          throws NoSuchAlgorithmException, InvalidAlgorithmParameterException
+  public static KeyPair generateKeyPair(CanonicalID keyCanonicalID, String provider, SecureRandom sr)
+          throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, NoSuchProviderException
   {
+    return generateKeyPair(keyCanonicalID.toCanonicalID(), provider, sr);
+  }
+
+  public static KeyPair generateKeyPair(String keyCanonicalID, String provider, SecureRandom sr)
+          throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, NoSuchProviderException {
+
+    CryptoConst.PKInfo pkInfo = CryptoConst.PKInfo.parse(keyCanonicalID);
 
 
-    String[] parsed = key.split("[ ,:]");
-    if (parsed.length != 2)
-    {
-      throw new IllegalArgumentException("invalid key " + key + " ie:  rsa 2048 or ec:secp256r1 or use , as separator");
-    }
-    String keyType = parsed[0].toUpperCase();
-    String keySize = parsed[1];
+
     if(sr == null)
       sr = defaultSecureRandom(); // get the default secure random
-    KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(keyType);
-    if ("RSA".equals(keyType))
+    KeyPairGenerator keyPairGenerator = provider != null ? KeyPairGenerator.getInstance(pkInfo.getType(), provider) : KeyPairGenerator.getInstance(pkInfo.getType());
+    if ("RSA".equals(pkInfo.getType()))
     {
-      keyPairGenerator.initialize(Integer.parseInt(keySize), sr);
+      keyPairGenerator.initialize(Integer.parseInt(pkInfo.getName()), sr);
     }
-    else if ("EC".equals(keyType))
+    else if ("EC".equals(pkInfo.getType()))
     {
-      keyPairGenerator.initialize(new ECGenParameterSpec(keySize), sr);
+      keyPairGenerator.initialize(new ECGenParameterSpec(pkInfo.getName()), sr);
     }
     else
     {
-      throw new IllegalArgumentException("Unsupported key type: " + keyType);
+      throw new IllegalArgumentException("Unsupported key type: " + keyCanonicalID);
     }
 
     return keyPairGenerator.generateKeyPair();

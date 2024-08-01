@@ -480,7 +480,7 @@ public class Const {
 
     // One week in milliseconds
     WEEK(DAY.MILLIS * 7, null, "weeks", "week", "w"),
-    YEAR(DAY.MILLIS*365, null, "years", "year", "y");
+    YEAR((long) ((float)DAY.MILLIS*365.2425), null, "years", "year", "y");
     public final long MILLIS;
     public final TimeUnit UNIT;
     private final String[] tokens;
