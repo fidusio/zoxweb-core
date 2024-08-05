@@ -29,7 +29,7 @@ import org.zoxweb.shared.security.JWT;
 import org.zoxweb.shared.security.JWT.JWTField;
 import org.zoxweb.shared.security.JWTHeader;
 import org.zoxweb.shared.security.JWTPayload;
-import org.zoxweb.shared.security.KeyStoreInfoDAO;
+import org.zoxweb.shared.security.KeyStoreInfo;
 import org.zoxweb.shared.util.*;
 import org.zoxweb.shared.util.SharedBase64.Base64Type;
 
@@ -1141,9 +1141,9 @@ public class CryptoUtil {
             SharedStringUtil.bytesToHex(key.getEncoded()));
   }
 
-  public static KeyStoreInfoDAO generateKeyStoreInfo(String keyStoreName, String alias,
-      String keyStoreType) throws NoSuchAlgorithmException {
-    KeyStoreInfoDAO ret = new KeyStoreInfoDAO();
+  public static KeyStoreInfo generateKeyStoreInfo(String keyStoreName, String alias,
+                                                  String keyStoreType) throws NoSuchAlgorithmException {
+    KeyStoreInfo ret = new KeyStoreInfo();
     ret.setKeyStore(keyStoreName);
     ret.setAlias(alias);
     ret.setKeyStorePassword(generateKey(CryptoConst.CryptoAlgo.AES, CryptoConst.AES_256_KEY_SIZE * 8).getEncoded());

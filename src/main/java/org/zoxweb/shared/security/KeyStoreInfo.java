@@ -15,19 +15,13 @@
  */
 package org.zoxweb.shared.security;
 
-import java.util.List;
 import org.zoxweb.shared.data.SetNameDescriptionDAO;
-import org.zoxweb.shared.util.GetNVConfig;
-import org.zoxweb.shared.util.NVConfig;
-import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
-import org.zoxweb.shared.util.NVConfigManager;
-import org.zoxweb.shared.util.NVStringList;
-import org.zoxweb.shared.util.SharedStringUtil;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.*;
+
+import java.util.List;
 
 @SuppressWarnings("serial")
-public class KeyStoreInfoDAO
+public class KeyStoreInfo
     extends SetNameDescriptionDAO {
 
     public enum Param
@@ -57,24 +51,24 @@ public class KeyStoreInfoDAO
         }
     }
 
-    public static final NVConfigEntity NVC_KEY_STORE_INFO_DAO = new NVConfigEntityLocal(
-            "key_store_info_dao",
+    public static final NVConfigEntity NVC_KEY_STORE_INFO = new NVConfigEntityLocal(
+            "key_store_info",
             null ,
-            KeyStoreInfoDAO.class.getSimpleName(),
+            KeyStoreInfo.class.getSimpleName(),
             true,
             false,
             false,
             false,
-            KeyStoreInfoDAO.class,
+            KeyStoreInfo.class,
             SharedUtil.extractNVConfigs(Param.values()),
             null,
             false,
             SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO
     );
 
-    public KeyStoreInfoDAO()
+    public KeyStoreInfo()
     {
-        super(NVC_KEY_STORE_INFO_DAO);
+        super(NVC_KEY_STORE_INFO);
     }
 
     public String getKeyStore()

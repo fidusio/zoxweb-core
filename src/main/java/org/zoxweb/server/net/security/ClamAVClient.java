@@ -35,7 +35,7 @@ import org.zoxweb.server.io.IOStreamInfo;
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.io.StreamStats;
 import org.zoxweb.shared.net.InetSocketAddressDAO;
-import org.zoxweb.shared.security.ScanResultDAO;
+import org.zoxweb.shared.security.ScanResult;
 import org.zoxweb.shared.util.Const;
 import org.zoxweb.shared.util.Const.TypeInBytes;
 
@@ -50,7 +50,7 @@ public class ClamAVClient
 		implements StreamStats
 	{
 		IOStreamInfo ci;
-		ScanResultDAO result = new ScanResultDAO();
+		ScanResult result = new ScanResult();
 		ClamAVScanResult(IOStreamInfo ci, InputStream is, String scanName)
 		{
 			super(is);
@@ -58,7 +58,7 @@ public class ClamAVClient
 			this.ci = ci;
 		}
 
-		public ScanResultDAO getScanResult()
+		public ScanResult getScanResult()
 		{
 			return result;
 		}

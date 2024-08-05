@@ -597,21 +597,21 @@ public class ZWDataFactory
 			}
 		},	
 		
-		LOGIN_TOKEN_DAO(LoginTokenDAO.class.getName())
-		{
-			@SuppressWarnings("unchecked")
-			@Override
-			public LoginTokenDAO newInstance()
-			{
-				return new LoginTokenDAO();
-			}
-
-			@Override
-			public NVConfigEntity getNVConfigEntity()
-			{
-				return LoginTokenDAO.NVC_LOGIN_IN_DAO;
-			}
-		},
+//		LOGIN_TOKEN_DAO(LoginTokenDAO.class.getName())
+//		{
+//			@SuppressWarnings("unchecked")
+//			@Override
+//			public LoginTokenDAO newInstance()
+//			{
+//				return new LoginTokenDAO();
+//			}
+//
+//			@Override
+//			public NVConfigEntity getNVConfigEntity()
+//			{
+//				return LoginTokenDAO.NVC_LOGIN_IN_DAO;
+//			}
+//		},
 		LONG_SEQUENCE(LongSequence.class.getName())
 		{
 			@SuppressWarnings("unchecked")
@@ -971,19 +971,19 @@ public class ZWDataFactory
 			}
 		},
 
-		SCAN_RESULT_DAO(ScanResultDAO.class.getName())
+		SCAN_RESULT_DAO(ScanResult.class.getName())
 		{
 			@SuppressWarnings("unchecked")
 			@Override
-			public ScanResultDAO newInstance()
+			public ScanResult newInstance()
 			{
-				return new ScanResultDAO();
+				return new ScanResult();
 			}
 
 			@Override
 			public NVConfigEntity getNVConfigEntity()
 			{
-				return ScanResultDAO.NVC_SCAN_RESULT_DAO;
+				return ScanResult.NVC_SCAN_RESULT;
 			}
 			
 		},
@@ -1307,19 +1307,19 @@ public class ZWDataFactory
                 return UserPreferenceDAO.NVC_USER_PREFERENCE_DAO;
             }
         },
-        KEY_STORE_INFO_DAO(KeyStoreInfoDAO.class.getName())
+        KEY_STORE_INFO_DAO(KeyStoreInfo.class.getName())
         {
             @SuppressWarnings("unchecked")
             @Override
-            public KeyStoreInfoDAO newInstance()
+            public KeyStoreInfo newInstance()
             {
-                return new KeyStoreInfoDAO();
+                return new KeyStoreInfo();
             }
 
             @Override
             public NVConfigEntity getNVConfigEntity()
             {
-                return KeyStoreInfoDAO.NVC_KEY_STORE_INFO_DAO;
+                return KeyStoreInfo.NVC_KEY_STORE_INFO;
             }
         },
         APP_ACCESS_MODE(AppAccessMode.class.getName())

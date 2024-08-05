@@ -26,7 +26,7 @@ import org.zoxweb.shared.util.*;
  *
  */
 @SuppressWarnings("serial")
-public class SubjectIDDAO
+public class SubjectIdentifier
 	extends PropertyDAO
 	implements SubjectID<String>
 {
@@ -58,15 +58,15 @@ public class SubjectIDDAO
 
 	}
 
-	public static final NVConfigEntity NVC_USER_ID_DAO = new NVConfigEntityLocal(
-	        "subject_id_dao",
+	public static final NVConfigEntity NVC_SUBJECT_IDENTIFIER = new NVConfigEntityLocal(
+	        "subject_identifier",
             null ,
-            SubjectIDDAO.class.getSimpleName(),
+            SubjectIdentifier.class.getSimpleName(),
             true,
             false,
             false,
             false,
-            SubjectIDDAO.class,
+            SubjectIdentifier.class,
             SharedUtil.extractNVConfigs(Param.values()),
             null,
             false,
@@ -77,9 +77,9 @@ public class SubjectIDDAO
 	/**
 	 * The default constructor.
 	 */
-	public SubjectIDDAO()
+	public SubjectIdentifier()
 	{
-	    super(NVC_USER_ID_DAO);
+	    super(NVC_SUBJECT_IDENTIFIER);
 	}
 
 
@@ -117,6 +117,12 @@ public class SubjectIDDAO
 	public void setSubjectType(SubjectType type)
 	{
 		setValue(Param.SUBJECT_TYPE, type);
+	}
+
+
+	public NVGenericMap getCredential()
+	{
+		return getProperties();
 	}
 
 	

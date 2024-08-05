@@ -19,7 +19,7 @@ package org.zoxweb.shared.security.shiro;
 import org.zoxweb.shared.crypto.PasswordDAO;
 import org.zoxweb.shared.data.UserIDDAO;
 import org.zoxweb.shared.security.AccessException;
-import org.zoxweb.shared.security.SubjectIDDAO;
+import org.zoxweb.shared.security.SubjectIdentifier;
 import org.zoxweb.shared.util.GetValue;
 
 import java.util.List;
@@ -48,7 +48,7 @@ public interface ShiroRealmStore
 	 * @throws IllegalArgumentException
 	 * @throws AccessException
 	 */
-	SubjectIDDAO addSubject(SubjectIDDAO subject)
+	SubjectIdentifier addSubject(SubjectIdentifier subject)
 			throws NullPointerException, IllegalArgumentException, AccessException;
 
 	/**
@@ -285,9 +285,9 @@ public interface ShiroRealmStore
 	 */
 	PasswordDAO getSubjectPassword(String domainID, String userID) throws NullPointerException, IllegalArgumentException, AccessException;
 
-	PasswordDAO setSubjectPassword(SubjectIDDAO subject, PasswordDAO passwd) throws NullPointerException, IllegalArgumentException, AccessException;
+	PasswordDAO setSubjectPassword(SubjectIdentifier subject, PasswordDAO passwd) throws NullPointerException, IllegalArgumentException, AccessException;
 	PasswordDAO setSubjectPassword(String subject, PasswordDAO passwd) throws NullPointerException, IllegalArgumentException, AccessException;
-	PasswordDAO setSubjectPassword(SubjectIDDAO subject, String passwd) throws NullPointerException, IllegalArgumentException, AccessException;
+	PasswordDAO setSubjectPassword(SubjectIdentifier subject, String passwd) throws NullPointerException, IllegalArgumentException, AccessException;
 	PasswordDAO setSubjectPassword(String subject, String passwd) throws NullPointerException, IllegalArgumentException, AccessException;
 	/**
 	 * Get the user roles
@@ -347,7 +347,7 @@ public interface ShiroRealmStore
 	 * @throws IllegalArgumentException
 	 * @throws AccessException
 	 */
-	SubjectIDDAO lookupSubjectID(GetValue<String> subjectID, String...params)
+	SubjectIdentifier lookupSubjectID(GetValue<String> subjectID, String...params)
 			throws NullPointerException, IllegalArgumentException, AccessException;
 	/**
 	 *
@@ -358,6 +358,6 @@ public interface ShiroRealmStore
 	 * @throws IllegalArgumentException
 	 * @throws AccessException
 	 */
-	SubjectIDDAO lookupSubjectID(String subjectID, String...params)
+	SubjectIdentifier lookupSubjectID(String subjectID, String...params)
 			throws NullPointerException, IllegalArgumentException, AccessException;
 }

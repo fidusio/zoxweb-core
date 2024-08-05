@@ -6,7 +6,7 @@ import java.security.KeyStore;
 import javax.crypto.SecretKey;
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.util.GSONUtil;
-import org.zoxweb.shared.security.KeyStoreInfoDAO;
+import org.zoxweb.shared.security.KeyStoreInfo;
 import org.zoxweb.shared.util.SharedStringUtil;
 
 public class KeyStoreTest {
@@ -14,8 +14,8 @@ public class KeyStoreTest {
   public static void main(String... args) {
     try {
       int index = 0;
-      KeyStoreInfoDAO ksid = GSONUtil
-          .fromJSON(IOUtil.inputStreamToString(args[index++]), KeyStoreInfoDAO.class);
+      KeyStoreInfo ksid = GSONUtil
+          .fromJSON(IOUtil.inputStreamToString(args[index++]), KeyStoreInfo.class);
       KeyStore ks = CryptoUtil.loadKeyStore(new FileInputStream(ksid.getKeyStore()),
           ksid.getKeyStoreType(),
           ksid.getKeyStorePassword().toCharArray());
