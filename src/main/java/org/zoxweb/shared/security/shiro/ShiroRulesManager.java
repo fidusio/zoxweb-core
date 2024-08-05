@@ -25,15 +25,15 @@ import java.util.List;
  */
 public interface ShiroRulesManager 
 {
-	void addShiroRule(ShiroAssociationRuleDAO sard);
+	void addShiroRule(ShiroAssociationRule sard);
 	
-	void deleteShiroRule(ShiroAssociationRuleDAO sard);
+	void deleteShiroRule(ShiroAssociationRule sard);
 	
-	void updateShiroRule(ShiroAssociationRuleDAO sard);
+	void updateShiroRule(ShiroAssociationRule sard);
 	
 	
-	List<ShiroAssociationRuleDAO> search(QueryMarker ...queryCriteria);
+	List<ShiroAssociationRule> search(QueryMarker ...queryCriteria);
 	
-	List<ShiroAssociationRuleDAO> search(Collection<QueryMarker> queryCriteria);
+	List<ShiroAssociationRule> search(Collection<QueryMarker> queryCriteria);
 
 }

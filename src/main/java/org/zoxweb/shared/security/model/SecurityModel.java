@@ -43,6 +43,9 @@ public final class SecurityModel
 	public final static String UPDATE = "update";
 	public final static String DELETE = "delete";
 
+	//
+	public final static String ASSIGN = "assign";
+	public final static String REMOVE = "remove";
 
 	// permissions
 	public final static String PERMISSION = "permission";
@@ -60,33 +63,40 @@ public final class SecurityModel
 
 
 
-	public final static String PERM_ADD_PERMISSION = toSecTok(PERMISSION, CREATE);//;PERMISSION + SEP + CREATE;//"permission:create";
-	public final static String PERM_DELETE_PERMISSION = toSecTok(PERMISSION, DELETE);//PERMISSION + SEP + DELETE;//"permission:delete";
-	public final static String PERM_UPDATE_PERMISSION = toSecTok(PERMISSION, UPDATE);//PERMISSION + SEP + UPDATE;//"permission:update";
-	public final static String PERM_ADD_ROLE =  toSecTok(ROLE, CREATE);//ROLE + SEP + CREATE;//"role:create";
-	public final static String PERM_DELETE_ROLE = toSecTok(ROLE, DELETE);//ROLE + SEP + DELETE;//"role:delete";
-	public final static String PERM_UPDATE_ROLE = toSecTok(ROLE, UPDATE);//ROLE + SEP + UPDATE;//"role:update";
-	public final static String PERM_CREATE_APP_ID = toSecTok(APP, CREATE);//APP + SEP + CREATE;//"app:create";
-	public final static String PERM_DELETE_APP_ID = toSecTok(APP, DELETE);//APP + SEP + DELETE;//"app:delete";
-	public final static String PERM_UPDATE_APP_ID = toSecTok(APP, UPDATE);//APP + SEP + UPDATE;//"app:update";
-	public final static String PERM_ADD_USER = toSecTok(USER, CREATE);//"user:create";
-	public final static String PERM_DELETE_USER = toSecTok(USER, DELETE);//"user:delete";
-	public final static String PERM_READ_USER = toSecTok(USER, READ);//"user:read";
-	public final static String PERM_UPDATE_USER = toSecTok(USER, USER);//"user:update";
+
+
+
+	public final static String PERM_ADD_PERMISSION = PERMISSION + SEP +  CREATE;//;PERMISSION + SEP + CREATE;//"permission:create";
+	public final static String PERM_DELETE_PERMISSION = PERMISSION + SEP + DELETE;//PERMISSION + SEP + DELETE;//"permission:delete";
+	public final static String PERM_UPDATE_PERMISSION = PERMISSION + SEP + UPDATE;//PERMISSION + SEP + UPDATE;//"permission:update";
+	public final static String PERM_ADD_ROLE =  ROLE + SEP + CREATE;//ROLE + SEP + CREATE;//"role:create";
+	public final static String PERM_DELETE_ROLE = ROLE + SEP + DELETE;//ROLE + SEP + DELETE;//"role:delete";
+	public final static String PERM_UPDATE_ROLE = ROLE + SEP + UPDATE;//ROLE + SEP + UPDATE;//"role:update";
+	public final static String PERM_CREATE_APP_ID = APP + SEP +CREATE;//APP + SEP + CREATE;//"app:create";
+	public final static String PERM_DELETE_APP_ID = APP + SEP + DELETE;//APP + SEP + DELETE;//"app:delete";
+	public final static String PERM_UPDATE_APP_ID = APP + SEP + UPDATE;//APP + SEP + UPDATE;//"app:update";
+	public final static String PERM_ADD_USER = USER + SEP + CREATE;//"user:create";
+	public final static String PERM_DELETE_USER = USER + SEP + DELETE;//"user:delete";
+	public final static String PERM_READ_USER = USER + SEP + READ;//"user:read";
+	public final static String PERM_UPDATE_USER = USER + SEP +USER;//"user:update";
 	public final static String PERM_SELF = "self";
 	public final static String PERM_PRIVATE = "private";
 	public final static String PERM_PUBLIC= "public";
 	public final static String PERM_STATUS= "status";
-	public final static String PERM_ADD_RESOURCE = toSecTok(RESOURCE, CREATE);//"resource:add";
-	public final static String PERM_DELETE_RESOURCE = toSecTok(RESOURCE, DELETE);//"resource:delete";
-	public final static String PERM_READ_RESOURCE = toSecTok(RESOURCE, READ);//"resource:read";
-	public final static String PERM_UPDATE_RESOURCE = toSecTok(RESOURCE, UPDATE);//"resource:update";
+	public final static String PERM_ADD_RESOURCE = RESOURCE + SEP + CREATE;//"resource:add";
+	public final static String PERM_DELETE_RESOURCE = RESOURCE + SEP + DELETE;//"resource:delete";
+	public final static String PERM_READ_RESOURCE = RESOURCE + SEP + READ;//"resource:read";
+	public final static String PERM_UPDATE_RESOURCE = RESOURCE + SEP + UPDATE;//"resource:update";
 	public final static String PERM_RESOURCE_ANY = "any";
+	public final static String PERM_ASSIGN_PERMISSION = PERMISSION + SEP + ASSIGN + SEP + PERMISSION;
+	public final static String PERM_REMOVE_PERMISSION = PERMISSION + SEP + REMOVE + SEP + PERMISSION;
+
 	//public final static String PERM_CREATE = toSecTok(PERMISSION, CREATE);
 	//public final static String PERM_ASSIGN_PERMISSION = "assign:permission";
-	public final static String PERM_ASSIGN_ROLE = "assign:role";
+	public final static String PERM_ASSIGN_ROLE = PERMISSION + SEP + ASSIGN + SEP + ROLE;
+	public final static String PERM_REMOVE_ROLE = PERMISSION + SEP + REMOVE + SEP + ROLE;
 
-	public final static String PERM_ACCESS = "access";
+	public final static String PERM_ACCESS = PERMISSION + SEP + "access";
 	
 
 
@@ -99,7 +109,7 @@ public final class SecurityModel
 			token = SharedStringUtil.toTrimmedLowerCase(token);
 			if(token != null)
 			{
-				if(sb.length() > 0)
+				if(sb.length() > 0 && sb.charAt(sb.length() -1) != SEP.charAt(0) )
 					sb.append(SEP);
 
 				sb.append(token);

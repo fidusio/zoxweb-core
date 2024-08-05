@@ -259,7 +259,7 @@ public interface ShiroRealmStore
 	 * @throws IllegalArgumentException
 	 * @throws AccessException
 	 */
-	ShiroAssociationDAO addShiroAssociation(ShiroAssociationDAO association)
+	ShiroAssociation addShiroAssociation(ShiroAssociation association)
 		throws NullPointerException, IllegalArgumentException, AccessException;
 	
 	/**
@@ -270,7 +270,7 @@ public interface ShiroRealmStore
 	 * @throws IllegalArgumentException
 	 * @throws AccessException
 	 */
-	ShiroAssociationDAO removeShiroAssociation(ShiroAssociationDAO association)
+	ShiroAssociation removeShiroAssociation(ShiroAssociation association)
         throws NullPointerException, IllegalArgumentException, AccessException;
 
 

@@ -23,7 +23,7 @@ import org.zoxweb.shared.security.model.PermissionModel;
 import org.zoxweb.shared.security.model.SecurityModel;
 import org.zoxweb.shared.security.model.SecurityModel.AppPermission;
 import org.zoxweb.shared.security.model.SecurityModel.Role;
-import org.zoxweb.shared.security.shiro.ShiroAssociationRuleDAO;
+import org.zoxweb.shared.security.shiro.ShiroAssociationRule;
 import org.zoxweb.shared.security.shiro.ShiroAssociationType;
 import org.zoxweb.shared.security.shiro.ShiroPermission;
 import org.zoxweb.shared.security.shiro.ShiroRole;
@@ -52,7 +52,7 @@ public class APIAppManagerProvider
 			UserPreferenceDAO.NVC_USER_PREFERENCE_DAO,
 			AppDeviceDAO.NVC_APP_DEVICE_DAO,
 			EncryptedKeyDAO.NVCE_ENCRYPTED_KEY_DAO,
-			ShiroAssociationRuleDAO.NVC_SHIRO_ASSOCIATION_RULE_DAO,
+			ShiroAssociationRule.NVC_SHIRO_ASSOCIATION_RULE,
 			ShiroPermission.NVC_SHIRO_PERMISSION,
 			ShiroRole.NVC_SHIRO_ROLE,
 			AddressDAO.NVC_ADDRESS_DAO,
@@ -161,7 +161,7 @@ public class APIAppManagerProvider
         	}
         	
         	
-        	ShiroAssociationRuleDAO sard = new ShiroAssociationRuleDAO();
+        	ShiroAssociationRule sard = new ShiroAssociationRule();
      		sard.setAssociatedTo(getAPISecurityManager().currentUserID());
      		sard.setAssociate(SecurityModel.toSubjectID(temp.getDomainID(), temp.getAppID(), Role.APP_USER));
      		sard.setAssociationType(ShiroAssociationType.ROLE_TO_SUBJECT);
@@ -957,7 +957,7 @@ public class APIAppManagerProvider
 			}
 			else
 			{
-				ShiroAssociationRuleDAO sard = new ShiroAssociationRuleDAO(role.getName()+"-" +userID.getSubjectID(), role, ShiroAssociationType.ROLE_TO_SUBJECT, userID);
+				ShiroAssociationRule sard = new ShiroAssociationRule(role.getName()+"-" +userID.getSubjectID(), role, ShiroAssociationType.ROLE_TO_SUBJECT, userID);
 				
 				switch(crud)
 				{
