@@ -73,6 +73,7 @@ public class Range<T extends Comparable<T>>
         INCLUSIVE(NVConfigManager
                 .createNVConfig("inclusive", "Inclusive (default) or exclusive", "inclusive", false, true,
                         Inclusive.class)),
+        UNIT(NVConfigManager.createNVConfig("unit", "Range Unit", "Unit", false, true, String.class)),
 
         ;
 
@@ -114,7 +115,7 @@ public class Range<T extends Comparable<T>>
     /**
      * Auto switch if start > end
      * <br>It effects {@link #setStart(Comparable)} and {@link #setEnd(Comparable)}
-     * <br>It does not effect constructor
+     * <br>It does not affect constructor
      * <br>Default is set to false.
      */
     private boolean isAutoSwitch = false;
@@ -421,6 +422,16 @@ public class Range<T extends Comparable<T>>
         return this;
     }
 
+    public String getUnit()
+    {
+        return lookupValue(Param.UNIT);
+    }
+
+    public void setUnit(String unit)
+    {
+        setValue(Param.UNIT, unit);
+    }
+
     /**
      * @return the inclusive type
      */
@@ -454,14 +465,18 @@ public class Range<T extends Comparable<T>>
 
 
 
-
-    public static Range toRange(String token)
+    public static Range toRange(String rangeToken)
     {
-        return toRange(token, null);
+        return toRange(rangeToken, null, null, null);
+    }
+
+    public static Range toRange(String rangeToken, String name, String unit)
+    {
+        return toRange(rangeToken, null, name, unit);
     }
 
 
-    public static Range toRange(String token, Class<? extends Number> override)
+    public static Range toRange(String token, Class<? extends Number> override, String name, String unit)
     {
         token = token.replaceAll("\\s+", "");
         Inclusive type = Inclusive.match(token);
@@ -481,23 +496,34 @@ public class Range<T extends Comparable<T>>
         if(override == null)
             override = vals[0].getClass();
 
+
+
+        Range ret = null;
         if (override == Integer.class)
         {
-            return new Range<Integer>(vals[0].intValue(), vals[1].intValue(), type);
+            ret = new Range<Integer>(vals[0].intValue(), vals[1].intValue(), type);
         }
-        if (override == Long.class)
+        else if (override == Long.class)
         {
-            return new Range<Long>(vals[0].longValue(), vals[1].longValue(), type);
+            ret = new Range<Long>(vals[0].longValue(), vals[1].longValue(), type);
         }
-        if (override == Float.class)
+        else if (override == Float.class)
         {
-            return new Range<Float>(vals[0].floatValue(), vals[1].floatValue(), type);
+            ret = new Range<Float>(vals[0].floatValue(), vals[1].floatValue(), type);
         }
-        if (override == Double.class)
+        else if (override == Double.class)
         {
-            return new Range<Double>(vals[0].doubleValue(), vals[1].doubleValue(), type);
+            ret =  new Range<Double>(vals[0].doubleValue(), vals[1].doubleValue(), type);
         }
 
-        return null;
+        if (ret != null) {
+            ret.setName(name);
+            ret.setUnit(unit);
+        }
+
+        return ret;
     }
+
+
+
 }

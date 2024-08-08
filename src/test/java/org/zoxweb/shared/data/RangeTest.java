@@ -80,7 +80,7 @@ public class RangeTest {
         floatRange = Range.toRange("[10, -50.10]");
         assert(floatRange.getStart().getClass() == Float.class);
 
-        intRange = Range.toRange("[4.6, 4.5]", Integer.class);
+        intRange = Range.toRange("[4.6, 4.5]", Integer.class, "toto", "nounit");
         assert(intRange.getStart().getClass() == Integer.class);
 
     }

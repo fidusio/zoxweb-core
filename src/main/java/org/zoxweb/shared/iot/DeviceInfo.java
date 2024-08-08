@@ -147,7 +147,12 @@ extends IOTBase
         return this;
     }
 
+
     public Set<PortInfo> lookupPorts(String matchCriteria)
+    {
+        return findMatchingPorts(Const.RegEx.CONTAINS_NO_CASE.toRegEx(matchCriteria, true));
+    }
+    public Set<PortInfo> findMatchingPorts(String matchCriteria)
     {
         Set<PortInfo> ret = new LinkedHashSet<>();
         for(PortInfo port : getPorts())

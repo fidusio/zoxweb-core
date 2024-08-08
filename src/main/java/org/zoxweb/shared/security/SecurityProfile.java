@@ -48,7 +48,7 @@ implements ResourceSecurity
      */
     public static final NVConfigEntity NVC_SECURITY_PROFILE = new NVConfigEntityLocal("security_profile",
             null,
-            "SecurityProp",
+            "SecurityProfile",
             true,
             false,
             false,

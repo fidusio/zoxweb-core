@@ -21,11 +21,12 @@ package org.zoxweb.shared.util;
  * The global id is unique globally across APPS and systems it can be used as a uniqueexchange identifier
  */
 public interface GlobalID<T>
+    extends GlobalIDBase<T>
 {
-    /**
-     * @return the global identifier of the object
-     */
-    T getGlobalID();
+//    /**
+//     * @return the global identifier of the object
+//     */
+//    T getGlobalID();
 
     /**
      * @param gid the global identifier of the object.

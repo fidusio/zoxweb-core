@@ -8,6 +8,8 @@ public abstract class IOTBase
 extends PropertyDAO
 {
 
+    public static final NVConfig ALIAS = NVConfigManager.createNVConfig("alias", "User defined alias", "Alias", false, true, String.class);
+
     public static final NVConfigEntity NVC_IOT_BASE = new NVConfigEntityLocal("iot_base",
             null,
             "IOTBase",
@@ -16,7 +18,7 @@ extends PropertyDAO
             false,
             false,
             IOTBase.class,
-            SharedUtil.toNVConfigList(DataConst.DataParam.UNIQUE_CANONICAL_ID.getNVConfig()),
+            SharedUtil.toNVConfigList(DataConst.DataParam.UNIQUE_CANONICAL_ID.getNVConfig(), ALIAS),
             null,
             false,
             PropertyDAO.NVC_PROPERTY_DAO);
@@ -29,5 +31,16 @@ extends PropertyDAO
         super(nvce, cids);
     }
 
+
+    public String getAlias()
+    {
+        return lookupValue(ALIAS);
+    }
+
+    public <V extends IOTBase> V setAlias(String alias)
+    {
+        setValue(ALIAS, alias);
+        return (V) this;
+    }
 
 }
