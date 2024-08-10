@@ -15,26 +15,12 @@
  */
 package org.zoxweb.shared.crypto;
 
-import org.zoxweb.shared.security.AccessSecurityException;
-import org.zoxweb.shared.security.JWTDecoder;
-import org.zoxweb.shared.security.JWTEncoder;
+import org.zoxweb.shared.util.CanonicalID;
+import org.zoxweb.shared.util.SetDescription;
+import org.zoxweb.shared.util.SetName;
 
-public interface CryptoInterface
-	extends JWTEncoder, JWTDecoder
+public interface CryptoBase
+    extends SetName, SetDescription, CanonicalID
 {
-
-	byte[] hash(String mdAlgo, byte[]... tokens)
-		throws AccessSecurityException;
 	
-	byte[] hash(String mdAlgo, String... tokens)
-		throws AccessSecurityException;
-	
-	
-	byte[] hmacSHA256(byte[] key, byte[] data)
-		throws AccessSecurityException;
-	
-	byte[] hmacSHA512(byte[] key, byte[] data)
-			throws AccessSecurityException;
-
-
 }

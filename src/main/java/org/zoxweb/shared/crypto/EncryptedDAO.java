@@ -32,7 +32,7 @@ import org.zoxweb.shared.util.SubjectID;
 @SuppressWarnings("serial")
 public class EncryptedDAO
     extends TimeStampDAO
-    implements CryptoDAO,SubjectID<String>
+    implements CryptoBase,SubjectID<String>
 {
 
 	//private String algoName;
@@ -51,7 +51,7 @@ public class EncryptedDAO
         implements GetNVConfig
     {
 		SUBJECT_ID(NVConfigManager.createNVConfig("subject_id", "Optional subject ID", "SubjectID", false, true, String.class)),
-		SUBJECT_PORPERTIES(NVConfigManager.createNVConfig("subject_properties", "Subject properties", "SubjectPropeties", false, true, NVGenericMap.class)),
+		SUBJECT_PROPERTIES(NVConfigManager.createNVConfig("subject_properties", "Subject properties", "SubjectPropeties", false, true, NVGenericMap.class)),
 		ALGO_PROPERTIES(NVConfigManager.createNVConfig("algo_properties", "Algorithm properties", "AlgorithmProperties", false, true, NVGenericMap.class)),
 		IV(NVConfigManager.createNVConfig("iv", "Initialization vector", "IV", true, true, byte[].class)),
 		DATA_LENGTH(NVConfigManager.createNVConfig("data_length", "The original data length in bytes", "DataLength", false, true, Long.class)),
@@ -96,7 +96,7 @@ public class EncryptedDAO
 	 */
 	public NVGenericMap  getSubjectProperties()
 	{
-		return (NVGenericMap) lookup(Param.SUBJECT_PORPERTIES);
+		return (NVGenericMap) lookup(Param.SUBJECT_PROPERTIES);
 	}
 	
 //	public void setSubjectProperties(ArrayValues<NVPair> subject)

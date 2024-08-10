@@ -27,7 +27,7 @@ import org.zoxweb.shared.util.*;
 @SuppressWarnings("serial")
 public class PasswordDAO
     extends PropertyDAO
-    implements CryptoDAO
+    implements CryptoBase
 {
 	
 	private enum Param

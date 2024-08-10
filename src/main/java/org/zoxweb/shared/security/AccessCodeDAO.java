@@ -43,7 +43,7 @@ public class AccessCodeDAO
 	public enum Params
 		implements GetNVConfig
 	{
-		ACCESS_CODE(NVConfigManager.createNVConfig("access_code", "The Acces Code", "AccessCode", false, true, false, String.class, FilterType.ENCRYPT)),
+		ACCESS_CODE(NVConfigManager.createNVConfig("access_code", "The Access Code", "AccessCode", false, true, false, String.class, FilterType.ENCRYPT)),
 		ACCESS_COUNT(NVConfigManager.createNVConfig("access_count", "Number of times this access code was used", "AccessCount",false, false, Long.class)),
 		ACCESS_QUOTA(NVConfigManager.createNVConfig("access_quota", "Maximum times the access code can be used 0 for ever", "AccessQuota",true, true, Long.class)),
 		CASE_SENSITIVE(NVConfigManager.createNVConfig("case_sensitive", "True the access code is a exact match", "CaseSensitive", false, false, Boolean.class)),

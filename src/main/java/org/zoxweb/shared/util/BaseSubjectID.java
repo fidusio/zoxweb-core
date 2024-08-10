@@ -2,7 +2,7 @@ package org.zoxweb.shared.util;
 
 public interface BaseSubjectID<T>
 {
-  enum SubjectType
+  public enum SubjectType
   {
     PHONE,
     TABLET,
@@ -12,6 +12,15 @@ public interface BaseSubjectID<T>
     GATEWAY,
     UNKNOWN
   }
+
+  public enum SubjectStatus
+  {
+    ACTIVE,
+    DISABLED,
+    PENDING_VALIDATION
+  }
+
+
   /**
    * Returns the subject ID.
    * @return

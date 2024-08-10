@@ -40,7 +40,7 @@ public class SubjectIdentifier
 	{
 		SUBJECT_ID(NVConfigManager.createNVConfig("subject_id", "Subject identifier", "SubjectID", true, true, true, String.class, CryptoConst.SubjectIDFilter.SINGLETON)),
 		SUBJECT_TYPE(NVConfigManager.createNVConfig("subject_type", "Subject Type", "SubjectType", true, true, SubjectType.class)),
-
+		SUBJECT_STATUS(NVConfigManager.createNVConfig("subject_status", "Subject status", "SubjectStatus", true, true, SubjectStatus.class)),
 
 		;
 
@@ -107,6 +107,16 @@ public class SubjectIdentifier
 	@Override
 	public void setSubjectID(String id) {
 		setValue(Param.SUBJECT_ID, id);
+	}
+
+	public SubjectStatus getSubjectStatus()
+	{
+		return lookupValue(Param.SUBJECT_STATUS);
+	}
+
+	public void setSubjectStatus(SubjectStatus subjectStatus)
+	{
+		setValue(Param.SUBJECT_STATUS, subjectStatus);
 	}
 
 	public SubjectType getSubjectType()
