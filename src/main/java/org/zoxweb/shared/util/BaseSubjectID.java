@@ -13,14 +13,6 @@ public interface BaseSubjectID<T>
     UNKNOWN
   }
 
-  public enum SubjectStatus
-  {
-    ACTIVE,
-    DISABLED,
-    PENDING_VALIDATION
-  }
-
-
   /**
    * Returns the subject ID.
    * @return

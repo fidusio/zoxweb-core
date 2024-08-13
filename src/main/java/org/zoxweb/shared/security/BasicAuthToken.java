@@ -12,7 +12,7 @@ public class BasicAuthToken
             implements GetNVConfig
     {
         USER(NVConfigManager.createNVConfig("user", "User name", "User", true, true, String.class)),
-        PASSWORD(NVConfigManager.createNVConfig("password", "Password", "Password", true, true, String.class)),
+        PASSWORD(NVConfigManager.createNVConfig("password", "Password", "Password", true, true, byte[].class)),
         ;
 
         private final NVConfig nvc;
@@ -57,14 +57,19 @@ public class BasicAuthToken
         setValue(Param.USER, user);
     }
 
-    public String getPassword()
+    public byte[] getPassword()
     {
         return lookupValue(Param.PASSWORD);
     }
 
-    public void setPassword(String password)
+    public void setPassword(byte[] password)
     {
         setValue(Param.PASSWORD, password);
+    }
+
+    public void setPassword(String password)
+    {
+        setValue(Param.PASSWORD, SharedStringUtil.getBytes(password));
     }
 
     @Override

@@ -17,6 +17,7 @@ package org.zoxweb.shared.crypto;
 
 import org.zoxweb.shared.crypto.CryptoConst.HASHType;
 import org.zoxweb.shared.data.PropertyDAO;
+import org.zoxweb.shared.security.CredentialInfo;
 import org.zoxweb.shared.util.*;
 
 /**
@@ -27,7 +28,7 @@ import org.zoxweb.shared.util.*;
 @SuppressWarnings("serial")
 public class PasswordDAO
     extends PropertyDAO
-    implements CryptoBase
+    implements CryptoBase, CredentialInfo
 {
 	
 	private enum Param

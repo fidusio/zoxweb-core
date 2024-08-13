@@ -35,11 +35,8 @@ public final class CryptoConst
 	{
 
 	}
-	public static final String PKCS12 = "PKCS12";
-//	public static final String HMAC_SHA_256 = "HmacSHA256";
-//	public static final String HMAC_SHA_512 = "HmacSHA512";
+	public static final String PKCS12 = "PKCS12";;
 	public static final String KEY_STORE_TYPE = "JCEKS";
-	//public static final String AES = "AES";
 
 	public enum PKInfo
 		implements GetName, CanonicalID
@@ -109,7 +106,6 @@ public final class CryptoConst
 					return pkInfo;
 			}
 
-
 			return null;
 		}
 	}
@@ -118,13 +114,6 @@ public final class CryptoConst
 
 	public static final String AES_ENCRYPTION_CBC_NO_PADDING = "AES/CBC/NoPadding";
 
-
-//	public static final String MD5 = "MD5";
-//	public static final String SHA_1 = "SHA-1";
-//	public static final String SHA_224 = "SHA-1";
-//	public static final String SHA_256 = "SHA-256";
-//	public static final String SHA_384 = "SHA-384";
-//	public static final String SHA_512 = "SHA-512";
 
 	public enum CryptoAlgo
 		implements GetName
@@ -308,7 +297,7 @@ public final class CryptoConst
 		
 		public static SecureRandomType lookup(String mdName)
         {
-			return (SecureRandomType) SharedUtil.lookupEnum(mdName, SecureRandomType.values());
+			return SharedUtil.lookupEnum(mdName, SecureRandomType.values());
 		}
 	}
 
@@ -431,14 +420,7 @@ public final class CryptoConst
 	public enum JWTAlgo
 		implements GetName
 	{
-//		none("none", null),
-//		HS256("HS256", "SHA-256"),
-//		HS512("HS512", "SHA-512"),
-//		RS256("RS256", "RSASSA-PKCS1-v1_5"),
-//		RS512("RS512", "RSASSA-PKCS1-v1_5"),
-//		ES256("ES256", "P-256", "secp256r1"),
-//		ES384("ES3", "P-256", "secp256r1"),
-//        ES512("ES512", "P-521", "secp521r1"),
+
 		none(null, null),
 		HS256(SignatureAlgo.HMAC_SHA_256, null),
 		HS384(SignatureAlgo.HMAC_SHA_384, null),
@@ -512,7 +494,7 @@ public final class CryptoConst
 	 * This enum contains user status with a specified status
 	 * expiration time.
 	 */
-	public enum UserStatus
+	public enum SubjectStatus
 	    implements GetValue<Long>
 	{
 		// Note:
@@ -528,7 +510,7 @@ public final class CryptoConst
 
 		private final long EXPIRATION_TIME;
 
-		UserStatus(long time)
+		SubjectStatus(long time)
 	    {
 			EXPIRATION_TIME = time;
 		}

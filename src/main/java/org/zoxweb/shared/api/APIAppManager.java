@@ -85,7 +85,7 @@ public interface APIAppManager
      * @throws AccessException
      * @throws APIException
      */
-	UserIDDAO createUserIDDAO(UserIDDAO userIDDAO, CryptoConst.UserStatus userIDstatus, String password)
+	UserIDDAO createUserIDDAO(UserIDDAO userIDDAO, CryptoConst.SubjectStatus userIDstatus, String password)
             throws NullPointerException, IllegalArgumentException, AccessException, APIException;
 
     /**
@@ -98,7 +98,7 @@ public interface APIAppManager
      * @throws AccessException
      * @throws APIException
      */
-    UserIDDAO createUserIDDAO(String subjectID, CryptoConst.UserStatus userIDstatus, String password)
+    UserIDDAO createUserIDDAO(String subjectID, CryptoConst.SubjectStatus userIDstatus, String password)
             throws NullPointerException, IllegalArgumentException, AccessException, APIException;
 
 	/**

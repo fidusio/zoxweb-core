@@ -21,7 +21,5 @@ package org.zoxweb.shared.security;
 public interface AuthenticationHandler<I, O>
     extends IsSecure
 {
-
-	void authenticate(I input, O output) throws AccessException;
-
+	void authenticate(I input, O against) throws AccessException;
 }

@@ -501,6 +501,17 @@ public final class SharedStringUtil
 		
 		return null;
 	}
+
+
+	/**
+	 * Covert a string to bytes array using UTF-8 format
+	 * @param str to be converted
+	 * @return byte array
+	 */
+	public static byte[] toBytes(String str)
+	{
+		return getBytes(str);
+	}
 	
 	/**
 	 * Return the byte array by converting the string to byte using UTF-8.
