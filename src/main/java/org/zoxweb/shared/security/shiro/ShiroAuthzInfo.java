@@ -74,7 +74,7 @@ extends ShiroDomain
     /**
      * @param subjectType the class name if the subject id
      */
-    public void setSubjectType(String subjectType)
+    private void setSubjectType(String subjectType)
     {
         setValue(Param.SUBJECT_TYPE, subjectType);
     }
@@ -91,7 +91,7 @@ extends ShiroDomain
      *
      * @param authzID gid of the authorization
      */
-    public void setAuthzID(String authzID)
+    private void setAuthzID(String authzID)
     {
         setValue(Param.AUTHZ_ID, authzID);
     }
@@ -105,7 +105,7 @@ extends ShiroDomain
     }
 
 
-    public void setAuthzType(SecurityModel.AuthzType authzType)
+    private void setAuthzType(SecurityModel.AuthzType authzType)
     {
         setValue(Param.AUTHZ_TYPE, authzType);
     }
@@ -121,7 +121,7 @@ extends ShiroDomain
     }
 
 
-    public void setResourceID(String resourceID)
+    private void setResourceID(String resourceID)
     {
         setValue(Param.RESOURCE_ID, resourceID);
     }
@@ -135,7 +135,7 @@ extends ShiroDomain
         return lookupValue(Param.RESOURCE_TYPE);
     }
 
-    public void setResourceType(String resourceType)
+    private void setResourceType(String resourceType)
     {
         setValue(Param.RESOURCE_TYPE, resourceType);
     }
