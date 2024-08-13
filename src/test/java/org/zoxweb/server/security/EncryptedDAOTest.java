@@ -34,7 +34,7 @@ public class EncryptedDAOTest {
       throws InvalidKeyException, NullPointerException, IllegalArgumentException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
     EncryptedDAO ed = new EncryptedDAO();
     ed = CryptoUtil.encryptDAO(new EncryptedDAO(), KEY, DATA);
-    ed.setGlobalID(UUID.randomUUID().toString());
+    ed.setGUID(UUID.randomUUID().toString());
     byte[] dataDecrypted = CryptoUtil.decryptEncryptedDAO(ed, KEY);
     assert (Arrays.equals(DATA, dataDecrypted));
 
@@ -45,7 +45,7 @@ public class EncryptedDAOTest {
       throws InvalidKeyException, NullPointerException, IllegalArgumentException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
     EncryptedDAO ed = new EncryptedDAO();
     ed.setHMACAll(true);
-    ed.setGlobalID(UUID.randomUUID().toString());
+    ed.setGUID(UUID.randomUUID().toString());
     ed.setSubjectID(UUID.randomUUID().toString());
     ed = CryptoUtil.encryptDAO(ed, KEY, DATA);
 
@@ -59,7 +59,7 @@ public class EncryptedDAOTest {
       throws InvalidKeyException, NullPointerException, IllegalArgumentException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
     EncryptedDAO ed = new EncryptedDAO();
     ed.setHMACAll(true);
-    ed.setGlobalID(UUID.randomUUID().toString());
+    ed.setGUID(UUID.randomUUID().toString());
     ed.setSubjectID(UUID.randomUUID().toString());
     ed = CryptoUtil.encryptDAO(ed, KEY, DATA);
     ed.setSubjectID(null);

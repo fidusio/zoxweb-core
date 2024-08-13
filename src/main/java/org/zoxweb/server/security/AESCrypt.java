@@ -15,38 +15,22 @@
  */
 package org.zoxweb.server.security;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayInputStream;
-//import java.io.ByteArrayOutputStream;
-import java.io.Console;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-
-import java.security.GeneralSecurityException;
-import java.security.InvalidKeyException;
-import java.security.MessageDigest;
-import java.security.SecureRandom;
-import java.util.Arrays;
-
-//import java.util.concurrent.locks.Lock;
-//import java.util.concurrent.locks.ReentrantLock;
-
-import javax.crypto.Cipher;
-import javax.crypto.Mac;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
-
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.io.UByteArrayOutputStream;
 import org.zoxweb.shared.util.Const.TypeInBytes;
 import org.zoxweb.shared.util.SharedStringUtil;
 import org.zoxweb.shared.util.SharedUtil;
+
+import javax.crypto.Cipher;
+import javax.crypto.Mac;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
+import java.io.*;
+import java.security.GeneralSecurityException;
+import java.security.InvalidKeyException;
+import java.security.MessageDigest;
+import java.security.SecureRandom;
+import java.util.Arrays;
 
 //import zoxsoft.util.UByteArrayOutputStream;
 //import zoxsoft.util.UIO;
@@ -534,13 +518,17 @@ public class AESCrypt {
       }
 
       text = hmac.doFinal();
-      out.write(text);  // HMAC from previous cyphertext.
+      out.write(text);  // HMAC from previous ciphertext.
       if (debug) {
         dbg("HMAC2: ", text);
       }
-    } catch (InvalidKeyException e) {
+    }
+    catch (InvalidKeyException e)
+    {
       throw new GeneralSecurityException(JCE_EXCEPTION_MESSAGE, e);
-    } finally {
+    }
+    finally
+    {
       if (closeIn) {
         IOUtil.close(in);
       }

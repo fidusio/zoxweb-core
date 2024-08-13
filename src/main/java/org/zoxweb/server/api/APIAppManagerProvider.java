@@ -147,13 +147,13 @@ public class APIAppManagerProvider
         	{
         		temp.getDevice().setReferenceID(device.getReferenceID());
         		temp.getDevice().setUserID(getAPISecurityManager().currentUserID());
-        		temp.getDevice().setGlobalID(device.getGlobalID());
+        		temp.getDevice().setGUID(device.getGUID());
         	}
 
         	AppIDDAO appIDDAO = lookupAppIDDAO(temp.getDomainID(), temp.getAppID());
 
         	if (appIDDAO != null) {
-        	    temp.setAppGID(appIDDAO.getAppGID());
+        	    temp.setAppGUID(appIDDAO.getAppGUID());
             }
         	else 
         	{
@@ -284,21 +284,21 @@ public class APIAppManagerProvider
 		userID.setReferenceID(userIDRef);
 		userID.setUserID(userIDRef);
 		userID.getUserInfo().setReferenceID(userIDRef);
-		userID.setGlobalID(globalID);
+		userID.setGUID(globalID);
 
 		////////////////////////
 		
 		try
 		{
 			// insert the user_info dao first
-			userID.getUserInfo().setGlobalID(globalID);
+			userID.getUserInfo().setGUID(globalID);
 			getAPIDataStore().insert(userID.getUserInfo());
 			
 			getAPIDataStore().insert(userID);
 			
 			UserIDCredentialsDAO userIDCredentials = new UserIDCredentialsDAO();
 			userIDCredentials.setReferenceID(userID.getReferenceID());
-			userIDCredentials.setGlobalID(globalID);
+			userIDCredentials.setGUID(globalID);
 			userIDCredentials.setUserID(userID.getReferenceID());
 			userIDCredentials.setLastStatusUpdateTimestamp(System.currentTimeMillis());
 			userIDCredentials.setUserStatus(userIDStatus);
@@ -307,7 +307,7 @@ public class APIAppManagerProvider
 			PasswordDAO passwordDAO = HashUtil.toPassword(HASHType.BCRYPT, 0, 10, password);
 			passwordDAO.setUserID(userID.getReferenceID());
 			passwordDAO.setReferenceID(userID.getReferenceID());
-			passwordDAO.setGlobalID(userID.getGlobalID());
+			passwordDAO.setGUID(userID.getGUID());
 			userIDCredentials.setPassword(passwordDAO);
 			
 			
@@ -560,7 +560,7 @@ public class APIAppManagerProvider
         List<UserPreferenceDAO> result = getAPIDataStore().search(UserPreferenceDAO.NVC_USER_PREFERENCE_DAO, null,
                 new QueryMatchString(RelationalOperator.EQUAL, userIDDAO.getReferenceID(), MetaToken.USER_ID),
                 LogicalOperator.AND,
-                new QueryMatchString(RelationalOperator.EQUAL, appIDDAO.getAppGID(), UserPreferenceDAO.Param.APP_GID.getNVConfig())
+                new QueryMatchString(RelationalOperator.EQUAL, appIDDAO.getAppGUID(), UserPreferenceDAO.Param.APP_GUID.getNVConfig())
         );
 
         if (result != null && !result.isEmpty()) {
@@ -702,7 +702,7 @@ public class APIAppManagerProvider
 
         SharedUtil.checkIfNulls("UserInfoDAO is null", userInfoDAO);
         SharedUtil.checkIfNulls("AppDeviceDAO is null", appDeviceDAO);
-        SharedUtil.checkIfNulls("AppIDDAO is null", appDeviceDAO.getAppGID());
+        SharedUtil.checkIfNulls("AppIDDAO is null", appDeviceDAO.getAppGUID());
         if (SharedStringUtil.isEmpty(subjectID) || SharedStringUtil.isEmpty(password)) {
             throw new NullPointerException("Username and/or password is null");
         }
@@ -718,7 +718,7 @@ public class APIAppManagerProvider
 
        
      
-        appDeviceDAO.setAppGID(appIDDAO.getAppGID());
+        appDeviceDAO.setAppGUID(appIDDAO.getAppGUID());
 
         UserIDDAO userIDDAO = lookupUserIDDAO(subjectID);
         if (userIDDAO == null)
@@ -743,7 +743,7 @@ public class APIAppManagerProvider
             // Does not exist, create UserPreferenceDAO
             userPreferenceDAO = new UserPreferenceDAO();
             userPreferenceDAO.setUserID(userIDDAO.getReferenceID());
-            userPreferenceDAO.setAppGID(appIDDAO.getAppGID());
+            userPreferenceDAO.setAppGUID(appIDDAO.getAppGUID());
 
             getAPIDataStore().insert(userPreferenceDAO);
         }
@@ -939,7 +939,7 @@ public class APIAppManagerProvider
     public void updateSubjectRole(String subjectID, AppIDDAO appID, String roleName, CRUD crud)
 			 throws NullPointerException, IllegalArgumentException, AccessException
 	{
-		String permission = PPEncoder.SINGLETON.encode(SecurityModel.PERM_ADD_ROLE, appID.getAppGID());
+		String permission = PPEncoder.SINGLETON.encode(SecurityModel.PERM_ADD_ROLE, appID.getAppGUID());
 		if (log.isEnabled()) log.getLogger().info("permision to check:" + permission);
 		if (log.isEnabled()) log.getLogger().info(SharedUtil.toCanonicalID(',', subjectID, roleName));
 		getAPISecurityManager().checkPermissions(permission);
@@ -947,7 +947,7 @@ public class APIAppManagerProvider
 		UserIDDAO userID = lookupUserIDDAO(subjectID);
 		if (userID != null)
 		{
-			String roleSubjectID = appID.getAppGID() + "-" + roleName;
+			String roleSubjectID = appID.getAppGUID() + "-" + roleName;
 			if (log.isEnabled()) log.getLogger().info("role:" + roleSubjectID);
 			if (log.isEnabled()) log.getLogger().info("userid:" +userID.getPrimaryEmail() + ":" + userID.getUserID());
 			ShiroRole role = getAPISecurityManager().lookupRole(roleSubjectID);
@@ -1009,7 +1009,7 @@ public class APIAppManagerProvider
 		if (sak instanceof AppDeviceDAO)
 		{
 			ret = new AppDeviceDAO();
-			((AppDeviceDAO)ret).setAppGID(((AppDeviceDAO) sak).getAppGID());
+			((AppDeviceDAO)ret).setAppGUID(((AppDeviceDAO) sak).getAppGUID());
 			((AppDeviceDAO)ret).setDevice(((AppDeviceDAO) sak).getDevice());
 		}
 		else if (sak instanceof SubjectAPIKey)

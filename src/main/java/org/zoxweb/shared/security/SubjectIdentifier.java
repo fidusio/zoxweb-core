@@ -105,7 +105,7 @@ public class SubjectIdentifier
 
 	public String getSubjectGID()
 	{
-		return getGlobalID();
+		return getGUID();
 	}
 
 

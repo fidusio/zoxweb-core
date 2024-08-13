@@ -23,14 +23,8 @@ package org.zoxweb.shared.util;
 public interface GlobalID<T>
     extends GlobalIDBase<T>
 {
-//    /**
-//     * @return the global identifier of the object
-//     */
-//    T getGlobalID();
-
     /**
-     * @param gid the global identifier of the object.
+     * @param gid the global identifier of the object uuid is string format.
      */
-    void setGlobalID(T gid);
-
+    void setGUID(T gid);
 }

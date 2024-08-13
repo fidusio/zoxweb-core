@@ -52,7 +52,7 @@ public class JSONTest {
 
 	    try {
 			SystemInfoDAO sysDAO = ServerUtil.loadSystemInfoDAO();
-			sysDAO.setGlobalID(UUID.randomUUID().toString());
+			sysDAO.setGUID(UUID.randomUUID().toString());
 			
 			for (NVEntity nve : sysDAO.getNetworkInterfaces().values()) {
 				NetworkInterfaceDAO niDAO = (NetworkInterfaceDAO) nve;

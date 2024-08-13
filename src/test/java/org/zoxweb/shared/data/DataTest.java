@@ -88,7 +88,7 @@ public class DataTest {
     ShiroSessionData ssd = new ShiroSessionData();
     
     ssd.setSubjectID("xlogistx");
-    ssd.setAppGID("xlogistx.com-xlogistx");
+    ssd.setAppGUID("xlogistx.com-xlogistx");
     ssd.getPermissions().add("p-all");
     ssd.getRoles().add("r-all");
     

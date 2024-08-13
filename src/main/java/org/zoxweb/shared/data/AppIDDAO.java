@@ -185,7 +185,7 @@ public class AppIDDAO
     }
 
 	
-	public String getAppGID()
+	public String getAppGUID()
 	{
 		// TODO Auto-generated method stub
 		return getSubjectID();
@@ -193,7 +193,7 @@ public class AppIDDAO
 
 
 	@Deprecated
-	public void setAppGID(String appGID)
+	public void setAppGUID(String appGID)
 		throws UnsupportedOperationException
 	{
 		// TODO Auto-generated method stub

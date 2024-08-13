@@ -2,7 +2,7 @@ package org.zoxweb.shared.util;
 
 public interface AppGlobalID<T> 
 {
-	T getAppGID();
+	T getAppGUID();
 	
-	void setAppGID(T appGID);
+	void setAppGUID(T appGID);
 }

@@ -336,9 +336,9 @@ public class CryptoUtil {
         hmac.update(SharedStringUtil.getBytes(ekd.getSubjectID()));
       }
 
-      if (!SharedStringUtil.isEmpty(ekd.getGlobalID())) {
+      if (!SharedStringUtil.isEmpty(ekd.getGUID())) {
         hmac.update(
-            SharedStringUtil.getBytes(SharedStringUtil.toTrimmedLowerCase(ekd.getGlobalID())));
+            SharedStringUtil.getBytes(SharedStringUtil.toTrimmedLowerCase(ekd.getGUID())));
       }
     }
 
@@ -446,9 +446,9 @@ public class CryptoUtil {
         hmac.update(SharedStringUtil.getBytes(ekd.getSubjectID()));
       }
 
-      if (!SharedStringUtil.isEmpty(ekd.getGlobalID())) {
+      if (!SharedStringUtil.isEmpty(ekd.getGUID())) {
         hmac.update(
-            SharedStringUtil.getBytes(SharedStringUtil.toTrimmedLowerCase(ekd.getGlobalID())));
+            SharedStringUtil.getBytes(SharedStringUtil.toTrimmedLowerCase(ekd.getGUID())));
       }
     }
 

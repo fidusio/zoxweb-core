@@ -5,5 +5,5 @@ public interface GlobalIDBase<T>
     /**
      * @return the global identifier of the object
      */
-    T getGlobalID();
+    T getGUID();
 }

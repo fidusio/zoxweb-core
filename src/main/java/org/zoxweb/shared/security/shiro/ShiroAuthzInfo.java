@@ -13,15 +13,15 @@ extends ShiroDomain
 
 
         // The subject that
-        SUBJECT_ID(NVConfigManager.createNVConfig("subject_id", "The subject global identifier.", "SubjectGID", false, true, String.class)),
+        SUBJECT_GUID(NVConfigManager.createNVConfig("subject_guid", "The subject global identifier.", "SubjectGID", false, true, String.class)),
         SUBJECT_TYPE(NVConfigManager.createNVConfig("subject_type", "The subject type.", "SubjectType", false, true, String.class)),
 
 
-        AUTHZ_ID(NVConfigManager.createNVConfig("authz_id", "The authorization global identifier.", "AuthzGID", false, true, String.class)),
+        AUTHZ_ID(NVConfigManager.createNVConfig("authz_guid", "The authorization global identifier.", "AuthzGID", false, true, String.class)),
         AUTHZ_TYPE(NVConfigManager.createNVConfig("authz_type", "The authorization type permission, role or role group.", "AuthzType", false, true, SecurityModel.AuthzType.class)),
 
 
-        RESOURCE_ID(NVConfigManager.createNVConfig("resource_id", "The resource global identifier.", "ResourceGID", false, true, String.class)),
+        RESOURCE_ID(NVConfigManager.createNVConfig("resource_guid", "The resource global identifier.", "ResourceGID", false, true, String.class)),
         RESOURCE_TYPE(NVConfigManager.createNVConfig("resource_type", "The resource type.", "ResourceType", false, true, String.class)),
         ;
 
@@ -49,18 +49,18 @@ extends ShiroDomain
     /**
      * @return GID of a subject or resource
      */
-    public String getSubjectID()
+    public String getSubjectGUID()
     {
-        return lookupValue(Param.SUBJECT_ID);
+        return lookupValue(Param.SUBJECT_GUID);
     }
 
     /**
      *
      * @param subjectID the GID of subject or resource
      */
-    public void setSubjectID(String subjectID)
+    private void setSubjectGUID(String subjectID)
     {
-        setValue(Param.SUBJECT_ID, subjectID);
+        setValue(Param.SUBJECT_GUID, subjectID);
     }
 
     /**
@@ -91,7 +91,7 @@ extends ShiroDomain
      *
      * @param authzID gid of the authorization
      */
-    private void setAuthzID(String authzID)
+    private void setAuthzGUID(String authzID)
     {
         setValue(Param.AUTHZ_ID, authzID);
     }
@@ -115,7 +115,7 @@ extends ShiroDomain
      * Get the resource global id
      * @return
      */
-    public String getResourceID()
+    public String getResourceGUID()
     {
         return lookupValue(Param.RESOURCE_ID);
     }
@@ -145,17 +145,17 @@ extends ShiroDomain
         SharedUtil.checkIfNulls("Shiro Authz null", shiroBase);
         if (shiroBase instanceof ShiroPermission)
         {
-            setAuthzID(((ShiroPermission) shiroBase).getGlobalID());
+            setAuthzGUID(((ShiroPermission) shiroBase).getGUID());
             setAuthzType(SecurityModel.AuthzType.PERMISSION);
         }
         else if (shiroBase instanceof ShiroRoleGroup)
         {
-            setAuthzID(((ShiroRoleGroup) shiroBase).getGlobalID());
+            setAuthzGUID(((ShiroRoleGroup) shiroBase).getGUID());
             setAuthzType(SecurityModel.AuthzType.ROLE_GROUP);
         }
         else if (shiroBase instanceof ShiroRole)
         {
-            setAuthzID(((ShiroRole) shiroBase).getGlobalID());
+            setAuthzGUID(((ShiroRole) shiroBase).getGUID());
             setAuthzType(SecurityModel.AuthzType.ROLE);
         }
         else
@@ -169,8 +169,8 @@ extends ShiroDomain
     public ShiroAuthzInfo setResource(NVEntity resource)
     {
         SharedUtil.checkIfNulls("Resource null", resource);
-        SharedUtil.checkIfNulls("Resource global id null", resource.getGlobalID());
-        setResourceID(resource.getGlobalID());
+        SharedUtil.checkIfNulls("Resource global id null", resource.getGUID());
+        setResourceID(resource.getGUID());
         setResourceType(resource.getClass().getName());
         return this;
     }
@@ -178,8 +178,8 @@ extends ShiroDomain
     public ShiroAuthzInfo setSubject(NVEntity subject)
     {
         SharedUtil.checkIfNulls("Subject null", subject);
-        SharedUtil.checkIfNulls("Subject global id null", subject.getGlobalID());
-        setSubjectID(subject.getGlobalID());
+        SharedUtil.checkIfNulls("Subject global id null", subject.getGUID());
+        setSubjectGUID(subject.getGUID());
         setSubjectType(subject.getClass().getName());
         return this;
     }

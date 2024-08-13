@@ -35,7 +35,7 @@ implements AppGlobalID<String>, SubjectID<String>
   implements GetNVConfig, GetName
   {
     SUBJECT_ID(NVConfigManager.createNVConfig("subject_id", "Subject ID", "SubjectID", false, true, String.class)),
-    APP_GID(NVConfigManager.createNVConfig("app_gid", "App global ID", "AppGID", false, true, String.class)),
+    APP_GUID(NVConfigManager.createNVConfig("app_guid", "App global ID", "AppGUID", false, true, String.class)),
     ROLES(NVConfigManager.createNVConfig("roles", "Subject roles", "Roles", false, true, NVStringList.class)),
     PERMISSIONS(NVConfigManager.createNVConfig("permissions", "Subject permissions", "Permissions", false, true, NVStringList.class)),
  
@@ -59,7 +59,7 @@ implements AppGlobalID<String>, SubjectID<String>
   
   }
   
-  public static final NVConfigEntity NVC_SESSION_DATA = new NVConfigEntityLocal("shiro_session_data", null , "ShiroSubjectData", true, false, false, false, ShiroSessionData.class, SharedUtil.extractNVConfigs(Param.SUBJECT_ID, Param.APP_GID, Param.ROLES, Param.PERMISSIONS), null, false, PropertyDAO.NVC_PROPERTY_DAO);
+  public static final NVConfigEntity NVC_SESSION_DATA = new NVConfigEntityLocal("shiro_session_data", null , "ShiroSubjectData", true, false, false, false, ShiroSessionData.class, SharedUtil.extractNVConfigs(Param.SUBJECT_ID, Param.APP_GUID, Param.ROLES, Param.PERMISSIONS), null, false, PropertyDAO.NVC_PROPERTY_DAO);
   public ShiroSessionData() {
     super(NVC_SESSION_DATA);
     // TODO Auto-generated constructor stubs
@@ -76,15 +76,15 @@ implements AppGlobalID<String>, SubjectID<String>
   }
 
   @Override
-  public String getAppGID() {
+  public String getAppGUID() {
     // TODO Auto-generated method stub
-    return lookupValue((GetName)Param.APP_GID);
+    return lookupValue((GetName)Param.APP_GUID);
   }
 
   @Override
-  public void setAppGID(String appGID) {
+  public void setAppGUID(String appGID) {
     // TODO Auto-generated method stub
-    setValue(Param.APP_GID, appGID);
+    setValue(Param.APP_GUID, appGID);
     
   }
 

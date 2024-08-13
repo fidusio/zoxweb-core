@@ -36,7 +36,7 @@ public class AppDeviceDAO
         implements GetNVConfig
     {
 
-        APP_GID(NVConfigManager.createNVConfig("app_gid", "App GID","AddGID", true, false, String.class)),
+        APP_GUID(NVConfigManager.createNVConfig("app_guid", "App GUID","AddGUID", true, false, String.class)),
         DEVICE(NVConfigManager.createNVConfigEntity("device", "Device information", "Device", true, false, DeviceDAO.NVC_DEVICE_DAO, NVConfigEntity.ArrayType.NOT_ARRAY)),
         ;
 
@@ -76,7 +76,7 @@ public class AppDeviceDAO
      * @return
      */
     public String getDomainID() {
-        return (getAppGID() != null ? SharedStringUtil.valueBeforeRightToken(getAppGID(),"-") : null);
+        return (getAppGUID() != null ? SharedStringUtil.valueBeforeRightToken(getAppGUID(),"-") : null);
     }
 
     /**
@@ -84,25 +84,25 @@ public class AppDeviceDAO
      * @return
      */
     public String getAppID() {
-        return (getAppGID() != null ? SharedStringUtil.valueAfterRightToken(getAppGID(), "-") : null);
+        return (getAppGUID() != null ? SharedStringUtil.valueAfterRightToken(getAppGUID(), "-") : null);
     }
 
     /**
      * Returns the app ID.
      * @return
      */
-    public String getAppGID() {
-        return lookupValue(Param.APP_GID);
+    public String getAppGUID() {
+        return lookupValue(Param.APP_GUID);
     }
 
     /**
      * Sets the app ID.
      * @param appGID
      */
-    public void setAppGID(String appGID) 
+    public void setAppGUID(String appGID)
     {
     	AppIDDAO.toAppID(appGID);
-        setValue(Param.APP_GID, appGID);
+        setValue(Param.APP_GUID, appGID);
     }
 
     /**

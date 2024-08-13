@@ -20,7 +20,6 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 
-import org.zoxweb.server.security.CryptoUtil;
 import org.zoxweb.shared.api.APIDataStore;
 import org.zoxweb.shared.crypto.EncryptedKeyDAO;
 import org.zoxweb.shared.crypto.KeyLockType;
@@ -93,7 +92,7 @@ public final class KeyMakerProvider
     ekd.setObjectReference(userIDDAO);
     ekd.setKeyLockType(KeyLockType.USER_ID);
     ekd.setUserID(userIDDAO.getReferenceID());
-    ekd.setGlobalID(userIDDAO.getGlobalID());
+    ekd.setGUID(userIDDAO.getGUID());
     return ekd;
   }
 
@@ -112,7 +111,7 @@ public final class KeyMakerProvider
         ekd.setObjectReference(nve);
         ekd.setKeyLockType(KeyLockType.USER_ID);
         ekd.setUserID(nve.getUserID());
-        ekd.setGlobalID(nve.getGlobalID());
+        ekd.setGUID(nve.getGUID());
         dataStore.insert(ekd);
       }
     } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException e) {
