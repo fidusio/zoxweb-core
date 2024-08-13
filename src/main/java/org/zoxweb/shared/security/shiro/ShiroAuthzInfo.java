@@ -111,6 +111,10 @@ extends ShiroDomain
     }
 
 
+    /**
+     * Get the resource global id
+     * @return
+     */
     public String getResourceID()
     {
         return lookupValue(Param.RESOURCE_ID);
@@ -122,6 +126,10 @@ extends ShiroDomain
         setValue(Param.RESOURCE_ID, resourceID);
     }
 
+    /**
+     * Get the resource type, if null the authz info is just for the subject
+     * @return the resource class name null if no set
+     */
     public String getResourceType()
     {
         return lookupValue(Param.RESOURCE_TYPE);
@@ -130,5 +138,49 @@ extends ShiroDomain
     public void setResourceType(String resourceType)
     {
         setValue(Param.RESOURCE_TYPE, resourceType);
+    }
+
+    public ShiroAuthzInfo setAuthz(ShiroBase shiroBase)
+    {
+        SharedUtil.checkIfNulls("Shiro Authz null", shiroBase);
+        if (shiroBase instanceof ShiroPermission)
+        {
+            setAuthzID(((ShiroPermission) shiroBase).getGlobalID());
+            setAuthzType(SecurityModel.AuthzType.PERMISSION);
+        }
+        else if (shiroBase instanceof ShiroRoleGroup)
+        {
+            setAuthzID(((ShiroRoleGroup) shiroBase).getGlobalID());
+            setAuthzType(SecurityModel.AuthzType.ROLE_GROUP);
+        }
+        else if (shiroBase instanceof ShiroRole)
+        {
+            setAuthzID(((ShiroRole) shiroBase).getGlobalID());
+            setAuthzType(SecurityModel.AuthzType.ROLE);
+        }
+        else
+        {
+            throw new IllegalArgumentException("Invalid Authz " + shiroBase);
+        }
+
+        return this;
+    }
+
+    public ShiroAuthzInfo setResource(NVEntity resource)
+    {
+        SharedUtil.checkIfNulls("Resource null", resource);
+        SharedUtil.checkIfNulls("Resource global id null", resource.getGlobalID());
+        setResourceID(resource.getGlobalID());
+        setResourceType(resource.getClass().getName());
+        return this;
+    }
+
+    public ShiroAuthzInfo setSubject(NVEntity subject)
+    {
+        SharedUtil.checkIfNulls("Subject null", subject);
+        SharedUtil.checkIfNulls("Subject global id null", subject.getGlobalID());
+        setSubjectID(subject.getGlobalID());
+        setSubjectType(subject.getClass().getName());
+        return this;
     }
 }
