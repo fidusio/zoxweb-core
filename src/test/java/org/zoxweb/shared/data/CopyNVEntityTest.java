@@ -26,7 +26,7 @@ public class CopyNVEntityTest {
 		
 		PhoneDAO phoneDAO = new PhoneDAO();
 		phoneDAO.setReferenceID("12345");
-		phoneDAO.setUserID("20000");
+		phoneDAO.setSubjectGUID("20000");
 		phoneDAO.setName("My Phone");
 		phoneDAO.setDescription("My mobile number.");
 		phoneDAO.setNumber("5551234");
@@ -59,14 +59,14 @@ public class CopyNVEntityTest {
 		folderInfoDAO.setDescription("Personal folder.");
 		folderInfoDAO.setCreationTime(System.currentTimeMillis());
 		folderInfoDAO.setReferenceID("00000");
-		folderInfoDAO.setUserID("20000");
+		folderInfoDAO.setSubjectGUID("20000");
 		
 		FileInfoDAO fileInfoDAO1 = new FileInfoDAO();
 		fileInfoDAO1.setName("File 1");
 		fileInfoDAO1.setDescription("My file 1.");
 		fileInfoDAO1.setFileType(FileType.FILE);
 		fileInfoDAO1.setReferenceID("11111");
-		fileInfoDAO1.setUserID("20000");
+		fileInfoDAO1.setSubjectGUID("20000");
 		
 		folderInfoDAO.getFolderContent().add(fileInfoDAO1);
 		
@@ -75,7 +75,7 @@ public class CopyNVEntityTest {
 		fileInfoDAO2.setDescription("My file 2.");
 		fileInfoDAO2.setFileType(FileType.FILE);
 		fileInfoDAO2.setReferenceID("22222");
-		fileInfoDAO2.setUserID("20000");
+		fileInfoDAO2.setSubjectGUID("20000");
 		FileInfoDAO remoteFileInfo = new FileInfoDAO();
 		remoteFileInfo.setReferenceID("99999");
 		remoteFileInfo.setDescription("Remote file.");

@@ -29,8 +29,9 @@ import java.util.Map;
 @SuppressWarnings("serial")
 public abstract class NVEntity
 	implements ReferenceID<String>,
-			   AccountID<String>,
-			   UserID<String>,
+			   //AccountID<String>,
+			   //UserID<String>,
+			   SubjectGUID<String>,
                GlobalID<String>,
 			   GetNVConfig,
 			   GetName {

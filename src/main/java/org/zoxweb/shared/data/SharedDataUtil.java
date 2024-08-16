@@ -15,24 +15,11 @@
  */
 package org.zoxweb.shared.data;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.zoxweb.shared.filters.MatchPatternFilter;
 import org.zoxweb.shared.filters.NVEntityFilter;
-import org.zoxweb.shared.util.ArrayValues;
-import org.zoxweb.shared.util.MetaToken;
-import org.zoxweb.shared.util.NVConfig;
-import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigMapUtil;
-import org.zoxweb.shared.util.NVEntity;
-import org.zoxweb.shared.util.NVPair;
-import org.zoxweb.shared.util.SharedStringUtil;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.*;
+
+import java.util.*;
 
 /**
  * The SharedDataUtil class is a utility class.
@@ -662,7 +649,7 @@ public class SharedDataUtil
 				//ret.setReferenceID(nveToCopy.getReferenceID());			
 				continue;
 			}
-			else if (nvc.getName().equals(MetaToken.USER_ID.getName()) && omitUserID)
+			else if (nvc.getName().equals(MetaToken.SUBJECT_GUID.getName()) && omitUserID)
 			{
 				// If user ID should be not be omitted, user ID is left null.
 				//ret.setUserID(nveToCopy.getUserID());

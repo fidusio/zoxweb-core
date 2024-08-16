@@ -15,12 +15,12 @@
  */
 package org.zoxweb.shared.api;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.zoxweb.shared.data.TimeStampDAO;
 import org.zoxweb.shared.security.KeyMaker;
 import org.zoxweb.shared.util.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class implements API configuration information interface to 
@@ -43,6 +43,7 @@ public class APIConfigInfoDAO
 	public enum Params
 		implements GetNVConfig
 	{
+		ACCOUNT_ID(NVConfigManager.createNVConfig(MetaToken.ACCOUNT_ID.getName(), "The account id","AccountID", true, false, false, true, true, String.class, null)),
 		API_TYPE_NAME(NVConfigManager.createNVConfig("api_type_name", "The name of the API type.","APITypeName", false, false, String.class)),
 		OAUTH_VERSION(NVConfigManager.createNVConfig("oauth_version", "OAuth version","OAuthVersion", false, false, OAuthVersion.class)),
 		//DESCRIPTION(NVConfigManager.createNVConfig("description", null, "Description", false, true, String.class)),
@@ -318,6 +319,25 @@ public class APIConfigInfoDAO
 		return apiSecurityManager;
 	}
 
+	/**
+	 * Returns the account ID.
+	 * @return account id
+	 */
+//	@Column(name = "account_id")
+	@Override
+	public String getAccountID()
+	{
+		return lookupValue(Params.ACCOUNT_ID);
+	}
 
+	/**
+	 * Sets the account ID.
+	 * @param accountID
+	 */
+	@Override
+	public void setAccountID(String accountID)
+	{
+		setValue(Params.ACCOUNT_ID, accountID);
+	}
 
 }

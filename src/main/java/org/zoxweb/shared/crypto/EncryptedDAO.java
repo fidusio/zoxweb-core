@@ -16,49 +16,30 @@
 package org.zoxweb.shared.crypto;
 
 import org.zoxweb.shared.data.TimeStampDAO;
-
-import org.zoxweb.shared.util.GetNVConfig;
-import org.zoxweb.shared.util.NVConfig;
-import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
-import org.zoxweb.shared.util.NVConfigManager;
-import org.zoxweb.shared.util.NVGenericMap;
-
-import org.zoxweb.shared.util.SharedBase64;
-import org.zoxweb.shared.util.SharedStringUtil;
-import org.zoxweb.shared.util.SharedUtil;
-import org.zoxweb.shared.util.SubjectID;
+import org.zoxweb.shared.util.*;
 
 @SuppressWarnings("serial")
 public class EncryptedDAO
     extends TimeStampDAO
-    implements CryptoBase,SubjectID<String>
+    implements CryptoBase, SubjectGUID<String>
 {
+	/**
+	 * The getGUID() and setGUID() must hold the same value of the resource GUID it is one to one mapping
+	 * on the other hand the subjectGUID is the same of the subject that owns the key
+	 */
 
-	//private String algoName;
-	//private String description;
-//	private String subject[];// optional
-//	
-//	private String algoParameters[];// optional
-//	private byte[] iv;// base64
-//	private byte[] encryptedData; // base64 if string
-//	private String expirationTime;// optional, long value or yyyy-mm-dd hh:mm:ss[.mmm] in GMT time zone only
-	//private String hint;// optional
-	//private String hmacAlgoName;
-	//private byte[] hmac;// base64
-	
 	protected enum Param
         implements GetNVConfig
     {
-		SUBJECT_ID(NVConfigManager.createNVConfig("subject_id", "Optional subject ID", "SubjectID", false, true, String.class)),
-		SUBJECT_PROPERTIES(NVConfigManager.createNVConfig("subject_properties", "Subject properties", "SubjectPropeties", false, true, NVGenericMap.class)),
+		SUBJECT_GUID(NVConfigManager.createNVConfig("subject_guid", "The subject GUID owner of the key", "SubjectGUID", false, true, String.class)),
+		//SUBJECT_PROPERTIES(NVConfigManager.createNVConfig("subject_properties", "Subject properties", "SubjectProperties", false, true, NVGenericMap.class)),
 		ALGO_PROPERTIES(NVConfigManager.createNVConfig("algo_properties", "Algorithm properties", "AlgorithmProperties", false, true, NVGenericMap.class)),
 		IV(NVConfigManager.createNVConfig("iv", "Initialization vector", "IV", true, true, byte[].class)),
 		DATA_LENGTH(NVConfigManager.createNVConfig("data_length", "The original data length in bytes", "DataLength", false, true, Long.class)),
 		ENCRYPTED_DATA(NVConfigManager.createNVConfig("encrypted_data", "Encrypted data", "EncryptedData", true, true, byte[].class)),
 		EXPIRATION_TIME(NVConfigManager.createNVConfig("expiration_time", "Expiration time", "ExpirationTime", false, true, String.class)),
 		HINT(NVConfigManager.createNVConfig("hint", "Hint of the encrypted message", "Hint", false, true, String.class)),
-		HMAC_ALOG_NAME(NVConfigManager.createNVConfig("hmac_algo_name", "The HMAC algorithm name", "HMACAlgoName", true, true, String.class)),
+		HMAC_ALGO_NAME(NVConfigManager.createNVConfig("hmac_algo_name", "The HMAC algorithm name", "HMACAlgoName", true, true, String.class)),
 		HMAC(NVConfigManager.createNVConfig("hmac", "The HMAC Value", "HMAC", true, true, byte[].class)),
 		HMAC_ALL(NVConfigManager.createNVConfig("hmac_all", "If true hmac will applied to global_id", "HMACAll", false, true, Boolean.class)),
 
@@ -90,14 +71,14 @@ public class EncryptedDAO
 		super(nvce);
 	}
 
-	/**
-	 * Get the list of principals
-	 * @return null or the list
-	 */
-	public NVGenericMap  getSubjectProperties()
-	{
-		return (NVGenericMap) lookup(Param.SUBJECT_PROPERTIES);
-	}
+//	/**
+//	 * Get the list of principals
+//	 * @return null or the list
+//	 */
+//	public NVGenericMap  getSubjectProperties()
+//	{
+//		return (NVGenericMap) lookup(Param.SUBJECT_PROPERTIES);
+//	}
 	
 //	public void setSubjectProperties(ArrayValues<NVPair> subject)
 //    {
@@ -171,12 +152,12 @@ public class EncryptedDAO
 
 	public String getHMACAlgoName()
     {
-		return lookupValue(Param.HMAC_ALOG_NAME);
+		return lookupValue(Param.HMAC_ALGO_NAME);
 	}
 
 	public void setHMACAlgoName(String hmac_algo_name)
     {
-		setValue(Param.HMAC_ALOG_NAME, hmac_algo_name);
+		setValue(Param.HMAC_ALGO_NAME, hmac_algo_name);
 	}
 
 	public byte[] getHMAC()
@@ -197,8 +178,8 @@ public class EncryptedDAO
 		sb.append(getName());
 		sb.append(':');
 		sb.append(getDescription());
-		sb.append(':');
-		sb.append(SharedUtil.toCanonicalID(',', (Object[])getSubjectProperties().values()));
+//		sb.append(':');
+//		sb.append(SharedUtil.toCanonicalID(',', (Object[])getSubjectProperties().values()));
 		sb.append(':');
 		sb.append(SharedUtil.toCanonicalID(',', (Object[])getAlgoProperties().values()));
 		sb.append(':');
@@ -273,16 +254,15 @@ public class EncryptedDAO
     }
 
 	@Override
-	public String getSubjectID() {
+	public String getSubjectGUID() {
 		// TODO Auto-generated method stub
-		return lookupValue(Param.SUBJECT_ID);
+		return lookupValue(Param.SUBJECT_GUID);
 	}
 
 	@Override
-	public void setSubjectID(String subjectID) {
+	public void setSubjectGUID(String subjectGUID) {
 		// TODO Auto-generated method stub
-		setValue(Param.SUBJECT_ID, subjectID);
-		
+		setValue(Param.SUBJECT_GUID, subjectGUID);
 	}
 	
 	public boolean isHMACAll()

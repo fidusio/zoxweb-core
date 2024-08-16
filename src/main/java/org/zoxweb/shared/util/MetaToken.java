@@ -32,7 +32,8 @@ public enum MetaToken
 	// 	Reference ID of the attribute.
 	REFERENCE_ID("reference_id"),
 	// Global ID of the attributes
-	GLOBAL_ID("global_id"),
+	GUID("guid"),
+	SUBJECT_GUID("subject_guid"),
 	// 	Value filter of the attribute.
 	VALUE_FILTER("value_filter"),
 	// 	Attributes list or collection.
@@ -51,8 +52,6 @@ public enum MetaToken
 	DOMAIN_ID("domain_id"),
 	// Account ID
 	ACCOUNT_ID("account_id"),
-	// User ID
-	USER_ID("user_id"),
 	//	Array property of the attribute.
 	IS_ARRAY("is_array"),
 	// RelationOperator

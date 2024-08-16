@@ -15,33 +15,27 @@
  */
 package org.zoxweb.shared.data;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.zoxweb.shared.accounting.PaymentInfoDAO;
 import org.zoxweb.shared.data.DataConst.DataParam;
-import org.zoxweb.shared.util.DomainID;
-import org.zoxweb.shared.util.GetNVConfig;
-import org.zoxweb.shared.util.NVConfig;
-import org.zoxweb.shared.util.NVConfigEntity;
+import org.zoxweb.shared.util.*;
 import org.zoxweb.shared.util.NVConfigEntity.ArrayType;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
-import org.zoxweb.shared.util.NVConfigManager;
-import org.zoxweb.shared.util.NVPair;
-import org.zoxweb.shared.util.SharedStringUtil;
-import org.zoxweb.shared.util.SharedUtil;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
  */
 @SuppressWarnings("serial")
 public class MerchantDAO 
-	extends SetNameDescriptionDAO 
+	extends SetNameDescriptionDAO
+	implements AccountID<String>
 {
 	
 	public enum Param
 		implements GetNVConfig
 	{
+		ACCOUNT_ID(NVConfigManager.createNVConfig(MetaToken.ACCOUNT_ID.getName(), "The account id","AccountID", true, false, false, true, true, String.class, null)),
 		LIST_OF_DOMAIN_IDS(NVConfigManager.createNVConfigEntity("domain_ids", "Domain ID", "DomainIDs", true, true, DomainInfoDAO.NVC_DOMAIN_INFO_DAO, ArrayType.LIST)),
 		COMPANY_TYPE(NVConfigManager.createNVConfig("company_type", "Type of company", "CompanyType", false, true, String.class)),
 		LIST_OF_ADDRESSES(NVConfigManager.createNVConfigEntity("addresses", "List of addresses", "Addresses", false, true, AddressDAO.NVC_ADDRESS_DAO, ArrayType.LIST)),
@@ -224,5 +218,21 @@ public class MerchantDAO
 		SharedUtil.checkIfNulls("Name cannot be empty or null.", SharedStringUtil.trimOrNull(name));
 		setValue(DataParam.NAME, name);
 	}
-	
+
+
+	@Override
+	public String getAccountID()
+	{
+		return lookupValue(Param.ACCOUNT_ID);
+	}
+
+	/**
+	 * Sets the account ID.
+	 * @param accountID
+	 */
+	@Override
+	public void setAccountID(String accountID)
+	{
+		setValue(Param.ACCOUNT_ID, accountID);
+	}
 }

@@ -13,7 +13,7 @@ extends ShiroDomain
 
 
         // The subject that
-        SUBJECT_GUID(NVConfigManager.createNVConfig("subject_guid", "The subject global identifier.", "SubjectGID", false, true, String.class)),
+//        SUBJECT_GUID(NVConfigManager.createNVConfig("subject_guid", "The subject global identifier.", "SubjectGID", false, true, String.class)),
         SUBJECT_TYPE(NVConfigManager.createNVConfig("subject_type", "The subject type.", "SubjectType", false, true, String.class)),
 
 
@@ -46,22 +46,7 @@ extends ShiroDomain
         super(NVC_SHIRO_AUTHZ_INFO);
     }
 
-    /**
-     * @return GID of a subject or resource
-     */
-    public String getSubjectGUID()
-    {
-        return lookupValue(Param.SUBJECT_GUID);
-    }
 
-    /**
-     *
-     * @param subjectID the GID of subject or resource
-     */
-    private void setSubjectGUID(String subjectID)
-    {
-        setValue(Param.SUBJECT_GUID, subjectID);
-    }
 
     /**
      * @return the class name of a subject
@@ -74,7 +59,7 @@ extends ShiroDomain
     /**
      * @param subjectType the class name if the subject id
      */
-    private void setSubjectType(String subjectType)
+    public void setSubjectType(String subjectType)
     {
         setValue(Param.SUBJECT_TYPE, subjectType);
     }
@@ -91,7 +76,7 @@ extends ShiroDomain
      *
      * @param authzID gid of the authorization
      */
-    private void setAuthzGUID(String authzID)
+    public void setAuthzGUID(String authzID)
     {
         setValue(Param.AUTHZ_ID, authzID);
     }
@@ -105,7 +90,7 @@ extends ShiroDomain
     }
 
 
-    private void setAuthzType(SecurityModel.AuthzType authzType)
+    public void setAuthzType(SecurityModel.AuthzType authzType)
     {
         setValue(Param.AUTHZ_TYPE, authzType);
     }
@@ -121,7 +106,7 @@ extends ShiroDomain
     }
 
 
-    private void setResourceID(String resourceID)
+    public void setResourceID(String resourceID)
     {
         setValue(Param.RESOURCE_ID, resourceID);
     }
@@ -135,7 +120,7 @@ extends ShiroDomain
         return lookupValue(Param.RESOURCE_TYPE);
     }
 
-    private void setResourceType(String resourceType)
+    public void setResourceType(String resourceType)
     {
         setValue(Param.RESOURCE_TYPE, resourceType);
     }

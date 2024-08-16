@@ -2641,7 +2641,7 @@ public class SharedUtil
 		for (NVConfig nvc : nvce.getAttributes())
 		{
             //Logic needs to be changed, NVEntiy must have reference ID implementation.
-            if (nvc != ReferenceIDDAO.NVC_REFERENCE_ID && nvc != ReferenceIDDAO.NVC_USER_ID && nvc != ReferenceIDDAO.NVC_ACCOUNT_ID) {
+            if (nvc != ReferenceIDDAO.NVC_REFERENCE_ID && nvc != ReferenceIDDAO.NVC_SUBJECT_GUID) {
 
                 if (validateRecursive && nvc instanceof NVConfigEntity)
                 {

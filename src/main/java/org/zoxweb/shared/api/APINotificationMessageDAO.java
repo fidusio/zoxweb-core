@@ -15,19 +15,12 @@
  */
 package org.zoxweb.shared.api;
 
+import org.zoxweb.shared.data.MerchantDAO;
+import org.zoxweb.shared.data.SetNameDescriptionDAO;
+import org.zoxweb.shared.util.*;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import org.zoxweb.shared.data.SetNameDescriptionDAO;
-import org.zoxweb.shared.util.ArrayValues;
-import org.zoxweb.shared.util.GetNVConfig;
-import org.zoxweb.shared.util.NVConfig;
-import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
-import org.zoxweb.shared.util.NVConfigManager;
-import org.zoxweb.shared.util.NVPair;
-import org.zoxweb.shared.util.SharedStringUtil;
-import org.zoxweb.shared.util.SharedUtil;
 
 /**
  * This class defines the APINotificationMessage data access object used to
@@ -47,7 +40,8 @@ public class APINotificationMessageDAO
 	 */
 	public enum Params
 		implements GetNVConfig
-	{	
+	{
+		ACCOUNT_ID(NVConfigManager.createNVConfig(MetaToken.ACCOUNT_ID.getName(), "The account id","AccountID", true, false, false, true, true, String.class, null)),
 		SENDER_ID(NVConfigManager.createNVConfig("sender_id", "The id of the sender.", "SenderID", false, true, String.class)),
 		RECIPIENT_IDS(NVConfigManager.createNVConfig("recipient_ids", "The ids of the recipients.", "RecipientIDs", true, true, String[].class)),
 		TITLE(NVConfigManager.createNVConfig("title", "The title or subject of the email.", "Title", false, true, String.class)),
@@ -333,6 +327,22 @@ public class APINotificationMessageDAO
 	public void setPostTag(String postTokenTag)
 	{
 		setValue(Params.POST_TOKEN_TAG, postTokenTag);
+	}
+
+	@Override
+	public String getAccountID()
+	{
+		return lookupValue(MerchantDAO.Param.ACCOUNT_ID);
+	}
+
+	/**
+	 * Sets the account ID.
+	 * @param accountID
+	 */
+	@Override
+	public void setAccountID(String accountID)
+	{
+		setValue(MerchantDAO.Param.ACCOUNT_ID, accountID);
 	}
 
 }

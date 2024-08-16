@@ -15,10 +15,10 @@
  */
 package org.zoxweb.shared.util;
 
+import org.zoxweb.shared.filters.ValueFilter;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import org.zoxweb.shared.filters.ValueFilter;
 
 /**
  * The dynamic enum map class extends NVPairList is used as a
@@ -31,7 +31,7 @@ public class DynamicEnumMap
 	extends NVPairList
 	implements ValueFilter<String, String>,
 			   AccountID<String>,
-			   UserID<String>,
+			   SubjectGUID<String>,
 			   SetDescription
 {
 	
@@ -39,7 +39,7 @@ public class DynamicEnumMap
 	private boolean staticEnum = false;
 	public static final String NAME_PREFIX = "dynamic_enum_map";
 	private String accountID;
-	private String userID;
+	private String subjectGUID;
 	private String description;
 	
 	/**
@@ -328,9 +328,9 @@ public class DynamicEnumMap
 	 * @return user id
 	 */
 	@Override
-	public String getUserID()
+	public String getSubjectGUID()
     {
-		return userID;
+		return subjectGUID;
 	}
 
 	/**
@@ -338,9 +338,9 @@ public class DynamicEnumMap
 	 * @param userID
 	 */
 	@Override
-	public void setUserID(String userID)
+	public void setSubjectGUID(String userID)
     {
-		this.userID = userID;	
+		this.subjectGUID = userID;
 	}
 
 	/**

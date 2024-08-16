@@ -15,11 +15,11 @@
  */
 package org.zoxweb.shared.util;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.filters.FilterType;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class JSONDemTest {
 	
@@ -27,7 +27,7 @@ public class JSONDemTest {
 
 		DynamicEnumMap dem = new DynamicEnumMap();
 		dem.setReferenceID("123456798");
-		dem.setUserID("48654561");
+		dem.setSubjectGUID("48654561");
 		dem.setAccountID("564654");
 		dem.setName("My Dem");
 		dem.setDescription("This is my dem.");
@@ -61,7 +61,7 @@ public class JSONDemTest {
 		
 		DynamicEnumMap dem2 = new DynamicEnumMap();
 		dem2.setReferenceID("123456798");
-		dem2.setUserID("48654561");
+		dem2.setSubjectGUID("48654561");
 		dem2.setAccountID("564654");
 		dem2.setName("My Dem");
 		dem2.setDescription("This is my dem.");

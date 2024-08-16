@@ -146,7 +146,7 @@ public class APIAppManagerProvider
         	if (device != null)
         	{
         		temp.getDevice().setReferenceID(device.getReferenceID());
-        		temp.getDevice().setUserID(getAPISecurityManager().currentUserID());
+        		temp.getDevice().setSubjectGUID(getAPISecurityManager().currentUserID());
         		temp.getDevice().setGUID(device.getGUID());
         	}
 
@@ -282,7 +282,7 @@ public class APIAppManagerProvider
 		String globalID = IDGeneratorUtil.UUIDV4.generateID();
 		getAPISecurityManager().associateNVEntityToSubjectUserID(userID, userIDRef);
 		userID.setReferenceID(userIDRef);
-		userID.setUserID(userIDRef);
+		userID.setSubjectGUID(userIDRef);
 		userID.getUserInfo().setReferenceID(userIDRef);
 		userID.setGUID(globalID);
 
@@ -299,13 +299,13 @@ public class APIAppManagerProvider
 			UserIDCredentialsDAO userIDCredentials = new UserIDCredentialsDAO();
 			userIDCredentials.setReferenceID(userID.getReferenceID());
 			userIDCredentials.setGUID(globalID);
-			userIDCredentials.setUserID(userID.getReferenceID());
+			userIDCredentials.setSubjectGUID(userID.getReferenceID());
 			userIDCredentials.setLastStatusUpdateTimestamp(System.currentTimeMillis());
 			userIDCredentials.setUserStatus(userIDStatus);
 			userIDCredentials.setCanonicalID(userID.getSubjectID());
 			
 			PasswordDAO passwordDAO = HashUtil.toPassword(HASHType.BCRYPT, 0, 10, password);
-			passwordDAO.setUserID(userID.getReferenceID());
+			passwordDAO.setSubjectGUID(userID.getReferenceID());
 			passwordDAO.setReferenceID(userID.getReferenceID());
 			passwordDAO.setGUID(userID.getGUID());
 			userIDCredentials.setPassword(passwordDAO);
@@ -360,11 +360,11 @@ public class APIAppManagerProvider
 		getAPIDataStore().delete(userID, true);
 		for(NVConfigEntity nvce : USER_NVCs)
 		{
-			getAPIDataStore().delete(nvce, new QueryMatch<String>(RelationalOperator.EQUAL, userID.getReferenceID(), MetaToken.USER_ID));
+			getAPIDataStore().delete(nvce, new QueryMatch<String>(RelationalOperator.EQUAL, userID.getReferenceID(), MetaToken.SUBJECT_GUID));
 		}
-//		getAPIDataStore().delete(UserIDCredentialsDAO.NVC_USER_ID_CREDENTIALS_DAO,  new QueryMatch<String>(RelationalOperator.EQUAL, userID.getReferenceID(), MetaToken.REFERENCE_ID));
-//		getAPIDataStore().delete(AppDeviceDAO.NVC_APP_DEVICE_DAO, new QueryMatch<String>(RelationalOperator.EQUAL, userID.getReferenceID(), MetaToken.USER_ID));
-//		getAPIDataStore().delete(EncryptedKeyDAO.NVCE_ENCRYPTED_KEY_DAO,  new QueryMatch<String>(RelationalOperator.EQUAL, userID.getReferenceID(), MetaToken.USER_ID));
+//		getAPIDataStore().delete(UserIDCredentialsDAO.NVC_SUBJECT_GUID_CREDENTIALS_DAO,  new QueryMatch<String>(RelationalOperator.EQUAL, userID.getReferenceID(), MetaToken.REFERENCE_ID));
+//		getAPIDataStore().delete(AppDeviceDAO.NVC_APP_DEVICE_DAO, new QueryMatch<String>(RelationalOperator.EQUAL, userID.getReferenceID(), MetaToken.SUBJECT_GUID));
+//		getAPIDataStore().delete(EncryptedKeyDAO.NVCE_ENCRYPTED_KEY_DAO,  new QueryMatch<String>(RelationalOperator.EQUAL, userID.getReferenceID(), MetaToken.SUBJECT_GUID));
 
 		
 		// TODO check if a user is logged in and invalidate his current session
@@ -529,7 +529,7 @@ public class APIAppManagerProvider
 //
 //        UserIDDAO ret = null;
 //
-//        List<UserIDDAO> result = getAPIDataStore().search(UserIDDAO.NVC_USER_ID_DAO, null,
+//        List<UserIDDAO> result = getAPIDataStore().search(UserIDDAO.NVC_SUBJECT_GUID_DAO, null,
 //                new QueryMatchString(RelationalOperator.EQUAL, subjectID, UserIDDAO.Param.PRIMARY_EMAIL)
 //        );
 //
@@ -558,7 +558,7 @@ public class APIAppManagerProvider
         UserPreferenceDAO ret = null;
 
         List<UserPreferenceDAO> result = getAPIDataStore().search(UserPreferenceDAO.NVC_USER_PREFERENCE_DAO, null,
-                new QueryMatchString(RelationalOperator.EQUAL, userIDDAO.getReferenceID(), MetaToken.USER_ID),
+                new QueryMatchString(RelationalOperator.EQUAL, userIDDAO.getReferenceID(), MetaToken.SUBJECT_GUID),
                 LogicalOperator.AND,
                 new QueryMatchString(RelationalOperator.EQUAL, appIDDAO.getAppGUID(), UserPreferenceDAO.Param.APP_GUID.getNVConfig())
         );
@@ -592,7 +592,7 @@ public class APIAppManagerProvider
     	try 
     	{
 			PasswordDAO newPasswordDAO = HashUtil.toPassword(HASHType.SHA_512, 0, 8196, newPassword);
-            newPasswordDAO.setUserID(credentials.getReferenceID());
+            newPasswordDAO.setSubjectGUID(credentials.getReferenceID());
             newPasswordDAO.setReferenceID(credentials.getReferenceID());
 			credentials.setPassword(newPasswordDAO);
 			getAPIDataStore().update(credentials);
@@ -742,14 +742,14 @@ public class APIAppManagerProvider
         if (userPreferenceDAO == null) {
             // Does not exist, create UserPreferenceDAO
             userPreferenceDAO = new UserPreferenceDAO();
-            userPreferenceDAO.setUserID(userIDDAO.getReferenceID());
+            userPreferenceDAO.setSubjectGUID(userIDDAO.getReferenceID());
             userPreferenceDAO.setAppGUID(appIDDAO.getAppGUID());
 
             getAPIDataStore().insert(userPreferenceDAO);
         }
 
         // Create AppDeviceDAO
-        appDeviceDAO.setUserID(userIDDAO.getReferenceID());
+        appDeviceDAO.setSubjectGUID(userIDDAO.getReferenceID());
         appDeviceDAO = (AppDeviceDAO) createAppDeviceDAO(appDeviceDAO);
 
         return appDeviceDAO;
@@ -949,7 +949,7 @@ public class APIAppManagerProvider
 		{
 			String roleSubjectID = appID.getAppGUID() + "-" + roleName;
 			if (log.isEnabled()) log.getLogger().info("role:" + roleSubjectID);
-			if (log.isEnabled()) log.getLogger().info("userid:" +userID.getPrimaryEmail() + ":" + userID.getUserID());
+			if (log.isEnabled()) log.getLogger().info("userid:" +userID.getPrimaryEmail() + ":" + userID.getSubjectGUID());
 			ShiroRole role = getAPISecurityManager().lookupRole(roleSubjectID);
 			if (role == null)
 			{

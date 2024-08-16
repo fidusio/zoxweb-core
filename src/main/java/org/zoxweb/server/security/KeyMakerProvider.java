@@ -1,25 +1,6 @@
 package org.zoxweb.server.security;
 
 
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.SignatureException;
-import java.security.UnrecoverableKeyException;
-
-import java.util.HashMap;
-import java.util.List;
-
-
-import java.util.logging.Logger;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
-
 import org.zoxweb.shared.api.APIDataStore;
 import org.zoxweb.shared.crypto.EncryptedKeyDAO;
 import org.zoxweb.shared.crypto.KeyLockType;
@@ -28,6 +9,15 @@ import org.zoxweb.shared.security.AccessException;
 import org.zoxweb.shared.security.KeyMaker;
 import org.zoxweb.shared.util.NVEntity;
 import org.zoxweb.shared.util.SharedUtil;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
+import java.security.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.logging.Logger;
 
 public final class KeyMakerProvider
     implements KeyMaker {
@@ -79,7 +69,7 @@ public final class KeyMakerProvider
       throws NullPointerException, IllegalArgumentException, AccessException {
     SharedUtil.checkIfNulls("User ID is null.", userIDDAO, key);
 
-    if (userIDDAO.getUserID() == null) {
+    if (userIDDAO.getSubjectGUID() == null) {
       throw new IllegalArgumentException("Get user ID is null.");
     }
 
@@ -91,7 +81,7 @@ public final class KeyMakerProvider
     }
     ekd.setObjectReference(userIDDAO);
     ekd.setKeyLockType(KeyLockType.USER_ID);
-    ekd.setUserID(userIDDAO.getReferenceID());
+    ekd.setSubjectGUID(userIDDAO.getSubjectGUID());
     ekd.setGUID(userIDDAO.getGUID());
     return ekd;
   }
@@ -100,7 +90,7 @@ public final class KeyMakerProvider
   public EncryptedKeyDAO createNVEntityKey(APIDataStore<?> dataStore, NVEntity nve, byte[] key)
       throws NullPointerException, IllegalArgumentException, AccessException {
     SharedUtil.checkIfNulls("User ID is null.", nve, key);
-    if (nve.getUserID() == null) {
+    if (nve.getSubjectGUID() == null) {
       throw new IllegalArgumentException("Get user ID is null.");
     }
 
@@ -110,7 +100,7 @@ public final class KeyMakerProvider
         ekd = CryptoUtil.createEncryptedKeyDAO(key);
         ekd.setObjectReference(nve);
         ekd.setKeyLockType(KeyLockType.USER_ID);
-        ekd.setUserID(nve.getUserID());
+        ekd.setSubjectGUID(nve.getSubjectGUID());
         ekd.setGUID(nve.getGUID());
         dataStore.insert(ekd);
       }

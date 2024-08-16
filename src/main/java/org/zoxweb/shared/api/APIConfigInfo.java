@@ -15,10 +15,10 @@
  */
 package org.zoxweb.shared.api;
 
-import java.util.List;
-
 import org.zoxweb.shared.security.KeyMaker;
 import org.zoxweb.shared.util.*;
+
+import java.util.List;
 
 /**
  * The API configuration information interface.
@@ -28,7 +28,7 @@ import org.zoxweb.shared.util.*;
 public interface APIConfigInfo
     extends ReferenceID<String>,
             AccountID<String>,
-            UserID<String>,
+            SubjectGUID<String>,
             SetName,
             SetDescription,
             TimeStampInterface,

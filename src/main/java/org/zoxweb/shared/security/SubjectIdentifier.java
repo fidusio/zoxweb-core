@@ -38,10 +38,10 @@ public class SubjectIdentifier
 	public enum Param
 		implements GetNVConfig
 	{
+		SUBJECT_GUID(NVConfigManager.createNVConfig("subject_guid", "The subject global identifier.", "SubjectGUID", true, true, true, String.class, null)),
 		SUBJECT_ID(NVConfigManager.createNVConfig("subject_id", "Subject identifier", "SubjectID", true, true, true, String.class, CryptoConst.SubjectIDFilter.SINGLETON)),
 		SUBJECT_TYPE(NVConfigManager.createNVConfig("subject_type", "Subject Type", "SubjectType", true, true, SubjectType.class)),
 		SUBJECT_STATUS(NVConfigManager.createNVConfig("subject_status", "Subject status", "SubjectStatus", true, true, CryptoConst.SubjectStatus.class)),
-
 		;
 
         private final NVConfig nvc;
@@ -85,28 +85,12 @@ public class SubjectIdentifier
 
 	
 
-	
-	/**
-	 * Returns the user ID.
-	 * @return user id
-	 */
-	@Override
-	public String getUserID()
-	{
-	    return getReferenceID();
-	}
-
-
 	@Override
 	public String getSubjectID() {
 		// TODO Auto-generated method stub
 		return lookupValue(Param.SUBJECT_ID);
 	}
 
-	public String getSubjectGID()
-	{
-		return getGUID();
-	}
 
 
 	@Override

@@ -1,22 +1,21 @@
 package org.zoxweb.server.security;
 
 
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.zoxweb.shared.crypto.EncryptedDAO;
+import org.zoxweb.shared.util.SharedStringUtil;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
 import java.util.Arrays;
 import java.util.UUID;
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-//import org.junit.BeforeClass;
-//import org.junit.Test;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.zoxweb.shared.crypto.EncryptedDAO;
-import org.zoxweb.shared.util.SharedStringUtil;
 
 public class EncryptedDAOTest {
 
@@ -46,7 +45,7 @@ public class EncryptedDAOTest {
     EncryptedDAO ed = new EncryptedDAO();
     ed.setHMACAll(true);
     ed.setGUID(UUID.randomUUID().toString());
-    ed.setSubjectID(UUID.randomUUID().toString());
+    ed.setSubjectGUID(UUID.randomUUID().toString());
     ed = CryptoUtil.encryptDAO(ed, KEY, DATA);
 
     byte[] dataDecrypted = CryptoUtil.decryptEncryptedDAO(ed, KEY);
@@ -60,9 +59,9 @@ public class EncryptedDAOTest {
     EncryptedDAO ed = new EncryptedDAO();
     ed.setHMACAll(true);
     ed.setGUID(UUID.randomUUID().toString());
-    ed.setSubjectID(UUID.randomUUID().toString());
+    ed.setSubjectGUID(UUID.randomUUID().toString());
     ed = CryptoUtil.encryptDAO(ed, KEY, DATA);
-    ed.setSubjectID(null);
+    ed.setSubjectGUID(null);
     EncryptedDAO finalEd = ed;
     Assertions.assertThrows(SignatureException.class, ()->CryptoUtil.decryptEncryptedDAO(finalEd, KEY));
   }

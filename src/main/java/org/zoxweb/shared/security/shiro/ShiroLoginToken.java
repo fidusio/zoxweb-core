@@ -16,25 +16,21 @@
 package org.zoxweb.shared.security.shiro;
 
 import org.zoxweb.shared.data.SetNameDAO;
-import org.zoxweb.shared.util.NVConfig;
-import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
-import org.zoxweb.shared.util.NVConfigManager;
-
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.*;
 
 @SuppressWarnings("serial")
 public class ShiroLoginToken
 	extends SetNameDAO
+	implements SubjectID<String>
 {
 
 	private static final NVConfig NVC_DOMAIN_ID = NVConfigManager.createNVConfig("domain_id", "The domain id","DomainID", true, true, String.class);
 	private static final NVConfig NVC_APPLICATION_ID = NVConfigManager.createNVConfig("application_id", "The application id trying to login to","ApplicationID", false, true, String.class);
 	private static final NVConfig NVC_REALM = NVConfigManager.createNVConfig("realm", "The realm","realm", false, true, String.class);
-	private static final NVConfig NVC_USER_ID = NVConfigManager.createNVConfig("user_id", "The user","UserID", true, true, String.class);
+	private static final NVConfig NVC_SUBJECT_ID = NVConfigManager.createNVConfig(MetaToken.SUBJECT_ID.getName(), "The user","SubjectID", true, true, String.class);
 	private static final NVConfig NVC_PASSWORD = NVConfigManager.createNVConfig("password", "The password","Password", true, true, String.class);
 
-	private static final NVConfigEntity NVC_LOGIN_TOKEN = new NVConfigEntityLocal("shiro_login_token", "The login token", "ShiroLoginToken", true, false, false, false, ShiroLoginToken.class, SharedUtil.toNVConfigList( NVC_DOMAIN_ID, NVC_APPLICATION_ID, NVC_REALM, NVC_USER_ID, NVC_PASSWORD), null, false, SetNameDAO.NVC_NAME_DAO);
+	private static final NVConfigEntity NVC_LOGIN_TOKEN = new NVConfigEntityLocal("shiro_login_token", "The login token", "ShiroLoginToken", true, false, false, false, ShiroLoginToken.class, SharedUtil.toNVConfigList( NVC_DOMAIN_ID, NVC_APPLICATION_ID, NVC_REALM, NVC_SUBJECT_ID, NVC_PASSWORD), null, false, SetNameDAO.NVC_NAME_DAO);
 
 	public ShiroLoginToken()
 	{
@@ -44,24 +40,16 @@ public class ShiroLoginToken
 	public ShiroLoginToken(String domainID, String applicationID, String realm, String userID, String password)
 	{
 		this();
-		setUserID( userID);
+		setSubjectID(userID);
 		
 		setPassword( password);
 		setDomainID( domainID);
 		setRealm( realm);
 	}
 	
-	@Override
-	public String getUserID()
-	{
-		return lookupValue( NVC_USER_ID);
-	}
 
-    @Override
-	public void setUserID( String user)
-	{
-		setValue( NVC_USER_ID, user);
-	}
+
+
 	
 	public String getApplicationID()
 	{
@@ -105,5 +93,23 @@ public class ShiroLoginToken
 	}
 
 
-	
+	/**
+	 * Sets the subject ID.
+	 *
+	 * @param id
+	 */
+	@Override
+	public void setSubjectID(String id) {
+		setValue(NVC_SUBJECT_ID, id);
+	}
+
+	/**
+	 * Returns the subject ID.
+	 *
+	 * @return
+	 */
+	@Override
+	public String getSubjectID() {
+		return lookupValue(NVC_SUBJECT_ID);
+	}
 }

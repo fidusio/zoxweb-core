@@ -17,7 +17,7 @@ package org.zoxweb.shared.api;
 
 import org.zoxweb.shared.util.AccountID;
 import org.zoxweb.shared.util.ReferenceID;
-import org.zoxweb.shared.util.UserID;
+import org.zoxweb.shared.util.SubjectGUID;
 
 /**
  * The API message interface.
@@ -25,7 +25,7 @@ import org.zoxweb.shared.util.UserID;
  *
  */
 public interface APIMessage
-	extends ReferenceID<String>, AccountID<String>, UserID<String>
+	extends ReferenceID<String>, AccountID<String>, SubjectGUID<String>
 {
 	/**
 	 * This method returns the message type.

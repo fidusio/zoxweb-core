@@ -125,15 +125,7 @@ public class UserIDDAO
 		setValue(Param.USER_INFO, user);
 	}
 	
-	/**
-	 * Returns the user ID.
-	 * @return user id
-	 */
-	@Override
-	public String getUserID()
-	{
-	    return getReferenceID();
-	}
+
 
 
 	@Override

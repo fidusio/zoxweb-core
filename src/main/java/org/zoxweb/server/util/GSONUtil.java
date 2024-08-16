@@ -2401,10 +2401,10 @@ public final class GSONUtil
 				ret.setReferenceID(jo.get(MetaToken.REFERENCE_ID.getName()).getAsString());
 			}
 			
-			if (jo.get(MetaToken.USER_ID.getName()) != null
-                    && !jo.get(MetaToken.USER_ID.getName()).isJsonNull())
+			if (jo.get(MetaToken.SUBJECT_GUID.getName()) != null
+                    && !jo.get(MetaToken.SUBJECT_GUID.getName()).isJsonNull())
 			{
-				ret.setUserID(jo.get(MetaToken.USER_ID.getName()).getAsString());
+				ret.setSubjectGUID(jo.get(MetaToken.SUBJECT_GUID.getName()).getAsString());
 			}
 			
 			if (jo.get(MetaToken.ACCOUNT_ID.getName()) != null
@@ -2484,7 +2484,7 @@ public final class GSONUtil
 		if (dem != null)
 		{
 			writer.name(MetaToken.REFERENCE_ID.getName()).value(dem.getReferenceID());
-			writer.name(MetaToken.USER_ID.getName()).value(dem.getUserID());
+			writer.name(MetaToken.SUBJECT_GUID.getName()).value(dem.getSubjectGUID());
 			writer.name(MetaToken.ACCOUNT_ID.getName()).value(dem.getAccountID());
 			writer.name(MetaToken.NAME.getName()).value(dem.getName());
 			writer.name(MetaToken.DESCRIPTION.getName()).value(dem.getDescription());
