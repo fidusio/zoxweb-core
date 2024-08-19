@@ -61,7 +61,7 @@ public final class SharedStringUtil
     public static final String UTF_16 = "UTF-16";
     public static final String TAG_ENVELOPE ="$$";
     public static final String[] EMPTY_STRING_ARRAY = new String[0];
-    public static final String COMMENT_TAGS[] = {"#", "//"};
+    public static final String[] COMMENT_TAGS = {"#", "//"};
 
 	/**
 	 * The constructor is declared private to prevent instantiation.

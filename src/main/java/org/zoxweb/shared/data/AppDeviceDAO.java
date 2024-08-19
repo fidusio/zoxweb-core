@@ -17,26 +17,31 @@ package org.zoxweb.shared.data;
 
 
 import org.zoxweb.shared.security.SubjectAPIKey;
-import org.zoxweb.shared.util.AppGlobalID;
-import org.zoxweb.shared.util.GetNVConfig;
-import org.zoxweb.shared.util.NVConfig;
-import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
-import org.zoxweb.shared.util.NVConfigManager;
-import org.zoxweb.shared.util.SharedStringUtil;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.*;
 
 @SuppressWarnings("serial")
 public class AppDeviceDAO
     extends SubjectAPIKey
-    implements AppGlobalID<String>
+    implements AppID<String>,
+        CanonicalID
 {
+
+    /**
+     * Converts the implementing object in its canonical form.
+     *
+     * @return text identification of the object
+     */
+    @Override
+    public String toCanonicalID() {
+        return SharedUtil.toCanonicalID('-', getDomainID(), getAppID());
+    }
 
     public enum Param
         implements GetNVConfig
     {
 
-        APP_GUID(NVConfigManager.createNVConfig("app_guid", "App GUID","AddGUID", true, false, String.class)),
+        APP_ID(NVConfigManager.createNVConfig("app_id", "App ID","AppID", true, false, String.class)),
+        DOMAIN_ID(NVConfigManager.createNVConfig("domain_id", "Domain ID","DomainID", true, false, String.class)),
         DEVICE(NVConfigManager.createNVConfigEntity("device", "Device information", "Device", true, false, DeviceDAO.NVC_DEVICE_DAO, NVConfigEntity.ArrayType.NOT_ARRAY)),
         ;
 
@@ -76,7 +81,17 @@ public class AppDeviceDAO
      * @return
      */
     public String getDomainID() {
-        return (getAppGUID() != null ? SharedStringUtil.valueBeforeRightToken(getAppGUID(),"-") : null);
+       return lookupValue(Param.DOMAIN_ID);
+    }
+
+    /**
+     * Sets the domain ID.
+     *
+     * @param domainID
+     */
+    @Override
+    public void setDomainID(String domainID) {
+        setValue(Param.DOMAIN_ID, domainID);
     }
 
     /**
@@ -84,26 +99,20 @@ public class AppDeviceDAO
      * @return
      */
     public String getAppID() {
-        return (getAppGUID() != null ? SharedStringUtil.valueAfterRightToken(getAppGUID(), "-") : null);
-    }
-
-    /**
-     * Returns the app ID.
-     * @return
-     */
-    public String getAppGUID() {
-        return lookupValue(Param.APP_GUID);
+        return lookupValue(Param.APP_ID);
     }
 
     /**
      * Sets the app ID.
-     * @param appGID
+     *
+     * @param appID
      */
-    public void setAppGUID(String appGID)
+    @Override
+    public void setAppID(String appID)
     {
-    	AppIDDAO.toAppID(appGID);
-        setValue(Param.APP_GUID, appGID);
+        setValue(Param.APP_ID, appID);
     }
+
 
     /**
      * Returns the device.

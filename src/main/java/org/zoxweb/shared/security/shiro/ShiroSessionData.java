@@ -1,14 +1,14 @@
 package org.zoxweb.shared.security.shiro;
 
-import org.zoxweb.shared.data.PropertyDAO;
+import org.zoxweb.shared.data.AppIDResource;
 import org.zoxweb.shared.util.*;
 
 import java.util.*;
 
 @SuppressWarnings("serial")
 public class ShiroSessionData
-extends PropertyDAO
-implements AppGlobalID<String>, SubjectID<String>
+extends AppIDResource
+implements SubjectID<String>
 {
   public enum ExtraParam
     implements GetName
@@ -35,7 +35,6 @@ implements AppGlobalID<String>, SubjectID<String>
   implements GetNVConfig, GetName
   {
     SUBJECT_ID(NVConfigManager.createNVConfig("subject_id", "Subject ID", "SubjectID", false, true, String.class)),
-    APP_GUID(NVConfigManager.createNVConfig("app_guid", "App global ID", "AppGUID", false, true, String.class)),
     ROLES(NVConfigManager.createNVConfig("roles", "Subject roles", "Roles", false, true, NVStringList.class)),
     PERMISSIONS(NVConfigManager.createNVConfig("permissions", "Subject permissions", "Permissions", false, true, NVStringList.class)),
  
@@ -59,7 +58,7 @@ implements AppGlobalID<String>, SubjectID<String>
   
   }
   
-  public static final NVConfigEntity NVC_SESSION_DATA = new NVConfigEntityLocal("shiro_session_data", null , "ShiroSubjectData", true, false, false, false, ShiroSessionData.class, SharedUtil.extractNVConfigs(Param.SUBJECT_ID, Param.APP_GUID, Param.ROLES, Param.PERMISSIONS), null, false, PropertyDAO.NVC_PROPERTY_DAO);
+  public static final NVConfigEntity NVC_SESSION_DATA = new NVConfigEntityLocal("shiro_session_data", null , "ShiroSubjectData", true, false, false, false, ShiroSessionData.class, SharedUtil.extractNVConfigs(Param.SUBJECT_ID, Param.ROLES, Param.PERMISSIONS), null, false, AppIDResource.NVC_APP_ID_RESOURCE);
   public ShiroSessionData() {
     super(NVC_SESSION_DATA);
     // TODO Auto-generated constructor stubs
@@ -75,18 +74,7 @@ implements AppGlobalID<String>, SubjectID<String>
     return lookupValue((GetName)Param.ROLES);
   }
 
-  @Override
-  public String getAppGUID() {
-    // TODO Auto-generated method stub
-    return lookupValue((GetName)Param.APP_GUID);
-  }
 
-  @Override
-  public void setAppGUID(String appGID) {
-    // TODO Auto-generated method stub
-    setValue(Param.APP_GUID, appGID);
-    
-  }
 
   @Override
   public String getSubjectID() {

@@ -153,11 +153,11 @@ public class APIAppManagerProvider
         	AppIDDAO appIDDAO = lookupAppIDDAO(temp.getDomainID(), temp.getAppID());
 
         	if (appIDDAO != null) {
-        	    temp.setAppGUID(appIDDAO.getAppGUID());
+        	    temp.setSubjectGUID(appIDDAO.getGUID());
             }
         	else 
         	{
-        		throw new APIException("APP " + new AppIDDAO(temp.getDomainID(), temp.getAppID()).getSubjectID() + " do not exists" );
+        		throw new APIException("APP " + new AppIDDAO(temp.getDomainID(), temp.getAppID()).toCanonicalID() + " do not exists" );
         	}
         	
         	
@@ -374,14 +374,14 @@ public class APIAppManagerProvider
     
     
   
-    public void deleteSubjectAPIKey(String subjectID)
-            throws NullPointerException, IllegalArgumentException, AccessException, APIException {
-
-    	SubjectAPIKey sak = lookupSubjectAPIKey(subjectID, true);
-    	
-    	deleteSubjectAPIKey(sak);
-
-    }
+//    public void deleteSubjectAPIKey(String subjectID)
+//            throws NullPointerException, IllegalArgumentException, AccessException, APIException {
+//
+//    	SubjectAPIKey sak = lookupSubjectAPIKey(subjectID, true);
+//
+//    	deleteSubjectAPIKey(sak);
+//
+//    }
 
    
     public synchronized void deleteSubjectAPIKey(SubjectAPIKey subjectAPIKey)
@@ -395,31 +395,31 @@ public class APIAppManagerProvider
     }
 
     
-    @SuppressWarnings("unchecked")
-	public 	<V extends SubjectAPIKey> V  lookupSubjectAPIKey(String subjectID, boolean throwExceptionIfNotFound)
-            throws NullPointerException, IllegalArgumentException, AccessException, APIException {
-    	List<SubjectAPIKey> result = getAPIDataStore().search(AppDeviceDAO.NVC_APP_DEVICE_DAO, 
-    			null, 
-    			new QueryMatchString(RelationalOperator.EQUAL, subjectID, SubjectAPIKey.Param.SUBJECT_ID));
-    	
-    	if (result == null || result.size() == 0)
-    	{
-    		result = getAPIDataStore().search(SubjectAPIKey.NVC_SUBJECT_API_KEY, 
-        			null, 
-        			new QueryMatchString(RelationalOperator.EQUAL, subjectID, SubjectAPIKey.Param.SUBJECT_ID));
-    		
-    	}
-    	
-    	if (result == null || result.size() != 1)
-    	{
-    		if (throwExceptionIfNotFound)
-    			throw new APIException("Subject not found " + subjectID);
-    		else return null;
-    		
-    	}
-    	
-    	return (V)result.get(0);
-    }
+//    @SuppressWarnings("unchecked")
+//	public 	<V extends SubjectAPIKey> V  lookupSubjectAPIKey(String subjectID, boolean throwExceptionIfNotFound)
+//            throws NullPointerException, IllegalArgumentException, AccessException, APIException {
+//    	List<SubjectAPIKey> result = getAPIDataStore().search(AppDeviceDAO.NVC_APP_DEVICE_DAO,
+//    			null,
+//    			new QueryMatchString(RelationalOperator.EQUAL, subjectID, SubjectAPIKey.Param.SUBJECT_ID));
+//
+//    	if (result == null || result.size() == 0)
+//    	{
+//    		result = getAPIDataStore().search(SubjectAPIKey.NVC_SUBJECT_API_KEY,
+//        			null,
+//        			new QueryMatchString(RelationalOperator.EQUAL, subjectID, SubjectAPIKey.Param.SUBJECT_ID));
+//
+//    	}
+//
+//    	if (result == null || result.size() != 1)
+//    	{
+//    		if (throwExceptionIfNotFound)
+//    			throw new APIException("Subject not found " + subjectID);
+//    		else return null;
+//
+//    	}
+//
+//    	return (V)result.get(0);
+//    }
     
    
 
@@ -433,40 +433,41 @@ public class APIAppManagerProvider
    
     public JWT validateJWT(String token)
             throws NullPointerException, IllegalArgumentException, AccessException, APIException{
-        SharedUtil.checkIfNulls("Null Token", token);
-        JWT jwt;
-        try {
-            jwt = CryptoUtil.parseJWT(token);
-        } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
-            e.printStackTrace();
-            throw new AccessSecurityException("Invalid token");
-        }
-
-        if (jwt.getPayload().getSubjectID() == null) {
-            throw new AccessSecurityException("Missing subject id");
-        }
-
-        // lookup subject id
-        SubjectAPIKey subjectAPIKey = lookupSubjectAPIKey(jwt.getPayload().getSubjectID(), true);
-
-        if (subjectAPIKey == null) {
-            throw new AccessSecurityException("Subject not found: " + jwt.getPayload().getSubjectID());
-        }
-
-        if (subjectAPIKey.getStatus() != Status.ACTIVE) {
-            throw new AccessSecurityException("Invalid SubjectAPIKey: " + subjectAPIKey.getStatus());
-        }
-
-        if (subjectAPIKey instanceof AppDeviceDAO) {
-            // validate domainID and AppID
-            AppDeviceDAO add = (AppDeviceDAO) subjectAPIKey;
-            if (!SharedStringUtil.equals(add.getDomainID(), jwt.getPayload().getDomainID(), true) ||
-                    !SharedStringUtil.equals(add.getAppID(), jwt.getPayload().getAppID(), true)) {
-                throw new AccessSecurityException("Invalid AppID");
-            }
-        }
-
-        return JWTProvider.SINGLETON.decode(subjectAPIKey.getAPIKeyAsBytes(), token);
+		throw new IllegalArgumentException("Not implemented yet");
+//        SharedUtil.checkIfNulls("Null Token", token);
+//        JWT jwt;
+//        try {
+//            jwt = CryptoUtil.parseJWT(token);
+//        } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+//            e.printStackTrace();
+//            throw new AccessSecurityException("Invalid token");
+//        }
+//
+//        if (jwt.getPayload().getSubjectID() == null) {
+//            throw new AccessSecurityException("Missing subject id");
+//        }
+//
+//        // lookup subject id
+//        SubjectAPIKey subjectAPIKey = lookupSubjectAPIKey(jwt.getPayload().getSubjectID(), true);
+//
+//        if (subjectAPIKey == null) {
+//            throw new AccessSecurityException("Subject not found: " + jwt.getPayload().getSubjectID());
+//        }
+//
+//        if (subjectAPIKey.getStatus() != Status.ACTIVE) {
+//            throw new AccessSecurityException("Invalid SubjectAPIKey: " + subjectAPIKey.getStatus());
+//        }
+//
+//        if (subjectAPIKey instanceof AppDeviceDAO) {
+//            // validate domainID and AppID
+//            AppDeviceDAO add = (AppDeviceDAO) subjectAPIKey;
+//            if (!SharedStringUtil.equals(add.getDomainID(), jwt.getPayload().getDomainID(), true) ||
+//                    !SharedStringUtil.equals(add.getAppID(), jwt.getPayload().getAppID(), true)) {
+//                throw new AccessSecurityException("Invalid AppID");
+//            }
+//        }
+//
+//        return JWTProvider.SINGLETON.decode(subjectAPIKey.getAPIKeyAsBytes(), token);
     }
 
    
@@ -560,7 +561,7 @@ public class APIAppManagerProvider
         List<UserPreferenceDAO> result = getAPIDataStore().search(UserPreferenceDAO.NVC_USER_PREFERENCE_DAO, null,
                 new QueryMatchString(RelationalOperator.EQUAL, userIDDAO.getReferenceID(), MetaToken.SUBJECT_GUID),
                 LogicalOperator.AND,
-                new QueryMatchString(RelationalOperator.EQUAL, appIDDAO.getAppGUID(), UserPreferenceDAO.Param.APP_GUID.getNVConfig())
+                new QueryMatchString(RelationalOperator.EQUAL, appIDDAO.getGUID(), UserPreferenceDAO.Param.APP_GUID.getNVConfig())
         );
 
         if (result != null && !result.isEmpty()) {
@@ -702,7 +703,7 @@ public class APIAppManagerProvider
 
         SharedUtil.checkIfNulls("UserInfoDAO is null", userInfoDAO);
         SharedUtil.checkIfNulls("AppDeviceDAO is null", appDeviceDAO);
-        SharedUtil.checkIfNulls("AppIDDAO is null", appDeviceDAO.getAppGUID());
+        SharedUtil.checkIfNulls("AppIDDAO is null", appDeviceDAO.getSubjectGUID());
         if (SharedStringUtil.isEmpty(subjectID) || SharedStringUtil.isEmpty(password)) {
             throw new NullPointerException("Username and/or password is null");
         }
@@ -718,7 +719,7 @@ public class APIAppManagerProvider
 
        
      
-        appDeviceDAO.setAppGUID(appIDDAO.getAppGUID());
+        appDeviceDAO.setSubjectGUID(appIDDAO.getGUID());
 
         UserIDDAO userIDDAO = lookupUserIDDAO(subjectID);
         if (userIDDAO == null)
@@ -743,7 +744,7 @@ public class APIAppManagerProvider
             // Does not exist, create UserPreferenceDAO
             userPreferenceDAO = new UserPreferenceDAO();
             userPreferenceDAO.setSubjectGUID(userIDDAO.getReferenceID());
-            userPreferenceDAO.setAppGUID(appIDDAO.getAppGUID());
+            userPreferenceDAO.setSubjectGUID(appIDDAO.getGUID());
 
             getAPIDataStore().insert(userPreferenceDAO);
         }
@@ -799,7 +800,7 @@ public class APIAppManagerProvider
     		ret = new AppIDDAO(domainID, appID);
  
     		ret = getAPIDataStore().insert(ret);
-    		NVPair appIDNVP = new NVPair(SecurityModel.TOK_APP_ID, ret.getSubjectID());
+    		NVPair appIDNVP = new NVPair(SecurityModel.TOK_APP_ID, ret.toCanonicalID());
     		
     		NVGenericMap permissions = new NVGenericMap();
     		for (AppPermission ap : AppPermission.values())
@@ -877,7 +878,7 @@ public class APIAppManagerProvider
     		apiSecurityManager.addRole(appUserRole);
     		apiSecurityManager.addRole(appServiceProviderRole);
     		apiSecurityManager.addRole(appResourceRole);
-    		getAPIDataStore().createSequence(ret.getSubjectID());
+    		getAPIDataStore().createSequence(ret.toCanonicalID());
 
             AppConfigDAO appConfigDAO = new AppConfigDAO();
             appConfigDAO.setAppIDDAO(ret);
@@ -939,7 +940,7 @@ public class APIAppManagerProvider
     public void updateSubjectRole(String subjectID, AppIDDAO appID, String roleName, CRUD crud)
 			 throws NullPointerException, IllegalArgumentException, AccessException
 	{
-		String permission = PPEncoder.SINGLETON.encode(SecurityModel.PERM_ADD_ROLE, appID.getAppGUID());
+		String permission = PPEncoder.SINGLETON.encode(SecurityModel.PERM_ADD_ROLE, appID.getGUID());
 		if (log.isEnabled()) log.getLogger().info("permision to check:" + permission);
 		if (log.isEnabled()) log.getLogger().info(SharedUtil.toCanonicalID(',', subjectID, roleName));
 		getAPISecurityManager().checkPermissions(permission);
@@ -947,7 +948,7 @@ public class APIAppManagerProvider
 		UserIDDAO userID = lookupUserIDDAO(subjectID);
 		if (userID != null)
 		{
-			String roleSubjectID = appID.getAppGUID() + "-" + roleName;
+			String roleSubjectID = appID.getGUID() + "-" + roleName;
 			if (log.isEnabled()) log.getLogger().info("role:" + roleSubjectID);
 			if (log.isEnabled()) log.getLogger().info("userid:" +userID.getPrimaryEmail() + ":" + userID.getSubjectGUID());
 			ShiroRole role = getAPISecurityManager().lookupRole(roleSubjectID);
@@ -995,34 +996,34 @@ public class APIAppManagerProvider
 
 
 
-	public SubjectAPIKey renewSubjectAPIKEy(String subjectID)
-			throws NullPointerException, IllegalArgumentException, AccessException, APIException 
-	{	
-		return renewSubjectAPIKEy(lookupSubjectAPIKey(subjectID, true));
-	}
+//	public SubjectAPIKey renewSubjectAPIKEy(String subjectID)
+//			throws NullPointerException, IllegalArgumentException, AccessException, APIException
+//	{
+//		return renewSubjectAPIKEy(lookupSubjectAPIKey(subjectID, true));
+//	}
 	
-	@Override
-	public SubjectAPIKey renewSubjectAPIKEy(SubjectAPIKey sak)
-			throws NullPointerException, IllegalArgumentException, AccessException, APIException {
-		// TODO Auto-generated method stub
-		SubjectAPIKey ret = null;
-		if (sak instanceof AppDeviceDAO)
-		{
-			ret = new AppDeviceDAO();
-			((AppDeviceDAO)ret).setAppGUID(((AppDeviceDAO) sak).getAppGUID());
-			((AppDeviceDAO)ret).setDevice(((AppDeviceDAO) sak).getDevice());
-		}
-		else if (sak instanceof SubjectAPIKey)
-		{
-			ret = new SubjectAPIKey();
-		}
-		
-		ret = createSubjectAPIKey(ret);
-		
-		
-		deleteSubjectAPIKey(sak);
-		return ret;
-	}
+//	@Override
+//	public SubjectAPIKey renewSubjectAPIKEy(SubjectAPIKey sak)
+//			throws NullPointerException, IllegalArgumentException, AccessException, APIException {
+//		// TODO Auto-generated method stub
+//		SubjectAPIKey ret = null;
+//		if (sak instanceof AppDeviceDAO)
+//		{
+//			ret = new AppDeviceDAO();
+//			((AppDeviceDAO)ret).setSubjectGUID(((AppDeviceDAO) sak).getSubjectGUID());
+//			((AppDeviceDAO)ret).setDevice(((AppDeviceDAO) sak).getDevice());
+//		}
+//		else if (sak instanceof SubjectAPIKey)
+//		{
+//			ret = new SubjectAPIKey();
+//		}
+//
+//		ret = createSubjectAPIKey(ret);
+//
+//
+//		deleteSubjectAPIKey(sak);
+//		return ret;
+//	}
 
 
 

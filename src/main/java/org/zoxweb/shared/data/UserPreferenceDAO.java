@@ -1,14 +1,8 @@
 package org.zoxweb.shared.data;
 
-import org.zoxweb.shared.util.AppGlobalID;
-import org.zoxweb.shared.util.GetNVConfig;
-import org.zoxweb.shared.util.NVConfig;
-import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntity.ArrayType;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
-import org.zoxweb.shared.util.NVConfigManager;
-import org.zoxweb.shared.util.SharedUtil;
 import org.zoxweb.shared.data.DataConst.Language;
+import org.zoxweb.shared.util.*;
+import org.zoxweb.shared.util.NVConfigEntity.ArrayType;
 
 /**
  * Created on 8/4/17
@@ -16,7 +10,6 @@ import org.zoxweb.shared.data.DataConst.Language;
 @SuppressWarnings("serial")
 public class UserPreferenceDAO
 	extends SetNameDescriptionDAO
-    implements AppGlobalID<String>    
 {
 
     public enum Param
@@ -61,21 +54,6 @@ public class UserPreferenceDAO
         super(NVC_USER_PREFERENCE_DAO);
     }
 
-    /**
-     * Returns the app ID.
-     * @return
-     */
-    public String getAppGUID() {
-        return lookupValue(Param.APP_GUID);
-    }
-
-    /**
-     * Sets the app ID.
-     * @param appGUID
-     */
-    public void setAppGUID(String appGUID) {
-        setValue(Param.APP_GUID, appGUID);
-    }
 
     public Language getDefaultLanguage()
     {

@@ -40,12 +40,12 @@ public class AppIDDAOTest {
         Assertions.assertThrows(UnsupportedOperationException.class, ()->appIDDAO1.setDomainID("zoxweb"));
     }
 
-    @SuppressWarnings("deprecation")
-	@Test //(expected = UnsupportedOperationException.class)
-    public void testInvalidSetSubjectID() {
-        AppIDDAO appIDDAO1 = new AppIDDAO();
-        Assertions.assertThrows(UnsupportedOperationException.class, ()->appIDDAO1.setSubjectID("zoxweb"));
-    }
+
+//	@Test //(expected = UnsupportedOperationException.class)
+//    public void testInvalidSetSubjectID() {
+//        AppIDDAO appIDDAO1 = new AppIDDAO();
+//        Assertions.assertThrows(UnsupportedOperationException.class, ()->appIDDAO1.setSubjectID("zoxweb"));
+//    }
 
     @Test
     public void testEquals() {

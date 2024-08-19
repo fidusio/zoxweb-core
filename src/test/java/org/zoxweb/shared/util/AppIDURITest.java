@@ -9,7 +9,7 @@ public class AppIDURITest
 	public void testPositive()
 	{
 		AppIDURI aiu = AppIDURI.parse("///zoxweb.com/zoxweb/batata");
-		System.out.println(aiu.getAppIDDAO().getSubjectID());
+		System.out.println(aiu.getAppIDDAO().toCanonicalID());
 		assertTrue("batata".equals(aiu.getRest()[0]));
 	}
 }

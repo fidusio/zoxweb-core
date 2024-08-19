@@ -6,8 +6,7 @@ import org.zoxweb.shared.data.AppIDDAO;
 public class AppIDURI 
 {
 	private AppIDDAO appID;
-	private String rest[];
-	private static final String EMPTY[] = new String[0]; 
+	private String[] rest;
 	
 	private AppIDURI()
 	{
@@ -51,7 +50,7 @@ public class AppIDURI
 		}
 		else
 		{
-			ret.rest = EMPTY;
+			ret.rest = SharedStringUtil.EMPTY_STRING_ARRAY;
 		}
 		
 		

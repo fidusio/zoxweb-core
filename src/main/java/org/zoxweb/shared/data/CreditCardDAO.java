@@ -15,18 +15,12 @@
  */
 package org.zoxweb.shared.data;
 
-import java.util.Date;
-
 import org.zoxweb.shared.filters.ChainedFilter;
 import org.zoxweb.shared.filters.CreditCardNumberFilter;
 import org.zoxweb.shared.filters.FilterType;
-import org.zoxweb.shared.util.GetNVConfig;
-import org.zoxweb.shared.util.NVConfig;
-import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
-import org.zoxweb.shared.util.NVConfigManager;
-import org.zoxweb.shared.util.SharedStringUtil;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.*;
+
+import java.util.Date;
 
 /**
  * This class defines the credit card data access object used to create 
@@ -38,12 +32,7 @@ public class CreditCardDAO
 	extends SetNameDescriptionDAO
 {
 	
-	/**
-	 * This enum includes the following parameters:
-	 * card type, card holder name, card number, expiration date,
-	 * and security code.
-	 * @author mzebib
-	 */
+
 	public enum Param
 		implements GetNVConfig
 	{
@@ -108,11 +97,11 @@ public class CreditCardDAO
 	
 	/**
 	 * Sets the credit card type.
-	 * @param type
+	 * @param cardType amex, visa, mc ...
 	 */
-	public void setCardType(CreditCardType type) 
+	public void setCardType(CreditCardType cardType)
 	{
-		setValue(Param.CARD_TYPE, type);
+		setValue(Param.CARD_TYPE, cardType);
 	}
 
     /**
@@ -126,7 +115,7 @@ public class CreditCardDAO
 
     /**
      * Sets the first name.
-     * @param firstName
+     * @param firstName of the cardholder
      */
     public void setFirstName(String firstName)
     {
@@ -135,7 +124,7 @@ public class CreditCardDAO
 
     /**
      * Returns the last name.
-     * @return
+     * @return the cardholder lastname
      */
     public String getLastName()
     {
@@ -144,7 +133,7 @@ public class CreditCardDAO
 
     /**
      * Sets the last name.
-     * @param lastName
+     * @param lastName of the cardholder
      */
     public void setLastName(String lastName)
     {
@@ -153,8 +142,8 @@ public class CreditCardDAO
 
 
 	/**
-	 * Returns the card holder name.
-	 * @return name of card holder
+	 * Returns the cardholder name.
+	 * @return name of cardholder
 	 */
 	public String getCardHolderName() 
 	{
@@ -177,7 +166,6 @@ public class CreditCardDAO
 	 */
 	public void setCardNumber(String number)
 	{
-//		setValue(CreditCard.CARD_NUMBER, CreditCardNumberFilter.SINGLETON.validate(number));
 		setValue(Param.CARD_NUMBER, number);
 	}
 		

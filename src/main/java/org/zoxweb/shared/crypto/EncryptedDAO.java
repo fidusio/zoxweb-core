@@ -21,7 +21,7 @@ import org.zoxweb.shared.util.*;
 @SuppressWarnings("serial")
 public class EncryptedDAO
     extends TimeStampDAO
-    implements CryptoBase, SubjectGUID<String>
+    implements CryptoBase
 {
 	/**
 	 * The getGUID() and setGUID() must hold the same value of the resource GUID it is one to one mapping
@@ -31,7 +31,7 @@ public class EncryptedDAO
 	protected enum Param
         implements GetNVConfig
     {
-		SUBJECT_GUID(NVConfigManager.createNVConfig("subject_guid", "The subject GUID owner of the key", "SubjectGUID", false, true, String.class)),
+		//SUBJECT_GUID(NVConfigManager.createNVConfig("subject_guid", "The subject GUID owner of the key", "SubjectGUID", false, true, String.class)),
 		//SUBJECT_PROPERTIES(NVConfigManager.createNVConfig("subject_properties", "Subject properties", "SubjectProperties", false, true, NVGenericMap.class)),
 		ALGO_PROPERTIES(NVConfigManager.createNVConfig("algo_properties", "Algorithm properties", "AlgorithmProperties", false, true, NVGenericMap.class)),
 		IV(NVConfigManager.createNVConfig("iv", "Initialization vector", "IV", true, true, byte[].class)),
@@ -71,44 +71,14 @@ public class EncryptedDAO
 		super(nvce);
 	}
 
-//	/**
-//	 * Get the list of principals
-//	 * @return null or the list
-//	 */
-//	public NVGenericMap  getSubjectProperties()
-//	{
-//		return (NVGenericMap) lookup(Param.SUBJECT_PROPERTIES);
-//	}
-	
-//	public void setSubjectProperties(ArrayValues<NVPair> subject)
-//    {
-//		if (subject == null)
-//		{
-//			getSubjectProperties().clear();
-//		}
-//		else
-//        {
-//			getSubjectProperties().add(subject.values(), true);
-//		}
-//	}
+
 
 
 	public NVGenericMap getAlgoProperties()
     {
-		return (NVGenericMap) lookup(Param.ALGO_PROPERTIES);
+		return lookup(Param.ALGO_PROPERTIES);
 	}
 
-//	public void setAlgoProperties(ArrayValues<NVPair> algo_parameters)
-//    {
-//		if (algo_parameters == null)
-//		{
-//			getAlgoProperties().clear();
-//		}
-//		else
-//        {
-//			getAlgoProperties().add(algo_parameters.values(), true);
-//		}
-//	}
 
 	public byte[] getIV()
     {
@@ -253,17 +223,6 @@ public class EncryptedDAO
         return ret;
     }
 
-	@Override
-	public String getSubjectGUID() {
-		// TODO Auto-generated method stub
-		return lookupValue(Param.SUBJECT_GUID);
-	}
-
-	@Override
-	public void setSubjectGUID(String subjectGUID) {
-		// TODO Auto-generated method stub
-		setValue(Param.SUBJECT_GUID, subjectGUID);
-	}
 	
 	public boolean isHMACAll()
 	{

@@ -58,14 +58,14 @@ public abstract class ShiroDomain
 		{
 			ShiroDomain to = (ShiroDomain) o;
 			
-			if (getReferenceID() != null && to.getReferenceID() != null)
+			if (getGUID() != null && to.getGUID() != null)
 			{
-				return getReferenceID().equals(to.getReferenceID());
+				return getGUID().equals(to.getGUID());
 			}
 			
-			if (getSubjectID() != null && to.getSubjectID() != null)
+			if (getDomainID() != null && to.getDomainID() != null)
 			{
-				return getSubjectID().equals(to.getSubjectID());
+				return getDomainID().equals(to.getDomainID());
 			}
 		}
 		return false;

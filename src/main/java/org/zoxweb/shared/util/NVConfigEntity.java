@@ -27,7 +27,7 @@ public interface NVConfigEntity
 	extends NVConfig, ReferenceID<String>, DomainID<String>, CanonicalID
 {
 	
-	public enum ArrayType {
+	enum ArrayType {
 		NOT_ARRAY,
 		LIST,
 		GET_NAME_MAP,

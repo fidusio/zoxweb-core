@@ -17,24 +17,13 @@
 package org.zoxweb.shared.security;
 
 
-
-import java.util.Date;
-
 import org.zoxweb.shared.data.TimeStampDAO;
 import org.zoxweb.shared.filters.FilterType;
-import org.zoxweb.shared.util.GetNVConfig;
-
-import org.zoxweb.shared.util.NVConfig;
-import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
-import org.zoxweb.shared.util.SharedUtil;
-import org.zoxweb.shared.util.SubjectID;
-import org.zoxweb.shared.util.SystemID;
 import org.zoxweb.shared.util.Const.Status;
-import org.zoxweb.shared.util.NVConfigManager;
-import org.zoxweb.shared.util.NVGenericMap;
-import org.zoxweb.shared.util.SharedBase64;
+import org.zoxweb.shared.util.*;
 import org.zoxweb.shared.util.SharedBase64.Base64Type;
+
+import java.util.Date;
 
 
 
@@ -50,7 +39,7 @@ public class SubjectAPIKey
     public enum Param
         implements GetNVConfig {
 
-        SUBJECT_ID(NVConfigManager.createNVConfig("subject_id", "Subject ID", "SubjectID", true, false, true, String.class, null)),
+        //SUBJECT_ID(NVConfigManager.createNVConfig("subject_id", "Subject ID", "SubjectID", true, false, true, String.class, null)),
         SYSTEM_ID(NVConfigManager.createNVConfig("system_id", "System ID", "SystemID", true, false, String.class)),
         API_KEY(NVConfigManager.createNVConfig("api_key", "API Key", "APIKey", true, false, false, String.class, FilterType.ENCRYPT)),
         STATUS(NVConfigManager.createNVConfig("status", "Status", "Status", true, false, Status.class)),
@@ -96,12 +85,12 @@ public class SubjectAPIKey
 
     @Override
     public String getSubjectID() {
-        return  lookupValue(Param.SUBJECT_ID);
+        return getSubjectGUID();
     }
 
     @Override
     public void setSubjectID(String id) {
-      setValue(Param.SUBJECT_ID, id);
+      setSubjectGUID(id);
     }
 
 //    public String getClientID() {

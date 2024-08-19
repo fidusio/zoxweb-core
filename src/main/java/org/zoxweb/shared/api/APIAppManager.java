@@ -187,16 +187,16 @@ public interface APIAppManager
             throws NullPointerException, IllegalArgumentException, AccessException, APIException;
 
 
-    /**
-     * Delete SubjectAPIKey.
-     * @param subjectID
-     * @throws NullPointerException
-     * @throws IllegalArgumentException
-     * @throws AccessException
-     * @throws APIException
-     */
-	void deleteSubjectAPIKey(String subjectID)
-            throws NullPointerException, IllegalArgumentException, AccessException, APIException;
+//    /**
+//     * Delete SubjectAPIKey.
+//     * @param subjectID
+//     * @throws NullPointerException
+//     * @throws IllegalArgumentException
+//     * @throws AccessException
+//     * @throws APIException
+//     */
+//	void deleteSubjectAPIKey(String subjectID)
+//            throws NullPointerException, IllegalArgumentException, AccessException, APIException;
 
     /**
      * Delete SubjectAPIKey.
@@ -209,18 +209,18 @@ public interface APIAppManager
 	void deleteSubjectAPIKey(SubjectAPIKey subjectAPIKey)
             throws NullPointerException, IllegalArgumentException, AccessException, APIException;
 
-    /**
-     * Look up SubjectAPIKey.
-     * @param subjectID
-     * @param throwExceptionIfNotFound if true and the subject api key not found an API exception is throw otherwise null is returned
-     * @return
-     * @throws NullPointerException
-     * @throws IllegalArgumentException
-     * @throws AccessException
-     * @throws APIException
-     */
-	<V extends SubjectAPIKey> V lookupSubjectAPIKey(String subjectID, boolean throwExceptionIfNotFound)
-            throws NullPointerException, IllegalArgumentException, AccessException, APIException;
+//    /**
+//     * Look up SubjectAPIKey.
+//     * @param subjectID
+//     * @param throwExceptionIfNotFound if true and the subject api key not found an API exception is throw otherwise null is returned
+//     * @return
+//     * @throws NullPointerException
+//     * @throws IllegalArgumentException
+//     * @throws AccessException
+//     * @throws APIException
+//     */
+//	<V extends SubjectAPIKey> V lookupSubjectAPIKey(String subjectID, boolean throwExceptionIfNotFound)
+//            throws NullPointerException, IllegalArgumentException, AccessException, APIException;
 	
 
     /**
@@ -231,14 +231,14 @@ public interface APIAppManager
      * @throws AccessException
      * @throws APIException
      */
-	void updateSubjectAPIKey(SubjectAPIKey subjectAPIKey)
-            throws NullPointerException, IllegalArgumentException, AccessException, APIException;
-	
-	SubjectAPIKey renewSubjectAPIKEy(String subjectID)
-			 throws NullPointerException, IllegalArgumentException, AccessException, APIException;
-	
-	SubjectAPIKey renewSubjectAPIKEy(SubjectAPIKey sak)
-			 throws NullPointerException, IllegalArgumentException, AccessException, APIException;
+//	void updateSubjectAPIKey(SubjectAPIKey subjectAPIKey)
+//            throws NullPointerException, IllegalArgumentException, AccessException, APIException;
+//
+//	SubjectAPIKey renewSubjectAPIKEy(String subjectID)
+//			 throws NullPointerException, IllegalArgumentException, AccessException, APIException;
+//
+//	SubjectAPIKey renewSubjectAPIKEy(SubjectAPIKey sak)
+//			 throws NullPointerException, IllegalArgumentException, AccessException, APIException;
 	
 
     /**

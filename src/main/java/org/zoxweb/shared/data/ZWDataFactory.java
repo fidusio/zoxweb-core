@@ -855,6 +855,36 @@ public class ZWDataFactory
 				return SubjectAPIKey.NVC_SUBJECT_API_KEY;
 			}
 		},
+		SUBJECT_IDENTIFIER(SubjectAPIKey.class.getName())
+		{
+			@SuppressWarnings("unchecked")
+			@Override
+			public SubjectIdentifier newInstance()
+			{
+				return new SubjectIdentifier();
+			}
+
+			@Override
+			public NVConfigEntity getNVConfigEntity()
+			{
+				return SubjectIdentifier.NVC_SUBJECT_IDENTIFIER;
+			}
+		},
+		SUBJECT_PROFILE(SubjectAPIKey.class.getName())
+		{
+			@SuppressWarnings("unchecked")
+			@Override
+			public SubjectInfo newInstance()
+			{
+				return new SubjectInfo();
+			}
+
+			@Override
+			public NVConfigEntity getNVConfigEntity()
+			{
+				return SubjectInfo.NVC_SUBJECT_INFO;
+			}
+		},
 		SYSTEM_INFO_DAO(SystemInfoDAO.class.getName())
 		{
 			@SuppressWarnings("unchecked")
@@ -1004,20 +1034,20 @@ public class ZWDataFactory
 		},
 
 		//	org.zoxweb.shared.data.shiro
-		SHIRO_NVENTITY_CRUDS(ShiroNVEntityCRUDs.class.getName())
-		{
-			@SuppressWarnings("unchecked")
-			@Override
-			public ShiroNVEntityCRUDs newInstance()
-			{
-				return new ShiroNVEntityCRUDs();
-			}
-			@Override
-			public NVConfigEntity getNVConfigEntity() 
-			{
-				return ShiroNVEntityCRUDs.NVC_SHIRO_NVENTITY_CRUDS;
-			}
-		},
+//		SHIRO_NVENTITY_CRUDS(ShiroNVEntityCRUDs.class.getName())
+//		{
+//			@SuppressWarnings("unchecked")
+//			@Override
+//			public ShiroNVEntityCRUDs newInstance()
+//			{
+//				return new ShiroNVEntityCRUDs();
+//			}
+//			@Override
+//			public NVConfigEntity getNVConfigEntity()
+//			{
+//				return ShiroNVEntityCRUDs.NVC_SHIRO_NVENTITY_CRUDS;
+//			}
+//		},
 		SHIRO_ROLE_DAO(ShiroRole.class.getName())
 		{
 			@SuppressWarnings("unchecked")
@@ -1063,21 +1093,21 @@ public class ZWDataFactory
 				return ShiroPermission.NVC_SHIRO_PERMISSION;
 			}
 		},
-		SHIRO_SESSION_DATA(ShiroSessionData.class.getName())
-        {
-            @SuppressWarnings("unchecked")
-            @Override
-            public ShiroSessionData newInstance()
-            {
-                return new ShiroSessionData();
-            }
-
-            @Override
-            public NVConfigEntity getNVConfigEntity() 
-            {
-                return ShiroSessionData.NVC_SESSION_DATA;
-            }
-        },
+//		SHIRO_SESSION_DATA(ShiroSessionData.class.getName())
+//        {
+//            @SuppressWarnings("unchecked")
+//            @Override
+//            public ShiroSessionData newInstance()
+//            {
+//                return new ShiroSessionData();
+//            }
+//
+//            @Override
+//            public NVConfigEntity getNVConfigEntity()
+//            {
+//                return ShiroSessionData.NVC_SESSION_DATA;
+//            }
+//        },
 		STAT_COUNTER(StatCounter.class.getName())
 		{
 			@SuppressWarnings("unchecked")

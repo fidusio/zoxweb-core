@@ -29,21 +29,12 @@ public interface ShiroRealmStore
 	extends ShiroRulesManager
 {
 
-	/**
-	 * Add a subject
-	 * @param subject
-	 * @return ShiroSubjectDAO
-	 * @throws NullPointerException
-	 * @throws IllegalArgumentException
-	 * @throws AccessException
-	 */
-	 ShiroSubject addSubject(ShiroSubject subject)
-        throws NullPointerException, IllegalArgumentException, AccessException;
+
 
 	/**
 	 * Add a subject
 	 * @param subject
-	 * @return ShiroSubjectDAO
+	 * @return SubjectIdentifier
 	 * @throws NullPointerException
 	 * @throws IllegalArgumentException
 	 * @throws AccessException
@@ -53,25 +44,27 @@ public interface ShiroRealmStore
 
 	/**
 	 * Delete a subject
+	 *
 	 * @param subject
 	 * @param withRoles
-	 * @return ShiroSubjectDAO
+	 * @return SubjectIdentifier
 	 * @throws NullPointerException
 	 * @throws IllegalArgumentException
 	 * @throws AccessException
 	 */
-	 ShiroSubject deleteSubject(ShiroSubject subject, boolean withRoles)
+	 SubjectIdentifier deleteSubject(SubjectIdentifier subject, boolean withRoles)
         throws NullPointerException, IllegalArgumentException, AccessException;
 
 	/**
 	 * Updates a subject, usually the password.
+	 *
 	 * @param subject
-	 * @return ShiroSubjectDAO
+	 * @return SubjectIdentifier
 	 * @throws NullPointerException
 	 * @throws IllegalArgumentException
 	 * @throws AccessException
 	 */
-	 ShiroSubject updateSubject(ShiroSubject subject)
+	 SubjectIdentifier updateSubject(SubjectIdentifier subject)
         throws NullPointerException, IllegalArgumentException, AccessException;
 
 	/**
@@ -198,10 +191,11 @@ public interface ShiroRealmStore
 
 	/**
 	 * Returns all subjects.
-	 * @return list of ShiroSubjectDAO
+	 *
+	 * @return list of SubjectIdentifier
 	 * @throws AccessException
 	 */
-	 List<ShiroSubject> getAllShiroSubjects()
+	 List<SubjectIdentifier> getAllSubjects()
         throws AccessException;
 
 	/**
@@ -230,13 +224,14 @@ public interface ShiroRealmStore
 	
 	/**
 	 * Looks up a subject based on username.
+	 *
 	 * @param userName
-	 * @return ShiroSubjectDAO
+	 * @return SubjectIdentifier
 	 * @throws NullPointerException
 	 * @throws IllegalArgumentException
 	 * @throws AccessException
 	 */
-	 ShiroSubject lookupSubject(String userName)
+	 SubjectIdentifier lookupSubject(String userName)
         throws NullPointerException, IllegalArgumentException, AccessException;
 
 	/**

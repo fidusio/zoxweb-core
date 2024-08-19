@@ -38,8 +38,8 @@ public class SubjectIdentifier
 	public enum Param
 		implements GetNVConfig
 	{
-		SUBJECT_GUID(NVConfigManager.createNVConfig("subject_guid", "The subject global identifier.", "SubjectGUID", true, true, true, String.class, null)),
-		SUBJECT_ID(NVConfigManager.createNVConfig("subject_id", "Subject identifier", "SubjectID", true, true, true, String.class, CryptoConst.SubjectIDFilter.SINGLETON)),
+		SUBJECT_GUID(NVConfigManager.createNVConfig(MetaToken.SUBJECT_GUID.getName(), "The subject global identifier.", "SubjectGUID", true, false, true, String.class, null)),
+		SUBJECT_ID(NVConfigManager.createNVConfig(MetaToken.SUBJECT_ID.getName(), "Subject identifier", "SubjectID", true, true, true, String.class, CryptoConst.SubjectIDFilter.SINGLETON)),
 		SUBJECT_TYPE(NVConfigManager.createNVConfig("subject_type", "Subject Type", "SubjectType", true, true, SubjectType.class)),
 		SUBJECT_STATUS(NVConfigManager.createNVConfig("subject_status", "Subject status", "SubjectStatus", true, true, CryptoConst.SubjectStatus.class)),
 		;
@@ -124,5 +124,16 @@ public class SubjectIdentifier
 		return getProperties();
 	}
 
+
+	public void setSubjectGUID(String subjectGUID)
+	{
+		setValue(MetaToken.SUBJECT_GUID.getName(), subjectGUID);
+		setValue(MetaToken.GUID.getName(), subjectGUID);
+	}
+	public void setGUID(String guid)
+	{
+		setValue(MetaToken.SUBJECT_GUID.getName(), guid);
+		setValue(MetaToken.GUID.getName(), guid);
+	}
 	
 }

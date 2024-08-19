@@ -35,8 +35,7 @@ public class EncryptedKeyDAO
         implements GetNVConfig
     {
 		KEY_LOCK_TYPE(NVConfigManager.createNVConfig("key_lock_type", "Key lock type", "KeyLockType", true, true, KeyLockType.class)),
-		OBJECT_REFERENCE_CLASS_NAME(NVConfigManager.createNVConfig("object_reference_class_name", "Object reference class name", "ObjectReferenceClassName", true, true, String.class)),
-		//OBJECT_REFERENCE(NVConfigManager.createNVConfigEntity("object_reference", "Object reference", "ObjectReference", false, true, NVEntity.class, null)),
+		REFERENCE_TYPE(NVConfigManager.createNVConfig("reference_type", "Class name of the object reference", "ReferenceType", true, true, String.class)),
 		;
 
 		private final NVConfig nvc;
@@ -76,44 +75,31 @@ public class EncryptedKeyDAO
 		setValue(Param.KEY_LOCK_TYPE, klt);
 	}
 	
-//	public NVEntity getObjectReference()
-//	{
-//		return lookupValue(Params.OBJECT_REFERENCE);
-//	}
+
 	
 	public void setObjectReference(NVEntity nve)
     {
 		//setValue(Params.OBJECT_REFERENCE, nve);
 
-        if (nve.getReferenceID() == null) {
+        if (nve.getReferenceID() == null || nve.getGUID() == null) {
 			throw new AccessException("NVEntity reference ID not set.");
 		}
 
 		setReferenceID(nve.getReferenceID());
-		setObjectReferenceClassName(nve.getClass().getName());
+		setGUID(nve.getGUID());
+		setReferenceType(nve.getClass().getName());
 	}
 
-	public String getObjectReferenceClassName()
+	public String getReferenceType()
     {
-		return lookupValue(Param.OBJECT_REFERENCE_CLASS_NAME);
+		return lookupValue(Param.REFERENCE_TYPE);
 	}
 	
-	public void setObjectReferenceClassName(String classMame)
+	public void setReferenceType(String classMame)
     {
-		setValue(Param.OBJECT_REFERENCE_CLASS_NAME, classMame);
+		setValue(Param.REFERENCE_TYPE, classMame);
 	}
-	
-//	@Override
-//	public String getReferenceID()
-//	{
-//		NVEntity nve = getObjectReference();
-//		if (nve != null && nve.getReferenceID() != null)
-//		{
-//			return nve.getReferenceID();
-//		}
-//		
-//		throw new AccessException("Object reference not set yet");
-//	}
+
 
 
 }
