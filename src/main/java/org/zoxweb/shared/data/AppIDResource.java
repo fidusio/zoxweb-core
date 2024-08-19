@@ -73,7 +73,6 @@ public class AppIDResource
 
 
     public void setDomainID(String domainID)
-            throws UnsupportedOperationException
     {
         setValue(Param.DOMAIN_ID, FilterType.DOMAIN.validate(domainID));
     }
@@ -87,7 +86,6 @@ public class AppIDResource
 
 
     public void setAppID(String appID)
-            throws UnsupportedOperationException
     {
         setValue(Param.APP_ID, AppIDNameFilter.SINGLETON.validate(appID));
     }
@@ -113,23 +111,27 @@ public class AppIDResource
     }
 
     public boolean equals(Object obj) {
-        if (obj == this) {
+        if (obj == this)
+        {
             return true;
         }
 
-        if (obj != null && obj instanceof AppIDDAO) {
-            AppIDDAO appIDDAO = (AppIDDAO) obj;
+        if (obj instanceof AppIDResource)
+        {
+            AppIDResource appIDResource = (AppIDResource) obj;
 
-            if (SharedStringUtil.equals(getDomainID(), appIDDAO.getDomainID(), true)
-                    && SharedStringUtil.equals(getAppID(), appIDDAO.getAppID(), true)) {
+            if (SharedStringUtil.equals(getDomainID(), appIDResource.getDomainID(), true)
+                    && SharedStringUtil.equals(getAppID(), appIDResource.getAppID(), true))
                 return true;
-            }
+
         }
         return false;
     }
 
     @Override
-    public int hashCode() {
+    public int hashCode()
+    {
+
 
         if (getDomainID() != null && getAppID() != null) {
             return 31 * getDomainID().hashCode() + getAppID().hashCode() + (getName() != null ? getName().hashCode() : 0);
@@ -156,7 +158,7 @@ public class AppIDResource
             throw new IllegalArgumentException("Illegal gid:"+ gid);
 
         String domainID = FilterType.DOMAIN.validate(gid.substring(0, sepIndex));
-        String appID = AppIDNameFilter.SINGLETON.validate(gid.substring(sepIndex + 1, gid.length()));
+        String appID = AppIDNameFilter.SINGLETON.validate(gid.substring(sepIndex + 1));
 
 
         return new AppIDResource(domainID, appID);

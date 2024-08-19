@@ -23,7 +23,6 @@ import org.zoxweb.shared.util.*;
 @SuppressWarnings("serial")
 public class AppIDDAO
     extends AppIDResource
-    implements AppID<String>, CanonicalID
 {
     public static final NVConfigEntity NVC_APP_ID_DAO = new NVConfigEntityLocal(
             "app_id_dao",
