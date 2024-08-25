@@ -168,4 +168,31 @@ extends ShiroDomain
         setSubjectType(subject.getClass().getName());
         return this;
     }
+
+    public static ShiroAuthzInfo create(NVEntity subject, ShiroBase shiro, NVEntity resource)
+    {
+        ShiroAuthzInfo ret = new ShiroAuthzInfo();
+        ret.setSubject(subject);
+        ret.setResource(resource);
+        ret.setAuthz(shiro);
+        return ret;
+    }
+    public boolean equals(Object to)
+    {
+        if (to instanceof ShiroAuthzInfo)
+        {
+            return toCanonicalID().equals(((ShiroAuthzInfo) to).toCanonicalID());
+        }
+        return false;
+    }
+
+    public int hashCode()
+    {
+        return toCanonicalID().hashCode();
+    }
+    public String toCanonicalID()
+    {
+        return SharedUtil.toCanonicalID(CAN_ID_SEP, getDomainID(), getAppID(), getSubjectGUID(),
+                getAuthzID(), getAuthzType(), getResourceGUID());
+    }
 }

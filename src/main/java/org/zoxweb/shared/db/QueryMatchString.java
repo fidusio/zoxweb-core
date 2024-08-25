@@ -15,10 +15,8 @@
  */
 package org.zoxweb.shared.db;
 
+import org.zoxweb.shared.util.*;
 import org.zoxweb.shared.util.Const.RelationalOperator;
-import org.zoxweb.shared.util.GetNVConfig;
-import org.zoxweb.shared.util.GetName;
-import org.zoxweb.shared.util.GetNameValue;
 
 @SuppressWarnings("serial")
 public class QueryMatchString
@@ -59,6 +57,21 @@ public class QueryMatchString
 	public QueryMatchString(RelationalOperator operator, String value, GetNVConfig... gnvs)
     {
 		super(operator, value, gnvs);
+	}
+
+
+	public static QueryMatchString toQueryMatch(String query)
+	{
+		for(RelationalOperator ro : RelationalOperator.values())
+		{
+			NVPair nameValue = SharedUtil.toNVPair(query, ro.getValue(), false);
+			if (nameValue != null && nameValue.getName() != null && nameValue.getValue() != null)
+			{
+				return new QueryMatchString(nameValue, ro);
+			}
+		}
+
+		return null;
 	}
 
 }

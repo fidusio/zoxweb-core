@@ -30,7 +30,7 @@ public class Const {
   public static final String LOGGER_NAME = "zoxweb-core";
   public static final String TOKEN_TAG = "$$TAG$$";
   public static final Object[] EMPTY_ARRAY = new Object[0];
-  public static final byte[] EMPTY_TYPE_ARRAY = new byte[0];
+  public static final byte[] EMPTY_BYTE_ARRAY = new byte[0];
 
   //public static final String UTF8 = "UTF-8";
 
@@ -1253,7 +1253,7 @@ public class Const {
 
     ;
 
-    private String value;
+    private final String value;
 
     LogicalOperator(String value) {
       this.value = value;
@@ -1275,17 +1275,17 @@ public class Const {
    */
   public enum RelationalOperator
       implements GetValue<String> {
-
-    EQUAL("="),
+    // DO NOT CHANGE ORDER
+    // It is mandatory to keep them as is
     NOT_EQUAL("!="),
-    GT(">"),
     GTE(">="),
-    LT("<"),
     LTE("<="),
-
+    EQUAL("="),
+    GT(">"),
+    LT("<"),
     ;
 
-    String value;
+    private final String value;
 
     RelationalOperator(String value) {
       this.value = value;

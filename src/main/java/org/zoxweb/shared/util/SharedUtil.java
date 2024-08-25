@@ -697,9 +697,9 @@ public class SharedUtil
 			if (index != -1)
 			{
 				String name = SharedStringUtil.trimOrNull(str.substring(0, index));
-				String value = str.substring(index+1);
+				String value = str.substring(index + sep.length());
 
-				if (value.length() == 0)
+				if (value.isEmpty())
 				{
 					value = null;
 				}

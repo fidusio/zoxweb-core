@@ -16,12 +16,13 @@
 package org.zoxweb.shared.crypto;
 
 import org.zoxweb.shared.data.TimeStampDAO;
+import org.zoxweb.shared.security.CredentialInfo;
 import org.zoxweb.shared.util.*;
 
 @SuppressWarnings("serial")
 public class EncryptedDAO
     extends TimeStampDAO
-    implements CryptoBase
+    implements CryptoBase, CredentialInfo
 {
 	/**
 	 * The getGUID() and setGUID() must hold the same value of the resource GUID it is one to one mapping

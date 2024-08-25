@@ -42,7 +42,7 @@ public class APIAppManagerProvider
     implements APIAppManager {
 
     private volatile APIDataStore<?> dataStore;
-    private volatile APISecurityManager<?> apiSecurityManager;
+    private volatile APISecurityManager<?, ?, ?> apiSecurityManager;
 
     //private HashMap<String, SubjectAPIKey> cache = new HashMap<String, SubjectAPIKey>();
 	public static final LogWrapper log = new LogWrapper(APIAppManagerProvider.class);
@@ -71,12 +71,12 @@ public class APIAppManagerProvider
   
 
 
-	public APISecurityManager<?> getAPISecurityManager() {
+	public APISecurityManager<?, ?, ?> getAPISecurityManager() {
 		return apiSecurityManager;
 	}
 
 
-	public void setAPISecurityManager(APISecurityManager<?> apiSecurityManager) {
+	public void setAPISecurityManager(APISecurityManager<?, ?, ?> apiSecurityManager) {
 		this.apiSecurityManager = apiSecurityManager;
 	}
 

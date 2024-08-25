@@ -15,16 +15,16 @@
  */
 package org.zoxweb.shared.api;
 
-import java.util.List;
-import java.util.Set;
-
+import org.zoxweb.shared.data.LongSequence;
+import org.zoxweb.shared.db.QueryMarker;
 import org.zoxweb.shared.security.AccessException;
 import org.zoxweb.shared.util.DynamicEnumMap;
 import org.zoxweb.shared.util.IDGenerator;
 import org.zoxweb.shared.util.NVConfigEntity;
 import org.zoxweb.shared.util.NVEntity;
-import org.zoxweb.shared.data.LongSequence;
-import org.zoxweb.shared.db.QueryMarker;
+
+import java.util.List;
+import java.util.Set;
 
 /**
  * The API data storage interface.
@@ -39,14 +39,23 @@ public interface APIDataStore<ST>
 	/**
 	 * @return the data stpre name
 	 */
-	public String getStoreName();
+	String getStoreName();
 	
 	/**
 	 * This method retrieves the storage tables.
 	 * @return the set of tables
 	 */
-	public Set<String> getStoreTables();
-	
+	Set<String> getStoreTables();
+
+
+	default <V extends NVEntity> V findOne(NVConfigEntity nvce, List<String> fieldNames, QueryMarker ... queryCriteria)
+		throws NullPointerException, IllegalArgumentException, AccessException, APIException
+	{
+		List<V> ret = search(nvce, fieldNames, queryCriteria);
+
+		return (ret == null || ret.isEmpty()) ? null : ret.get(0);
+	}
+
 	/**
 	 * This method searches for documents.
 	 * @param nvce
@@ -58,8 +67,17 @@ public interface APIDataStore<ST>
 	 * @throws AccessException 
 	 * @throws APIException
 	 */
-	public <V extends NVEntity> List<V> search(NVConfigEntity nvce, List<String> fieldNames, QueryMarker ... queryCriteria) 
+	<V extends NVEntity> List<V> search(NVConfigEntity nvce, List<String> fieldNames, QueryMarker ... queryCriteria)
 			throws NullPointerException, IllegalArgumentException, AccessException, APIException;
+
+	default <V extends NVEntity> V findOne(String  className, List<String> fieldNames, QueryMarker ... queryCriteria)
+			throws NullPointerException, IllegalArgumentException, AccessException, APIException
+	{
+		List<V> ret = search(className, fieldNames, queryCriteria);
+
+		return (ret == null || ret.isEmpty()) ? null : ret.get(0);
+	}
+
 	/**
 	 * 
 	 * Search based on the class name as collection
@@ -73,7 +91,7 @@ public interface APIDataStore<ST>
 	 * @throws AccessException
 	 * @throws APIException
 	 */
-	public <V extends NVEntity> List<V> search(String className, List<String> fieldNames, QueryMarker ... queryCriteria) 
+	<V extends NVEntity> List<V> search(String className, List<String> fieldNames, QueryMarker ... queryCriteria)
 			throws NullPointerException, IllegalArgumentException, AccessException, APIException;
 	
 	/**
@@ -87,7 +105,7 @@ public interface APIDataStore<ST>
 	 * @throws AccessException
 	 * @throws APIException
 	 */
-	public <T> APISearchResult<T> batchSearch(NVConfigEntity nvce, QueryMarker ... queryCriteria) 
+	<T> APISearchResult<T> batchSearch(NVConfigEntity nvce, QueryMarker ... queryCriteria)
 			throws NullPointerException, IllegalArgumentException, AccessException, APIException;
 	/**
 	 * Report serach based on hte class collection
@@ -100,7 +118,7 @@ public interface APIDataStore<ST>
 	 * @throws AccessException
 	 * @throws APIException
 	 */
-	public <T> APISearchResult<T> batchSearch(String className, QueryMarker ... queryCriteria) 
+	<T> APISearchResult<T> batchSearch(String className, QueryMarker ... queryCriteria)
 			throws NullPointerException, IllegalArgumentException, AccessException, APIException;
 	
 	/**
@@ -115,7 +133,7 @@ public interface APIDataStore<ST>
 	 * @throws AccessException
 	 * @throws APIException
 	 */
-	public <T, V extends NVEntity> APIBatchResult<V> nextBatch(APISearchResult<T> results, int startIndex, int batchSize) 
+	<T, V extends NVEntity> APIBatchResult<V> nextBatch(APISearchResult<T> results, int startIndex, int batchSize)
 			throws NullPointerException, IllegalArgumentException, AccessException, APIException;
 	/**
 	 * User the specific search
@@ -130,7 +148,7 @@ public interface APIDataStore<ST>
 	 * @throws AccessException
 	 * @throws APIException
 	 */
-	public <V extends NVEntity> List<V> userSearch(String userID, NVConfigEntity nvce, List<String> fieldNames, QueryMarker ... queryCriteria) 
+	<V extends NVEntity> List<V> userSearch(String userID, NVConfigEntity nvce, List<String> fieldNames, QueryMarker ... queryCriteria)
 			throws NullPointerException, IllegalArgumentException, AccessException, APIException;
 	
 	/**
@@ -147,7 +165,7 @@ public interface APIDataStore<ST>
 	 * @throws AccessException
 	 * @throws APIException
 	 */
-	public <V extends NVEntity> List<V> userSearch(String userID, String className, List<String> fieldNames, QueryMarker ... queryCriteria) 
+	<V extends NVEntity> List<V> userSearch(String userID, String className, List<String> fieldNames, QueryMarker ... queryCriteria)
 			throws NullPointerException, IllegalArgumentException, AccessException, APIException;
 	
 	/**
@@ -160,7 +178,7 @@ public interface APIDataStore<ST>
 	 * @throws AccessException 
 	 * @throws APIException
 	 */
-	public <V extends NVEntity> List<V> searchByID(NVConfigEntity nvce, String... ids) 
+	<V extends NVEntity> List<V> searchByID(NVConfigEntity nvce, String... ids)
 			throws NullPointerException, IllegalArgumentException, AccessException, APIException;
 	
 	
@@ -174,7 +192,7 @@ public interface APIDataStore<ST>
 	 * @throws AccessException 
 	 * @throws APIException
 	 */
-	public <V extends NVEntity> List<V> searchByID(String className, String... ids) 
+	<V extends NVEntity> List<V> searchByID(String className, String... ids)
 			throws NullPointerException, IllegalArgumentException, AccessException, APIException;
 	
 	
@@ -189,7 +207,7 @@ public interface APIDataStore<ST>
 	 * @throws AccessException 
 	 * @throws APIException
 	 */
-	public <V extends NVEntity> List<V> userSearchByID(String userID, NVConfigEntity nvce, String... ids) 
+	<V extends NVEntity> List<V> userSearchByID(String userID, NVConfigEntity nvce, String... ids)
 			throws NullPointerException, IllegalArgumentException, AccessException, APIException;
 	/**
 	 * This method inserts a document.
@@ -200,7 +218,7 @@ public interface APIDataStore<ST>
 	 * @throws AccessException 
 	 * @throws APIException
 	 */
-	public <V extends NVEntity> V insert(V nve)
+	<V extends NVEntity> V insert(V nve)
 			throws NullPointerException, IllegalArgumentException, AccessException, APIException;
 	
 	/**
@@ -213,7 +231,7 @@ public interface APIDataStore<ST>
 	 * @throws AccessException 
 	 * @throws APIException
 	 */
-	public <V extends NVEntity> boolean delete(V nve, boolean withReference)
+	<V extends NVEntity> boolean delete(V nve, boolean withReference)
 			throws NullPointerException, IllegalArgumentException, AccessException, APIException;
 	
 	
@@ -228,7 +246,7 @@ public interface APIDataStore<ST>
 	 * @throws AccessException
 	 * @throws APIException
 	 */
-	public <V extends NVEntity> boolean delete(NVConfigEntity nvce, QueryMarker ... queryCriteria)
+	<V extends NVEntity> boolean delete(NVConfigEntity nvce, QueryMarker ... queryCriteria)
 			throws NullPointerException, IllegalArgumentException, AccessException, APIException;
 	
 	/**
@@ -239,7 +257,7 @@ public interface APIDataStore<ST>
 	 * @throws IllegalArgumentException
 	 * @throws APIException
 	 */
-	public <V extends NVEntity> V update(V nve) 
+	<V extends NVEntity> V update(V nve)
 			throws NullPointerException, IllegalArgumentException, APIException;
 	
 	/**
@@ -257,7 +275,7 @@ public interface APIDataStore<ST>
 	 * @throws IllegalArgumentException
 	 * @throws APIException
 	 */
-	public <V extends NVEntity> V patch(V nve, boolean updateTS, boolean sync, boolean updateRefOnly, boolean includeParam, String... nvConfigNames) 
+	<V extends NVEntity> V patch(V nve, boolean updateTS, boolean sync, boolean updateRefOnly, boolean includeParam, String... nvConfigNames)
 			throws NullPointerException, IllegalArgumentException, APIException;
 	
 	/**
@@ -269,7 +287,7 @@ public interface APIDataStore<ST>
 	 * @throws IllegalArgumentException
 	 * @throws APIException
 	 */
-	public long countMatch(NVConfigEntity nvce, QueryMarker ... queryCriteria)
+	long countMatch(NVConfigEntity nvce, QueryMarker ... queryCriteria)
 			throws NullPointerException, IllegalArgumentException, APIException;
 	
 	
@@ -281,7 +299,7 @@ public interface APIDataStore<ST>
 	 * @throws IllegalArgumentException
 	 * @throws APIException
 	 */
-	public DynamicEnumMap insertDynamicEnumMap(DynamicEnumMap dynamicEnumMap)
+	DynamicEnumMap insertDynamicEnumMap(DynamicEnumMap dynamicEnumMap)
 			throws NullPointerException, IllegalArgumentException, APIException;
 	
 	/**
@@ -292,7 +310,7 @@ public interface APIDataStore<ST>
 	 * @throws IllegalArgumentException
 	 * @throws APIException
 	 */
-	public DynamicEnumMap updateDynamicEnumMap(DynamicEnumMap dynamicEnumMap)
+	DynamicEnumMap updateDynamicEnumMap(DynamicEnumMap dynamicEnumMap)
 			throws NullPointerException, IllegalArgumentException, APIException;
 	
 	/**
@@ -303,7 +321,7 @@ public interface APIDataStore<ST>
 	 * @throws IllegalArgumentException 
 	 * @throws APIException 
 	 */
-	public DynamicEnumMap searchDynamicEnumMapByName(String name)
+	DynamicEnumMap searchDynamicEnumMapByName(String name)
 			throws NullPointerException, IllegalArgumentException, APIException;
 	
 	/**
@@ -313,10 +331,10 @@ public interface APIDataStore<ST>
 	 * @throws IllegalArgumentException 
 	 * @throws APIException 
 	 */
-	public void deleteDynamicEnumMap(String name)
+	void deleteDynamicEnumMap(String name)
 		throws NullPointerException, IllegalArgumentException, APIException;
 	
-	public <NID> IDGenerator<String, NID> getIDGenerator();
+	<NID> IDGenerator<String, NID> getIDGenerator();
 	
 	
 	/**
@@ -329,14 +347,14 @@ public interface APIDataStore<ST>
 	 * @throws AccessException 
 	 * @throws APIException 
 	 */
-	public List<DynamicEnumMap> getAllDynamicEnumMap(String domainID, String userID)
+	List<DynamicEnumMap> getAllDynamicEnumMap(String domainID, String userID)
 		throws NullPointerException, IllegalArgumentException, AccessException, APIException;
 	
 	
-	public <NT, RT> NT lookupByReferenceID(String metaTypeName, RT objectId);
+	<NT, RT> NT lookupByReferenceID(String metaTypeName, RT objectId);
 	
 	
-	public <NT, RT, NIT> NT lookupByReferenceID(String metaTypeName, RT objectId, NIT projection);
+	<NT, RT, NIT> NT lookupByReferenceID(String metaTypeName, RT objectId, NIT projection);
 	
 	LongSequence createSequence(String sequenceName)
 			throws NullPointerException, IllegalArgumentException, AccessException, APIException;;

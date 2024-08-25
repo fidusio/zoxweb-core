@@ -15,7 +15,7 @@
  */
 package org.zoxweb.shared.api;
 
-import org.zoxweb.shared.data.TimeStampDAO;
+import org.zoxweb.shared.data.PropertyDAO;
 import org.zoxweb.shared.security.KeyMaker;
 import org.zoxweb.shared.util.*;
 
@@ -30,7 +30,7 @@ import java.util.List;
  */
 @SuppressWarnings("serial")
 public class APIConfigInfoDAO 
-	extends TimeStampDAO 
+	extends PropertyDAO
 	implements APIConfigInfo
 {
 
@@ -51,7 +51,7 @@ public class APIConfigInfoDAO
 		VERSION(NVConfigManager.createNVConfig("api_version", "API version", "CurrentVersion", false, false, String.class)),
 		DEFAULT_LOCATION(NVConfigManager.createNVConfig("default_location", "Default storage location", "DefaultLocation", false, true, String.class)),
 		CONFIGURATION_PARAMETERS(NVConfigManager.createNVConfig("configuration_parameters", "API configuration parameters", "APIConfigurationParameters", true, true, false, String[].class, null)),
-		PROPERTIES(NVConfigManager.createNVConfig("properties", "Configuration properties", "Properties", false, true, NVGenericMap.class)),
+//		PROPERTIES(NVConfigManager.createNVConfig("properties", "Configuration properties", "Properties", false, true, NVGenericMap.class)),
 		//API_KEY_REF_ID(NVConfigManager.createNVConfig("api_key_ref_id", "API key reference id", "APIKeyRefID", true, true, false, true, String.class, null)),
 		;
 		
@@ -72,7 +72,7 @@ public class APIConfigInfoDAO
 	// This variable should not be part of the NVConfig definition;
 	private APIConfigStatus status = APIConfigStatus.INACTIVE;	
 	private volatile KeyMaker keyMaker = null;
-	private volatile APISecurityManager<?> apiSecurityManager = null;
+	private volatile APISecurityManager<?, ?, ?> apiSecurityManager = null;
 	/**
 	 * This NVConfigEntity type constant is set to an instantiation of a NVConfigEntityLocal object based on API ConfigInfoDAO.
 	 */
@@ -89,7 +89,7 @@ public class APIConfigInfoDAO
 																		SharedUtil.extractNVConfigs(Params.values()),
 																		null, 
 																		false,
-																		TimeStampDAO.NVC_TIME_STAMP_DAO
+																		PropertyDAO.NVC_PROPERTY_DAO
 																	);
 	
 	
@@ -165,7 +165,7 @@ public class APIConfigInfoDAO
 	 * This method sets the service configuration parameters.
 	 * @param configParams
 	 */
-	public void setConfigParameters(List<NVPair> configParams) 
+	public void setConfigParameters(List<NVPair> configParams)
 	{
 		getConfigParameters().add(configParams.toArray(new NVPair[0]), true);
 	}
@@ -179,15 +179,6 @@ public class APIConfigInfoDAO
 		getConfigParameters().add(configParams.values(), true);
 	}
 
-	/**
-	 * Get the configuration properties
-	 * @return
-	 */
-	@Override
-	public NVGenericMap getProperties()
-	{
-		return (NVGenericMap)lookup(Params.PROPERTIES);
-	}
 
 	/**
 	 * @return The version
@@ -308,13 +299,13 @@ public class APIConfigInfoDAO
 	}
 
 	@Override
-	public void setAPISecurityManager(APISecurityManager<?> apiSM)
+	public void setAPISecurityManager(APISecurityManager<?, ?, ?> apiSM)
 	{
 		apiSecurityManager = apiSM;
 	}
 
 	@Override
-	public APISecurityManager<?> getAPISecurityManager()
+	public APISecurityManager<?, ?, ?> getAPISecurityManager()
 	{
 		return apiSecurityManager;
 	}

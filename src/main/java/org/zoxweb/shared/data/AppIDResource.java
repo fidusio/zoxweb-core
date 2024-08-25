@@ -15,7 +15,7 @@ public class AppIDResource
     {
         APP_ID(NVConfigManager.createNVConfig("app_id", "App ID","AppID", true, false, false, String.class, AppIDNameFilter.SINGLETON)),
         DOMAIN_ID(NVConfigManager.createNVConfig("domain_id", "Domain ID", "Domain ID", true, true, false, String.class, FilterType.DOMAIN)),
-        //SUBJECT_ID(NVConfigManager.createNVConfig("subject_id", "Subject ID", "Subject ID", true, false, true, String.class, null)),
+        DOMAIN_APP_ID(NVConfigManager.createNVConfig("domain_app_id", "Domain APP ID", "DomainAppID", true, false, true, String.class, null)),
         ;
 
         private final NVConfig nvc;
@@ -71,10 +71,13 @@ public class AppIDResource
         return lookupValue(Param.DOMAIN_ID);
     }
 
-
+    /**
+     * @param domainID not to be used call #setDomainAppID
+     */
+    @Deprecated
     public void setDomainID(String domainID)
     {
-        setValue(Param.DOMAIN_ID, FilterType.DOMAIN.validate(domainID));
+        throw new UnsupportedOperationException("Method not supported use setDomainAppID method.");
     }
 
 
@@ -83,29 +86,43 @@ public class AppIDResource
         return lookupValue(Param.APP_ID);
     }
 
-
-
+    /**
+     * @param appID not to be used call #setDomainAppID
+     */
+    @Deprecated
     public void setAppID(String appID)
     {
+        throw new UnsupportedOperationException("Method not supported use setDomainAppID method.");
+    }
+
+
+    /**
+     * @param domainID to be set
+     * @param appID to be set
+     * @throws IllegalArgumentException if the domain value or app value are invalid
+     */
+    public synchronized void setDomainAppID(String domainID, String appID)
+    {
+        setValue(Param.DOMAIN_APP_ID, toDomainAppID(domainID, appID));
         setValue(Param.APP_ID, AppIDNameFilter.SINGLETON.validate(appID));
+        setValue(Param.DOMAIN_ID, FilterType.DOMAIN.validate(domainID));
     }
 
 
 
-    public synchronized void setDomainAppID(String domainID, String appID)
+    public String getDomainAppID()
     {
-        setDomainID(domainID);
-        setAppID(appID);
+        return lookupValue(Param.DOMAIN_APP_ID);
     }
 
     public String toCanonicalID()
     {
-        return appIDSubjectID(getDomainID(), getAppID());
+        return toDomainAppID(getDomainID(), getAppID());
     }
 
 
 
-    public static String appIDSubjectID(String domainID, String appIDName)
+    public static String toDomainAppID(String domainID, String appIDName)
     {
         return SharedUtil.toCanonicalID(ShiroBase.CAN_ID_SEP, FilterType.DOMAIN.validate(domainID),AppIDNameFilter.SINGLETON.validate(appIDName));
     }

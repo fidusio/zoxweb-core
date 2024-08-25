@@ -20,11 +20,7 @@ import java.util.List;
 import org.zoxweb.shared.filters.FilterType;
 import org.zoxweb.shared.filters.GetValueFilter;
 import org.zoxweb.shared.filters.ValueFilter;
-import org.zoxweb.shared.util.DynamicEnumMap;
-import org.zoxweb.shared.util.GetNameValue;
-import org.zoxweb.shared.util.NVPair;
-import org.zoxweb.shared.util.NVPairList;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.*;
 import org.zoxweb.shared.api.APIConfigInfo;
 import org.zoxweb.shared.api.APIConfigInfoDAO;
 import org.zoxweb.shared.api.APIDataStore;
@@ -47,7 +43,14 @@ public class SMTPCreator
 	public final static String API_NAME = "SMTP";
 //	public static final DynamicEnumMap AUTHENTICATION = new DynamicEnumMap("Authentication", new NVPair("NONE", "None"), new NVPair("SSL","SSL"), new NVPair("TLS", "TLS"));
 //	public static final DynamicEnumMap MESSAGE_FORMAT = new DynamicEnumMap("MessageFormat", new NVPair("TEXT", "Text"), new NVPair("HTML", "Html"));
-	
+
+
+//	public static final NVGenericMap SMTP_PARAM = new NVGenericMap("SMTP_API").
+//			build("Username", null).
+//			build(new NVPair("Password", null, FilterType.ENCRYPT_MASK)).
+//			build("Host", null).
+//			build(new NVInt("Port", 465)).
+//			build()
 	/**
 	 * Contains SMTP provider variables.
 	 */

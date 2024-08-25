@@ -11,8 +11,8 @@ import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVEntity;
 import org.zoxweb.shared.util.NVPair;
 
-public interface APISecurityManager<S>
-	extends ShiroRealmStore, ShiroRulesManager
+public interface APISecurityManager<S, O, I>
+	extends ShiroRealmStore<O,I>, ShiroRulesManager
 {
 	
 	Object encryptValue(APIDataStore<?> dataStore, NVEntity container, NVConfig nvc, NVBase<?> nvb, byte msKey[])

@@ -16,7 +16,6 @@
 package org.zoxweb.shared.security.shiro;
 
 
-import org.zoxweb.shared.crypto.PasswordDAO;
 import org.zoxweb.shared.data.UserIDDAO;
 import org.zoxweb.shared.security.AccessException;
 import org.zoxweb.shared.security.SubjectIdentifier;
@@ -25,58 +24,14 @@ import org.zoxweb.shared.util.GetValue;
 import java.util.List;
 import java.util.Set;
 
-public interface ShiroRealmStore
-	extends ShiroRulesManager
+public interface ShiroRealmStore<O,I>
+	extends ShiroRealmController<O,I>
 {
 
 
 
-	/**
-	 * Add a subject
-	 * @param subject
-	 * @return SubjectIdentifier
-	 * @throws NullPointerException
-	 * @throws IllegalArgumentException
-	 * @throws AccessException
-	 */
-	SubjectIdentifier addSubject(SubjectIdentifier subject)
-			throws NullPointerException, IllegalArgumentException, AccessException;
 
-	/**
-	 * Delete a subject
-	 *
-	 * @param subject
-	 * @param withRoles
-	 * @return SubjectIdentifier
-	 * @throws NullPointerException
-	 * @throws IllegalArgumentException
-	 * @throws AccessException
-	 */
-	 SubjectIdentifier deleteSubject(SubjectIdentifier subject, boolean withRoles)
-        throws NullPointerException, IllegalArgumentException, AccessException;
 
-	/**
-	 * Updates a subject, usually the password.
-	 *
-	 * @param subject
-	 * @return SubjectIdentifier
-	 * @throws NullPointerException
-	 * @throws IllegalArgumentException
-	 * @throws AccessException
-	 */
-	 SubjectIdentifier updateSubject(SubjectIdentifier subject)
-        throws NullPointerException, IllegalArgumentException, AccessException;
-
-	/**
-	 * Add a role
-	 * @param role 
-	 * @return ShiroRoleDAO
-	 * @throws NullPointerException
-	 * @throws IllegalArgumentException
-	 * @throws AccessException
-	 */
-	 ShiroRole addRole(ShiroRole role)
-        throws NullPointerException, IllegalArgumentException, AccessException;
 	
 	/**
 	 * Lookup for a role based on the role ID which can either be ref_id or the role subject id
@@ -89,72 +44,10 @@ public interface ShiroRealmStore
 	 ShiroRole lookupRole(String roleID)
 			throws NullPointerException, IllegalArgumentException, AccessException;
 
-	/**
-	 * Delete a role.
-	 * @param role
-	 * @param withPermissions
-	 * @return ShiroRoleDAO
-	 * @throws NullPointerException
-	 * @throws IllegalArgumentException
-	 * @throws AccessException
-	 */
-	 ShiroRole deleteRole(ShiroRole role, boolean withPermissions)
-        throws NullPointerException, IllegalArgumentException, AccessException;
 
-	/**
-	 * Updates a role
-	 * @param role
-	 * @return ShiroRoleDAO
-	 * @throws NullPointerException
-	 * @throws IllegalArgumentException
-	 * @throws AccessException
-	 */
-	 ShiroRole updateRole(ShiroRole role)
-        throws NullPointerException, IllegalArgumentException, AccessException;
 
-	/**
-	 * Adds a role group.
-	 * @param rolegroup
-	 * @return ShiroRoleGroupDAO
-	 * @throws NullPointerException
-	 * @throws IllegalArgumentException
-	 * @throws AccessException
-	 */
-	 ShiroRoleGroup addRoleGroup(ShiroRoleGroup rolegroup)
-        throws NullPointerException, IllegalArgumentException, AccessException;
 
-	/**
-	 * Delete a role group.
-	 * @param rolegroup
-	 * @return ShiroRoleGroupDAO
-	 * @throws NullPointerException
-	 * @throws IllegalArgumentException
-	 * @throws AccessException
-	 */
-	 ShiroRoleGroup deleteRoleGroup(ShiroRoleGroup rolegroup)
-        throws NullPointerException, IllegalArgumentException, AccessException;
 
-	/**
-	 * Update a role group.
-	 * @param rolegroup
-	 * @return ShiroRoleGroupDAO
-	 * @throws NullPointerException
-	 * @throws IllegalArgumentException
-	 * @throws AccessException
-	 */
-	 ShiroRoleGroup updateRoleGroup(ShiroRoleGroup rolegroup)
-        throws NullPointerException, IllegalArgumentException, AccessException;
-	
-	/**
-	 * Add a permission
-	 * @param permission
-	 * @return ShiroPermissionDAO
-	 * @throws NullPointerException
-	 * @throws IllegalArgumentException
-	 * @throws AccessException
-	 */
-	 ShiroPermission addPermission(ShiroPermission permission)
-        throws NullPointerException, IllegalArgumentException, AccessException;
 	
 	/**
 	 * Lookup permission based on the permission permission ID which can either be ref_id or the permission subject id
@@ -167,27 +60,9 @@ public interface ShiroRealmStore
 	 ShiroPermission lookupPermission(String permissionID)
 			throws NullPointerException, IllegalArgumentException, AccessException;
 
-	/**
-	 * Delete a permission
-	 * @param permission
-	 * @return ShiroPermissionDAO
-	 * @throws NullPointerException
-	 * @throws IllegalArgumentException
-	 * @throws AccessException
-	 */
-	 ShiroPermission deletePermission(ShiroPermission permission)
-        throws NullPointerException, IllegalArgumentException, AccessException;
 
-	/**
-	 * Updates a permission.
-	 * @param permission 
-	 * @return ShiroPermissionDAO
-	 * @throws NullPointerException
-	 * @throws IllegalArgumentException
-	 * @throws AccessException
-	 */
-	 ShiroPermission updatePermission(ShiroPermission permission)
-        throws NullPointerException, IllegalArgumentException, AccessException;
+
+
 
 	/**
 	 * Returns all subjects.
@@ -222,30 +97,8 @@ public interface ShiroRealmStore
 	List<ShiroPermission> getAllShiroPermissions()
 		throws AccessException;
 	
-	/**
-	 * Looks up a subject based on username.
-	 *
-	 * @param userName
-	 * @return SubjectIdentifier
-	 * @throws NullPointerException
-	 * @throws IllegalArgumentException
-	 * @throws AccessException
-	 */
-	 SubjectIdentifier lookupSubject(String userName)
-        throws NullPointerException, IllegalArgumentException, AccessException;
 
-	/**
-	 * Looks up association collection.
-	 * @param shiroDao
-	 * @param sat
-	 * @return ShiroCollectionAssociationDAO
-	 * @throws NullPointerException
-	 * @throws IllegalArgumentException
-	 * @throws AccessException
-	 */
-//	ShiroCollectionAssociationDAO lookupShiroCollection(ShiroBase shiroDao, ShiroAssociationType sat)
-//		throws NullPointerException, IllegalArgumentException, AccessException;
-	
+
 	/**
 	 * Create an association.
 	 * @param association
@@ -268,22 +121,22 @@ public interface ShiroRealmStore
 	ShiroAssociation removeShiroAssociation(ShiroAssociation association)
         throws NullPointerException, IllegalArgumentException, AccessException;
 
-
-	/**
-	 * Get the user password
-	 * @param domainID
-	 * @param userID
-	 * @return
-	 * @throws NullPointerException
-	 * @throws IllegalArgumentException
-	 * @throws AccessException
-	 */
-	PasswordDAO getSubjectPassword(String domainID, String userID) throws NullPointerException, IllegalArgumentException, AccessException;
-
-	PasswordDAO setSubjectPassword(SubjectIdentifier subject, PasswordDAO passwd) throws NullPointerException, IllegalArgumentException, AccessException;
-	PasswordDAO setSubjectPassword(String subject, PasswordDAO passwd) throws NullPointerException, IllegalArgumentException, AccessException;
-	PasswordDAO setSubjectPassword(SubjectIdentifier subject, String passwd) throws NullPointerException, IllegalArgumentException, AccessException;
-	PasswordDAO setSubjectPassword(String subject, String passwd) throws NullPointerException, IllegalArgumentException, AccessException;
+//
+//	/**
+//	 * Get the user password
+//	 * @param domainID
+//	 * @param userID
+//	 * @return
+//	 * @throws NullPointerException
+//	 * @throws IllegalArgumentException
+//	 * @throws AccessException
+//	 */
+//	PasswordDAO getSubjectPassword(String domainID, String userID) throws NullPointerException, IllegalArgumentException, AccessException;
+//
+//	PasswordDAO setSubjectPassword(SubjectIdentifier subject, PasswordDAO passwd) throws NullPointerException, IllegalArgumentException, AccessException;
+//	PasswordDAO setSubjectPassword(String subject, PasswordDAO passwd) throws NullPointerException, IllegalArgumentException, AccessException;
+//	PasswordDAO setSubjectPassword(SubjectIdentifier subject, String passwd) throws NullPointerException, IllegalArgumentException, AccessException;
+//	PasswordDAO setSubjectPassword(String subject, String passwd) throws NullPointerException, IllegalArgumentException, AccessException;
 	/**
 	 * Get the user roles
 	 * @param domainID
@@ -332,27 +185,4 @@ public interface ShiroRealmStore
 	UserIDDAO lookupUserID(String subjectID, String...params)
 			throws NullPointerException, IllegalArgumentException, AccessException;
 
-
-	/**
-	 *
-	 * @param subjectID
-	 * @param params
-	 * @return
-	 * @throws NullPointerException
-	 * @throws IllegalArgumentException
-	 * @throws AccessException
-	 */
-	SubjectIdentifier lookupSubjectID(GetValue<String> subjectID, String...params)
-			throws NullPointerException, IllegalArgumentException, AccessException;
-	/**
-	 *
-	 * @param subjectID
-	 * @param params
-	 * @return
-	 * @throws NullPointerException
-	 * @throws IllegalArgumentException
-	 * @throws AccessException
-	 */
-	SubjectIdentifier lookupSubjectID(String subjectID, String...params)
-			throws NullPointerException, IllegalArgumentException, AccessException;
 }

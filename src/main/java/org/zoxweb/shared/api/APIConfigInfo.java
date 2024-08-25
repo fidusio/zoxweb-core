@@ -18,8 +18,6 @@ package org.zoxweb.shared.api;
 import org.zoxweb.shared.security.KeyMaker;
 import org.zoxweb.shared.util.*;
 
-import java.util.List;
-
 /**
  * The API configuration information interface.
  * @author mzebib
@@ -32,6 +30,7 @@ public interface APIConfigInfo
             SetName,
             SetDescription,
             TimeStampInterface,
+			GetNVProperties,
             CanonicalID
 {
 	
@@ -78,18 +77,18 @@ public interface APIConfigInfo
 	 */
 	void setVersion(String version);
 	
-	/**
-	 * @return the configuration parameters.
-	 * @deprecated
-	 */
-	ArrayValues<NVPair> getConfigParameters();
-	
-	/**
-	 * This method sets the configuration parameters.
-	 * @param configParams
-	 * @deprecated
-	 */
-	void setConfigParameters(List<NVPair> configParams);
+//	/**
+//	 * @return the configuration parameters.
+//	 * @deprecated
+//	 */
+//	ArrayValues<NVPair> getConfigParameters();
+//
+//	/**
+//	 * This method sets the configuration parameters.
+//	 * @param configParams
+//	 * @deprecated
+//	 */
+//	void setConfigParameters(List<NVPair> configParams);
 	
 	/**
 	 * This method sets the configuration parameters.
@@ -143,8 +142,8 @@ public interface APIConfigInfo
 	void setKeyMaker(KeyMaker keyMaker);
 	KeyMaker getKeyMaker();
 	
-	void setAPISecurityManager(APISecurityManager<?> apiSM);
-	APISecurityManager<?> getAPISecurityManager();
+	void setAPISecurityManager(APISecurityManager<?, ?, ?> apiSM);
+	APISecurityManager<?, ?, ?> getAPISecurityManager();
 
 
 	/**

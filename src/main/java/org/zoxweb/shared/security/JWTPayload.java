@@ -35,7 +35,7 @@ public class JWTPayload
 	    implements GetNVConfig, GetName
 	{
 		
-		ISS(NVConfigManager.createNVConfig("iss", "Issuer intentifier", "Issuer", false, true, false, String.class, null)),
+		ISS(NVConfigManager.createNVConfig("iss", "Issuer Identifier", "Issuer", false, true, false, String.class, null)),
 		SUB(NVConfigManager.createNVConfig("sub", "Subject Identifier", "SubjectID", true, true, false, String.class, null)),
 		AUD(NVConfigManager.createNVConfig("aud", "Audience", "Audience", false, true, false, String.class, null)),	
 		EXP(NVConfigManager.createNVConfig("exp", "Expiration time", "Expiration", false, true, false, Date.class, null)),

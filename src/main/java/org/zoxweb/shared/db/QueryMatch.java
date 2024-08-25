@@ -15,12 +15,8 @@
  */
 package org.zoxweb.shared.db;
 
-import org.zoxweb.shared.util.GetNVConfig;
-import org.zoxweb.shared.util.GetName;
-import org.zoxweb.shared.util.SetNameValue;
-import org.zoxweb.shared.util.SharedStringUtil;
-import org.zoxweb.shared.util.SharedUtil;
 import org.zoxweb.shared.util.Const.RelationalOperator;
+import org.zoxweb.shared.util.*;
 
 /**
  * This class declares query criteria including: name, value, and 
@@ -41,6 +37,13 @@ public class QueryMatch<V>
 	public QueryMatch()
     {
 		
+	}
+
+	public QueryMatch (GetNameValue<V> nv, RelationalOperator operator)
+	{
+		setName(nv.getName());
+		setValue(nv.getValue());
+		setOperator(operator);
 	}
 	
 	/**
@@ -183,6 +186,6 @@ public class QueryMatch<V>
     {
         return getName() + ":" + getOperator() + ":" + getValue();
     }
-	
+
 
 }

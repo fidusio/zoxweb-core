@@ -40,14 +40,14 @@ public interface APIAppManager
      * Get the API security manager
      * @return
      */
-    APISecurityManager<?> getAPISecurityManager();
+    APISecurityManager<?, ?, ?> getAPISecurityManager();
 	
 
     /**
      * Set the api security manager
      * @param apiSecurityManager
      */
-	void setAPISecurityManager(APISecurityManager<?> apiSecurityManager);
+	void setAPISecurityManager(APISecurityManager<?, ?, ?> apiSecurityManager);
 
 
     /**

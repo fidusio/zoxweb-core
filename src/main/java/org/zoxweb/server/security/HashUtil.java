@@ -227,18 +227,48 @@ public class HashUtil {
     return toPassword(algo, saltLength, saltIteration, SharedStringUtil.getBytes(password));
   }
 
-//  public static PasswordDAO toBCryptPassword(int logRounds, String password)
-//          throws NoSuchAlgorithmException
-//  {
-//    return toPassword(CryptoConst.HASHType.BCRYPT, 0, logRounds, password);
-//  }
+  public static PasswordDAO toBCryptPassword(String password, int logRounds)
+
+  {
+      try {
+          return toPassword(CryptoConst.HASHType.BCRYPT, 0, logRounds, password);
+      } catch (NoSuchAlgorithmException e) {
+          throw new SecurityException(e);
+      }
+  }
 
 
-//  public static PasswordDAO toBCryptPassword(int logRounds, byte[] password)
-//          throws NoSuchAlgorithmException
-//  {
-//    return toPassword(CryptoConst.HASHType.BCRYPT, 0, logRounds, password);
-//  }
+  public static PasswordDAO toBCryptPassword(byte[] password, int logRounds)
+
+  {
+      try {
+          return toPassword(CryptoConst.HASHType.BCRYPT, 0, logRounds, password);
+      } catch (NoSuchAlgorithmException e) {
+          throw new SecurityException(e);
+      }
+  }
+
+
+  public static PasswordDAO toBCryptPassword(String password)
+  {
+      try {
+          return toPassword(CryptoConst.HASHType.BCRYPT, 0, 10, password);
+      } catch (NoSuchAlgorithmException e) {
+          throw new SecurityException(e);
+      }
+  }
+
+
+  public static PasswordDAO toBCryptPassword(byte[] password)
+  {
+      try {
+          return toPassword(CryptoConst.HASHType.BCRYPT, 0, 10, password);
+      } catch (NoSuchAlgorithmException e) {
+          throw new SecurityException(e);
+      }
+  }
+
+
 
   public static PasswordDAO toPassword(CryptoConst.HASHType algo, int saltLength, int saltIteration,
                                        byte[] password)

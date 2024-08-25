@@ -10,7 +10,9 @@ import org.zoxweb.shared.util.SharedUtil;
 
 @SuppressWarnings("serial")
 public class JWTToken
-    extends SetNameDescriptionDAO {
+    extends SetNameDescriptionDAO
+    implements CredentialInfo
+{
 
   public enum Param
       implements GetNVConfig {
