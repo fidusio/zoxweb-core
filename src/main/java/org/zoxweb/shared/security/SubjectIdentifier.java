@@ -17,6 +17,7 @@ package org.zoxweb.shared.security;
 
 import org.zoxweb.shared.crypto.CryptoConst;
 import org.zoxweb.shared.data.PropertyDAO;
+import org.zoxweb.shared.filters.FilterType;
 import org.zoxweb.shared.util.*;
 
 /**
@@ -94,7 +95,12 @@ public class SubjectIdentifier
 
 
 	@Override
-	public void setSubjectID(String id) {
+	public void setSubjectID(String id)
+	{
+		if (FilterType.EMAIL.isValid(id))
+		{
+			id = FilterType.EMAIL.validate(id);
+		}
 		setValue(Param.SUBJECT_ID, id);
 	}
 

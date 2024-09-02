@@ -1,6 +1,7 @@
 package org.zoxweb.shared.security;
 
 import org.zoxweb.shared.data.PropertyDAO;
+import org.zoxweb.shared.filters.FilterType;
 import org.zoxweb.shared.util.*;
 
 public class SubjectInfo
@@ -10,6 +11,7 @@ extends PropertyDAO
             implements GetNVConfig
     {
         SUBJECT_GUID(NVConfigManager.createNVConfig(MetaToken.SUBJECT_GUID.getName(), "The subject global identifier.", "SubjectGUID", true, false, true, String.class, null)),
+        EMAIL(NVConfigManager.createNVConfig("email", "Primary email address", "Email", true, true, false, String.class, FilterType.EMAIL))
         ;
         private final NVConfig nvc;
 
@@ -60,5 +62,15 @@ extends PropertyDAO
     {
         setValue(MetaToken.SUBJECT_GUID.getName(), guid);
         setValue(MetaToken.GUID.getName(), guid);
+    }
+
+    public void setEmail(String email)
+    {
+        setValue(Param.EMAIL, email);
+    }
+
+    public String getEmail()
+    {
+        return lookupValue(Param.EMAIL);
     }
 }

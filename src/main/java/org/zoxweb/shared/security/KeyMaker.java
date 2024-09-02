@@ -17,15 +17,14 @@ package org.zoxweb.shared.security;
 
 import org.zoxweb.shared.api.APIDataStore;
 import org.zoxweb.shared.crypto.EncryptedKeyDAO;
-import org.zoxweb.shared.data.UserIDDAO;
 import org.zoxweb.shared.util.NVEntity;
 
 public interface KeyMaker 
 {
-	EncryptedKeyDAO createUserIDKey(UserIDDAO userID, byte[]key)
+	EncryptedKeyDAO createSubjectIDKey(SubjectIdentifier subjectID, final byte[]key)
 		throws NullPointerException, IllegalArgumentException, AccessException;
 	
-	EncryptedKeyDAO createNVEntityKey(APIDataStore<?> dataStore, NVEntity nve, byte[] key)
+	EncryptedKeyDAO createNVEntityKey(APIDataStore<?> dataStore, NVEntity nve, final byte[] key)
 		throws NullPointerException, IllegalArgumentException, AccessException;
 
 	
@@ -35,11 +34,15 @@ public interface KeyMaker
 	
 	byte[] getMasterKey()
 		throws NullPointerException, IllegalArgumentException, AccessException;
-	
+
+
 	EncryptedKeyDAO lookupEncryptedKeyDOA(APIDataStore<?> dataStore, NVEntity nve)
 		throws NullPointerException, IllegalArgumentException, AccessException;
+
+	EncryptedKeyDAO lookupEncryptedKeyDOA(APIDataStore<?> dataStore, String dataRefGUID)
+			throws NullPointerException, IllegalArgumentException, AccessException;
 	
-	EncryptedKeyDAO lookupEncryptedKeyDOA(APIDataStore<?> dataStore, String dataRefID)
+	EncryptedKeyDAO lookupEncryptedKeyDOA(APIDataStore<?> dataStore, String resourceRefGUID, String subjectGUID)
 		throws NullPointerException, IllegalArgumentException, AccessException;
 	
 }

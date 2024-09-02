@@ -1322,19 +1322,19 @@ public class ZWDataFactory
                 return ImageDAO.NVC_IMAGE_DAO;
             }
         },
-        USER_PREFERENCE_DAO(UserPreferenceDAO.class.getName())
+        USER_PREFERENCE_DAO(SubjectPreference.class.getName())
         {
             @SuppressWarnings("unchecked")
             @Override
-            public UserPreferenceDAO newInstance()
+            public SubjectPreference newInstance()
             {
-                return new UserPreferenceDAO();
+                return new SubjectPreference();
             }
 
             @Override
             public NVConfigEntity getNVConfigEntity()
             {
-                return UserPreferenceDAO.NVC_USER_PREFERENCE_DAO;
+                return SubjectPreference.NVC_SUBJECT_PREFERENCE;
             }
         },
         KEY_STORE_INFO_DAO(KeyStoreInfo.class.getName())

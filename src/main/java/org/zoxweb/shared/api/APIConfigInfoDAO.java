@@ -17,6 +17,7 @@ package org.zoxweb.shared.api;
 
 import org.zoxweb.shared.data.PropertyDAO;
 import org.zoxweb.shared.security.KeyMaker;
+import org.zoxweb.shared.security.SecurityController;
 import org.zoxweb.shared.util.*;
 
 import java.util.ArrayList;
@@ -33,6 +34,7 @@ public class APIConfigInfoDAO
 	extends PropertyDAO
 	implements APIConfigInfo
 {
+
 
 	/**
 	 * This enum contains the following variables:
@@ -72,7 +74,8 @@ public class APIConfigInfoDAO
 	// This variable should not be part of the NVConfig definition;
 	private APIConfigStatus status = APIConfigStatus.INACTIVE;	
 	private volatile KeyMaker keyMaker = null;
-	private volatile APISecurityManager<?, ?, ?> apiSecurityManager = null;
+	//private volatile APISecurityManager<?, ?, ?> apiSecurityManager = null;
+	private volatile SecurityController securityController = null;
 	/**
 	 * This NVConfigEntity type constant is set to an instantiation of a NVConfigEntityLocal object based on API ConfigInfoDAO.
 	 */
@@ -139,7 +142,7 @@ public class APIConfigInfoDAO
 	@Override
 	public void setServiceTypes(APIServiceType[] serviceTypes)
 	{
-		List<APIServiceType > list = new ArrayList<APIServiceType>();
+		List<APIServiceType> list = new ArrayList<APIServiceType>();
 		
 		if (serviceTypes != null)
 		{
@@ -158,7 +161,7 @@ public class APIConfigInfoDAO
 	@SuppressWarnings("unchecked")
 	public ArrayValues<NVPair> getConfigParameters()
 	{
-		return (ArrayValues<NVPair>) lookup(Params.CONFIGURATION_PARAMETERS);
+		return lookup(Params.CONFIGURATION_PARAMETERS);
 	}
 
 	/**
@@ -298,17 +301,17 @@ public class APIConfigInfoDAO
 		return keyMaker;
 	}
 
-	@Override
-	public void setAPISecurityManager(APISecurityManager<?, ?, ?> apiSM)
-	{
-		apiSecurityManager = apiSM;
-	}
-
-	@Override
-	public APISecurityManager<?, ?, ?> getAPISecurityManager()
-	{
-		return apiSecurityManager;
-	}
+//	@Override
+//	public void setAPISecurityManager(APISecurityManager<?, ?, ?> apiSM)
+//	{
+//		apiSecurityManager = apiSM;
+//	}
+//
+//	@Override
+//	public APISecurityManager<?, ?, ?> getAPISecurityManager()
+//	{
+//		return apiSecurityManager;
+//	}
 
 	/**
 	 * Returns the account ID.
@@ -330,5 +333,23 @@ public class APIConfigInfoDAO
 	{
 		setValue(Params.ACCOUNT_ID, accountID);
 	}
+
+
+	/**
+	 * @return
+	 */
+	@Override
+	public SecurityController getSecurityController() {
+		return securityController;
+	}
+
+	/**
+	 * @param securityController
+	 */
+	@Override
+	public void setSecurityController(SecurityController securityController) {
+		this.securityController = securityController;
+	}
+
 
 }

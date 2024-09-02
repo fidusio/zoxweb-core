@@ -1030,6 +1030,11 @@ public class CryptoUtil {
     return kg.generateKey();
   }
 
+  public static SecretKey toSecretKey(byte[] key, String algoName)
+  {
+    return new SecretKeySpec(key, algoName);
+  }
+
 
   public static KeyPair generateKeyPair(String type, int keySizeInBits)
       throws NoSuchAlgorithmException

@@ -2,6 +2,7 @@ package org.zoxweb.shared.security.shiro;
 
 import org.zoxweb.shared.security.AccessSecurityException;
 import org.zoxweb.shared.security.CredentialInfo;
+import org.zoxweb.shared.security.KeyMaker;
 import org.zoxweb.shared.security.SubjectIdentifier;
 import org.zoxweb.shared.util.BaseSubjectID;
 
@@ -11,6 +12,17 @@ import java.util.Set;
 public interface ShiroRealmController<O,I>
 extends AuthorizationInfoLookup<O,I>
 {
+
+    /**
+     * Create a subject identifier
+     * @param subjectID the email or uuid identifier of the subject
+     * @param subjectType the type of the subject
+     * @param credential subject credentials
+     * @return the created subject identifier
+     * @throws AccessSecurityException if not permitted
+     */
+    SubjectIdentifier addSubjectIdentifier(String subjectID, BaseSubjectID.SubjectType subjectType, CredentialInfo credential)
+            throws AccessSecurityException;
 
     /**
      * Create a subject identifier
@@ -214,6 +226,19 @@ extends AuthorizationInfoLookup<O,I>
      */
     ShiroAuthzInfo deleteShiroAuthzInfo(ShiroAuthzInfo shiroAuthzInfo)
             throws AccessSecurityException;
+
+    /**
+     *
+     * @return the key maker associated with shiro realm controller
+     * @throws AccessSecurityException if not permitted
+     */
+    KeyMaker getKeyMaker() throws AccessSecurityException;
+
+    /**
+     * @param keyMaker to be set for the shiro realm controller
+     * @throws AccessSecurityException if no permitted
+     */
+    void setKeyMaker(KeyMaker keyMaker) throws AccessSecurityException;
 
 
 

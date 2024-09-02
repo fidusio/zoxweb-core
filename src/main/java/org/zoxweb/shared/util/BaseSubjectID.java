@@ -10,6 +10,7 @@ public interface BaseSubjectID<T>
     DOMAIN,
     DEVICE,
     GATEWAY,
+    ENTITY,
     UNKNOWN
   }
 

@@ -77,6 +77,10 @@ public enum MetaToken
 	// enum type (enum class name)
 	ENUM_TYPE("enum_type"),
 	UNIT("unit"),
+	RESOURCE_TYPE("resource_type"),
+	RESOURCE_GUID("resource_guid"),
+	REFERENCE_TYPE("reference_type"),
+	REFERENCE_GUID("reference_guid"),
 	
 	;
 	

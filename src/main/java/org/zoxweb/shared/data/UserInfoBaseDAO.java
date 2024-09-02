@@ -15,16 +15,12 @@
  */
 package org.zoxweb.shared.data;
 
-import java.util.Date;
-import java.util.List;
-
-import org.zoxweb.shared.data.AddressDAO;
-import org.zoxweb.shared.data.DataConst;
-import org.zoxweb.shared.data.PhoneDAO;
-import org.zoxweb.shared.data.SetNameDescriptionDAO;
 import org.zoxweb.shared.filters.FilterType;
 import org.zoxweb.shared.util.*;
 import org.zoxweb.shared.util.NVConfigEntity.ArrayType;
+
+import java.util.Date;
+import java.util.List;
 
 @SuppressWarnings("serial")
 public abstract class UserInfoBaseDAO 
@@ -187,7 +183,7 @@ public abstract class UserInfoBaseDAO
 
 	@SuppressWarnings("unchecked")
 	public ArrayValues<NVEntity> getAddressesAsArrayValues() {
-	    return (ArrayValues<NVEntity>) lookup(Param.LIST_OF_ADDRESSES);
+	    return lookup(Param.LIST_OF_ADDRESSES);
     }
 	
 	/**

@@ -16,14 +16,7 @@
 package org.zoxweb.shared.crypto;
 
 import org.zoxweb.shared.security.AccessException;
-import org.zoxweb.shared.util.DoNotExpose;
-import org.zoxweb.shared.util.GetNVConfig;
-import org.zoxweb.shared.util.NVConfig;
-import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
-import org.zoxweb.shared.util.NVConfigManager;
-import org.zoxweb.shared.util.NVEntity;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.*;
 
 @SuppressWarnings("serial")
 public class EncryptedKeyDAO
@@ -34,8 +27,12 @@ public class EncryptedKeyDAO
 	protected enum Param
         implements GetNVConfig
     {
+
+		// represent the GUID of NVEntity that this key will be used
+		REFERENCE_GUID(NVConfigManager.createNVConfig(MetaToken.REFERENCE_GUID.getName(), "The reference guid", "ReferenceGUID", true, true, String.class)),
+		// represent the class name type of the NVEntity
+		REFERENCE_TYPE(NVConfigManager.createNVConfig(MetaToken.REFERENCE_TYPE.getName(), "Class name of the object reference", "ReferenceType", true, true, String.class)),
 		KEY_LOCK_TYPE(NVConfigManager.createNVConfig("key_lock_type", "Key lock type", "KeyLockType", true, true, KeyLockType.class)),
-		REFERENCE_TYPE(NVConfigManager.createNVConfig("reference_type", "Class name of the object reference", "ReferenceType", true, true, String.class)),
 		;
 
 		private final NVConfig nvc;
@@ -79,14 +76,10 @@ public class EncryptedKeyDAO
 	
 	public void setObjectReference(NVEntity nve)
     {
-		//setValue(Params.OBJECT_REFERENCE, nve);
-
         if (nve.getReferenceID() == null || nve.getGUID() == null) {
 			throw new AccessException("NVEntity reference ID not set.");
 		}
-
-		setReferenceID(nve.getReferenceID());
-		setGUID(nve.getGUID());
+		setReferenceGUID(nve.getGUID());
 		setReferenceType(nve.getClass().getName());
 	}
 
@@ -98,6 +91,16 @@ public class EncryptedKeyDAO
 	public void setReferenceType(String classMame)
     {
 		setValue(Param.REFERENCE_TYPE, classMame);
+	}
+	
+	public String getReferenceGUID()
+	{
+		return lookupValue(Param.REFERENCE_GUID);
+	}
+	
+	public void setReferenceGUID(String resourceGUID)
+	{
+		setValue(Param.REFERENCE_GUID, resourceGUID);
 	}
 
 

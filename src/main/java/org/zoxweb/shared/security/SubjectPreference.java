@@ -1,21 +1,26 @@
-package org.zoxweb.shared.data;
+package org.zoxweb.shared.security;
 
+import org.zoxweb.shared.data.AddressDAO;
+import org.zoxweb.shared.data.CreditCardDAO;
 import org.zoxweb.shared.data.DataConst.Language;
+import org.zoxweb.shared.data.SetNameDescriptionDAO;
 import org.zoxweb.shared.util.*;
 import org.zoxweb.shared.util.NVConfigEntity.ArrayType;
 
 /**
+ * This class the subject preferences based on the AppGUID, it is mapped to the subject via
+ * the subjectGUID
  * Created on 8/4/17
  */
 @SuppressWarnings("serial")
-public class UserPreferenceDAO
+public class SubjectPreference
 	extends SetNameDescriptionDAO
 {
 
     public enum Param
         implements GetNVConfig {
 
-    	APP_GUID(NVConfigManager.createNVConfig("app_guid", "App GUID","AddGUID", true, false, String.class)),
+        APP_GUID(NVConfigManager.createNVConfig("app_guid", "App GUID","AddGUID", true, false, String.class)),
         DEFAULT_LANGUAGE(NVConfigManager.createNVConfig("language", "Default language", "DefaultLanguage", false, true, Language.class)),
         DEFAULT_DELIVERY_ADDRESS(NVConfigManager.createNVConfigEntity("delivery_address", "Default delivery address", "DefaultDeliveryAddress", false, true, AddressDAO.NVC_ADDRESS_DAO, ArrayType.NOT_ARRAY)),
         DEFAULT_BILLING_ADDRESS(NVConfigManager.createNVConfigEntity("billing_address", "Default billing address", "DefaultBillingAddress", false, true, AddressDAO.NVC_ADDRESS_DAO, ArrayType.NOT_ARRAY)),
@@ -34,24 +39,24 @@ public class UserPreferenceDAO
         }
     }
 
-    public static final NVConfigEntity NVC_USER_PREFERENCE_DAO = new NVConfigEntityLocal(
-            "user_preference_dao",
+    public static final NVConfigEntity NVC_SUBJECT_PREFERENCE = new NVConfigEntityLocal(
+            "subject_preference",
             null,
-            "UserPreferenceDAO",
+            "SubjectPreference",
             true,
             false,
             false,
             false,
-            UserPreferenceDAO.class,
+            SubjectPreference.class,
             SharedUtil.extractNVConfigs(Param.values()),
             null,
             false,
             SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO
     );
 
-    public UserPreferenceDAO()
+    public SubjectPreference()
     {
-        super(NVC_USER_PREFERENCE_DAO);
+        super(NVC_SUBJECT_PREFERENCE);
     }
 
 
@@ -93,6 +98,15 @@ public class UserPreferenceDAO
     public void setDefaultCreditCard(CreditCardDAO creditCard)
     {
         setValue(Param.DEFAULT_CREDIT_CARD, creditCard);
+    }
+
+    public void setAppGUID(String appGUID)
+    {
+        setValue(Param.APP_GUID, appGUID);
+    }
+    public String getAppGUID()
+    {
+        return lookupValue(Param.APP_GUID);
     }
 
 

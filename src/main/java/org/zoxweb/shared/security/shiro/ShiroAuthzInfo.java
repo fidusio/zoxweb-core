@@ -21,8 +21,8 @@ extends ShiroDomain
         AUTHZ_TYPE(NVConfigManager.createNVConfig("authz_type", "The authorization type permission, role or role group.", "AuthzType", false, true, SecurityModel.AuthzType.class)),
 
 
-        RESOURCE_ID(NVConfigManager.createNVConfig("resource_guid", "The resource global identifier.", "ResourceGID", false, true, String.class)),
-        RESOURCE_TYPE(NVConfigManager.createNVConfig("resource_type", "The resource type.", "ResourceType", false, true, String.class)),
+        RESOURCE_GUID(NVConfigManager.createNVConfig(MetaToken.RESOURCE_GUID.getName(), "The resource global identifier.", "ResourceGUID", false, true, String.class)),
+        RESOURCE_TYPE(NVConfigManager.createNVConfig(MetaToken.RESOURCE_TYPE.getName(), "The resource type.", "ResourceType", false, true, String.class)),
         ;
 
         private final NVConfig nvc;
@@ -102,13 +102,13 @@ extends ShiroDomain
      */
     public String getResourceGUID()
     {
-        return lookupValue(Param.RESOURCE_ID);
+        return lookupValue(Param.RESOURCE_GUID);
     }
 
 
-    public void setResourceID(String resourceID)
+    public void setResourceGUID(String resourceID)
     {
-        setValue(Param.RESOURCE_ID, resourceID);
+        setValue(Param.RESOURCE_GUID, resourceID);
     }
 
     /**
@@ -155,7 +155,7 @@ extends ShiroDomain
     {
         SharedUtil.checkIfNulls("Resource null", resource);
         SharedUtil.checkIfNulls("Resource global id null", resource.getGUID());
-        setResourceID(resource.getGUID());
+        setResourceGUID(resource.getGUID());
         setResourceType(resource.getClass().getName());
         return this;
     }

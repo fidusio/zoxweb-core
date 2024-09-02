@@ -49,7 +49,7 @@ public class APIAppManagerProvider
 	private static final NVConfigEntity[] USER_NVCs =
 		{
 			UserIDCredentialsDAO.NVC_USER_ID_CREDENTIALS_DAO,
-			UserPreferenceDAO.NVC_USER_PREFERENCE_DAO,
+			SubjectPreference.NVC_SUBJECT_PREFERENCE,
 			AppDeviceDAO.NVC_APP_DEVICE_DAO,
 			EncryptedKeyDAO.NVCE_ENCRYPTED_KEY_DAO,
 			ShiroAssociationRule.NVC_SHIRO_ASSOCIATION_RULE,
@@ -327,7 +327,8 @@ public class APIAppManagerProvider
 			getAPIDataStore().insert(userIDCredentials);
 
 			// create the user master key
-			getAPIDataStore().insert(KeyMakerProvider.SINGLETON.createUserIDKey(userID, KeyMakerProvider.SINGLETON.getMasterKey()));
+			// TODO REMOVE
+			//getAPIDataStore().insert(KeyMakerProvider.SINGLETON.createSubjectIDKey(userID, KeyMakerProvider.SINGLETON.getMasterKey()));
 
 		}
 		catch (Exception e)
@@ -543,7 +544,7 @@ public class APIAppManagerProvider
 //    }
 
   
-    public UserPreferenceDAO lookupUserPreferenceDAO(AppIDDAO appIDDAO,String subjectID)
+    public SubjectPreference lookupUserPreferenceDAO(AppIDDAO appIDDAO, String subjectID)
             throws NullPointerException, IllegalArgumentException, AccessException, APIException {
     	UserIDDAO userIDDAO = lookupUserIDDAO(subjectID);
 
@@ -551,17 +552,17 @@ public class APIAppManagerProvider
     }
 
   
-    public UserPreferenceDAO lookupUserPreferenceDAO(AppIDDAO appIDDAO, UserIDDAO userIDDAO)
+    public SubjectPreference lookupUserPreferenceDAO(AppIDDAO appIDDAO, UserIDDAO userIDDAO)
             throws NullPointerException, IllegalArgumentException, AccessException, APIException {
         SharedUtil.checkIfNulls("AppIDDAO is null", appIDDAO);
         SharedUtil.checkIfNulls("UserIDDAO is null", userIDDAO);
 
-        UserPreferenceDAO ret = null;
+        SubjectPreference ret = null;
 
-        List<UserPreferenceDAO> result = getAPIDataStore().search(UserPreferenceDAO.NVC_USER_PREFERENCE_DAO, null,
+        List<SubjectPreference> result = getAPIDataStore().search(SubjectPreference.NVC_SUBJECT_PREFERENCE, null,
                 new QueryMatchString(RelationalOperator.EQUAL, userIDDAO.getReferenceID(), MetaToken.SUBJECT_GUID),
                 LogicalOperator.AND,
-                new QueryMatchString(RelationalOperator.EQUAL, appIDDAO.getGUID(), UserPreferenceDAO.Param.APP_GUID.getNVConfig())
+                new QueryMatchString(RelationalOperator.EQUAL, appIDDAO.getGUID(), SubjectPreference.Param.APP_GUID.getNVConfig())
         );
 
         if (result != null && !result.isEmpty()) {
@@ -739,14 +740,14 @@ public class APIAppManagerProvider
       
         
         // Lookup UserPreferenceDAO based on AppIDDAO and UserIDDAO
-        UserPreferenceDAO userPreferenceDAO = lookupUserPreferenceDAO(appIDDAO, userIDDAO);
-        if (userPreferenceDAO == null) {
+        SubjectPreference subjectPreference = lookupUserPreferenceDAO(appIDDAO, userIDDAO);
+        if (subjectPreference == null) {
             // Does not exist, create UserPreferenceDAO
-            userPreferenceDAO = new UserPreferenceDAO();
-            userPreferenceDAO.setSubjectGUID(userIDDAO.getReferenceID());
-            userPreferenceDAO.setSubjectGUID(appIDDAO.getGUID());
+            subjectPreference = new SubjectPreference();
+            subjectPreference.setSubjectGUID(userIDDAO.getReferenceID());
+            subjectPreference.setSubjectGUID(appIDDAO.getGUID());
 
-            getAPIDataStore().insert(userPreferenceDAO);
+            getAPIDataStore().insert(subjectPreference);
         }
 
         // Create AppDeviceDAO

@@ -16,6 +16,7 @@
 package org.zoxweb.shared.api;
 
 import org.zoxweb.shared.security.KeyMaker;
+import org.zoxweb.shared.security.SecurityControllerHolder;
 import org.zoxweb.shared.util.*;
 
 /**
@@ -31,7 +32,8 @@ public interface APIConfigInfo
             SetDescription,
             TimeStampInterface,
 			GetNVProperties,
-            CanonicalID
+            CanonicalID,
+		    SecurityControllerHolder
 {
 	
 	public enum OAuthVersion
@@ -141,9 +143,9 @@ public interface APIConfigInfo
 	
 	void setKeyMaker(KeyMaker keyMaker);
 	KeyMaker getKeyMaker();
-	
-	void setAPISecurityManager(APISecurityManager<?, ?, ?> apiSM);
-	APISecurityManager<?, ?, ?> getAPISecurityManager();
+
+//	void setAPISecurityManager(APISecurityManager<?, ?, ?> apiSM);
+//	APISecurityManager<?, ?, ?> getAPISecurityManager();
 
 
 	/**

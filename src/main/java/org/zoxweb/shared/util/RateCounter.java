@@ -43,6 +43,8 @@ public class RateCounter
     );
 
 
+    private transient long timestamp = 0;
+
     public RateCounter()
     {
         super(NVC_RATE_COUNTER);
@@ -111,6 +113,25 @@ public class RateCounter
        setValue(Param.DELTAS, (getDeltas() + delta));
        setValue(Param.COUNTS,  (getCounts() + inc));
        return this;
+    }
+
+    public synchronized RateCounter start()
+    {
+        timestamp = System.currentTimeMillis();
+        return this;
+    }
+
+    public  RateCounter stop()
+    {
+        return stop(1);
+    }
+
+    public synchronized RateCounter stop(long inc)
+    {
+        if (timestamp == 0)
+            throw new IllegalStateException("Never started must calls start() first");
+
+        return register(System.currentTimeMillis() - timestamp, inc);
     }
 
 

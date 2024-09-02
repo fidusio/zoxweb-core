@@ -6,7 +6,7 @@ import org.zoxweb.shared.data.AppDeviceDAO;
 import org.zoxweb.shared.data.AppIDDAO;
 import org.zoxweb.shared.data.UserIDDAO;
 import org.zoxweb.shared.data.UserInfoDAO;
-import org.zoxweb.shared.data.UserPreferenceDAO;
+import org.zoxweb.shared.security.SubjectPreference;
 import org.zoxweb.shared.db.QueryMarker;
 import org.zoxweb.shared.security.AccessException;
 import org.zoxweb.shared.security.JWT;
@@ -141,11 +141,11 @@ public interface APIAppManager
      * @throws AccessException
      * @throws APIException
      */
-	UserPreferenceDAO lookupUserPreferenceDAO(AppIDDAO appIDDAO, String subjectID)
+	SubjectPreference lookupUserPreferenceDAO(AppIDDAO appIDDAO, String subjectID)
             throws NullPointerException, IllegalArgumentException, AccessException, APIException;
 
 
-	UserPreferenceDAO lookupUserPreferenceDAO(AppIDDAO appIDDAO, UserIDDAO userIDDAO)
+	SubjectPreference lookupUserPreferenceDAO(AppIDDAO appIDDAO, UserIDDAO userIDDAO)
             throws NullPointerException, IllegalArgumentException, AccessException, APIException;
 
     /**

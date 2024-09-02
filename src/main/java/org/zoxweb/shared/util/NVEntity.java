@@ -48,7 +48,7 @@ public abstract class NVEntity
 		}
 	}
 
-	public static boolean GLOBAL_ID_AS_REF_ID = false;
+	//public static boolean GLOBAL_ID_AS_REF_ID = false;
 	
 	protected transient NVConfigEntity config;
 	protected Map<String, NVBase<?>> attributes;

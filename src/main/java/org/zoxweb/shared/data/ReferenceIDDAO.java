@@ -53,10 +53,7 @@ public abstract class ReferenceIDDAO
 	//@Column(name = "reference_id")
 	@Override
 	public String getReferenceID()
-    {
-		if(GLOBAL_ID_AS_REF_ID)
-			return getGUID();
-
+	{
 		return lookupValue(NVC_REFERENCE_ID);
 	}
 
@@ -67,10 +64,7 @@ public abstract class ReferenceIDDAO
 	@Override
 	public void setReferenceID(String referenceID)
 	{
-		if(GLOBAL_ID_AS_REF_ID)
-			setGUID(referenceID);
-		else
-			setValue(NVC_REFERENCE_ID, referenceID);
+		setValue(NVC_REFERENCE_ID, referenceID);
 	}
 	
 	/**
