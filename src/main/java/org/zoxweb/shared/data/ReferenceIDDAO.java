@@ -25,32 +25,27 @@ import org.zoxweb.shared.util.NVEntity;
 import org.zoxweb.shared.util.SharedUtil;
 
 /**
- *
- *
+ * This is the base class of all classes and object used via all projects
+ * any update or modification must be approved by the architect.
  */
-//@MappedSuperclass
-@SuppressWarnings("serial")
 public abstract class ReferenceIDDAO 
 	extends NVEntity 
 {
 
 	public static final NVConfig NVC_REFERENCE_ID = NVConfigManager.createNVConfig(MetaToken.REFERENCE_ID.getName(), "The reference id of the Object","ReferenceID", true, false, true, true, true, String.class, null);
-	//public static final NVConfig NVC_ACCOUNT_ID = NVConfigManager.createNVConfig(MetaToken.ACCOUNT_ID.getName(), "The account id","AccountID", true, false, false, true, true, String.class, null);
 	public static final NVConfig NVC_SUBJECT_GUID = NVConfigManager.createNVConfig(MetaToken.SUBJECT_GUID.getName(), "The user id or Subject GUID","SubjectGUID", true, false, false, true, false, String.class, null);
 	public static final NVConfig NVC_GUID = NVConfigManager.createNVConfig(MetaToken.GUID.getName(), "The global id of the Object","GlobalUID", true, false, true, true, false, String.class, null);
 	public static final NVConfigEntity NVC_REFERENCE_ID_DAO = new NVConfigEntityLocal("reference_id_dao", null , "ReferenceIDDAO", true, false, false, false, ReferenceIDDAO.class, SharedUtil.toNVConfigList(NVC_REFERENCE_ID, NVC_SUBJECT_GUID, NVC_GUID), null, false, null);
 
-	protected ReferenceIDDAO(NVConfigEntity nvce)
+	protected ReferenceIDDAO(NVConfigEntity nvConfigEntity)
 	{
-		super(nvce);
+		super(nvConfigEntity);
 	}
 	
 	/**
 	 * Returns the reference ID.
-	 * @return reference id
+	 * @return reference id data store specific
 	 */
-	//@Id
-	//@Column(name = "reference_id")
 	@Override
 	public String getReferenceID()
 	{
@@ -59,61 +54,19 @@ public abstract class ReferenceIDDAO
 
 	/**
 	 * Sets the reference ID.
-	 * @param referenceID
+	 * @param referenceID datastore specific
 	 */
 	@Override
 	public void setReferenceID(String referenceID)
 	{
 		setValue(NVC_REFERENCE_ID, referenceID);
 	}
-	
-	/**
-	 * Returns the account ID.
-	 * @return account id
-	 */
-	//@Column(name = "account_id")
-//	@Override
-//	public String getAccountID()
-//	{
-//		return lookupValue(NVC_ACCOUNT_ID);
-//	}
-//
-//	/**
-//	 * Sets the account ID.
-//	 * @param accountID
-//	 */
-//	@Override
-//	public void setAccountID(String accountID)
-//	{
-//		setValue(NVC_ACCOUNT_ID, accountID);
-//	}
-	
-	/**
-	 * Returns the user ID.
-	 * @return user id
-	 */
-	//@Column(name = "user_id")
-//	@Override
-//	public String getUserID()
-//	{
-//		return getSubjectGUID();
-//	}
-//
-//	/**
-//	 * Sets the user ID.
-//	 * @param userID
-//	 */
-//	@Override
-//	public void setUserID(String userID)
-//	{
-//		setSubjectGUID(userID);
-//	}
+
 
 	/**
-	 * Returns the global ID.
-	 * @return global id
+	 * Returns the global GUID, the GUID is a portable UUID that can be used to uniquely identify and instance across system it is data store agnostic.
+	 * @return global guid
 	 */
-	//@Column(name = "global_id")
 	@Override
 	public String getGUID() {
 		return lookupValue(NVC_GUID);
@@ -121,27 +74,26 @@ public abstract class ReferenceIDDAO
 
 	/**
 	 * Sets the global ID.
-	 * @param globalID global uuid
+	 * @param globalGUID global uuid
 	 */
 	@Override
-	public void setGUID(String globalID)
+	public void setGUID(String globalGUID)
 	{
-		setValue(NVC_GUID, globalID);
+		setValue(NVC_GUID, globalGUID);
 	}
 
 	/**
-	 * Returns the global ID.
-	 * @return global id
+	 * Returns the subject_GUID the uuid of the subject that created this object.
+	 * @return global_guid
 	 */
-	//@Column(name = "global_id")
 	@Override
 	public String getSubjectGUID() {
 		return lookupValue(NVC_SUBJECT_GUID);
 	}
 
 	/**
-	 * Sets the global ID.
-	 * @param subjectGUID global uuid
+	 * Sets the Subject GUID.
+	 * @param subjectGUID of the creator of this object
 	 */
 	@Override
 	public void setSubjectGUID(String subjectGUID)

@@ -2,11 +2,12 @@ package org.zoxweb.shared.security;
 
 
 import org.zoxweb.shared.crypto.CryptoConst;
+import org.zoxweb.shared.crypto.CryptoConst.AuthenticationType;
 import org.zoxweb.shared.data.PropertyDAO;
 import org.zoxweb.shared.util.*;
-import org.zoxweb.shared.crypto.CryptoConst.AuthenticationType;
 
 import java.util.List;
+import java.util.Set;
 
 
 public class SecurityProfile
@@ -19,9 +20,9 @@ implements ResourceSecurity
             implements GetNVConfig
     {
         AUTHENTICATIONS(NVConfigManager.createNVConfig("authentications", "Authentication types", "Authentications", false, true, CryptoConst.AuthenticationType[].class)),
-        PERMISSIONS(NVConfigManager.createNVConfig("permissions", "Permission tokens", "Permissions", false, true, NVStringList.class)),
-        ROLES(NVConfigManager.createNVConfig("roles", "Role tokens", "Roles", false, true, NVStringList.class)),
-        RESTRICTIONS(NVConfigManager.createNVConfig("restrictions", "Restrictions", "Restrictions", false, true, NVStringList.class)),
+        PERMISSIONS(NVConfigManager.createNVConfig("permissions", "Permission tokens", "Permissions", false, true, NVStringSet.class)),
+        ROLES(NVConfigManager.createNVConfig("roles", "Role tokens", "Roles", false, true, NVStringSet.class)),
+        RESTRICTIONS(NVConfigManager.createNVConfig("restrictions", "Restrictions", "Restrictions", false, true, NVStringSet.class)),
 
 
         ;
@@ -70,38 +71,38 @@ implements ResourceSecurity
         super(nvce);
     }
 
-    public String[] getPermissions()
+    public Set<String> getPermissions()
     {
-        return ((NVStringList)lookup(Param.PERMISSIONS)).getValues();
+        return ((NVStringSet)lookup(Param.PERMISSIONS)).getValue();
     }
 
     public void setPermissions(String ...permissions)
     {
         this.permissions = null;
-        ((NVStringList)lookup(Param.PERMISSIONS)).setValues(permissions);
+        ((NVStringSet)lookup(Param.PERMISSIONS)).setValues(permissions);
     }
 
-    public String[] getRoles()
+    public Set<String> getRoles()
     {
-        return ((NVStringList)lookup(Param.ROLES)).getValues();
+        return ((NVStringSet)lookup(Param.ROLES)).getValue();
     }
 
     public void setRoles(String ...roles)
     {
         this.roles = null;
-        ((NVStringList)lookup(Param.ROLES)).setValues(roles);
+        ((NVStringSet)lookup(Param.ROLES)).setValues(roles);
 
     }
 
-    public String[] getRestrictions()
+    public Set<String> getRestrictions()
     {
-        return ((NVStringList)lookup(Param.RESTRICTIONS)).getValues();
+        return ((NVStringSet)lookup(Param.RESTRICTIONS)).getValue();
     }
 
     public void setRestrictions(String ...restrictions)
     {
         this.restrictions = null;
-        ((NVStringList)lookup(Param.RESTRICTIONS)).setValues(restrictions);
+        ((NVStringSet)lookup(Param.RESTRICTIONS)).setValues(restrictions);
 
     }
 
@@ -125,7 +126,7 @@ implements ResourceSecurity
             synchronized (this)
             {
                 if(permissions == null)
-                    permissions = getPermissions();
+                    permissions = getPermissions().toArray(new String[0]);
             }
         }
         return permissions;
@@ -139,7 +140,7 @@ implements ResourceSecurity
             synchronized (this)
             {
                 if(roles == null)
-                    roles = getRoles();
+                    roles = getRoles().toArray(new String[0]);
             }
         }
 
@@ -154,7 +155,7 @@ implements ResourceSecurity
             synchronized (this)
             {
                 if(restrictions == null)
-                    restrictions = getRestrictions();
+                    restrictions = getRestrictions().toArray(new String[0]);
             }
         }
 

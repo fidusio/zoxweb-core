@@ -16,10 +16,11 @@
 package org.zoxweb.shared.filters;
 
 
-
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 import org.zoxweb.shared.util.SharedStringUtil;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 
@@ -88,14 +89,14 @@ public class FilterTypeTest {
 
     @Test
     public void testPasswordFilterIsValid() {
-        String[] validPasswords = {"Password14", "p1ssw2rdS", "Password1", "Password2014",
-				"Password14Password14Password14Password14", "Password14Password14Password14Password14Password14", "Password14$"};
+        String[] validPasswords = {"!Password14", "^p1ssw2rdS", "$2Passwor", "*Password2014", "P!ssw2rd",
+				"Password14Password14Password14Password14)", "(Password14Password14Password14Password14Password14", "Password14$"};
 
         for (String password : validPasswords) {
             assertTrue(FilterType.PASSWORD.isValid(password));
         }
 
-        String[] invalidPasswords = {"p1ssw2rd", "password", "password14", "Password"};
+        String[] invalidPasswords = {"p1ssw2rd", "!@345","password", "$2Passw","password14", "Password"};
 
         for (String password : invalidPasswords) {
             assertFalse(FilterType.PASSWORD.isValid(password));

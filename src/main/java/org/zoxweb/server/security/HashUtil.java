@@ -30,6 +30,7 @@ package org.zoxweb.server.security;
 import org.zoxweb.shared.crypto.BCryptHash;
 import org.zoxweb.shared.crypto.CryptoConst;
 import org.zoxweb.shared.crypto.PasswordDAO;
+import org.zoxweb.shared.filters.FilterType;
 import org.zoxweb.shared.security.AccessException;
 import org.zoxweb.shared.util.SharedBase64;
 import org.zoxweb.shared.util.SharedStringUtil;
@@ -224,7 +225,7 @@ public class HashUtil {
                                        String password)
           throws NullPointerException, IllegalArgumentException, NoSuchAlgorithmException {
     SharedUtil.checkIfNulls("Null parameter", algo, password);
-    return toPassword(algo, saltLength, saltIteration, SharedStringUtil.getBytes(password));
+    return toPassword(algo, saltLength, saltIteration, SharedStringUtil.getBytes(FilterType.PASSWORD.validate(password)));
   }
 
   public static PasswordDAO toBCryptPassword(String password, int logRounds)

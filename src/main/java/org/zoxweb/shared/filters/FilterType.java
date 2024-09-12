@@ -539,7 +539,9 @@ public enum FilterType
 	PASSWORD
     {
 		//public static final String REGEXP ="((?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%]).{6,20})";
-		public static final String REGEX ="((?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{8,64})";
+		//public static final String REGEX ="((?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{8,64})";
+		public static final String REGEX = "^(?=.*[A-Z])(?=.*\\d)(?=.*[\\p{P}\\p{S}])(?=.*[\\p{L}]).{8,}$";
+
 		public static final int MIN_LENGTH = 8;
 
         /**
@@ -557,16 +559,11 @@ public enum FilterType
 			
 			if (in.matches(REGEX))
 			{
-				if (in.length() < MIN_LENGTH)
-                {
-                    throw new IllegalArgumentException("Password length < min length " + in.length() + ":" + in);
-                }
-				
 				return in;
 			}
 			else
             {
-                throw new IllegalArgumentException("Invalid password: " + in);
+                throw new IllegalArgumentException("Invalid password did mot pass requirements length < 8, contains special characters");
 			}
 		}
 
@@ -581,7 +578,7 @@ public enum FilterType
 			
 			if (in != null)
 			{
-				return in.matches(REGEX) && !(in.length() < MIN_LENGTH);
+				return in.matches(REGEX);
 			}
 			
 			return false;

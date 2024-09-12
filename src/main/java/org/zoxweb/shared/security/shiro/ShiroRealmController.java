@@ -1,9 +1,6 @@
 package org.zoxweb.shared.security.shiro;
 
-import org.zoxweb.shared.security.AccessSecurityException;
-import org.zoxweb.shared.security.CredentialInfo;
-import org.zoxweb.shared.security.KeyMaker;
-import org.zoxweb.shared.security.SubjectIdentifier;
+import org.zoxweb.shared.security.*;
 import org.zoxweb.shared.util.BaseSubjectID;
 
 import java.util.Set;
@@ -241,5 +238,13 @@ extends AuthorizationInfoLookup<O,I>
     void setKeyMaker(KeyMaker keyMaker) throws AccessSecurityException;
 
 
+    /**
+     * Lookup subject resource security based on the subject id
+     * @param subjectID the subject identifier can't be null
+     * @param domainID the domain id can be null
+     * @param appID the app id can be null
+     * @return permissions and role associated with subject
+     */
+    ResourceSecurity subjectResourceSecurity(String subjectID, String domainID, String appID);
 
 }

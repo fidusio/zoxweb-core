@@ -3,14 +3,7 @@ package org.zoxweb.shared.security.model;
 import org.zoxweb.shared.security.shiro.ShiroBase;
 import org.zoxweb.shared.security.shiro.ShiroPermission;
 import org.zoxweb.shared.security.shiro.ShiroRole;
-import org.zoxweb.shared.util.AppID;
-import org.zoxweb.shared.util.GetDescription;
-import org.zoxweb.shared.util.GetName;
-import org.zoxweb.shared.util.GetNameValue;
-import org.zoxweb.shared.util.GetValue;
-import org.zoxweb.shared.util.NVPair;
-import org.zoxweb.shared.util.SharedStringUtil;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.*;
 
 public final class SecurityModel
 {
@@ -27,14 +20,28 @@ public final class SecurityModel
 
 
 	public final static String SEP = ":";
+	//
+	public static final String GUID = "guid";
+	public static final String SUBJECT_GUID = "subject_guid";
+	public static final String SUBJECT_ID = "subject_id";
+
+	public static final String REFERENCE_GUID = "reference_guid";
+	public static final String RESOURCE_GUID = "resource_guid";
+
 
 
 	public final static String TOK_APP_ID = "$$app_id$$";
 
 	public final static String TOK_REFERENCE_ID = "$$reference_id$$";
-	public final static String TOK_RESOURCE_ID = "$$resource_id$$";
-	public final static String TOK_SUBJECT_ID = "$$subject_id$$";
-	public final static String TOK_USER_ID = "$$user_id$$";
+	public final static String TOK_RESOURCE_GUID = "$$" + RESOURCE_GUID + "$$";
+	public final static String TOK_SUBJECT_ID = "$$" + SUBJECT_ID+ "$$";
+	public final static String TOK_SUBJECT_GUID = "$$" + SUBJECT_GUID+ "$$";
+	public final static String TOK_CRUD = "$$crud$$";
+
+
+
+
+
 
 	// cruds:
 	public final static String ALL = "*";
@@ -57,7 +64,7 @@ public final class SecurityModel
 	public final static String RESOURCE = "resource";
 	public final static String APP ="app";
 	public final static String SHARE = "share";
-	public final static String USER = "user";
+	public final static String SUBJECT = "subject";
 
 
 
@@ -75,10 +82,10 @@ public final class SecurityModel
 	public final static String PERM_CREATE_APP_ID = APP + SEP +CREATE;//APP + SEP + CREATE;//"app:create";
 	public final static String PERM_DELETE_APP_ID = APP + SEP + DELETE;//APP + SEP + DELETE;//"app:delete";
 	public final static String PERM_UPDATE_APP_ID = APP + SEP + UPDATE;//APP + SEP + UPDATE;//"app:update";
-	public final static String PERM_ADD_USER = USER + SEP + CREATE;//"user:create";
-	public final static String PERM_DELETE_USER = USER + SEP + DELETE;//"user:delete";
-	public final static String PERM_READ_USER = USER + SEP + READ;//"user:read";
-	public final static String PERM_UPDATE_USER = USER + SEP +USER;//"user:update";
+	public final static String PERM_ADD_USER = SUBJECT + SEP + CREATE;//"user:create";
+	public final static String PERM_DELETE_SUBJECT = SUBJECT + SEP + DELETE;//"user:delete";
+	public final static String PERM_READ_SUBJECT = SUBJECT + SEP + READ;//"user:read";
+	public final static String PERM_UPDATE_SUBJECT = SUBJECT + SEP + UPDATE;//"user:update";
 	public final static String PERM_SELF = "self";
 	public final static String PERM_PRIVATE = "private";
 	public final static String PERM_PUBLIC= "public";
@@ -97,6 +104,13 @@ public final class SecurityModel
 	public final static String PERM_REMOVE_ROLE = PERMISSION + SEP + REMOVE + SEP + ROLE;
 
 	public final static String PERM_ACCESS = PERMISSION + SEP + "access";
+
+
+	// subject resource permission explicit permission "resource:subject_guid:*:subject_guid of the resource"
+	public static final String PERM_SUBJECT_RESOURCE_ACCESS = RESOURCE + SEP + SUBJECT_GUID + SEP + ALL + SEP + TOK_SUBJECT_GUID;
+
+	// resource:R,U,D:resource_guid
+	public static final String PERM_RESOURCE_ACCESS = RESOURCE + SEP + TOK_CRUD + SEP + TOK_RESOURCE_GUID;
 	
 
 
@@ -129,9 +143,9 @@ public final class SecurityModel
 		PRIVATE(PERM_PRIVATE),
 		PUBLIC(PERM_PUBLIC),
 		REFERENCE_ID(TOK_REFERENCE_ID),
-		RESOURCE_ID(TOK_RESOURCE_ID),
+		RESOURCE_ID(TOK_RESOURCE_GUID),
 		SUBJECT_ID(TOK_SUBJECT_ID),
-		USER_ID(TOK_USER_ID),
+		USER_ID(TOK_SUBJECT_GUID),
 		;
 
 		
@@ -168,19 +182,19 @@ public final class SecurityModel
 		ROLE_DELETE("role_delete", "Permission to delete a role", PERM_DELETE_ROLE),
 		ROLE_UPDATE("role_update", "Permission to update a role", PERM_UPDATE_ROLE),
 		USER_CREATE("user_create", "Permission to create a user", PERM_ADD_USER),
-		USER_DELETE("user_delete", "Permission to delete a user", PERM_DELETE_USER),
-		USER_UPDATE("user_update", "Permission to update a user", PERM_UPDATE_USER),
-		USER_READ("user_read", "Permission to update a user", PERM_UPDATE_USER),
+		USER_DELETE("user_delete", "Permission to delete a user", PERM_DELETE_SUBJECT),
+		USER_UPDATE("user_update", "Permission to update a user", PERM_UPDATE_SUBJECT),
+		USER_READ("user_read", "Permission to update a user", PERM_UPDATE_SUBJECT),
 		RESOURCE_ADD("resource_add", "Permission to add a resource", PERM_ADD_RESOURCE, TOK_APP_ID),
 		RESOURCE_ANY("resource_any", "Any permission applicable", PERM_RESOURCE_ANY),
 		
 		RESOURCE_DELETE("resource_delete", "Permission to delete a resource", PERM_DELETE_RESOURCE, TOK_APP_ID),
 		RESOURCE_UPDATE("resource_update", "Permission to update a resource", PERM_UPDATE_RESOURCE, TOK_APP_ID),
 		RESOURCE_READ_ALL("resource_read_all", "Permission to read all resources", PERM_READ_RESOURCE, ALL),
-		RESOURCE_READ_PUBLIC("resource_read_public", "Permission to read a public resource", PERM_READ_RESOURCE, TOK_APP_ID, TOK_RESOURCE_ID, PERM_PUBLIC),
-		RESOURCE_READ_PRIVATE("resource_private", "Permission to read  a private resource", PERM_READ_RESOURCE, TOK_APP_ID, TOK_RESOURCE_ID, PERM_PRIVATE),
+		RESOURCE_READ_PUBLIC("resource_read_public", "Permission to read a public resource", PERM_READ_RESOURCE, TOK_APP_ID, TOK_RESOURCE_GUID, PERM_PUBLIC),
+		RESOURCE_READ_PRIVATE("resource_private", "Permission to read  a private resource", PERM_READ_RESOURCE, TOK_APP_ID, TOK_RESOURCE_GUID, PERM_PRIVATE),
 		SELF("self", "permission granted to all users", PERM_SELF),
-		SELF_USER("self_user", "permission granted to all users", "nventity:create,read,update,delete", TOK_USER_ID, TOK_RESOURCE_ID),
+		SELF_USER("self_user", "permission granted to all users", "nventity:create,read,update,delete", TOK_SUBJECT_GUID, TOK_RESOURCE_GUID),
 	
 		
 		;
@@ -312,15 +326,15 @@ public final class SecurityModel
 	{
 		ASSIGN_ROLE_APP("assign_role_app", "Assign a role to user", PERM_ADD_ROLE, TOK_APP_ID),
 		ORDER_CREATE("order_create", "Create order", "order:create", TOK_APP_ID, PERM_SELF),
-		ORDER_DELETE("order_delete", "Delete order", "order:delete", TOK_APP_ID, TOK_RESOURCE_ID),
-		ORDER_UPDATE("order_update", "Update order", "order:update", TOK_APP_ID, TOK_RESOURCE_ID),
+		ORDER_DELETE("order_delete", "Delete order", "order:delete", TOK_APP_ID, TOK_RESOURCE_GUID),
+		ORDER_UPDATE("order_update", "Update order", "order:update", TOK_APP_ID, TOK_RESOURCE_GUID),
 		ORDER_READ_APP("order_read_app", "Read app  order", "order:read", TOK_APP_ID),
-		ORDER_READ_USER_APP("order_read_user_app", "Read app  order", "order:read", TOK_APP_ID, TOK_RESOURCE_ID, TOK_USER_ID),
-		ORDER_UPDATE_STATUS_APP("order_update_status_app", "Read app  order", "order:update", TOK_APP_ID, TOK_RESOURCE_ID, PERM_STATUS),
+		ORDER_READ_USER_APP("order_read_user_app", "Read app  order", "order:read", TOK_APP_ID, TOK_RESOURCE_GUID, TOK_SUBJECT_GUID),
+		ORDER_UPDATE_STATUS_APP("order_update_status_app", "Read app  order", "order:update", TOK_APP_ID, TOK_RESOURCE_GUID, PERM_STATUS),
 		RESOURCE_ADD("resource_add", "Add resource", PERM_ADD_RESOURCE, TOK_APP_ID),
-		RESOURCE_DELETE("resource_delete", "delete resource", PERM_DELETE_RESOURCE, TOK_APP_ID, TOK_RESOURCE_ID),
-		RESOURCE_READ_PRIVATE("resource_read_private", "read private resource", PERM_READ_RESOURCE, TOK_APP_ID, TOK_RESOURCE_ID, PERM_PRIVATE),
-		RESOURCE_READ_PUBLIC("resource_read_public", "read public resource", PERM_READ_RESOURCE, TOK_APP_ID, TOK_RESOURCE_ID, PERM_PUBLIC),
+		RESOURCE_DELETE("resource_delete", "delete resource", PERM_DELETE_RESOURCE, TOK_APP_ID, TOK_RESOURCE_GUID),
+		RESOURCE_READ_PRIVATE("resource_read_private", "read private resource", PERM_READ_RESOURCE, TOK_APP_ID, TOK_RESOURCE_GUID, PERM_PRIVATE),
+		RESOURCE_READ_PUBLIC("resource_read_public", "read public resource", PERM_READ_RESOURCE, TOK_APP_ID, TOK_RESOURCE_GUID, PERM_PUBLIC),
 		RESOURCE_UPDATE("resource_update", "update resource", PERM_UPDATE_RESOURCE, TOK_APP_ID),
 		SELF("self", "self", PERM_SELF),
 		;

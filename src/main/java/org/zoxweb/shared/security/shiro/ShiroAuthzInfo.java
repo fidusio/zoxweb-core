@@ -12,9 +12,7 @@ extends ShiroDomain
 
 
 
-        // The subject that
-//        SUBJECT_GUID(NVConfigManager.createNVConfig("subject_guid", "The subject global identifier.", "SubjectGID", false, true, String.class)),
-        SUBJECT_TYPE(NVConfigManager.createNVConfig("subject_type", "The subject type.", "SubjectType", false, true, String.class)),
+        SUBJECT_TYPE(NVConfigManager.createNVConfig("subject_type", "The class name type of the subject.", "SubjectType", false, true, String.class)),
 
 
         AUTHZ_ID(NVConfigManager.createNVConfig("authz_guid", "The authorization global identifier.", "AuthzGID", false, true, String.class)),
@@ -22,7 +20,7 @@ extends ShiroDomain
 
 
         RESOURCE_GUID(NVConfigManager.createNVConfig(MetaToken.RESOURCE_GUID.getName(), "The resource global identifier.", "ResourceGUID", false, true, String.class)),
-        RESOURCE_TYPE(NVConfigManager.createNVConfig(MetaToken.RESOURCE_TYPE.getName(), "The resource type.", "ResourceType", false, true, String.class)),
+        RESOURCE_TYPE(NVConfigManager.createNVConfig(MetaToken.RESOURCE_TYPE.getName(), "The class name of the resource.", "ResourceType", false, true, String.class)),
         ;
 
         private final NVConfig nvc;
@@ -97,8 +95,8 @@ extends ShiroDomain
 
 
     /**
-     * Get the resource global id
-     * @return
+     * Get the resource GUID
+     * @return resource GUID
      */
     public String getResourceGUID()
     {
@@ -106,9 +104,9 @@ extends ShiroDomain
     }
 
 
-    public void setResourceGUID(String resourceID)
+    public void setResourceGUID(String resourceGUID)
     {
-        setValue(Param.RESOURCE_GUID, resourceID);
+        setValue(Param.RESOURCE_GUID, resourceGUID);
     }
 
     /**
