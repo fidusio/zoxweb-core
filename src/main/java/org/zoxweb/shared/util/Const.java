@@ -761,6 +761,20 @@ public class Const {
     }
 
 
+
+    /**
+     * Checks if given year is a leap year.
+     * A year is a leap year if it is a multiple of 400 or a multiple of 4 but not 100.
+     * Example: 2015 (non-leap year) returns false and 2008 (leap year) returns true.
+     *
+     * @param year to be checked
+     * @return true if leap year, false if not
+     */
+    public static boolean isLeapYear(int year)
+    {
+      return (year % 400 == 0) || ((year % 100) != 0 && (year % 4 == 0));
+    }
+
   }
 
   public enum TimeZoneOffset

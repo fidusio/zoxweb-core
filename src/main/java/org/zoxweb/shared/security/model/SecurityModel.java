@@ -29,7 +29,7 @@ public final class SecurityModel
 	public static final String RESOURCE_GUID = "resource_guid";
 
 
-
+	// token to be dynamically replaced
 	public final static String TOK_APP_ID = "$$app_id$$";
 
 	public final static String TOK_REFERENCE_ID = "$$reference_id$$";
@@ -38,6 +38,47 @@ public final class SecurityModel
 	public final static String TOK_SUBJECT_GUID = "$$" + SUBJECT_GUID+ "$$";
 	public final static String TOK_CRUD = "$$crud$$";
 
+
+	public enum SecToken
+		implements GetName
+	{
+		REFERENCE_ID(TOK_REFERENCE_ID),
+		APP_ID(TOK_APP_ID),
+		RESOURCE_GUID(TOK_RESOURCE_GUID),
+		SUBJECT_ID(TOK_SUBJECT_ID),
+		SUBJECT_GUID(TOK_SUBJECT_GUID),
+		CRUD(TOK_CRUD),
+		;
+
+		private final String tag;
+		SecToken(String tag)
+		{
+			this.tag = tag;
+		}
+		/**
+		 * @return the name of the object
+		 */
+		@Override
+		public String getName() {
+			return tag;
+		}
+
+		public GetNameValue<String> toGNV(String value)
+		{
+			return new NVPair(this, value);
+		}
+
+
+		public static String updateToken(String token, GetNameValue<String> ...gnvs)
+		{
+			for (GetNameValue<String> gnv : gnvs)
+			{
+				token = SharedStringUtil.embedText(token, gnv.getName(), gnv.getValue());
+			}
+
+			return token;
+		}
+	}
 
 
 
@@ -107,7 +148,8 @@ public final class SecurityModel
 
 
 	// subject resource permission explicit permission "resource:subject_guid:*:subject_guid of the resource"
-	public static final String PERM_SUBJECT_RESOURCE_ACCESS = RESOURCE + SEP + SUBJECT_GUID + SEP + ALL + SEP + TOK_SUBJECT_GUID;
+	public static final String PERM_SUBJECT_GUID_RESOURCE_ACCESS = RESOURCE + SEP + SUBJECT_GUID + SEP + ALL + SEP + TOK_SUBJECT_GUID;
+	public static final String PERM_RESOURCE_ACCESS_VIA_SUBJECT_GUID = RESOURCE + SEP + SUBJECT_GUID + SEP + TOK_CRUD + SEP + TOK_SUBJECT_GUID;
 
 	// resource:R,U,D:resource_guid
 	public static final String PERM_RESOURCE_ACCESS = RESOURCE + SEP + TOK_CRUD + SEP + TOK_RESOURCE_GUID;

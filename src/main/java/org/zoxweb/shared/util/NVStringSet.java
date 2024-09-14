@@ -1,7 +1,7 @@
 package org.zoxweb.shared.util;
 
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 @SuppressWarnings("serial")
@@ -13,7 +13,7 @@ extends NVBase<Set<String>>
 	 */
 	public NVStringSet()
 	{
-		super((String)null, new HashSet<String>());
+		super((String)null, new LinkedHashSet<String>());
 	}
 
 
@@ -45,7 +45,7 @@ extends NVBase<Set<String>>
 	 */
 	public NVStringSet(String name)
 	{
-		super(name, new HashSet<String>());
+		super(name, new LinkedHashSet<String>());
 	}
 
 
