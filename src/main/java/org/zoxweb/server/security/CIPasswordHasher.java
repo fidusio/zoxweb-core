@@ -2,29 +2,29 @@ package org.zoxweb.server.security;
 
 import org.zoxweb.shared.crypto.CredentialHasher;
 import org.zoxweb.shared.crypto.CryptoConst;
-import org.zoxweb.shared.crypto.PasswordDAO;
+import org.zoxweb.shared.crypto.CIPassword;
 import org.zoxweb.shared.security.AccessException;
 import org.zoxweb.shared.util.SharedUtil;
 
 import java.security.NoSuchAlgorithmException;
 
-public class PasswordDAOHasher
-implements CredentialHasher<PasswordDAO>
+public class CIPasswordHasher
+implements CredentialHasher<CIPassword>
 {
     private CryptoConst.HASHType hashType;
 
     private int iteration;
 
-    public PasswordDAOHasher(){}
+    public CIPasswordHasher(){}
 
-    public PasswordDAOHasher(CryptoConst.HASHType hashType, int iteration)
+    public CIPasswordHasher(CryptoConst.HASHType hashType, int iteration)
     {
         setHashType(hashType);
         setIteration(iteration);
     }
 
     @Override
-    public PasswordDAO hash(String password)
+    public CIPassword hash(String password)
     {
         try
         {
@@ -37,7 +37,7 @@ implements CredentialHasher<PasswordDAO>
     }
 
     @Override
-    public PasswordDAO hash(byte[] password)
+    public CIPassword hash(byte[] password)
     {
         try
         {
@@ -50,7 +50,7 @@ implements CredentialHasher<PasswordDAO>
     }
 
     @Override
-    public PasswordDAO hash(char[] password) {
+    public CIPassword hash(char[] password) {
         try
         {
             return HashUtil.toPassword(hashType, 0, iteration, new String(password));
@@ -66,7 +66,7 @@ implements CredentialHasher<PasswordDAO>
         return iteration;
     }
 
-    public PasswordDAOHasher setIteration(int iteration)
+    public CIPasswordHasher setIteration(int iteration)
     {
         if(getHashType() == CryptoConst.HASHType.BCRYPT)
         {
@@ -85,7 +85,7 @@ implements CredentialHasher<PasswordDAO>
         return hashType;
     }
 
-    public PasswordDAOHasher setHashType(CryptoConst.HASHType hashType) {
+    public CIPasswordHasher setHashType(CryptoConst.HASHType hashType) {
         SharedUtil.checkIfNulls("Null hash type", hashType);
         this.hashType = hashType;
         return this;

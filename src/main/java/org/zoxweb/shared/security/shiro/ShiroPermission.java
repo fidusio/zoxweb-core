@@ -32,7 +32,7 @@ public class ShiroPermission
 	
 	public static final NVConfigEntity  NVC_SHIRO_PERMISSION = new NVConfigEntityLocal("shiro_permission", "Shiro permission dao object" ,
 			"ShiroPermission", false, true, false, false, ShiroPermission.class, SharedUtil.toNVConfigList(NVC_PATTERN),
-			null, false, ShiroDomain.NVC_APP_ID_DAO);
+			null, false, ShiroDomain.NVC_SHIRO_DOMAIN);
 	
 	public ShiroPermission()
 	{

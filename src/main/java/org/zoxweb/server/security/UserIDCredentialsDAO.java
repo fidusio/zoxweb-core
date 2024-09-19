@@ -18,7 +18,7 @@ package org.zoxweb.server.security;
 import java.util.Date;
 
 import org.zoxweb.shared.crypto.CryptoConst;
-import org.zoxweb.shared.crypto.PasswordDAO;
+import org.zoxweb.shared.crypto.CIPassword;
 import org.zoxweb.shared.data.SetNameDescriptionDAO;
 import org.zoxweb.shared.util.*;
 
@@ -58,7 +58,7 @@ public class UserIDCredentialsDAO
     PENDING_PIN(NVConfigManager
         .createNVConfig("pending_pin", "Pending pin", "PendingPin", true, true, String.class)),
     PASSWORD(NVConfigManager.createNVConfigEntity("password", "Password", "Password", true, true,
-        PasswordDAO.NVCE_PASSWORD_DAO)),
+        CIPassword.NVCE_CI_PASSWORD)),
     CANONICAL_ID(NVConfigManager.createNVConfig("canonical_id", "CanonicalID map", "CanonicalID", true, false, String.class)),
 
     ;
@@ -170,14 +170,14 @@ public class UserIDCredentialsDAO
    *
    * @return password dao
    */
-  public PasswordDAO getPassword() {
+  public CIPassword getPassword() {
     return lookupValue(Param.PASSWORD);
   }
 
   /**
    * Sets the password.
    */
-  public void setPassword(PasswordDAO password) {
+  public void setPassword(CIPassword password) {
     setValue(Param.PASSWORD, password);
   }
 

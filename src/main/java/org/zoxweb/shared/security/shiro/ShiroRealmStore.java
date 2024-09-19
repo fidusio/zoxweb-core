@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Set;
 
 public interface ShiroRealmStore<O,I>
-	extends ShiroRealmController<O,I>
+	extends RealmController<O,I>
 {
 
 

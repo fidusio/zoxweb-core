@@ -4,17 +4,17 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.crypto.CryptoConst;
-import org.zoxweb.shared.crypto.PasswordDAO;
+import org.zoxweb.shared.crypto.CIPassword;
 import org.zoxweb.shared.crypto.BCryptHash;
 import org.zoxweb.shared.util.SharedStringUtil;
 
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
-public class PasswordDAOTest {
+public class PasswordTest {
     @Test
     public void createPassword() throws NoSuchAlgorithmException {
-        PasswordDAO p = HashUtil.toPassword(CryptoConst.HASHType.SHA_256, 24, 8192, "password");
+        CIPassword p = HashUtil.toPassword(CryptoConst.HASHType.SHA_256, 24, 8192, "P!ssw2rd");
         System.out.println(GSONUtil.toJSONDefault(p, true));
        // p.setSalt(CryptoUtil.generateRandomHashedBytes());
     }
@@ -34,23 +34,23 @@ public class PasswordDAOTest {
 
         // generated online with clear password = password
         String bcryptHash = "$2y$10$yvHLPVjv6yF1MhI95Tw.TellvsfC7TDxYoNBxK8ksuEga8xkpHk7C";
-        PasswordDAO parsed = PasswordDAO.fromCanonicalID(bcryptHash);
+        CIPassword parsed = CIPassword.fromCanonicalID(bcryptHash);
         System.out.println(bcryptHash + " " + HashUtil.isBCryptPasswordValid("password", bcryptHash));
         System.out.println(bCrypted);
         Assertions.assertTrue(HashUtil.isPasswordValid(parsed, "password"));
 
 
-        PasswordDAO bPassword = HashUtil.toPassword(CryptoConst.HASHType.BCRYPT, 0, 10, "password");
+        CIPassword bPassword = HashUtil.toPassword(CryptoConst.HASHType.BCRYPT, 0, 10, "P!ssw2rd");
         System.out.println(GSONUtil.toJSONDefault(bPassword));
-        Assertions.assertTrue(HashUtil.isPasswordValid(bPassword, "password"));
+        Assertions.assertTrue(HashUtil.isPasswordValid(bPassword, "P!ssw2rd"));
 
-        HashUtil.validatePassword(bPassword, "password");
+        HashUtil.validatePassword(bPassword, "P!ssw2rd");
 
-        PasswordDAO passwordFromCanonicalID = PasswordDAO
+        CIPassword passwordFromCanonicalID = CIPassword
                 .fromCanonicalID(bPassword.toCanonicalID());
 
         System.out.println(GSONUtil.toJSONDefault(passwordFromCanonicalID));
-        Assertions.assertTrue(HashUtil.isPasswordValid(passwordFromCanonicalID, "password"));
+        Assertions.assertTrue(HashUtil.isPasswordValid(passwordFromCanonicalID, "P!ssw2rd"));
 
 
 
@@ -58,8 +58,8 @@ public class PasswordDAOTest {
         String salted = BCrypt.gensalt(9);
         String hashedPW = BCrypt.hashpw("password", salted);
         BCrypt.checkpw("password",hashedPW);
-        bPassword = HashUtil.toPassword(CryptoConst.HASHType.BCRYPT, 0, 9, "password");
+        bPassword = HashUtil.toPassword(CryptoConst.HASHType.BCRYPT, 0, 9, "P!ssw2rd");
         System.out.println(GSONUtil.toJSONDefault(bPassword));
-        Assertions.assertTrue(HashUtil.isPasswordValid(bPassword, "password"));
+        Assertions.assertTrue(HashUtil.isPasswordValid(bPassword, "P!ssw2rd"));
     }
 }

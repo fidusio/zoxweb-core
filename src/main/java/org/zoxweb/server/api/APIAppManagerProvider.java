@@ -10,7 +10,7 @@ import org.zoxweb.shared.api.APISecurityManager;
 import org.zoxweb.shared.crypto.CryptoConst;
 import org.zoxweb.shared.crypto.CryptoConst.HASHType;
 import org.zoxweb.shared.crypto.EncryptedKeyDAO;
-import org.zoxweb.shared.crypto.PasswordDAO;
+import org.zoxweb.shared.crypto.CIPassword;
 import org.zoxweb.shared.data.*;
 import org.zoxweb.shared.db.QueryMarker;
 import org.zoxweb.shared.db.QueryMatch;
@@ -304,7 +304,7 @@ public class APIAppManagerProvider
 			userIDCredentials.setUserStatus(userIDStatus);
 			userIDCredentials.setCanonicalID(userID.getSubjectID());
 			
-			PasswordDAO passwordDAO = HashUtil.toPassword(HASHType.BCRYPT, 0, 10, password);
+			CIPassword passwordDAO = HashUtil.toPassword(HASHType.BCRYPT, 0, 10, password);
 			passwordDAO.setSubjectGUID(userID.getReferenceID());
 			passwordDAO.setReferenceID(userID.getReferenceID());
 			passwordDAO.setGUID(userID.getGUID());
@@ -593,7 +593,7 @@ public class APIAppManagerProvider
     	
     	try 
     	{
-			PasswordDAO newPasswordDAO = HashUtil.toPassword(HASHType.SHA_512, 0, 8196, newPassword);
+			CIPassword newPasswordDAO = HashUtil.toPassword(HASHType.SHA_512, 0, 8196, newPassword);
             newPasswordDAO.setSubjectGUID(credentials.getReferenceID());
             newPasswordDAO.setReferenceID(credentials.getReferenceID());
 			credentials.setPassword(newPasswordDAO);

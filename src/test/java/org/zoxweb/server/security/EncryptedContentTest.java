@@ -21,7 +21,7 @@ import org.zoxweb.shared.crypto.CryptoConst.HASHType;
 import org.zoxweb.shared.crypto.CryptoConst.SecureRandomType;
 import org.zoxweb.shared.crypto.EncryptedDAO;
 import org.zoxweb.shared.crypto.EncryptedKeyDAO;
-import org.zoxweb.shared.crypto.PasswordDAO;
+import org.zoxweb.shared.crypto.CIPassword;
 import org.zoxweb.shared.util.SharedStringUtil;
 
 import javax.crypto.SecretKey;
@@ -119,7 +119,7 @@ public class EncryptedContentTest {
 
         //			EncryptedDAO fromJson = GSONUtil.fromJSON(gsonString, EncryptedDAO.class);
         //			System.out.println(fromJson.toCanonicalID());
-        PasswordDAO passwordDAO = null;
+        CIPassword passwordDAO = null;
         for (int i = 0; i < 10; i++) {
           long ts = System.nanoTime();
           passwordDAO = HashUtil.toPassword("sha-256", 0, 8196, "password");
@@ -129,7 +129,7 @@ public class EncryptedContentTest {
 
         //System.out.println( passwordDAO.toCanonicalID());
         System.out.println("passwordDAO:" + HashUtil.isPasswordValid(passwordDAO, "password"));
-        PasswordDAO passwordFromCanonicalID = PasswordDAO
+        CIPassword passwordFromCanonicalID = CIPassword
             .fromCanonicalID(passwordDAO.toCanonicalID());
         System.out.println("passwordFromCanonicalID:" + HashUtil
             .isPasswordValid(passwordFromCanonicalID, "password"));
@@ -138,7 +138,7 @@ public class EncryptedContentTest {
         System.out.println(json);
         System.out.println("json length:" + json.length());
 
-        PasswordDAO fromJSON = GSONUtil.fromJSON(json, PasswordDAO.class);
+        CIPassword fromJSON = GSONUtil.fromJSON(json, CIPassword.class);
         System.out.println(passwordDAO.toCanonicalID());
         System.out.println(fromJSON.toCanonicalID());
 
@@ -220,9 +220,9 @@ public class EncryptedContentTest {
         for (String canId : passwordCanonicalIDS) {
           System.out.println(
               "==============================================================================");
-          PasswordDAO pd = null;
+          CIPassword pd = null;
           try {
-            pd = PasswordDAO.fromCanonicalID(canId);
+            pd = CIPassword.fromCanonicalID(canId);
 
           } catch (Exception e) {
             System.out.println(e);
@@ -238,9 +238,9 @@ public class EncryptedContentTest {
 
       for (HASHType mdt : HASHType.values()) {
         try {
-          PasswordDAO pDAO = HashUtil.toPassword(mdt.getName(), 0, -1, "password");
+          CIPassword pDAO = HashUtil.toPassword(mdt.getName(), 0, -1, "password");
           System.out.println(HashUtil
-              .isPasswordValid(PasswordDAO.fromCanonicalID(pDAO.toCanonicalID()), "password")
+              .isPasswordValid(CIPassword.fromCanonicalID(pDAO.toCanonicalID()), "password")
               + "::::" + pDAO.toCanonicalID());
         } catch (NullPointerException | IllegalArgumentException
             | NoSuchAlgorithmException e) {

@@ -1,7 +1,7 @@
 package org.zoxweb.server.security;
 
 import org.zoxweb.server.io.IOUtil;
-import org.zoxweb.shared.crypto.PasswordDAO;
+import org.zoxweb.shared.crypto.CIPassword;
 import org.zoxweb.shared.util.SharedStringUtil;
 
 import java.io.Console;
@@ -55,7 +55,7 @@ public class PasswordToHash {
 
             }
 
-            PasswordDAO passwordDAO = HashUtil.toPassword(algo, 0, iteration, rawPassword);
+            CIPassword passwordDAO = HashUtil.toPassword(algo, 0, iteration, rawPassword);
             System.out.println(passwordDAO.toCanonicalID());
 
             HashUtil.validatePassword(passwordDAO, rawPassword);

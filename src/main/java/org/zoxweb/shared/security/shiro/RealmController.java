@@ -6,7 +6,7 @@ import org.zoxweb.shared.util.BaseSubjectID;
 import java.util.Set;
 
 
-public interface ShiroRealmController<O,I>
+public interface RealmController<O,I>
 extends AuthorizationInfoLookup<O,I>
 {
 
@@ -21,24 +21,17 @@ extends AuthorizationInfoLookup<O,I>
     SubjectIdentifier addSubjectIdentifier(String subjectID, BaseSubjectID.SubjectType subjectType, CredentialInfo credential)
             throws AccessSecurityException;
 
-    /**
-     * Create a subject identifier
-     * @param subjectID the email or uuid identifier of the subject
-     * @param subjectType the type of the subject
-     * @return the created subject identifier
-     * @throws AccessSecurityException if not permitted
-     */
-    SubjectIdentifier addSubjectIdentifier(String subjectID, BaseSubjectID.SubjectType subjectType)
-            throws AccessSecurityException;
 
     /**
      * Create a subject identifier
      * @param subjectIdentifier the subject identifier
+     * @param credential the subject credential
      * @return the created subject identifier
      * @throws AccessSecurityException if not permitted
      */
-    SubjectIdentifier addSubjectIdentifier(SubjectIdentifier subjectIdentifier)
+    SubjectIdentifier addSubjectIdentifier(SubjectIdentifier subjectIdentifier, CredentialInfo credential)
             throws AccessSecurityException;
+
 
     /**
      * Delete a user identifier use with extreme care

@@ -29,7 +29,7 @@ package org.zoxweb.server.security;
 
 import org.zoxweb.shared.crypto.BCryptHash;
 import org.zoxweb.shared.crypto.CryptoConst;
-import org.zoxweb.shared.crypto.PasswordDAO;
+import org.zoxweb.shared.crypto.CIPassword;
 import org.zoxweb.shared.filters.FilterType;
 import org.zoxweb.shared.security.AccessException;
 import org.zoxweb.shared.util.SharedBase64;
@@ -214,21 +214,21 @@ public class HashUtil {
     return BCrypt.checkpw(password, bCryptHash);
   }
 
-  public static PasswordDAO toPassword(String algo, int saltLength, int saltIteration,
-                                       String password)
+  public static CIPassword toPassword(String algo, int saltLength, int saltIteration,
+                                      String password)
           throws NullPointerException, IllegalArgumentException, NoSuchAlgorithmException {
     SharedUtil.checkIfNulls("Null parameter", algo, password);
     return toPassword(CryptoConst.HASHType.lookup(algo), saltLength, saltIteration, password);
   }
 
-  public static PasswordDAO toPassword(CryptoConst.HASHType algo, int saltLength, int saltIteration,
-                                       String password)
+  public static CIPassword toPassword(CryptoConst.HASHType algo, int saltLength, int saltIteration,
+                                      String password)
           throws NullPointerException, IllegalArgumentException, NoSuchAlgorithmException {
     SharedUtil.checkIfNulls("Null parameter", algo, password);
     return toPassword(algo, saltLength, saltIteration, SharedStringUtil.getBytes(FilterType.PASSWORD.validate(password)));
   }
 
-  public static PasswordDAO toBCryptPassword(String password, int logRounds)
+  public static CIPassword toBCryptPassword(String password, int logRounds)
 
   {
       try {
@@ -239,7 +239,7 @@ public class HashUtil {
   }
 
 
-  public static PasswordDAO toBCryptPassword(byte[] password, int logRounds)
+  public static CIPassword toBCryptPassword(byte[] password, int logRounds)
 
   {
       try {
@@ -250,7 +250,7 @@ public class HashUtil {
   }
 
 
-  public static PasswordDAO toBCryptPassword(String password)
+  public static CIPassword toBCryptPassword(String password)
   {
       try {
           return toPassword(CryptoConst.HASHType.BCRYPT, 0, 10, password);
@@ -260,7 +260,7 @@ public class HashUtil {
   }
 
 
-  public static PasswordDAO toBCryptPassword(byte[] password)
+  public static CIPassword toBCryptPassword(byte[] password)
   {
       try {
           return toPassword(CryptoConst.HASHType.BCRYPT, 0, 10, password);
@@ -271,8 +271,8 @@ public class HashUtil {
 
 
 
-  public static PasswordDAO toPassword(CryptoConst.HASHType algo, int saltLength, int saltIteration,
-                                       byte[] password)
+  public static CIPassword toPassword(CryptoConst.HASHType algo, int saltLength, int saltIteration,
+                                      byte[] password)
           throws NullPointerException, IllegalArgumentException, NoSuchAlgorithmException {
     SharedUtil.checkIfNulls("Null parameter", algo, password);
     if (password.length < 6) {
@@ -281,7 +281,7 @@ public class HashUtil {
     byte[] hashedPassword = null;
     byte[] salt = null;
 
-    PasswordDAO passwordDAO = new PasswordDAO();
+    CIPassword passwordDAO = new CIPassword();
     if (algo == CryptoConst.HASHType.BCRYPT)
     {
       BCryptHash bcryptHash = toBCryptHash(saltIteration, password);
@@ -348,7 +348,7 @@ public class HashUtil {
   }
 
 
-  public static PasswordDAO mergeContent(PasswordDAO password, PasswordDAO toMerge) {
+  public static CIPassword mergeContent(CIPassword password, CIPassword toMerge) {
     synchronized (password) {
       password.setName(toMerge.getName());
       password.setHashIteration(toMerge.getHashIteration());
@@ -359,7 +359,7 @@ public class HashUtil {
     return password;
   }
 
-  public static boolean isPasswordValid(final PasswordDAO passwordDAO, String password)
+  public static boolean isPasswordValid(final CIPassword passwordDAO, String password)
           throws NullPointerException, IllegalArgumentException, NoSuchAlgorithmException {
     SharedUtil.checkIfNulls("Null values", passwordDAO, password);
     if(CryptoConst.HASHType.lookup(passwordDAO.getName()) == CryptoConst.HASHType.BCRYPT)
@@ -375,7 +375,7 @@ public class HashUtil {
     }
   }
 
-  public static void validatePassword(final PasswordDAO passwordDAO, String password)
+  public static void validatePassword(final CIPassword passwordDAO, String password)
           throws NullPointerException, IllegalArgumentException, AccessException {
     SharedUtil.checkIfNulls("Null values", passwordDAO, password);
     validatePassword(passwordDAO, password.toCharArray());
@@ -407,7 +407,7 @@ public class HashUtil {
   }
 
 
-  public static void validatePassword(final PasswordDAO passwordDAO, final char[] password)
+  public static void validatePassword(final CIPassword passwordDAO, final char[] password)
           throws NullPointerException, IllegalArgumentException, AccessException {
 
     SharedUtil.checkIfNulls("Null values", passwordDAO, password);

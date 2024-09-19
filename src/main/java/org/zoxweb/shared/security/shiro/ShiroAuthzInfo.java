@@ -37,7 +37,7 @@ extends ShiroDomain
     }
 
     public static final NVConfigEntity NVC_SHIRO_AUTHZ_INFO = new NVConfigEntityLocal("shiro_authz_info", "Shiro authorization info" , "ShiroAuthzInfo",
-            false, true, false, false, ShiroAuthzInfo.class, SharedUtil.extractNVConfigs(Param.values()), null, false, ShiroDomain.NVC_APP_ID_DAO);
+            false, true, false, false, ShiroAuthzInfo.class, SharedUtil.extractNVConfigs(Param.values()), null, false, ShiroDomain.NVC_SHIRO_DOMAIN);
 
     public ShiroAuthzInfo()
     {
