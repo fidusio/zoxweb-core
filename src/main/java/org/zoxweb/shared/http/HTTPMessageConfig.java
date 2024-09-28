@@ -16,7 +16,7 @@
 package org.zoxweb.shared.http;
 
 import org.zoxweb.shared.data.SetNameDescriptionDAO;
-import org.zoxweb.shared.net.InetSocketAddressDAO;
+import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.util.*;
 import org.zoxweb.shared.util.NVConfigEntity.ArrayType;
 
@@ -64,7 +64,7 @@ public class HTTPMessageConfig
 		AUTHORIZATION(NVConfigManager.createNVConfigEntity("http_authorization", "The http authorization header", "HTTPAuthorization", false, true, HTTPAuthorization.class, ArrayType.NOT_ARRAY)),
 		//PARAMETERS(NVConfigManager.createNVConfig("parameters", "parameters", "Parameters", false, true, false, String[].class, null)),
 		PARAMETERS(NVConfigManager.createNVConfig("parameters", "parameters", "Parameters", false, true, NVGenericMap.class)),
-		PROXY_ADDRESS(NVConfigManager.createNVConfigEntity("proxy_address", "The proxy address if not null","ProxyAddress",true, false, InetSocketAddressDAO.class, ArrayType.NOT_ARRAY)),
+		PROXY_ADDRESS(NVConfigManager.createNVConfigEntity("proxy_address", "The proxy address if not null","ProxyAddress",true, false, IPAddress.class, ArrayType.NOT_ARRAY)),
 		ENABLE_ENCODING(NVConfigManager.createNVConfig("enable_encoding", "The NVP will be url encoded", "EnableEncoding", false, true, Boolean.class)),
 		ENABLE_SECURE_CHECK(NVConfigManager.createNVConfig("enable_secure_check", "If the connection is secure, certificate will be validated", "EnableSecureCheck", false, true, Boolean.class)),
 		HTTP_PARAMETER_FORMATTER(NVConfigManager.createNVConfig("http_parameter_formatter", "The NVP parameter formatter", "HTTPParameterFormatter", false, true, HTTPEncoder.class)),
@@ -457,7 +457,7 @@ public class HTTPMessageConfig
 	 * @see org.zoxweb.shared.http.HTTPMessageConfigInterface#getProxyAddress()
 	 */
 	@Override
-	public InetSocketAddressDAO getProxyAddress() {
+	public IPAddress getProxyAddress() {
 		
 		return lookupValue(Params.PROXY_ADDRESS);
 	}
@@ -465,10 +465,10 @@ public class HTTPMessageConfig
 
 
 	/**
-	 * @see org.zoxweb.shared.http.HTTPMessageConfigInterface#setProxyAddress(org.zoxweb.shared.net.InetSocketAddressDAO)
+	 * @see org.zoxweb.shared.http.HTTPMessageConfigInterface#setProxyAddress(IPAddress)
 	 */
 	@Override
-	public void setProxyAddress(InetSocketAddressDAO proxyAddress)
+	public void setProxyAddress(IPAddress proxyAddress)
 	{
 		
 		setValue(Params.PROXY_ADDRESS, proxyAddress);

@@ -23,22 +23,22 @@ import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.SharedUtil;
 
 @SuppressWarnings("serial")
-public class InetSocketAddressDAO
+public class IPAddress
     extends SetNameDAO
 {
 	
 	private static final NVConfig INET_ADDRESS = NVConfigManager.createNVConfig("inet_address", "The ip address","InetAddress",true, false, String.class);
 	private static final NVConfig PORT = NVConfigManager.createNVConfig("port", "The port number","Port", true, false, int.class);
-	private static final NVConfig BACKLOG  = NVConfigManager.createNVConfig("backlog", "","BackLog", true, false, int.class);
+	private static final NVConfig BACKLOG  = NVConfigManager.createNVConfig("backlog", "How many pending connections","BackLog", true, false, int.class);
 	private static final NVConfig PROXY_TYPE = NVConfigManager.createNVConfig("proxy_type", "proxy type","ProxyType", false, false, ProxyType.class);
-	public static final NVConfigEntity NVC_INET_SOCKET_ADDRESS_DAO = new NVConfigEntityLocal("inet_socket_address_dao", null , "InetSocketAddressDAO", true, false, false, false, InetSocketAddressDAO.class, SharedUtil.toNVConfigList(INET_ADDRESS, PORT, BACKLOG, PROXY_TYPE), null, false, SetNameDAO.NVC_NAME_DAO);
+	public static final NVConfigEntity NVC_IP_ADDRESS = new NVConfigEntityLocal("ip_address", null , "IPAddress", true, false, false, false, IPAddress.class, SharedUtil.toNVConfigList(INET_ADDRESS, PORT, BACKLOG, PROXY_TYPE), null, false, SetNameDAO.NVC_NAME_DAO);
 
-	public InetSocketAddressDAO()
+	public IPAddress()
     {
-		super(NVC_INET_SOCKET_ADDRESS_DAO);
+		super(NVC_IP_ADDRESS);
 	}
 
-	public InetSocketAddressDAO(String addressPort)
+	public IPAddress(String addressPort)
     {
 		this();
 		String[] params = addressPort.split(":");
@@ -81,16 +81,16 @@ public class InetSocketAddressDAO
 //		}
 	}
 	
-	public InetSocketAddressDAO(String address, int port)
+	public IPAddress(String address, int port)
     {
 		this(address, port, 128,null);
 	}
 
-	public InetSocketAddressDAO(String address, int port, ProxyType pt)
+	public IPAddress(String address, int port, ProxyType pt)
 	{
 		this(address, port, 128, pt);
 	}
-	public InetSocketAddressDAO(String address, int port, int backlog, ProxyType pt)
+	public IPAddress(String address, int port, int backlog, ProxyType pt)
 	{
 		this();
 		setInetAddress(address);
@@ -155,11 +155,11 @@ public class InetSocketAddressDAO
 
 	public boolean equals(Object o)
     {
-		if (o != null && o instanceof InetSocketAddressDAO)
+		if (o != null && o instanceof IPAddress)
 		{
-			if (getInetAddress() != null && getInetAddress().equalsIgnoreCase(((InetSocketAddressDAO)o).getInetAddress())) {
+			if (getInetAddress() != null && getInetAddress().equalsIgnoreCase(((IPAddress)o).getInetAddress())) {
 
-			    if (getPort() == ((InetSocketAddressDAO)o).getPort())
+			    if (getPort() == ((IPAddress)o).getPort())
 				{
 					return true;
 				}
@@ -188,13 +188,13 @@ public class InetSocketAddressDAO
 		return SharedUtil.toCanonicalID(':',getInetAddress(), getPort());
 	}
 
-	public static InetSocketAddressDAO parse(String addressPortProxyType, ProxyType pt)
+	public static IPAddress parse(String addressPortProxyType, ProxyType pt)
 	{
 		if (addressPortProxyType.toUpperCase().indexOf(pt.name()) == -1)
 		{
 			addressPortProxyType = addressPortProxyType + ":" + pt;
 		}
-		return new InetSocketAddressDAO(addressPortProxyType);
+		return new IPAddress(addressPortProxyType);
 	}
 	
 }

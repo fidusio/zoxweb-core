@@ -9,7 +9,7 @@ import org.zoxweb.shared.api.APIException;
 import org.zoxweb.shared.api.APISecurityManager;
 import org.zoxweb.shared.crypto.CryptoConst;
 import org.zoxweb.shared.crypto.CryptoConst.HASHType;
-import org.zoxweb.shared.crypto.EncryptedKeyDAO;
+import org.zoxweb.shared.crypto.EncryptedKey;
 import org.zoxweb.shared.crypto.CIPassword;
 import org.zoxweb.shared.data.*;
 import org.zoxweb.shared.db.QueryMarker;
@@ -51,7 +51,7 @@ public class APIAppManagerProvider
 			UserIDCredentialsDAO.NVC_USER_ID_CREDENTIALS_DAO,
 			SubjectPreference.NVC_SUBJECT_PREFERENCE,
 			AppDeviceDAO.NVC_APP_DEVICE_DAO,
-			EncryptedKeyDAO.NVCE_ENCRYPTED_KEY_DAO,
+			EncryptedKey.NVCE_ENCRYPTED_KEY,
 			ShiroAssociationRule.NVC_SHIRO_ASSOCIATION_RULE,
 			ShiroPermission.NVC_SHIRO_PERMISSION,
 			ShiroRole.NVC_SHIRO_ROLE,

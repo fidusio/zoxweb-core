@@ -25,7 +25,7 @@ import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.net.*;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.shared.http.*;
-import org.zoxweb.shared.net.InetSocketAddressDAO;
+import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.protocol.Delimiter;
 import org.zoxweb.shared.security.SecurityStatus;
 import org.zoxweb.shared.util.NVBoolean;
@@ -57,7 +57,7 @@ public class NIOProxyProtocol
 		final HTTPMessageConfigInterface hmci;
 		int payloadIndex = -1;
 		int payloadSent = 0;
-		final InetSocketAddressDAO remoteAddress;
+		final IPAddress remoteAddress;
 		boolean headerNotSent = true;
 		
 		RequestInfo(HTTPMessageConfigInterface hmci, UByteArrayOutputStream ubaos)
@@ -164,7 +164,7 @@ public class NIOProxyProtocol
 	
 	private UByteArrayOutputStream requestBuffer = new UByteArrayOutputStream();
 	private HTTPMessageConfigInterface requestMCCI = null;
-	private InetSocketAddressDAO lastRemoteAddress = null;
+	private IPAddress lastRemoteAddress = null;
 	private SocketChannel remoteChannel = null;
 	private SelectionKey  remoteChannelSK = null;
 	//private SocketChannel phSChannel = null;
@@ -597,7 +597,7 @@ public class NIOProxyProtocol
 		{
 			
 			int index = 0;
-			InetSocketAddressDAO addressPort = new InetSocketAddressDAO(args[index++]);
+			IPAddress addressPort = new IPAddress(args[index++]);
 			int threadCount = index < args.length ? Integer.parseInt(args[index++]) : 8;
 			InetFilterRulesManager clientIFRM = null;
 			TaskUtil.setThreadMultiplier(threadCount);

@@ -19,7 +19,7 @@ import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.task.TaskUtil;
-import org.zoxweb.shared.net.InetSocketAddressDAO;
+import org.zoxweb.shared.net.IPAddress;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -41,7 +41,7 @@ public class NIOTunnel
 	    extends ProtocolFactoryBase<NIOTunnel>
 	{
 
-		private InetSocketAddressDAO remoteAddress;
+		private IPAddress remoteAddress;
 
 		public NIOTunnelFactory()
 		{
@@ -49,17 +49,17 @@ public class NIOTunnel
 		}
 
 
-		public NIOTunnelFactory(InetSocketAddressDAO remoteAddress)
+		public NIOTunnelFactory(IPAddress remoteAddress)
 		{
 			this.remoteAddress = remoteAddress;
 		}
 
-		public void setRemoteAddress(InetSocketAddressDAO rAddress)
+		public void setRemoteAddress(IPAddress rAddress)
 		{
 			remoteAddress = rAddress;
 		}
 
-		public InetSocketAddressDAO getRemoteAddress()
+		public IPAddress getRemoteAddress()
 		{
 			return remoteAddress;
 		}
@@ -77,7 +77,7 @@ public class NIOTunnel
 		}
 		public void init()
 		{
-			setRemoteAddress(new InetSocketAddressDAO(getProperties().getValue("remote_host")));
+			setRemoteAddress(new IPAddress(getProperties().getValue("remote_host")));
 		}
 
 	}
@@ -89,9 +89,9 @@ public class NIOTunnel
 	private volatile ByteBuffer sourceBB;
 
 
-	final private InetSocketAddressDAO remoteAddress;
+	final private IPAddress remoteAddress;
 
-	public NIOTunnel(InetSocketAddressDAO remoteAddress)
+	public NIOTunnel(IPAddress remoteAddress)
 	{
 		this.remoteAddress = remoteAddress;
 	}
@@ -200,7 +200,7 @@ public class NIOTunnel
 		{
 			int index = 0;
 			int port = Integer.parseInt(args[index++]);
-			InetSocketAddressDAO remoteAddress = new InetSocketAddressDAO(args[index++]);
+			IPAddress remoteAddress = new IPAddress(args[index++]);
 			TaskUtil.setThreadMultiplier(4);
 			
 			

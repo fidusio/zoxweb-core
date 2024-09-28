@@ -23,7 +23,7 @@ import org.zoxweb.server.net.NetworkTunnel;
 import org.zoxweb.server.security.CryptoUtil;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.server.util.GSONUtil;
-import org.zoxweb.shared.net.InetSocketAddressDAO;
+import org.zoxweb.shared.net.IPAddress;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLServerSocketFactory;
@@ -63,8 +63,8 @@ public class SecureNetworkTunnel
 	
 	
 	private ServerSocket ss;
-	private InetSocketAddressDAO remoteSocketAddress;
-	public SecureNetworkTunnel(SSLServerSocketFactory sslssf, int localPort, int backlog, InetSocketAddressDAO remoteAddress) throws IOException
+	private IPAddress remoteSocketAddress;
+	public SecureNetworkTunnel(SSLServerSocketFactory sslssf, int localPort, int backlog, IPAddress remoteAddress) throws IOException
 	{
 		ss = sslssf.createServerSocket(localPort, backlog);
 		remoteSocketAddress = remoteAddress;
@@ -136,7 +136,7 @@ public class SecureNetworkTunnel
 					{
 						String[] parsed = args[index].split(",");
 						int port = Integer.parseInt(parsed[0]);
-						InetSocketAddressDAO remoteAddress = new InetSocketAddressDAO(parsed[1]);
+						IPAddress remoteAddress = new IPAddress(parsed[1]);
 						ServerSocketChannel ssc = ServerSocketChannel.open();
 					
 						ssc.bind(new InetSocketAddress(port));
@@ -162,7 +162,7 @@ public class SecureNetworkTunnel
 					{
 						String[] parsed = args[index].split(",");
 						int port = Integer.parseInt(parsed[0]);
-						InetSocketAddressDAO remoteAddress = new InetSocketAddressDAO(parsed[1]);
+						IPAddress remoteAddress = new IPAddress(parsed[1]);
 						new SecureNetworkTunnel(sslssf, port, 128, remoteAddress);
 						
 					}

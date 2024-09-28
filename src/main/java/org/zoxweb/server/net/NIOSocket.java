@@ -22,8 +22,8 @@ import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.server.util.DateUtil;
 import org.zoxweb.shared.data.events.BaseEventObject;
 import org.zoxweb.shared.data.events.EventListenerManager;
-import org.zoxweb.shared.data.events.InetSocketAddressEvent;
-import org.zoxweb.shared.net.InetSocketAddressDAO;
+import org.zoxweb.shared.data.events.IPAddressEvent;
+import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.net.SharedNetUtil;
 import org.zoxweb.shared.security.SecurityStatus;
 import org.zoxweb.shared.util.Const.TimeInMillis;
@@ -171,7 +171,7 @@ public class NIOSocket
 		return sk;
 	}
 	
-	public SelectionKey addServerSocket(InetSocketAddressDAO sa, int backlog, ProtocolFactory<?> psf) throws IOException
+	public SelectionKey addServerSocket(IPAddress sa, int backlog, ProtocolFactory<?> psf) throws IOException
 	{
 		return addServerSocket(sa.getInetAddress() != null ? new InetSocketAddress(sa.getInetAddress(), sa.getPort()): new InetSocketAddress(sa.getPort()),
 				backlog,
@@ -314,7 +314,7 @@ public class NIOSocket
 													InetSocketAddress remoteISA = (InetSocketAddress) sc.getRemoteAddress();
 													if(remoteISA.getAddress() instanceof Inet4Address) {
 														String remoteIPAddress = SharedNetUtil.toV4Address(remoteISA.getAddress().getAddress());
-														InetSocketAddressEvent event = new InetSocketAddressEvent(this, new InetSocketAddressDAO(remoteIPAddress, isa.getPort()));
+														IPAddressEvent event = new IPAddressEvent(this, new IPAddress(remoteIPAddress, isa.getPort()));
 														eventListenerManager.dispatch(event, true);
 													}
 												}

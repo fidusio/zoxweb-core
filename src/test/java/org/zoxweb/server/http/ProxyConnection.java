@@ -7,7 +7,7 @@ import org.zoxweb.shared.http.HTTPMessageConfigInterface;
 import org.zoxweb.shared.http.HTTPMethod;
 import org.zoxweb.shared.http.HTTPResponseData;
 import org.zoxweb.shared.http.HTTPStatusCode;
-import org.zoxweb.shared.net.InetSocketAddressDAO;
+import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.util.SharedUtil;
 
 public class ProxyConnection {
@@ -17,7 +17,7 @@ public class ProxyConnection {
       int index = 0;
       String proxy = args[index++];
 
-      InetSocketAddressDAO proxyAddress = new InetSocketAddressDAO(proxy);
+      IPAddress proxyAddress = new IPAddress(proxy);
 
       Map<Long, String> results = new ConcurrentSkipListMap<Long, String>();
       for (int i = 1; i < args.length; i++) {

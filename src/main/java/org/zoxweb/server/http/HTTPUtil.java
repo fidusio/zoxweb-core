@@ -28,7 +28,7 @@ import org.zoxweb.server.util.ReflectionUtil;
 import org.zoxweb.server.util.RuntimeUtil;
 import org.zoxweb.shared.data.SimpleMessage;
 import org.zoxweb.shared.http.*;
-import org.zoxweb.shared.net.InetSocketAddressDAO;
+import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.protocol.Delimiter;
 import org.zoxweb.shared.protocol.MessageStatus;
 import org.zoxweb.shared.util.*;
@@ -815,11 +815,11 @@ public class HTTPUtil
 
 		return ret;
 	}
-	public static InetSocketAddressDAO parseHost(String url)
+	public static IPAddress parseHost(String url)
 	{
 		return parseHost(url, -1);
 	}
-	public static InetSocketAddressDAO parseHost(String url, int defaultPort)
+	public static IPAddress parseHost(String url, int defaultPort)
 	{
 		int index = url.indexOf(Delimiter.COLON_PATH.getValue());
 		int hostStart;
@@ -851,7 +851,7 @@ public class HTTPUtil
 			hostEnd = index;
 		}
 
-		InetSocketAddressDAO ret = new InetSocketAddressDAO(url.substring(hostStart, hostEnd));
+		IPAddress ret = new IPAddress(url.substring(hostStart, hostEnd));
 
 		if (ret.getPort() == -1)
 		// detect scheme type

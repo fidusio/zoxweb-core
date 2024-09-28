@@ -15,7 +15,7 @@
  */
 package org.zoxweb.shared.http;
 
-import org.zoxweb.shared.net.InetSocketAddressDAO;
+import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.util.*;
 
 import java.util.List;
@@ -257,13 +257,13 @@ extends ReferenceID<String>, SetName, SetDescription
 	/**
 	 * @return the proxy address null if not set
 	 */
-	InetSocketAddressDAO getProxyAddress();
+	IPAddress getProxyAddress();
 	
 	/**
 	 * Set the proxy address
 	 * @param proxyAddress
 	 */
-	void setProxyAddress(InetSocketAddressDAO proxyAddress);
+	void setProxyAddress(IPAddress proxyAddress);
 	
 	/**
 	 * @return reason

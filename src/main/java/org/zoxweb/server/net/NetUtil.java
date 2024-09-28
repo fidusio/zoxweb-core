@@ -634,7 +634,7 @@ public class NetUtil
 	
 	
 	
-	public static boolean areInetSocketAddressDAOEquals(InetSocketAddressDAO isad1, InetSocketAddressDAO isad2) throws UnknownHostException
+	public static boolean areInetSocketAddressDAOEquals(IPAddress isad1, IPAddress isad2) throws UnknownHostException
 	{	
 		if (isad1 != null && isad2 != null)
 		{

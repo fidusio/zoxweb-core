@@ -17,7 +17,7 @@ package org.zoxweb.shared.data;
 
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.server.util.ServerUtil;
-import org.zoxweb.shared.net.InetSocketAddressDAO;
+import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.net.NetworkInterfaceDAO;
 import org.zoxweb.shared.util.ArrayValues;
 import org.zoxweb.shared.util.NVEntity;
@@ -130,8 +130,8 @@ public class SystemInfoDAOTest {
 		
 		System.out.println(sys.getNetworkInterfaces().size() + "," +sysFromJson.getNetworkInterfaces().size() );
 		System.out.println(sys.getNetworkInterfaces().size() + "," +sys.getNetworkInterfaces().search("eth4") );
-		InetSocketAddressDAO addr1 = new InetSocketAddressDAO("zoxweb.com", 80);
-		InetSocketAddressDAO addr2 = new InetSocketAddressDAO("zoxweb.com", 80);
+		IPAddress addr1 = new IPAddress("zoxweb.com", 80);
+		IPAddress addr2 = new IPAddress("zoxweb.com", 80);
 		System.out.println(addr1.equals(addr2));
 		
 		} catch(Exception e) {

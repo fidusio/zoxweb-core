@@ -26,7 +26,7 @@ import org.zoxweb.shared.http.HTTPMessageConfig;
 import org.zoxweb.shared.http.HTTPMessageConfigInterface;
 import org.zoxweb.shared.http.HTTPMethod;
 import org.zoxweb.shared.http.HTTPVersion;
-import org.zoxweb.shared.net.InetSocketAddressDAO;
+import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.util.Const.TimeInMillis;
 import org.zoxweb.shared.util.SharedUtil;
 
@@ -49,7 +49,7 @@ public class HTTP2ProxyTest {
       long delta1 = 0;
 
       //long delta2 = 0;
-      InetSocketAddressDAO proxyAddress = new InetSocketAddressDAO(args[index++]);
+      IPAddress proxyAddress = new IPAddress(args[index++]);
       HTTPMethod hMethod = SharedUtil.lookupTypedEnum(HTTPMethod.values(), args[index++]);
 
       HTTPMessageConfigInterface hmci = HTTPMessageConfig
@@ -63,7 +63,7 @@ public class HTTP2ProxyTest {
       //hmci.getHeaderParameters().add(new NVPair("Accept", "text/html"));
 
       UByteArrayOutputStream ubaos = new UByteArrayOutputStream();
-      InetSocketAddressDAO remoteAddress = HTTPUtil.parseHost(hmci.getURI());
+      IPAddress remoteAddress = HTTPUtil.parseHost(hmci.getURI());
       HTTPUtil.formatRequest(hmci, false, ubaos);
       System.out.println(remoteAddress);
 

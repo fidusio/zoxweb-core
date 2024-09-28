@@ -18,7 +18,7 @@ public class ConnectionConfig
       implements GetNVConfig
   {
     SCHEMES(NVConfigManager.createNVConfig("schemes", "Protocol schemes", "Schemes", false, true, NVStringList.class)),
-    SOCKET_CONFIG(NVConfigManager.createNVConfigEntity("socket_config", "Socket configuration", "SocketConfig", false, true, InetSocketAddressDAO.NVC_INET_SOCKET_ADDRESS_DAO)),
+    SOCKET_CONFIG(NVConfigManager.createNVConfigEntity("socket_config", "Socket configuration", "SocketConfig", false, true, IPAddress.NVC_IP_ADDRESS)),
     SSL_CONFIG(NVConfigManager.createNVConfig("ssl_config", "SSL configuration", "SSLConfig", false, true, NVGenericMap.class)),
 
 
@@ -57,12 +57,12 @@ public class ConnectionConfig
   }
 
 
-  public void setSocketConfig(InetSocketAddressDAO sc)
+  public void setSocketConfig(IPAddress sc)
   {
     setValue(Param.SOCKET_CONFIG, sc);
   }
 
-  public InetSocketAddressDAO getSocketConfig()
+  public IPAddress getSocketConfig()
   {
     return lookupValue(Param.SOCKET_CONFIG);
   }

@@ -4,14 +4,14 @@ package org.zoxweb.server.net.ssl;
 import org.zoxweb.server.net.BaseSessionCallback;
 import org.zoxweb.server.net.ProtocolFactoryBase;
 import org.zoxweb.shared.data.ConfigDAO;
-import org.zoxweb.shared.net.InetSocketAddressDAO;
+import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.util.InstanceCreator;
 
 public class SSLNIOSocketHandlerFactory
         extends ProtocolFactoryBase<SSLNIOSocketHandler>
 {
 
-    private InetSocketAddressDAO remoteConnection;
+    private IPAddress remoteConnection;
     private SSLContextInfo sslContext;
     private Class<? extends BaseSessionCallback> scClass;
     private InstanceCreator<SSLSessionCallback> instanceCreator;
@@ -35,7 +35,7 @@ public class SSLNIOSocketHandlerFactory
     }
 
 
-    public SSLNIOSocketHandlerFactory(SSLContextInfo sslContext, InetSocketAddressDAO rc)
+    public SSLNIOSocketHandlerFactory(SSLContextInfo sslContext, IPAddress rc)
     {
         this();
         this.sslContext = sslContext;
@@ -77,7 +77,7 @@ public class SSLNIOSocketHandlerFactory
     public void init()
     {
         if(getProperties().getValue("remote_host") != null)
-            setRemoteConnection(new InetSocketAddressDAO(getProperties().getValue("remote_host")));
+            setRemoteConnection(new IPAddress(getProperties().getValue("remote_host")));
         sslContext = (SSLContextInfo) ((ConfigDAO)getProperties().getValue("ssl_engine")).attachment();
         try
         {
@@ -93,12 +93,12 @@ public class SSLNIOSocketHandlerFactory
 
     }
 
-    public void setRemoteConnection(InetSocketAddressDAO rConnection)
+    public void setRemoteConnection(IPAddress rConnection)
     {
         remoteConnection = rConnection;
     }
 
-    public InetSocketAddressDAO getRemoteConnection(){ return remoteConnection; }
+    public IPAddress getRemoteConnection(){ return remoteConnection; }
 
 
 //    @Override

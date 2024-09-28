@@ -5,7 +5,7 @@ import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.net.SelectorController;
-import org.zoxweb.shared.net.InetSocketAddressDAO;
+import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.util.SharedUtil;
 
 import javax.net.ssl.SSLEngine;
@@ -39,7 +39,7 @@ public class SSLSessionConfig
     volatile ByteBuffer inRemoteData = null;
     volatile SSLConnectionHelper sslConnectionHelper = null;
     volatile boolean forcedClose = false;
-    volatile InetSocketAddressDAO remoteConnection = null;
+    volatile IPAddress remoteConnection = null;
 
     // used for remote connection creation only
 

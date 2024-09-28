@@ -31,7 +31,7 @@ import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.server.util.RuntimeUtil;
 import org.zoxweb.shared.app.AppCreatorDefault;
 import org.zoxweb.shared.data.events.*;
-import org.zoxweb.shared.net.InetSocketAddressDAO;
+import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.security.IPBlockerConfig;
 import org.zoxweb.shared.util.Const.TimeInMillis;
 import org.zoxweb.shared.util.NVPair;
@@ -53,7 +53,7 @@ public class IPBlockerListener
 					+ ", lastTimeDetected=" + lastTimeDetected + ", attackCount=" + attackCount + ", blocked=" + blocked
 					+ ", attackRate=" + attackRate + " per min]";
 		}
-		InetSocketAddressDAO remoteHost = null;
+		IPAddress remoteHost = null;
 		long detectionStartTime = 0;
 		long lastTimeDetected = 0;
 		long attackCount = 0;
@@ -107,7 +107,7 @@ public class IPBlockerListener
 	
 	private TaskSchedulerProcessor tsp = null;
 	protected transient volatile FileMonitor fileMonitor = null;	
-	private Map<InetSocketAddressDAO, RemoteIPInfo> ripiMap = new LinkedHashMap<InetSocketAddressDAO, RemoteIPInfo>();
+	private Map<IPAddress, RemoteIPInfo> ripiMap = new LinkedHashMap<IPAddress, RemoteIPInfo>();
 	private IPBlockerConfig ipbc;
 	private Lock lock = new ReentrantLock();
 	public IPBlockerListener(IPBlockerConfig ipbc,TaskSchedulerProcessor tsp)
@@ -153,7 +153,7 @@ public class IPBlockerListener
 			if (!SharedStringUtil.isEmpty(value))
 			{
 				value = value.toLowerCase();
-				reportBadAddress(new InetSocketAddressEvent(ste.getSource(), new InetSocketAddressDAO(value, 22)));
+				reportBadAddress(new IPAddressEvent(ste.getSource(), new IPAddress(value, 22)));
 				//log.info(timeStamp + " we have a match:" + value );
 //				RemoteIPInfo ripi = ripiMap.get(value);
 //				if (ripi == null)
@@ -201,11 +201,11 @@ public class IPBlockerListener
 	}
 
 
-	private void reportBadAddress(InetSocketAddressEvent isae) {
+	private void reportBadAddress(IPAddressEvent isae) {
 		if(isae != null)
 		{
 			long timeStamp = isae.getTimeStamp();
-			InetSocketAddressDAO isad = isae.getData();
+			IPAddress isad = isae.getData();
 			if(isad != null)
 			{
 				RemoteIPInfo ripi = ripiMap.get(isad);
@@ -258,9 +258,9 @@ public class IPBlockerListener
 
 	@Override
 	public void handleEvent(BaseEventObject<?> event) {
-		if(event instanceof InetSocketAddressEvent)
+		if(event instanceof IPAddressEvent)
 		{
-			reportBadAddress((InetSocketAddressEvent) event);
+			reportBadAddress((IPAddressEvent) event);
 		}
 		else if (event instanceof StringTokenEvent)
 		{

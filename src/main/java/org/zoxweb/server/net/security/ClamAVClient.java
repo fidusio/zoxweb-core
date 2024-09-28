@@ -34,7 +34,7 @@ import java.util.Arrays;
 import org.zoxweb.server.io.IOStreamInfo;
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.io.StreamStats;
-import org.zoxweb.shared.net.InetSocketAddressDAO;
+import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.security.ScanResult;
 import org.zoxweb.shared.util.Const;
 import org.zoxweb.shared.util.Const.TypeInBytes;
@@ -375,7 +375,7 @@ public class ClamAVClient
 	  try
 	  {
 		  int index = 0;
-		  InetSocketAddressDAO hostInfo = new InetSocketAddressDAO(args[index++]);
+		  IPAddress hostInfo = new IPAddress(args[index++]);
 		  ClamAVClient cavc = new ClamAVClient(hostInfo.getInetAddress(), hostInfo.getPort(), 0);
 		  InputStream is = null;
 		  

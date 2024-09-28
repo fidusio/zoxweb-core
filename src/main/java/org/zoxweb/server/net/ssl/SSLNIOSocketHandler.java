@@ -26,7 +26,7 @@ import org.zoxweb.server.net.NIOSocket;
 import org.zoxweb.server.net.ProtocolHandler;
 import org.zoxweb.server.security.CryptoUtil;
 import org.zoxweb.server.task.TaskUtil;
-import org.zoxweb.shared.net.InetSocketAddressDAO;
+import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.util.ParamUtil;
 import org.zoxweb.shared.util.SharedUtil;
 
@@ -118,7 +118,7 @@ public class SSLNIOSocketHandler
 
 	private SSLConnectionHelper sslDispatcher = null;
 	private SSLSessionConfig config = null;
-	final public InetSocketAddressDAO remoteConnection;
+	final public IPAddress remoteConnection;
 	final private SSLContextInfo sslContext;
 	private SSLSessionCallback sessionCallback;
 	private final boolean simpleStateMachine;
@@ -136,7 +136,7 @@ public class SSLNIOSocketHandler
 	}
 
 	public SSLNIOSocketHandler(SSLContextInfo sslContext, SSLSessionCallback sessionCallback, boolean simpleStateMachine,
-							   InetSocketAddressDAO rc)
+							   IPAddress rc)
 	{
 		SharedUtil.checkIfNulls("context  can't be null", sslContext);
 		this.sslContext = sslContext;
@@ -310,7 +310,7 @@ public class SSLNIOSocketHandler
 			String ksPassword = params.stringValue("-kspassword");
 			boolean dbg = params.nameExists("-dbg");
 			String ra =  params.stringValue("-ra", true);
-			InetSocketAddressDAO remoteAddress = ra != null ? new InetSocketAddressDAO(ra) : null;
+			IPAddress remoteAddress = ra != null ? new IPAddress(ra) : null;
 
 			if(dbg)
 			{

@@ -4,7 +4,7 @@ package org.zoxweb.server.security;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.zoxweb.shared.crypto.EncryptedDAO;
+import org.zoxweb.shared.crypto.EncryptedData;
 import org.zoxweb.shared.util.SharedStringUtil;
 
 import javax.crypto.BadPaddingException;
@@ -31,10 +31,10 @@ public class EncryptedDAOTest {
   @Test
   public void testED()
       throws InvalidKeyException, NullPointerException, IllegalArgumentException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
-    EncryptedDAO ed = new EncryptedDAO();
-    ed = CryptoUtil.encryptDAO(new EncryptedDAO(), KEY, DATA);
+    EncryptedData ed = new EncryptedData();
+    ed = CryptoUtil.encryptData(new EncryptedData(), KEY, DATA);
     ed.setGUID(UUID.randomUUID().toString());
-    byte[] dataDecrypted = CryptoUtil.decryptEncryptedDAO(ed, KEY);
+    byte[] dataDecrypted = CryptoUtil.decryptEncryptedData(ed, KEY);
     assert (Arrays.equals(DATA, dataDecrypted));
 
   }
@@ -42,13 +42,13 @@ public class EncryptedDAOTest {
   @Test
   public void testEDHmacAll()
       throws InvalidKeyException, NullPointerException, IllegalArgumentException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
-    EncryptedDAO ed = new EncryptedDAO();
+    EncryptedData ed = new EncryptedData();
     ed.setHMACAll(true);
     ed.setGUID(UUID.randomUUID().toString());
     ed.setSubjectGUID(UUID.randomUUID().toString());
-    ed = CryptoUtil.encryptDAO(ed, KEY, DATA);
+    ed = CryptoUtil.encryptData(ed, KEY, DATA);
 
-    byte[] dataDecrypted = CryptoUtil.decryptEncryptedDAO(ed, KEY);
+    byte[] dataDecrypted = CryptoUtil.decryptEncryptedData(ed, KEY);
     assert (Arrays.equals(DATA, dataDecrypted));
   }
 
@@ -56,14 +56,14 @@ public class EncryptedDAOTest {
   @Test//(expected = SignatureException.class)
   public void testEDFailedSignature()
       throws InvalidKeyException, NullPointerException, IllegalArgumentException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
-    EncryptedDAO ed = new EncryptedDAO();
+    EncryptedData ed = new EncryptedData();
     ed.setHMACAll(true);
     ed.setGUID(UUID.randomUUID().toString());
     ed.setSubjectGUID(UUID.randomUUID().toString());
-    ed = CryptoUtil.encryptDAO(ed, KEY, DATA);
+    ed = CryptoUtil.encryptData(ed, KEY, DATA);
     ed.setSubjectGUID(null);
-    EncryptedDAO finalEd = ed;
-    Assertions.assertThrows(SignatureException.class, ()->CryptoUtil.decryptEncryptedDAO(finalEd, KEY));
+    EncryptedData finalEd = ed;
+    Assertions.assertThrows(SignatureException.class, ()->CryptoUtil.decryptEncryptedData(finalEd, KEY));
   }
 
 }

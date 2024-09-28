@@ -19,8 +19,8 @@ import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.crypto.CryptoConst;
 import org.zoxweb.shared.crypto.CryptoConst.HASHType;
 import org.zoxweb.shared.crypto.CryptoConst.SecureRandomType;
-import org.zoxweb.shared.crypto.EncryptedDAO;
-import org.zoxweb.shared.crypto.EncryptedKeyDAO;
+import org.zoxweb.shared.crypto.EncryptedData;
+import org.zoxweb.shared.crypto.EncryptedKey;
 import org.zoxweb.shared.crypto.CIPassword;
 import org.zoxweb.shared.util.SharedStringUtil;
 
@@ -144,22 +144,22 @@ public class EncryptedContentTest {
 
         System.out.println("password is equal " + HashUtil.isPasswordValid(fromJSON, "password"));
 
-        EncryptedKeyDAO ekd = CryptoUtil.createEncryptedKeyDAO("password");
+        EncryptedKey ekd = CryptoUtil.createEncryptedKey("password");
         String ekdJSON = GSONUtil.toJSON(ekd, true, false, false);
         System.out.println(ekdJSON);
-        byte[] key = CryptoUtil.decryptEncryptedDAO(ekd, "password");
+        byte[] key = CryptoUtil.decryptEncryptedData(ekd, "password");
         System.out.println(key.length + " " + SharedStringUtil.bytesToHex(key));
         System.out.println(key.length + " " + SharedStringUtil.bytesToHex(ekd.getEncryptedData()));
 
-        EncryptedKeyDAO ekdFromJSON = GSONUtil.fromJSON(ekdJSON, EncryptedKeyDAO.class);
+        EncryptedKey ekdFromJSON = GSONUtil.fromJSON(ekdJSON, EncryptedKey.class);
 
-        key = CryptoUtil.decryptEncryptedDAO(ekdFromJSON, "password");
+        key = CryptoUtil.decryptEncryptedData(ekdFromJSON, "password");
         System.out.println("from json       key:" + SharedStringUtil.bytesToHex(key));
         System.out.println(
             "from json encrypted:" + SharedStringUtil.bytesToHex(ekdFromJSON.getEncryptedData()));
 
-        ekd = CryptoUtil.rekeyEncrytedKeyDAO(ekd, "password", "newpassword");
-        key = CryptoUtil.decryptEncryptedDAO(ekd, "newpassword");
+        ekd = CryptoUtil.rekeyEncrytedKey(ekd, "password", "newpassword");
+        key = CryptoUtil.decryptEncryptedData(ekd, "newpassword");
 
         System.out.println("rekeyed         key:" + SharedStringUtil.bytesToHex(key));
 
@@ -183,14 +183,14 @@ public class EncryptedContentTest {
               "generateRandomHashedBytes" + "," + SharedStringUtil.bytesToHex(randomBytes));
 
           ts = System.nanoTime();
-          EncryptedKeyDAO ekdTest = CryptoUtil.createEncryptedKeyDAO("password");
+          EncryptedKey ekdTest = CryptoUtil.createEncryptedKey("password");
           ts = System.nanoTime() - ts;
           System.out.print("[" + ts + " ns]");
           System.out.println(ekdTest.getName() + "\t,Encrypted data " + SharedStringUtil
               .bytesToHex(ekdTest.getEncryptedData()));
 
           ts = System.nanoTime();
-          byte[] drecryptedKey = CryptoUtil.decryptEncryptedDAO(ekdTest, ("password"));
+          byte[] drecryptedKey = CryptoUtil.decryptEncryptedData(ekdTest, ("password"));
           ts = System.nanoTime() - ts;
           System.out.print("[" + ts + " ns]");
           System.out.println(ekdTest.getName() + "\t,Decrypted data " + SharedStringUtil
@@ -253,22 +253,22 @@ public class EncryptedContentTest {
 
         byte[] data = "Marwan NAEL is the best of the b".getBytes(StandardCharsets.UTF_8);
 
-        EncryptedDAO ed = CryptoUtil.encryptDAO(new EncryptedDAO(), sk.getEncoded(), data);
+        EncryptedData ed = CryptoUtil.encryptData(new EncryptedData(), sk.getEncoded(), data);
         //ed.setDataLength(16);
         System.out.println(ed.toCanonicalID());
-        System.out.println(new String(CryptoUtil.decryptEncryptedDAO(ed, sk.getEncoded())));
+        System.out.println(new String(CryptoUtil.decryptEncryptedData(ed, sk.getEncoded())));
 
         System.out.println(GSONUtil.toJSON(ed, true));
 
-        ed = CryptoUtil.encryptDAO(new EncryptedDAO(), sk.getEncoded(), new byte[0]);
+        ed = CryptoUtil.encryptData(new EncryptedData(), sk.getEncoded(), new byte[0]);
         //ed.setDataLength(16);
         System.out.println(ed.toCanonicalID());
-        System.out.println(new String(CryptoUtil.decryptEncryptedDAO(ed, sk.getEncoded())));
+        System.out.println(new String(CryptoUtil.decryptEncryptedData(ed, sk.getEncoded())));
 
         System.out.println(GSONUtil.toJSON(ed, true, true, true));
-        ed = CryptoUtil.encryptDAO(new EncryptedDAO(), sk.getEncoded(), data);
-        EncryptedDAO fromCanID = EncryptedDAO.fromCanonicalID(ed.toCanonicalID());
-        System.out.println(new String(CryptoUtil.decryptEncryptedDAO(fromCanID, sk.getEncoded())));
+        ed = CryptoUtil.encryptData(new EncryptedData(), sk.getEncoded(), data);
+        EncryptedData fromCanID = EncryptedData.fromCanonicalID(ed.toCanonicalID());
+        System.out.println(new String(CryptoUtil.decryptEncryptedData(fromCanID, sk.getEncoded())));
       } catch (Exception e) {
         e.printStackTrace();
       }

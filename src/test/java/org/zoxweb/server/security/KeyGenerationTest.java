@@ -4,8 +4,8 @@ package org.zoxweb.server.security;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.crypto.CryptoConst;
 import org.zoxweb.shared.crypto.CryptoConst.SignatureAlgo;
-import org.zoxweb.shared.crypto.EncryptedDAO;
-import org.zoxweb.shared.crypto.EncryptedKeyDAO;
+import org.zoxweb.shared.crypto.EncryptedData;
+import org.zoxweb.shared.crypto.EncryptedKey;
 import org.zoxweb.shared.security.JWT;
 import org.zoxweb.shared.util.Const.TimeInMillis;
 import org.zoxweb.shared.util.SharedBase64;
@@ -29,8 +29,8 @@ public class KeyGenerationTest {
     try {
       for (int i = 0; i < 5; i++) {
 
-        EncryptedDAO ed = CryptoUtil
-            .encryptDAO(new EncryptedKeyDAO(), SharedStringUtil.getBytes("password"), null, 1);
+        EncryptedData ed = CryptoUtil
+            .encryptData(new EncryptedKey(), SharedStringUtil.getBytes("password"), null, 1);
         String json = GSONUtil.toJSON(ed, false, false, false, Base64Type.URL);
         KeyPair aliceKey = CryptoUtil.generateKeyPair("RSA", 2048);
         long ts = System.nanoTime();
@@ -40,7 +40,7 @@ public class KeyGenerationTest {
         System.out.println("json:" + json);
         System.out.println(
             "canonical:" + ed.toCanonicalID() + "   length:" + ed.toCanonicalID().length());
-        EncryptedDAO edTemp = EncryptedDAO.fromCanonicalID(ed.toCanonicalID());
+        EncryptedData edTemp = EncryptedData.fromCanonicalID(ed.toCanonicalID());
         System.out.println(GSONUtil.toJSON(edTemp, false, false, false, Base64Type.URL));
         bobKey.getPublic().getFormat();
 
@@ -104,7 +104,7 @@ public class KeyGenerationTest {
       long ts = System.currentTimeMillis();
       for (int i = 0; i < loop; i++) {
         CryptoUtil
-            .encryptDAO(new EncryptedKeyDAO(), SharedStringUtil.getBytes("password"), null, 8196);
+            .encryptData(new EncryptedKey(), SharedStringUtil.getBytes("password"), null, 8196);
       }
       ts = System.currentTimeMillis() - ts;
       System.out
@@ -113,17 +113,17 @@ public class KeyGenerationTest {
       ts = System.currentTimeMillis();
       for (int i = 0; i < loop; i++) {
         CryptoUtil
-            .encryptDAO(new EncryptedKeyDAO(), SharedStringUtil.getBytes("password"), null, 1);
+            .encryptData(new EncryptedKey(), SharedStringUtil.getBytes("password"), null, 1);
       }
       ts = System.currentTimeMillis() - ts;
       System.out.println("Generated " + loop + " with rehash 1 took " + TimeInMillis.toString(ts));
-      EncryptedDAO ed = CryptoUtil
-          .encryptDAO(new EncryptedKeyDAO(), SharedStringUtil.getBytes("password"), null, 1);
+      EncryptedData ed = CryptoUtil
+          .encryptData(new EncryptedKey(), SharedStringUtil.getBytes("password"), null, 1);
       String json = GSONUtil.toJSON(ed, false, false, false, Base64Type.URL);
       System.out.println(json);
       System.out.println(json.length() + ":" + SharedStringUtil.getBytes(json).length);
-      ed = GSONUtil.fromJSON(json, EncryptedKeyDAO.class, Base64Type.URL);
-      byte[] data = CryptoUtil.decryptEncryptedDAO(ed, SharedStringUtil.getBytes("password"), 1);
+      ed = GSONUtil.fromJSON(json, EncryptedKey.class, Base64Type.URL);
+      byte[] data = CryptoUtil.decryptEncryptedData(ed, SharedStringUtil.getBytes("password"), 1);
       System.out.println(SharedStringUtil.bytesToHex(data));
     } catch (Exception e) {
       e.printStackTrace();

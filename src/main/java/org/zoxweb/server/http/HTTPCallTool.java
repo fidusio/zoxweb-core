@@ -21,7 +21,7 @@ import org.zoxweb.server.logging.LoggerUtil;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.http.*;
-import org.zoxweb.shared.net.InetSocketAddressDAO;
+import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.net.ProxyType;
 import org.zoxweb.shared.util.*;
 
@@ -132,7 +132,7 @@ public final class HTTPCallTool //implements Runnable
             log.getLogger().info("ErrorAsException: " + errorAsException);
 
             log.getLogger().info("proxy: " + proxy);
-            InetSocketAddressDAO proxyAddress = proxy != null ? InetSocketAddressDAO.parse(proxy, ProxyType.HTTP) : null;
+            IPAddress proxyAddress = proxy != null ? IPAddress.parse(proxy, ProxyType.HTTP) : null;
 
             List<HTTPAPIEndPoint<Void, byte[]>> endpoints = new ArrayList<>();
             for(String url : urls) {

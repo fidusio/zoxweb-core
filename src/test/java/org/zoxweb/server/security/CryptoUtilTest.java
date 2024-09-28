@@ -16,8 +16,8 @@
 package org.zoxweb.server.security;
 
 import org.zoxweb.server.io.UByteArrayOutputStream;
-import org.zoxweb.shared.crypto.EncryptedDAO;
-import org.zoxweb.shared.crypto.EncryptedKeyDAO;
+import org.zoxweb.shared.crypto.EncryptedData;
+import org.zoxweb.shared.crypto.EncryptedKey;
 import org.zoxweb.shared.util.Const;
 import org.zoxweb.shared.util.Const.SizeInBytes;
 import org.zoxweb.shared.util.SharedStringUtil;
@@ -52,32 +52,32 @@ public class CryptoUtilTest {
       byte[] original = ubaos.toByteArray();
 
       for (int i = 0; i < repeat; i++) {
-        EncryptedDAO ed = new EncryptedDAO();
+        EncryptedData ed = new EncryptedData();
         long delta = System.nanoTime();
-        ed = CryptoUtil.encryptDAO(ed, "password".getBytes(), original);
+        ed = CryptoUtil.encryptData(ed, "password".getBytes(), original);
         delta = System.nanoTime() - delta;
         System.out.println("Encrypting: " + original.length + " bytes took " + Const.TimeInMillis
             .nanosToString(delta));
         //System.out.println(ed.toCanonicalID());
         delta = System.nanoTime();
-        byte[] data = CryptoUtil.decryptEncryptedDAO(ed, "password");
+        byte[] data = CryptoUtil.decryptEncryptedData(ed, "password");
         delta = System.nanoTime() - delta;
         System.out.println(
             SharedUtil.slowEquals(original, data) + ": decrypting took " + Const.TimeInMillis
                 .nanosToString(delta));
       }
 
-      EncryptedKeyDAO ekd = CryptoUtil.createEncryptedKeyDAO("password");
-      byte[] key = CryptoUtil.decryptEncryptedDAO(ekd, "password");
+      EncryptedKey ekd = CryptoUtil.createEncryptedKey("password");
+      byte[] key = CryptoUtil.decryptEncryptedData(ekd, "password");
       System.out.println(SharedStringUtil.bytesToHex(key));
       System.out.println(ekd.toCanonicalID());
 
-      EncryptedDAO ed = CryptoUtil
-          .encryptDAO(new EncryptedKeyDAO(), SharedStringUtil.getBytes("password"),
+      EncryptedData ed = CryptoUtil
+          .encryptData(new EncryptedKey(), SharedStringUtil.getBytes("password"),
               SharedStringUtil.getBytes("password"));
       System.out.println(ed.toCanonicalID());
 
-      key = CryptoUtil.decryptEncryptedDAO(ed, "password");
+      key = CryptoUtil.decryptEncryptedData(ed, "password");
       System.out.println(SharedStringUtil.bytesToHex(key));
 
     } catch (Exception e) {

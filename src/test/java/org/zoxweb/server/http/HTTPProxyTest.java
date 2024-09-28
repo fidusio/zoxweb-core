@@ -21,7 +21,7 @@ import org.zoxweb.shared.http.HTTPHeader;
 import org.zoxweb.shared.http.HTTPMessageConfig;
 import org.zoxweb.shared.http.HTTPMessageConfigInterface;
 import org.zoxweb.shared.http.HTTPMethod;
-import org.zoxweb.shared.net.InetSocketAddressDAO;
+import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.util.Const.DeviceType;
 import org.zoxweb.shared.util.SharedUtil;
 
@@ -79,8 +79,8 @@ public class HTTPProxyTest {
 
     try {
       int index = 0;
-      InetSocketAddressDAO proxys[] = {new InetSocketAddressDAO(args[index++]),
-          new InetSocketAddressDAO(args[index++])};
+      IPAddress proxys[] = {new IPAddress(args[index++]),
+          new IPAddress(args[index++])};
       HTTPMessageConfigInterface hcc = HTTPMessageConfig
           .createAndInit(args[index++], null, HTTPMethod.GET);
       int loopCount = Integer.parseInt(args[index++]);
@@ -96,7 +96,7 @@ public class HTTPProxyTest {
       for (int i = 0; i < loopCount; i++) {
         for (int j = 0; j < proxys.length; j++) {
 
-          InetSocketAddressDAO p = proxys[j];
+          IPAddress p = proxys[j];
           contents[j] = null;
           try {
             hcc.setProxyAddress(p);

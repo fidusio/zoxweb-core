@@ -19,7 +19,7 @@ import org.zoxweb.shared.data.TimeStampDAO;
 import org.zoxweb.shared.util.*;
 
 @SuppressWarnings("serial")
-public class EncryptedDAO
+public class EncryptedData
     extends TimeStampDAO
     implements CryptoBase
 {
@@ -59,14 +59,14 @@ public class EncryptedDAO
 		}	
 	}
 
-	public final static NVConfigEntity NVCE_ENCRYPTED_DAO = new NVConfigEntityLocal("encrypted_dao", null, "EncryptedDAO", false, true, false, false, EncryptedDAO.class, SharedUtil.extractNVConfigs(Param.values()), null, false, TimeStampDAO.NVC_TIME_STAMP_DAO);
+	public final static NVConfigEntity NVCE_ENCRYPTED_DATA = new NVConfigEntityLocal("encrypted_data", null, "EncryptedData", false, true, false, false, EncryptedData.class, SharedUtil.extractNVConfigs(Param.values()), null, false, TimeStampDAO.NVC_TIME_STAMP_DAO);
 
-	public EncryptedDAO()
+	public EncryptedData()
     {
-		super(NVCE_ENCRYPTED_DAO);
+		super(NVCE_ENCRYPTED_DATA);
 	}
 
-	protected EncryptedDAO( NVConfigEntity nvce)
+	protected EncryptedData(NVConfigEntity nvce)
     {
 		super(nvce);
 	}
@@ -185,7 +185,7 @@ public class EncryptedDAO
 		setValue(Param.DATA_LENGTH, data_length);
 	}
 
-	public static EncryptedDAO fromCanonicalID(String encryptedDAOCanonicalFormat)
+	public static EncryptedData fromCanonicalID(String encryptedDAOCanonicalFormat)
         throws NullPointerException, IllegalArgumentException
     {
         if (SharedStringUtil.isEmpty(encryptedDAOCanonicalFormat))
@@ -194,7 +194,7 @@ public class EncryptedDAO
         }
 
         String tokens[] = encryptedDAOCanonicalFormat.split(":");
-        EncryptedDAO  ret = new EncryptedDAO();
+        EncryptedData ret = new EncryptedData();
         int index = 0;
         switch(tokens.length)
         {

@@ -549,19 +549,19 @@ public class ZWDataFactory
 				return InetFilterDAO.NVC_INET_FILTER_DAO;
 			}
 		},
-		INET_SOCKET_ADDRESS_DAO(InetSocketAddressDAO.class.getName())
+		INET_SOCKET_ADDRESS_DAO(IPAddress.class.getName())
 		{
 			@SuppressWarnings("unchecked")
 			@Override
-			public InetSocketAddressDAO newInstance()
+			public IPAddress newInstance()
 			{
-				return new InetSocketAddressDAO();
+				return new IPAddress();
 			}
 
 			@Override
 			public NVConfigEntity getNVConfigEntity() 
 			{
-				return InetSocketAddressDAO.NVC_INET_SOCKET_ADDRESS_DAO;
+				return IPAddress.NVC_IP_ADDRESS;
 			}
 		},
 		
