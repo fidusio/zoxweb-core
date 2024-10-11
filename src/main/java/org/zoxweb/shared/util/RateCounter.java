@@ -44,6 +44,7 @@ public class RateCounter
 
 
     private transient long timestamp = 0;
+    private transient long lastDelta = 0;
 
     public RateCounter()
     {
@@ -112,26 +113,41 @@ public class RateCounter
     {
        setValue(Param.DELTAS, (getDeltas() + delta));
        setValue(Param.COUNTS,  (getCounts() + inc));
+       lastDelta = delta;
        return this;
     }
 
-    public synchronized RateCounter start()
+    public synchronized long start()
     {
         timestamp = System.currentTimeMillis();
-        return this;
+        return timestamp;
     }
 
-    public  RateCounter stop()
+    public  long stop()
     {
         return stop(1);
     }
 
-    public synchronized RateCounter stop(long inc)
+    public synchronized long stop(long inc)
     {
         if (timestamp == 0)
             throw new IllegalStateException("Never started must calls start() first");
+        long currentTS = System.currentTimeMillis();
 
-        return register(System.currentTimeMillis() - timestamp, inc);
+        register(currentTS - timestamp, inc);
+        timestamp = currentTS;
+        return timestamp;
+    }
+
+    public synchronized long lastTimeStampInMillis()
+    {
+        return timestamp;
+    }
+
+
+    public synchronized long lastDeltaInMillis()
+    {
+        return lastDelta;
     }
 
 
@@ -139,6 +155,7 @@ public class RateCounter
     {
         setValue(Param.DELTAS, (long)0);
         setValue(Param.COUNTS, (long)0);
+        lastDelta = 0;
         return this;
     }
 
