@@ -333,7 +333,7 @@ public class ParamUtil {
         public String stringValue(String name, String defaultValue, boolean nullOk)
         {
             List<String> ret = lookup(name);
-            if(ret == null)
+            if(ret == null || ret.isEmpty())
             {
                 if(defaultValue == null && !nullOk)
                     throw new IllegalArgumentException("Parameter " + name + " not found");

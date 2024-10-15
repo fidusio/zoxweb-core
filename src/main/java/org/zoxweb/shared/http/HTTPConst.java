@@ -20,7 +20,7 @@ public final class HTTPConst
 
 
     public static final String WEB_SOCKET_UUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
-    public static final GetNameValue<String> CHARSET_UTF_8 = new NVPair("charset", "utf-8");
+    public static final GetNameValue<String> CHARSET_UTF_8 = new NVPair("charset", SharedStringUtil.UTF_8);
 
 
     public enum HTTPValue

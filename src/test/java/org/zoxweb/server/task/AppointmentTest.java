@@ -69,6 +69,26 @@ public class AppointmentTest {
         System.out.println( "ExecCount: " + ((TaskSchedulerProcessor.TaskSchedulerAppointment<?>)sc).execCount());
     }
 
+
+    @Test
+    public void scheduleWithFixedDelayWithCancel()
+    {
+
+        long initialDelay = 200;
+        long delay = 100;
+        AtomicInteger ai = new AtomicInteger();
+        TaskSchedulerProcessor tsp = new TaskSchedulerProcessor(TaskUtil.defaultTaskProcessor());
+        long delta = System.currentTimeMillis();
+        ScheduledFuture<?> sc = tsp.scheduleWithFixedDelay(()->System.out.println(ai.incrementAndGet() + " repeat " + (System.currentTimeMillis() - delta)), initialDelay, delay, TimeUnit.MILLISECONDS);
+
+        tsp.schedule(()->sc.cancel(true), delay*10, TimeUnit.MILLISECONDS);
+
+        TaskUtil.sleep(initialDelay + (delay*60));
+
+        tsp.close();
+        System.out.println( "ExecCount: " + ((TaskSchedulerProcessor.TaskSchedulerAppointment<?>)sc).execCount());
+    }
+
     @Test
     public void scheduleAtFixedRate()
     {
