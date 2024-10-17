@@ -32,7 +32,7 @@ public class TypedCache {
      * @return this
      */
     public TypedCache registerType(Enum<?> cacheType) {
-        return registerType(SharedUtil.enumName(cacheType));
+        return registerType(SUS.enumName(cacheType));
     }
 
     /**
@@ -44,11 +44,11 @@ public class TypedCache {
      * @return matching object or null
      */
     public <C> C lookupObject(Enum<?> cacheType, String cachedObjectName) {
-        return lookupObject(SharedUtil.enumName(cacheType), cachedObjectName);
+        return lookupObject(SUS.enumName(cacheType), cachedObjectName);
     }
 
     public <C> C lookupObject(Enum<?> cacheType, Enum<?> cachedObjectName) {
-        return lookupObject(SharedUtil.enumName(cacheType), SharedUtil.enumName(cachedObjectName));
+        return lookupObject(SUS.enumName(cacheType), SUS.enumName(cachedObjectName));
     }
 
     public <C> C lookupObject(String cacheType, String cachedObjectName) {
@@ -62,7 +62,7 @@ public class TypedCache {
     }
 
     public TypedCache addObject(Enum<?> cacheType, GetName objectToCache) {
-        return addObject(SharedUtil.enumName(cacheType), objectToCache.getName(), objectToCache);
+        return addObject(SUS.enumName(cacheType), objectToCache.getName(), objectToCache);
     }
 
     public TypedCache addObject(String cacheType, GetName objectToCache) {
@@ -70,11 +70,11 @@ public class TypedCache {
     }
 
     public TypedCache addObject(Enum<?> cacheType, GetName cachedObjectName, Object objectToCache) {
-        return addObject(SharedUtil.enumName(cacheType), cachedObjectName.getName(), objectToCache);
+        return addObject(SUS.enumName(cacheType), cachedObjectName.getName(), objectToCache);
     }
 
     public TypedCache addObject(Enum<?> cacheType, String name, Object toCache) {
-        return addObject(SharedUtil.enumName(cacheType), name, toCache);
+        return addObject(SUS.enumName(cacheType), name, toCache);
     }
 
     public TypedCache addObject(String cacheType, String name, Object toCache) {
@@ -90,11 +90,11 @@ public class TypedCache {
     }
 
     public TypedCache removeObject(Enum<?> cacheType, String cachedObjectName) {
-        return removeObject(SharedUtil.enumName(cacheType), cachedObjectName);
+        return removeObject(SUS.enumName(cacheType), cachedObjectName);
     }
 
     public TypedCache removeObject(Enum<?> cacheType, GetName cachedObjectName) {
-        return removeObject(SharedUtil.enumName(cacheType), cachedObjectName.getName());
+        return removeObject(SUS.enumName(cacheType), cachedObjectName.getName());
     }
 
     public TypedCache removeObject(String cacheType, GetName cachedObjectName) {
@@ -114,7 +114,7 @@ public class TypedCache {
     }
 
     public <T> Collection<T> getValues(Enum<?> type) {
-        return getValues(SharedUtil.enumName(type));
+        return getValues(SUS.enumName(type));
     }
 
     public <T> Collection<T> getValues(String type) {

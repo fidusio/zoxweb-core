@@ -4,7 +4,7 @@ import org.zoxweb.server.fsm.State;
 import org.zoxweb.server.fsm.TriggerConsumer;
 import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.shared.util.RateCounter;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.SUS;
 
 import javax.net.ssl.SSLEngineResult;
 import java.util.concurrent.atomic.AtomicLong;
@@ -84,7 +84,7 @@ public class SSLHandshakingState extends State {
         SSLSessionConfig config = (SSLSessionConfig)getStateMachine().getConfig();
         if(log.isEnabled()) log.getLogger().info("Entry: " + config.getHandshakeStatus());
 
-        if (config.getHandshakeStatus() == NEED_UNWRAP || SharedUtil.enumName(config.getHandshakeStatus()).equals("NEED_UNWRAP_AGAIN"))
+        if (config.getHandshakeStatus() == NEED_UNWRAP || SUS.enumName(config.getHandshakeStatus()).equals("NEED_UNWRAP_AGAIN"))
         {
             try {
 

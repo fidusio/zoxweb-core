@@ -57,7 +57,7 @@ public class RateCounter
 
     public RateCounter(Enum<?> name)
     {
-        this(SharedUtil.enumName(name), null);
+        this(SUS.enumName(name), null);
     }
     public RateCounter(String name, String description)
     {

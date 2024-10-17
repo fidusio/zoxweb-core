@@ -16,15 +16,7 @@
 package org.zoxweb.shared.security;
 
 import org.zoxweb.shared.data.SetNameDescriptionDAO;
-import org.zoxweb.shared.util.GetNVConfig;
-import org.zoxweb.shared.util.GetNVProperties;
-import org.zoxweb.shared.util.GetName;
-import org.zoxweb.shared.util.NVConfig;
-import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
-import org.zoxweb.shared.util.NVConfigManager;
-import org.zoxweb.shared.util.NVGenericMap;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.*;
 import org.zoxweb.shared.crypto.CryptoConst.JWTAlgo;
 
 
@@ -133,7 +125,7 @@ implements GetNVProperties
 	public void setProperties(NVGenericMap nvgm)
 	{
 		this.nvgm.clear();
-		SharedUtil.updateGetNVGenericMap(this, nvgm);
+		SUS.updateGetNVProperties(this, nvgm);
 	}
 
 }

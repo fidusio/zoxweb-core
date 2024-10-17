@@ -1,10 +1,7 @@
 package org.zoxweb.server.fsm;
 
 import org.zoxweb.server.logging.LogWrapper;
-import org.zoxweb.shared.util.GetName;
-import org.zoxweb.shared.util.NVBase;
-import org.zoxweb.shared.util.NVGenericMap;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.*;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -34,7 +31,7 @@ public class State<P>
     }
     public State(Enum<?> name, NVBase<?> ...props)
     {
-        this(SharedUtil.enumName(name), props);
+        this(SUS.enumName(name), props);
     }
 
     @Override
@@ -56,9 +53,16 @@ public class State<P>
         return triggerConsumers.get(canonicalID);
     }
 
+
     @Override
     public TriggerConsumerInt<?> lookupTriggerConsumer(GetName canonicalID) {
         return lookupTriggerConsumer(canonicalID.getName());
+    }
+
+
+    @Override
+    public TriggerConsumerInt<?> lookupTriggerConsumer(Enum<?> canonicalID) {
+        return lookupTriggerConsumer(canonicalID.name());
     }
 
     @Override

@@ -106,7 +106,7 @@ class CustomSSLStateMachine extends MonoStateMachine<SSLEngineResult.HandshakeSt
         long ts = System.currentTimeMillis();
         if (log.isEnabled()) log.getLogger().info("Entry: " + config.getHandshakeStatus());
 
-        if (config.getHandshakeStatus() == NEED_UNWRAP || SharedUtil.enumName(config.getHandshakeStatus()).equals("NEED_UNWRAP_AGAIN")) {
+        if (config.getHandshakeStatus() == NEED_UNWRAP || SUS.enumName(config.getHandshakeStatus()).equals("NEED_UNWRAP_AGAIN")) {
             try {
 
                 int bytesRead = config.sslChannel.read(config.inSSLNetData);

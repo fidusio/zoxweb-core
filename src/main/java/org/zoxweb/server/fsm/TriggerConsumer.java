@@ -1,7 +1,7 @@
 package org.zoxweb.server.fsm;
 
 import org.zoxweb.server.logging.LogWrapper;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.SUS;
 
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicLong;
@@ -38,7 +38,7 @@ implements TriggerConsumerInt<T>
         canonicalIDs = new String[gnCanonicalIDs.length];
         for(int i = 0; i < canonicalIDs.length; i++)
         {
-            canonicalIDs[i] = SharedUtil.enumName(gnCanonicalIDs[i]);
+            canonicalIDs[i] = SUS.enumName(gnCanonicalIDs[i]);
         }
     }
 
@@ -91,7 +91,7 @@ implements TriggerConsumerInt<T>
 
     public <D> void publish(Enum<?> canID, D data) {
         if(canID != null)
-            getState().getStateMachine().publish(new Trigger(getState(), SharedUtil.enumName(canID), data));
+            getState().getStateMachine().publish(new Trigger(getState(), SUS.enumName(canID), data));
     }
 
     public void publishSync(TriggerInt triggerInt) {
@@ -106,7 +106,7 @@ implements TriggerConsumerInt<T>
 
     public <D> void publishSync(Enum<?> canID, D data) {
         if(canID != null)
-            getState().getStateMachine().publishSync(new Trigger(getState(), SharedUtil.enumName(canID), data));
+            getState().getStateMachine().publishSync(new Trigger(getState(), SUS.enumName(canID), data));
     }
 
     public StateMachineInt getStateMachine()

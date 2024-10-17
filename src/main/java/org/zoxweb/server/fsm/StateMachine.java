@@ -5,6 +5,7 @@ import org.zoxweb.shared.task.SupplierConsumerTask;
 import org.zoxweb.server.task.TaskSchedulerProcessor;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.SUS;
 
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -258,7 +259,7 @@ public class StateMachine<C>
     @Override
     public StateInt<?>  lookupState(Enum<?> name)
     {
-        return lookupState(SharedUtil.enumName(name));
+        return lookupState(SUS.enumName(name));
     }
 
     @Override

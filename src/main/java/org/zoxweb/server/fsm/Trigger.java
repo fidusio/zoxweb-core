@@ -1,7 +1,7 @@
 package org.zoxweb.server.fsm;
 
 
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.SUS;
 
 import java.util.EventObject;
 import java.util.concurrent.atomic.AtomicLong;
@@ -33,7 +33,7 @@ implements TriggerInt<D>
     }
 
     public Trigger(Object source, Enum<?> canonicalID, StateInt lastState, D data) {
-        this(source, SharedUtil.enumName(canonicalID), lastState, data);
+        this(source, SUS.enumName(canonicalID), lastState, data);
     }
     public Trigger(StateInt state, String canonicalID, D data)
     {
@@ -43,7 +43,7 @@ implements TriggerInt<D>
 
     public Trigger(StateInt state, Enum<?> name, D data)
     {
-        this(state, SharedUtil.enumName(name), state, data);
+        this(state, SUS.enumName(name), state, data);
     }
 
     @Override

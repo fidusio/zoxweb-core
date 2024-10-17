@@ -33,6 +33,7 @@ public interface StateInt<P>
 
     TriggerConsumerInt<?> lookupTriggerConsumer(String canonicalID);
     TriggerConsumerInt<?> lookupTriggerConsumer(GetName canonicalID);
+    TriggerConsumerInt<?> lookupTriggerConsumer(Enum<?> canonicalID);
 
     Consumer<?> lookupConsumer(String canonicalID);
 

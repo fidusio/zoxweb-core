@@ -8,12 +8,12 @@ public class NamedDescription
 
     public NamedDescription(Enum<?> name)
     {
-        this(SharedUtil.enumName(name), null);
+        this(SUS.enumName(name), null);
     }
 
     public NamedDescription(Enum<?> name, String description)
     {
-        this(SharedUtil.enumName(name), description);
+        this(SUS.enumName(name), description);
     }
 
 

@@ -2074,17 +2074,7 @@ public class SharedUtil
 		return false;
 	}
 
-	/**
-	 * Check if an array is empty meaning null or length = 0
-	 * @param array
-	 * @return
-	 */
-	public static boolean isEmpty(Object[] array)
-	{
-		if (array != null && array.length != 0)
-			return false;
-		return true;
-	}
+
 	
 	/**
 	 * 
@@ -2108,55 +2098,8 @@ public class SharedUtil
 		
 		return ret;
 	}
-	
-	
-	public static NVGenericMap toNVGenricMap(NVEntity nve)
-	{
-		NVGenericMap ret = new NVGenericMap();
-		NVConfigEntity nvce = (NVConfigEntity) nve.getNVConfig();
-		for(NVConfig nvc : nvce.getAttributes())
-		{
-			ret.add(nve.lookup(nvc));
-		}
-		return ret;
-	}
 
 
-	public static String enumName(Enum<?> en)
-	{
-		checkIfNulls("enum can't be null", en);
-		if (en instanceof GetName)
-			return ((GetName) en).getName();
-		return en.name();
-	}
-	
-	public static NVGenericMap updateGetNVGenericMap(GetNVProperties toUpdate, NVGenericMap value)
-	{
-		return updateNVGenericMap(toUpdate.getProperties(), value);
-	}
-	
-	
-	
-	@SuppressWarnings("unchecked")
-	public static NVGenericMap updateNVGenericMap(NVGenericMap toUpdate, NVGenericMap value)
-	{
-		for(GetNameValue<?> gnv : value.values())
-		{
-			GetNameValue<?> gnvToUpdate = toUpdate.get(gnv);
-			if (gnvToUpdate != null)
-			{
-				((NVBase<Object>)gnvToUpdate).setValue(gnv.getValue());
-			}
-			else
-			{
-				toUpdate.add(gnv);
-			}
-		}
-		
-		return toUpdate;
-	}
-	
-	
 	@SuppressWarnings("unchecked")
     public static<V> List<V> addTo(List<V> list, V ...toAdd)
 	{
