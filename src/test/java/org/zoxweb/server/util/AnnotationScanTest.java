@@ -2,6 +2,7 @@ package org.zoxweb.server.util;
 
 import org.junit.jupiter.api.Test;
 import org.zoxweb.shared.annotation.EndPointProp;
+import org.zoxweb.shared.annotation.MappedProp;
 import org.zoxweb.shared.annotation.ParamProp;
 import org.zoxweb.shared.annotation.SecurityProp;
 import org.zoxweb.shared.crypto.CryptoConst;
@@ -9,10 +10,11 @@ import org.zoxweb.shared.http.HTTPMethod;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.util.Arrays;
 
 public class AnnotationScanTest {
 
-
+    @MappedProp(name = "toBeTested", id = "toBeTested-class")
     @SecurityProp(authentications = {CryptoConst.AuthenticationType.DOMAIN}, roles = "admin")
     public static class ToBeTested
     {
@@ -46,6 +48,10 @@ public class AnnotationScanTest {
        assert(!result.getMethodsAnnotations().isEmpty());
        assert(result.isClassAnnotatedBy(SecurityProp.class));
 
+       result =  ReflectionUtil.scanClassAnnotations(ToBeTested.class, MappedProp.class);
+       assert(result != null);
+       System.out.println(Arrays.toString(result.getClassAnnotations()));
+
     }
 
     @Test
@@ -53,6 +59,7 @@ public class AnnotationScanTest {
     {
         assert(!ReflectionUtil.isClassAnnotatedAs(ToBeTested.class, Deprecated.class));
         assert(ReflectionUtil.isClassAnnotatedAs(ToBeTested.class, SecurityProp.class));
+        assert(ReflectionUtil.isClassAnnotatedAs(ToBeTested.class, MappedProp.class));
     }
 
     @Test
