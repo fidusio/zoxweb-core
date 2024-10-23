@@ -1,6 +1,7 @@
 package org.zoxweb.server.fsm;
 
 import org.zoxweb.server.logging.LogWrapper;
+import org.zoxweb.shared.util.NVGenericMap;
 import org.zoxweb.shared.util.SUS;
 
 import java.util.Arrays;
@@ -16,6 +17,7 @@ implements TriggerConsumerInt<T>
     private StateInt<?> state;
     protected AtomicLong execCounter = new AtomicLong();
     private  Function<T, ?> function;
+    private  NVGenericMap nvgmProperties = null;
 
 
     public TriggerConsumer(Function f, String ...canonicalIDs)
@@ -112,5 +114,15 @@ implements TriggerConsumerInt<T>
     public StateMachineInt getStateMachine()
     {
         return state.getStateMachine();
+    }
+    
+    public void setProperties(NVGenericMap nvgm)
+    {
+        this.nvgmProperties = nvgm;
+    }
+    
+    public NVGenericMap getProperties()
+    {
+        return nvgmProperties;
     }
 }

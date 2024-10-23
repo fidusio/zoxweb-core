@@ -1,11 +1,13 @@
 package org.zoxweb.server.fsm;
 
 
+import org.zoxweb.shared.util.SetNVProperties;
+
 import java.util.function.Consumer;
 import java.util.function.Function;
 
 public interface TriggerConsumerInt<T>
-    extends Consumer<T>
+    extends Consumer<T>, SetNVProperties
 {
     String[] canonicalIDs();
 
