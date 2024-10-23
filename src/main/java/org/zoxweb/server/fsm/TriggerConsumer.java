@@ -17,7 +17,7 @@ implements TriggerConsumerInt<T>
     private StateInt<?> state;
     protected AtomicLong execCounter = new AtomicLong();
     private  Function<T, ?> function;
-    private  NVGenericMap nvgmProperties = null;
+    private  NVGenericMap nvgmConfig = null;
 
 
     public TriggerConsumer(Function f, String ...canonicalIDs)
@@ -118,11 +118,11 @@ implements TriggerConsumerInt<T>
     
     public void setProperties(NVGenericMap nvgm)
     {
-        this.nvgmProperties = nvgm;
+        this.nvgmConfig = nvgm;
     }
     
     public NVGenericMap getProperties()
     {
-        return nvgmProperties;
+        return nvgmConfig;
     }
 }
