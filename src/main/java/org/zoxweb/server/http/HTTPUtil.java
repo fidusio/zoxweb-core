@@ -36,7 +36,6 @@ import org.zoxweb.shared.util.*;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.*;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -50,23 +49,14 @@ public class HTTPUtil
 {
 
 
-	private static final Lock LOCK = new ReentrantLock();
 	private static final AtomicBoolean extraMethodAdded =  new AtomicBoolean();
-
-	//public static final  String WEB_SOCKECT_STRING =  "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
 	private static final Lock lock = new ReentrantLock();
-	private static final MessageDigest SHA_1 = HashUtil.getMessageDigestSilent("SHA-1");
+
 
 	/**
 	 * The constructor is declared private to prevent instantiation.
 	 */
-	private HTTPUtil()
-	{
-
-	}
-
-
-
+	private HTTPUtil(){}
 
 	public static String toWebSocketAcceptValue(String secWebSocketKey) throws NoSuchAlgorithmException {
 
@@ -74,7 +64,7 @@ public class HTTPUtil
 		try
 		{
 			lock.lock();
-			secWebSocketAcceptBytes = SHA_1.digest(SharedStringUtil.getBytes(secWebSocketKey + HTTPConst.WEB_SOCKET_UUID));
+			secWebSocketAcceptBytes = HashUtil.getMessageDigestSilent("SHA-1").digest(SharedStringUtil.getBytes(secWebSocketKey + HTTPConst.WEB_SOCKET_UUID));
 		}
 		finally
 		{
@@ -389,7 +379,7 @@ public class HTTPUtil
 		{
 			try
 			{
-				LOCK.lock();
+				lock.lock();
 
 				if (!extraMethodAdded.get())
 				{
@@ -400,12 +390,28 @@ public class HTTPUtil
 //								// We are adding patch at the end
 //								"GET", "POST", "HEAD", "OPTIONS", "PUT", "DELETE", "TRACE", "PATCH", "COPY", "LINK", "UNLINK", "PURGE", "LOCK", "UNLOCK"
 //							});
+
+					String[] propNames = {
+							"http.keepAlive",
+							"http.maxConnections",
+							"sun.net.http.keepAliveTimeout",
+					};
+					for (String propName: propNames)
+						System.out.println(propName + "=" + System.getProperty(propName));
+
+
+					System.setProperty("http.keepAlive", "true"); // Default is true
+					System.setProperty("http.maxConnections", "8"); // Maximum number of connections per destination
+					System.setProperty("sun.net.http.keepAliveTimeout", "5000");
+					for (String propName: propNames)
+						System.out.println(propName + "=" + System.getProperty(propName));
+
 					extraMethodAdded.set(true);
 				}
 			}
 			finally
 			{
-				LOCK.unlock();
+				lock.unlock();
 			}
 		}
 //		Class<?> httpUrlConnection = HttpURLConnection.class;

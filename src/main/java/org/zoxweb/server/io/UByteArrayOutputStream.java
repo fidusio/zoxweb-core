@@ -303,32 +303,50 @@ public class UByteArrayOutputStream
 		
 	/**
 	 * Insert a byte array at the specified location
-	 * @param index
-	 * @param array
+	 * @param index where to insert the buffer
+	 * @param array data buffer to be inserted
 	 * @throws IndexOutOfBoundsException 
 	 */
-	public synchronized void insertAt(int index, byte[] array)
+	public void insertAt(int index, byte[] array)
 			throws IndexOutOfBoundsException 
 	{
-		if (index < 0)
+		insertAt(index, array, 0, array.length);
+	}
+
+	/**
+	 *
+	 * @param index where to insert the buffer
+	 * @param array data buffer to be inserted
+	 * @param offset offset relative to the array
+	 * @param length of array data to be inserted
+	 * @throws IndexOutOfBoundsException in case of indexation error
+	 */
+	public synchronized void insertAt(int index, byte[] array, int offset, int length)
+			throws IndexOutOfBoundsException
+	{
+		if (index < 0 || offset < 0 || length < 0)
 		{
-			throw new IndexOutOfBoundsException("Invalid index " + index);
+			throw new IndexOutOfBoundsException("Invalid index " + index + " or offset " + offset + " or length " + length);
 		}
-		
-		if (index > size()) 
+
+		if (index > size() || offset > length)
 		{
-			throw new IndexOutOfBoundsException("Index " + index + "bigger than size " + size());
+			throw new IndexOutOfBoundsException("Index " + index + "bigger than size " + size() + " or offset > length " + (length - offset));
 		}
+
 
 		if (array.length == 0)
-		{
 			return;
-		}
 
+
+		int toCopyCount = length-offset;
 		// set the new size
-		int newCount = count + array.length;
-		
-		if (newCount > buf.length) 
+		int newCount = count + toCopyCount;
+		if(newCount == count)
+			return;
+
+		// increase the buffer size;
+		if (newCount > buf.length)
 		{
 			byte[] newbuf = new byte[Math.max(buf.length << 1, newCount)];
 			System.arraycopy(buf, 0, newbuf, 0, count);
@@ -339,19 +357,19 @@ public class UByteArrayOutputStream
 		byte[] remainderBuf = null;
 		// copy the remainder
 
-		if (remainderLength > 0) 
+		if (remainderLength > 0)
 		{
 			remainderBuf = new byte[count - index];
 			System.arraycopy(buf, index, remainderBuf, 0, remainderBuf.length);
 		}
 
 		// copy the array
-		System.arraycopy(array, 0, buf, index, array.length);
+		System.arraycopy(array, offset, buf, index, toCopyCount);
 
 		// copy remainder;
 		if (remainderLength > 0)
 		{
-			System.arraycopy(remainderBuf, 0, buf, index + array.length, remainderBuf.length);
+			System.arraycopy(remainderBuf, 0, buf, index + toCopyCount, remainderBuf.length);
 		}
 
 		count = newCount;
@@ -461,6 +479,18 @@ public class UByteArrayOutputStream
 	public String getString(int indexStart, int length)
 	{
 		return SharedStringUtil.toString(getInternalBuffer(), indexStart, length);
+	}
+
+	public synchronized String toString(boolean withContent)
+	{
+		StringBuilder sb = new StringBuilder();
+		sb.append("Size  " + size() + "Buffer Length " + buf.length);
+		if(withContent) {
+			sb.append("\n");
+			sb.append(SharedStringUtil.toString(buf, 0, size()));
+		}
+
+		return sb.toString();
 	}
 
 	/**

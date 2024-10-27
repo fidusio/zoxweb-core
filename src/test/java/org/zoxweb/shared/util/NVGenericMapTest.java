@@ -8,6 +8,7 @@ import org.zoxweb.shared.http.HTTPEndPoint;
 import org.zoxweb.shared.util.SharedBase64.Base64Type;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -192,6 +193,24 @@ public class NVGenericMapTest
 			
 		}
 		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+
+	@Test
+	public void testBeanValues() {
+		try {
+			NVGenericMap nvgm = new NVGenericMap();
+			nvgm.build(SUS.buildNV("inet-address", InetAddress.getLocalHost()))
+					.build("nv", "simple string");
+
+			//String json = GSONUtil.toJSONDefault(nvgm, true);
+			System.out.println(nvgm);
+			InetAddress address = nvgm.getValue("inet-address");
+			System.out.println(address.getHostAddress());
+		}
+		catch (Exception e)
 		{
 			e.printStackTrace();
 		}

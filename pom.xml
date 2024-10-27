@@ -66,6 +66,7 @@
     <jakarta-mail.version>2.0.1</jakarta-mail.version>
     <jsoup.version>RELEASE</jsoup.version>
     <junit.version>RELEASE</junit.version>
+    <okhttp.version>RELEASE</okhttp.version>
   </properties>
 
 
@@ -206,14 +207,12 @@
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>
       <version>${gson.version}</version>
-      <scope>provided</scope>
     </dependency>
 
     <dependency>
       <groupId>org.jsoup</groupId>
       <artifactId>jsoup</artifactId>
       <version>${jsoup.version}</version>
-      <scope>provided</scope>
     </dependency>
 
 
@@ -222,22 +221,26 @@
       <groupId>com.sun.mail</groupId>
       <artifactId>jakarta.mail</artifactId>
       <version>${jakarta-mail.version}</version>
-      <scope>provided</scope>
     </dependency>
 
     <dependency>
       <groupId>javax.cache</groupId>
       <artifactId>cache-api</artifactId>
       <version>${javax-cache.version}</version>
-      <scope>provided</scope>
     </dependency>
+
+    <dependency>
+      <groupId>com.squareup.okhttp3</groupId>
+      <artifactId>okhttp</artifactId>
+      <version>${okhttp.version}</version>
+    </dependency>
+
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
       <version>${junit.version}</version>
       <scope>test</scope>
     </dependency>
-
 
   </dependencies>
 

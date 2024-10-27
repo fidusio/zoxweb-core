@@ -1,16 +1,14 @@
 package org.zoxweb.shared.http;
 
 
-import java.io.IOException;
-import java.util.Arrays;
-
-
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.util.GSONUtil;
-import org.zoxweb.shared.util.ArrayValues;
 import org.zoxweb.shared.util.SharedUtil;
+
+import java.io.IOException;
+import java.util.Arrays;
 
 public class HTTPServerConfigTest {
 
@@ -38,5 +36,17 @@ public class HTTPServerConfigTest {
 
   }
 
+  @Test
+  public void readSystemProperties()
+  {
+    String[] propNames = {
+            "http.keepAlive",
+            "http.maxConnections",
+            "sun.net.http.keepAliveTimeout",
+    };
+    for (String propName: propNames)
+      System.out.println(propName + "=" + System.getProperty(propName));
+    System.getProperties().list(System.out);
+  }
 
 }

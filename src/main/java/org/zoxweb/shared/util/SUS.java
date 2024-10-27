@@ -91,4 +91,9 @@ public class SUS
         
         return toUpdate;
     }
+
+    public static <V> GetNameValue<V> buildNV(String name, V value)
+    {
+        return new NamedValue<>(name, value);
+    }
 }

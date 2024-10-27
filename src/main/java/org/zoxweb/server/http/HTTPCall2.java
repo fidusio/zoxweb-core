@@ -36,16 +36,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class HTTPCall 
+public class HTTPCall2
 {
 
-	public final static RateCounter HTTP_CALLS = new RateCounter("HTTP_CALLS", "This counter is used the send static functions it capture the whole call duration including parameter formatting, call, result decoding.");
+	public final static RateCounter HTTP_CALLS = new RateCounter("HTTP2_CALLS", "This counter is used the send static functions it capture the whole call duration including parameter formatting, call, result decoding.");
 
 	public final static AtomicBoolean ENABLE_HTTP = new AtomicBoolean(true);
 	private final HTTPMessageConfigInterface hcc;
 	private final String urlOverride;
 	private final ReplacementFilter uriFilter;
-	
+
 	private SSLSocketProp ssp;
 	private final OutputStream osBypass;
 	private final CloseEnabledInputStream contentAsIS;
@@ -61,23 +61,23 @@ public class HTTPCall
 			e.printStackTrace();
 		}
 	}
-	
-	public HTTPCall(HTTPMessageConfigInterface params)
+
+	public HTTPCall2(HTTPMessageConfigInterface params)
 	{
 		this( params, null, null, null, null, null);
 	}
-	
-	public HTTPCall(HTTPMessageConfigInterface params, SSLSocketProp ssp)
+
+	public HTTPCall2(HTTPMessageConfigInterface params, SSLSocketProp ssp)
 	{
 		this( params, ssp, null, null, null, null);
 	}
 
-	public HTTPCall(HTTPMessageConfigInterface params,
-					SSLSocketProp ssp,
-					String urlOverride,
-					ReplacementFilter uriFilter,
-					OutputStream osBypass,
-					CloseEnabledInputStream contentAsIS)
+	public HTTPCall2(HTTPMessageConfigInterface params,
+                     SSLSocketProp ssp,
+                     String urlOverride,
+                     ReplacementFilter uriFilter,
+                     OutputStream osBypass,
+                     CloseEnabledInputStream contentAsIS)
 	{
 		SharedUtil.checkIfNulls("HTTPActionParameters can't be null", params);
 		this.hcc = params;
@@ -294,7 +294,7 @@ public class HTTPCall
 			
 			// check if we have an error in the response
 			isError = con.getErrorStream();
-			if ( isError != null)
+			if (isError != null)
 			{
 				ret  = IOUtil.inputStreamToByteArray(isError, false);
 				respHeaders = con.getHeaderFields();
@@ -326,7 +326,7 @@ public class HTTPCall
 					{
 						throw new HTTPCallException("Can not forward with ContentAsIS set",  new HTTPResponseData(status, con.getHeaderFields(), null, System.currentTimeMillis() -ts));
 					}
-					HTTPCall hccRedirect = new HTTPCall(hcc, ssp, urlOverride, uriFilter, osBypass, contentAsIS);
+					HTTPCall2 hccRedirect = new HTTPCall2(hcc, ssp, urlOverride, uriFilter, osBypass, contentAsIS);
 					return hccRedirect.sendRequest();
 					
 				default:
@@ -386,7 +386,7 @@ public class HTTPCall
 		HTTPResponseData ret;
 		try
 		{
-			ret = new HTTPCall(hmci).sendRequest();
+			ret = new HTTPCall2(hmci).sendRequest();
 		}
 		catch(HTTPCallException e)
 		{
@@ -404,7 +404,7 @@ public class HTTPCall
 		HTTPResponseData hrd;
 		try
 		{
-			hrd = new HTTPCall(hmci).sendRequest();
+			hrd = new HTTPCall2(hmci).sendRequest();
 		}
 		catch(HTTPCallException e)
 		{
@@ -423,7 +423,7 @@ public class HTTPCall
 		HTTPResponseData hrd ;
 		try
 		{
-			hrd = new HTTPCall(hmci).sendRequest();
+			hrd = new HTTPCall2(hmci).sendRequest();
 		}
 		catch(HTTPCallException e)
 		{
