@@ -391,20 +391,20 @@ public class HTTPUtil
 //								"GET", "POST", "HEAD", "OPTIONS", "PUT", "DELETE", "TRACE", "PATCH", "COPY", "LINK", "UNLINK", "PURGE", "LOCK", "UNLOCK"
 //							});
 
-					String[] propNames = {
-							"http.keepAlive",
-							"http.maxConnections",
-							"sun.net.http.keepAliveTimeout",
-					};
-					for (String propName: propNames)
-						System.out.println(propName + "=" + System.getProperty(propName));
-
-
-					System.setProperty("http.keepAlive", "true"); // Default is true
-					System.setProperty("http.maxConnections", "8"); // Maximum number of connections per destination
-					System.setProperty("sun.net.http.keepAliveTimeout", "5000");
-					for (String propName: propNames)
-						System.out.println(propName + "=" + System.getProperty(propName));
+//					String[] propNames = {
+//							"http.keepAlive",
+//							"http.maxConnections",
+//							"sun.net.http.keepAliveTimeout",
+//					};
+//					for (String propName: propNames)
+//						System.out.println(propName + "=" + System.getProperty(propName));
+//
+//
+//					System.setProperty("http.keepAlive", "true"); // Default is true
+//					System.setProperty("http.maxConnections", "8"); // Maximum number of connections per destination
+//					System.setProperty("sun.net.http.keepAliveTimeout", "5000");
+//					for (String propName: propNames)
+//						System.out.println(propName + "=" + System.getProperty(propName));
 
 					extraMethodAdded.set(true);
 				}

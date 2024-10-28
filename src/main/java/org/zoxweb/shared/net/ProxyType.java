@@ -14,5 +14,4 @@ public enum ProxyType
      * Represents a SOCKS (V4 or V5) proxy.
      */
     SOCKS
-    
 }

@@ -18,6 +18,9 @@ package org.zoxweb.shared.http;
 import org.zoxweb.shared.util.GetNameValue;
 import org.zoxweb.shared.util.SharedUtil;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * HTTP Protocol methods or actions RFC2616
  * @author javconsigliere
@@ -50,13 +53,15 @@ implements GetNameValue<String>
 	VIEW("VIEW", "doView")
 	;
 
-	private String name;
-	private String value;
+	private final String name;
+	private final String value;
+	private static final Map<String, HTTPMethod> fastLookup = new HashMap<>();
 	
 	HTTPMethod(String name, String value)
 	{
 		this.name= name;
 		this.value = value;
+
 	}
 	@Override
 	public String getName() {
@@ -70,16 +75,32 @@ implements GetNameValue<String>
 		return value;
 	}
 	
-	public static HTTPMethod lookup(String match)
+	public static HTTPMethod lookup(String lookFor)
 	{
-		return SharedUtil.lookupEnum(match, values());
+		return SharedUtil.lookupEnum(lookFor, values());
+	}
+	public static HTTPMethod lookupHTTPMethod(String lookFor)
+	{
+		if (fastLookup.isEmpty())
+		{
+			synchronized (fastLookup)
+			{
+				// prevent double penetration
+				if (fastLookup.isEmpty())
+				{
+					for(HTTPMethod httpMethod : HTTPMethod.values())
+						fastLookup.put(httpMethod.getName().toLowerCase(), httpMethod);
+				}
+			}
+		}
+		return fastLookup.get(lookFor.toLowerCase());
 	}
 	
 	public static String[] toMethodNames()
 	{
 		
-		HTTPMethod all[] = values();
-		String ret[] = new String[all.length];
+		HTTPMethod[] all = values();
+		String[] ret= new String[all.length];
 		for (int i=0; i< all.length; i++)
 		{
 			ret[i] = all[i].getName();

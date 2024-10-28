@@ -15,11 +15,13 @@
  */
 package org.zoxweb.server.io;
 
+import org.zoxweb.shared.net.ProxyType;
 import org.zoxweb.shared.util.SharedStringUtil;
 import org.zoxweb.shared.util.SharedUtil;
 
 import java.io.*;
 import java.net.MalformedURLException;
+import java.net.Proxy;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.DirectoryStream;
@@ -553,5 +555,20 @@ public class IOUtil
 		}
 
 		return matchedTokens;
+	}
+
+
+	public static Proxy.Type toProxyType(ProxyType pt)
+	{
+        switch (pt) {
+            case DIRECT:
+				return Proxy.Type.DIRECT;
+            case HTTP:
+				return Proxy.Type.HTTP;
+            case SOCKS:
+				return Proxy.Type.SOCKS;
+        }
+
+		return null;
 	}
 }

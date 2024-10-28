@@ -65,7 +65,7 @@ public class HTTPMessageConfig
 		//PARAMETERS(NVConfigManager.createNVConfig("parameters", "parameters", "Parameters", false, true, false, String[].class, null)),
 		PARAMETERS(NVConfigManager.createNVConfig("parameters", "parameters", "Parameters", false, true, NVGenericMap.class)),
 		PROXY_ADDRESS(NVConfigManager.createNVConfigEntity("proxy_address", "The proxy address if not null","ProxyAddress",true, false, IPAddress.class, ArrayType.NOT_ARRAY)),
-		ENABLE_ENCODING(NVConfigManager.createNVConfig("enable_encoding", "The NVP will be url encoded", "EnableEncoding", false, true, Boolean.class)),
+		//ENABLE_ENCODING(NVConfigManager.createNVConfig("enable_encoding", "The NVP will be url encoded", "EnableEncoding", false, true, Boolean.class)),
 		ENABLE_SECURE_CHECK(NVConfigManager.createNVConfig("enable_secure_check", "If the connection is secure, certificate will be validated", "EnableSecureCheck", false, true, Boolean.class)),
 		HTTP_PARAMETER_FORMATTER(NVConfigManager.createNVConfig("http_parameter_formatter", "The NVP parameter formatter", "HTTPParameterFormatter", false, true, HTTPEncoder.class)),
 		ERROR_AS_EXCEPTION(NVConfigManager.createNVConfig("error_as_exception", "In case of processing error throw IOException", "ErrorAsException", false, true, Boolean.class)),
@@ -736,7 +736,12 @@ public class HTTPMessageConfig
 	@Override
 	public boolean isURLEncodingEnabled()
 	{
-		return  lookupValue(Params.ENABLE_ENCODING);
+		String mp = getHeaders().getValue(HTTPHeader.CONTENT_TYPE);
+		if (mp != null)// && mp.getValue() != null)
+		{
+			return SharedStringUtil.contains(mp, HTTPMediaType.APPLICATION_WWW_URL_ENC.getValue(), true);
+		}
+		return false;
 	}
 
 
@@ -744,7 +749,8 @@ public class HTTPMessageConfig
 	@Override
 	public void setURLEncodingEnabled(boolean value)
 	{
-		setValue(Params.ENABLE_ENCODING, value);
+		if(value)
+			getHeaders().build(HTTPHeader.CONTENT_TYPE.toHTTPHeader(HTTPMediaType.APPLICATION_WWW_URL_ENC));
 	}
 
 

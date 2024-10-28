@@ -16,12 +16,7 @@
 package org.zoxweb.shared.http;
 
 import org.zoxweb.shared.crypto.CryptoConst;
-import org.zoxweb.shared.util.GetName;
-import org.zoxweb.shared.util.GetNameValue;
-import org.zoxweb.shared.util.NVPair;
-import org.zoxweb.shared.util.SharedBase64;
-import org.zoxweb.shared.util.SharedStringUtil;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.*;
 
 /**
  * The authorization the enum currently support Basic and Bearer
@@ -37,23 +32,34 @@ public enum HTTPAuthScheme
 		public GetNameValue<String> toHTTPHeader(String ...args)
 		{
 			int index = 0;
-			String username = args.length > index ? args[index++] : null;
+			String usernameAndMaybePassword = args.length > index ? args[index++] : null;
 			String password = args.length > index ? args[index++] : null;
 			
-			if(!SharedStringUtil.isEmpty(username) && !SharedStringUtil.isEmpty(password))
+			if(SUS.isNotEmpty(usernameAndMaybePassword) && SUS.isNotEmpty(password))
 			{
 			
 				return new NVPair(HTTPHeader.AUTHORIZATION,
-					BASIC.getName() + " " + new String(SharedBase64.encode(SharedStringUtil.getBytes(SharedUtil.toCanonicalID(':', username, password)))));
+					BASIC.getName() + " " + new String(SharedBase64.encode(SharedStringUtil.getBytes(SharedUtil.toCanonicalID(':', usernameAndMaybePassword, password)))));
 			}
 			
-			if(!SharedStringUtil.isEmpty(username))
+			if(SUS.isNotEmpty(usernameAndMaybePassword))
 			{
+				String authToken;
+				// if the username has the password like user:password
+				if (usernameAndMaybePassword.indexOf(':') != -1)
+				{
+					authToken = usernameAndMaybePassword;
+				}
+				else
+				{
+					authToken = usernameAndMaybePassword + ":";
+				}
+
 				return new NVPair(HTTPHeader.AUTHORIZATION,
-					BASIC.getName() + " " + new String(SharedBase64.encode(SharedStringUtil.getBytes(username+":"))));
+					BASIC.getName() + " " + new String(SharedBase64.encode(SharedStringUtil.getBytes(authToken))));
 			}
 			
-			if(!SharedStringUtil.isEmpty(password))
+			if(SUS.isNotEmpty(password))
 			{
 				return new NVPair(HTTPHeader.AUTHORIZATION,
 					BASIC.getName() + " " + new String(SharedBase64.encode(SharedStringUtil.getBytes(":"+password))));

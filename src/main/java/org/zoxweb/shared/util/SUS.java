@@ -19,6 +19,8 @@ public class SUS
         return collection != null && !collection.isEmpty();
     }
 
+
+
     /**
      * 
      * @param str to checked
@@ -29,12 +31,22 @@ public class SUS
         return str != null && !str.trim().isEmpty();
     }
 
+    public static boolean isEmpty(String str)
+    {
+        return str == null || str.trim().isEmpty();
+    }
+
     /**
      * Check if an array is empty not empty meaning not null and length > 0
      * @param array to be checked
      * @return true if the array exists and not empty
      */
     public static boolean isNotEmpty(Object[] array)
+    {
+        return (array != null && array.length != 0);
+    }
+
+    public static boolean isNotEmpty(byte[] array)
     {
         return (array != null && array.length != 0);
     }

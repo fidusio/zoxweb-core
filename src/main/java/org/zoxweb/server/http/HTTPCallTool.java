@@ -152,6 +152,8 @@ public final class HTTPCallTool //implements Runnable
                 hmci.setHeader(HTTPHeader.ACCEPT, HTTPMediaType.APPLICATION_JSON, HTTPConst.CHARSET_UTF_8);
                 if(disableKeepAlive)
                     hmci.setHeader(HTTPHeader.CONNECTION, "Close");
+                else
+                    hmci.setHeader(HTTPHeader.CONNECTION, "Keep-Alive");
 
                 if (content != null)
                     hmci.setContent(content);
@@ -161,7 +163,7 @@ public final class HTTPCallTool //implements Runnable
 
                 endpoints.add(endpoint);
                 // vm warmup
-                log.getLogger().info("Test Call: " + new HTTPCall(hmci).sendRequest());
+                log.getLogger().info("Test Call: " + new OkHTTPCall(hmci).sendRequest());
             }
 
 
@@ -180,10 +182,13 @@ public final class HTTPCallTool //implements Runnable
             }
             ts = TaskUtil.waitIfBusyThenClose(25) - ts;
             RateCounter rc = new RateCounter("OverAll");
-            rc.register(ts, HTTPCall.HTTP_CALLS.getCounts());
+            rc.register(ts, OkHTTPCall.OK_HTTP_CALLS.getCounts());
 
-            log.getLogger().info("It took: " + Const.TimeInMillis.toString(ts) + " to send: " + HTTPCall.HTTP_CALLS.getCounts() + " failed: " + failCounter+
-                    " rate: " + rc.rate(Const.TimeInMillis.SECOND.MILLIS) + " per/second" + " average call duration: " + HTTPCall.HTTP_CALLS.average() + " millis");
+            log.getLogger().info("It took: " + Const.TimeInMillis.toString(ts) + " to send: " + OkHTTPCall.OK_HTTP_CALLS.getCounts() + " failed: " + failCounter+
+                    " rate: " + rc.rate(Const.TimeInMillis.SECOND.MILLIS) + " per/second" + " average call duration: " + OkHTTPCall.OK_HTTP_CALLS.average() + " millis");
+
+            log.getLogger().info("over all stats diff: " + Const.TimeInMillis.toString(OkHTTPCall.OK_HTTP_CALLS.getDeltas() -ts)  +  " rate: " + rc.rate(Const.TimeInMillis.SECOND.MILLIS) + " per/second" + " average call duration: " + rc.average() + " millis");
+
         }
         catch(Exception e)
         {

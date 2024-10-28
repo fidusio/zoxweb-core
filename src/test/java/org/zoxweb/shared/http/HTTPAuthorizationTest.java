@@ -5,6 +5,10 @@ import org.zoxweb.server.http.HTTPCall;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.util.GetNameValue;
 import org.zoxweb.shared.util.NVConfigEntity;
+import org.zoxweb.shared.util.SharedUtil;
+
+import java.net.MalformedURLException;
+import java.net.URL;
 
 public class HTTPAuthorizationTest {
 
@@ -89,7 +93,15 @@ public class HTTPAuthorizationTest {
         {
             e.printStackTrace();
         }
+    }
 
 
+    @Test
+    public void userInfoFromURL() throws MalformedURLException {
+        URL url = new URL("http://john:secret123@example.com:8080/resource?name=mario&lastname=taza");
+
+        System.out.println(SharedUtil.toCanonicalID(',', url.getProtocol(), url.getUserInfo(), url.getHost(), url.getPort(), url.getPath(), url.getQuery()));
+        GetNameValue<String> authorization = HTTPAuthScheme.BASIC.toHTTPHeader(url.getUserInfo());
+        System.out.println(authorization);
     }
 }

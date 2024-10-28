@@ -30,7 +30,7 @@ public class HTTPAPIEndPoint<I,O>
         {
             try
             {
-                HTTPResponseData hrd = HTTPCall.send(createHMCI(callback.get(), authorization));
+                HTTPResponseData hrd = OkHTTPCall.send(createHMCI(callback.get(), authorization));
                 HTTPAPIResult<?> hapir = new HTTPAPIResult<>(hrd.getStatus(),
                         hrd.getHeaders(),
                         dataDecoder != null ? dataDecoder.decode(hrd) : hrd.getData(),
@@ -165,7 +165,7 @@ public class HTTPAPIEndPoint<I,O>
 
     public HTTPAPIResult<O> syncCall(I input, HTTPAuthorization authorization) throws IOException
     {
-        HTTPResponseData hrd = HTTPCall.send(createHMCI(input, authorization));
+        HTTPResponseData hrd = OkHTTPCall.send(createHMCI(input, authorization));
         HTTPAPIResult<O> hapir = null;
         if(dataDecoder != null)
             hapir = new HTTPAPIResult<O>(hrd.getStatus(), hrd.getHeaders(), dataDecoder.decode(hrd), hrd.getDuration());
