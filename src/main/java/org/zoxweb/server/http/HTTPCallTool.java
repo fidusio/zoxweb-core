@@ -184,10 +184,10 @@ public final class HTTPCallTool //implements Runnable
             RateCounter rc = new RateCounter("OverAll");
             rc.register(ts, OkHTTPCall.OK_HTTP_CALLS.getCounts());
 
-            log.getLogger().info("It took: " + Const.TimeInMillis.toString(ts) + " to send: " + OkHTTPCall.OK_HTTP_CALLS.getCounts() + " failed: " + failCounter+
-                    " rate: " + rc.rate(Const.TimeInMillis.SECOND.MILLIS) + " per/second" + " average call duration: " + OkHTTPCall.OK_HTTP_CALLS.average() + " millis");
+            log.getLogger().info("OkHTTPCall stat: " + Const.TimeInMillis.toString(ts) + " to send: " + OkHTTPCall.OK_HTTP_CALLS.getCounts() + " failed: " + failCounter+
+                    " rate: " +  OkHTTPCall.OK_HTTP_CALLS.rate(Const.TimeInMillis.SECOND.MILLIS) + " per/second" + " average call duration: " + OkHTTPCall.OK_HTTP_CALLS.average() + " millis");
 
-            log.getLogger().info("over all stats diff: " + Const.TimeInMillis.toString(OkHTTPCall.OK_HTTP_CALLS.getDeltas() -ts)  +  " rate: " + rc.rate(Const.TimeInMillis.SECOND.MILLIS) + " per/second" + " average call duration: " + rc.average() + " millis");
+            log.getLogger().info("App  stats: " + repeat + " it took " + Const.TimeInMillis.toString(ts)  +  " rate: " + rc.rate(Const.TimeInMillis.SECOND.MILLIS) + " per/second" + " average call duration: " + rc.average() + " millis");
 
         }
         catch(Exception e)
