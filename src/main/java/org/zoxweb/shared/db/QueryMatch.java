@@ -130,7 +130,7 @@ public class QueryMatch<V>
 	@Override
 	public void setName(String name)
     {
-		if (SharedStringUtil.isEmpty(name))
+		if (SUS.isEmpty(name))
 		{
 			throw new NullPointerException("Name is null.");
 		}

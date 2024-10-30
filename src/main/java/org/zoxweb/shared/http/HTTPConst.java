@@ -7,6 +7,7 @@ public final class HTTPConst
     private HTTPConst(){}
 
     public final static String APPLICATION_JSON = "application/json";
+    public final static String APPLICATION_PDF = "application/pdf";
     public final static String TEXT_CSV = "text/csv";
     public final static String TEXT_CSS = "text/css";
     public final static String TEXT_JAVASCRIPT = "text/javascript";
@@ -142,7 +143,7 @@ public final class HTTPConst
                 if (headerValue.length() > 0)
                     headerValue.append("; ");
 
-                if (!SharedStringUtil.isEmpty(value))
+                if (!SUS.isEmpty(value))
                     headerValue.append(value);
 
             }
@@ -169,7 +170,7 @@ public final class HTTPConst
                 if (headerValue.length() > 0)
                     headerValue.append("; ");
 
-                if (gnv !=null && !SharedStringUtil.isEmpty(gnv.getName()))
+                if (gnv !=null && !SUS.isEmpty(gnv.getName()))
                 {
                     headerValue.append(gnv.getName());
                     if(gnv.getValue() != null)

@@ -188,7 +188,7 @@ public class EncryptedData
 	public static EncryptedData fromCanonicalID(String encryptedDAOCanonicalFormat)
         throws NullPointerException, IllegalArgumentException
     {
-        if (SharedStringUtil.isEmpty(encryptedDAOCanonicalFormat))
+        if (SUS.isEmpty(encryptedDAOCanonicalFormat))
         {
             throw new NullPointerException("empty dao");
         }
@@ -207,10 +207,10 @@ public class EncryptedData
             ret.setDataLength(Long.parseLong(tokens[index++]));
             ret.setEncryptedData(SharedBase64.decode(tokens[index++].getBytes()));
             String temp = tokens[index++];
-            if(!SharedStringUtil.isEmpty(temp))
+            if(!SUS.isEmpty(temp))
             	ret.setExpirationTime(temp);
 			temp = tokens[index++];
-			if(!SharedStringUtil.isEmpty(temp))
+			if(!SUS.isEmpty(temp))
 				ret.setHint(temp);
             ret.setHMACAlgoName(tokens[index++]);
             ret.setHMAC(SharedBase64.decode(tokens[index++].getBytes()));

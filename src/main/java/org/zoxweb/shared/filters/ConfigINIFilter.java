@@ -18,7 +18,7 @@ package org.zoxweb.shared.filters;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.zoxweb.shared.util.SharedStringUtil;
+import org.zoxweb.shared.util.SUS;
 
 @SuppressWarnings("serial")
 public class ConfigINIFilter
@@ -87,7 +87,7 @@ public class ConfigINIFilter
 				line = line.trim();
 			}
 			
-			if (!SharedStringUtil.isEmpty(line))
+			if (!SUS.isEmpty(line))
 			{
 				goodLines.add(line);
 			}
@@ -99,7 +99,7 @@ public class ConfigINIFilter
 	@Override
 	public boolean isValid(String in)
     {
-		return !SharedStringUtil.isEmpty( in);
+		return !SUS.isEmpty( in);
 	}
 
 	public boolean isLineTrimmingEnabled()

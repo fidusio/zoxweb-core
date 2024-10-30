@@ -1,11 +1,13 @@
 package org.zoxweb.shared.util;
 
 public class NamedValue<V>
-    implements SetNameValue<V>
+    implements GetNameValue<V>
 
 {
     protected String name;
     protected V value;
+    public NamedValue(){}
+
     public NamedValue(String name, V value)
     {
         this.name = name;
@@ -34,10 +36,11 @@ public class NamedValue<V>
      *
      * @param name
      */
-    @Override
-    public void setName(String name)
+
+    public NamedValue<V> setName(String name)
     {
         this.name = name;
+        return this;
     }
 
     /**
@@ -45,8 +48,8 @@ public class NamedValue<V>
      *
      * @param value
      */
-    @Override
-    public void setValue(V value) {
+    public NamedValue<V> setValue(V value) {
         this.value = value;
+        return this;
     }
 }

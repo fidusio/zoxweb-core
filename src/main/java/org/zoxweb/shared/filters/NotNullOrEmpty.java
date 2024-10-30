@@ -15,7 +15,7 @@
  */
 package org.zoxweb.shared.filters;
 
-import org.zoxweb.shared.util.SharedStringUtil;
+import org.zoxweb.shared.util.SUS;
 
 @SuppressWarnings("serial")
 public class NotNullOrEmpty 
@@ -47,7 +47,7 @@ public class NotNullOrEmpty
 	public String validate(String in) 
         throws NullPointerException, IllegalArgumentException
     {
-		if (!SharedStringUtil.isEmpty(in))
+		if (!SUS.isEmpty(in))
 		{
 			return in;
 		}
@@ -60,7 +60,7 @@ public class NotNullOrEmpty
 	@Override
 	public boolean isValid(String in)
     {
-		return !SharedStringUtil.isEmpty(in);
+		return !SUS.isEmpty(in);
 	}
 
 }

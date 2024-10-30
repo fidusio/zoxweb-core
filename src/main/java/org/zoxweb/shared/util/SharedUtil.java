@@ -1998,7 +1998,7 @@ public class SharedUtil
 			}
 			else if (Long.class.equals(c))
 			{
-				if (!SharedStringUtil.isEmpty(value))
+				if (!SUS.isEmpty(value))
 				{
 					return Long.valueOf(value);
 				}
@@ -2009,7 +2009,7 @@ public class SharedUtil
 			}
 			else if (Integer.class.equals(c))
 			{
-				if (!SharedStringUtil.isEmpty(value))
+				if (!SUS.isEmpty(value))
 				{
 					return Integer.valueOf(value);
 				}
@@ -2024,7 +2024,7 @@ public class SharedUtil
 			}
 			else if (Float.class.equals(c))
 			{
-				if (!SharedStringUtil.isEmpty(value))
+				if (!SUS.isEmpty(value))
 				{
 					return Float.valueOf(value);
 				}
@@ -2035,7 +2035,7 @@ public class SharedUtil
 			}
 			else if (Double.class.equals(c))
 			{
-				if (!SharedStringUtil.isEmpty(value))
+				if (!SUS.isEmpty(value))
 				{
 					return Double.valueOf(value);
 				}

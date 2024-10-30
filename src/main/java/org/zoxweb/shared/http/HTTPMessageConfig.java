@@ -115,7 +115,7 @@ public class HTTPMessageConfig
 	{
 		super(nvce);
 		setRedirectEnabled(true);
-		setURLEncodingEnabled(true);
+		setContentType(HTTPMediaType.APPLICATION_WWW_URL_ENC);
 		setSecureCheckEnabled(true);
 		setHTTPParameterFormatter(HTTPEncoder.URL_ENCODED);
 		setHTTPErrorAsException(true);
@@ -744,14 +744,25 @@ public class HTTPMessageConfig
 		return false;
 	}
 
-
-
 	@Override
-	public void setURLEncodingEnabled(boolean value)
+	public boolean isMultipartFormDataEnabled()
 	{
-		if(value)
-			getHeaders().build(HTTPHeader.CONTENT_TYPE.toHTTPHeader(HTTPMediaType.APPLICATION_WWW_URL_ENC));
+		String mp = getHeaders().getValue(HTTPHeader.CONTENT_TYPE);
+		if (mp != null)// && mp.getValue() != null)
+		{
+			return SharedStringUtil.contains(mp, HTTPMediaType.MULTIPART_FORM_DATA.getValue(), true);
+		}
+		return false;
 	}
+
+
+
+//	@Override
+//	public void setURLEncodingEnabled(boolean value)
+//	{
+//		if(value)
+//			getHeaders().build(HTTPHeader.CONTENT_TYPE.toHTTPHeader(HTTPMediaType.APPLICATION_WWW_URL_ENC));
+//	}
 
 
 	public void setUserAgent(String ...userAgent)

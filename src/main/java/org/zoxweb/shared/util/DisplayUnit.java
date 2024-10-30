@@ -40,7 +40,7 @@ public enum DisplayUnit
 
 
 	public static DisplayUnit parseUnit(String str) {
-		if (!SharedStringUtil.isEmpty(str)) {
+		if (!SUS.isEmpty(str)) {
 			str = str.toLowerCase();
 
 			for (DisplayUnit unit : values()) {

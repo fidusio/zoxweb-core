@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.zoxweb.shared.util.DataDecoder;
-import org.zoxweb.shared.util.SharedStringUtil;
+import org.zoxweb.shared.util.SUS;
 
 public class HTTPCookieParser
 	implements DataDecoder<List<String>, List<String>>
@@ -23,7 +23,7 @@ public class HTTPCookieParser
 			{
 				cookies = new ArrayList<String>();
 				String[] tokens = token.split(";");
-				if(!SharedStringUtil.isEmpty(tokens[0]))
+				if(!SUS.isEmpty(tokens[0]))
 				{
 					cookies.add(tokens[0]);
 				}

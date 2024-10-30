@@ -5,15 +5,7 @@ import org.zoxweb.shared.data.DataConst;
 
 
 import org.zoxweb.shared.data.SetNameDescriptionDAO;
-import org.zoxweb.shared.util.GetNVConfig;
-import org.zoxweb.shared.util.NVConfig;
-import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
-import org.zoxweb.shared.util.NVEntity;
-import org.zoxweb.shared.util.NVStringList;
-import org.zoxweb.shared.util.SharedStringUtil;
-import org.zoxweb.shared.util.SharedUtil;
-import org.zoxweb.shared.util.NVConfigManager;
+import org.zoxweb.shared.util.*;
 
 import java.util.List;
 
@@ -85,7 +77,7 @@ public class APIDataOP
         List<String> list = getPropertiesNames().getValue();
         for (String name: names)
         {
-            if(!SharedStringUtil.isEmpty(name))
+            if(!SUS.isEmpty(name))
                 list.add(name);
         }
     }

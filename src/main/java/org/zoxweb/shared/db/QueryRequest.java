@@ -19,8 +19,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SetCanonicalID;
-import org.zoxweb.shared.util.SharedStringUtil;
 
 @SuppressWarnings("serial")
 public class QueryRequest
@@ -88,7 +88,7 @@ public class QueryRequest
 
 			for (String fn : fieldNames)
 			{
-				if (!SharedStringUtil.isEmpty(fn))
+				if (!SUS.isEmpty(fn))
 				{
                     field_names.add(fn);
                 }

@@ -2,6 +2,8 @@ package org.zoxweb.shared.net;
 
 import java.io.IOException;
 import java.util.Arrays;
+
+import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedStringUtil;
 import org.zoxweb.shared.util.SharedUtil;
 
@@ -182,7 +184,7 @@ public class SharedNetUtil
   public static boolean validateNIConfig(NIConfigDAO nicd) throws IOException
   {
     SharedUtil.checkIfNulls("NIConfigDAO null", nicd, nicd.getInetProtocol());
-    if(SharedStringUtil.isEmpty(nicd.getNIName()))
+    if(SUS.isEmpty(nicd.getNIName()))
     {
      throw new IllegalArgumentException("Network Interface name invalid:" + nicd.getNIName()); 
     }
@@ -193,7 +195,7 @@ public class SharedNetUtil
       case DHCP:
         break;
       case STATIC:
-        if (SharedStringUtil.isEmpty(nicd.getAddress()) || SharedStringUtil.isEmpty(nicd.getNetmask()))
+        if (SUS.isEmpty(nicd.getAddress()) || SUS.isEmpty(nicd.getNetmask()))
         {
           throw new IOException("Network missing:" + SharedUtil.toCanonicalID(',', nicd.getAddress(), nicd.getNetmask()));
         }

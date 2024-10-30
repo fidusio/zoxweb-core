@@ -16,7 +16,7 @@
 package org.zoxweb.shared.filters;
 
 import org.zoxweb.shared.util.NVPair;
-import org.zoxweb.shared.util.SharedStringUtil;
+import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.api.APINotificationMessage;
 
 /**
@@ -68,7 +68,7 @@ public class MessageContentFilter
 
 		String bodyContent = in.getBodyTemplate();
 
-		if (!SharedStringUtil.isEmpty(bodyContent))
+		if (!SUS.isEmpty(bodyContent))
 		{
 			for (NVPair nvp : in.getBodyTags().values())
 			{

@@ -2,7 +2,7 @@ package org.zoxweb.shared.http;
 
 import org.zoxweb.shared.filters.ValueFilter;
 import org.zoxweb.shared.util.GetNameValue;
-import org.zoxweb.shared.util.SharedStringUtil;
+import org.zoxweb.shared.util.SUS;
 
 public enum HTTPEncoder
     implements GetNameValue<String>, ValueFilter<GetNameValue<String>, String>
@@ -150,7 +150,7 @@ public enum HTTPEncoder
 			sb = new StringBuilder();
 		}
 
-		if (!SharedStringUtil.isEmpty(str))
+		if (!SUS.isEmpty(str))
 		{
 			if (sb.length() > 0)
 			{

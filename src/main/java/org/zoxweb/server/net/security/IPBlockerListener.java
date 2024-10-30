@@ -35,6 +35,7 @@ import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.security.IPBlockerConfig;
 import org.zoxweb.shared.util.Const.TimeInMillis;
 import org.zoxweb.shared.util.NVPair;
+import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedStringUtil;
 import org.zoxweb.shared.util.SharedUtil;
 
@@ -150,7 +151,7 @@ public class IPBlockerListener
 			List<NVPair> results = SharedUtil.toNVPairs(token, "=", " ");
 			NVPair parameter = SharedUtil.lookup(results, ipbc.getAuthValue());
 			String value = SharedUtil.getValue(parameter);
-			if (!SharedStringUtil.isEmpty(value))
+			if (!SUS.isEmpty(value))
 			{
 				value = value.toLowerCase();
 				reportBadAddress(new IPAddressEvent(ste.getSource(), new IPAddress(value, 22)));
@@ -227,7 +228,7 @@ public class IPBlockerListener
 				if (ripi.attackCount >= ipbc.getTriggerCounter() && ripi.attackRate >= ipbc.getRate()) {
 					log.info("we must block:" + ripi);
 					String command = SharedStringUtil.embedText(ipbc.getCommand(), ipbc.getCommandToken(), isad.getInetAddress());
-					if (!SharedStringUtil.isEmpty(ipbc.getPortToken()) && isad.getPort() > 0)
+					if (!SUS.isEmpty(ipbc.getPortToken()) && isad.getPort() > 0)
 					{
 						command = SharedStringUtil.embedText(command, ipbc.getPortToken(), ""+isad.getPort());
 					}

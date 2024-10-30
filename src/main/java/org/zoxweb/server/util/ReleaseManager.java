@@ -23,6 +23,7 @@ import java.util.List;
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.shared.app.AppVersionDAO;
 import org.zoxweb.shared.util.NVPair;
+import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedStringUtil;
 import org.zoxweb.shared.util.SharedUtil;
 
@@ -89,7 +90,7 @@ public class ReleaseManager
 			}
 		}
 
-		if (!SharedStringUtil.isEmpty(name))
+		if (!SUS.isEmpty(name))
 		{
 			AppVersionDAO ret = new AppVersionDAO();
 		

@@ -22,15 +22,13 @@ import org.jetbrains.annotations.Nullable;
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.net.ssl.SSLCheckDisabler;
+import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.http.*;
 import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.util.*;
 
 import javax.net.ssl.X509TrustManager;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.Proxy;
+import java.io.*;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
@@ -42,19 +40,82 @@ public class OkHTTPCall
 {
 
 	public static final LogWrapper log = new LogWrapper(OkHTTPCall.class).setEnabled(false);
-	static class BinaryContent
+
+	static class RBNamedValueContent
+		extends  RequestBody
+	{
+
+		private NamedValueContent nvc;
+		RBNamedValueContent(NamedValueContent nvc)
+		{
+			this.nvc = nvc;
+		}
+
+
+		/**
+		 * @return
+		 */
+		@Nullable
+		@Override
+		public MediaType contentType()
+		{
+			return MediaType.parse(nvc.getMediaType());
+		}
+
+		/**
+		 * @param bufferedSink
+		 * @throws IOException
+		 */
+		@Override
+		public void writeTo(@NotNull BufferedSink bufferedSink) throws IOException
+		{
+			InputStream is = null;
+			try {
+				if (nvc.getContent() != null) {
+					if (nvc.getContent() instanceof File) {
+						is = new FileInputStream((File) nvc.getContent());
+					} else if (nvc.getContent() instanceof InputStream) {
+						is = (InputStream) nvc.getContent();
+					}
+
+					if (is != null) {
+						byte[] buffer = new byte[4092]; // 4KB buffer
+						int bytesRead;
+
+						while ((bytesRead = is.read(buffer)) != -1) {
+							bufferedSink.write(buffer, 0, bytesRead);
+						}
+
+
+					}
+				}
+			}
+			finally {
+				IOUtil.close(is);
+			}
+		}
+	}
+
+	static class RBBinaryContent
 		extends RequestBody
 	{
 
 		private final MediaType mediaType;
 		private final byte[] content;
-		BinaryContent(MediaType mediaType, String content)
+
+		RBBinaryContent(NVGenericMap nvgm)
+		{
+			mediaType = MediaType.parse(HTTPMediaType.APPLICATION_JSON.getValue());
+			content = SharedStringUtil.getBytes(GSONUtil.toJSONDefault(nvgm));
+		}
+
+		RBBinaryContent(MediaType mediaType, String content)
 		{
 			this.mediaType = mediaType;
 			this.content = SUS.isNotEmpty(content) ? SharedStringUtil.getBytes(content) : null;
 
 		}
-		BinaryContent(MediaType mediaType, byte[] content)
+		RBBinaryContent(MediaType mediaType, byte[] content)
 		{
 			this.mediaType = mediaType;
 			this.content = content;
@@ -81,11 +142,11 @@ public class OkHTTPCall
 				byte[] buffer = new byte[4092]; // 8KB buffer
 				int bytesRead;
 				while ((bytesRead = inputStream.read(buffer)) != -1) {
-					try {
-						bufferedSink.write(buffer, 0, bytesRead);
-					}
-					catch (IOException e)
-					{
+						try {
+							bufferedSink.write(buffer, 0, bytesRead);
+						}
+						catch (IOException e)
+						{
 						e.printStackTrace();
 						throw e;
 					}
@@ -130,9 +191,11 @@ public class OkHTTPCall
 		builder.readTimeout(DEFAULT_20_SECOND, TimeUnit.MILLISECONDS);
 		builder.writeTimeout(DEFAULT_20_SECOND, TimeUnit.MILLISECONDS);
 		//builder.protocols(Arrays.asList(Protocol.HTTP_1_1));
+
+		// allow redirect
 		builder.followRedirects(true).followSslRedirects(true);
 		if(proxy != null) {
-			builder.setProxy$okhttp(new Proxy(IOUtil.toProxyType(proxy.getProxyType()), new InetSocketAddress(proxy.getInetAddress(), proxy.getPort())));
+			builder.setProxy$okhttp(IOUtil.toProxy(proxy));
 		}
 		if(connectionPool>0)
 			builder.connectionPool(new ConnectionPool(connectionPool, kaTimeoutMillis, TimeUnit.MILLISECONDS));
@@ -147,7 +210,7 @@ public class OkHTTPCall
 
 	public OkHTTPCall(HTTPMessageConfigInterface hmci)
 	{
-		SharedUtil.checkIfNulls("HTTPActionParameters can't be null", hmci);
+		SharedUtil.checkIfNulls("HTTPMessageConfigInterface can't be null", hmci);
 		this.hmci = hmci;
 
 		if (hmci.getProxyAddress() != null)
@@ -240,11 +303,33 @@ public class OkHTTPCall
 		RequestBody requestBody = null;
 		if(SUS.isNotEmpty(urlEncodedParameter) && hmci.isURLEncodingEnabled() && hmci.getMethod() != HTTPMethod.GET)
 		{
-			requestBody = new BinaryContent(null, urlEncodedParameter);
+			requestBody = new RBBinaryContent(null, urlEncodedParameter);
+		}
+		else if(hmci.isMultipartFormDataEnabled())
+		{
+			MultipartBody.Builder mbBuilder = new MultipartBody.Builder().setType(MultipartBody.FORM);
+
+			for(GetNameValue<?> gnv : hmci.getParameters().values())
+			{
+				if (gnv instanceof NamedValueContent)
+				{
+					mbBuilder.addFormDataPart(gnv.getName(), "" + gnv.getValue(), new RBNamedValueContent((NamedValueContent) gnv));
+				}
+				else if (SUS.isPrimitiveGNV(gnv))
+				{
+					mbBuilder.addFormDataPart(gnv.getName(), "" + gnv.getValue());
+				}
+				else if (gnv instanceof NVGenericMap)
+				{
+					mbBuilder.addFormDataPart(gnv.getName(), gnv.getName(), new RBBinaryContent((NVGenericMap) gnv));
+				}
+
+			}
+			requestBody = mbBuilder.build();
 		}
 		else if(SUS.isNotEmpty(hmci.getContent()))
 		{
-			requestBody = new BinaryContent(null, hmci.getContent());
+			requestBody = new RBBinaryContent(null, hmci.getContent());
 		}
 
 

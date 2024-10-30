@@ -15,6 +15,7 @@
  */
 package org.zoxweb.shared.filters;
 
+import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedStringUtil;
 
 /**
@@ -41,7 +42,7 @@ public class HTMLContentFilter
 	 */
 	public static String validateHTML(String html)
     {
-		if (!SharedStringUtil.isEmpty(html))
+		if (!SUS.isEmpty(html))
 		{
 			if (!SharedStringUtil.contains(html, HTML_PRE_TAG, true))
 			{

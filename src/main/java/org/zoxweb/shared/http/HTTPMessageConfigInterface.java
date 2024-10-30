@@ -124,12 +124,17 @@ extends ReferenceID<String>, SetName, SetDescription
 	 * @return true if url encoding is enabled
 	 */
 	boolean isURLEncodingEnabled();
-	
+
+	/**
+	 * @return true of content type  multipart/form-data
+	 */
+	boolean isMultipartFormDataEnabled();
+
 	/**
 	 * enable url encoding
 	 * @param value true enable URL Encoding
 	 */
-	void setURLEncodingEnabled(boolean value);
+	//void setURLEncodingEnabled(boolean value);
 	
 	
 	

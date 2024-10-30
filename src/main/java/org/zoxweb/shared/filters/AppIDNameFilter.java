@@ -15,7 +15,7 @@
  */
 package org.zoxweb.shared.filters;
 
-import org.zoxweb.shared.util.SharedStringUtil;
+import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedUtil;
 
 @SuppressWarnings("serial")
@@ -53,7 +53,7 @@ public class AppIDNameFilter
 	@Override
 	public boolean isValid(String in) 
 	{
-		if (!SharedStringUtil.isEmpty(in))
+		if (!SUS.isEmpty(in))
 		{
 			in = in.trim();
 			for (int i = 0; i < in.length(); i++)

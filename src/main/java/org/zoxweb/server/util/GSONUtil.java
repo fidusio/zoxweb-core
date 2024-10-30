@@ -203,7 +203,7 @@ public final class GSONUtil
         
         try
 		{
-			if(jp.isString() && !SharedStringUtil.isEmpty(jp.getAsString()))
+			if(jp.isString() && !SUS.isEmpty(jp.getAsString()))
           		return DateUtil.DEFAULT_GMT_MILLIS.parse(jp.getAsString());
         } catch (ParseException e) {
           // TODO Auto-generated catch block
@@ -2514,7 +2514,7 @@ public final class GSONUtil
 
 			for (String fn : qr.getFieldNames())
 			{
-				if (!SharedStringUtil.isEmpty(fn))
+				if (!SUS.isEmpty(fn))
 				{
 					ja.add(fn);
 				}

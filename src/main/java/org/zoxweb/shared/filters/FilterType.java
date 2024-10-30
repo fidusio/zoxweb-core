@@ -17,6 +17,7 @@ package org.zoxweb.shared.filters;
 
 import org.zoxweb.shared.data.DataConst;
 import org.zoxweb.shared.util.NVConfig;
+import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedStringUtil;
 import org.zoxweb.shared.util.SharedUtil;
 
@@ -440,7 +441,7 @@ public enum FilterType
 		
 		public boolean isValid(String in)
         {
-			return SharedStringUtil.isEmpty(in);
+			return SUS.isEmpty(in);
 		}	
 	},
 	/**

@@ -246,7 +246,7 @@ public class DynamicEnumMapManager
 				throw new NullPointerException("Dynamic enum value at index " + i + " is null.");
 			}
 			
-			if (SharedStringUtil.isEmpty(nvp.getName()))
+			if (SUS.isEmpty(nvp.getName()))
 			{
 				throw new IllegalArgumentException("Dynamic enum name at index " + i + " is empty or null.");
 			}

@@ -116,7 +116,7 @@ public class APINotificationMessageDAO
 	public void setSenderID(String senderID) 
 			throws NullPointerException, IllegalArgumentException
 	{
-		if (SharedStringUtil.isEmpty(senderID))
+		if (SUS.isEmpty(senderID))
 		{
 			throw new NullPointerException("Null or empty value: " + senderID);
 		}
@@ -180,7 +180,7 @@ public class APINotificationMessageDAO
 	public void setTitle(String title) 
 			throws NullPointerException, IllegalArgumentException 
 	{
-		if (SharedStringUtil.isEmpty(title))
+		if (SUS.isEmpty(title))
 		{
 			throw new NullPointerException("Null or empty value: " + title);
 		}
@@ -206,7 +206,7 @@ public class APINotificationMessageDAO
 	public void setBodyTemplate(String messageBody) 
 			throws NullPointerException, IllegalArgumentException 
 	{
-		if (SharedStringUtil.isEmpty(messageBody))
+		if (SUS.isEmpty(messageBody))
 		{
 			throw new NullPointerException("Null or empty value: " + messageBody);
 		}

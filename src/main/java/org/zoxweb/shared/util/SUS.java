@@ -1,6 +1,8 @@
 package org.zoxweb.shared.util;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Sus(Shared Util Shortcut) basically to minimise typing
@@ -8,6 +10,9 @@ import java.util.Collection;
 public class SUS
 {
     private SUS(){}
+
+    private static final Map<Object,Object> cache = new HashMap<>();
+
 
     /**
      * 
@@ -31,10 +36,6 @@ public class SUS
         return str != null && !str.trim().isEmpty();
     }
 
-    public static boolean isEmpty(String str)
-    {
-        return str == null || str.trim().isEmpty();
-    }
 
     /**
      * Check if an array is empty not empty meaning not null and length > 0
@@ -107,5 +108,57 @@ public class SUS
     public static <V> GetNameValue<V> buildNV(String name, V value)
     {
         return new NamedValue<>(name, value);
+    }
+
+    /**
+     * Returns true if str is null or str.trim().length() == 0.
+     * @param str to be checked
+     * @return true if str is empty
+     */
+    public static boolean isEmpty(String str)
+    {
+        return str == null || str.trim().isEmpty();
+    }
+
+    public static boolean isPrimitiveGNV(GetNameValue<?> nvb)
+    {
+        SharedUtil.checkIfNulls("NameValue null", nvb);
+        if (cache.get(nvb.getClass()) != null ||
+                (nvb.getValue() != null && cache.get(nvb.getValue().getClass()) !=null) )
+            return true;
+
+        if (nvb instanceof NVPair ||
+                nvb instanceof NVInt ||
+                nvb instanceof NVLong ||
+                nvb instanceof NVFloat ||
+                nvb instanceof NVDouble)
+        {
+            synchronized (cache)
+            {
+                cache.put(nvb.getClass(), nvb.getClass());
+                return true;
+            }
+        }
+
+        if (nvb.getValue() != null)
+        {
+            Object value = nvb.getValue();
+            if (value instanceof String ||
+                    value instanceof Integer ||
+                    value instanceof Long ||
+                    value instanceof Float ||
+                    value instanceof Double ||
+                    value instanceof Short)
+            {
+                synchronized (cache)
+                {
+                    cache.put(value.getClass(), value.getClass());
+                    return true;
+                }
+            }
+        }
+
+        return false;
+
     }
 }

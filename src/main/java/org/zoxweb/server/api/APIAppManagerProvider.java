@@ -226,7 +226,7 @@ public class APIAppManagerProvider
 			listParams = new ArrayList<String>();
 			for (String str : params)
 			{
-				if (!SharedStringUtil.isEmpty(str))
+				if (!SUS.isEmpty(str))
 				{
 					listParams.add(str);
 				}
@@ -705,7 +705,7 @@ public class APIAppManagerProvider
         SharedUtil.checkIfNulls("UserInfoDAO is null", userInfoDAO);
         SharedUtil.checkIfNulls("AppDeviceDAO is null", appDeviceDAO);
         SharedUtil.checkIfNulls("AppIDDAO is null", appDeviceDAO.getSubjectGUID());
-        if (SharedStringUtil.isEmpty(subjectID) || SharedStringUtil.isEmpty(password)) {
+        if (SUS.isEmpty(subjectID) || SUS.isEmpty(password)) {
             throw new NullPointerException("Username and/or password is null");
         }
         
@@ -762,7 +762,7 @@ public class APIAppManagerProvider
     {
 		// TODO Auto-generated method stub
     	
-         if (SharedStringUtil.isEmpty(subjectID) || SharedStringUtil.isEmpty(password)) {
+         if (SUS.isEmpty(subjectID) || SUS.isEmpty(password)) {
              throw new NullPointerException("Username and/or password is null");
          }
          

@@ -135,7 +135,7 @@ public class CIPassword
 
 	public static CIPassword fromCanonicalID(String passwordCanonicalID)
 		throws NullPointerException, IllegalArgumentException {
-		if (SharedStringUtil.isEmpty(passwordCanonicalID)) {
+		if (SUS.isEmpty(passwordCanonicalID)) {
 			throw new NullPointerException("Empty password");
 		}
 

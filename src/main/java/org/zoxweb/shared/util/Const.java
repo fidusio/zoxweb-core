@@ -76,7 +76,7 @@ public class Const {
 
     public static JavaClassVersion lookup(String javaVersion)
     {
-      if(!SharedStringUtil.isEmpty(javaVersion))
+      if(!SUS.isEmpty(javaVersion))
       {
         JavaClassVersion[] all = JavaClassVersion.values();
 
@@ -1353,7 +1353,7 @@ public class Const {
      */
     public String toRegEx(String token, boolean literal)
     {
-      if(!SharedStringUtil.isEmpty(token) || literal)
+      if(!SUS.isEmpty(token) || literal)
       {
         token = "\\Q" + token + "\\E";
       }

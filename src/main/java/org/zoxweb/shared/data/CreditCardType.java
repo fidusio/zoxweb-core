@@ -16,6 +16,7 @@
 package org.zoxweb.shared.data;
 
 import org.zoxweb.shared.filters.ValueFilter;
+import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedStringUtil;
 import org.zoxweb.shared.util.SharedUtil;
 
@@ -88,7 +89,7 @@ public enum CreditCardType
 	 */
 	public static CreditCardType lookup(String ccNumber)
 	{
-		if (!SharedStringUtil.isEmpty(ccNumber))
+		if (!SUS.isEmpty(ccNumber))
 		{
 			for (CreditCardType type: CreditCardType.values())
 			{

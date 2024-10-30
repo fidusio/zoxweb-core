@@ -457,7 +457,7 @@ public class HTTPUtil
 
 	public static String formatParameters(GetNameValue<String>[] params, String charset, boolean urlEncode, HTTPEncoder hpf) throws UnsupportedEncodingException
 	{
-		if (SharedStringUtil.isEmpty(charset))
+		if (SUS.isEmpty(charset))
 		{
 			charset = SharedStringUtil.UTF_8;
 		}
@@ -513,7 +513,7 @@ public class HTTPUtil
 
 	public static UByteArrayOutputStream  formatBinaryParameters(ArrayValues<GetNameValue<?>> params, String charset, boolean urlEncode) throws UnsupportedEncodingException
 	{
-		if (SharedStringUtil.isEmpty(charset))
+		if (SUS.isEmpty(charset))
 		{
 			charset = SharedStringUtil.UTF_8;
 		}
@@ -641,7 +641,7 @@ public class HTTPUtil
 		for (String param : allParams)
 		{
 			NVPair nvp = SharedUtil.toNVPair(param);
-			if (nvp != null && !SharedStringUtil.isEmpty(nvp.getName()))
+			if (nvp != null && !SUS.isEmpty(nvp.getName()))
 			{
 				ret.add(nvp);
 			}
@@ -670,7 +670,7 @@ public class HTTPUtil
 		for (String param : allParams)
 		{
 			NVPair nvp = SharedUtil.toNVPair(param);
-			if (nvp != null && !SharedStringUtil.isEmpty(nvp.getName()))
+			if (nvp != null && !SUS.isEmpty(nvp.getName()))
 			{
 				av.add(nvp);
 			}
@@ -816,7 +816,7 @@ public class HTTPUtil
 		}
 
 		String ret = url.substring(hostEnd);
-		if (SharedStringUtil.isEmpty(ret))
+		if (SUS.isEmpty(ret))
 			return "/";
 
 		return ret;
@@ -1103,7 +1103,7 @@ public class HTTPUtil
 
 				String name = ele.attr("name");
 				String value = ele.attr("value");
-				if (!SharedStringUtil.isEmpty(name))
+				if (!SUS.isEmpty(name))
 				{
 					//System.out.println( name + ":" + value);
 					switch( encoding)

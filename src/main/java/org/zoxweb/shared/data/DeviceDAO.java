@@ -1,16 +1,7 @@
 package org.zoxweb.shared.data;
 
 import org.zoxweb.shared.security.shiro.ShiroBase;
-import org.zoxweb.shared.util.DeviceID;
-import org.zoxweb.shared.util.GetNVConfig;
-
-import org.zoxweb.shared.util.NVConfig;
-import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
-import org.zoxweb.shared.util.NVConfigManager;
-import org.zoxweb.shared.util.SharedStringUtil;
-import org.zoxweb.shared.util.SharedUtil;
-import org.zoxweb.shared.util.SubjectID;
+import org.zoxweb.shared.util.*;
 
 @SuppressWarnings("serial")
 public class DeviceDAO
@@ -209,7 +200,7 @@ public class DeviceDAO
 		String subID = lookupValue(Param.SUBJECT_ID);
 		if (subID == null)
 		{
-			if (!SharedStringUtil.isEmpty(getManufacturer()))
+			if (!SUS.isEmpty(getManufacturer()))
 				subID = SharedUtil.toCanonicalID(ShiroBase.CAN_ID_SEP, getManufacturer(), getModel(), getVersion(), getSerialNumber(), getDeviceID());
 			else
 				subID = SharedUtil.toCanonicalID(ShiroBase.CAN_ID_SEP, getModel(), getVersion(), getSerialNumber(), getDeviceID());

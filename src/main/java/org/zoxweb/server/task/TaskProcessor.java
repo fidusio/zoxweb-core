@@ -247,7 +247,7 @@ public class TaskProcessor
 		}
 		
 		tasksQueue = new ThresholdQueue<TaskEvent>((taskQueueMaxSize*75)/100, taskQueueMaxSize);
-		if (SharedStringUtil.isEmpty(defaultPrefix))
+		if (SUS.isEmpty(defaultPrefix))
 		{
 			defaultPrefix = "TP";
 		}

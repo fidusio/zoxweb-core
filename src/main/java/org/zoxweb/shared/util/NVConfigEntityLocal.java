@@ -549,7 +549,7 @@ public class NVConfigEntityLocal
 	@Override
 	public String toCanonicalID() 
 	{
-		if (!SharedStringUtil.isEmpty(getDomainID()))
+		if (!SUS.isEmpty(getDomainID()))
         {
             return SharedUtil.toCanonicalID('.', getDomainID(), getName());
         }

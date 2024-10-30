@@ -69,7 +69,7 @@ public class NVEntityReferenceList
 	public NVEntity get(String name)
 	{
 		//NVEntity ret = SharedUtil.lookup((List<? extends GetName>) value, name);
-		if (!SharedStringUtil.isEmpty(name))
+		if (!SUS.isEmpty(name))
 		{
 			for (NVEntity nve : values())
 			{

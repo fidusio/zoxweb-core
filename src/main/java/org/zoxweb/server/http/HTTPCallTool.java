@@ -145,7 +145,6 @@ public final class HTTPCallTool //implements Runnable
 
 
                 hmci.setSecureCheckEnabled(certCheckEnabled);
-                hmci.setURLEncodingEnabled(false);
                 hmci.setHTTPParameterFormatter(null);
 
                 hmci.setContentType(HTTPMediaType.APPLICATION_JSON, HTTPConst.CHARSET_UTF_8);

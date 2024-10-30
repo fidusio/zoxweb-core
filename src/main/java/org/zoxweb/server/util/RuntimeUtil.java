@@ -21,7 +21,7 @@ import org.zoxweb.shared.data.RuntimeResultDAO.ResultAttribute;
 import org.zoxweb.shared.data.VMInfoDAO;
 import org.zoxweb.shared.util.Const;
 import org.zoxweb.shared.util.Const.JavaClassVersion;
-import org.zoxweb.shared.util.SharedStringUtil;
+import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedUtil;
 
 import java.io.*;
@@ -127,7 +127,7 @@ public class RuntimeUtil
 	  if (params.length > 0)
 	  {
 	    String parameters = SharedUtil.toCanonicalID(' ', (Object[])params);
-	    if(!SharedStringUtil.isEmpty(parameters))
+	    if(!SUS.isEmpty(parameters))
 	    {
 	      command = command + " " + parameters; 
 	    }

@@ -81,7 +81,6 @@ public class APIIntegration
                 config = HTTPMessageConfig.createAndInit(apiURL, apiURI, httpMethod);
                 config.setAccept(HTTPMediaType.APPLICATION_JSON);
                 config.setContentType(HTTPMediaType.APPLICATION_JSON);
-                config.setURLEncodingEnabled(false);
                 config.getHeaders().add("revision", "2023-09-15");
                 config.setAuthorization(new HTTPAuthorization(apiKeyID, apiKey));
                 config.setName("klaviyo.profile");

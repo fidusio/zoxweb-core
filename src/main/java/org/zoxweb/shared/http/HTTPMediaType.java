@@ -29,6 +29,7 @@ public enum HTTPMediaType
 	APPLICATION_JOSE("application/jose"),
 	APPLICATION_JOSE_JSON("application/jose+json"),
 	APPLICATION_JSON(HTTPConst.APPLICATION_JSON, "json"),
+	APPLICATION_PDF(HTTPConst.APPLICATION_PDF, "json"),
 	APPLICATION_OCTET_STREAM("application/octet-stream"),
 	MULTIPART_FORM_DATA("multipart/form-data"),
 	TEXT_CSV(HTTPConst.TEXT_CSV, "csv"),

@@ -16,6 +16,7 @@
 package org.zoxweb.shared.filters;
 
 import org.zoxweb.shared.util.GetValue;
+import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedStringUtil;
 
 import java.util.ArrayList;
@@ -203,7 +204,7 @@ public class MatchPatternFilter
 		
 		for (String str : matchCriteria)
 		{
-			if (!SharedStringUtil.isEmpty(str))
+			if (!SUS.isEmpty(str))
 			{
 				if (str.equals(MatchLiteral.RECURSIVE.getValue()))
 				{
@@ -218,7 +219,7 @@ public class MatchPatternFilter
 		
 		for (String str : matchCriteria)
 		{
-			if (!SharedStringUtil.isEmpty(str)
+			if (!SUS.isEmpty(str)
                     || !str.equals(MatchLiteral.RECURSIVE.getValue())
                     || !str.equals(MatchLiteral.CASE_INSENSITIVE.getValue()))
 			{

@@ -395,30 +395,30 @@ public class SharedDataUtil
 				AddressDAO address = (AddressDAO) nve;
 				StringBuilder sb = new StringBuilder();
 				
-				if (!SharedStringUtil.isEmpty(address.getName()) && !SharedStringUtil.isEmpty(address.getStreet()))
+				if (!SUS.isEmpty(address.getName()) && !SUS.isEmpty(address.getStreet()))
 				{
 					sb.append(address.getName());
 					sb.append(", ");
 					sb.append(address.getStreet());
 				}
-				else if (!SharedStringUtil.isEmpty(address.getStreet()))
+				else if (!SUS.isEmpty(address.getStreet()))
 				{
 					sb.append(address.getStreet());
 				}
 				
-				if (!SharedStringUtil.isEmpty(address.getCity()))
+				if (!SUS.isEmpty(address.getCity()))
 				{
 					sb.append(", ");
 					sb.append(address.getCity());
 				}
 				
-				if (!SharedStringUtil.isEmpty(address.getStateOrProvince()))
+				if (!SUS.isEmpty(address.getStateOrProvince()))
 				{
 					sb.append(", ");
 					sb.append(address.getStateOrProvince());
 				}
 				
-				if (!SharedStringUtil.isEmpty(address.getCountry()))
+				if (!SUS.isEmpty(address.getCountry()))
 				{
 					String country = address.getCountry();
 					
@@ -441,7 +441,7 @@ public class SharedDataUtil
 					}
 				}
 				
-				if (!SharedStringUtil.isEmpty(address.getZIPOrPostalCode()))
+				if (!SUS.isEmpty(address.getZIPOrPostalCode()))
 				{
 					sb.append(", ");
 					sb.append(address.getZIPOrPostalCode());
@@ -454,28 +454,28 @@ public class SharedDataUtil
 				PhoneDAO phone = (PhoneDAO) nve;
 				StringBuilder sb = new StringBuilder();
 				
-				if (!SharedStringUtil.isEmpty(phone.getName()))
+				if (!SUS.isEmpty(phone.getName()))
 				{
 					sb.append(phone.getName());
 					sb.append(", ");
 				}
 					
-				if (!SharedStringUtil.isEmpty(phone.getCountryCode()))
+				if (!SUS.isEmpty(phone.getCountryCode()))
 				{
 					sb.append(phone.getCountryCode());
 				}
 				
-				if (!SharedStringUtil.isEmpty(phone.getAreaCode()))
+				if (!SUS.isEmpty(phone.getAreaCode()))
 				{
 					sb.append(" (" + phone.getAreaCode() + ") ");
 				}
 				
-				if (!SharedStringUtil.isEmpty(phone.getNumber()))
+				if (!SUS.isEmpty(phone.getNumber()))
 				{
 					sb.append(phone.getNumber());
 				}
 				
-				if (!SharedStringUtil.isEmpty(phone.getExtension()))
+				if (!SUS.isEmpty(phone.getExtension()))
 				{
 					sb.append(" ext. " + phone.getExtension());
 				}
@@ -486,7 +486,7 @@ public class SharedDataUtil
 			{
 				CreditCardDAO card = (CreditCardDAO) nve;
 				
-				if (!SharedStringUtil.isEmpty(card.getName()) && card.getCardType() != null && card.getCardNumber() != null)
+				if (!SUS.isEmpty(card.getName()) && card.getCardType() != null && card.getCardNumber() != null)
 				{
 					ret = card.getName() + ", " + card.getCardType().getDisplay() + " ending in " + getCreditCardLastFourDigits(card.getCardNumber());
 				}

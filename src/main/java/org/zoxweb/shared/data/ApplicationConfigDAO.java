@@ -143,7 +143,7 @@ public class ApplicationConfigDAO
 	public String lookupValue(String name)
 	{
 		name = SharedStringUtil.toLowerCase(name);
-		if (!SharedStringUtil.isEmpty(name))
+		if (!SUS.isEmpty(name))
 		{
 			GetNameValue<?> gnv = nvgProperties.get(name);
 			if(gnv != null && gnv.getValue() != null)

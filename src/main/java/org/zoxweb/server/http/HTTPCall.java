@@ -157,7 +157,7 @@ public class HTTPCall
 			case UNLOCK:
 			case VIEW:
 				// if we have a GET
-				if (!SharedStringUtil.isEmpty(encodedContentParams))
+				if (!SUS.isEmpty(encodedContentParams))
 				{
 					if (hcc.getHTTPParameterFormatter() == HTTPEncoder.URL_ENCODED)
 						urlURI += "?" + encodedContentParams;

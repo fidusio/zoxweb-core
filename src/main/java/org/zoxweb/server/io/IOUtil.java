@@ -15,15 +15,14 @@
  */
 package org.zoxweb.server.io;
 
+import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.net.ProxyType;
+import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedStringUtil;
 import org.zoxweb.shared.util.SharedUtil;
 
 import java.io.*;
-import java.net.MalformedURLException;
-import java.net.Proxy;
-import java.net.URL;
-import java.net.URLConnection;
+import java.net.*;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -187,7 +186,7 @@ public class IOUtil
 
 		Predicate<Path> composition = null;
 		Predicate<Path> pattern = p -> p.toString().matches(filterPattern);
-		if(SharedStringUtil.isEmpty(filterExclusion))
+		if(SUS.isEmpty(filterExclusion))
 		{
 			Predicate<Path> exclusion = p -> p.toString().matches(filterExclusion);
 			composition = pattern.and(exclusion.negate());
@@ -570,5 +569,11 @@ public class IOUtil
         }
 
 		return null;
+	}
+
+
+	public static Proxy toProxy(IPAddress proxyInfo)
+	{
+		return new Proxy(toProxyType(proxyInfo.getProxyType()), new InetSocketAddress(proxyInfo.getInetAddress(), proxyInfo.getPort()));
 	}
 }

@@ -420,7 +420,7 @@ public class ParamUtil {
         int counter = 0;
         for(; index < args.length; index++)
         {
-            if (!SharedStringUtil.isEmpty(args[index]))
+            if (!SUS.isEmpty(args[index]))
             {
                 String name = null;
                 String value = null;
@@ -483,7 +483,7 @@ public class ParamUtil {
         ParamInfo lastMulti = null;
         for(; index < args.length; index++)
         {
-            if (!SharedStringUtil.isEmpty(args[index]))
+            if (!SUS.isEmpty(args[index]))
             {
                 String name = null;
                 String value = null;

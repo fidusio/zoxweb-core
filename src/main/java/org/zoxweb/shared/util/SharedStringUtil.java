@@ -721,7 +721,7 @@ public final class SharedStringUtil
 		List<String> ret = new ArrayList<String>();
 		for(String tmp : results)
 		{
-			if(!isEmpty(tmp))
+			if(!SUS.isEmpty(tmp))
 				ret.add(tmp);
 		}
 		return ret.toArray(new String[0]);
@@ -770,20 +770,6 @@ public final class SharedStringUtil
 		return new String[] {str};
 	}
 
-	/**
-	 * Returns true if str is null or str.trim().length() == 0.
-	 * @param str to be checked
-	 * @return true if str is empty
-	 */
-	public static boolean isEmpty(String str)
-    {
-		if (str != null && str.trim().length() != 0)
-		{
-			return false;
-		}
-		
-		return true;
-	}
 	public static boolean isComment(String line)
 	{
 	  return isComment(line, COMMENT_TAGS);
