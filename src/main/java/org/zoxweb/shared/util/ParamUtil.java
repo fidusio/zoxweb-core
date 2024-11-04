@@ -264,10 +264,10 @@ public class ParamUtil {
             throw new IllegalArgumentException(name + " value not found or no valid");
         }
 
-        public <E extends Enum<?>> E enumValue(String name, Enum ...enums)
+        public <E extends Enum<?>> E enumValue(String name, Enum<?> ...enums)
         {
             List<String> ret = lookup(name);
-            if (ret.size() == 1)
+            if (ret != null && ret.size() == 1)
             {
                 return SharedUtil.lookupEnum(ret.get(0), enums);
             }

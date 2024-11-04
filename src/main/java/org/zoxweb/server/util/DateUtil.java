@@ -1,14 +1,13 @@
 package org.zoxweb.server.util;
 
+import org.zoxweb.shared.util.Const.DayOfWeek;
+import org.zoxweb.shared.util.Const.TimeInMillis;
+
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
-
-
-import org.zoxweb.shared.util.Const.DayOfWeek;
-import org.zoxweb.shared.util.Const.TimeInMillis;
 
 public class DateUtil {
 
@@ -24,6 +23,7 @@ public class DateUtil {
    * Today Local TimeZone format 'yyyy-MM-dd'
    */
   public static final SimpleDateFormat TODAY_LTZ = new SimpleDateFormat("yyyy-MM-dd");
+  public static final SimpleDateFormat FILE_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss-SSS");
 
   private DateUtil() {
   }

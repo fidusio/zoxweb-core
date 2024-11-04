@@ -24,6 +24,28 @@ public final class HTTPConst
     public static final GetNameValue<String> CHARSET_UTF_8 = new NVPair("charset", SharedStringUtil.UTF_8);
 
 
+    /**
+     * HTTP Common-Name parameters
+     */
+    public enum CNP
+            implements GetName
+    {
+        MEDIA_TYPE("media-type"),
+        FILENAME("filename"),
+        CONTENT_LENGTH("content-length")
+
+        ;
+        private final String name;
+        CNP(String name)
+        {
+            this.name = name;
+        }
+
+        public String getName()
+        {
+            return name;
+        }
+    }
     public enum HTTPValue
         implements GetValue<String>
     {
@@ -195,4 +217,7 @@ public final class HTTPConst
     {
         return SharedStringUtil.getBytes(gnv.getName() + ": " + gnv.getValue());
     }
+
+
+
 }

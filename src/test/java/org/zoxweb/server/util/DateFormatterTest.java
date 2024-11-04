@@ -1,18 +1,14 @@
 package org.zoxweb.server.util;
 
-import java.text.SimpleDateFormat;
-
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-
-//import org.junit.Assert;
-//import org.junit.Before;
-//import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.zoxweb.server.filters.TimestampFilter;
 import org.zoxweb.shared.util.Const.TimeInMillis;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 
 public class DateFormatterTest {
 
@@ -21,8 +17,10 @@ public class DateFormatterTest {
 	@Test
 	public void testFormat()
 	{
+		System.out.println(DateUtil.FILE_DATE_FORMAT.format(new Date()));
 		System.out.println(DateUtil.DEFAULT_DATE_FORMAT.format(new Date()));
 		System.out.println(DateUtil.DEFAULT_JAVA_FORMAT.format(new Date()));
+
 		System.out.println("DEFAULT_GMT_MILLIS"+":" +DateUtil.DEFAULT_GMT_MILLIS.format(new Date()));
 		System.out.println("DEFAULT_ZULU_MILLIS"+":" +DateUtil.DEFAULT_ZULU_MILLIS.format(new Date()));
 	}

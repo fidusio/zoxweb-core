@@ -52,8 +52,8 @@ public class HTTPMessageConfig
 		URI(NVConfigManager.createNVConfig("uri", "The http URI", "URI", false, true, String.class)),
 		CHARSET(NVConfigManager.createNVConfig("charset", "The character set", "Charset", false, true, String.class)),
 		BOUNDARY(NVConfigManager.createNVConfig("boundary", "The multipart boundary", "Boundary", false, true, String.class)),
-		CONNECTION_TIMEOUT(NVConfigManager.createNVConfig("connection_timeout", "The connection timeout in millis (<= 0 for ever)", "ConnectionTimeout", false, true, Integer.class)),
-		READ_TIMEOUT(NVConfigManager.createNVConfig("read_timeout", "The read timeout in millis (<= 0 for ever)", "ReadTimeout", false, true, Integer.class)),
+		TIMEOUT(NVConfigManager.createNVConfig("connection_timeout", "The connection timeout in millis (<= 0 for ever)", "ConnectionTimeout", false, true, Long.class)),
+//		READ_TIMEOUT(NVConfigManager.createNVConfig("read_timeout", "The read timeout in millis (<= 0 for ever)", "ReadTimeout", false, true, Integer.class)),
 		REDIRECT_ENABLED(NVConfigManager.createNVConfig("redirect_enabled", "The redirect enabled", "RedirectEnabled", false, true, Boolean.class)),
 		//MULTI_PART_ENCODING(NVConfigManager.createNVConfig("multi_part_encoding", "The multipart encoding", "MultiPartEncoding", false, true, Boolean.class)),
 		HTTP_METHOD(NVConfigManager.createNVConfig("http_method", "The http method", "HTTPMethod", false, true, HTTPMethod.class)),
@@ -360,9 +360,8 @@ public class HTTPMessageConfig
 				+ ", getURL()=" + getURL() + ", getContent()="
 				+  (getContent() != null ? new String(getContent()) : "null") + ", getBoundary()="
 				+ getBoundary() + ", isRedirectEnabled()="
-				+ isRedirectEnabled() + ", getConnectTimeout()="
-				+ getConnectTimeout() + ", getReadTimeout()="
-				+ getReadTimeout() + ", getCharset()=" + getCharset()
+				+ isRedirectEnabled() + ", getTimeout()="
+				+ getTimeout() + ", getCharset()=" + getCharset()
 				+ ", getProxyAddress()=" + getProxyAddress()
 //				", getUser()=" + getUser() + ", getPassword()=" + getPassword()
 				+ ", getAuthentication()=" + getAuthorization() + "]";
@@ -385,9 +384,20 @@ public class HTTPMessageConfig
 	 * 
 	 * @return connection timeout
 	 */
-	public int getConnectTimeout() 
+	public long getTimeout()
 	{
-		return lookupValue(Params.CONNECTION_TIMEOUT);
+		return lookupValue(Params.TIMEOUT);
+	}
+
+	public void setTimeout(long timeout)
+	{
+		if ( timeout < 0)
+		{
+			timeout = 0;
+		}
+
+		setValue(Params.TIMEOUT, timeout);
+
 	}
 
 	@Override
@@ -403,36 +413,27 @@ public class HTTPMessageConfig
 	}
 
 
-	public void setConnectTimeout(int connectTimeout) 
-	{
-		if ( connectTimeout < 0)
-		{
-			connectTimeout = 0;
-		}
-		
-		setValue(Params.CONNECTION_TIMEOUT, connectTimeout);
-		
-	}
+
 	/**
 	 * The read timeout in millis seconds before throwing an exception, 0 to disable
 	 * 
 	 * @return read timeout
 	 */
-	public int getReadTimeout() 
-	{
-		return lookupValue(Params.READ_TIMEOUT);
-	}
-
-
-	public void setReadTimeout(int readTimeout) 
-	{
-		if (readTimeout < 0)
-		{
-			readTimeout = 0;
-		}
-		
-		setValue(Params.READ_TIMEOUT, readTimeout);
-	}
+//	public int getReadTimeout()
+//	{
+//		return lookupValue(Params.READ_TIMEOUT);
+//	}
+//
+//
+//	public void setReadTimeout(int readTimeout)
+//	{
+//		if (readTimeout < 0)
+//		{
+//			readTimeout = 0;
+//		}
+//
+//		setValue(Params.READ_TIMEOUT, readTimeout);
+//	}
 
 
 	/**

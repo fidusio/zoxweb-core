@@ -213,8 +213,9 @@ public class HTTPCall
 			con.setDoOutput(true);
 			con.setAllowUserInteraction(true);
 			con.setInstanceFollowRedirects(hcc.isRedirectEnabled());
-			con.setConnectTimeout(hcc.getConnectTimeout());
-			con.setReadTimeout(hcc.getReadTimeout());
+			long timeoutInMillis = Const.TimeInMillis.SECOND.MILLIS*hcc.getTimeout();
+			con.setConnectTimeout((int) timeoutInMillis);
+			con.setReadTimeout((int) timeoutInMillis);
 			
 			
 			

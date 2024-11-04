@@ -18,7 +18,7 @@ public class AnnotationScanTest {
     @SecurityProp(authentications = {CryptoConst.AuthenticationType.DOMAIN}, roles = "admin")
     public static class ToBeTested
     {
-        @EndPointProp(uris = "/profile/{profileId}/{realm}", name = "profileReader", methods = {HTTPMethod.GET}, oContentType = "text")
+        @EndPointProp(uris = "/profile/{profileId}/{realm}", name = "profileReader", methods = {HTTPMethod.GET}, responseContentType = "text")
         @SecurityProp(authentications = {CryptoConst.AuthenticationType.ALL})
         public String getProfile(@ParamProp(name ="profileId") String profileId, @ParamProp(name ="realm", optional = false) String realm)
         {
@@ -30,7 +30,7 @@ public class AnnotationScanTest {
         private void notToBeReported(){}
 
 
-        @EndPointProp(uris = "/check-user/{user}", name = "CheckUser", methods = {HTTPMethod.POST}, oContentType = "boolean")
+        @EndPointProp(uris = "/check-user/{user}", name = "CheckUser", methods = {HTTPMethod.POST}, responseContentType = "boolean")
         @SecurityProp(authentications = {CryptoConst.AuthenticationType.ALL}, permissions= "self, admin")
         public static boolean checkStatus(String user, int i)
         {

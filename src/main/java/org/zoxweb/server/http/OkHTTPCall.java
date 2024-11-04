@@ -41,14 +41,14 @@ public class OkHTTPCall
 
 	public static final LogWrapper log = new LogWrapper(OkHTTPCall.class).setEnabled(false);
 
-	static class RBNamedValueContent
+	static class RBNamedValue
 		extends  RequestBody
 	{
 
-		private NamedValueContent nvc;
-		RBNamedValueContent(NamedValueContent nvc)
+		private final  NamedValue<?> namedValue;
+		RBNamedValue(NamedValue<?> nvc)
 		{
-			this.nvc = nvc;
+			this.namedValue = nvc;
 		}
 
 
@@ -59,7 +59,15 @@ public class OkHTTPCall
 		@Override
 		public MediaType contentType()
 		{
-			return MediaType.parse(nvc.getMediaType());
+			HTTPMediaType mt = namedValue.getProperties().getValue(HTTPConst.CNP.MEDIA_TYPE);
+			return MediaType.parse(mt.getValue());
+		}
+
+		@Override
+		public long contentLength()
+				throws IOException
+		{
+			return namedValue.getProperties().getValue(HTTPConst.CNP.CONTENT_LENGTH);
 		}
 
 		/**
@@ -70,28 +78,31 @@ public class OkHTTPCall
 		public void writeTo(@NotNull BufferedSink bufferedSink) throws IOException
 		{
 			InputStream is = null;
+			long totalRead = 0;
 			try {
-				if (nvc.getContent() != null) {
-					if (nvc.getContent() instanceof File) {
-						is = new FileInputStream((File) nvc.getContent());
-					} else if (nvc.getContent() instanceof InputStream) {
-						is = (InputStream) nvc.getContent();
+				if (namedValue.getValue() != null) {
+					if (namedValue.getValue() instanceof File) {
+						is = new FileInputStream((File) namedValue.getValue());
+					} else if (namedValue.getValue() instanceof InputStream) {
+						is = (InputStream) namedValue.getValue();
 					}
 
 					if (is != null) {
 						byte[] buffer = new byte[4092]; // 4KB buffer
 						int bytesRead;
 
-						while ((bytesRead = is.read(buffer)) != -1) {
+						while ((bytesRead = is.read(buffer)) != -1)
+						{
 							bufferedSink.write(buffer, 0, bytesRead);
+							bufferedSink.flush();
+							totalRead+=bytesRead;
 						}
-
-
 					}
 				}
 			}
 			finally {
 				IOUtil.close(is);
+				if(log.isEnabled()) log.getLogger().info("TotalRead :" + totalRead + " content-length: " + contentLength());
 			}
 		}
 	}
@@ -129,6 +140,14 @@ public class OkHTTPCall
 			return mediaType;
 		}
 
+		@Override
+		public long contentLength() throws IOException {
+			if (content != null)
+				return content.length;
+
+			return super.contentLength();
+		}
+
 		/**
 		 * @param bufferedSink to write to the connection stream
 		 * @throws IOException in case of error
@@ -158,8 +177,6 @@ public class OkHTTPCall
 	}
 
 
-	public static final long DEFAULT_20_SECOND = Const.TimeInMillis.toMillis("20s");
-
 	public final static RateCounter OK_HTTP_CALLS = new RateCounter("ok-http-calls", "This counter is used the send static functions it capture the whole call duration including parameter formatting, call, result decoding.");
 
 	public final static AtomicBoolean ENABLE_HTTP = new AtomicBoolean(true);
@@ -169,15 +186,16 @@ public class OkHTTPCall
 
 
 
-	private static final OkHttpClient sslEnabledClient = createOkHttpBuilder(null, null, true, 10, DEFAULT_20_SECOND).build();
-	private static final OkHttpClient sslDisabledClient = createOkHttpBuilder(null, null, false, 10, DEFAULT_20_SECOND).build();
+	private static final OkHttpClient sslEnabledClient = createOkHttpBuilder(null, null, HTTPMessageConfigInterface.DEFAULT_TIMEOUT_20_SECOND, true, 10, HTTPMessageConfigInterface.DEFAULT_TIMEOUT_20_SECOND).build();
+	private static final OkHttpClient sslDisabledClient = createOkHttpBuilder(null, null, HTTPMessageConfigInterface.DEFAULT_TIMEOUT_20_SECOND,false, 10, HTTPMessageConfigInterface.DEFAULT_TIMEOUT_20_SECOND).build();
 
 	private final OkHttpClient okHttpClient;
 	public static OkHttpClient.Builder createOkHttpBuilder(ExecutorService executorService,
 														   IPAddress proxy,
+														   long timeoutInSecond,
 														   boolean enableSSLCheck,
 														   int connectionPool,
-														   long kaTimeoutMillis)
+														   long kaTimeoutSecond)
 	{
 		OkHttpClient.Builder builder = new OkHttpClient.Builder();
 		if(!enableSSLCheck)
@@ -187,9 +205,9 @@ public class OkHTTPCall
 		}
 
 		// Optionally configure timeouts
-		builder.connectTimeout(DEFAULT_20_SECOND, TimeUnit.MILLISECONDS);
-		builder.readTimeout(DEFAULT_20_SECOND, TimeUnit.MILLISECONDS);
-		builder.writeTimeout(DEFAULT_20_SECOND, TimeUnit.MILLISECONDS);
+		builder.connectTimeout(timeoutInSecond, TimeUnit.SECONDS);
+		builder.readTimeout(timeoutInSecond, TimeUnit.SECONDS);
+		builder.writeTimeout(timeoutInSecond, TimeUnit.SECONDS);
 		//builder.protocols(Arrays.asList(Protocol.HTTP_1_1));
 
 		// allow redirect
@@ -198,7 +216,7 @@ public class OkHTTPCall
 			builder.setProxy$okhttp(IOUtil.toProxy(proxy));
 		}
 		if(connectionPool>0)
-			builder.connectionPool(new ConnectionPool(connectionPool, kaTimeoutMillis, TimeUnit.MILLISECONDS));
+			builder.connectionPool(new ConnectionPool(connectionPool, kaTimeoutSecond, TimeUnit.SECONDS));
 		if(executorService != null)
 			builder.dispatcher(new Dispatcher(executorService));
 
@@ -210,16 +228,29 @@ public class OkHTTPCall
 
 	public OkHTTPCall(HTTPMessageConfigInterface hmci)
 	{
+		this(null, hmci);
+	}
+
+	public OkHTTPCall(OkHttpClient client, HTTPMessageConfigInterface hmci)
+	{
 		SharedUtil.checkIfNulls("HTTPMessageConfigInterface can't be null", hmci);
 		this.hmci = hmci;
-
-		if (hmci.getProxyAddress() != null)
-		{
-			okHttpClient = createOkHttpBuilder(null, hmci.getProxyAddress(), !hmci.isSecureCheckEnabled(), 0, 0).build();
+		if (client == null) {
+			if (hmci.getProxyAddress() != null) {
+				long timeout = hmci.getTimeout();
+				if (timeout == 0) {
+					timeout = HTTPMessageConfigInterface.DEFAULT_TIMEOUT_20_SECOND;
+				} else {
+					timeout = TimeUnit.SECONDS.convert(timeout, TimeUnit.MILLISECONDS);
+				}
+				okHttpClient = createOkHttpBuilder(null, hmci.getProxyAddress(), timeout, !hmci.isSecureCheckEnabled(), 0, 0).build();
+			} else {
+				okHttpClient = hmci.isSecureCheckEnabled() ? sslEnabledClient : sslDisabledClient;
+			}
 		}
 		else
 		{
-			okHttpClient = hmci.isSecureCheckEnabled() ? sslEnabledClient : sslDisabledClient;
+			okHttpClient = client;
 		}
 
 	}
@@ -311,9 +342,9 @@ public class OkHTTPCall
 
 			for(GetNameValue<?> gnv : hmci.getParameters().values())
 			{
-				if (gnv instanceof NamedValueContent)
+				if (gnv instanceof NamedValue)
 				{
-					mbBuilder.addFormDataPart(gnv.getName(), "" + gnv.getValue(), new RBNamedValueContent((NamedValueContent) gnv));
+					mbBuilder.addFormDataPart(gnv.getName(),  ((NamedValue<?>) gnv).getProperties().getValue(HTTPConst.CNP.FILENAME), new RBNamedValue((NamedValue<?>) gnv));
 				}
 				else if (SUS.isPrimitiveGNV(gnv))
 				{
@@ -597,16 +628,22 @@ public class OkHTTPCall
 
 		return hrd;
 	}
-	
-	
-	
+
+
+
 	public static HTTPResponseData send(HTTPMessageConfigInterface hmci)
+			throws IOException
+	{
+		return send(null, hmci);
+	}
+
+	public static HTTPResponseData send(OkHttpClient okHttpClient, HTTPMessageConfigInterface hmci)
 			throws IOException
 	{
 		HTTPResponseData ret;
 		try
 		{
-			ret = new OkHTTPCall(hmci).sendRequest();
+			ret = new OkHTTPCall(okHttpClient, hmci).sendRequest();
 		}
 		catch(HTTPCallException e)
 		{
@@ -617,14 +654,14 @@ public class OkHTTPCall
 		return ret;
 	}
 
-	public static <O> HTTPAPIResult<O> send(HTTPMessageConfigInterface hmci, Class<?> clazz)
+	public static <O> HTTPAPIResult<O> send(OkHttpClient okHttpClient, HTTPMessageConfigInterface hmci, Class<?> clazz)
 			throws IOException
 	{
 
 		HTTPResponseData hrd;
 		try
 		{
-			hrd = new OkHTTPCall(hmci).sendRequest();
+			hrd = new OkHTTPCall(okHttpClient, hmci).sendRequest();
 		}
 		catch(HTTPCallException e)
 		{
@@ -637,13 +674,13 @@ public class OkHTTPCall
 		return ret;
 	}
 
-	public static <O> HTTPAPIResult<O> send(HTTPMessageConfigInterface hmci, DataDecoder<HTTPResponseData, O> decoder)
+	public static <O> HTTPAPIResult<O> send(OkHttpClient okHttpClient, HTTPMessageConfigInterface hmci, DataDecoder<HTTPResponseData, O> decoder)
 			throws IOException
 	{
 		HTTPResponseData hrd ;
 		try
 		{
-			hrd = new OkHTTPCall(hmci).sendRequest();
+			hrd = new OkHTTPCall(okHttpClient, hmci).sendRequest();
 		}
 		catch(HTTPCallException e)
 		{

@@ -261,7 +261,7 @@ public class SharedUtil
 	 */
 	public static String toCanonicalID(char sep, Object... objArray)
     {
-		return toCanonicalID(false, sep, objArray);
+		return SUS.toCanonicalID(sep, objArray);
 	}
 
 
@@ -272,18 +272,7 @@ public class SharedUtil
 	
 	public static String toCanonicalID(boolean ignoreNulls, char sep,  Object... objArray)
     {
-		StringBuilder sb = new StringBuilder();
-		
-		if (objArray != null)
-		{
-
-			for (int i = 0; i < objArray.length; i++)
-			{
-				_toCanonicalID(i, sb, ignoreNulls, sep, objArray[i]);
-			}
-		}
-		
-		return sb.toString();
+		return SUS.toCanonicalID(ignoreNulls, sep, objArray);
 	}
 
 	/**
@@ -295,43 +284,32 @@ public class SharedUtil
 	 */
 	public static String toCanonicalID(boolean ignoreNulls, char sep, Enumeration<?> enumer)
     {
-		StringBuilder sb = new StringBuilder();
-		
-		if (enumer != null)
-		{
-			int pos = 0;
-			while (enumer.hasMoreElements())
-            {
-				_toCanonicalID(pos++, sb, ignoreNulls, sep, enumer.nextElement());
-			}
-		}
-			
-		return sb.toString();
+		return SUS.toCanonicalID(ignoreNulls, sep, enumer);
 	}
 	
-	private static StringBuilder _toCanonicalID(int pos, StringBuilder sb, boolean ignoreNull, char sep, Object val)
-    {
-		if ( val == null && ignoreNull)
-		{
-			return sb;
-		}
-		
-		if (ignoreNull && sb.length() != 0)
-		{
-			sb.append(sep);
-		}
-		else if (pos != 0)
-		{
-			sb.append(sep);
-		}
-		
-		if (val != null)
-		{
-            sb.append(val);
-        }
-
-		return sb;
-	}
+//	private static StringBuilder _toCanonicalID(int pos, StringBuilder sb, boolean ignoreNull, char sep, Object val)
+//    {
+//		if ( val == null && ignoreNull)
+//		{
+//			return sb;
+//		}
+//
+//		if (ignoreNull && sb.length() != 0)
+//		{
+//			sb.append(sep);
+//		}
+//		else if (pos != 0)
+//		{
+//			sb.append(sep);
+//		}
+//
+//		if (val != null)
+//		{
+//            sb.append(val);
+//        }
+//
+//		return sb;
+//	}
 
 
 	public static boolean equals(ValueFilter<?, ?> vf1, ValueFilter<?, ?> vf2)

@@ -29,6 +29,7 @@ public enum HTTPHeader
 	ACCESS_CONTROL_ALLOW_ORIGIN("Access-Control-Allow-Origin"),
 	AUTHORIZATION("Authorization"),
 	CACHE_CONTROL("Cache-Control"),
+	COOKIE("Cookie"),
 	CONNECTION("Connection"),
 	CONTENT_DISPOSITION("Content-Disposition"),
 	CONTENT_ENCODING("Content-Encoding"),
@@ -36,7 +37,6 @@ public enum HTTPHeader
 	CONTENT_LOCATION("Content-Location"),
 	CONTENT_TRANSFER_ENCODING("Content-Transfer-Encoding"),
 	CONTENT_TYPE("Content-Type"),
-	COOKIE("Cookie"),
 	DATE("Date"),
 	ETAG("Etag"),
 	EXPIRES("Expires"),
@@ -97,6 +97,9 @@ public enum HTTPHeader
 	{
 		return name;
 	}
+
+
+
 
 
 

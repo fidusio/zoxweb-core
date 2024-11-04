@@ -236,34 +236,45 @@ class CustomSSLStateMachine extends MonoStateMachine<SSLEngineResult.HandshakeSt
                         // even if we have read zero it will trigger BUFFER_UNDERFLOW then we wait for incoming
                         // data
 
-                        SSLEngineResult result = config.smartUnwrap(config.inSSLNetData, config.inAppData);
-
-
-                        if (log.isEnabled())
-                            log.getLogger().info("AFTER-NOT_HANDSHAKING-PROCESSING: " + result + " bytesRead: " + bytesRead + " callback: " + callback);
-                        switch (result.getStatus())
+                        SSLEngineResult result;
+                        do
                         {
-                            case BUFFER_UNDERFLOW:
-                                // no incoming data available we need to wait for more socket data
-                                // return and let the NIOSocket or the data handler call back
-                                return;
+                            result = config.smartUnwrap(config.inSSLNetData, config.inAppData);
 
-                            case BUFFER_OVERFLOW:
-                                throw new IllegalStateException("NOT_HANDSHAKING should never be " + result.getStatus());
-                                // this should never happen
-                            case OK:
 
-                                if(callback != null) callback.accept(config.inAppData);
-                                // config.sslRead.set(true);
-                                break;
-                            case CLOSED:
-                                // check result here
-                                if(log.isEnabled()) log.getLogger().info("CLOSED-DURING-NOT_HANDSHAKING: " + result + " bytesRead: " + bytesRead);
-                                config.close();
-                                break;
-                        }
+                            if (log.isEnabled())
+                                log.getLogger().info("AFTER-NOT_HANDSHAKING-PROCESSING: " + result + " bytesRead: " + bytesRead + " callback: " + callback);
+                            switch (result.getStatus()) {
+                                case BUFFER_UNDERFLOW:
+                                    // no incoming data available we need to wait for more socket data
+                                    // return and let the NIOSocket or the data handler call back
+                                    //log.getLogger().info("AFTER-NOT_HANDSHAKING-PROCESSING: " + result + " bytesRead: " + bytesRead + " callback: " + callback);
+                                    return;
+
+                                case BUFFER_OVERFLOW:
+                                    throw new IllegalStateException("NOT_HANDSHAKING should never be " + result.getStatus());
+                                    // this should never happen
+                                case OK:
+
+                                    if (callback != null && bytesRead > 0) {
+                                        callback.accept(config.inAppData);
+                                        if(log.isEnabled())log.getLogger().info("AFTER-NOT_HANDSHAKING-OK: " + result + " bytesRead: " + bytesRead + " callback: " + callback);
+
+                                    }
+                                    // config.sslRead.set(true);
+                                    break;
+                                case CLOSED:
+                                    // check result here
+                                    if (log.isEnabled())
+                                        log.getLogger().info("CLOSED-DURING-NOT_HANDSHAKING: " + result + " bytesRead: " + bytesRead);
+                                    config.close();
+                                    break;
+                            }
+                        }while(config.inSSLNetData.hasRemaining() && result.getStatus() == SSLEngineResult.Status.OK && config.getHandshakeStatus() == NOT_HANDSHAKING && callback != null && bytesRead > 0);
+
                     }
                 } catch (Exception e) {
+                    e.printStackTrace();
 
                     if(callback != null)
                         callback.exception(e);
@@ -336,6 +347,8 @@ class CustomSSLStateMachine extends MonoStateMachine<SSLEngineResult.HandshakeSt
                 return (T) rcFinished;
             case "NOT_HANDSHAKING":
                 return (T)rcNotHandshaking;
+            default:
+                System.out.println("***************************************** SHIT: "  + type);
         }
         return null;
     }

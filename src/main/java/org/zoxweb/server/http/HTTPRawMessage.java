@@ -16,12 +16,14 @@
 package org.zoxweb.server.http;
 
 import org.zoxweb.server.io.UByteArrayOutputStream;
+import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.shared.http.HTTPMessageConfig;
 import org.zoxweb.shared.http.HTTPMessageConfigInterface;
 import org.zoxweb.shared.http.HTTPMethod;
 import org.zoxweb.shared.http.HTTPMediaType;
 import org.zoxweb.shared.protocol.Delimiter;
 import org.zoxweb.shared.util.GetNameValue;
+import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedStringUtil;
 import org.zoxweb.shared.util.SharedUtil;
 
@@ -29,11 +31,15 @@ import java.util.Arrays;
 
 public class HTTPRawMessage 
 {
+
+	public static final LogWrapper log = new LogWrapper(HTTPRawMessage.class).setEnabled(false);
+
 	private final UByteArrayOutputStream ubaos;
 	private int endOfHeadersIndex = -1;
 	private int parseIndex = 0;
 	private String firstLine = null;
 	private HTTPMessageConfigInterface hmci = new HTTPMessageConfig();
+
 
 	public HTTPRawMessage(String msg)
 	{
@@ -119,12 +125,11 @@ public class HTTPRawMessage
 					}
 					parseIndex = endOfCurrentLine+ Delimiter.CRLF.getBytes().length;
 				}
-
-
 			}
 		}
-		
 	}
+
+
 
 
 	private HTTPMethod  parseHTTPMethod()
@@ -153,7 +158,10 @@ public class HTTPRawMessage
 		{
 			if (hmci.getContentLength() !=-1)
 			{
-				return ((endOfHeadersIndex + hmci.getContentLength()  + Delimiter.CRLFCRLF.getBytes().length) == endOfMessageIndex());
+				int currentLength = endOfHeadersIndex + hmci.getContentLength()  + Delimiter.CRLFCRLF.getBytes().length;
+				if(log.isEnabled())log.getLogger().info(SUS.toCanonicalID(',', hmci.getContentLength(), currentLength, endOfMessageIndex(), (currentLength - endOfMessageIndex()), Thread.currentThread()));
+				//new Throwable().printStackTrace();
+				return (currentLength == endOfMessageIndex());
 			}
 			return true;
 		}

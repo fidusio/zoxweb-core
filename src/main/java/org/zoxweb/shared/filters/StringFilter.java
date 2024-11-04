@@ -41,4 +41,12 @@ public class StringFilter extends
 
         return ret;
     }
+
+
+    public String getExtension()
+    {
+        return config.getValue("extension");
+    }
+
+
 }

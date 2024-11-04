@@ -53,9 +53,9 @@ public @interface EndPointProp {
      */
     HTTPMethod[] methods() default {};
 
-    String iContentType() default HTTPConst.APPLICATION_JSON + "; charset=utf-8";
+    String requestContentType() default HTTPConst.APPLICATION_JSON + "; charset=utf-8";
 
-    String oContentType() default HTTPConst.APPLICATION_JSON + "; charset=utf-8";
+    String responseContentType() default HTTPConst.APPLICATION_JSON + "; charset=utf-8";
 
     /**
      * Name of the handler or servlet depending on the server used

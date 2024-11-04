@@ -26,6 +26,8 @@ import java.util.List;
 public interface HTTPMessageConfigInterface
 extends ReferenceID<String>, SetName, SetDescription
 {
+	long DEFAULT_TIMEOUT_20_SECOND = 20;
+
 	/**
 	 * @return true if multipart encoding
 	 */
@@ -190,12 +192,6 @@ extends ReferenceID<String>, SetName, SetDescription
 	 */
 	void setRedirectEnabled(boolean redirectEnabled);
 	
-	/**
-	 * The connect timeout in millis seconds before throwing an exception, 0 to disable
-	 * 
-	 * @return connection timeout in millis
-	 */
-	int getConnectTimeout();
 
 
 	/**
@@ -211,25 +207,31 @@ extends ReferenceID<String>, SetName, SetDescription
 	 */
 	void setSecureCheckEnabled(boolean sslCheck);
 
-	
 	/**
-	 * Set the connection timeout is millis 
-	 * @param connectTimeout
+	 * The connect timeout in seconds before throwing an exception, 0 to disable
+	 *
+	 * @return connection timeout in seconds
 	 */
-	void setConnectTimeout(int connectTimeout);
+	long getTimeout();
+
+	/**
+	 * Set the connection timeout is sedonds
+	 * @param connectTimeout in  seconds
+	 */
+	void setTimeout(long connectTimeout);
 	
 	/**
 	 * The read timeout in millis seconds before throwing an exception, 0 to disable
 	 * 
 	 * @return the read timeout in millis
 	 */
-	int getReadTimeout();
+//	int getReadTimeout();
 	
 	/**
 	 * Set the read timeout is millis
 	 * @param readTimeout
 	 */
-	void setReadTimeout(int readTimeout);
+//	void setReadTimeout(int readTimeout);
 
 	/**
 	 * Get the encoding to be used for the parameter, if null default will be used
