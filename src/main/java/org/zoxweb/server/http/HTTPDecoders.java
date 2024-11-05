@@ -1,19 +1,20 @@
 package org.zoxweb.server.http;
 
 import org.zoxweb.server.io.UByteArrayOutputStream;
+import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.http.*;
 import org.zoxweb.shared.protocol.Delimiter;
 import org.zoxweb.shared.util.*;
 import org.zoxweb.shared.util.SharedBase64.Base64Type;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.List;
 
 
 public final class HTTPDecoders {
-  public static final byte[] NAME_EQUAL_DOUBLE_QUOTE = SharedStringUtil.getBytes("name=\"");
-  public static final byte[] DOUBLE_QUOTE = {'\"'};
-  //public final static Logger log = Logger.getLogger(HTTPDecoder.class.getName());
+  public final static LogWrapper log = new LogWrapper(HTTPDecoders.class).setEnabled(false);
 
   private HTTPDecoders() {
   }
@@ -75,44 +76,155 @@ public final class HTTPDecoders {
         {
           if (HTTPMediaType.lookup(hmci.getContentType()) == HTTPMediaType.MULTIPART_FORM_DATA)
           {
-            String boundaryName = HTTPAttribute.BOUNDARY.getValue() + "=";
+            NamedValue<String> multipartFromData = HTTPHeaderParser.parseHeader(HTTPHeader.CONTENT_TYPE.getName() +": " + hmci.getContentType());
 
-            int index = SharedStringUtil.indexOf(hmci.getContentType(), boundaryName, 0, true);
+            String boundary = multipartFromData.getProperties().getValue(HTTPConst.CNP.BOUNDARY);
+            if(log.isEnabled()) log.getLogger().info("boundary=" + boundary);
 
-            if(index != -1)
+
+
+            if(SUS.isNotEmpty(boundary))
             {
-              String boundary = SharedStringUtil.trimOrNull(hmci.getContentType().substring(index+boundaryName.length()));
-              hmci.setBoundary(boundary);
-              // we need to parse the payload next
-              index = hrm.endOfHeadersIndex() + Delimiter.CRLFCRLF.getBytes().length;
+
+              byte[] boundaryTag = SharedStringUtil.getBytes("--" + boundary);
+              byte[] boundaryStart = SharedStringUtil.getBytes("--" + boundary + Delimiter.CRLF.getValue());
+              byte[] boundaryEnd = SharedStringUtil.getBytes("--" + boundary + "--");
 
               UByteArrayOutputStream ubaos = hrm.getDataStream();
-              while((index = ubaos.indexOf(index, NAME_EQUAL_DOUBLE_QUOTE)) != -1)
+              // check is boundaryEnd exit
+              if(ubaos.indexOf(hrm.endOfHeadersIndex(), boundaryEnd) == -1 )
               {
-                index += NAME_EQUAL_DOUBLE_QUOTE.length;
-                int indexEnd = ubaos.indexOf(index, DOUBLE_QUOTE);
-                String name = ubaos.getString(index, indexEnd - index);
-                index = ubaos.indexOf(indexEnd, Delimiter.CRLFCRLF.getBytes());
-                index += Delimiter.CRLFCRLF.getBytes().length;
-                indexEnd = ubaos.indexOf(index, Delimiter.CRLF.getBytes());
-                String value = ubaos.getString(index, indexEnd - index);
-                hmci.getParameters().add(new NVPair(name, value));
+                throw new IllegalArgumentException("boundary end " + SharedStringUtil.toString(boundaryEnd) + " not found");
               }
 
-//              String payload = hrm.getUBAOS().getString(index);
-//              index = 0;
-//              // not very solid
-//              while( (index = payload.indexOf("name=\"", index)) != -1)
-//              {
-//                index += 6;
-//                String name = payload.substring(index, payload.indexOf("\"", index));
-//                index = payload.indexOf(ProtocolDelimiter.CRLFCRLF.getValue(), index);
-//                index += ProtocolDelimiter.CRLFCRLF.getBytes().length;
-//                int endOfLine =  payload.indexOf(ProtocolDelimiter.CRLF.getValue(), index);
-//                String value = payload.substring(index, endOfLine).trim();
-//                index = endOfLine + ProtocolDelimiter.CRLF.getBytes().length;
-//                hmci.getParameters().add(new NVPair(name, value));
-//              }
+              hmci.setBoundary(boundary);
+
+              // we need to parse the payload next
+              int index = hrm.endOfHeadersIndex();
+              if(log.isEnabled()) log.getLogger().info("index of the end main headers: " + index);
+
+              while((index = ubaos.indexOf(index, boundaryStart)) != -1)
+              {
+                index += boundaryStart.length;
+
+                if(log.isEnabled()) log.getLogger().info("index of start of a part: "  + index);
+                // index point to the first --boundary\r\n
+                int endOfSubHeaders = ubaos.indexOf(index, Delimiter.CRLFCRLF.getBytes());
+                if(endOfSubHeaders == -1)
+                { // we have a problem
+                  if (log.isEnabled()) log.getLogger().info(index + " end of sub headers missing from index " + index);
+                }
+                else
+                  endOfSubHeaders += Delimiter.CRLFCRLF.getBytes().length;
+
+
+                int endOfSubPart = ubaos.indexOf(endOfSubHeaders, boundaryTag);
+
+
+
+                if (log.isEnabled()) log.getLogger().info(index + " end of SubHeader: " + endOfSubHeaders + " end of SubPart" + " content\n{" +
+                        ubaos.getString(index, endOfSubPart - index - Delimiter.CRLF.getBytes().length) + "}");
+
+
+                int startOfData = endOfSubHeaders;
+                int dataLength = endOfSubPart - endOfSubHeaders - Delimiter.CRLF.getBytes().length;
+
+                if(log.isEnabled()) log.getLogger().info("data: \"" + ubaos.getString(startOfData, dataLength) +"\"");
+
+
+
+                // index points to the next sub-http-header
+                // parse one sub part
+                int headerIndex = index;
+                //Map<String, NamedValue<String>> subPartRawHeaders = new HashMap<>();
+                NVGenericMap subPartRawHeaders = new NVGenericMap();
+
+                // header parsing
+                while(headerIndex != -1 && headerIndex < endOfSubPart)
+                {
+
+                  int indexEndOfHeader = ubaos.indexOf(headerIndex, Delimiter.CRLF.getBytes());
+                  if (indexEndOfHeader != -1 && indexEndOfHeader < endOfSubHeaders)
+                  {
+                    String fullHeader = ubaos.getString(headerIndex, indexEndOfHeader - headerIndex);
+                    NamedValue<String> header = HTTPHeaderParser.parseHeader(fullHeader);
+                    if (header != null) {
+                      subPartRawHeaders.build(header);
+//                      log.getLogger().info("header: " + fullHeader + " end");
+                    }
+                  }
+                  headerIndex = indexEndOfHeader + Delimiter.CRLF.getBytes().length;
+                }
+
+                if(log.isEnabled()) log.getLogger().info("headers:\n" + subPartRawHeaders);
+
+
+                NamedValue<String> contentDisposition = (NamedValue<String>) subPartRawHeaders.get(HTTPHeader.CONTENT_DISPOSITION);
+                NamedValue<String> contentType = (NamedValue<String>) subPartRawHeaders.get(HTTPHeader.CONTENT_TYPE);
+                String name = null;
+                String filename = null;
+                String mediaType = null;
+                ByteArrayInputStream is = null;
+                if (contentDisposition != null)
+                {
+                  name = contentDisposition.getProperties().getValue("name");
+                  filename = contentDisposition.getProperties().getValue("filename");
+                }
+                if(contentType != null)
+                {
+                  mediaType = contentType.getValue();
+                }
+
+                if (filename != null)
+                {
+                  // we covert to input stream
+                  is = new ByteArrayInputStream(ubaos.getInternalBuffer(), startOfData, dataLength);
+                }
+
+                if(log.isEnabled()) log.getLogger().info("name=" + name + " filename=" + filename + " mediaType=" + mediaType + " is=" + is);
+
+                if (name != null)
+                {
+                  if (is != null && mediaType != null && HTTPMediaType.lookup(mediaType) != HTTPMediaType.APPLICATION_JSON)
+                  {
+                    NamedValue<InputStream> toAdd = new NamedValue<>();
+                    toAdd.setName(name).setValue(is);
+                    if (filename != null)
+                      toAdd.getProperties().build("filename", filename);
+                    if(mediaType != null)
+                      toAdd.getProperties().build("media-type", mediaType);
+
+                    toAdd.getProperties().build(new NVLong("length", is.available()));
+                    if(log.isEnabled())  log.getLogger().info("toAdd: " + toAdd);
+                    hmci.getParameters().add(toAdd);
+                  }
+                  else
+                  {
+                    String value = ubaos.getString(startOfData, dataLength);
+                    if (mediaType != null && HTTPMediaType.lookup(mediaType) == HTTPMediaType.APPLICATION_JSON)
+                    {
+                      NVGenericMap toAdd = GSONUtil.fromJSONDefault(ubaos.getString(startOfData, dataLength), NVGenericMap.class);
+                      toAdd.setName(name);
+                      hmci.getParameters().build(toAdd);
+                    }
+                    else
+                    {
+                      NVPair nvp = new NVPair(name, value);
+                      hmci.getParameters().build(nvp);
+                      if (log.isEnabled()) log.getLogger().info("adding nvp: " + nvp);
+                    }
+                  }
+                }
+
+
+                index = endOfSubPart;
+
+                if ((index + boundaryEnd.length) >= ubaos.size())
+                  break;
+                // we need to parse the delimiters of content-disposition
+              }
+
+
               return hmci;
             }
           }

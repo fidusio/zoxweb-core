@@ -32,7 +32,8 @@ public final class HTTPConst
     {
         MEDIA_TYPE("media-type"),
         FILENAME("filename"),
-        CONTENT_LENGTH("content-length")
+        CONTENT_LENGTH("content-length"),
+        BOUNDARY("boundary"),
 
         ;
         private final String name;
@@ -44,6 +45,11 @@ public final class HTTPConst
         public String getName()
         {
             return name;
+        }
+
+        public String toString()
+        {
+            return getName();
         }
     }
     public enum HTTPValue

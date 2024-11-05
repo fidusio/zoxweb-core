@@ -83,6 +83,11 @@ public enum HTTPHeader
 		return name;
 	}
 
+	public String lowerCase()
+	{
+		return name.toLowerCase();
+	}
+
 	public GetNameValue<String> toHTTPHeader(String ...values)
 	{
 		return HTTPConst.toHTTPHeader(name, values);

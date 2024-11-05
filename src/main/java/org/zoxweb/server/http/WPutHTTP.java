@@ -123,7 +123,10 @@ public class WPutHTTP {
                         .build(new NVLong(HTTPConst.CNP.CONTENT_LENGTH, fileToData.getLength()))
                         .build(new NVEnum(HTTPConst.CNP.MEDIA_TYPE, fileToData.getMediaType()))
                 ;
-                hmci.getParameters().build("text", "simple date").build(new NVInt("int-value", 20)).build(nvc);
+
+                NVGenericMap paramNVGM = new NVGenericMap("data-nvgm");
+                paramNVGM.build("n1", "v1").build(new NVInt("int", 256)).build(new NVDouble("pi", Math.PI));
+                hmci.getParameters().build("text", "simple date").build(new NVInt("int-value", 20)).build(nvc).build(paramNVGM);
 //                hmci.setContent(IOUtil.inputStreamToByteArray(fileToData.getInputStream(), true).toByteArray() );
 
 

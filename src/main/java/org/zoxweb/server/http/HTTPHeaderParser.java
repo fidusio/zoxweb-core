@@ -1,6 +1,7 @@
 package org.zoxweb.server.http;
 
 import org.zoxweb.shared.util.NamedValue;
+import org.zoxweb.shared.util.SUS;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,7 +40,11 @@ public class HTTPHeaderParser {
      * @param headerLine the HTTP header line to parse
      * @return a map containing the header name, main value, and parameters
      */
-    public static NamedValue<String> parseHeader(String headerLine) {
+    public static NamedValue<String> parseHeader(String headerLine)
+    {
+        if (SUS.isEmpty(headerLine))
+            return null;
+
         Map<String, Object> headerComponents = new HashMap<>();
 
         NamedValue<String> namedValue = new NamedValue<String>();
