@@ -289,7 +289,7 @@ public class HTTPMessageConfig
 	 */
 	public void setContent(String content)
 	{
-		setContent(SharedStringUtil.getBytes(content));
+		setContent(content != null ? SharedStringUtil.getBytes(content) : null);
 	}
 	
 	/**

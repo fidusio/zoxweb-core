@@ -1,23 +1,28 @@
 POST /system-upload HTTP/1.1
 Authorization: Basic YWRtaW46YmF0YXRh
-Content-Type: multipart/form-data; boundary=bd1a40c9-9408-4b59-8d4b-f6693561887e
-Content-Length: 453
+Content-Type: multipart/form-data; boundary=18117525-f472-4559-baee-e5b7e3480095
+Content-Length: 709
 Host: localhost:6443
 Connection: Keep-Alive
 Accept-Encoding: gzip
 User-Agent: okhttp/5.0.0-alpha.14
 
---bd1a40c9-9408-4b59-8d4b-f6693561887e
-Content-Disposition: form-data; name="data"
+--18117525-f472-4559-baee-e5b7e3480095
+Content-Disposition: form-data; name="text"
 
 simple date
---bd1a40c9-9408-4b59-8d4b-f6693561887e
+--18117525-f472-4559-baee-e5b7e3480095
 Content-Disposition: form-data; name="int-value"
 
 20
---bd1a40c9-9408-4b59-8d4b-f6693561887e
+--18117525-f472-4559-baee-e5b7e3480095
 Content-Disposition: form-data; name="file"; filename="batat.txt"
 Content-Type: application/octet-stream
 
-abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz01
---bd1a40c9-9408-4b59-8d4b-f6693561887e--
+abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrst
+--18117525-f472-4559-baee-e5b7e3480095
+Content-Disposition: form-data; name="data-nvgm"; filename="data-nvgm"
+Content-Type: application/json
+
+{"n1":"v1","int":256,"pi":3.141592653589793}
+--18117525-f472-4559-baee-e5b7e3480095--
