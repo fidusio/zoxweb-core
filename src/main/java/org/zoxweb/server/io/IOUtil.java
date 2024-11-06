@@ -232,6 +232,35 @@ public class IOUtil
 		return new String( baos.getInternalBuffer(), 0 , baos.size(),charsetEncoding );
 	}
 
+	public static long countInputStreamBytes(InputStream is, boolean close)
+			throws IOException
+	{
+		byte[] buffer = new byte[4096];
+		int read;
+		long ret = 0;
+
+		try
+		{
+			while ((read = is.read(buffer, 0, buffer.length)) != -1)
+			{
+				ret += read;
+			}
+
+		}
+		finally
+		{
+			if (close)
+			{
+				close(is);
+			}
+		}
+
+
+		return ret;
+
+	}
+
+
     /**
      * @param filename
      * @return
@@ -265,7 +294,7 @@ public class IOUtil
 	public static String inputStreamToString(InputStream is, boolean close) 
         throws IOException
 	{
-		byte buffer[] = new byte[4096];
+		byte[] buffer = new byte[4096];
 		StringBuilder sb = new StringBuilder();
 		int read;
 
@@ -285,7 +314,7 @@ public class IOUtil
 	public static String readerToString(Reader is, boolean close) 
 	        throws IOException
 		{
-			char buffer[] = new char[4096];
+			char[] buffer = new char[4096];
 			StringBuilder sb = new StringBuilder();
 			int read;
 
