@@ -14,25 +14,24 @@ public class MonoStateMachine<K, V>
     extends RegistrarMap<K, Consumer<V>, MonoStateMachine<K,V>>
 {
 
-    private final boolean notSync;
+    private final boolean synchronous;
 
-    public MonoStateMachine(boolean sync)
+    public MonoStateMachine(boolean synchronous)
     {
         super(new LinkedHashMap<>());
-        this.notSync = !sync;
+        this.synchronous = synchronous;
     }
     public void publish(K key, V param)
     {
 
         Consumer<V> c = lookup(key);
-        if (c != null) {
-            if (notSync)
-                c.accept(param);
+        if (c != null)
+        {
+            if(synchronous)
+                synchronized (this){c.accept(param);}
             else
-                synchronized (this)
-                {
-                    c.accept(param);
-                }
+                c.accept(param);
+
         }
     }
 

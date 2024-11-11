@@ -263,7 +263,7 @@ public class NVGenericMap
 				}
 				else if(gnv instanceof NVBoolean)
 				{
-					to.add(new NVBoolean(gnv.getName(), ((NVBoolean) gnv).value));
+					to.add(new NVBoolean(gnv.getName(), ((NVBoolean) gnv).getValue()));
 				}
 				else if(gnv instanceof NVInt)
 				{

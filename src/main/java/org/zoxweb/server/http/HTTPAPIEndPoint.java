@@ -165,6 +165,13 @@ public class HTTPAPIEndPoint<I,O>
 
     public HTTPAPIResult<O> syncCall(I input, HTTPAuthorization authorization) throws IOException
     {
+        // first check without affecting rate controller
+        boolean send = rateController == null || rateController.isPastThreshold(false);
+
+        // now try to use the rate controller
+        if (!send || (rateController !=null && !rateController.isPastThreshold(true)))
+            throw new IOException("Rate controller timeout threshold reached: " + rateController);
+
         HTTPResponseData hrd = OkHTTPCall.send(createHMCI(input, authorization));
         HTTPAPIResult<O> hapir = null;
         if(dataDecoder != null)
@@ -194,11 +201,17 @@ public class HTTPAPIEndPoint<I,O>
 
         HTTPMessageConfigInterface ret = HTTPMessageConfig.createAndInit(config.getURL(), config.getURI(), config.getMethod(), config.isSecureCheckEnabled());
         NVGenericMap.copy(config.getHeaders(), ret.getHeaders(), true);
+
+
         NVGenericMap.copy(config.getParameters(), ret.getParameters(), true);
+
+
         ret.setProxyAddress(config.getProxyAddress());
         ret.setRedirectEnabled(config.isRedirectEnabled());
         ret.setHTTPErrorAsException(config.isHTTPErrorAsException());
         ret.setCharset(config.getCharset());
+        ret.setTimeout(config.getTimeout());
+        ret.setProxyAddress(config.getProxyAddress());
 
         if (authorization != null)
             ret.setAuthorization(authorization);

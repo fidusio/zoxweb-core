@@ -7,6 +7,8 @@ public class RateController
     implements GetName, WaitTime<RateController>
 {
 
+
+
     public enum RCType
     {
         TIME,
@@ -208,6 +210,12 @@ public class RateController
     }
 
 
+    public synchronized boolean isPastThreshold(boolean invokeWait)
+    {
+        if(invokeWait)
+            nextWait();
+        return getNextTime() - System.currentTimeMillis() - (rate*deltaInMillis) > 0;
+    }
     public synchronized RateController setRate(float rate, TimeUnit unit)
     {
         SharedUtil.checkIfNulls("TimeUnit null", unit);
@@ -243,19 +251,39 @@ public class RateController
 
 
 
+//    @Override
+//    public String toString() {
+//        return "RateController{" +
+//                "name=" + getName() +
+//                "rate=" + rate + "/" + tim.getTokens()[0] +
+//                ", unit=" + unit +
+//                ", deltaInMillis=" + deltaInMillis +
+//                ", nextTime=" + nextTime +
+//                ", transactions=" + callCounts +
+//                ", type=" + type +
+//                ", counter=" + counter +
+//                ", counterEndTime=" + counterEndTime +
+//                ", duration=" + duration +
+//                '}';
+//    }
+
     @Override
     public String toString() {
         return "RateController{" +
-                "name=" + getName() +
-                "rate=" + rate + "/" + tim.getTokens()[0] +
+                "pastThreshold=" + isPastThreshold(false) +
+                ", rate=" + getRate() +
                 ", unit=" + unit +
-                ", deltaInMillis=" + deltaInMillis +
-                ", nextTime=" + nextTime +
-                ", transactions=" + callCounts +
-                ", type=" + type +
+                ", tim=" + tim +
+                ", deltaInMillis=" + getDeltaInMillis() +
+                ", nextTime=" + Const.TimeInMillis.toString(getNextTime()) +
+                ", callCounts=" + getCallCounts() +
                 ", counter=" + counter +
-                ", counterEndTime=" + counterEndTime +
-                ", duration=" + duration +
+                ", counterEndTime=" + Const.TimeInMillis.toString(counterEndTime) +
+                ", counterStartTime=" +  Const.TimeInMillis.toString(counterStartTime) +
+                ", duration=" + getDuration() +
+                ", namedDescription=" + namedDescription +
+                ", RCType=" + getRCType() +
+                ", rateUnit=" + getRateUnit() +
                 '}';
     }
 }

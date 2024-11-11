@@ -11,22 +11,22 @@ public interface TriggerConsumerInt<T>
 {
     String[] canonicalIDs();
 
-    StateInt getState();
+    StateInt<?> getState();
 
-    void setSate(StateInt state);
+    void setSate(StateInt<?> state);
 
     <R> TriggerConsumerInt<?> setFunction(Function<?, R> function);
     <R> Function<T, R> getFunction();
 
 
-    void publish(TriggerInt triggerInt);
+    void publish(TriggerInt<?> triggerInt);
     <D> void publish(String canID, D data);
     <D>void  publish(Enum<?> canID, D data);
 
-    void publishSync(TriggerInt triggerInt);
+    void publishSync(TriggerInt<?> triggerInt);
     <D> void publishSync(String canID, D data);
     <D>void  publishSync(Enum<?> canID, D data);
 
-    public StateMachineInt getStateMachine();
+     StateMachineInt<?> getStateMachine();
 
 }

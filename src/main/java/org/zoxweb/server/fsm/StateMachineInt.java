@@ -19,9 +19,9 @@ extends GetName, AutoCloseable, GetConfig<C>
     <D>StateMachineInt<C> publish(StateInt<?> state, Enum<?> canID, D data);
     StateMachineInt<C> publishSync(TriggerInt<?> trigger);
 
-     <D>StateMachineInt<C> publishSync(StateInt<?> state, String canID, D data);
+    <D>StateMachineInt<C> publishSync(StateInt<?> state, String canID, D data);
 
-     <D>StateMachineInt<C> publishSync(StateInt<?> state, Enum<?> canID, D data);
+    <D>StateMachineInt<C> publishSync(StateInt<?> state, Enum<?> canID, D data);
     StateMachineInt<C> publishToCurrentState(TriggerInt<?> trigger);
 
 

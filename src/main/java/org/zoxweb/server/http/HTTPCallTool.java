@@ -30,7 +30,8 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 
-public final class HTTPCallTool //implements Runnable
+public final class HTTPCallTool
+        implements Runnable
 {
     private static final LogWrapper log = new LogWrapper(HTTPCallTool.class);
     private static final AtomicLong failCounter = new AtomicLong();
@@ -67,41 +68,43 @@ public final class HTTPCallTool //implements Runnable
             }
         }
     };
-//    public HTTPCallTool(HTTPMessageConfigInterface hmci)
-//    {
-//        this.hmci = hmci;
-//    }
+
+    HTTPMessageConfigInterface hmci;
+    public HTTPCallTool(HTTPMessageConfigInterface hmci)
+    {
+        this.hmci = hmci;
+    }
 
 
 
 
-//    public void run()
-//    {
-//        HTTPResponseData rd = null;
-//        try
-//        {
-//            rd = HTTPCall.send(hmci);
-//
-//        }
-//        catch(Exception e)
-//        {
-//            e.printStackTrace();
-//            if(e instanceof HTTPCallException)
-//            {
-//                rd = ((HTTPCallException) e).getResponseData();
-//            }
-//        }
-//        if(rd.getStatus() != HTTPStatusCode.OK.CODE)
-//        {
-//            failCounter.incrementAndGet();
-//        }
-//
-//
-//        if(printResult) {
-//            log.getLogger().info("Total: " + HTTPCall.HTTP_CALLS.getCounts() + " Fail: " + failCounter + " status: " + rd.getStatus() + " length: " + rd.getData().length);
-//            log.getLogger().info(rd.getDataAsString());
-//        }
-//    }
+    public void run()
+    {
+        HTTPResponseData rd = null;
+        try
+        {
+            rd = OkHTTPCall.send(hmci);
+
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            if(e instanceof HTTPCallException)
+            {
+                rd = ((HTTPCallException) e).getResponseData();
+            }
+        }
+        if(rd.getStatus() != HTTPStatusCode.OK.CODE)
+        {
+            failCounter.incrementAndGet();
+        }
+
+
+        if(printResult) {
+            log.getLogger().info("Total: " + HTTPCall.HTTP_CALLS.getCounts() + " Fail: " + failCounter + " status: " + rd.getStatus() + " length: " + rd.getData().length);
+            log.getLogger().info(rd.getDataAsString());
+        }
+    }
 
     public static void main(String ...args)
     {
@@ -135,8 +138,11 @@ public final class HTTPCallTool //implements Runnable
             IPAddress proxyAddress = proxy != null ? IPAddress.parse(proxy, ProxyType.HTTP) : null;
 
             List<HTTPAPIEndPoint<Void, byte[]>> endpoints = new ArrayList<>();
+            HTTPMessageConfigInterface[] hmcis = new HTTPMessageConfigInterface[urls.size()];
+            int index = 0;
             for(String url : urls) {
                 HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit(url, null, httpMethod);
+                hmcis[index++] = hmci;
                 hmci.setProxyAddress(proxyAddress);
                 if (user != null && password !=null)
                     hmci.setBasicAuthorization(user, password);
@@ -173,11 +179,13 @@ public final class HTTPCallTool //implements Runnable
 
             for(int i = 0; i < repeat; i++)
             {
+
+//                for(int j = 0; j < hmcis.length; j++)
+//                    TaskUtil.defaultTaskProcessor().execute(new HTTPCallTool(hmcis[j]));
                 for(HTTPAPIEndPoint<Void, byte[]>   endPoint : endpoints)
-                {
                     endPoint.asyncCall(callback);
-                    //TaskUtil.getDefaultTaskProcessor().execute(new HTTPCallTool(hmci));
-                }
+
+
             }
             ts = TaskUtil.waitIfBusyThenClose(25) - ts;
             RateCounter rc = new RateCounter("OverAll");

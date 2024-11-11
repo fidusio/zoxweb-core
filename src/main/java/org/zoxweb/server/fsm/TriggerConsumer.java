@@ -36,36 +36,33 @@ implements TriggerConsumerInt<T>
     }
     public TriggerConsumer(Enum<?>...gnCanonicalIDs)
     {
-
-        canonicalIDs = new String[gnCanonicalIDs.length];
-        for(int i = 0; i < canonicalIDs.length; i++)
-        {
-            canonicalIDs[i] = SUS.enumName(gnCanonicalIDs[i]);
-        }
+        canonicalIDs = SUS.enumNames(gnCanonicalIDs);
     }
 
     @Override
     public String[] canonicalIDs() {
         return canonicalIDs;
     }
-
-    public StateInt getState()
+    @Override
+    public StateInt<?> getState()
     {
         return state;
     }
 
-
-    public void setSate(StateInt state)
+    @Override
+    public void setSate(StateInt<?> state)
     {
         this.state = state;
     }
 
-   public<R> TriggerConsumerInt<T> setFunction(Function<?, R> function)
-   {
-       this.function = (Function<T, ?>) function;
-       return this;
-   }
+    @Override
+    public<R> TriggerConsumerInt<T> setFunction(Function<?, R> function)
+    {
+        this.function = (Function<T, ?>) function;
+        return this;
+    }
 
+    @Override
    public<R> Function getFunction()
    {
        return function;
@@ -81,11 +78,11 @@ implements TriggerConsumerInt<T>
     }
 
     @Override
-    public void publish(TriggerInt triggerInt) {
+    public void publish(TriggerInt<?> triggerInt) {
         if(triggerInt != null)
             getState().getStateMachine().publish(triggerInt);
     }
-
+    @Override
     public <D>void publish(String canID, D data) {
         if(canID != null)
             getState().getStateMachine().publish(new Trigger(getState(), canID, data));
@@ -96,7 +93,8 @@ implements TriggerConsumerInt<T>
             getState().getStateMachine().publish(new Trigger(getState(), SUS.enumName(canID), data));
     }
 
-    public void publishSync(TriggerInt triggerInt) {
+    @Override
+    public void publishSync(TriggerInt<?> triggerInt) {
         if(triggerInt != null)
             getState().getStateMachine().publishSync(triggerInt);
     }
@@ -111,7 +109,8 @@ implements TriggerConsumerInt<T>
             getState().getStateMachine().publishSync(new Trigger(getState(), SUS.enumName(canID), data));
     }
 
-    public StateMachineInt getStateMachine()
+    @Override
+    public StateMachineInt<?> getStateMachine()
     {
         return state.getStateMachine();
     }

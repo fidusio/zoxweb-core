@@ -185,7 +185,7 @@ public class SSLStateMachine extends StateMachine<SSLSessionConfig>
 
     public static String rates()
     {
-        return SharedUtil.toCanonicalID(',', SSLHandshakingState.NeedWrap.rcNeedWrap, SSLHandshakingState.NeedUnwrap.rcNeedUnwrap, SSLHandshakingState.NeedTask.rcNeedTask, SSLHandshakingState.Finished.rcFinished, SSLDataReadyState.NotHandshaking.rcNotHandshaking);
+        return SharedUtil.toCanonicalID(',', SSLHandshakingState.rcNeedWrap, SSLHandshakingState.rcNeedUnwrap, SSLHandshakingState.rcNeedTask, SSLHandshakingState.rcFinished, SSLDataReadyState.rcNotHandshaking);
     }
 
     public static <T> T lookupType(String type)
@@ -194,15 +194,15 @@ public class SSLStateMachine extends StateMachine<SSLSessionConfig>
         switch(type)
         {
             case "NEED_WRAP":
-                return (T) SSLHandshakingState.NeedWrap.rcNeedWrap;
+                return (T) SSLHandshakingState.rcNeedWrap;
             case "NEED_UNWRAP":
-                return (T) SSLHandshakingState.NeedUnwrap.rcNeedUnwrap;
+                return (T) SSLHandshakingState.rcNeedUnwrap;
             case "NEED_TASK":
-                return (T) SSLHandshakingState.NeedTask.rcNeedTask;
+                return (T) SSLHandshakingState.rcNeedTask;
             case "FINISHED":
-                return (T) SSLHandshakingState.Finished.rcFinished;
+                return (T) SSLHandshakingState.rcFinished;
             case "NOT_HANDSHAKING":
-                return (T) SSLDataReadyState.NotHandshaking.rcNotHandshaking;
+                return (T) SSLDataReadyState.rcNotHandshaking;
             case "SSL_CONNECTION_COUNT":
                 return (T) Long.valueOf(counter.get());
 

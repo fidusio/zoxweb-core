@@ -81,6 +81,13 @@ public class SUS
             return ((GetName) en).getName();
         return en.name();
     }
+    public static String[] enumNames(Enum<?> ...enums)
+    {
+        String[] ret = new String[enums.length];
+        for(int i = 0; i < enums.length; i++)
+            ret[i] = enumName(enums[i]);
+        return ret;
+    }
 
     public static NVGenericMap updateGetNVProperties(GetNVProperties toUpdate, NVGenericMap value)
     {

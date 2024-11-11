@@ -16,7 +16,7 @@ public class State<P>
     public final static LogWrapper log = new LogWrapper(State.class).setEnabled(false);
     private final String name;
     private final NVGenericMap data = new NVGenericMap();
-    private volatile StateMachineInt stateMachine;
+    private volatile StateMachineInt<?> stateMachine;
 
     private final  Map<String, Consumer<?>> triggerConsumers = new LinkedHashMap<String, Consumer<?>> ();
     public State(String name, NVBase<?> ...props)
@@ -70,7 +70,7 @@ public class State<P>
         return name;
     }
 
-    public synchronized StateInt register(TriggerConsumerInt<?> tc)
+    public synchronized StateInt<?> register(TriggerConsumerInt<?> tc)
     {
         for(String canID : tc.canonicalIDs())
             triggerConsumers.put(canID, tc);
@@ -78,7 +78,7 @@ public class State<P>
         return this;
     }
 
-    public synchronized StateInt register(Consumer<?> consumer, String ...canIDs)
+    public synchronized StateInt<?> register(Consumer<?> consumer, String ...canIDs)
     {
         Consumer<?> tch = consumer instanceof TriggerConsumerHolder ? consumer : new TriggerConsumerHolder<>(consumer);
         for(String canID : canIDs)
@@ -86,15 +86,25 @@ public class State<P>
         return this;
     }
 
+    /**
+     * @param consumer
+     * @param canIDs
+     * @return
+     */
+    @Override
+    public StateInt<?> register(Consumer<?> consumer, Enum<?>... canIDs) {
+
+        return register(consumer, SUS.enumNames(canIDs));
+    }
 
 
     @Override
-    public StateMachineInt getStateMachine() {
+    public StateMachineInt<?> getStateMachine() {
         return stateMachine;
     }
 
     @Override
-    public void setStateMachine(StateMachineInt smi) {
+    public void setStateMachine(StateMachineInt<?> smi) {
         stateMachine = smi;
     }
 

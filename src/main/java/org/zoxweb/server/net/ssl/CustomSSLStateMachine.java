@@ -1,9 +1,11 @@
 package org.zoxweb.server.net.ssl;
 
 import org.zoxweb.server.fsm.MonoStateMachine;
-import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.server.logging.LogWrapper;
-import org.zoxweb.shared.util.*;
+import org.zoxweb.shared.util.Identifier;
+import org.zoxweb.shared.util.RateCounter;
+import org.zoxweb.shared.util.SharedStringUtil;
+import org.zoxweb.shared.util.SharedUtil;
 
 import javax.net.ssl.SSLEngineResult;
 import java.io.Closeable;
@@ -24,7 +26,6 @@ class CustomSSLStateMachine extends MonoStateMachine<SSLEngineResult.HandshakeSt
     static RateCounter rcFinished = new RateCounter("Finished");
 
     private static final AtomicLong counter = new AtomicLong();
-    private final SSLSessionConfig config;
     private final SSLNIOSocketHandler sslns;
     private final long id;
 
@@ -37,8 +38,7 @@ class CustomSSLStateMachine extends MonoStateMachine<SSLEngineResult.HandshakeSt
     {
         super(false);
         this.sslns = sslns;
-        this.config = sslns.getConfig();
-        this.config.sslConnectionHelper = this;
+        sslns.getConfig().sslConnectionHelper = this;
         id = counter.incrementAndGet();
         register(NOT_HANDSHAKING, this::notHandshaking)
                 .register(NEED_WRAP, this::needWrap)
@@ -51,7 +51,7 @@ class CustomSSLStateMachine extends MonoStateMachine<SSLEngineResult.HandshakeSt
     @Override
     public void close() throws IOException
     {
-        config.close();
+        getConfig().close();
     }
 
     public Long getID()
@@ -59,195 +59,30 @@ class CustomSSLStateMachine extends MonoStateMachine<SSLEngineResult.HandshakeSt
         return id;
     }
 
-
-
-
-
-    public void needWrap(SSLSessionCallback callback) {
-        long ts = System.currentTimeMillis();
-
-        if (config.getHandshakeStatus() == NEED_WRAP) {
-            try {
-                SSLEngineResult result = config.smartWrap(ByteBufferUtil.EMPTY, config.outSSLNetData);
-                // at handshake stage, data in appOut won't be
-                // processed hence dummy buffer
-                if (log.isEnabled())
-                    log.getLogger().info("AFTER-NEED_WRAP-HANDSHAKING: " + result);
-
-                switch (result.getStatus()) {
-                    case BUFFER_UNDERFLOW:
-                    case BUFFER_OVERFLOW:
-                        config.forcedClose = true;
-                        throw new IllegalStateException(result + " invalid state context " + config.outSSLNetData + " " + config.sslChannel.getRemoteAddress());
-                    case OK:
-                        int written = ByteBufferUtil.smartWrite(null, config.sslChannel, config.outSSLNetData);
-                        if (log.isEnabled())
-                            log.getLogger().info(result.getHandshakeStatus() + " After writing data HANDSHAKING-NEED_WRAP: " + config.outSSLNetData + " written:" + written);
-                        config.sslConnectionHelper.publish(result.getHandshakeStatus(), callback);
-                        break;
-                    case CLOSED:
-                        config.close();
-                        break;
-                }
-            } catch (Exception e) {
-                if (log.isEnabled())
-                    e.printStackTrace();
-
-                config.close();
-            }
-        }
-        ts = System.currentTimeMillis() - ts;
-        rcNeedWrap.register(ts);
+    public void needWrap(SSLSessionCallback callback)
+    {
+        rcNeedWrap.register(SSLUtil._needWrap(getConfig(), callback));
     }
 
-
-    public void needUnwrap(SSLSessionCallback callback) {
-
-        long ts = System.currentTimeMillis();
-        if (log.isEnabled()) log.getLogger().info("Entry: " + config.getHandshakeStatus());
-
-        if (config.getHandshakeStatus() == NEED_UNWRAP || SUS.enumName(config.getHandshakeStatus()).equals("NEED_UNWRAP_AGAIN")) {
-            try {
-
-                int bytesRead = config.sslChannel.read(config.inSSLNetData);
-                if (bytesRead == -1)
-                {
-                    if (log.isEnabled())
-                        log.getLogger().info("SSLCHANNEL-CLOSED-NEED_UNWRAP: " + config.getHandshakeStatus() + " bytes read: " + bytesRead);
-                    config.close();
-                }
-                else //if (bytesRead > 0)
-                {
-                    // even if we have read zero it will trigger BUFFER_UNDERFLOW then we wait for incoming
-                    // data
-                    if (log.isEnabled())
-                        log.getLogger().info("BEFORE-UNWRAP: " + config.inSSLNetData + " bytes read " + bytesRead);
-                    SSLEngineResult result = config.smartUnwrap(config.inSSLNetData, ByteBufferUtil.EMPTY);
-
-
-                    if (log.isEnabled())
-                    {
-                        log.getLogger().info("AFTER-NEED_UNWRAP-HANDSHAKING: " + result + " bytes read: " + bytesRead);
-                        log.getLogger().info("AFTER-NEED_UNWRAP-HANDSHAKING inNetData: " + config.inSSLNetData + " inAppData: " + config.inAppData);
-                    }
-
-                    switch (result.getStatus()) {
-                        case BUFFER_UNDERFLOW:
-                            // no incoming data available we need to wait for more socket data
-                            // return and let the NIOSocket or the data handler call back
-                            // config.sslChannelSelectableStatus.set(true);
-                            // config.sslChannelSelectableStatus.set(true);
-                            // config.sslRead.set(true);
-                            return;
-                        case BUFFER_OVERFLOW:
-                            throw new IllegalStateException("NEED_UNWRAP should never happen: " + result.getStatus());
-                            // this should never happen
-                        case OK:
-                            config.sslConnectionHelper.publish(result.getHandshakeStatus(), callback);
-                            break;
-                        case CLOSED:
-                            // check result here
-                            if (log.isEnabled())
-                                log.getLogger().info("CLOSED-DURING-NEED_UNWRAP: " + result + " bytes read: " + bytesRead);
-                            config.close();
-                            break;
-                    }
-                }
-            } catch (Exception e) {
-                if (log.isEnabled())
-                    e.printStackTrace();
-                config.close();
-            }
-        }
-        ts = System.currentTimeMillis() - ts;
-        rcNeedUnwrap.register(ts);
+    public void needUnwrap(SSLSessionCallback callback)
+    {
+        rcNeedUnwrap.register(SSLUtil._needUnwrap(getConfig(), callback));
     }
 
     public void needTask(SSLSessionCallback callback)
     {
-        long ts = System.currentTimeMillis();
-
-        Runnable toRun;
-        while((toRun = config.getDelegatedTask()) != null)
-        {
-            toRun.run();
-
-        }
-        SSLEngineResult.HandshakeStatus status = config.getHandshakeStatus();
-
-        ts = System.currentTimeMillis() - ts;
-        if (log.isEnabled())
-            log.getLogger().info("After run: " + status);
-        rcNeedTask.register(ts);
-        config.sslConnectionHelper.publish(status, callback);
+        rcNeedTask.register(SSLUtil._needTask(getConfig(), callback));
     }
-
-
-
-
 
     public void finished(SSLSessionCallback callback)
     {
-        long ts = System.currentTimeMillis();
-
-        // ********************************************
-        // Very crucial steps
-        // ********************************************
-        if(config.remoteConnection != null)
-        {
-            // we have a SSL tunnel
-            config.sslConnectionHelper.createRemoteConnection();
-        }
-
-        if (config.inSSLNetData.position() > 0)
-        {
-            //**************************************************
-            // ||-----DATA BUFFER------ ||
-            // ||Handshake data|App data||
-            // ||-----------------------||
-            // The buffer has app data that needs to be decrypted
-            //**************************************************
-            config.sslConnectionHelper.publish(config.getHandshakeStatus(), callback);
-        }
-
-        ts = System.currentTimeMillis() - ts;
-        rcFinished.register(ts);
+        rcFinished.register(SSLUtil._finished(getConfig(), callback));
     }
-
-
 
     public void notHandshaking(SSLSessionCallback callback)
     {
-        long ts = System.currentTimeMillis();
-        SSLUtil._notHandshaking(config, callback);
-        ts = System.currentTimeMillis() - ts;
-        rcNotHandshaking.register(System.currentTimeMillis() - ts);
+        rcNotHandshaking.register(SSLUtil._notHandshaking(getConfig(), callback));
     }
-
-
-//    public void dispatch(SSLEngineResult.HandshakeStatus status, SSLSessionCallback callback)
-//    {
-//        //stateMap.get(status).accept(callback);
-//        switch(status)
-//        {
-//
-//            case NOT_HANDSHAKING:
-//                notHandshaking(callback);
-//                break;
-//            case FINISHED:
-//                finished(callback);
-//                break;
-//            case NEED_TASK:
-//                needTask(callback);
-//                break;
-//            case NEED_WRAP:
-//                needWrap(callback);
-//                break;
-//            case NEED_UNWRAP:
-//                needUnwrap(callback);
-//                break;
-//        }
-//    }
 
     @Override
     public void createRemoteConnection()
@@ -259,7 +94,6 @@ class CustomSSLStateMachine extends MonoStateMachine<SSLEngineResult.HandshakeSt
     {
         return sslns.getConfig();
     }
-
 
     public static String rates()
     {

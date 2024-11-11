@@ -10,7 +10,7 @@ import java.util.function.Consumer;
 public interface StateInt<P>
     extends GetName, GetNVProperties
 {
-    public enum States
+    enum States
         implements GetName
     {
         INIT("init"),
@@ -37,14 +37,15 @@ public interface StateInt<P>
 
     Consumer<?> lookupConsumer(String canonicalID);
 
-    StateInt register(TriggerConsumerInt<?> tc);
+    StateInt<?> register(TriggerConsumerInt<?> tc);
 
 
-    StateInt register(Consumer<?> consumer, String ...canid);
+    StateInt<?> register(Consumer<?> consumer, String ...canIDs);
+    StateInt<?> register(Consumer<?> consumer, Enum<?> ...canIDs);
 
-    StateMachineInt getStateMachine();
+    StateMachineInt<?> getStateMachine();
 
-    void setStateMachine(StateMachineInt smi);
+    void setStateMachine(StateMachineInt<?> smi);
 
     NVGenericMap getProperties();
 

@@ -8,16 +8,18 @@ import org.zoxweb.shared.http.HTTPResponseData;
 import org.zoxweb.shared.util.*;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentSkipListMap;
 
 public final class HTTPAPIManager
     extends RegistrarMap<String, HTTPAPIEndPoint<?,?>, HTTPAPIManager>
-    //implements Registrar<String, HTTPAPIEndPoint, HTTPAPIManager>
 {
 
 
     public static final LogWrapper log = new LogWrapper(HTTPAPIManager.class);
 
     public static final HTTPAPIManager SINGLETON = new HTTPAPIManager();
+
+    private final Map<String, Set<HTTPAPIEndPoint<?,?>>> groups = new ConcurrentSkipListMap<>();
     //private final Map<String, HTTPAPIEndPoint<?,?>> map = new LinkedHashMap<String, HTTPAPIEndPoint<?,?>>();
 
     public static final DataDecoder<HTTPResponseData, NVGenericMap> NVGM_DECODER = (input)->
@@ -53,7 +55,7 @@ public final class HTTPAPIManager
 
 
 
-        return HTTPAPIManager.SINGLETON.buildEndPoint(config, encoder, decoder)
+        return buildEndPoint(config, encoder, decoder)
                 .setRateController(rateController)
                 .setScheduler(TaskUtil.defaultTaskScheduler())
                 .setDomain(domain)
@@ -106,19 +108,23 @@ public final class HTTPAPIManager
     }
 
 
+    public synchronized  <I,O> HTTPAPIManager register(HTTPAPIEndPoint<I,O> apiEndPoint)
+    {
+        return register(null, apiEndPoint);
+    }
 
-    public <I,O> HTTPAPIManager register(HTTPAPIEndPoint<I,O> apiEndPoint)
+
+    public synchronized  <I,O> HTTPAPIManager register(String groupName, HTTPAPIEndPoint<I,O> apiEndPoint)
     {
         if (apiEndPoint.toCanonicalID() != null)
         {
             return super.register(apiEndPoint.toCanonicalID(), apiEndPoint);
-
         }
         return this;
     }
 
 
-    public HTTPAPIEndPoint unregister(String name)
+    public HTTPAPIEndPoint<?,?> unregister(String name)
     {
         if (name != null)
         {
@@ -133,7 +139,7 @@ public final class HTTPAPIManager
 
 
 
-    public HTTPAPIEndPoint unregister(String name, String domain)
+    public HTTPAPIEndPoint<?,?> unregister(String name, String domain)
     {
         domain = SharedStringUtil.trimOrNull(domain);
         if (name != null)
@@ -145,7 +151,7 @@ public final class HTTPAPIManager
     }
 
 
-    public HTTPAPIEndPoint unregister(HTTPAPIEndPoint apiEndPoint)
+    public HTTPAPIEndPoint<?,?> unregister(HTTPAPIEndPoint apiEndPoint)
     {
 
         if (apiEndPoint != null)
