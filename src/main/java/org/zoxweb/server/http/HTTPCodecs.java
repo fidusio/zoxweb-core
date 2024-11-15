@@ -13,10 +13,10 @@ import java.io.InputStream;
 import java.util.List;
 
 
-public final class HTTPDecoders {
-  public final static LogWrapper log = new LogWrapper(HTTPDecoders.class).setEnabled(false);
+public final class HTTPCodecs {
+  public final static LogWrapper log = new LogWrapper(HTTPCodecs.class).setEnabled(false);
 
-  private HTTPDecoders() {
+  private HTTPCodecs() {
   }
 
   public static final DataDecoder<byte[], NVGenericMap> BytesToNVGM = (input) -> {
@@ -27,6 +27,10 @@ public final class HTTPDecoders {
     return GSONUtil
         .fromJSONGenericMap(SharedStringUtil.toString(input.getData()), null, Base64Type.DEFAULT);
   };
+
+
+  public static final DataDecoder<HTTPResponseData, NVGenericMap> NVGMDecoderPAS = (input)->
+          GSONUtil.fromJSONDefault(input.getDataAsString(), NVGenericMap.class, true);
 
   public static final DataDecoder<HTTPResponseData, List<NVGenericMap>> HRDToNVGMList = (input) -> {
     return GSONUtil
@@ -62,6 +66,8 @@ public final class HTTPDecoders {
 
     return null;
   };
+
+
 
 
   public static final DataDecoder<HTTPRawMessage, HTTPMessageConfigInterface> MULTIPART_FORM_DATA = (hrm) ->{

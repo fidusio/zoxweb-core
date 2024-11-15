@@ -18,10 +18,7 @@ package org.zoxweb.server.task;
 import java.util.UUID;
 import java.util.concurrent.Executor;
 
-import org.zoxweb.shared.util.GetDescription;
-import org.zoxweb.shared.util.GetName;
-import org.zoxweb.shared.util.LifeCycleMonitor;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.*;
 
 /**
  * @param <E> Executor
@@ -60,7 +57,7 @@ public class ExecutorHolder<E extends Executor>
       String description)
       throws NullPointerException, IllegalArgumentException {
 
-    SharedUtil.checkIfNulls("Executor or LifeCycleMonitor null", es, lcm);
+    SUS.checkIfNulls("Executor or LifeCycleMonitor null", es, lcm);
     this.es = (E) es;
     this.name = name != null ? name : UUID.randomUUID().toString();
     this.description = description;

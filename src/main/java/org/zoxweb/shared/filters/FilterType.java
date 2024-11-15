@@ -19,7 +19,6 @@ import org.zoxweb.shared.data.DataConst;
 import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedStringUtil;
-import org.zoxweb.shared.util.SharedUtil;
 
 import java.math.BigDecimal;
 
@@ -137,8 +136,8 @@ public enum FilterType
 		public String validate(String in)
             throws  NullPointerException, IllegalArgumentException
         {
-			String str = SharedStringUtil.trimOrNull(in);
-			SharedUtil.checkIfNulls("Null or empty input.", str);
+			String str = SUS.trimOrNull(in);
+			SUS.checkIfNulls("Null or empty input.", str);
             str = str.toLowerCase();
 			
 	    	if (FilterType.URL.isValid(str))
@@ -243,8 +242,8 @@ public enum FilterType
 		public String validate(String in)
 			throws  NullPointerException, IllegalArgumentException
         {
-            in = SharedStringUtil.trimOrNull(in);
-			SharedUtil.checkIfNulls("URL address null or empty", in);
+            in = SUS.trimOrNull(in);
+			SUS.checkIfNulls("URL address null or empty", in);
 			
 			if (in.matches(REGEX))
 			{
@@ -336,8 +335,8 @@ public enum FilterType
 		public String validate(String in)
 			throws NullPointerException, IllegalArgumentException
         {
-            in = SharedStringUtil.trimOrNull(in);
-			SharedUtil.checkIfNulls("Email address null or empty", in);
+            in = SUS.trimOrNull(in);
+			SUS.checkIfNulls("Email address null or empty", in);
 			
 			if (in.matches(REGEX))
 			{
@@ -555,8 +554,8 @@ public enum FilterType
 		public String validate(String in)
 			throws  NullPointerException, IllegalArgumentException
         {
-            in = SharedStringUtil.trimOrNull(in);
-			SharedUtil.checkIfNulls("Password null or empty", in);
+            in = SUS.trimOrNull(in);
+			SUS.checkIfNulls("Password null or empty", in);
 			
 			if (in.matches(REGEX))
 			{
@@ -608,8 +607,8 @@ public enum FilterType
 		public String validate(String in)
 				throws  NullPointerException, IllegalArgumentException
 		{
-			in = SharedStringUtil.trimOrNull(in);
-			SharedUtil.checkIfNulls("Password null or empty", in);
+			in = SUS.trimOrNull(in);
+			SUS.checkIfNulls("Password null or empty", in);
 
 			if (in.matches(REGEX))
 			{
@@ -628,7 +627,7 @@ public enum FilterType
 		 */
 		public boolean isValid(String in)
 		{
-			in = SharedStringUtil.trimOrNull(in);
+			in = SUS.trimOrNull(in);
 
 			if (in != null)
 			{
@@ -693,8 +692,8 @@ public enum FilterType
 		public String validate(String in)
 			throws  NullPointerException, IllegalArgumentException
         {
-            in = SharedStringUtil.trimOrNull(in);
-			SharedUtil.checkIfNulls("URL address null or empty", in);
+            in = SUS.trimOrNull(in);
+			SUS.checkIfNulls("URL address null or empty", in);
 			
 			if (in.matches(REGEX))
 			{

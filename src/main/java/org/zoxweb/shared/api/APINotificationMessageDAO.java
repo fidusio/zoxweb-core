@@ -150,7 +150,7 @@ public class APINotificationMessageDAO
 	public void setRecipientIDs(String... recipients)
 			throws NullPointerException, IllegalArgumentException 
 	{
-		SharedUtil.checkIfNulls("Null or empty array", (Object[]) recipients);
+		SUS.checkIfNulls("Null or empty array", (Object[]) recipients);
 		
 		List<NVPair> list = new ArrayList<NVPair>();
 		
@@ -291,7 +291,7 @@ public class APINotificationMessageDAO
 	public void setMessageType(APIServiceType type) 
 			throws NullPointerException, IllegalArgumentException 
 	{
-		SharedUtil.checkIfNulls("Null value: ", type);
+		SUS.checkIfNulls("Null value: ", type);
 		setValue(Params.MESSAGE_TYPE, type);
 	}
 

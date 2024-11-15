@@ -29,7 +29,7 @@ implements KVMapStore<K,V>
 
 	public KVMapStoreDefault(Map<K,V> map, Set<K> eFilter, DataSizeReader<V> sizeReader)
 	{
-		SharedUtil.checkIfNulls("Values can't be null", map);
+		SUS.checkIfNulls("Values can't be null", map);
 		this.mapCache = map;
 		this.exclusionFilter = eFilter != null ? eFilter : new HashSet<K>();
 		this.sizeReader = sizeReader;

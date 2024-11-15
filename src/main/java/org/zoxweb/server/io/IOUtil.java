@@ -19,7 +19,6 @@ import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.net.ProxyType;
 import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedStringUtil;
-import org.zoxweb.shared.util.SharedUtil;
 
 import java.io.*;
 import java.net.*;
@@ -75,14 +74,14 @@ public class IOUtil
 	public static File findFile(String filename)
 	{
 		filename = SharedStringUtil.trimOrNull(filename);
-		SharedUtil.checkIfNulls("Filename can't be null.", filename);
+		SUS.checkIfNulls("Filename can't be null.", filename);
 
 		return findFile(new File(filename));
 	}
 
 	public static File findFile(File file)
 	{
-		SharedUtil.checkIfNulls("File can't be null.", file);
+		SUS.checkIfNulls("File can't be null.", file);
 		return (file.exists() && file.isFile()) ? file : null;
 	}
 	

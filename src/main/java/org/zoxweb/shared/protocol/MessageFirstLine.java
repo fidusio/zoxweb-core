@@ -17,6 +17,7 @@ package org.zoxweb.shared.protocol;
 
 import java.io.Serializable;
 
+import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedUtil;
 
 @SuppressWarnings("serial")
@@ -28,7 +29,7 @@ public class MessageFirstLine
 
 	public MessageFirstLine(String fullRequestLine)
     {
-		SharedUtil.checkIfNulls("Can't parse a null line", fullRequestLine);
+		SUS.checkIfNulls("Can't parse a null line", fullRequestLine);
 		String[] tokensTemp = fullRequestLine.split(" ");
 
 		if (tokensTemp == null || tokensTemp.length < 3)

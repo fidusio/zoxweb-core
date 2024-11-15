@@ -15,7 +15,7 @@ public class NVCollectionStringDecoder
 	
 	public NVCollectionStringDecoder(String nvpSep, String valueSep, boolean filterEmpty)
 	{
-		SharedUtil.checkIfNulls("Null is not allowed", SharedStringUtil.trimOrNull(nvpSep), SharedStringUtil.trimOrNull(valueSep));
+		SUS.checkIfNulls("Null is not allowed", SharedStringUtil.trimOrNull(nvpSep), SharedStringUtil.trimOrNull(valueSep));
 		if (nvpSep.equals(valueSep))
 		{
 			throw new IllegalArgumentException("Name value separator cannot be equal to value separator " + nvpSep);
@@ -29,7 +29,7 @@ public class NVCollectionStringDecoder
 	public NVCollection<String> decode(String input)
 		throws NullPointerException, IllegalArgumentException
 	{
-		SharedUtil.checkIfNulls("Null input", SharedStringUtil.trimOrNull(input));
+		SUS.checkIfNulls("Null input", SharedStringUtil.trimOrNull(input));
 		String[] splitter = input.split(nvpSeparator);
 		if (splitter.length != 2)
 		{

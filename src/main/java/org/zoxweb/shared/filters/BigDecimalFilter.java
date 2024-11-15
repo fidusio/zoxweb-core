@@ -17,6 +17,7 @@ package org.zoxweb.shared.filters;
 
 import java.math.BigDecimal;
 
+import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedUtil;
 
 @SuppressWarnings("serial")
@@ -41,7 +42,7 @@ public class BigDecimalFilter
 	public BigDecimal validate(String in) 
         throws NullPointerException, IllegalArgumentException
     {
-		SharedUtil.checkIfNulls("Input empty or null.", in);
+		SUS.checkIfNulls("Input empty or null.", in);
 		
 		try
         {

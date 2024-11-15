@@ -215,7 +215,7 @@ public class MerchantDAO
 	public void setName(String name) 
 			throws NullPointerException, IllegalArgumentException
 	{
-		SharedUtil.checkIfNulls("Name cannot be empty or null.", SharedStringUtil.trimOrNull(name));
+		SUS.checkIfNulls("Name cannot be empty or null.", SharedStringUtil.trimOrNull(name));
 		setValue(DataParam.NAME, name);
 	}
 

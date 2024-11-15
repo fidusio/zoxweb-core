@@ -16,18 +16,17 @@
 package org.zoxweb;
 
 
+import org.zoxweb.server.util.RuntimeUtil;
+import org.zoxweb.server.util.ThresholdQueue;
+import org.zoxweb.shared.data.VMInfoDAO;
+import org.zoxweb.shared.util.ArrayQueue;
+import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.SimpleQueueInterface;
+
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.LinkedBlockingQueue;
-
-import org.zoxweb.server.util.ThresholdQueue;
-import org.zoxweb.server.util.RuntimeUtil;
-import org.zoxweb.shared.data.VMInfoDAO;
-
-import org.zoxweb.shared.util.ArrayQueue;
-import org.zoxweb.shared.util.SimpleQueueInterface;
-import org.zoxweb.shared.util.SharedUtil;
 
 public class QueueTest {
 
@@ -47,7 +46,7 @@ public class QueueTest {
     System.out.println("Empty:" + aq);
     int index = 0;
     for (; index < aq.capacity(); index++) {
-      aq.queue(new Integer(index));
+      aq.queue(Integer.valueOf(index));
       System.out.println(aq);
     }
 
@@ -56,7 +55,7 @@ public class QueueTest {
       System.out.println(aq.dequeue() + ":" + aq);
     }
 
-    aq.queue(new Integer(index));
+    aq.queue(Integer.valueOf(index));
     System.out.println(aq);
     int size = aq.size();
     for (int i = 0; i < size; i++) {
@@ -66,7 +65,7 @@ public class QueueTest {
 
     index = 0;
     for (; index < aq.capacity() + 1; index++) {
-      boolean result = aq.queue(new Integer(index));
+      boolean result = aq.queue(Integer.valueOf(index));
       System.out.println(aq + "," + result);
     }
 

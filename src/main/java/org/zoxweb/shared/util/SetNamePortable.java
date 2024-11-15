@@ -43,7 +43,7 @@ public class SetNamePortable
 	@Override
 	public void setName(String name)
     {
-		SharedUtil.checkIfNulls("Name is null.", name);
+		SUS.checkIfNulls("Name is null.", name);
 		this.name = name;
 	}
 

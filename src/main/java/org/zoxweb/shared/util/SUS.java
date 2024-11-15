@@ -76,7 +76,7 @@ public class SUS
      */
     public static String enumName(Enum<?> en)
     {
-        SharedUtil.checkIfNulls("enum can't be null", en);
+        checkIfNulls("enum can't be null", en);
         if (en instanceof GetName)
             return ((GetName) en).getName();
         return en.name();
@@ -87,6 +87,24 @@ public class SUS
         for(int i = 0; i < enums.length; i++)
             ret[i] = enumName(enums[i]);
         return ret;
+    }
+
+    /**
+     * Checks all the objs if any of them is null it will throw a NullPointerException.
+     * @param msg NullPointerException message
+     * @param objs to be checked
+     * @throws NullPointerException if any obj is null
+     */
+    public static void checkIfNulls(String msg, Object... objs)
+            throws NullPointerException
+    {
+        if (objs == null)
+            // error in invoking the check
+            throw new NullPointerException("Null Array Object");
+
+        for (Object o : objs)
+            if (o == null)
+                throw new NullPointerException(msg);
     }
 
     public static NVGenericMap updateGetNVProperties(GetNVProperties toUpdate, NVGenericMap value)
@@ -130,7 +148,7 @@ public class SUS
 
     public static boolean isPrimitiveGNV(GetNameValue<?> nvb)
     {
-        SharedUtil.checkIfNulls("NameValue null", nvb);
+        checkIfNulls("NameValue null", nvb);
         if (cache.get(nvb.getClass()) != null ||
                 (nvb.getValue() != null && cache.get(nvb.getValue().getClass()) !=null) )
             return true;

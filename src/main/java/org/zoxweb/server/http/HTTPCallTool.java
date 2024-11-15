@@ -42,7 +42,7 @@ public final class HTTPCallTool
 
 
 
-    private static final HTTPCallBack<Void, byte[]> callback = new HTTPCallBack<Void, byte[]>(null) {
+    private static final HTTPCallback<Void, byte[]> callback = new HTTPCallback<Void, byte[]>(null) {
         @Override
         public void exception(Exception e)
         {

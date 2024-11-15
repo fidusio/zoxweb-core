@@ -30,6 +30,7 @@ import org.zoxweb.shared.data.RuntimeResultDAO;
 import org.zoxweb.shared.net.InetProp.IPVersion;
 import org.zoxweb.shared.net.NIConfigDAO;
 import org.zoxweb.shared.net.SharedNetUtil;
+import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedUtil;
 
 
@@ -58,7 +59,7 @@ public class IPInfo
 	
 	private IPInfo(NetworkInterface ni, IPVersion ipv)
 	{
-		SharedUtil.checkIfNulls("NetworkInterface or ipv can't be null", ni, ipv);
+		SUS.checkIfNulls("NetworkInterface or ipv can't be null", ni, ipv);
 		if ( ipv == IPVersion.V6)
 		{
 			throw new IllegalArgumentException("IPV6 is not supported");

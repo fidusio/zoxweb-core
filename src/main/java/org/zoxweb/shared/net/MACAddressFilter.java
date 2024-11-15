@@ -1,8 +1,8 @@
 package org.zoxweb.shared.net;
 
 import org.zoxweb.shared.filters.ValueFilter;
+import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedStringUtil;
-import org.zoxweb.shared.util.SharedUtil;
 
 @SuppressWarnings("serial")
 public class MACAddressFilter
@@ -32,7 +32,7 @@ public class MACAddressFilter
 	@Override
 	public byte[] validate(String in) throws NullPointerException, IllegalArgumentException 
 	{
-		SharedUtil.checkIfNulls("MAC is null", in);
+		SUS.checkIfNulls("MAC is null", in);
 		byte[] ret = macAddressToBytes(in);
 		if (ret.length != MAC_ADDRESS_LENGTH)
 		{
@@ -62,7 +62,7 @@ public class MACAddressFilter
 	
 	public static String toString(byte[] address, String sep)
 	{
-		SharedUtil.checkIfNulls("MAC is null", address);
+		SUS.checkIfNulls("MAC is null", address);
 		if (address.length != MAC_ADDRESS_LENGTH)
 		{
 			//throw new IllegalArgumentException("Invalid MAC Address length " + address.length);

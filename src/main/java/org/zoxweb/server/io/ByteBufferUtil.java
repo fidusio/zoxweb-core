@@ -17,7 +17,7 @@ package org.zoxweb.server.io;
 
 import org.zoxweb.server.util.ServerUtil;
 import org.zoxweb.shared.util.Const;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SimpleQueue;
 
 import java.io.IOException;
@@ -154,7 +154,7 @@ public class ByteBufferUtil
 	
 	public static void write(ByteChannel bc, byte[] array, int off, int len) throws IOException
 	{
-		SharedUtil.checkIfNulls("null byte channel", bc);
+		SUS.checkIfNulls("null byte channel", bc);
 
 		if (off < 0)
 		{

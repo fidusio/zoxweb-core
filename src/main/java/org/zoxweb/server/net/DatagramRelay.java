@@ -1,5 +1,10 @@
 package org.zoxweb.server.net;
 
+import org.zoxweb.server.io.IOUtil;
+import org.zoxweb.server.util.GSONUtil;
+import org.zoxweb.shared.util.*;
+import org.zoxweb.shared.util.SharedBase64.Base64Type;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InterruptedIOException;
@@ -8,14 +13,6 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.Arrays;
 import java.util.logging.Logger;
-
-import org.zoxweb.server.io.IOUtil;
-import org.zoxweb.server.util.GSONUtil;
-import org.zoxweb.shared.util.DaemonController;
-import org.zoxweb.shared.util.GetName;
-import org.zoxweb.shared.util.NVGenericMap;
-import org.zoxweb.shared.util.SharedBase64.Base64Type;
-import org.zoxweb.shared.util.SharedUtil;
 
 /**
  * This a very simple and basic Datagram relay single threaded definitely not performant must be upgraded
@@ -117,8 +114,8 @@ implements Runnable, DaemonController
 	public DatagramRelay(int localPort, InetAddress remoteHost, int remotePort, int packetSize)
 			throws IOException
 	{
-	
-		SharedUtil.checkIfNulls("null host", remoteHost);
+
+		SUS.checkIfNulls("null host", remoteHost);
 		SharedUtil.illegalCondition("Invalid port values", (localPort > 0 && localPort < 65535 ), (remotePort > 0 && remotePort < 65535));
 		SharedUtil.illegalCondition("Invalid packet size " + packetSize, (packetSize > 0 && packetSize < 65535 ));
 		

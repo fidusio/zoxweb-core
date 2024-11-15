@@ -15,11 +15,11 @@
  */
 package org.zoxweb;
 
-import java.nio.ByteBuffer;
-
-import org.zoxweb.shared.util.Const;
 import org.zoxweb.shared.util.BytesValue;
+import org.zoxweb.shared.util.Const;
 import org.zoxweb.shared.util.SharedBase64;
+
+import java.nio.ByteBuffer;
 
 public class PrimitiveTest {
 
@@ -55,7 +55,7 @@ public class PrimitiveTest {
         };
 
     for (long v : longVals) {
-      Long value = new Long(v);
+      Long value = Long.valueOf(v);
       long delta = System.nanoTime();
       byte[] bytesJ = ByteBuffer.allocate(Long.SIZE / Byte.SIZE).putLong(value).array();
       delta = System.nanoTime() - delta;
@@ -87,7 +87,7 @@ public class PrimitiveTest {
         };
 
     for (float v : floatVals) {
-      Float value = new Float(v);
+      Float value = Float.valueOf(v);
       long delta = System.nanoTime();
       byte[] bytesJ = ByteBuffer.allocate(Float.SIZE / Byte.SIZE).putFloat(value).array();
       delta = System.nanoTime() - delta;

@@ -71,7 +71,7 @@ public class Lifetime
      */
     public long timeSinceCreation(TimeUnit tu)
     {
-        SharedUtil.checkIfNulls("TimeUnit can't be null", tu);
+        SUS.checkIfNulls("TimeUnit can't be null", tu);
         return tu.convert(System.currentTimeMillis() - creationTimestamp, TimeUnit.MILLISECONDS);
 
     }

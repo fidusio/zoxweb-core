@@ -523,7 +523,7 @@ public final class SharedStringUtil
 	public static byte[] getBytes(String str)
 		throws NullPointerException, IllegalArgumentException
     {
-		SharedUtil.checkIfNulls("Null String", str);
+		SUS.checkIfNulls("Null String", str);
 
 		try
         {
@@ -547,7 +547,7 @@ public final class SharedStringUtil
 		throws NullPointerException, IllegalArgumentException
     {
 
-		SharedUtil.checkIfNulls("Null String", (Object[])strs);
+		SUS.checkIfNulls("Null String", (Object[])strs);
 		
 		byte[][] ret = new byte[strs.length][];
 		
@@ -591,7 +591,7 @@ public final class SharedStringUtil
 			throws NullPointerException, IllegalArgumentException
 	{
 
-		SharedUtil.checkIfNulls("Null String", array);
+		SUS.checkIfNulls("Null String", array);
 
 		try
 		{
@@ -945,7 +945,7 @@ public final class SharedStringUtil
 	
 	public static String formatStringValues(String sep, String... values)
     {
-		SharedUtil.checkIfNulls("Null Parameter", sep, values);
+		SUS.checkIfNulls("Null Parameter", sep, values);
 		StringBuilder ret = new StringBuilder();
 
 		for (String value : values) {
@@ -1029,7 +1029,7 @@ public final class SharedStringUtil
 	
 	public static String formatStringValues(String sep, GetName... gns)
     {
-		SharedUtil.checkIfNulls("Null Parameter", sep, gns);
+		SUS.checkIfNulls("Null Parameter", sep, gns);
 		StringBuilder ret = new StringBuilder();
 
 		for (GetName gn : gns)
@@ -1051,7 +1051,7 @@ public final class SharedStringUtil
 
 	public static String formatStringValues(String sep, GetValue<?>... values)
     {
-		SharedUtil.checkIfNulls("Null Parameter", sep, values);	
+		SUS.checkIfNulls("Null Parameter", sep, values);
 		StringBuilder ret = new StringBuilder();
 
 		for (GetValue<?> gnv : values)
@@ -1162,7 +1162,7 @@ public final class SharedStringUtil
 	public static String embedText(String text, String textMarker, String value)
     {
 
-		SharedUtil.checkIfNulls("Invalid text",text);
+		SUS.checkIfNulls("Invalid text",text);
 		
 		if (textMarker != null)
 		{
@@ -1197,7 +1197,7 @@ public final class SharedStringUtil
 	@SuppressWarnings("unchecked")
 	public static String embedText(String text, Enum<?> textMarker, String value)
     {
-		SharedUtil.checkIfNulls("Invalid text",text);
+		SUS.checkIfNulls("Invalid text",text);
 		
 		if (textMarker != null)
 		{

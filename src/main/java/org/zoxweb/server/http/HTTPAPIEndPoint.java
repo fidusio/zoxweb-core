@@ -1,5 +1,6 @@
 package org.zoxweb.server.http;
 
+import okhttp3.OkHttpClient;
 import org.zoxweb.server.task.TaskSchedulerProcessor;
 import org.zoxweb.shared.http.*;
 import org.zoxweb.shared.util.*;
@@ -15,12 +16,28 @@ public class HTTPAPIEndPoint<I,O>
     implements CanonicalID, GetNVProperties
 
 {
+    private HTTPMessageConfigInterface config;
+    private RateController rateController;
+    private BiDataEncoder<HTTPMessageConfigInterface, I, HTTPMessageConfigInterface> dataEncoder;
+    private DataDecoder<HTTPResponseData, O> dataDecoder;
+    private transient Executor executor;
+    private transient TaskSchedulerProcessor tsp;
+    private final NamedDescription namedDescription = new NamedDescription();
+    private String domain;
+    private OkHttpClient okHttpClient = null;
+    private final Map<Integer, HTTPStatusCode> positiveResults;
+    private final AtomicLong successCounter = new AtomicLong();
+    private final AtomicLong failedCounter = new AtomicLong();
+    private NVGenericMap properties = new NVGenericMap();
+
+
+
     private class ToRun
             implements Runnable
     {
-        private final HTTPCallBack<I,O> callback;
+        private final HTTPCallback<I,O> callback;
         private final HTTPAuthorization authorization;
-        ToRun(HTTPCallBack<I,O> callback, HTTPAuthorization authorization)
+        ToRun(HTTPCallback<I,O> callback, HTTPAuthorization authorization)
         {
             this.callback = callback;
             this.authorization = authorization;
@@ -30,7 +47,7 @@ public class HTTPAPIEndPoint<I,O>
         {
             try
             {
-                HTTPResponseData hrd = OkHTTPCall.send(createHMCI(callback.get(), authorization));
+                HTTPResponseData hrd = OkHTTPCall.send(getOkHttpClient(), createHMCI(callback.get(), authorization));
                 HTTPAPIResult<?> hapir = new HTTPAPIResult<>(hrd.getStatus(),
                         hrd.getHeaders(),
                         dataDecoder != null ? dataDecoder.decode(hrd) : hrd.getData(),
@@ -45,26 +62,39 @@ public class HTTPAPIEndPoint<I,O>
         }
     }
 
-    private HTTPMessageConfigInterface config;
-    private RateController rateController;
-    private BiDataEncoder<HTTPMessageConfigInterface, I, HTTPMessageConfigInterface> dataEncoder;
-    private DataDecoder<HTTPResponseData, O> dataDecoder;
-    private transient Executor executor;
-    private transient TaskSchedulerProcessor tsp;
-    private final NamedDescription namedDescription = new NamedDescription();
-    private String domain;
-
-    private final Map<Integer, HTTPStatusCode> positiveResults = new HashMap<>();
-
-    private final AtomicLong successCounter = new AtomicLong();
-    private final AtomicLong failedCounter = new AtomicLong();
-    private NVGenericMap properties = new NVGenericMap();
 
 
 
-    public HTTPAPIEndPoint(HTTPMessageConfigInterface config)
+    public HTTPAPIEndPoint<I,O> copy(boolean newRateController)
+    {
+        HTTPAPIEndPoint<I,O> ret = new HTTPAPIEndPoint<>(config, positiveResults);
+        ret.setDataEncoder(dataEncoder);
+        ret.setDataDecoder(dataDecoder);
+        ret.executor = executor;
+        ret.tsp = tsp;
+        ret.okHttpClient = okHttpClient;
+        ret.properties = NVGenericMap.copy(properties, true);
+        ret.domain = domain;
+        if (rateController != null && newRateController)
+        {
+            ret.setRateController(new RateController(rateController.getName(), rateController.getRate(), rateController.getRateUnit()));
+        }
+
+        return ret;
+    }
+
+    public HTTPAPIEndPoint(HTTPMessageConfigInterface config, Map<Integer, HTTPStatusCode> positiveResults)
     {
         this.config = config;
+        if (positiveResults != null)
+            this.positiveResults = positiveResults;
+        else
+            this.positiveResults = new HashMap<>();
+    }
+
+    public HTTPAPIEndPoint(HTTPMessageConfigInterface config )
+    {
+        this(config, null);
     }
 
 
@@ -73,6 +103,11 @@ public class HTTPAPIEndPoint<I,O>
     {
         this.config = hmci;
         return this;
+    }
+
+    public HTTPMessageConfigInterface getConfig()
+    {
+        return config;
     }
 
     public HTTPAPIEndPoint<I,O> setRateController(RateController rateController)
@@ -116,6 +151,8 @@ public class HTTPAPIEndPoint<I,O>
     }
 
 
+
+
     public HTTPAPIEndPoint<I,O> setName(String name)
     {
         namedDescription.setName(name);
@@ -138,7 +175,16 @@ public class HTTPAPIEndPoint<I,O>
         return namedDescription.getDescription();
     }
 
+    public OkHttpClient getOkHttpClient()
+    {
+        return okHttpClient;
+    }
 
+    public HTTPAPIEndPoint<I,O> setOkHttpClient(OkHttpClient okHttpClient)
+    {
+        this.okHttpClient = okHttpClient;
+        return this;
+    }
 
 
     public HTTPAPIEndPoint<I,O> setExecutor(Executor exec)
@@ -165,13 +211,7 @@ public class HTTPAPIEndPoint<I,O>
 
     public HTTPAPIResult<O> syncCall(I input, HTTPAuthorization authorization) throws IOException
     {
-        // first check without affecting rate controller
-        boolean send = rateController == null || rateController.isPastThreshold(false);
-
-        // now try to use the rate controller
-        if (!send || (rateController !=null && !rateController.isPastThreshold(true)))
-            throw new IOException("Rate controller timeout threshold reached: " + rateController);
-
+        checkRateController();
         HTTPResponseData hrd = OkHTTPCall.send(createHMCI(input, authorization));
         HTTPAPIResult<O> hapir = null;
         if(dataDecoder != null)
@@ -184,10 +224,21 @@ public class HTTPAPIEndPoint<I,O>
     }
 
 
-
-    public HTTPAPIEndPoint<I,O> syncCall(HTTPCallBack<I,O> callback, HTTPAuthorization authorization)
+    private void checkRateController()
+            throws IOException
     {
+        // first check without affecting rate controller
+        boolean send = rateController == null || rateController.isPastThreshold(false);
 
+        // now try to use the rate controller
+        if (!send || (rateController !=null && !rateController.isPastThreshold(true)))
+            throw new IOException("Rate controller timeout threshold reached: " + rateController);
+    }
+
+    public HTTPAPIEndPoint<I,O> syncCall(HTTPCallback<I,O> callback, HTTPAuthorization authorization)
+            throws IOException
+    {
+        checkRateController();
         ToRun toRun = new ToRun(callback, authorization);
         toRun.run();
         return this;
@@ -227,18 +278,18 @@ public class HTTPAPIEndPoint<I,O>
     }
 
 
-    public HTTPAPIEndPoint<I,O> asyncCall(HTTPCallBack<I,O> callback)
+    public HTTPAPIEndPoint<I,O> asyncCall(HTTPCallback<I,O> callback)
     {
         return asyncCall(callback, null, rateController != null ? rateController.nextWait() : 0);
     }
 
-    public HTTPAPIEndPoint<I,O>  asyncCall(HTTPCallBack<I,O> callback, HTTPAuthorization authorization)
+    public HTTPAPIEndPoint<I,O>  asyncCall(HTTPCallback<I,O> callback, HTTPAuthorization authorization)
     {
         return asyncCall(callback, authorization, rateController != null ? rateController.nextWait() : 0);
     }
 
 
-    public HTTPAPIEndPoint<I,O> asyncCall(HTTPCallBack<I,O> callback, HTTPAuthorization authorization, long delayInMillis)
+    public HTTPAPIEndPoint<I,O> asyncCall(HTTPCallback<I,O> callback, HTTPAuthorization authorization, long delayInMillis)
     {
 
         ToRun toRun = new ToRun(callback, authorization);
@@ -282,7 +333,7 @@ public class HTTPAPIEndPoint<I,O>
         return this;
     }
 
-    public synchronized HTTPAPIEndPoint<I,O>  setPositiveResults(List<Integer> httpStatusCodes) {
+    public synchronized HTTPAPIEndPoint<I,O> setPositiveResults(List<Integer> httpStatusCodes) {
         if (httpStatusCodes != null)
         {
             positiveResults.clear();

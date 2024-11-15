@@ -8,10 +8,7 @@ import org.zoxweb.shared.db.QueryMatchString;
 import org.zoxweb.shared.security.AccessException;
 import org.zoxweb.shared.security.KeyMaker;
 import org.zoxweb.shared.security.SubjectIdentifier;
-import org.zoxweb.shared.util.Const;
-import org.zoxweb.shared.util.MetaToken;
-import org.zoxweb.shared.util.NVEntity;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.*;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -41,7 +38,7 @@ public final class KeyMakerProvider
 
   public synchronized void setMasterKey(KeyStore keystore, String alias, String aliasPassword)
       throws NullPointerException, IllegalArgumentException, AccessException {
-    SharedUtil.checkIfNulls("Null parameters", keystore, alias);
+    SUS.checkIfNulls("Null parameters", keystore, alias);
     try {
       if (!keystore.containsAlias(alias)) {
         throw new IllegalArgumentException("Alias for key not found");
@@ -81,7 +78,7 @@ public final class KeyMakerProvider
 
   public EncryptedKey createSubjectIDKey(SubjectIdentifier subjectID, final byte[] encryptionKey)
       throws NullPointerException, IllegalArgumentException, AccessException {
-    SharedUtil.checkIfNulls("subjectID is null or encryptionKey is null.", subjectID, encryptionKey);
+    SUS.checkIfNulls("subjectID is null or encryptionKey is null.", subjectID, encryptionKey);
 
     if (subjectID.getGUID() == null || subjectID.getSubjectGUID() == null) {
       throw new IllegalArgumentException("Get user ID is null.");
@@ -103,7 +100,7 @@ public final class KeyMakerProvider
 
   public EncryptedKey createNVEntityKey(APIDataStore<?> dataStore, NVEntity nve, final byte[] key)
       throws NullPointerException, IllegalArgumentException, AccessException {
-    SharedUtil.checkIfNulls("User ID is null.", nve, key);
+    SUS.checkIfNulls("User ID is null.", nve, key);
     if (nve.getSubjectGUID() == null || nve.getGUID() == null) {
       throw new IllegalArgumentException("NVE SubjectGUID or GUID is null.");
     }
@@ -127,7 +124,7 @@ public final class KeyMakerProvider
   public byte[] getKey(APIDataStore<?> dataStore, final byte[] key, String... chainedIDs)
       throws NullPointerException, IllegalArgumentException, AccessException
   {
-    SharedUtil.checkIfNulls("Null decryption key parameters", dataStore, chainedIDs);
+    SUS.checkIfNulls("Null decryption key parameters", dataStore, chainedIDs);
 
     byte[] tempKey = key != null ? key : getMasterKey();
     System.out.println(Arrays.toString(chainedIDs));
@@ -151,7 +148,7 @@ public final class KeyMakerProvider
 
   public EncryptedKey lookupEncryptedKeyDOA(APIDataStore<?> dataStore, NVEntity nve)
       throws NullPointerException, IllegalArgumentException, AccessException {
-    SharedUtil.checkIfNulls("Null parameters", dataStore, nve);
+    SUS.checkIfNulls("Null parameters", dataStore, nve);
 
     return lookupEncryptedKeyDOA(dataStore, nve.getGUID(), nve.getSubjectGUID());
   }
@@ -159,7 +156,7 @@ public final class KeyMakerProvider
   public synchronized EncryptedKey lookupEncryptedKeyDOA(APIDataStore<?> dataStore,
                                                          String dataRefGUID, String subjectGUID)
       throws NullPointerException, IllegalArgumentException, AccessException {
-    SharedUtil.checkIfNulls("Null parameters", dataStore, dataRefGUID);
+    SUS.checkIfNulls("Null parameters", dataStore, dataRefGUID);
     EncryptedKey ekd = keyMap.get(SharedUtil.toCanonicalID(':', dataRefGUID, subjectGUID));
 
     if (ekd == null) {
@@ -181,7 +178,7 @@ public final class KeyMakerProvider
   public synchronized final EncryptedKey lookupEncryptedKeyDOA(APIDataStore<?> dataStore,
                                                                String dataRefGUID)
           throws NullPointerException, IllegalArgumentException, AccessException {
-    SharedUtil.checkIfNulls("Null parameters", dataStore, dataRefGUID);
+    SUS.checkIfNulls("Null parameters", dataStore, dataRefGUID);
     EncryptedKey ekd = keyMap.get(dataRefGUID);
 
     if (ekd == null) {

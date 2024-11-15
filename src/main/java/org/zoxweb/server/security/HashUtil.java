@@ -28,10 +28,11 @@
 package org.zoxweb.server.security;
 
 import org.zoxweb.shared.crypto.BCryptHash;
-import org.zoxweb.shared.crypto.CryptoConst;
 import org.zoxweb.shared.crypto.CIPassword;
+import org.zoxweb.shared.crypto.CryptoConst;
 import org.zoxweb.shared.filters.FilterType;
 import org.zoxweb.shared.security.AccessException;
+import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedBase64;
 import org.zoxweb.shared.util.SharedStringUtil;
 import org.zoxweb.shared.util.SharedUtil;
@@ -217,14 +218,14 @@ public class HashUtil {
   public static CIPassword toPassword(String algo, int saltLength, int saltIteration,
                                       String password)
           throws NullPointerException, IllegalArgumentException, NoSuchAlgorithmException {
-    SharedUtil.checkIfNulls("Null parameter", algo, password);
+    SUS.checkIfNulls("Null parameter", algo, password);
     return toPassword(CryptoConst.HASHType.lookup(algo), saltLength, saltIteration, password);
   }
 
   public static CIPassword toPassword(CryptoConst.HASHType algo, int saltLength, int saltIteration,
                                       String password)
           throws NullPointerException, IllegalArgumentException, NoSuchAlgorithmException {
-    SharedUtil.checkIfNulls("Null parameter", algo, password);
+    SUS.checkIfNulls("Null parameter", algo, password);
     return toPassword(algo, saltLength, saltIteration, SharedStringUtil.getBytes(FilterType.PASSWORD.validate(password)));
   }
 
@@ -274,7 +275,7 @@ public class HashUtil {
   public static CIPassword toPassword(CryptoConst.HASHType algo, int saltLength, int saltIteration,
                                       byte[] password)
           throws NullPointerException, IllegalArgumentException, NoSuchAlgorithmException {
-    SharedUtil.checkIfNulls("Null parameter", algo, password);
+    SUS.checkIfNulls("Null parameter", algo, password);
     if (password.length < 6) {
       throw new IllegalArgumentException("password length too short");
     }
@@ -361,7 +362,7 @@ public class HashUtil {
 
   public static boolean isPasswordValid(final CIPassword passwordDAO, String password)
           throws NullPointerException, IllegalArgumentException, NoSuchAlgorithmException {
-    SharedUtil.checkIfNulls("Null values", passwordDAO, password);
+    SUS.checkIfNulls("Null values", passwordDAO, password);
     if(CryptoConst.HASHType.lookup(passwordDAO.getName()) == CryptoConst.HASHType.BCRYPT)
     {
       return isBCryptPasswordValid(password, passwordDAO.getCanonicalID());
@@ -377,7 +378,7 @@ public class HashUtil {
 
   public static void validatePassword(final CIPassword passwordDAO, String password)
           throws NullPointerException, IllegalArgumentException, AccessException {
-    SharedUtil.checkIfNulls("Null values", passwordDAO, password);
+    SUS.checkIfNulls("Null values", passwordDAO, password);
     validatePassword(passwordDAO, password.toCharArray());
   }
 
@@ -410,7 +411,7 @@ public class HashUtil {
   public static void validatePassword(final CIPassword passwordDAO, final char[] password)
           throws NullPointerException, IllegalArgumentException, AccessException {
 
-    SharedUtil.checkIfNulls("Null values", passwordDAO, password);
+    SUS.checkIfNulls("Null values", passwordDAO, password);
 
     try
     {

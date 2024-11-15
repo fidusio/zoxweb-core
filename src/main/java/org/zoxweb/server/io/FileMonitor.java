@@ -27,6 +27,7 @@ import java.io.RandomAccessFile;
 import java.util.logging.Logger;
 
 import org.zoxweb.shared.util.DaemonController;
+import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedUtil;
 import org.zoxweb.shared.data.events.BaseEventObject;
 import org.zoxweb.shared.data.events.EventListenerManager;
@@ -59,7 +60,7 @@ public class FileMonitor
 	public FileMonitor(String logToMonitor, EventListenerManager<BaseEventObject<?>, ?> elm, boolean autoRun, boolean device)
 		throws NullPointerException, IllegalArgumentException, IOException
 	{
-		SharedUtil.checkIfNulls("Null variable", logToMonitor);
+		SUS.checkIfNulls("Null variable", logToMonitor);
 		// open file and got to the end
 		file = new File(logToMonitor);
 		this.device = device;

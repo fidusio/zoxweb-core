@@ -51,7 +51,7 @@ public class SharedDataUtil
 	
 	private static Map<String, String> discover(Map<String, String> ret, FolderInfoDAO folder, List<FolderInfoDAO> folderList, NVEntity match, char sep)
 	{
-		SharedUtil.checkIfNulls("null folder", folder);
+		SUS.checkIfNulls("null folder", folder);
 		
 		if (ret == null)
 			ret = new HashMap<String, String>();
@@ -87,7 +87,7 @@ public class SharedDataUtil
 	
 	private static Map<NVEntity, String> discoverNVE(List<NVEntity> matchResult, Map<NVEntity, String> ret, FolderInfoDAO folder, List<FolderInfoDAO> folderList, MatchPatternFilter match, char sep)
 	{
-		SharedUtil.checkIfNulls("null folder", folder);
+		SUS.checkIfNulls("null folder", folder);
 		if (ret == null)
 			ret = new HashMap<NVEntity, String>();
 				
@@ -127,7 +127,7 @@ public class SharedDataUtil
 
 	public static List<NVEntity> search(FolderInfoDAO entry, String ...args)
 	{
-		SharedUtil.checkIfNulls("Null parameters", entry, args);
+		SUS.checkIfNulls("Null parameters", entry, args);
 		List<NVEntity> matches = new ArrayList<NVEntity>();
 		//if (!SharedStringUtil.isEmpty(match))
 		{
@@ -151,7 +151,7 @@ public class SharedDataUtil
 	
 	public static NVEntity lookupInFolder(FolderInfoDAO entry, String refID, boolean deepSearch)
 	{
-		SharedUtil.checkIfNulls("Null parameters", entry, refID);
+		SUS.checkIfNulls("Null parameters", entry, refID);
 		
 		ArrayValues<NVEntity> content = entry.getFolderContent();
 		
@@ -178,7 +178,7 @@ public class SharedDataUtil
 	
 	public static Map<String, NVEntity> mapReferenceIDToNVEntity(Map<String, NVEntity> ret, FolderInfoDAO folder, List<FolderInfoDAO> folderList)
 	{
-		SharedUtil.checkIfNulls("null folder", folder);
+		SUS.checkIfNulls("null folder", folder);
 		if (ret == null)
 		{
 			ret = new HashMap<String, NVEntity>();
@@ -206,7 +206,7 @@ public class SharedDataUtil
 	
 	public static Map<String, FolderInfoDAO> mapReferenceIDToContainerFolder(Map<String, FolderInfoDAO> ret, FolderInfoDAO folder, List<FolderInfoDAO> folderList)
 	{
-		SharedUtil.checkIfNulls("null folder", folder);
+		SUS.checkIfNulls("null folder", folder);
 		if (ret == null)
 		{
 			ret = new HashMap<String, FolderInfoDAO>();
@@ -634,7 +634,7 @@ public class SharedDataUtil
 	@SuppressWarnings("unchecked")
 	public static NVEntity copyNVEntity(NVEntityFactory factory, NVEntity nveToCopy, boolean deep, boolean omitRefID, boolean omitUserID) {
 		
-		SharedUtil.checkIfNulls("NVEntity object to copy is null.", nveToCopy, factory);
+		SUS.checkIfNulls("NVEntity object to copy is null.", nveToCopy, factory);
 		
 		NVConfigEntity nvce = (NVConfigEntity) nveToCopy.getNVConfig();
 		

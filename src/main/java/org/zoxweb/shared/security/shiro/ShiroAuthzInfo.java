@@ -125,7 +125,7 @@ extends ShiroDomain
 
     public ShiroAuthzInfo setAuthz(ShiroBase shiroBase)
     {
-        SharedUtil.checkIfNulls("Shiro Authz null", shiroBase);
+        SUS.checkIfNulls("Shiro Authz null", shiroBase);
         if (shiroBase instanceof ShiroPermission)
         {
             setAuthzGUID(((ShiroPermission) shiroBase).getGUID());
@@ -151,8 +151,8 @@ extends ShiroDomain
 
     public ShiroAuthzInfo setResource(NVEntity resource)
     {
-        SharedUtil.checkIfNulls("Resource null", resource);
-        SharedUtil.checkIfNulls("Resource global id null", resource.getGUID());
+        SUS.checkIfNulls("Resource null", resource);
+        SUS.checkIfNulls("Resource global id null", resource.getGUID());
         setResourceGUID(resource.getGUID());
         setResourceType(resource.getClass().getName());
         return this;
@@ -160,8 +160,8 @@ extends ShiroDomain
 
     public ShiroAuthzInfo setSubject(NVEntity subject)
     {
-        SharedUtil.checkIfNulls("Subject null", subject);
-        SharedUtil.checkIfNulls("Subject global id null", subject.getGUID());
+        SUS.checkIfNulls("Subject null", subject);
+        SUS.checkIfNulls("Subject global id null", subject.getGUID());
         setSubjectGUID(subject.getGUID());
         setSubjectType(subject.getClass().getName());
         return this;

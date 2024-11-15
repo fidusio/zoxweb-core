@@ -1,5 +1,7 @@
 package org.zoxweb.shared.util;
 
+import java.util.Objects;
+
 public class NamedDescription
         implements NamedDescriptionInt
 {
@@ -26,8 +28,9 @@ public class NamedDescription
     {
         this(name, null);
     }
-    public NamedDescription(String name, String description){
-    SharedUtil.checkIfNulls("name can't be null.", name);
+    public NamedDescription(String name, String description)
+    {
+        SUS.checkIfNulls("name can't be null.", name);
         this.name = name;
         this.description = description;
     }
@@ -59,5 +62,30 @@ public class NamedDescription
                 "name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 '}';
+    }
+
+//    public boolean equals(Object obj)
+//    {
+//        if (obj instanceof NamedDescription)
+//        {
+//            String nameToCompare = ((NamedDescription) obj).getName();
+//            String descriptionToCompare = ((NamedDescription) obj).getDescription();
+//            return nameToCompare.equals(name) && (SUS.isNotEmpty(description) ? description.equals(descriptionToCompare) : description == descriptionToCompare);
+//        }
+//        return false;
+//    }
+
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, description);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        NamedDescription that = (NamedDescription) o;
+        return Objects.equals(name, that.name) && Objects.equals(description, that.description);
     }
 }

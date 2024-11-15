@@ -66,14 +66,14 @@ public class CIPassword
 
 	public synchronized void setName(HASHType mdt)
     {
-		SharedUtil.checkIfNulls("Null Message Digest", mdt);
+		SUS.checkIfNulls("Null Message Digest", mdt);
 		
 		setName(mdt.getName());
 	}
 
 	public synchronized void setName(String name)
     {
-		SharedUtil.checkIfNulls("Null Message Digest", name);
+		SUS.checkIfNulls("Null Message Digest", name);
 
 		HASHType mdt = HASHType.lookup(name);
 

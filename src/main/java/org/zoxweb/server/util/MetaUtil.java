@@ -41,7 +41,7 @@ public class MetaUtil
 			NullPointerException,
 			IllegalArgumentException,
 			SecurityException, NoSuchMethodException, InvocationTargetException {
-		SharedUtil.checkIfNulls("Null class name", className);
+		SUS.checkIfNulls("Null class name", className);
 		NVConfigEntity nvce = classNameToNVCE.get(className);
 
 		if (nvce == null)
@@ -55,7 +55,7 @@ public class MetaUtil
 
 	public static NVConfigEntity fromClass(Class<?> clazz)
 			throws InstantiationException, IllegalAccessException, NullPointerException, IllegalArgumentException, NoSuchMethodException, SecurityException, InvocationTargetException {
-		SharedUtil.checkIfNulls("Null class name", clazz);
+		SUS.checkIfNulls("Null class name", clazz);
 		Object obj = clazz.getConstructor().newInstance();
 
 		if (obj instanceof NVEntity)

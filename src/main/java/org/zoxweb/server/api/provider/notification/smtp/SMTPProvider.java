@@ -285,8 +285,8 @@ public class SMTPProvider
 		{
 			throw new APIException("Missing configuration information");
 		}
-		
-		SharedUtil.checkIfNulls("APINotificationMessage is null", message);
+
+		SUS.checkIfNulls("APINotificationMessage is null", message);
 		
 		if (!(message instanceof APINotificationMessage))
 		{

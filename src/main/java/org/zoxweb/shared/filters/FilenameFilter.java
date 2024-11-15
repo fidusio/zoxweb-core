@@ -16,6 +16,7 @@
 package org.zoxweb.shared.filters;
 
 import org.zoxweb.shared.util.Const;
+import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedStringUtil;
 import org.zoxweb.shared.util.SharedUtil;
 
@@ -53,7 +54,7 @@ public class FilenameFilter
 	public String validate(String fileName) throws NullPointerException, IllegalArgumentException
     {
 		fileName = SharedStringUtil.trimOrNull(fileName);
-		SharedUtil.checkIfNulls("Null filename ", fileName);
+		SUS.checkIfNulls("Null filename ", fileName);
 		int lastIndex = -1;
 		
 		for (Const.FilenameSep fns : Const.FilenameSep.values())

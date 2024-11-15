@@ -17,7 +17,7 @@ package org.zoxweb.server.util;
 
 
 import org.zoxweb.shared.annotation.ParamProp;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.SUS;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
@@ -64,7 +64,7 @@ public class ReflectionUtil
 
 		public AnnotationMap(Class<?> c)
 		{
-			SharedUtil.checkIfNulls("class can't be null", c);
+			SUS.checkIfNulls("class can't be null", c);
 			this.clazz = c;
 		}
 
@@ -100,7 +100,7 @@ public class ReflectionUtil
 
 		public boolean isClassAnnotatedBy(Class<? extends Annotation> c)
 		{
-			SharedUtil.checkIfNulls("Class can't be null", c);
+			SUS.checkIfNulls("Class can't be null", c);
 			if(classAnnotations != null) {
 				for (Annotation a : classAnnotations) {
 					if (a.annotationType().equals(c))
@@ -112,7 +112,7 @@ public class ReflectionUtil
 
 		public boolean isMethodAnnotatedBy(Method m, Class<? extends Annotation> c)
 		{
-			SharedUtil.checkIfNulls("Method or class can't be null", m,c);
+			SUS.checkIfNulls("Method or class can't be null", m,c);
 			MethodAnnotations methodAnnotations = methodsAnnotations.get(m);
 
 			if(methodAnnotations != null)
@@ -127,7 +127,7 @@ public class ReflectionUtil
 
 //		public boolean isMethodAnnotatedBy(String m, Class<? extends Annotation> c)
 //		{
-//			SharedUtil.checkIfNulls("Method or class can't be null", m,c);
+//			SUS.checkIfNulls("Method or class can't be null", m,c);
 //			Annotation[] annotations = methodsAnnotations.get(m);
 //			if(annotations != null)
 //			{
@@ -399,13 +399,13 @@ public class ReflectionUtil
 
 	public static boolean hasMethod(Object instance, Method method)
 	{
-		SharedUtil.checkIfNulls("Instance or method can't be null", instance, method);
+		SUS.checkIfNulls("Instance or method can't be null", instance, method);
 		return hasMethod(instance.getClass(), method);
 	}
 
 	public static boolean hasMethod(Class<?> clazz, Method method)
 	{
-		SharedUtil.checkIfNulls("Instance or method can't be null", clazz, method);
+		SUS.checkIfNulls("Instance or method can't be null", clazz, method);
 		for(Method m : clazz.getMethods())
 		{
 			if (method == method)

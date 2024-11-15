@@ -70,7 +70,7 @@ public class DynamicEnumMapManager
 	 */
 	public synchronized DynamicEnumMap addDynamicEnumMap(DynamicEnumMap enumMap)
     {
-		SharedUtil.checkIfNulls("Can't add null values", enumMap);
+		SUS.checkIfNulls("Can't add null values", enumMap);
 		
 		DynamicEnumMap currentDEM = allEnumMaps.get(enumMap.getName());
 		
@@ -229,11 +229,11 @@ public class DynamicEnumMapManager
 	public static void validateDynamicEnumMap(DynamicEnumMap dem)
 		throws NullPointerException, IllegalArgumentException
     {
-		SharedUtil.checkIfNulls("Dynamic enum map is null.", dem);
+		SUS.checkIfNulls("Dynamic enum map is null.", dem);
 		
 		List<NVPair> values = dem.getValue();
-		
-		SharedUtil.checkIfNulls("Dynamic enum map values are null.", values);
+
+		SUS.checkIfNulls("Dynamic enum map values are null.", values);
 		
 		HashSet<String> names = new HashSet<String>();
 		

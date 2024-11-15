@@ -111,7 +111,7 @@ public class ApplicationConfigDAO
 	
 	public ApplicationConfigDAO(NVGenericMap prop)
 	{
-		SharedUtil.checkIfNulls("Null properties", prop);
+		SUS.checkIfNulls("Null properties", prop);
 		nvgProperties = prop;
 	}
 	

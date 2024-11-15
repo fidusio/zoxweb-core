@@ -4,7 +4,7 @@ import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.shared.task.CallableConsumer;
 import org.zoxweb.shared.task.ConsumerCallback;
 import org.zoxweb.shared.task.ExceptionCallback;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.SUS;
 
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -24,7 +24,7 @@ public class FutureCallableRunnableTask<V>
 
     FutureCallableRunnableTask(TaskEvent te)
     {
-        SharedUtil.checkIfNulls("TaskEvent can't be null", te);
+        SUS.checkIfNulls("TaskEvent can't be null", te);
         callable = null;
         runnable = null;
         isFuture = false;
@@ -33,7 +33,7 @@ public class FutureCallableRunnableTask<V>
 
     FutureCallableRunnableTask(Callable<V> callable, Object source)
     {
-        SharedUtil.checkIfNulls("Callable can't be null", callable);
+        SUS.checkIfNulls("Callable can't be null", callable);
         this.callable = callable;
         this.runnable = null;
         this.isFuture = true;
@@ -44,7 +44,7 @@ public class FutureCallableRunnableTask<V>
 
     FutureCallableRunnableTask(Runnable runnable, V result, boolean isFuture, Object source)
     {
-        SharedUtil.checkIfNulls("Runnable can't be null", runnable);
+        SUS.checkIfNulls("Runnable can't be null", runnable);
         this.callable = null;
         this.runnable = runnable;
         this.result = result;

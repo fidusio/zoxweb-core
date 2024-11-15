@@ -15,6 +15,7 @@
  */
 package org.zoxweb.shared.filters;
 
+import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedUtil;
 
 @SuppressWarnings("serial")
@@ -26,7 +27,7 @@ public class PartialFilter
 	
 	public PartialFilter(ValueFilter<String, String> vf)
     {
-		SharedUtil.checkIfNulls("Empty value.", vf);
+		SUS.checkIfNulls("Empty value.", vf);
 		this.vf = vf;
 	}	
 

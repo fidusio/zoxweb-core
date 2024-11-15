@@ -18,7 +18,7 @@ public class AsyncHTTPCallTest
     private static final LogWrapper log = new LogWrapper(AsyncHTTPCallTest.class);
     static final AtomicLong error = new AtomicLong();
     static final AtomicLong success = new AtomicLong();
-    private static final HTTPCallBack<Void, NVGenericMap> callback = new HTTPCallBack<Void, NVGenericMap>() {
+    private static final HTTPCallback<Void, NVGenericMap> callback = new HTTPCallback<Void, NVGenericMap>() {
         @Override
         public void exception(Exception e)
         {
@@ -63,7 +63,7 @@ public class AsyncHTTPCallTest
 
 
             HTTPAPIEndPoint<Void, NVGenericMap> testEndPoint = new HTTPAPIEndPoint<Void, NVGenericMap>(hmci)
-                    .setDataDecoder(HTTPAPIManager.NVGM_DECODER)
+                    .setDataDecoder(HTTPCodecs.NVGMDecoderPAS)
                     .setDataEncoder(dataEncoder)
                     .setExecutor(TaskUtil.defaultTaskProcessor())
                     .setRateController(rc)

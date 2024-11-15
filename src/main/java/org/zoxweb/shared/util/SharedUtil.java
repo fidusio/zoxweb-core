@@ -42,24 +42,15 @@ public class SharedUtil
 	 * Checks all the objs if any of them is null it will throw a NullPointerException.
 	 * @param msg to be added to the NullPointerException
 	 * @param objs to be checked
-	 * @throws NullPointerException if any of th
+	 * @throws NullPointerException
+	 * @deprecated
+	 * Use {@link SUS#checkIfNulls(String, Object...)}instead.
 	 */
+	@Deprecated
 	public static void checkIfNulls(String msg, Object... objs)
 		throws NullPointerException
 	{
-		if (objs == null)
-		{
-			// error in invoking the check
-			throw new NullPointerException("Null Array Object");
-		}
-
-		for (Object o : objs)
-		{
-            if (o == null)
-            {
-                throw new NullPointerException(msg);
-            }
-        }
+		SUS.checkIfNulls(msg, objs);
 	}
 	
 	public static void illegalCondition(String message, boolean ... conditions)

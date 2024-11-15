@@ -15,35 +15,21 @@
  */
 package org.zoxweb.server.util;
 
-import java.beans.XMLDecoder;
-import java.beans.XMLEncoder;
-import java.io.BufferedReader;
-
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-
-import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.net.NetUtil;
 import org.zoxweb.shared.data.SystemInfoDAO;
 import org.zoxweb.shared.net.NetworkInterfaceDAO;
-import org.zoxweb.shared.util.NVEntity;
-import org.zoxweb.shared.util.NVPair;
-import org.zoxweb.shared.util.SharedStringUtil;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.*;
+
+import java.beans.XMLDecoder;
+import java.beans.XMLEncoder;
+import java.io.*;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.security.SecureRandom;
+import java.util.*;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public final class ServerUtil
 {
@@ -381,7 +367,7 @@ public final class ServerUtil
 	 */
 	public static boolean areAllInstancesMatchingType(List<?> list, Class<?> clazz)
     {
-		SharedUtil.checkIfNulls("Null list or class.", list, clazz);
+		SUS.checkIfNulls("Null list or class.", list, clazz);
 		
 		if (!list.isEmpty())
 		{

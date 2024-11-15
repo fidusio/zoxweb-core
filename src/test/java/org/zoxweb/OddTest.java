@@ -58,8 +58,8 @@ public class OddTest {
             int b = i;
             long lA = i;
             long lB = i;
-            Integer aI = new Integer(i);
-            Integer bI = new Integer(i);
+            Integer aI = Integer.valueOf(i);
+            Integer bI = Integer.valueOf(i);
             assert a==b;
             assert lA==lB;
             assert lA==a;

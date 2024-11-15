@@ -184,7 +184,7 @@ public class DynamicEnumMap
 	 */
 	public void addEnumValue(Enum<?> e)
     {
-		SharedUtil.checkIfNulls("Enum is null.", e);
+		SUS.checkIfNulls("Enum is null.", e);
 		
 		if (e instanceof GetName)
 		{
@@ -301,8 +301,8 @@ public class DynamicEnumMap
 	public synchronized void setName(String name)
     {
 		String oldName = this.name;
-		
-		SharedUtil.checkIfNulls("Null value", name);
+
+		SUS.checkIfNulls("Null value", name);
 		
 		name = SharedStringUtil.filterString(name, NAME_PREFIX + ":", NAME_PREFIX);
 		

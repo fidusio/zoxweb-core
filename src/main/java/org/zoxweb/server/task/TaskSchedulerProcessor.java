@@ -246,7 +246,7 @@ public class TaskSchedulerProcessor
 	}
 
 	private TaskSchedulerProcessor(Comparator<Appointment> tsc, TaskProcessor tp) {
-		SharedUtil.checkIfNulls("TaskSchedulerComparator can't be null", tsc);
+		SUS.checkIfNulls("TaskSchedulerComparator can't be null", tsc);
 		queue =  new ConcurrentSkipListSet<>(tsc);
 		taskProcessor = tp;
 		TaskUtil.startRunnable(tp != null?  tp.getThreadGroup() : null, this, "TSP-" + counterID);

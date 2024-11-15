@@ -15,6 +15,7 @@
  */
 package org.zoxweb.shared.filters;
 
+import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedUtil;
 
 /**
@@ -62,7 +63,7 @@ public class NumberFilter
         throws NullPointerException, IllegalArgumentException
     {
 
-		SharedUtil.checkIfNulls("Given number is empty or null.", in);
+		SUS.checkIfNulls("Given number is empty or null.", in);
 		
 		if (in.matches(PATTERN))
 		{

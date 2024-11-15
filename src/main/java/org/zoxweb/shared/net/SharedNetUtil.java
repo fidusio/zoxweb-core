@@ -1,11 +1,11 @@
 package org.zoxweb.shared.net;
 
-import java.io.IOException;
-import java.util.Arrays;
-
 import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedStringUtil;
 import org.zoxweb.shared.util.SharedUtil;
+
+import java.io.IOException;
+import java.util.Arrays;
 
 public class SharedNetUtil
 {
@@ -92,7 +92,7 @@ public class SharedNetUtil
   public static String toV4Address(byte[] address)
     throws IOException
   {
-    SharedUtil.checkIfNulls("Null address", address);
+    SUS.checkIfNulls("Null address", address);
     if (address.length != 4)
       throw new IOException("Invalid address length:" + address.length);
     
@@ -113,7 +113,7 @@ public class SharedNetUtil
   public static boolean belongsToNetwork(byte[] address, byte[] netmask, byte[] network)
       throws IOException
   {
-    SharedUtil.checkIfNulls("Network or IP adress can't be null", network, address);
+    SUS.checkIfNulls("Network or IP adress can't be null", network, address);
     byte[] tempNetwork = null;
     if ( netmask != null)
     {
@@ -183,7 +183,7 @@ public class SharedNetUtil
   
   public static boolean validateNIConfig(NIConfigDAO nicd) throws IOException
   {
-    SharedUtil.checkIfNulls("NIConfigDAO null", nicd, nicd.getInetProtocol());
+    SUS.checkIfNulls("NIConfigDAO null", nicd, nicd.getInetProtocol());
     if(SUS.isEmpty(nicd.getNIName()))
     {
      throw new IllegalArgumentException("Network Interface name invalid:" + nicd.getNIName()); 

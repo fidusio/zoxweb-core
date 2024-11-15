@@ -18,6 +18,7 @@ package org.zoxweb.shared.queue;
 import java.util.Date;
 import java.util.EventObject;
 
+import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedUtil;
 import org.zoxweb.shared.util.ToBytes;
 
@@ -47,7 +48,7 @@ public abstract class QueueEvent<V>
 	public QueueEvent(Object source, boolean persistent, int priority, Date timestamp, String correlationID, String replyTo, V content)
     {
 		this(source, persistent, priority, timestamp, correlationID, replyTo);
-		SharedUtil.checkIfNulls("Null content", content);
+		SUS.checkIfNulls("Null content", content);
 		this.content = content;
 	}
 	

@@ -383,7 +383,7 @@ public class JarTool {
 	public static byte[] gzip(byte[] content)
 			throws NullPointerException, IllegalArgumentException, IOException
 	{
-		SharedUtil.checkIfNulls("Can't zip null content", content);
+		SUS.checkIfNulls("Can't zip null content", content);
 
 		if (content.length == 0)
 		{
@@ -411,7 +411,7 @@ public class JarTool {
 	public static byte[] gunzip(byte[] content)
 			throws NullPointerException, IllegalArgumentException, IOException
 	{
-		SharedUtil.checkIfNulls("Can't zip null content", content);
+		SUS.checkIfNulls("Can't zip null content", content);
 
 		if (content.length == 0)
 		{

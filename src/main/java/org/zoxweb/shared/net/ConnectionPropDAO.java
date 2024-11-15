@@ -18,7 +18,7 @@ package org.zoxweb.shared.net;
 import org.zoxweb.shared.net.InetProp.NICategory;
 import org.zoxweb.shared.net.InetProp.NIStatus;
 import org.zoxweb.shared.net.InetProp.NIType;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.SUS;
 
 public class ConnectionPropDAO
 {
@@ -61,7 +61,7 @@ public class ConnectionPropDAO
 	 * @param name
 	 */
 	public void setName(String name) {
-		SharedUtil.checkIfNulls("Can't have a null name",name);
+		SUS.checkIfNulls("Can't have a null name",name);
 		this.name = name;
 	}
 	
@@ -77,7 +77,7 @@ public class ConnectionPropDAO
 	 * @param category
 	 */
 	public void setCategory(NICategory category) {
-		SharedUtil.checkIfNulls("Can't have a null category",category);
+		SUS.checkIfNulls("Can't have a null category",category);
 		this.category = category;
 	}
 
@@ -93,7 +93,7 @@ public class ConnectionPropDAO
 	 * @param type
 	 */
 	public void setType(NIType type) {
-		SharedUtil.checkIfNulls("Can have a null type",type);
+		SUS.checkIfNulls("Can have a null type",type);
 		this.type = type;
 	}
 	
@@ -104,7 +104,7 @@ public class ConnectionPropDAO
 	 */
 	protected void changeStatus(NIStatus status)
 		throws NullPointerException {
-		SharedUtil.checkIfNulls("Can't change null to null status", status);
+		SUS.checkIfNulls("Can't change null to null status", status);
 		this.status = status;
 	}
 

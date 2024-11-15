@@ -3,6 +3,7 @@ package org.zoxweb.server.http;
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.server.util.GSONUtil;
+import org.zoxweb.shared.http.HTTPAuthorization;
 import org.zoxweb.shared.http.HTTPMessageConfigInterface;
 import org.zoxweb.shared.http.HTTPResponseData;
 import org.zoxweb.shared.util.*;
@@ -20,10 +21,10 @@ public final class HTTPAPIManager
     public static final HTTPAPIManager SINGLETON = new HTTPAPIManager();
 
     private final Map<String, Set<HTTPAPIEndPoint<?,?>>> groups = new ConcurrentSkipListMap<>();
+
     //private final Map<String, HTTPAPIEndPoint<?,?>> map = new LinkedHashMap<String, HTTPAPIEndPoint<?,?>>();
 
-    public static final DataDecoder<HTTPResponseData, NVGenericMap> NVGM_DECODER = (input)->
-            GSONUtil.fromJSONDefault(input.getDataAsString(), NVGenericMap.class, true);
+
 
 
     private HTTPAPIManager()
@@ -69,8 +70,8 @@ public final class HTTPAPIManager
         GetNameValue<String> id = nvgm.lookup("id");
         if (id != null)
         {
-            if ("NVGM_DECODER".equals(id.getValue()))
-                return (V) NVGM_DECODER;
+            if ("NVGM_DECODER_PAS".equals(id.getValue()))
+                return (V) HTTPCodecs.NVGMDecoderPAS;
         }
 
         String metaType = nvgm.getValue("meta_type");
@@ -133,7 +134,6 @@ public final class HTTPAPIManager
                 return super.unregister(name);
             }
         }
-
         return null;
     }
 
@@ -173,10 +173,8 @@ public final class HTTPAPIManager
     }
 
 
-    public HTTPAPIEndPoint[] getDomainEndPoints(String domain)
+    public HTTPAPIEndPoint[] getDomainEndPoints(String domain, boolean copy)
     {
-
-
         List<HTTPAPIEndPoint> ret = new ArrayList<>();
         domain = SharedStringUtil.trimOrNull(domain);
         if (domain != null) {
@@ -185,12 +183,22 @@ public final class HTTPAPIManager
                 Set<Map.Entry<String, HTTPAPIEndPoint<?,?>>> entries = entrySet();
                 for (Map.Entry<String, HTTPAPIEndPoint<?,?>> entry : entries) {
                     if (entry.getKey().startsWith(domain))
-                        ret.add(entry.getValue());
+                        ret.add(copy ? entry.getValue().copy(true) : entry.getValue());
                 }
             }
         }
 
         return ret.toArray(new HTTPAPIEndPoint[0]);
+    }
+
+    public HTTPAPICaller createAPICaller(String domain, String name, HTTPAuthorization authorization)
+    {
+        HTTPAPIEndPoint[] domainEndPoints = getDomainEndPoints(domain, true);
+        Map<String, HTTPAPIEndPoint>  endPointMap = new HashMap<>();
+        for (HTTPAPIEndPoint haep : domainEndPoints)
+            endPointMap.put(haep.toCanonicalID(), haep);
+        return new HTTPAPICaller(name, endPointMap).setHTTPAuthorization(authorization).setDomain(domain);
+
     }
 
 }

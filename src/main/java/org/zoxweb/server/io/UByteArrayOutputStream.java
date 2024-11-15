@@ -15,6 +15,8 @@
  */
 package org.zoxweb.server.io;
 
+import org.zoxweb.shared.util.BytesArray;
+import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedStringUtil;
 import org.zoxweb.shared.util.SharedUtil;
 
@@ -518,7 +520,7 @@ public class UByteArrayOutputStream
 	 * @throws IOException is case error
 	 */
 	public synchronized int writeTo(OutputStream os, int blockSize, int maxBytes) throws IOException {
-		SharedUtil.checkIfNulls("Null outputStream", os);
+		SUS.checkIfNulls("Null outputStream", os);
 		if (blockSize < 1 || size() == 0 || maxBytes < 1 || maxBytes > size())
 			throw new IllegalArgumentException("Invalid block size: " + blockSize + " size: " + size());
 		if (blockSize > maxBytes)
@@ -539,6 +541,32 @@ public class UByteArrayOutputStream
 	}
 
 	/**
+	 * @param copy if true will return a copy of the data if false direct access to the internal buff in this mode use it with extreme care
+	 * @return BytesArray object of actual data
+	 */
+	public synchronized BytesArray toBytesArray(boolean copy)
+	{
+		return toBytesArray(copy, 0, size());
+	}
+
+	/**
+	 *
+	 * @param copy if true will return a copy of the data if false direct access to the internal buff in this mode use it with extreme care
+	 * @param offset offset
+	 * @param length length of data
+	 * @return BytesArray object of actual data, if copy is true the BytesArray.offset = 0 and BytesArray.length = length
+	 */
+	public synchronized BytesArray toBytesArray(boolean copy, int offset, int length)
+	{
+		if(copy)
+		{
+			return new BytesArray(copyBytes(offset, offset+length), 0, length);
+		}
+		return new BytesArray(getInternalBuffer(), offset, length);
+	}
+
+
+	/**
 	 * 
 	 * @param baos
 	 */
@@ -549,6 +577,7 @@ public class UByteArrayOutputStream
 		System.out.println("Buffer Length " + baos.buf.length);
 		System.out.println( new String(baos.buf, 0, baos.size()));
 	}
+
 
 
  

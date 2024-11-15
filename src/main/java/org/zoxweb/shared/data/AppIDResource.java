@@ -169,7 +169,7 @@ public class AppIDResource
     public static AppIDResource toAppID(String gid)
     {
         gid = SharedStringUtil.trimOrNull(gid);
-        SharedUtil.checkIfNulls("Null app global ig", gid);
+        SUS.checkIfNulls("Null app global ig", gid);
         int sepIndex = gid.lastIndexOf(ShiroBase.CAN_ID_SEP);
         if (sepIndex < 1 || sepIndex + 1 == gid.length())
             throw new IllegalArgumentException("Illegal gid:"+ gid);

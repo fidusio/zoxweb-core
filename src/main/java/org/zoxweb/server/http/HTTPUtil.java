@@ -189,7 +189,7 @@ public class HTTPUtil
 
 	public static HTTPMessageConfigInterface buildJSONResponse(HTTPMessageConfigInterface hmci, Object content, HTTPStatusCode statusCode, GetNameValue<?> ...headers)
 	{
-		SharedUtil.checkIfNulls("HTTPStatusCode null", statusCode);
+		SUS.checkIfNulls("HTTPStatusCode null", statusCode);
 
 		if (hmci == null)
 			hmci = HTTPMessageConfig.createAndInit(null, null, (HTTPMethod) null);

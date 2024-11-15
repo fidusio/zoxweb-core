@@ -88,7 +88,7 @@ public class NIOSocket
 	
 	public SelectionKey addServerSocket(InetSocketAddress sa, int backlog, ProtocolFactory<?> psf) throws IOException
 	{
-		SharedUtil.checkIfNulls("Null values", sa, psf);
+		SUS.checkIfNulls("Null values", sa, psf);
 		ServerSocketChannel ssc = ServerSocketChannel.open();
 		ssc.bind(sa, backlog);
 		return addServerSocket(ssc, psf);
@@ -96,7 +96,7 @@ public class NIOSocket
 	
 	public SelectionKey addServerSocket(ServerSocketChannel ssc,  ProtocolFactory<?> psf) throws IOException
 	{
-		SharedUtil.checkIfNulls("Null values", ssc, psf);
+		SUS.checkIfNulls("Null values", ssc, psf);
 		
 		SelectionKey sk = selectorController.register(ssc, SelectionKey.OP_ACCEPT, psf, false);
 		logger.getLogger().info(ssc + " added");
@@ -106,7 +106,7 @@ public class NIOSocket
 
 	public SelectionKey addDatagramChannel(InetSocketAddress sa,  ProtocolFactory<?> psf) throws IOException
 	{
-		SharedUtil.checkIfNulls("Null values", sa, psf);
+		SUS.checkIfNulls("Null values", sa, psf);
 		DatagramChannel dc = DatagramChannel.open();
 		dc.socket().bind(sa);
 		
@@ -164,7 +164,7 @@ public class NIOSocket
 
 	public SelectionKey addDatagramChannel(DatagramChannel dc,  ProtocolFactory<?> psf) throws IOException
 	{
-		SharedUtil.checkIfNulls("Null values", dc, psf);
+		SUS.checkIfNulls("Null values", dc, psf);
 		SelectionKey sk = selectorController.register(dc, SelectionKey.OP_ACCEPT, psf, false);
 		logger.getLogger().info(dc + " added");
 		

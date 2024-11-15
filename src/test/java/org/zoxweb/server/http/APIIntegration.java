@@ -131,7 +131,7 @@ public class APIIntegration
                     .setScheduler(TaskUtil.defaultTaskScheduler())
                     .setDomain(domain);
            // System.out.println(GSONUtil.toJSONDefault(new RateController("klavio", "75/min")));
-            HTTPCallBack<NVGenericMap, NVGenericMap> callback = new HTTPCallBack<NVGenericMap, NVGenericMap>(parameters) {
+            HTTPCallback<NVGenericMap, NVGenericMap> callback = new HTTPCallback<NVGenericMap, NVGenericMap>(parameters) {
                 
                 @Override
                 public void exception(Exception e)
@@ -175,7 +175,7 @@ public class APIIntegration
             if(username != null && password != null)
             {
 
-                HTTPCallBack<NVGenericMap, NVGenericMap> loginCallback = new HTTPCallBack<NVGenericMap, NVGenericMap>() {
+                HTTPCallback<NVGenericMap, NVGenericMap> loginCallback = new HTTPCallback<NVGenericMap, NVGenericMap>() {
 
                     @Override
                     public void accept(HTTPAPIResult<NVGenericMap> apiResult)

@@ -18,6 +18,7 @@ package org.zoxweb.server.task;
 import org.zoxweb.server.util.DefaultEvenManager;
 import org.zoxweb.shared.data.events.BaseEventObject;
 import org.zoxweb.shared.data.events.EventListenerManager;
+import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedUtil;
 
 import java.util.concurrent.Executor;
@@ -372,7 +373,7 @@ public class TaskUtil
 
 	public static long completeTermination(ExecutorService execService, long timeToWait)
 	{
-		SharedUtil.checkIfNulls("ExecService is null", execService);
+		SUS.checkIfNulls("ExecService is null", execService);
 		if (timeToWait < 25)
 		{
 			throw new IllegalArgumentException("Invalid timeToWait < 25 millis " + timeToWait);

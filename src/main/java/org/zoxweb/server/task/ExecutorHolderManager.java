@@ -15,6 +15,9 @@
  */
 package org.zoxweb.server.task;
 
+import org.zoxweb.shared.util.LifeCycleMonitor;
+import org.zoxweb.shared.util.SUS;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
@@ -23,9 +26,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
-import org.zoxweb.shared.util.LifeCycleMonitor;
-import org.zoxweb.shared.util.SharedUtil;
 
 public class ExecutorHolderManager
     implements LifeCycleMonitor<ExecutorHolder<?>>, AutoCloseable {
@@ -63,8 +63,8 @@ public class ExecutorHolderManager
 	@SuppressWarnings("unchecked")
 	public <T extends Executor> T register(Executor exec, String name)
 			throws NullPointerException, IllegalArgumentException {
-		
-		SharedUtil.checkIfNulls("Executor cannot be null", exec);
+
+		SUS.checkIfNulls("Executor cannot be null", exec);
 
 		if (exec instanceof ExecutorHolder) {
 			throw new IllegalArgumentException("Cannot resigter an ExecutorHolder: " + exec);

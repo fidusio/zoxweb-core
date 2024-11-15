@@ -45,7 +45,7 @@ public class AppIDNameFilter
             return in.trim().toLowerCase();
         }
 
-		SharedUtil.checkIfNulls("Null App name", in);
+		SUS.checkIfNulls("Null App name", in);
 		
 		throw new IllegalArgumentException("Invalid App name " + in);
 	}

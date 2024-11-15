@@ -81,7 +81,7 @@ public class ShiroAssociationRule
 	public ShiroAssociationRule(String name, String associate, String associateRefType, String associatedTo, Status status, ShiroAssociationType at, Date expiration, CRUD crud)
 	{
 		this();
-		SharedUtil.checkIfNulls("Null parameters", name, associate, associatedTo, at, crud);
+		SUS.checkIfNulls("Null parameters", name, associate, associatedTo, at, crud);
 		setName(name);
 		setAssociate(associate);
 		setAssociatedTo(associatedTo);
@@ -100,7 +100,7 @@ public class ShiroAssociationRule
 	public ShiroAssociationRule(String name, ShiroDomain associate, ShiroAssociationType at, NVEntity associateTo)
 	{
 		this();
-		SharedUtil.checkIfNulls("Null parameters", name, associate, at, associateTo);
+		SUS.checkIfNulls("Null parameters", name, associate, at, associateTo);
 		if(associate == associateTo || associate.equals(associateTo))
 		{
 			throw new IllegalArgumentException("Invalid association rule");

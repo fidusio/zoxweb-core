@@ -22,6 +22,7 @@ import org.zoxweb.shared.api.APIServiceProvider;
 import org.zoxweb.shared.data.DataConst.APIProperty;
 import org.zoxweb.shared.util.Const;
 import org.zoxweb.shared.util.GetName;
+import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedUtil;
 
 import java.util.concurrent.atomic.AtomicLong;
@@ -97,7 +98,7 @@ public abstract class APIServiceProviderBase<V>
 	@SuppressWarnings("unchecked")
 	public <T> T lookupProperty(GetName propertyName) 
 	{
-		SharedUtil.checkIfNulls("Null property name", propertyName);
+		SUS.checkIfNulls("Null property name", propertyName);
 
 		if (propertyName instanceof APIProperty)
 		{

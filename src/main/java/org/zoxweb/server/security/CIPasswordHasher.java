@@ -4,6 +4,7 @@ import org.zoxweb.shared.crypto.CredentialHasher;
 import org.zoxweb.shared.crypto.CryptoConst;
 import org.zoxweb.shared.crypto.CIPassword;
 import org.zoxweb.shared.security.AccessException;
+import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedUtil;
 
 import java.security.NoSuchAlgorithmException;
@@ -86,7 +87,7 @@ implements CredentialHasher<CIPassword>
     }
 
     public CIPasswordHasher setHashType(CryptoConst.HASHType hashType) {
-        SharedUtil.checkIfNulls("Null hash type", hashType);
+        SUS.checkIfNulls("Null hash type", hashType);
         this.hashType = hashType;
         return this;
     }

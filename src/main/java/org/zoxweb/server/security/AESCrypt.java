@@ -18,8 +18,8 @@ package org.zoxweb.server.security;
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.io.UByteArrayOutputStream;
 import org.zoxweb.shared.util.Const.TypeInBytes;
+import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedStringUtil;
-import org.zoxweb.shared.util.SharedUtil;
 
 import javax.crypto.Cipher;
 import javax.crypto.Mac;
@@ -339,7 +339,7 @@ public class AESCrypt {
    * @throws UnsupportedEncodingException if UTF-16 encoding is not supported.
    */
   public void setPassword(byte pass[]) throws UnsupportedEncodingException {
-    SharedUtil.checkIfNulls("Can't have a null password", pass);
+    SUS.checkIfNulls("Can't have a null password", pass);
     this.password = pass;
     dbg("Using password: ", this.password);
   }

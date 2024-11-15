@@ -71,7 +71,7 @@ public class RateController
 
     public RateController setRCType(RCType type)
     {
-        SharedUtil.checkIfNulls("Null type", type);
+        SUS.checkIfNulls("Null type", type);
         this.type = type;
         return this;
     }
@@ -218,7 +218,7 @@ public class RateController
     }
     public synchronized RateController setRate(float rate, TimeUnit unit)
     {
-        SharedUtil.checkIfNulls("TimeUnit null", unit);
+        SUS.checkIfNulls("TimeUnit null", unit);
         this.rate = rate;
         this.unit = unit;
 

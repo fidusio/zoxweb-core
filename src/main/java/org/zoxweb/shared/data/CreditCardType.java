@@ -110,8 +110,8 @@ public enum CreditCardType
 	@Override
 	public CreditCardType validate(String ccNumber) 
 			throws NullPointerException, IllegalArgumentException 
-	{	
-		SharedUtil.checkIfNulls("Null credit card number", ccNumber);
+	{
+		SUS.checkIfNulls("Null credit card number", ccNumber);
 		ccNumber = SharedStringUtil.trimOrNull(ccNumber);
 		ccNumber = ccNumber.replaceAll("[ -]", "");
 		

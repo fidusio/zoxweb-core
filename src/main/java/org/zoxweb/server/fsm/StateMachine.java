@@ -1,10 +1,9 @@
 package org.zoxweb.server.fsm;
 
 import org.zoxweb.server.logging.LogWrapper;
-import org.zoxweb.shared.task.SupplierConsumerTask;
 import org.zoxweb.server.task.TaskSchedulerProcessor;
 import org.zoxweb.server.task.TaskUtil;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.task.SupplierConsumerTask;
 import org.zoxweb.shared.util.SUS;
 
 import java.util.LinkedHashMap;
@@ -42,7 +41,7 @@ public class StateMachine<C>
     public StateMachine(String name, TaskSchedulerProcessor taskSchedulerProcessor)
             throws NullPointerException
     {
-        SharedUtil.checkIfNulls("Name or TaskScheduler can't be null.", name, taskSchedulerProcessor);
+        SUS.checkIfNulls("Name or TaskScheduler can't be null.", name, taskSchedulerProcessor);
         this.name = name;
         this.tsp = taskSchedulerProcessor;
         //this.schedulerOnly = schedulerOnly;
@@ -53,7 +52,7 @@ public class StateMachine<C>
             throws NullPointerException
     {
         if(log.isEnabled()) log.getLogger().info(name + ":" + executor);
-        SharedUtil.checkIfNulls("Name or Executor can't be null.", name);
+        SUS.checkIfNulls("Name or Executor can't be null.", name);
         this.name = name;
         this.tsp = null;
         this.executor = executor;

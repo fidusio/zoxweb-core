@@ -10,6 +10,7 @@ import org.zoxweb.shared.security.JWTToken;
 import org.zoxweb.shared.util.Const.TimeInMillis;
 import org.zoxweb.shared.util.KVMapStore;
 import org.zoxweb.shared.util.KVMapStoreDefault;
+import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedUtil;
 
 import java.util.*;
@@ -52,7 +53,7 @@ implements KVMapStore<String, JWT>
 	
 	public JWTTokenCache(long expirationPeriod, TaskSchedulerProcessor tsp)
 	{
-		SharedUtil.checkIfNulls("TaskScheduler null", tsp);
+		SUS.checkIfNulls("TaskScheduler null", tsp);
 		
 		if (expirationPeriod <= 0)
 		{

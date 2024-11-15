@@ -20,6 +20,7 @@ import java.io.OutputStream;
 import java.util.UUID;
 
 import org.zoxweb.shared.util.ReferenceID;
+import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedUtil;
 
 @SuppressWarnings("serial")
@@ -50,7 +51,7 @@ public class ChunkedBuffer
 	 */
 	public ChunkedBuffer(byte content[], int chunkSize, String referenceID)
 	{
-		SharedUtil.checkIfNulls("Null content", content);
+		SUS.checkIfNulls("Null content", content);
 
 		if (chunkSize < 1)
 		{

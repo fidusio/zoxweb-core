@@ -16,6 +16,7 @@
 package org.zoxweb.shared.filters;
 
 import org.zoxweb.shared.data.PhoneDAO;
+import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedStringUtil;
 import org.zoxweb.shared.util.SharedUtil;
 
@@ -54,7 +55,7 @@ public class PhoneNumberFilterOLD
         throws NullPointerException, IllegalArgumentException
     {
 		num = SharedStringUtil.trimOrNull(num);
-		SharedUtil.checkIfNulls("Phone number empty or null", num);
+		SUS.checkIfNulls("Phone number empty or null", num);
 		
 		String number = num.replaceAll("[\\s-()]", "");
 		String[] code = number.split("[+]");

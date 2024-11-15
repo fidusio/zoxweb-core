@@ -15,8 +15,8 @@
  */
 package org.zoxweb.shared.filters;
 
+import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedStringUtil;
-import org.zoxweb.shared.util.SharedUtil;
 
 public enum AddressFilterType
     implements ValueFilter<String, String>
@@ -36,7 +36,7 @@ public enum AddressFilterType
         {
 
 			in = SharedStringUtil.trimOrNull(in);
-			SharedUtil.checkIfNulls("Postal code is null.", in);
+			SUS.checkIfNulls("Postal code is null.", in);
 			
 			in = in.toUpperCase();
 			
@@ -77,7 +77,7 @@ public enum AddressFilterType
         {
 			in = SharedStringUtil.trimOrNull(in);
 
-			SharedUtil.checkIfNulls("ZIP code is null.", in);
+			SUS.checkIfNulls("ZIP code is null.", in);
 			
 			if (in.matches(REGEX))
 			{

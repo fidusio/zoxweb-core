@@ -1,14 +1,14 @@
 package org.zoxweb.server.util;
 
-import java.io.IOException;
-import java.util.logging.Logger;
-
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.shared.data.RuntimeResultDAO;
-import org.zoxweb.shared.util.SharedUtil;
-import org.zoxweb.shared.util.TaskListener;
 import org.zoxweb.shared.util.Const.TimeInMillis;
+import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedStringUtil;
+import org.zoxweb.shared.util.TaskListener;
+
+import java.io.IOException;
+import java.util.logging.Logger;
 
 public class CronCommand 
 implements Runnable
@@ -47,7 +47,7 @@ implements Runnable
 	
 	public CronCommand(TaskListener<CronCommand, String> taskListener, int repeatCount, long delay, String command)
 	{
-		SharedUtil.checkIfNulls("Command cannot be null", SharedStringUtil.trimOrNull(command), taskListener);
+		SUS.checkIfNulls("Command cannot be null", SharedStringUtil.trimOrNull(command), taskListener);
 		if (repeatCount < 0 || delay < 0)
 		{
 			throw new IllegalArgumentException("Invalid dealy or repeatCount value");

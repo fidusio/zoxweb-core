@@ -153,7 +153,7 @@ public class SubjectAPIKey
     }
 
     public static SubjectAPIKey copy(SubjectAPIKey subjectAPIKey) {
-        SharedUtil.checkIfNulls("SubjectAPIKey is null.", subjectAPIKey);
+        SUS.checkIfNulls("SubjectAPIKey is null.", subjectAPIKey);
 
         SubjectAPIKey ret = new SubjectAPIKey();
         ret.setSubjectID(subjectAPIKey.getSubjectID());

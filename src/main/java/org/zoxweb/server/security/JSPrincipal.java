@@ -1,6 +1,7 @@
 package org.zoxweb.server.security;
 
 import org.zoxweb.shared.util.GetName;
+import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedStringUtil;
 import org.zoxweb.shared.util.SharedUtil;
 
@@ -13,7 +14,7 @@ public class JSPrincipal implements Principal, GetName
     private final String name;
     public JSPrincipal(String name)
     {
-        SharedUtil.checkIfNulls("Principal name can't be null", name);
+        SUS.checkIfNulls("Principal name can't be null", name);
         this.name = SharedStringUtil.toLowerCase(name);
     }
 

@@ -79,7 +79,7 @@ public class HTTPCall
 					OutputStream osBypass,
 					CloseEnabledInputStream contentAsIS)
 	{
-		SharedUtil.checkIfNulls("HTTPActionParameters can't be null", params);
+		SUS.checkIfNulls("HTTPActionParameters can't be null", params);
 		this.hcc = params;
 		this.urlOverride = urlOverride;
 		this.uriFilter = uriFilter;

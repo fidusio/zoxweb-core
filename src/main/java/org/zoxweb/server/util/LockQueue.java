@@ -19,6 +19,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.zoxweb.shared.util.Const;
+import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedUtil;
 import org.zoxweb.shared.util.SimpleQueue;
 
@@ -84,7 +85,7 @@ public class LockQueue
 	 */
 	public void queueLock(Lock lock)
     {
-		SharedUtil.checkIfNulls("Can't add null lock", lock);
+		SUS.checkIfNulls("Can't add null lock", lock);
 		lock.unlock();
 		queue.queue(lock);
 

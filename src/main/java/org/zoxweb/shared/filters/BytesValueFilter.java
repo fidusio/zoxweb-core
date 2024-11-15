@@ -15,22 +15,9 @@
  */
 package org.zoxweb.shared.filters;
 
+import org.zoxweb.shared.util.*;
+
 import java.io.UnsupportedEncodingException;
-
-
-
-
-import org.zoxweb.shared.util.BytesValue;
-import org.zoxweb.shared.util.GetValue;
-import org.zoxweb.shared.util.NVBase;
-import org.zoxweb.shared.util.NVBlob;
-import org.zoxweb.shared.util.NVDouble;
-import org.zoxweb.shared.util.NVFloat;
-import org.zoxweb.shared.util.NVInt;
-import org.zoxweb.shared.util.NVLong;
-import org.zoxweb.shared.util.NVPair;
-import org.zoxweb.shared.util.SharedStringUtil;
-import org.zoxweb.shared.util.SharedUtil;
 
 @SuppressWarnings("serial")
 public class BytesValueFilter
@@ -55,14 +42,14 @@ public class BytesValueFilter
 	public byte[] validate(Object in)
         throws NullPointerException, IllegalArgumentException
     {
-		SharedUtil.checkIfNulls("Null value", in);
+		SUS.checkIfNulls("Null value", in);
 
 		if (in instanceof GetValue)
 		{
 			in = ((GetValue)in).getValue();
 		}
 		
-		SharedUtil.checkIfNulls("GetValue.getValue() null", in);
+		SUS.checkIfNulls("GetValue.getValue() null", in);
 
 		if (in instanceof String)
 		{
@@ -123,7 +110,7 @@ public class BytesValueFilter
 
 	public static void setByteArrayToNVBase(NVBase<?> in, byte[] value)
     {
-		SharedUtil.checkIfNulls("Null NVBase<?>", in, value);
+		SUS.checkIfNulls("Null NVBase<?>", in, value);
 
 		if (in instanceof NVPair)
 		{
@@ -164,13 +151,13 @@ public class BytesValueFilter
 
 	public static Object bytesToValue(Class<?> in, byte[] value)
     {
-		SharedUtil.checkIfNulls("Null values", in, value);
+		SUS.checkIfNulls("Null values", in, value);
 		return bytesToValue(in, value, 0, value.length);
 	}
 	
 	public static Object bytesToValue(Class<?> in, byte[] value, int offset, int length)
     {
-		SharedUtil.checkIfNulls("Null values", in, value);
+		SUS.checkIfNulls("Null values", in, value);
 
 		if (String.class.equals(in))
 		{
@@ -218,7 +205,7 @@ public class BytesValueFilter
 	
 //	public static Object byteArrayToObject(Class<?> in, byte[] value)
 //	{
-//		SharedUtil.checkIfNulls("Null values", in, value);
+//		SUS.checkIfNulls("Null values", in, value);
 //		return byteArrayToObject(in, value, 0, value.length);
 //	}
 //	
@@ -226,7 +213,7 @@ public class BytesValueFilter
 //	
 //	public static Object byteArrayToObject(Class<?> in , byte[] value, int offset, int length)
 //	{
-//		SharedUtil.checkIfNulls("Null values", in, value);
+//		SUS.checkIfNulls("Null values", in, value);
 //		if (String.class.equals(in))
 //		{
 //			

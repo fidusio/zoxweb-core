@@ -15,6 +15,7 @@
  */
 package org.zoxweb.shared.filters;
 
+import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedUtil;
 
 @SuppressWarnings("serial")
@@ -62,7 +63,7 @@ public class ChainedFilter
 	public String validate(String in) 
         throws NullPointerException, IllegalArgumentException
     {
-		SharedUtil.checkIfNulls("Null or empty input", in);
+		SUS.checkIfNulls("Null or empty input", in);
 		
 		if (getValueFilters() != null)
 		{

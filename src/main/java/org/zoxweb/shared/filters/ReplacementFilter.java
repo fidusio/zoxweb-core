@@ -15,6 +15,7 @@
  */
 package org.zoxweb.shared.filters;
 
+import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedUtil;
 
 @SuppressWarnings("serial")
@@ -26,7 +27,7 @@ public class ReplacementFilter
 
 	public ReplacementFilter(String toReplace, String replacement)
     {
-		SharedUtil.checkIfNulls("params can't be null", toReplace, replacement);
+		SUS.checkIfNulls("params can't be null", toReplace, replacement);
 		this.replace = toReplace;
 		this.replacement = replacement;
 	}

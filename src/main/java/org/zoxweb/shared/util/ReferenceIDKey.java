@@ -33,7 +33,7 @@ public class ReferenceIDKey
 	
 	public ReferenceIDKey(ReferenceID<String> refID)
 	{
-		SharedUtil.checkIfNulls("Reference ID is null.", refID);
+		SUS.checkIfNulls("Reference ID is null.", refID);
 
 		if (refID.getReferenceID() == null)
 		{
@@ -45,7 +45,7 @@ public class ReferenceIDKey
 	
 	public ReferenceIDKey(String refID)
 	{
-        SharedUtil.checkIfNulls("Reference ID is null.", refID);
+		SUS.checkIfNulls("Reference ID is null.", refID);
 		this.refID = new ReferenceIDPortable<String>(refID);
 	}
 

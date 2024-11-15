@@ -16,6 +16,7 @@
 package org.zoxweb.server.api.provider.notification.smtp;
 
 import org.zoxweb.shared.filters.ValueFilter;
+import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedStringUtil;
 import org.zoxweb.shared.util.SharedUtil;
 
@@ -44,7 +45,7 @@ public class SMTPMessageIDFilter
 	public String validate(String[] v) 
         throws NullPointerException, IllegalArgumentException
 	{
-		SharedUtil.checkIfNulls("Null parameter", (Object) v);
+		SUS.checkIfNulls("Null parameter", (Object) v);
 
 		if (v.length == 0)
 		{

@@ -233,7 +233,7 @@ public class OkHTTPCall
 
 	public OkHTTPCall(OkHttpClient client, HTTPMessageConfigInterface hmci)
 	{
-		SharedUtil.checkIfNulls("HTTPMessageConfigInterface can't be null", hmci);
+		SUS.checkIfNulls("HTTPMessageConfigInterface can't be null", hmci);
 		this.hmci = hmci;
 		if (client == null) {
 			if (hmci.getProxyAddress() != null) {

@@ -6,6 +6,7 @@ import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.net.SelectorController;
 import org.zoxweb.shared.net.IPAddress;
+import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedUtil;
 
 import javax.net.ssl.SSLEngine;
@@ -55,7 +56,7 @@ public class SSLSessionConfig
 
     public SSLSessionConfig(SSLContextInfo sslContext)
     {
-        SharedUtil.checkIfNulls("sslContext null", sslContext);
+        SUS.checkIfNulls("sslContext null", sslContext);
         this.sslEngine = sslContext.newInstance();
     }
 

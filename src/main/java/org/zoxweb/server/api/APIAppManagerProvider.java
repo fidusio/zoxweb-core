@@ -94,7 +94,7 @@ public class APIAppManagerProvider
     
     public SubjectAPIKey createAppDeviceDAO(AppDeviceDAO appDeviceDAO)
             throws NullPointerException, IllegalArgumentException, AccessException, APIException{
-        SharedUtil.checkIfNulls("AppDeviceDAO is null", appDeviceDAO);
+        SUS.checkIfNulls("AppDeviceDAO is null", appDeviceDAO);
 
         if (appDeviceDAO.getAppID() == null || appDeviceDAO.getDomainID() == null)
         {
@@ -117,7 +117,7 @@ public class APIAppManagerProvider
     public SubjectAPIKey createSubjectAPIKey(SubjectAPIKey subjectAPIKey, Status status, long ttl)
             throws NullPointerException, IllegalArgumentException, AccessException, APIException
     {
-        SharedUtil.checkIfNulls("Null SubjectAPIKey", subjectAPIKey);
+        SUS.checkIfNulls("Null SubjectAPIKey", subjectAPIKey);
 
         if (subjectAPIKey.getSubjectID() == null) {
             subjectAPIKey.setSubjectID(IDGeneratorUtil.SHA256Base64.generateID());
@@ -185,7 +185,7 @@ public class APIAppManagerProvider
     
     public DeviceDAO lookupDeviceDAO(String deviceID)
     {
-    	 SharedUtil.checkIfNulls("Null SubjectAPIKey", deviceID);
+    	 SUS.checkIfNulls("Null SubjectAPIKey", deviceID);
     	 List<DeviceDAO> ret = getAPIDataStore().search(DeviceDAO.NVC_DEVICE_DAO, null, new QueryMatchString(RelationalOperator.EQUAL, deviceID, DeviceDAO.Param.SUBJECT_ID));
     	 
     	 if(ret != null && ret.size() == 1)
@@ -208,7 +208,7 @@ public class APIAppManagerProvider
     public static UserIDDAO lookupUserID(APIDataStore<?> apiDataStore, String subjectID, String ...params)
 			throws NullPointerException, IllegalArgumentException, AccessException, APIException
 	{
-		SharedUtil.checkIfNulls("subjectID null", apiDataStore, subjectID);
+		SUS.checkIfNulls("subjectID null", apiDataStore, subjectID);
 		QueryMatch<?> query;
 		if (FilterType.EMAIL.isValid(subjectID))
 		{
@@ -248,14 +248,14 @@ public class APIAppManagerProvider
 	public synchronized UserIDDAO lookupUserIDDAO(GetValue<String> subjectID, String ...params)
 			throws NullPointerException, IllegalArgumentException, AccessException
 	{
-		SharedUtil.checkIfNulls("DB or user ID null", subjectID);
+		SUS.checkIfNulls("DB or user ID null", subjectID);
 		return lookupUserIDDAO(subjectID.getValue(), params);
 	}
 	
 	public synchronized UserIDDAO createUserIDDAO(UserIDDAO userID, CryptoConst.SubjectStatus userIDStatus, String password)
 			throws NullPointerException, IllegalArgumentException, AccessException, APIException
 	{
-		SharedUtil.checkIfNulls("UserIDDAO object is null.", userID, userIDStatus);
+		SUS.checkIfNulls("UserIDDAO object is null.", userID, userIDStatus);
 
 		// validate the password
 		password = FilterType.PASSWORD.validate(password);
@@ -349,7 +349,7 @@ public class APIAppManagerProvider
 		// of the super admin can delete user
 		getAPISecurityManager().checkPermissions(SecurityModel.Permission.USER_DELETE.getValue());
 		
-		SharedUtil.checkIfNulls("subjectID null", subjectID);
+		SUS.checkIfNulls("subjectID null", subjectID);
 		UserIDDAO userID = lookupUserIDDAO(subjectID);
 		if (userID == null)
 		{
@@ -435,7 +435,7 @@ public class APIAppManagerProvider
     public JWT validateJWT(String token)
             throws NullPointerException, IllegalArgumentException, AccessException, APIException{
 		throw new IllegalArgumentException("Not implemented yet");
-//        SharedUtil.checkIfNulls("Null Token", token);
+//        SUS.checkIfNulls("Null Token", token);
 //        JWT jwt;
 //        try {
 //            jwt = CryptoUtil.parseJWT(token);
@@ -495,8 +495,8 @@ public class APIAppManagerProvider
 //    @Override
 //    public UserIDDAO createUserIDDAO(UserIDDAO userIDDAO, String password)
 //            throws NullPointerException, IllegalArgumentException, AccessException, APIException {
-//        SharedUtil.checkIfNulls("UserIDDAO is null.", userIDDAO);
-//        SharedUtil.checkIfNulls("Password is null.", password);
+//        SUS.checkIfNulls("UserIDDAO is null.", userIDDAO);
+//        SUS.checkIfNulls("Password is null.", password);
 //
 //        password = FilterType.PASSWORD.validate(password);
 //
@@ -554,8 +554,8 @@ public class APIAppManagerProvider
   
     public SubjectPreference lookupUserPreferenceDAO(AppIDDAO appIDDAO, UserIDDAO userIDDAO)
             throws NullPointerException, IllegalArgumentException, AccessException, APIException {
-        SharedUtil.checkIfNulls("AppIDDAO is null", appIDDAO);
-        SharedUtil.checkIfNulls("UserIDDAO is null", userIDDAO);
+        SUS.checkIfNulls("AppIDDAO is null", appIDDAO);
+        SUS.checkIfNulls("UserIDDAO is null", userIDDAO);
 
         SubjectPreference ret = null;
 
@@ -648,8 +648,8 @@ public class APIAppManagerProvider
     
     public AppIDDAO lookupAppIDDAO(String domainID, String appID, boolean exceptionIfNotFound)
             throws NullPointerException, IllegalArgumentException, AccessException, APIException {
-//        SharedUtil.checkIfNulls("Domain ID is null", domainID);
-//        SharedUtil.checkIfNulls("App ID is null", appID);
+//        SUS.checkIfNulls("Domain ID is null", domainID);
+//        SUS.checkIfNulls("App ID is null", appID);
         domainID = FilterType.DOMAIN.validate(domainID);
         appID =  AppIDNameFilter.SINGLETON.validate(appID);
         
@@ -702,9 +702,9 @@ public class APIAppManagerProvider
     	
     	
 
-        SharedUtil.checkIfNulls("UserInfoDAO is null", userInfoDAO);
-        SharedUtil.checkIfNulls("AppDeviceDAO is null", appDeviceDAO);
-        SharedUtil.checkIfNulls("AppIDDAO is null", appDeviceDAO.getSubjectGUID());
+        SUS.checkIfNulls("UserInfoDAO is null", userInfoDAO);
+        SUS.checkIfNulls("AppDeviceDAO is null", appDeviceDAO);
+        SUS.checkIfNulls("AppIDDAO is null", appDeviceDAO.getSubjectGUID());
         if (SUS.isEmpty(subjectID) || SUS.isEmpty(password)) {
             throw new NullPointerException("Username and/or password is null");
         }
@@ -893,7 +893,7 @@ public class APIAppManagerProvider
     public synchronized AppIDDAO deleteAppIDDAO(String domainID, String appID)
     	throws NullPointerException, IllegalArgumentException, AccessException, APIException
     {
-    	SharedUtil.checkIfNulls("Null domain or app id", domainID, appID);
+    	SUS.checkIfNulls("Null domain or app id", domainID, appID);
     	getAPISecurityManager().checkPermissions(SecurityModel.Permission.APP_ID_DELETE.getValue());
     	AppIDDAO ret = lookupAppIDDAO(domainID, appID, true);
 //

@@ -146,7 +146,7 @@ public class CryptoUtil {
   public static EncryptedKey rekeyEncrytedKey(final EncryptedKey toBeRekeyed,
                                               String originalKey, String newKey)
       throws NullPointerException, IllegalArgumentException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
-    SharedUtil.checkIfNulls("Null parameter", originalKey, toBeRekeyed, newKey);
+    SUS.checkIfNulls("Null parameter", originalKey, toBeRekeyed, newKey);
     return rekeyEncrytedKey(toBeRekeyed, SharedStringUtil.getBytes(originalKey),
         SharedStringUtil.getBytes(newKey));
   }
@@ -154,7 +154,7 @@ public class CryptoUtil {
   public static EncryptedKey rekeyEncrytedKey(final EncryptedKey toBeRekeyed,
                                               final byte[] originalKey, final byte[] newKey)
       throws NullPointerException, IllegalArgumentException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
-    SharedUtil.checkIfNulls("Null parameter", originalKey, toBeRekeyed, newKey);
+    SUS.checkIfNulls("Null parameter", originalKey, toBeRekeyed, newKey);
     byte[] decyptedKey = decryptEncryptedData(toBeRekeyed, originalKey);
 
     return (EncryptedKey) encryptData(toBeRekeyed, newKey, decyptedKey);
@@ -208,7 +208,7 @@ public class CryptoUtil {
       IllegalBlockSizeException,
       BadPaddingException {
 
-    SharedUtil.checkIfNulls("Null key", key, ekd);
+    SUS.checkIfNulls("Null key", key, ekd);
 
     if (key.length < MIN_KEY_BYTES || hashIteration < 1) {
       throw new IllegalArgumentException(
@@ -733,9 +733,9 @@ public class CryptoUtil {
   public static String encodeJWT(byte[] key, JWT jwt, boolean setHash)
       throws   IOException,
       SecurityException, GeneralSecurityException {
-    SharedUtil.checkIfNulls("Null jwt", jwt);
-    SharedUtil.checkIfNulls("Null jwt header", jwt.getHeader());
-    SharedUtil.checkIfNulls("Null jwt algorithm", jwt.getHeader().getJWTAlgorithm());
+    SUS.checkIfNulls("Null jwt", jwt);
+    SUS.checkIfNulls("Null jwt header", jwt.getHeader());
+    SUS.checkIfNulls("Null jwt algorithm", jwt.getHeader().getJWTAlgorithm());
 
     StringBuilder sb = new StringBuilder();
     byte[] b64Header = SharedBase64.encode(Base64Type.URL,
@@ -755,7 +755,7 @@ public class CryptoUtil {
       case HS256:
       case HS384:
       case HS512:
-        SharedUtil.checkIfNulls("Null key", key);
+        SUS.checkIfNulls("Null key", key);
         Mac hmac = HashUtil.getMac(jwtAlgo.getSignatureAlgo());
         SecretKeySpec secret_key = new SecretKeySpec(key, jwtAlgo.getSignatureAlgo().getName());
         hmac.init(secret_key);
@@ -770,7 +770,7 @@ public class CryptoUtil {
       case ES256:
       case ES384:
       case ES512:
-        SharedUtil.checkIfNulls("Null key", key);
+        SUS.checkIfNulls("Null key", key);
         PrivateKey privateKey = CryptoUtil.generatePrivateKey(jwtAlgo.getSignatureAlgo().getCryptoAlgo().getName(), key);
         b64Hash = SharedBase64.encodeAsString(Base64Type.URL,
                                               CryptoUtil.sign(jwtAlgo.getSignatureAlgo(),
@@ -817,7 +817,7 @@ public class CryptoUtil {
       case HS256:
       case HS384:
       case HS512:
-        SharedUtil.checkIfNulls("Null key", key);
+        SUS.checkIfNulls("Null key", key);
         if (tokens.length != JWTField.values().length) {
           throw new SecurityException("Invalid token");
         }
@@ -845,7 +845,7 @@ public class CryptoUtil {
       case ES256:
       case ES384:
       case ES512:
-        SharedUtil.checkIfNulls("Null key", key);
+        SUS.checkIfNulls("Null key", key);
         if (tokens.length != JWTField.values().length) {
           throw new SecurityException("Invalid token");
         }
@@ -868,7 +868,7 @@ public class CryptoUtil {
 
   public static JWT parseJWT(String token)
       throws InstantiationException, IllegalAccessException, ClassNotFoundException, NullPointerException, IllegalArgumentException {
-    SharedUtil.checkIfNulls("Null token", token);
+    SUS.checkIfNulls("Null token", token);
     String[] tokens = token.trim().split("\\.");
 
     if (tokens.length < 2 || tokens.length > 3) {
@@ -896,8 +896,7 @@ public class CryptoUtil {
     jwtPayload.setProperties(nvgmPayload);
     jwtHeader.setProperties(nvgmHeader);
 
-    SharedUtil
-        .checkIfNulls("Null jwt header or parameters", jwtHeader, jwtHeader.getJWTAlgorithm());
+    SUS.checkIfNulls("Null jwt header or parameters", jwtHeader, jwtHeader.getJWTAlgorithm());
 //		JWT ret = new JWT();
     //ret.setHeader(jwtHeader);
     //ret.setPayload(jwtPayload);

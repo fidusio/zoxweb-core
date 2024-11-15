@@ -41,7 +41,7 @@ public class AppointmentComparator
 	@Override
 	public int compare(Appointment o1, Appointment o2)
     {
-		SharedUtil.checkIfNulls("Values can not be null", o1, o2);
+		SUS.checkIfNulls("Values can not be null", o1, o2);
 		return SharedUtil.signum(o1.getPreciseExpiration() - o2.getPreciseExpiration());
 	}
 

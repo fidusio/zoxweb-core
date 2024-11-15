@@ -28,7 +28,7 @@ import org.zoxweb.server.security.CryptoUtil;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.util.ParamUtil;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.SUS;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
@@ -138,7 +138,7 @@ public class SSLNIOSocketHandler
 	public SSLNIOSocketHandler(SSLContextInfo sslContext, SSLSessionCallback sessionCallback, boolean simpleStateMachine,
 							   IPAddress rc)
 	{
-		SharedUtil.checkIfNulls("context  can't be null", sslContext);
+		SUS.checkIfNulls("context  can't be null", sslContext);
 		this.sslContext = sslContext;
 		remoteConnection = rc;
 		this.simpleStateMachine = simpleStateMachine;
@@ -149,11 +149,11 @@ public class SSLNIOSocketHandler
 		}
 		else
 		{
-			SharedUtil.checkIfNulls("SSL session call can't be null", sessionCallback);
+			SUS.checkIfNulls("SSL session call can't be null", sessionCallback);
 			this.sessionCallback = sessionCallback;
 		}
 
-		SharedUtil.checkIfNulls("Session callback can't be null", this.sessionCallback);
+		SUS.checkIfNulls("Session callback can't be null", this.sessionCallback);
 	}
 	
 	@Override

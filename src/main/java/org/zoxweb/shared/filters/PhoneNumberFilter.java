@@ -15,6 +15,7 @@
  */
 package org.zoxweb.shared.filters;
 
+import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedStringUtil;
 import org.zoxweb.shared.util.SharedStringUtil.MatchToken;
 import org.zoxweb.shared.util.SharedUtil;
@@ -64,7 +65,7 @@ public class PhoneNumberFilter
         throws NullPointerException, IllegalArgumentException
     {
 
-		SharedUtil.checkIfNulls("Number is null.", in);
+		SUS.checkIfNulls("Number is null.", in);
 	
 		String number = in;
 

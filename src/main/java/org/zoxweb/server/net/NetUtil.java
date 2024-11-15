@@ -19,7 +19,7 @@ import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.shared.net.*;
 import org.zoxweb.shared.net.InetProp.*;
 import org.zoxweb.shared.security.SecurityStatus;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.SUS;
 
 import java.io.Closeable;
 import java.io.FileReader;
@@ -174,7 +174,7 @@ public class NetUtil
 	public static boolean belongsToNetwork(byte[] network, byte[] networkMask, String ipAddress)
 			throws IOException
 	{
-		SharedUtil.checkIfNulls("Network or IP adress can't be null", network, ipAddress);
+		SUS.checkIfNulls("Network or IP adress can't be null", network, ipAddress);
 		byte[] tempNetwork = null;
 		if ( networkMask != null)
 		{
@@ -519,7 +519,7 @@ public class NetUtil
 	
 	public static InetAddressDAO toInetAddressDAO(String str) throws IOException
 	{
-		SharedUtil.checkIfNulls("Null address", str);
+		SUS.checkIfNulls("Null address", str);
 		InetAddressDAO ret = new InetAddressDAO();
 		ret.setInetAddress(str);
 		ret.setIPVersion(InetAddress.getByName(str) instanceof Inet4Address ? IPVersion.V4 : IPVersion.V6);
@@ -528,8 +528,8 @@ public class NetUtil
 	}
 	
 	public static InetAddressDAO toInetAddressDAO(InetAddress addr) throws IOException
-	{	
-		SharedUtil.checkIfNulls("Null address", addr);
+	{
+		SUS.checkIfNulls("Null address", addr);
 		InetAddressDAO ret = new InetAddressDAO();
 		ret.setInetAddress(addr.getHostAddress());
 		ret.setIPVersion(addr instanceof Inet4Address ? IPVersion.V4 : IPVersion.V6);

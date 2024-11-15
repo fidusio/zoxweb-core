@@ -1,5 +1,6 @@
 package org.zoxweb.shared.security;
 
+import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedUtil;
 
 public final class JWTEncoderData 
@@ -9,7 +10,7 @@ public final class JWTEncoderData
 	
 	public JWTEncoderData(byte[] key, JWT jwt)
 	{
-		SharedUtil.checkIfNulls("Null constructor parameter", key, jwt);
+		SUS.checkIfNulls("Null constructor parameter", key, jwt);
 		this.key = key;
 		this.jwt = jwt;
 	}
