@@ -74,6 +74,7 @@ public final class GSONUtil
 	
 	private final static Gson DEFAULT_GSON = new GsonBuilder()
 			.registerTypeAdapter(NVGenericMap.class, new NVGenericMapSerDeserializer())
+			//.registerTypeAdapter(NVGenericMapList.class, new NVGenericMapListSerDeserializer())
 			.registerTypeHierarchyAdapter(NVEntity.class, new NVEntitySerDeserializer())
 			.registerTypeAdapter(Date.class, new DateSerDeserializer())
 											//.registerTypeAdapter(Enum.class, new EnumSerDeserializer()
@@ -83,6 +84,7 @@ public final class GSONUtil
 	private final static Gson DEFAULT_GSON_NVGM_PRIMITIVE_AS_STRING = new GsonBuilder()
 
 			.registerTypeAdapter(NVGenericMap.class, new NVGenericMapPrimitiveAsStringSerDeserializer())
+			//.registerTypeAdapter(NVGenericMapList.class, new NVGenericMapListSerDeserializer())
 			.registerTypeHierarchyAdapter(NVEntity.class, new NVEntityNVGMPrimitiveAsStringSerDeserializer())
 			.registerTypeAdapter(Date.class, new DateSerDeserializer())
 			//.registerTypeAdapter(Enum.class, new EnumSerDeserializer()
@@ -90,7 +92,8 @@ public final class GSONUtil
 
 	private final static Gson DEFAULT_GSON_PRETTY = new GsonBuilder()
 			.registerTypeAdapter(NVGenericMap.class, new NVGenericMapSerDeserializer())
-			.registerTypeHierarchyAdapter(NVEntity.class, new NVEntitySerDeserializer())
+			//.registerTypeHierarchyAdapter(NVEntity.class, new NVEntitySerDeserializer())
+			.registerTypeAdapter(NVGenericMapList.class, new NVGenericMapListSerDeserializer())
 			.registerTypeAdapter(Date.class, new DateSerDeserializer())
 			.setPrettyPrinting()
 			//.registerTypeAdapter(Enum.class, new EnumSerDeserializer()
@@ -128,6 +131,37 @@ public final class GSONUtil
         return fromJSONGenericMap((JsonObject)json, null, Base64Type.DEFAULT, false);
       }
 	  
+	}
+
+
+	public static class NVGenericMapListSerDeserializer implements JsonSerializer<NVGenericMapList>,JsonDeserializer<NVGenericMapList>
+	{
+
+		@Override
+		public JsonElement serialize(NVGenericMapList src, Type typeOfSrc,
+									 JsonSerializationContext context) {
+			// TODO Auto-generated method stub
+
+
+			JsonTreeWriter jtw = new JsonTreeWriter();
+			try {
+				toJSONGenericMapArray(jtw, src, false, false);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+			return jtw.get();
+		}
+
+		@Override
+		public NVGenericMapList deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+				throws JsonParseException
+		{
+			// TODO Auto-generated method stub
+			return new NVGenericMapList(null, fromJSONGenericMapArray(json, Base64Type.DEFAULT));
+		}
+
 	}
 
 //	public static class MetaTypeInterfaceSerDeserializer
@@ -416,6 +450,21 @@ public final class GSONUtil
 	{
 		List<NVGenericMap> ret = new ArrayList<NVGenericMap>();
 		JsonElement je =  JsonParser.parseString(json);
+		if (je instanceof JsonArray)
+		{
+			JsonArray ja = (JsonArray) je;
+			for (int i = 0; i < ja.size(); i++)
+			{
+				JsonObject jo = (JsonObject) ja.get(i);
+				ret.add(fromJSONGenericMap(jo, null, b64Type, false));
+			}
+		}
+		return ret;
+	}
+
+	public static List<NVGenericMap> fromJSONGenericMapArray(JsonElement je, Base64Type b64Type)
+	{
+		List<NVGenericMap> ret = new ArrayList<NVGenericMap>();
 		if (je instanceof JsonArray)
 		{
 			JsonArray ja = (JsonArray) je;
@@ -963,6 +1012,17 @@ public final class GSONUtil
 		toJSONGenericMap(writer, nvgm,  printNull, printClassType);
 		writer.close();
 		return sw.toString();
+	}
+
+	private static JsonWriter toJSONGenericMapArray(JsonWriter writer, NVGenericMapList nvgmList,  boolean printNull, boolean printClassType) throws IOException {
+		writer.beginArray();
+		for (NVGenericMap nvgm : nvgmList.getValue())
+		{
+			toJSONGenericMap(writer, nvgm, printNull, printClassType);
+		}
+
+		writer.endArray();
+		return writer;
 	}
 	
 	private static JsonWriter toJSONGenericMap(JsonWriter writer, NVGenericMap nvgm,  boolean printNull, boolean printClassType) throws IOException

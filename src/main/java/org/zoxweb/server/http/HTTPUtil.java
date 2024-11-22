@@ -733,6 +733,24 @@ public class HTTPUtil
 		return ret;
 	}
 
+
+	public static List<String> parseURIParameters(String uri)
+	{
+		List<String> ret = new ArrayList<>();
+		String[] paramNames = uri.split("/");
+
+		for(int i = 0; i < paramNames.length; i++)
+		{
+			List<CharSequence> ch = SharedStringUtil.parseGroup(paramNames[i], "{","}", false);
+			if(ch.size() == 1)
+			{
+				String name = ch.get(0).toString();
+				ret.add(name);
+			}
+		}
+		return ret;
+	}
+
 //	public static NVGenericMap parsePathParameters(String pathWithMetas, String pathWithValues, ReflectionUtil.MethodAnnotations metaData)
 //	{
 //		NVGenericMap nvgm = new NVGenericMap();
@@ -908,6 +926,38 @@ public class HTTPUtil
 		}
 
 		return urlURI;
+	}
+
+	public static String formatURI(String uri, NVGenericMap parameters)
+			throws UnsupportedEncodingException
+	{
+		if(uri != null && parameters != null)
+		{
+			List<String> paramNames = parseURIParameters(uri);
+			for (String paramName : paramNames)
+			{
+				Object value = parameters.getValue(paramName);
+				uri = SharedStringUtil.embedText(uri, "{" + paramName + "}",
+						value != null ? URLEncoder.encode("" + value, SharedStringUtil.UTF_8) : "");
+			}
+		}
+		return uri;
+	}
+
+	public static String formatURI(String uri, Map<String, Object> parameters)
+			throws UnsupportedEncodingException
+	{
+		if(uri != null & parameters != null)
+		{
+			List<String> paramNames = parseURIParameters(uri);
+			for (String paramName : paramNames)
+			{
+				Object value = parameters.get(paramName);
+				uri = SharedStringUtil.embedText(uri, "{" + paramName + "}",
+						value != null ? URLEncoder.encode("" + value, SharedStringUtil.UTF_8) : "");
+			}
+		}
+		return uri;
 	}
 
 

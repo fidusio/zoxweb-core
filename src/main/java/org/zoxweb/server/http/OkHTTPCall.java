@@ -100,7 +100,8 @@ public class OkHTTPCall
 					}
 				}
 			}
-			finally {
+			finally
+			{
 				IOUtil.close(is);
 				if(log.isEnabled()) log.getLogger().info("TotalRead :" + totalRead + " content-length: " + contentLength());
 			}
@@ -235,23 +236,22 @@ public class OkHTTPCall
 	{
 		SUS.checkIfNulls("HTTPMessageConfigInterface can't be null", hmci);
 		this.hmci = hmci;
-		if (client == null) {
-			if (hmci.getProxyAddress() != null) {
+		if (client == null)
+		{
+			if (hmci.getProxyAddress() != null)
+			{
 				long timeout = hmci.getTimeout();
-				if (timeout == 0) {
+				if (timeout == 0)
 					timeout = HTTPMessageConfigInterface.DEFAULT_TIMEOUT_20_SECOND;
-				} else {
+				else
 					timeout = TimeUnit.SECONDS.convert(timeout, TimeUnit.MILLISECONDS);
-				}
 				okHttpClient = createOkHttpBuilder(null, hmci.getProxyAddress(), timeout, !hmci.isSecureCheckEnabled(), 0, 0).build();
-			} else {
-				okHttpClient = hmci.isSecureCheckEnabled() ? sslEnabledClient : sslDisabledClient;
 			}
+			else
+				okHttpClient = hmci.isSecureCheckEnabled() ? sslEnabledClient : sslDisabledClient;
 		}
 		else
-		{
 			okHttpClient = client;
-		}
 
 	}
 
@@ -289,10 +289,7 @@ public class OkHTTPCall
 			requestBuilder.addHeader(gnv.getName(), gnv.getValue());
 		}
 
-
-
-		String fullURL = SharedStringUtil.concat(hmci.getURL(), hmci.getURI(), "/");
-
+		String fullURL = HTTPUtil.formatURI(SharedStringUtil.concat(hmci.getURL(), hmci.getURI(), "/"), hmci.getParameters());
 		String urlEncodedParameter = null;
 		// set the url
 		// if method is get and hmci.isURLEncodingEnabled() merge uri + encoded parameters

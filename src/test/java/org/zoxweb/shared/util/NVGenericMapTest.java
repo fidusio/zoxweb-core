@@ -121,7 +121,7 @@ public class NVGenericMapTest
 
 
 	@Test
-	public void composedtest()
+	public void composedTest()
 	{
 		try
 		{
@@ -214,5 +214,17 @@ public class NVGenericMapTest
 		{
 			e.printStackTrace();
 		}
+	}
+
+
+
+	@Test
+	public void toJSON()
+	{
+		NVGenericMap nvgm = new NVGenericMap().build("name", "mario").build("lastname", "taza");
+		System.out.println(GSONUtil.toJSONDefault(nvgm, true));
+		nvgm.remove("lastname");
+		System.out.println(GSONUtil.toJSONDefault(nvgm, true));
+
 	}
 }

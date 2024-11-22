@@ -10,7 +10,6 @@ import org.zoxweb.shared.util.SharedBase64.Base64Type;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.List;
 
 
 public final class HTTPCodecs {
@@ -24,29 +23,25 @@ public final class HTTPCodecs {
   };
 
   public static final DataDecoder<HTTPResponseData, NVGenericMap> HRDToNVGM = (input) -> {
-    return GSONUtil
-        .fromJSONGenericMap(SharedStringUtil.toString(input.getData()), null, Base64Type.DEFAULT);
+    return GSONUtil.fromJSONDefault(input.getDataAsString(), NVGenericMap.class);
   };
 
 
   public static final DataDecoder<HTTPResponseData, NVGenericMap> NVGMDecoderPAS = (input)->
           GSONUtil.fromJSONDefault(input.getDataAsString(), NVGenericMap.class, true);
 
-  public static final DataDecoder<HTTPResponseData, List<NVGenericMap>> HRDToNVGMList = (input) -> {
-    return GSONUtil
-        .fromJSONGenericMapArray(SharedStringUtil.toString(input.getData()), Base64Type.DEFAULT);
-  };
-
-  public static final DataDecoder<byte[], NVEntity> BytesToNVE = (input) -> {
-    return GSONUtil.fromJSON(input);
-  };
-
-  public static final DataDecoder<HTTPResponseData, NVEntity> HRDToNVE = (input) -> {
-    return GSONUtil.fromJSON(input.getData());
-  };
+  public static final DataDecoder<HTTPResponseData, NVGenericMapList> HRDToNVGMList = (input) -> GSONUtil.fromJSONDefault(input.getDataAsString(), NVGenericMapList.class);
 
 
-  public static final DataDecoder<HTTPRawMessage, HTTPMessageConfigInterface> WWW_URL_ENC = (hrm) ->{
+  public static final DataDecoder<byte[], NVEntity> BytesToNVE = (input) -> GSONUtil.fromJSON(input);
+
+
+  public static final DataDecoder<HTTPResponseData, NVEntity> HRDToNVE = (input) -> GSONUtil.fromJSON(input.getData());
+
+
+
+  public static final DataDecoder<HTTPRawMessage, HTTPMessageConfigInterface> WWW_URL_ENC = (hrm) ->
+  {
     HTTPMessageConfigInterface hmci = hrm.getHTTPMessageConfig();
     switch(hmci.getMethod())
     {
@@ -70,7 +65,8 @@ public final class HTTPCodecs {
 
 
 
-  public static final DataDecoder<HTTPRawMessage, HTTPMessageConfigInterface> MULTIPART_FORM_DATA = (hrm) ->{
+  public static final DataDecoder<HTTPRawMessage, HTTPMessageConfigInterface> MULTIPART_FORM_DATA = (hrm) ->
+  {
 
     HTTPMessageConfigInterface hmci = hrm.getHTTPMessageConfig();
     switch(hmci.getMethod())

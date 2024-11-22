@@ -68,13 +68,16 @@ public class HTTPAPIEndPoint<I,O>
     public HTTPAPIEndPoint<I,O> copy(boolean newRateController)
     {
         HTTPAPIEndPoint<I,O> ret = new HTTPAPIEndPoint<>(config, positiveResults);
-        ret.setDataEncoder(dataEncoder);
-        ret.setDataDecoder(dataDecoder);
+        ret.setName(getName())
+                .setDescription(getDescription())
+                .setDataEncoder(dataEncoder)
+                .setDataDecoder(dataDecoder);
         ret.executor = executor;
         ret.tsp = tsp;
         ret.okHttpClient = okHttpClient;
         ret.properties = NVGenericMap.copy(properties, true);
         ret.domain = domain;
+
         if (rateController != null && newRateController)
         {
             ret.setRateController(new RateController(rateController.getName(), rateController.getRate(), rateController.getRateUnit()));
@@ -92,7 +95,7 @@ public class HTTPAPIEndPoint<I,O>
             this.positiveResults = new HashMap<>();
     }
 
-    public HTTPAPIEndPoint(HTTPMessageConfigInterface config )
+    public HTTPAPIEndPoint(HTTPMessageConfigInterface config)
     {
         this(config, null);
     }

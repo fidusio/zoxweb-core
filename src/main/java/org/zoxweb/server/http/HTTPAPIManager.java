@@ -109,13 +109,30 @@ public final class HTTPAPIManager
     }
 
 
-    public synchronized  <I,O> HTTPAPIManager register(HTTPAPIEndPoint<I,O> apiEndPoint)
+    public  <I,O> HTTPAPIEndPoint<I, O> buildEndPoint(String name,
+                                                      String domain,
+                                                      String description,
+                                                      HTTPMessageConfigInterface config)
     {
-        return register(null, apiEndPoint);
+        return (HTTPAPIEndPoint<I, O>) new HTTPAPIEndPoint<>(config)
+                .setName(name)
+                .setDomain(domain)
+                .setDescription(description);
+    }
+
+    public  <I,O> HTTPAPIEndPoint<I, O> buildEndPoint(GetName gn,
+                                                      String domain,
+                                                      String description,
+                                                      HTTPMessageConfigInterface config)
+    {
+        return buildEndPoint(gn.getName(), domain, description, config);
     }
 
 
-    public synchronized  <I,O> HTTPAPIManager register(String groupName, HTTPAPIEndPoint<I,O> apiEndPoint)
+
+
+
+    public synchronized  <I,O> HTTPAPIManager register(HTTPAPIEndPoint<I,O> apiEndPoint)
     {
         if (apiEndPoint.toCanonicalID() != null)
         {
@@ -196,7 +213,10 @@ public final class HTTPAPIManager
         HTTPAPIEndPoint[] domainEndPoints = getDomainEndPoints(domain, true);
         Map<String, HTTPAPIEndPoint>  endPointMap = new HashMap<>();
         for (HTTPAPIEndPoint haep : domainEndPoints)
+        {
+            log.getLogger().info(haep.toCanonicalID());
             endPointMap.put(haep.toCanonicalID(), haep);
+        }
         return new HTTPAPICaller(name, endPointMap).setHTTPAuthorization(authorization).setDomain(domain);
 
     }

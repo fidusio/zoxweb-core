@@ -16,7 +16,7 @@ public class HTTPAPICaller
     public static class Callback<I,O>
         extends HTTPCallback<I,O>
     {
-        private ConsumerCallback<O> callback;
+        private final ConsumerCallback<O> callback;
 
         private Callback(I input, ConsumerCallback<O> callback)
         {
@@ -37,7 +37,7 @@ public class HTTPAPICaller
         }
 
         /**
-         * @param
+         * @param e exception tha occurred
          */
         @Override
         public void exception(Exception e)
@@ -56,7 +56,7 @@ public class HTTPAPICaller
 
     private OkHttpClient okHttpClient;
 
-    private final Map<String, HTTPAPIEndPoint> endpoints;
+    private final Map<String, HTTPAPIEndPoint> endPoints;
 
 
 
@@ -70,7 +70,7 @@ public class HTTPAPICaller
     protected HTTPAPICaller(String name, String description, Map<String, HTTPAPIEndPoint> endpoints)
     {
         namedDescription = new NamedDescription(name.toLowerCase().trim(), description);
-        this.endpoints = endpoints;
+        this.endPoints = endpoints;
     }
 
     /**
@@ -140,17 +140,21 @@ public class HTTPAPICaller
     public HTTPAPICaller updateURL(String url)
     {
         url = FilterType.URL.validate(url);
-        for(HTTPAPIEndPoint<?,?> haep : endpoints.values())
+        for(HTTPAPIEndPoint<?,?> haep : endPoints.values())
             haep.getConfig().setURL(url);
 
         return this;
     }
 
 
+    public <I,O> HTTPCallback<I,O> asyncCall(GetName endpointName, I input, ConsumerCallback<O> consumerCallback)
+    {
+        return asyncCall(endpointName.getName(),input, consumerCallback);
+    }
 
     public <I,O> HTTPCallback<I,O> asyncCall(String endpointName, I input, ConsumerCallback<O> consumerCallback)
     {
-        HTTPAPIEndPoint<I,O> endPoint = endpoints.get(SUS.toCanonicalID('.', domain, endpointName));
+        HTTPAPIEndPoint<I,O> endPoint = endPoints.get(SUS.toCanonicalID('.', domain, endpointName));
         if (endPoint == null)
             throw new IllegalArgumentException("endpoint " + endpointName + " not found");
         Callback<I,O> callback = new Callback<>(input, consumerCallback);
@@ -159,10 +163,20 @@ public class HTTPAPICaller
     }
 
 
+    public <I,O> O syncCall(GetName endpointName, I input) throws IOException
+    {
+        return syncCall(endpointName.getName(), input);
+    }
+
 
     public <I,O> O syncCall(String endpointName, I input) throws IOException
     {
-        HTTPAPIEndPoint<I,O> endPoint = endpoints.get(SUS.toCanonicalID('.', domain, endpointName));
+        HTTPAPIEndPoint<I,O> endPoint = endPoints.get(SUS.toCanonicalID('.', domain, endpointName));
         return endPoint.syncCall(input, httpAuthorization).getData();
+    }
+
+    public <I,O> HTTPAPIEndPoint<I,O> lookupEndPoint(String endpointName)
+    {
+        return endPoints.get(SUS.toCanonicalID('.', domain, endpointName));
     }
 }

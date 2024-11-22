@@ -1,8 +1,12 @@
 package org.zoxweb.server.http;
 
 import org.junit.jupiter.api.Test;
+import org.zoxweb.shared.util.NVGenericMap;
+import org.zoxweb.shared.util.NVInt;
 
 
+import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
 import java.util.Map;
 
 public class PathParameterTest {
@@ -16,7 +20,7 @@ public class PathParameterTest {
     }
 
     @Test
-    public void parseParameters()
+    public void parseParametersWithValues()
     {
         String metaPath = "/path/{param1}/{param2}/token/{param3}";
         String[] dataPaths ={
@@ -33,6 +37,40 @@ public class PathParameterTest {
             System.out.println(result);
 
         }
+    }
+
+    @Test
+    public void parseFormatParameters() throws UnsupportedEncodingException {
+        String metaPath = "/path/{param1}/{param2}/token/{param3}";
+
+        System.out.println(HTTPUtil.parseURIParameters(metaPath));
+        NVGenericMap nvgm = new NVGenericMap().build("param1", "value1")
+                .build(new NVInt("param2", 25))
+                .build("param3", null);
+        String uri = HTTPUtil.formatURI(metaPath, nvgm);
+
+        System.out.println(metaPath);
+        System.out.println(uri);
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("param1", "batata");
+        params.put("param2", 1.75);
+        params.put("param3", true);
+
+        uri = HTTPUtil.formatURI(metaPath, params);
+
+        System.out.println(metaPath);
+        System.out.println(uri);
+        uri = HTTPUtil.formatURI(metaPath, params);
+
+        System.out.println(metaPath);
+        System.out.println(uri);
+        uri = HTTPUtil.formatURI(metaPath, new NVGenericMap());
+
+        System.out.println(metaPath);
+        System.out.println(uri);
+
+
     }
 
     @Test
