@@ -1,6 +1,8 @@
 package org.zoxweb.server.http;
 
 import okhttp3.OkHttpClient;
+import org.zoxweb.server.task.TaskSchedulerProcessor;
+import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.shared.filters.FilterType;
 import org.zoxweb.shared.http.HTTPAPIResult;
 import org.zoxweb.shared.http.HTTPAuthorization;
@@ -149,18 +151,34 @@ public class HTTPAPICaller
 
     public <I,O> HTTPCallback<I,O> asyncCall(GetName endpointName, I input, ConsumerCallback<O> consumerCallback)
     {
-        return asyncCall(endpointName.getName(),input, consumerCallback);
+        return asyncCall(endpointName.getName(), input, consumerCallback, 0);
     }
 
     public <I,O> HTTPCallback<I,O> asyncCall(String endpointName, I input, ConsumerCallback<O> consumerCallback)
+    {
+        return asyncCall(endpointName, input, consumerCallback, 0);
+    }
+
+    public <I,O> HTTPCallback<I,O> asyncCall(String endpointName, I input, ConsumerCallback<O> consumerCallback, long delayInMillis)
     {
         HTTPAPIEndPoint<I,O> endPoint = endPoints.get(SUS.toCanonicalID('.', domain, endpointName));
         if (endPoint == null)
             throw new IllegalArgumentException("endpoint " + endpointName + " not found");
         Callback<I,O> callback = new Callback<>(input, consumerCallback);
-        endPoint.asyncCall(callback, httpAuthorization);
+        // is different wait the delay then invoke
+        if(delayInMillis > 0)
+        {
+            TaskSchedulerProcessor tsp = endPoint.getScheduler() != null ? endPoint.getScheduler() : TaskUtil.defaultTaskScheduler();
+            tsp.queue(delayInMillis, () -> endPoint.asyncCall(callback, httpAuthorization));
+        }
+        else
+            endPoint.asyncCall(callback, httpAuthorization);
+
+
         return callback;
     }
+
+
 
 
     public <I,O> O syncCall(GetName endpointName, I input) throws IOException

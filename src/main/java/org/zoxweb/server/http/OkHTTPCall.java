@@ -60,7 +60,7 @@ public class OkHTTPCall
 		public MediaType contentType()
 		{
 			HTTPMediaType mt = namedValue.getProperties().getValue(HTTPConst.CNP.MEDIA_TYPE);
-			return MediaType.parse(mt.getValue());
+			return mt != null ? MediaType.parse(mt.getValue()) : null;
 		}
 
 		@Override

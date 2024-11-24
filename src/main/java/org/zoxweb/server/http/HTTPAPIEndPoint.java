@@ -202,6 +202,12 @@ public class HTTPAPIEndPoint<I,O>
         return this;
     }
 
+    public TaskSchedulerProcessor getScheduler()
+    {
+        return tsp;
+    }
+
+
 
 
 
@@ -294,20 +300,16 @@ public class HTTPAPIEndPoint<I,O>
 
     public HTTPAPIEndPoint<I,O> asyncCall(HTTPCallback<I,O> callback, HTTPAuthorization authorization, long delayInMillis)
     {
-
         ToRun toRun = new ToRun(callback, authorization);
 
         if(tsp != null)
-        {
             tsp.queue(delayInMillis, toRun);
-        }
         else if(executor != null)
             executor.execute(toRun);
         else
             throw new IllegalArgumentException("No executor or scheduler found can't execute");
 
         return this;
-
     }
 
 

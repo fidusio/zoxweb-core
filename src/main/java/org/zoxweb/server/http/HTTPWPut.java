@@ -1,272 +1,149 @@
-/*
- * Copyright (c) 2012-2017 ZoxWeb.com LLC.
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
- */
 package org.zoxweb.server.http;
 
-import org.zoxweb.server.net.ssl.SSLCheckDisabler;
-import org.zoxweb.shared.http.HTTPMediaType;
-import org.zoxweb.shared.http.HTTPMessageConfig;
-import org.zoxweb.shared.http.HTTPMethod;
-import org.zoxweb.shared.http.HTTPResponseData;
-import org.zoxweb.shared.util.GetNameValue;
-import org.zoxweb.shared.util.NVPair;
-import org.zoxweb.shared.util.SharedStringUtil;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.server.io.UByteArrayOutputStream;
+import org.zoxweb.shared.http.*;
+import org.zoxweb.shared.util.*;
 
-import java.io.*;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
-/**
- * JMPut: java mput is a command line form processor
- * @author mnael
- *
- */
-public class HTTPWPut 
-{
+public class HTTPWPut {
+    private static final String dummy = "abcdefghijklmnopqrstuvwxyz0123456789";
 
-	public static void error( String error)
-	{
-		if (error != null)
-		{
-			System.out.println("Error:" + error);
-		}
-		
-		System.out.println("usage: [-dSSL disable SSL check] [destination url] {[name=value parameters]}");
-		System.out.println("uploading a file: [-dSSL disable SSL check] [destination url] file.url=filename or [-dSSL disable SSL check] [destination url] file.url=file:///full_path file=filename");
-		System.exit(-1);
-	}
-	
-	
-	public static HTTPResponseData wPut(URL destURL, 
-				 					 	boolean disableSSLCheck, 
-				 					 	boolean isMultiPart,
-				 					 	String username,
-				 					 	String password,
-				 					 	List<GetNameValue<String>> headers, 
-				 					 	List<GetNameValue<String>> params) throws IOException
-	{
-		HTTPMessageConfig hcc = new HTTPMessageConfig();
-		hcc.setBasicAuthorization(username, password);
-		hcc.setMethod(HTTPMethod.POST);
-		hcc.setParameters(params);
-		
-		hcc.setURL(destURL.getProtocol() +"://"+ destURL.getHost() );
-		hcc.setURI(destURL.getPath());
-		if(isMultiPart)
-			hcc.setContentType(HTTPMediaType.MULTIPART_FORM_DATA);
-		//hcc.setMultiPartEncoding(isMutliPart);
+    public static class FileToData
+    {
 
-		if (headers != null)
-		{
-			hcc.setHeaders(headers);
-		}
+        private String filename;
+        private InputStream is;
+        private HTTPMediaType mediaType;
+        private final long length;
 
-		HTTPCall hc = new HTTPCall(hcc, disableSSLCheck ? SSLCheckDisabler.SINGLETON : null);
-		
-		//System.out.println( hcc);
-		return hc.sendRequest();
-	}
-	
-	public static void main(String ...args)
-	{
-		ArrayList <GetNameValue<String>> params = new ArrayList<GetNameValue<String>>();
-		ArrayList <GetNameValue<String>> hParams = new ArrayList<GetNameValue<String>>();
-		
-		URL destURL=null;
-		boolean disableSSL = false;
-		boolean multipart = false;
-		String user = null;
-		String password = null;
-		
-		if (args.length <2)
-		{
-			error("missing parameters");
-		}
-		
-		for (String arg : args)
-		{
-			String nameval[] = SharedStringUtil.parseNameValue(arg, "=");
+        public FileToData(String filename) throws IOException {
+           File file = new File(filename);
+           if (file.exists())
+           {
+               filename = file.getName();
+               length = file.length();
+               is = new FileInputStream(file);
+               mediaType = HTTPMediaType.lookupByExtension(filename);
+               return;
+           }
 
-			try
-			{
-				if (nameval.length == 1)
-				{
-					if ("-dSSL".equalsIgnoreCase(nameval[0]))
-					{
-						disableSSL = true;
-					}
-					else
-					{
-						destURL = new URL(nameval[0]);
-					}
-				}
-				else if (nameval.length == 2)
-				{
-					if ("-user".equalsIgnoreCase(nameval[0]))
-					{
-						user = nameval[1];
-						break;
-					}
-					if ("-password".equalsIgnoreCase(nameval[0]))
-					{
-						password = nameval[1];
-						break;
-					}
-					
-					InputStream tempIS = null;
-					File tempFile = null;
-					URL tempURL = null;
 
-					try
-					{
-						// support 2 mode local filename or fully qualified url
-						tempURL = new URL(nameval[1]);
-						multipart = true;
-					}
-					catch (Exception e)
-					{
-						//e.printStackTrace();
-						
-						try
-						{
-							tempFile = new File(nameval[1]);
+           String[] tokens = filename.split(":");
+           if (tokens.length != 2)
+               throw  new IllegalArgumentException("Invalid dummy filename : " + filename);
 
-							if (tempFile.exists() && tempFile.isFile())
-							{
-								tempIS  = new BufferedInputStream(new FileInputStream( tempFile));
-							}
+           this.filename = tokens[0];
+            mediaType = HTTPMediaType.lookupByExtension(this.filename);
+           length = Const.SizeInBytes.parse(tokens[1]);
+            UByteArrayOutputStream ubaos = new UByteArrayOutputStream();
+            int len = dummy.length();
+            while (ubaos.size() < length)
+            {
+                ubaos.write(dummy.charAt(ubaos.size()%len));
 
-							multipart = true;
-						
-						}
-						catch (Exception e1)
-						{
-							e1.printStackTrace();
-						}
-					}
-					
-					//GetNameValue<String> gnv = SharedUtil.lookupNV(params, nameval[0], ".");
-					
-					boolean add = false;
-					String sep = null;
-					// this is a trick
-					// if name has [name].url
-					String canonicalName[] = SharedStringUtil.parseNameValue(nameval[0], ".");
+            }
+            is = ubaos.toByteArrayInputStream();
+        }
 
-					if (canonicalName.length == 2)
-					{
-						if (canonicalName[1].equalsIgnoreCase("url") && (tempURL != null || tempIS != null))
-						{
-							sep = ".";
-							nameval[0] = canonicalName[0];
-						}
-						else if (canonicalName[0].equalsIgnoreCase("-h"))
-						{
-							// we have a header parameter
-							nameval[0] = canonicalName[1];
-							
-							hParams.add( new NVPair( nameval[0], nameval[1]));
-							continue;
-						}
-					}
+        public String getFilename()
+        {
+            return filename;
+        }
 
-					HTTPMultiPartParameter p = (HTTPMultiPartParameter)SharedUtil.lookupNV(params, nameval[0], sep);
+        public InputStream getInputStream()
+        {
+            return is;
+        }
 
-					if (p == null)
-					{
-						p = new HTTPMultiPartParameter();
-						add = true;
-					}
-					
-					if (tempURL != null || tempIS != null)
-					{
-						p.setName( nameval[0]);
+        public HTTPMediaType getMediaType()
+        {
+            return mediaType;
+        }
+        public FileToData setMediaType(HTTPMediaType hmt)
+        {
+            mediaType = hmt;
+            return this;
+        }
 
-						String value = p.getValue();
-						p.setValue(null);
+        public long getLength()
+        {
+            return length;
+        }
 
-						if (value != null)
-						{
-							p.setFileName(value);
-						}
-						else if (tempURL != null)
-						{
-							p.setFileName(tempURL.getFile());
-						}
-						else if (tempFile != null)
-						{
-							p.setFileName(tempFile.getName());
-						}
 
-						if (tempURL != null)
-						{
-							p.setURL( tempURL);
-						}
+        @Override
+        public String toString() {
+            return "FileToData{" +
+                    "filename='" + getFilename() + '\'' +
+                    ", mediaType=" + getMediaType() +
+                    ", length=" + getLength() +
+                    '}';
+        }
+    }
 
-						if (tempIS != null)
-						{
-							p.setInputStreamValue(tempIS, true);
-						}
-					}
-					else
-					{
-						p.setName(nameval[0]);
-						
-						String value = p.getFileName();
-						p.setValue(null);
+    public static void main(String[] args) {
 
-						if (value != null)
-						{
-							p.setFileName( nameval[1]);
-						}
-						else
-						{
-							p.setValue( nameval[1]);
-						}
-					}
 
-					if (add)
-					{
-						params.add( p);	
-					}
-				}
-			}
-			catch (Exception e)
-			{
-				e.printStackTrace();
-			}
-		}
 
-		if (destURL == null)
-		{
-			error("Missing URL");
-		}
 
-		try
-		{
-			HTTPResponseData rd =  wPut(destURL, disableSSL, multipart, user, password, hParams, params);
-			System.out.println("status:" + rd.getStatus());
-			System.out.println(new String(rd.getData()) );
-		}
-		catch (Exception e )
-		{
-			e.printStackTrace();
-			error(null);
-		}
-	}
+        long ts = System.currentTimeMillis();
+        try {
+            ParamUtil.ParamMap params = ParamUtil.parse("=", args);
+            String url = params.stringValue("url");
+            String filePath = params.stringValue("file");
+            int repeat = params.intValue("repeat", 1);
+            HTTPMethod method = params.enumValue("method", HTTPMethod.POST, HTTPMethod.PUT);
+            if(method == null)
+                method = HTTPMethod.POST;
+            boolean  disableSSL = params.booleanValue("dssl", true);
 
- }
+
+
+
+
+
+
+            //UByteArrayOutputStream baos = IOUtil.inputStreamToByteArray(inputStream, true);
+            for (int i=0; i < repeat; i++) {
+                FileToData fileToData = new FileToData(filePath);
+                fileToData.setMediaType(HTTPMediaType.APPLICATION_OCTET_STREAM);
+                System.out.println(fileToData);
+                HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit(url, null, method, !disableSSL);
+                //hmci.getHeaders().build("Connection", "Close");
+                hmci.setContentType(HTTPMediaType.MULTIPART_FORM_DATA);
+                NamedValue<InputStream> nvc = new NamedValue<>();
+                nvc.setValue(fileToData.getInputStream())
+                        .setName("file")
+                        .getProperties()
+                        .build(HTTPConst.CNP.FILENAME, fileToData.getFilename())
+                        .build(new NVLong(HTTPConst.CNP.CONTENT_LENGTH, fileToData.getLength()))
+                        .build(new NVEnum(HTTPConst.CNP.MEDIA_TYPE, fileToData.getMediaType()))
+                ;
+
+                NVGenericMap paramNVGM = new NVGenericMap("data-nvgm");
+                paramNVGM.build("n1", "v1").build(new NVInt("int", 256)).build(new NVDouble("pi", Math.PI));
+                hmci.getParameters().build("text", "simple date").build(new NVInt("int-value", 20)).build(nvc).build(paramNVGM);
+//                hmci.setContent(IOUtil.inputStreamToByteArray(fileToData.getInputStream(), true).toByteArray() );
+
+
+                System.out.println(OkHTTPCall.send(hmci));
+            }
+
+
+
+
+
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            System.err.println("Usage: java WputHttp <url=URL> <file=FilePath> [dssl=yes/no] [method=POST/PUT]");
+        }
+
+        System.out.println("It took overall " + Const.TimeInMillis.toString((System.currentTimeMillis() - ts)));
+    }
+}
