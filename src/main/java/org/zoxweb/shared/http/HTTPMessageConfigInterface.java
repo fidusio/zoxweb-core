@@ -27,7 +27,7 @@ public interface HTTPMessageConfigInterface
 extends ReferenceID<String>, SetName, SetDescription
 {
 	long DEFAULT_TIMEOUT_20_SECOND = 20;
-
+	long DEFAULT_TIMEOUT_40_SECOND = 40;
 	/**
 	 * @return true if multipart encoding
 	 */

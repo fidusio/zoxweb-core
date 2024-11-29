@@ -10,6 +10,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class HTTPAPIEndPoint<I,O>
@@ -21,7 +23,7 @@ public class HTTPAPIEndPoint<I,O>
     private BiDataEncoder<HTTPMessageConfigInterface, I, HTTPMessageConfigInterface> dataEncoder;
     private DataDecoder<HTTPResponseData, O> dataDecoder;
     private transient Executor executor;
-    private transient TaskSchedulerProcessor tsp;
+    private transient ScheduledExecutorService tsp;
     private final NamedDescription namedDescription = new NamedDescription();
     private String domain;
     private OkHttpClient okHttpClient = null;
@@ -202,7 +204,7 @@ public class HTTPAPIEndPoint<I,O>
         return this;
     }
 
-    public TaskSchedulerProcessor getScheduler()
+    public ScheduledExecutorService getScheduler()
     {
         return tsp;
     }
@@ -221,7 +223,7 @@ public class HTTPAPIEndPoint<I,O>
     public HTTPAPIResult<O> syncCall(I input, HTTPAuthorization authorization) throws IOException
     {
         checkRateController();
-        HTTPResponseData hrd = OkHTTPCall.send(createHMCI(input, authorization));
+        HTTPResponseData hrd = OkHTTPCall.send(getOkHttpClient(), createHMCI(input, authorization));
         HTTPAPIResult<O> hapir = null;
         if(dataDecoder != null)
             hapir = new HTTPAPIResult<O>(hrd.getStatus(), hrd.getHeaders(), dataDecoder.decode(hrd), hrd.getDuration());
@@ -303,7 +305,7 @@ public class HTTPAPIEndPoint<I,O>
         ToRun toRun = new ToRun(callback, authorization);
 
         if(tsp != null)
-            tsp.queue(delayInMillis, toRun);
+            tsp.schedule(toRun, delayInMillis, TimeUnit.MILLISECONDS);
         else if(executor != null)
             executor.execute(toRun);
         else

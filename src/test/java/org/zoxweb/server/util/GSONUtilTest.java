@@ -3,6 +3,7 @@ package org.zoxweb.server.util;
 import org.junit.jupiter.api.Test;
 import org.zoxweb.shared.util.NVGenericMap;
 import org.zoxweb.shared.util.NVInt;
+import org.zoxweb.shared.util.NVStringList;
 
 import java.util.Objects;
 
@@ -63,5 +64,19 @@ public class GSONUtilTest {
             Object obj = GSONUtil.fromJSONDefault(json, (Class<?>)obj2D[1]);
             System.out.println("object: " + obj.getClass() + " val : " + obj);
         }
+    }
+
+
+
+    @Test
+    public void testStringArray()
+    {
+        String str = "[\"text\", \"audio\"]";
+        String[] array = GSONUtil.fromJSONDefault(str, String[].class);
+        NVStringList nvsl = new NVStringList("test-name", array);
+        String json = GSONUtil.toJSONDefault(nvsl);
+        System.out.println(json);
+        nvsl = GSONUtil.fromJSONDefault(json, NVStringList.class);
+        System.out.println(nvsl);
     }
 }

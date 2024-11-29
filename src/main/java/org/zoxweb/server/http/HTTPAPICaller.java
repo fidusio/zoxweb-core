@@ -7,10 +7,16 @@ import org.zoxweb.shared.filters.FilterType;
 import org.zoxweb.shared.http.HTTPAPIResult;
 import org.zoxweb.shared.http.HTTPAuthorization;
 import org.zoxweb.shared.task.ConsumerCallback;
-import org.zoxweb.shared.util.*;
+import org.zoxweb.shared.util.GetDescription;
+import org.zoxweb.shared.util.GetName;
+import org.zoxweb.shared.util.NamedDescription;
+import org.zoxweb.shared.util.SUS;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class HTTPAPICaller
     implements GetName, GetDescription
@@ -139,12 +145,32 @@ public class HTTPAPICaller
         return this;
     }
 
-    public HTTPAPICaller updateURL(String url)
+    public synchronized HTTPAPICaller updateURL(String url)
     {
         url = FilterType.URL.validate(url);
         for(HTTPAPIEndPoint<?,?> haep : endPoints.values())
             haep.getConfig().setURL(url);
+        return this;
+    }
 
+    public synchronized HTTPAPICaller updateExecutor(Executor executor)
+    {
+        for(HTTPAPIEndPoint<?,?> haep : endPoints.values())
+            haep.setExecutor(executor);
+        return this;
+    }
+
+    public synchronized HTTPAPICaller updateScheduler(TaskSchedulerProcessor tps)
+    {
+        for(HTTPAPIEndPoint<?,?> haep : endPoints.values())
+            haep.setScheduler(tps);
+        return this;
+    }
+
+    public synchronized HTTPAPICaller updateOkHttpClient(OkHttpClient okHttpClient)
+    {
+        for(HTTPAPIEndPoint<?,?> haep : endPoints.values())
+            haep.setOkHttpClient(okHttpClient);
         return this;
     }
 
@@ -168,8 +194,8 @@ public class HTTPAPICaller
         // is different wait the delay then invoke
         if(delayInMillis > 0)
         {
-            TaskSchedulerProcessor tsp = endPoint.getScheduler() != null ? endPoint.getScheduler() : TaskUtil.defaultTaskScheduler();
-            tsp.queue(delayInMillis, () -> endPoint.asyncCall(callback, httpAuthorization));
+            ScheduledExecutorService tsp = endPoint.getScheduler() != null ? endPoint.getScheduler() : TaskUtil.defaultTaskScheduler();
+            tsp.schedule(() -> endPoint.asyncCall(callback, httpAuthorization), delayInMillis, TimeUnit.MILLISECONDS);
         }
         else
             endPoint.asyncCall(callback, httpAuthorization);

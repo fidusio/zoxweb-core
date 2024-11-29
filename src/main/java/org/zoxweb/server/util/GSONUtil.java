@@ -76,6 +76,7 @@ public final class GSONUtil
 			.registerTypeAdapter(NVGenericMap.class, new NVGenericMapSerDeserializer())
 			//.registerTypeAdapter(NVGenericMapList.class, new NVGenericMapListSerDeserializer())
 			.registerTypeHierarchyAdapter(NVEntity.class, new NVEntitySerDeserializer())
+			.registerTypeAdapter(NVStringList.class, new NVStringListSerDeserializer())
 			.registerTypeAdapter(Date.class, new DateSerDeserializer())
 											//.registerTypeAdapter(Enum.class, new EnumSerDeserializer()
 			.create();
@@ -87,6 +88,7 @@ public final class GSONUtil
 			//.registerTypeAdapter(NVGenericMapList.class, new NVGenericMapListSerDeserializer())
 			.registerTypeHierarchyAdapter(NVEntity.class, new NVEntityNVGMPrimitiveAsStringSerDeserializer())
 			.registerTypeAdapter(Date.class, new DateSerDeserializer())
+			.registerTypeAdapter(NVStringList.class, new NVStringListSerDeserializer())
 			//.registerTypeAdapter(Enum.class, new EnumSerDeserializer()
 			.create();
 
@@ -95,6 +97,7 @@ public final class GSONUtil
 			//.registerTypeHierarchyAdapter(NVEntity.class, new NVEntitySerDeserializer())
 			.registerTypeAdapter(NVGenericMapList.class, new NVGenericMapListSerDeserializer())
 			.registerTypeAdapter(Date.class, new DateSerDeserializer())
+			.registerTypeAdapter(NVStringList.class, new NVStringListSerDeserializer())
 			.setPrettyPrinting()
 			//.registerTypeAdapter(Enum.class, new EnumSerDeserializer()
 			.create();
@@ -131,6 +134,34 @@ public final class GSONUtil
         return fromJSONGenericMap((JsonObject)json, null, Base64Type.DEFAULT, false);
       }
 	  
+	}
+
+
+	public static class NVStringListSerDeserializer implements JsonSerializer<NVStringList>,JsonDeserializer<NVStringList>
+	{
+
+		@Override
+		public JsonElement serialize(NVStringList src, Type typeOfSrc,
+									 JsonSerializationContext context) {
+			// TODO Auto-generated method stub
+
+
+			JsonTreeWriter jtw = new JsonTreeWriter();
+
+			toJSONStringList(jtw, src);
+
+
+			return jtw.get();
+		}
+
+		@Override
+		public NVStringList deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+				throws JsonParseException
+		{
+			// TODO Auto-generated method stub
+			return fromJSONStringList(json);
+		}
+
 	}
 
 
@@ -475,6 +506,47 @@ public final class GSONUtil
 			}
 		}
 		return ret;
+	}
+
+	private static NVStringList fromJSONStringList(JsonElement je)
+	{
+		NVStringList ret = new NVStringList();
+		if (je instanceof JsonArray)
+		{
+			JsonArray ja = (JsonArray) je;
+			for (int i = 0; i < ja.size(); i++)
+			{
+				String value = ja.get(i).getAsString();
+				ret.add(value);
+			}
+		}
+		return ret;
+	}
+
+	private static JsonWriter toJSONStringList(JsonWriter jw, NVStringList nvsl)
+	{
+
+		try
+		{
+//			if (nvsl.getName() != null)
+//			{
+//
+//				jw.name(nvsl.getName());
+//			}
+
+			jw.beginArray();
+			for(String value : nvsl.getValues())
+			{
+				if(SUS.isNotEmpty( value))
+					jw.value(value);
+			}
+			jw.endArray();
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();;
+		}
+		return jw;
 	}
 	
 	

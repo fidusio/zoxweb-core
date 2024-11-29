@@ -62,6 +62,15 @@ public class NVGenericMap
 		return value.get(new GetNameKey(name, true));
 	}
 
+	public <GNV extends GetNameValue<?>> GNV getNV(String name)
+	{
+		return (GNV) get(name);
+	}
+
+	public <GNV extends GetNameValue<?>> GNV getNV(GetName getName)
+	{
+		return (GNV) get(getName);
+	}
 
 
 	public <V> V getValue(GetName name)
