@@ -554,7 +554,10 @@ public class HTTPMessageConfig
 	@Override
 	public void setContentType(String contentType)
 	{
-		getHeaders().add(HTTPConst.toHTTPHeader(HTTPHeader.CONTENT_TYPE, contentType));
+		if (contentType == null)
+			getHeaders().remove(HTTPHeader.CONTENT_TYPE);
+		else
+			getHeaders().add(HTTPConst.toHTTPHeader(HTTPHeader.CONTENT_TYPE, contentType));
 	}
 
 	@Override
@@ -583,7 +586,10 @@ public class HTTPMessageConfig
 	@Override
 	public void setContentType(GetValue<String> ...contentTypes)
 	{
-		getHeaders().add(HTTPConst.toHTTPHeader(HTTPHeader.CONTENT_TYPE, contentTypes));
+		if (contentTypes == null)
+			getHeaders().remove(HTTPHeader.CONTENT_TYPE);
+		else
+			getHeaders().add(HTTPConst.toHTTPHeader(HTTPHeader.CONTENT_TYPE, contentTypes));
 	}
 
 

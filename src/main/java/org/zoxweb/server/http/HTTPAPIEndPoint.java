@@ -262,6 +262,7 @@ public class HTTPAPIEndPoint<I,O>
     {
 
         HTTPMessageConfigInterface ret = HTTPMessageConfig.createAndInit(config.getURL(), config.getURI(), config.getMethod(), config.isSecureCheckEnabled());
+        ret.setContentType((String) null);
         NVGenericMap.copy(config.getHeaders(), ret.getHeaders(), true);
 
 
