@@ -115,14 +115,26 @@ public class RateControllerTest {
     {
         String[] rates={
                 "10000/min",
-                "500/sec"
+                "500/sec",
+                "10/s"
         };
 
         for (String rate: rates)
         {
             RateController rc = new RateController(rate, rate);
             System.out.println(rc);
+            int max = (int) rc.getTPS();
+            System.out.println(rc.isPastThreshold(true));
+            for (int i = 0; i < max; i++)
+            {
+                rc.nextWait();
+            }
+            rc.nextWait();
+            System.out.println(rc.isPastThreshold(true));
+
         }
+
+
     }
 
 

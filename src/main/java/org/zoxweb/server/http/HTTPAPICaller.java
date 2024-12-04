@@ -7,10 +7,7 @@ import org.zoxweb.shared.filters.FilterType;
 import org.zoxweb.shared.http.HTTPAPIResult;
 import org.zoxweb.shared.http.HTTPAuthorization;
 import org.zoxweb.shared.task.ConsumerCallback;
-import org.zoxweb.shared.util.GetDescription;
-import org.zoxweb.shared.util.GetName;
-import org.zoxweb.shared.util.NamedDescription;
-import org.zoxweb.shared.util.SUS;
+import org.zoxweb.shared.util.*;
 
 import java.io.IOException;
 import java.util.Map;
@@ -153,6 +150,13 @@ public class HTTPAPICaller
         return this;
     }
 
+    public synchronized HTTPAPICaller updateRateController(RateController rc)
+    {
+        for(HTTPAPIEndPoint<?,?> haep : endPoints.values())
+            haep.setRateController(rc);
+        return this;
+    }
+
     public synchronized HTTPAPICaller updateExecutor(Executor executor)
     {
         for(HTTPAPIEndPoint<?,?> haep : endPoints.values())
@@ -205,7 +209,10 @@ public class HTTPAPICaller
     }
 
 
-
+    public HTTPAPIEndPoint<?,?>[] getEndPoints()
+    {
+        return endPoints.values().toArray(new HTTPAPIEndPoint[0]);
+    }
 
     public <I,O> O syncCall(GetName endpointName, I input) throws IOException
     {

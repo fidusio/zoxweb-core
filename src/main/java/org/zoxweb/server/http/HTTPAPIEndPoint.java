@@ -79,6 +79,7 @@ public class HTTPAPIEndPoint<I,O>
         ret.okHttpClient = okHttpClient;
         ret.properties = NVGenericMap.copy(properties, true);
         ret.domain = domain;
+        ret.rateController = rateController;
 
         if (rateController != null && newRateController)
         {
@@ -238,11 +239,13 @@ public class HTTPAPIEndPoint<I,O>
     private void checkRateController()
             throws IOException
     {
+        if(rateController == null)
+            return;
         // first check without affecting rate controller
-        boolean send = rateController == null || rateController.isPastThreshold(false);
+        boolean send = rateController.isPastThreshold(false);
 
         // now try to use the rate controller
-        if (!send || (rateController !=null && !rateController.isPastThreshold(true)))
+        if (send || rateController.isPastThreshold(true))
             throw new IOException("Rate controller timeout threshold reached: " + rateController);
     }
 
