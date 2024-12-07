@@ -259,4 +259,22 @@ public class SUS
     {
         return str != null ? str.trim() : "";
     }
+
+    public static String errorMessage(String message, Enum<?> ...enums)
+    {
+        StringBuilder sb = new StringBuilder(message);
+        for (Enum<?> e : enums)
+        {
+            sb.append('\n');
+
+            if (e instanceof GetName)
+                sb.append(((GetName) e).getName());
+            else
+                sb.append(e.name());
+            sb.append(": ");
+            if (e instanceof GetDescription)
+                sb.append(((GetDescription) e).getDescription());
+        }
+        return sb.toString();
+    }
 }

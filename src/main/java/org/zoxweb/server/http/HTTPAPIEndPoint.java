@@ -261,17 +261,12 @@ public class HTTPAPIEndPoint<I,O>
 
 
 
-    protected HTTPMessageConfigInterface createHMCI(I input, HTTPAuthorization authorization)
+    private HTTPMessageConfigInterface createHMCI(I input, HTTPAuthorization authorization)
     {
 
         HTTPMessageConfigInterface ret = HTTPMessageConfig.createAndInit(config.getURL(), config.getURI(), config.getMethod(), config.isSecureCheckEnabled());
-        ret.setContentType((String) null);
         NVGenericMap.copy(config.getHeaders(), ret.getHeaders(), true);
-
-
         NVGenericMap.copy(config.getParameters(), ret.getParameters(), true);
-
-
         ret.setProxyAddress(config.getProxyAddress());
         ret.setRedirectEnabled(config.isRedirectEnabled());
         ret.setHTTPErrorAsException(config.isHTTPErrorAsException());
