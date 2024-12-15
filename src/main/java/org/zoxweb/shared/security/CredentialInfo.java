@@ -11,4 +11,6 @@ public interface CredentialInfo
         API_KEY,
         TOKEN
     }
+
+    CredentialType getCredentialType();
 }

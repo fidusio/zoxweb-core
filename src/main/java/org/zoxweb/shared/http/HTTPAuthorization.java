@@ -76,10 +76,10 @@ extends SetNameDAO
 		setToken(token);
 	}
 
-	protected HTTPAuthorization(NVConfigEntity nvce)
-	{
-		super(nvce);
-	}
+//	protected HTTPAuthorization(NVConfigEntity nvce)
+//	{
+//		super(nvce);
+//	}
 
 	protected HTTPAuthorization(NVConfigEntity nvce, HTTPAuthScheme type)
 	{

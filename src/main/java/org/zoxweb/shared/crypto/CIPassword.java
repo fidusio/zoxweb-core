@@ -30,7 +30,8 @@ public class CIPassword
     extends PropertyDAO
     implements CryptoBase, CredentialInfo
 {
-	
+
+
 	private enum Param
         implements GetNVConfig
     {
@@ -179,6 +180,15 @@ public class CIPassword
 		}
 		
 		return ret;
+	}
+
+
+	/**
+	 * @return
+	 */
+	@Override
+	public CredentialType getCredentialType() {
+		return CredentialType.PASSWORD;
 	}
 
 }

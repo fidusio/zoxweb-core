@@ -14,6 +14,7 @@ public class JWTToken
     implements CredentialInfo
 {
 
+
   public enum Param
       implements GetNVConfig {
     JWT(NVConfigManager
@@ -75,5 +76,13 @@ public class JWTToken
     setValue(Param.TOKEN, token);
   }
 
+
+  /**
+   * @return
+   */
+  @Override
+  public CredentialType getCredentialType() {
+    return CredentialType.TOKEN;
+  }
 
 }
