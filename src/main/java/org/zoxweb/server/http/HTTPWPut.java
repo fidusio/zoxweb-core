@@ -37,7 +37,7 @@ public class HTTPWPut {
                throw  new IllegalArgumentException("Invalid dummy filename : " + filename);
 
            this.filename = tokens[0];
-            mediaType = HTTPMediaType.lookupByExtension(this.filename);
+           mediaType = HTTPMediaType.lookupByExtension(this.filename);
            length = Const.SizeInBytes.parse(tokens[1]);
             UByteArrayOutputStream ubaos = new UByteArrayOutputStream();
             int len = dummy.length();
@@ -95,6 +95,11 @@ public class HTTPWPut {
             ParamUtil.ParamMap params = ParamUtil.parse("=", args);
             String url = params.stringValue("url");
             String filePath = params.stringValue("file");
+            String user = params.stringValue("user", true);
+            String password = params.stringValue("password", true);
+
+            String fileLocation = params.stringValue("file-location", true);
+            String filePassword = params.stringValue("file-password", true);
             int repeat = params.intValue("repeat", 1);
             HTTPMethod method = params.enumValue("method", HTTPMethod.POST, HTTPMethod.PUT);
             if(method == null)
@@ -124,11 +129,25 @@ public class HTTPWPut {
                         .build(new NVEnum(HTTPConst.CNP.MEDIA_TYPE, fileToData.getMediaType()))
                 ;
 
-                NVGenericMap paramNVGM = new NVGenericMap("data-nvgm");
-                paramNVGM.build("n1", "v1").build(new NVInt("int", 256)).build(new NVDouble("pi", Math.PI));
-                hmci.getParameters().build("text", "simple date").build(new NVInt("int-value", 20)).build(nvc).build(paramNVGM);
-//                hmci.setContent(IOUtil.inputStreamToByteArray(fileToData.getInputStream(), true).toByteArray() );
+                hmci.getParameters().build(nvc);
+                if (fileLocation != null)
+                {
+                    hmci.getParameters().build("file-location", fileLocation);
+                }
+                if(filePassword != null)
+                {
+                    hmci.getParameters().build("file-password", filePassword);
+                }
 
+                if (user != null && password != null)
+                {
+                    hmci.setAuthorization(new HTTPAuthorizationBasic(user, password));
+                }
+
+//                NVGenericMap paramNVGM = new NVGenericMap("data-nvgm");
+//
+//                paramNVGM.build("n1", "v1").build(new NVInt("int", 256)).build(new NVDouble("pi", Math.PI));
+//                hmci.getParameters().build("text", "simple date").build(new NVInt("int-value", 20)).build(paramNVGM);
 
                 System.out.println(OkHTTPCall.send(hmci));
             }
