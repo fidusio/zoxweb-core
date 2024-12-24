@@ -324,36 +324,36 @@ public class HTTPMessageConfig
 		return createAndInit(url, uri, method, true);
 	}
 
-	public static HTTPMessageConfigInterface createAndInit(String url, String uri, HTTPMethod method, boolean sslCheck)
+	public static HTTPMessageConfigInterface createAndInit(String url, String uri, HTTPMethod method, boolean sslCheckEnabled)
 	{
 		HTTPMessageConfigInterface ret = new HTTPMessageConfig();
 		ret.setURL(url);
 		ret.setURI(uri);
 		ret.setMethod(method);
-		ret.setSecureCheckEnabled(sslCheck);
+		ret.setSecureCheckEnabled(sslCheckEnabled);
 		return ret;
 	}
 
 
-	public static HTTPMessageConfigInterface createAndInit(String url, String uri, HTTPMethod method, boolean sslCheck, String contentType)
+	public static HTTPMessageConfigInterface createAndInit(String url, String uri, HTTPMethod method, boolean sslCheckEnabled, String contentType)
 	{
 		HTTPMessageConfigInterface ret = new HTTPMessageConfig();
 		ret.setURL(url);
 		ret.setURI(uri);
 		ret.setMethod(method);
 		ret.setContentType(contentType);
-		ret.setSecureCheckEnabled(sslCheck);
+		ret.setSecureCheckEnabled(sslCheckEnabled);
 		return ret;
 	}
 
-	public static HTTPMessageConfigInterface createAndInit(String url, String uri, HTTPMethod method, boolean sslCheck, GetValue<String> ...contentTypes)
+	public static HTTPMessageConfigInterface createAndInit(String url, String uri, HTTPMethod method, boolean sslCheckEnabled, GetValue<String> ...contentTypes)
 	{
 		HTTPMessageConfigInterface ret = new HTTPMessageConfig();
 		ret.setURL(url);
 		ret.setURI(uri);
 		ret.setMethod(method);
 		ret.setContentType(contentTypes);
-		ret.setSecureCheckEnabled(sslCheck);
+		ret.setSecureCheckEnabled(sslCheckEnabled);
 		return ret;
 	}
 	

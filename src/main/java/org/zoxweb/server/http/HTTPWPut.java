@@ -15,26 +15,34 @@ public class HTTPWPut {
     public static class FileToData
     {
 
-        private String filename;
-        private InputStream is;
+        private final String filename;
+        private final InputStream is;
         private HTTPMediaType mediaType;
         private final long length;
 
-        public FileToData(String filename) throws IOException {
-           File file = new File(filename);
+        public FileToData(String fileToUpload, InputStream is, long length)
+        {
+            this.filename = fileToUpload;
+            this.length = length;
+            this.is = is;
+            mediaType = HTTPMediaType.lookupByExtension(fileToUpload);
+        }
+
+        public FileToData(String fileToUpload) throws IOException {
+           File file = new File(fileToUpload);
            if (file.exists())
            {
-               filename = file.getName();
+               this.filename = file.getName();
                length = file.length();
                is = new FileInputStream(file);
-               mediaType = HTTPMediaType.lookupByExtension(filename);
+               mediaType = HTTPMediaType.lookupByExtension(fileToUpload);
                return;
            }
 
 
-           String[] tokens = filename.split(":");
+           String[] tokens = fileToUpload.split(":");
            if (tokens.length != 2)
-               throw  new IllegalArgumentException("Invalid dummy filename : " + filename);
+               throw  new IllegalArgumentException("Invalid dummy filename : " + fileToUpload);
 
            this.filename = tokens[0];
            mediaType = HTTPMediaType.lookupByExtension(this.filename);
@@ -85,6 +93,46 @@ public class HTTPWPut {
         }
     }
 
+    public static HTTPResponseData uploadFile(String url,
+                                              HTTPMethod method,
+                                              HTTPAuthorization httpAuthorization,
+                                              boolean sslCheckEnabled,
+                                              FileToData fileToData,
+                                              String remoteFileLocation,
+                                              String remoteFilePassword)
+            throws IOException
+    {
+        fileToData.setMediaType(HTTPMediaType.APPLICATION_OCTET_STREAM);
+        HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit(url, null, method, sslCheckEnabled);
+        //hmci.getHeaders().build("Connection", "Close");
+        hmci.setContentType(HTTPMediaType.MULTIPART_FORM_DATA);
+        NamedValue<InputStream> nvc = new NamedValue<>();
+        nvc.setValue(fileToData.getInputStream())
+                .setName("file")
+                .getProperties()
+                .build(HTTPConst.CNP.FILENAME, fileToData.getFilename())
+                .build(new NVLong(HTTPConst.CNP.CONTENT_LENGTH, fileToData.getLength()))
+                .build(new NVEnum(HTTPConst.CNP.MEDIA_TYPE, fileToData.getMediaType()))
+        ;
+
+        hmci.getParameters().build(nvc);
+        if (remoteFileLocation != null)
+        {
+            hmci.getParameters().build("file-location", remoteFileLocation);
+        }
+        if(remoteFilePassword != null)
+        {
+            hmci.getParameters().build("file-password", remoteFilePassword);
+        }
+
+        if (httpAuthorization != null)
+        {
+            hmci.setAuthorization(httpAuthorization);
+        }
+
+        return OkHTTPCall.send(hmci);
+    }
+
     public static void main(String[] args) {
 
 
@@ -117,39 +165,45 @@ public class HTTPWPut {
                 FileToData fileToData = new FileToData(filePath);
                 fileToData.setMediaType(HTTPMediaType.APPLICATION_OCTET_STREAM);
                 System.out.println(fileToData);
-                HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit(url, null, method, !disableSSL);
-                //hmci.getHeaders().build("Connection", "Close");
-                hmci.setContentType(HTTPMediaType.MULTIPART_FORM_DATA);
-                NamedValue<InputStream> nvc = new NamedValue<>();
-                nvc.setValue(fileToData.getInputStream())
-                        .setName("file")
-                        .getProperties()
-                        .build(HTTPConst.CNP.FILENAME, fileToData.getFilename())
-                        .build(new NVLong(HTTPConst.CNP.CONTENT_LENGTH, fileToData.getLength()))
-                        .build(new NVEnum(HTTPConst.CNP.MEDIA_TYPE, fileToData.getMediaType()))
-                ;
 
-                hmci.getParameters().build(nvc);
-                if (fileLocation != null)
-                {
-                    hmci.getParameters().build("file-location", fileLocation);
-                }
-                if(filePassword != null)
-                {
-                    hmci.getParameters().build("file-password", filePassword);
-                }
-
-                if (user != null && password != null)
-                {
-                    hmci.setAuthorization(new HTTPAuthorizationBasic(user, password));
-                }
+//                HTTPAuthorization httpAuthorization = null;
+//                HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit(url, null, method, !disableSSL);
+//                //hmci.getHeaders().build("Connection", "Close");
+//                hmci.setContentType(HTTPMediaType.MULTIPART_FORM_DATA);
+//                NamedValue<InputStream> nvc = new NamedValue<>();
+//                nvc.setValue(fileToData.getInputStream())
+//                        .setName("file")
+//                        .getProperties()
+//                        .build(HTTPConst.CNP.FILENAME, fileToData.getFilename())
+//                        .build(new NVLong(HTTPConst.CNP.CONTENT_LENGTH, fileToData.getLength()))
+//                        .build(new NVEnum(HTTPConst.CNP.MEDIA_TYPE, fileToData.getMediaType()))
+//                ;
+//
+//                hmci.getParameters().build(nvc);
+//                if (fileLocation != null)
+//                {
+//                    hmci.getParameters().build("file-location", fileLocation);
+//                }
+//                if(filePassword != null)
+//                {
+//                    hmci.getParameters().build("file-password", filePassword);
+//                }
+//
 
 //                NVGenericMap paramNVGM = new NVGenericMap("data-nvgm");
 //
 //                paramNVGM.build("n1", "v1").build(new NVInt("int", 256)).build(new NVDouble("pi", Math.PI));
 //                hmci.getParameters().build("text", "simple date").build(new NVInt("int-value", 20)).build(paramNVGM);
 
-                System.out.println(OkHTTPCall.send(hmci));
+//                System.out.println(OkHTTPCall.send(hmci));
+                HTTPResponseData hrd = uploadFile(url,
+                        method,
+                        user != null && password != null ? new HTTPAuthorizationBasic(user, password) : null,
+                        !disableSSL,
+                        fileToData,
+                        fileLocation,
+                        filePassword);
+                System.out.println(hrd);
             }
 
 
@@ -160,7 +214,7 @@ public class HTTPWPut {
         catch (Exception e)
         {
             e.printStackTrace();
-            System.err.println("Usage: java WputHttp <url=URL> <file=FilePath> [dssl=yes/no] [method=POST/PUT]");
+            System.err.println("Usage: java HTTPWPut <url=URL> <file=FilePath> [dssl=yes/no] [method=POST/PUT]");
         }
 
         System.out.println("It took overall " + Const.TimeInMillis.toString((System.currentTimeMillis() - ts)));

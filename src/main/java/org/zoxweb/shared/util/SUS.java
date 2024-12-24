@@ -48,6 +48,11 @@ public class SUS
         return (array != null && array.length != 0);
     }
 
+    /**
+     *
+     * @param array to check
+     * @return true if array == null or array.length = 0
+     */
     public static boolean isNotEmpty(byte[] array)
     {
         return (array != null && array.length != 0);
@@ -81,6 +86,12 @@ public class SUS
             return ((GetName) en).getName();
         return en.name();
     }
+
+    /**
+     *
+     * @param enums to be converted
+     * @return string[] of the enums names
+     */
     public static String[] enumNames(Enum<?> ...enums)
     {
         String[] ret = new String[enums.length];
@@ -131,6 +142,13 @@ public class SUS
         return toUpdate;
     }
 
+    /**
+     * Build a NamedValue object
+     * @param name of the parameter
+     * @param value value of the parameter
+     * @return NamedValue {@link org.zoxweb.shared.util.NamedValue}
+     * @param <V> type of NamedValue
+     */
     public static <V> GetNameValue<V> buildNV(String name, V value)
     {
         return new NamedValue<>(name, value);
@@ -146,6 +164,11 @@ public class SUS
         return str == null || str.trim().isEmpty();
     }
 
+    /**
+     *
+     * @param nvb to be checked
+     * @return true is gnv is primitive type
+     */
     public static boolean isPrimitiveGNV(GetNameValue<?> nvb)
     {
         checkIfNulls("NameValue null", nvb);
@@ -212,11 +235,24 @@ public class SUS
         return sb;
     }
 
-    public static String toCanonicalID(char sep, Object ...datas)
+    /**
+     * Produce a canonical id separated by the char separator
+     * @param sep between objArray
+     * @param objArray array by invoking objArray[i].toString()
+     * @return the canonical identifier
+     */
+    public static String toCanonicalID(char sep, Object ...objArray)
     {
-        return toCanonicalID(false, sep, datas);
+        return toCanonicalID(false, sep, objArray);
     }
 
+    /**
+     * Produce a canonical id separated by the char separator
+     * @param ignoreNulls if true null will be removed
+     * @param sep between objArray
+     * @param objArray array by invoking objArray[i].toString()
+     * @return the canonical identifier
+     */
     public static String toCanonicalID(boolean ignoreNulls, char sep,  Object... objArray)
     {
         StringBuilder sb = new StringBuilder();
@@ -233,6 +269,13 @@ public class SUS
         return sb.toString();
     }
 
+    /**
+     *
+     * @param ignoreNulls if true null will be removed
+     * @param sep between enumer
+     * @param enumer enumeration
+     * @return the canonical identifier
+     */
     public static String toCanonicalID(boolean ignoreNulls, char sep, Enumeration<?> enumer)
     {
         StringBuilder sb = new StringBuilder();
@@ -249,17 +292,31 @@ public class SUS
         return sb.toString();
     }
 
+    /**
+     * @param str to be validated
+     * @return null or trimmed not empty string
+     */
     public static String trimOrNull(String str)
     {
         str = (str != null ? str.trim() : null);
         return str != null ? (!str.isEmpty() ? str : null) : null;
     }
 
+    /**
+     * @param str to be validated
+     * @return empty string null or trimmed string
+     */
     public static String trimOrEmpty(String str)
     {
         return str != null ? str.trim() : "";
     }
 
+    /**
+     * Produce an error message
+     * @param message description message
+     * @param enums possible values
+     * @return error message to be printed or consumed
+     */
     public static String errorMessage(String message, Enum<?> ...enums)
     {
         StringBuilder sb = new StringBuilder(message);

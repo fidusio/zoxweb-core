@@ -80,6 +80,7 @@ public class OkHTTPCall
 			InputStream is = null;
 			long totalRead = 0;
 			try {
+				if(log.isEnabled()) log.getLogger().info("namedvalue " + namedValue);
 				if (namedValue.getValue() != null) {
 					if (namedValue.getValue() instanceof File) {
 						is = new FileInputStream((File) namedValue.getValue());
