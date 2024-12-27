@@ -20,8 +20,8 @@ import org.zoxweb.shared.crypto.EncryptedData;
 import org.zoxweb.shared.crypto.EncryptedKey;
 import org.zoxweb.shared.util.Const;
 import org.zoxweb.shared.util.Const.SizeInBytes;
+import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedStringUtil;
-import org.zoxweb.shared.util.SharedUtil;
 
 public class CryptoUtilTest {
 
@@ -63,7 +63,7 @@ public class CryptoUtilTest {
         byte[] data = CryptoUtil.decryptEncryptedData(ed, "password");
         delta = System.nanoTime() - delta;
         System.out.println(
-            SharedUtil.slowEquals(original, data) + ": decrypting took " + Const.TimeInMillis
+            SUS.slowEquals(original, data) + ": decrypting took " + Const.TimeInMillis
                 .nanosToString(delta));
       }
 

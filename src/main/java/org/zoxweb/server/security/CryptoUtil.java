@@ -65,6 +65,8 @@ public class CryptoUtil {
 
   public static final int DEFAULT_ITERATION = 8196;
 
+
+
   //public static final int SALT_LENGTH = 32;
 
   public static byte[] generateRandomBytes(SecureRandom sr, int size)
@@ -363,7 +365,7 @@ public class CryptoUtil {
 
     hmac.update(ekd.getEncryptedData());
 
-    if (!SharedUtil.slowEquals(ekd.getHMAC(), hmac.doFinal())) {
+    if (!SUS.slowEquals(ekd.getHMAC(), hmac.doFinal())) {
       throw new SignatureException("Data tempered with");
     }
 
@@ -646,7 +648,7 @@ public class CryptoUtil {
   public static PublicKey generatePublicKey(String type, String publicKey)
           throws GeneralSecurityException
   {
-    String publicKeyPEM = SharedStringUtil.filterString(publicKey, "BEGIN PUBLIC KEY", "END PUBLIC KEY", "-", "\n");
+    String publicKeyPEM = CryptoConst.applyPemFilters(publicKey);//SharedStringUtil.filterString(publicKey, "BEGIN PUBLIC KEY", "END PUBLIC KEY", "-", "\n");
     // Use Base64Type.DEFAULT DO NOT USE Base64Type.URL because of - char
     return generatePublicKey(type, SharedBase64.decode(Base64Type.DEFAULT, publicKeyPEM));
   }
@@ -656,6 +658,26 @@ public class CryptoUtil {
     X509EncodedKeySpec publicSpec = new X509EncodedKeySpec(keys);
     KeyFactory keyFactory = KeyFactory.getInstance(type);
     return  keyFactory.generatePublic(publicSpec);
+  }
+
+  public static KeyPair toKeyPair(String type, String provider, String pubKeyBase64, String privKeyBase64) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException
+  {
+    return toKeyPair(type,
+            provider,
+            SharedBase64.decode(CryptoConst.applyPemFilters(pubKeyBase64)),
+            SharedBase64.decode(CryptoConst.applyPemFilters(privKeyBase64)));
+  }
+
+  public static KeyPair toKeyPair(String type, String provider, byte[] pubKey, byte[] privKey) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException {
+
+    KeyFactory kf = KeyFactory.getInstance(type, provider);
+
+    EncodedKeySpec pubKeySpec = new X509EncodedKeySpec(pubKey);
+    EncodedKeySpec privKeySpec = new PKCS8EncodedKeySpec(privKey);
+
+    PublicKey regeneratedPublicKey = kf.generatePublic(pubKeySpec);
+    PrivateKey regeneratedPrivateKey = kf.generatePrivate(privKeySpec);
+    return new KeyPair(regeneratedPublicKey, regeneratedPrivateKey);
   }
 
 
@@ -972,6 +994,8 @@ public class CryptoUtil {
     if(sr == null)
       sr = defaultSecureRandom(); // get the default secure random
     KeyPairGenerator keyPairGenerator = provider != null ? KeyPairGenerator.getInstance(pkInfo.getType(), provider) : KeyPairGenerator.getInstance(pkInfo.getType());
+    RSAKeyGenParameterSpec h;
+
     if ("RSA".equals(pkInfo.getType()))
     {
       keyPairGenerator.initialize(Integer.parseInt(pkInfo.getName()), sr);
@@ -986,6 +1010,12 @@ public class CryptoUtil {
     }
 
     return keyPairGenerator.generateKeyPair();
+  }
+
+  public static KeyPair generateKeyPair(String type, String provider, AlgorithmParameterSpec keySpec, SecureRandom random) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException {
+    KeyPairGenerator kpg = KeyPairGenerator.getInstance(type, provider);
+    kpg.initialize(keySpec, random != null ? random : defaultSecureRandom());
+    return kpg.generateKeyPair();
   }
 
   public static byte[] encrypt(PublicKey receiver, byte[] data)

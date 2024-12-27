@@ -2380,50 +2380,7 @@ public class SharedUtil
 		return -1;
 	}
 
-	/**
-	 * Compares two byte arrays in length-constant time. This comparison method
-     * is used so that password hashes cannot be extracted from an on-line 
-     * system using a timing attack and then attacked off-line.
-     * 
-     * @param   a       the first byte array
-     * @param   b       the second byte array 
-     * @return          true if both byte arrays are the same, false if not
-	 */
-	public static boolean slowEquals(byte[] a, byte[] b) {
-		checkIfNulls("one of the byte array is null", a, b);
-		int diff = a.length ^ b.length;
-		
-		for(int i = 0; i < a.length && i < b.length; i++)
-			diff |= a[i] ^ b[i];
-		return diff == 0;
-	}
-	
-	
-	/**
-	 * Compares two byte arrays 
-     * 
-     * @param   a       the first byte array
-     * @param   b       the second byte array 
-     * @param	length	the length to be compared
-     * @return          true if both byte arrays are the same, false if not
-	 */
-	public static boolean equals(byte[] a, byte[] b, int length) {
-		checkIfNulls("one of the byte array is null", a, b);
-		if (length < 0 || length > a.length || length > b.length)
-		{
-			throw new IllegalArgumentException("Invalid length " + length);
-		}
-		
-		
-		for(int i = 0; i < length; i++)
-		{
-			if (a[i] != b[i])
-			{
-				return false;
-			}
-		}
-		return true;
-	}
+
 	
 	
 

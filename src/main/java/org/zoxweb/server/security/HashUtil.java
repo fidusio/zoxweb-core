@@ -35,7 +35,6 @@ import org.zoxweb.shared.security.AccessException;
 import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedBase64;
 import org.zoxweb.shared.util.SharedStringUtil;
-import org.zoxweb.shared.util.SharedUtil;
 
 import javax.crypto.Mac;
 import javax.crypto.SecretKeyFactory;
@@ -127,7 +126,7 @@ public class HashUtil {
     byte[] testHash = pbkdf2(password, salt, iterations, hash.length);
     // Compare the hashes in constant time. The password is correct if
     // both hashes match.
-    return SharedUtil.slowEquals(hash, testHash);
+    return SUS.slowEquals(hash, testHash);
   }
 
   /**
@@ -372,7 +371,7 @@ public class HashUtil {
               passwordDAO.getSalt(), SharedStringUtil.getBytes(password), passwordDAO.getHashIteration(),
               false);
 
-      return SharedUtil.slowEquals(genHash, passwordDAO.getPassword());
+      return SUS.slowEquals(genHash, passwordDAO.getPassword());
     }
   }
 

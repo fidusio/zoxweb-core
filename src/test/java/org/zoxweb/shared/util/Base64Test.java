@@ -15,14 +15,13 @@
  */
 package org.zoxweb.shared.util;
 
-import java.awt.*;
+import org.zoxweb.shared.util.SharedBase64.Base64Type;
+
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Base64.Decoder;
 import java.util.Base64.Encoder;
 import java.util.UUID;
-
-import org.zoxweb.shared.util.SharedBase64.Base64Type;
 
 //import org.apache.commons.codec.binary.Base64;
 
@@ -112,7 +111,7 @@ public class Base64Test {
 		
 		
 
-		System.out.println("Equals:" + SharedUtil.slowEquals("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".getBytes(), SharedBase64.BASE_64));
+		System.out.println("Equals:" + SUS.equals("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".getBytes(), SharedBase64.BASE_64));
 		
 		try
 		{

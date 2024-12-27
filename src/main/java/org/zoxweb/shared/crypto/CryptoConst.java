@@ -22,6 +22,11 @@ import org.zoxweb.shared.util.*;
 
 public final class CryptoConst
 {
+	private CryptoConst()
+	{
+
+	}
+
     /**
      * AES 256 bits key size in bytes(32)
      */
@@ -30,11 +35,8 @@ public final class CryptoConst
 	 * AES block size in bits 128 (16 bytes);
 	 */
 	public static final int AES_BLOCK_SIZE = 16;
+	public static final String[] PEM_KEY_FILTERS = {"BEGIN", "END", "PUBLIC", "KEY", "EC", "\n", " ", "PRIVATE"};
 
-	private CryptoConst()
-	{
-
-	}
 	public static final String PKCS12 = "PKCS12";;
 	public static final String KEY_STORE_TYPE = "JCEKS";
 
@@ -45,8 +47,13 @@ public final class CryptoConst
 		EC_256(CryptoAlgo.EC, "secp256r1"),
 		EC_384(CryptoAlgo.EC, "secp384r1"),
 		EC_521(CryptoAlgo.EC, "secp521r1"),
-		RSA_2024(CryptoAlgo.RSA, "2048"),
+		RSA_2048(CryptoAlgo.RSA, "2048"),
+		RSA_3072(CryptoAlgo.RSA, "3072"),
 		RSA_4096(CryptoAlgo.RSA, "4096"),
+		KYBER_512(CryptoAlgo.CRYSTALS_KYBER, "kyber512"),
+		KYBER_768(CryptoAlgo.CRYSTALS_KYBER, "kyber768"),
+		KYBER_1024(CryptoAlgo.CRYSTALS_KYBER, "kyber1024"),
+
 		;
 
 
@@ -122,6 +129,8 @@ public final class CryptoConst
 		DSA("DSA"),
 		EC("EC"),
 		RSA("RSA"),
+		CRYSTALS_KYBER("Kyber"),
+		CRYSTALS("CRYSTALS"),
 		;
 
 
@@ -245,6 +254,7 @@ public final class CryptoConst
 		SHA256_EC(CryptoAlgo.EC,"SHA256withECDSA"),
 		SHA384_EC(CryptoAlgo.EC,"SHA384withECDSA"),
     	SHA512_EC(CryptoAlgo.EC,"SHA512withECDSA"),
+		CRYSTALS_DILITHIUM(CryptoAlgo.CRYSTALS, "Dilithium")
 		
 		;
 		private final String name;
@@ -520,6 +530,11 @@ public final class CryptoConst
 	    {
 			return EXPIRATION_TIME;
 		}
+	}
+
+	public static String applyPemFilters(String pemToken)
+	{
+		return SharedStringUtil.filterString(pemToken, PEM_KEY_FILTERS);
 	}
 
 	public static class SubjectIDFilter

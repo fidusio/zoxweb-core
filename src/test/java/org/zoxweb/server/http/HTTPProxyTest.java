@@ -23,6 +23,7 @@ import org.zoxweb.shared.http.HTTPMessageConfigInterface;
 import org.zoxweb.shared.http.HTTPMethod;
 import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.util.Const.DeviceType;
+import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedUtil;
 
 public class HTTPProxyTest {
@@ -114,10 +115,9 @@ public class HTTPProxyTest {
 
         try {
           if (i > 5) {
-            boolean result = SharedUtil.slowEquals(contents[0], contents[1]);
-						if (result) {
-							deltaTotal += deltas[0] - deltas[1];
-						}
+            boolean result = SUS.slowEquals(contents[0], contents[1]);
+            if (result)
+                deltaTotal += deltas[0] - deltas[1];
             System.out.println("Result " + result + " difference " + (deltas[0] - deltas[1]));
           }
         } catch (Exception e) {
