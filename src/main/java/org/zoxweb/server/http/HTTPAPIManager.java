@@ -168,7 +168,7 @@ public final class HTTPAPIManager
     }
 
 
-    public HTTPAPIEndPoint<?,?> unregister(HTTPAPIEndPoint apiEndPoint)
+    public HTTPAPIEndPoint<?,?> unregister(HTTPAPIEndPoint<?,?> apiEndPoint)
     {
 
         if (apiEndPoint != null)
@@ -178,7 +178,7 @@ public final class HTTPAPIManager
 
 
 
-    public HTTPAPIEndPoint[] getAll()
+    public HTTPAPIEndPoint<?,?>[] getAll()
     {
         return mapCache.values().toArray(new HTTPAPIEndPoint[0]);
     }
@@ -190,9 +190,9 @@ public final class HTTPAPIManager
     }
 
 
-    public HTTPAPIEndPoint[] getDomainEndPoints(String domain, boolean copy)
+    public HTTPAPIEndPoint<?,?>[] getDomainEndPoints(String domain, boolean copy)
     {
-        List<HTTPAPIEndPoint> ret = new ArrayList<>();
+        List<HTTPAPIEndPoint<?,?>> ret = new ArrayList<>();
         domain = SharedStringUtil.trimOrNull(domain);
         if (domain != null) {
             domain = domain.endsWith(".") ? domain : domain + ".";
@@ -208,17 +208,33 @@ public final class HTTPAPIManager
         return ret.toArray(new HTTPAPIEndPoint[0]);
     }
 
-    public HTTPAPICaller createAPICaller(String domain, String name, HTTPAuthorization authorization)
+    public  <V extends HTTPAPICaller> V createAPICaller(String domain, String name, HTTPAuthorization authorization)
     {
-        HTTPAPIEndPoint[] domainEndPoints = getDomainEndPoints(domain, true);
-        Map<String, HTTPAPIEndPoint>  endPointMap = new HashMap<>();
-        for (HTTPAPIEndPoint haep : domainEndPoints)
+        HTTPAPIEndPoint<?,?>[] domainEndPoints = getDomainEndPoints(domain, true);
+        Map<String, HTTPAPIEndPoint<?,?>>  endPointMap = new HashMap<>();
+        for (HTTPAPIEndPoint<?,?> haep : domainEndPoints)
         {
             log.getLogger().info(haep.toCanonicalID());
             endPointMap.put(haep.toCanonicalID(), haep);
         }
         return new HTTPAPICaller(name, endPointMap).setHTTPAuthorization(authorization).setDomain(domain);
+    }
 
+    public  <V extends HTTPAPICaller> V buildAPICaller(V apiCaller, String domain, NVGenericMap props)
+    {
+        HTTPAPIEndPoint<?,?>[] domainEndPoints = getDomainEndPoints(domain, true);
+        Map<String, HTTPAPIEndPoint<?,?>>  endPointMap = new HashMap<>();
+        for (HTTPAPIEndPoint<?,?> haep : domainEndPoints)
+        {
+            log.getLogger().info(haep.toCanonicalID());
+            endPointMap.put(haep.toCanonicalID(), haep);
+        }
+        apiCaller.setEndPoints(endPointMap);
+        HTTPAuthorization authorization = props.getValue(HTTPAPIBuilder.Prop.AUTHZ);
+        String url = props.getValue(HTTPAPIBuilder.Prop.URL);
+        if(authorization != null) apiCaller.setHTTPAuthorization(authorization);
+        if(url != null) apiCaller.updateURL(url);
+        return apiCaller.setDomain(domain);
     }
 
 }

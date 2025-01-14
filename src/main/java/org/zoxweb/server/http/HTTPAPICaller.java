@@ -18,6 +18,9 @@ import java.util.concurrent.TimeUnit;
 public class HTTPAPICaller
     implements GetName, GetDescription
 {
+
+
+
     public static class Callback<I,O>
         extends HTTPCallback<I,O>
     {
@@ -61,18 +64,23 @@ public class HTTPAPICaller
 
     private OkHttpClient okHttpClient;
 
-    private final Map<String, HTTPAPIEndPoint> endPoints;
+    private Map<String, HTTPAPIEndPoint<?,?>> endPoints;
 
 
 
     private String domain;
 
-    protected HTTPAPICaller(String name, Map<String, HTTPAPIEndPoint> endpoints)
+    public HTTPAPICaller(String name, String description)
+    {
+        this(name, description, null);
+    }
+
+    protected HTTPAPICaller(String name, Map<String, HTTPAPIEndPoint<?,?>> endpoints)
     {
         this(name, null, endpoints);
     }
 
-    protected HTTPAPICaller(String name, String description, Map<String, HTTPAPIEndPoint> endpoints)
+    protected HTTPAPICaller(String name, String description, Map<String, HTTPAPIEndPoint<?,?>> endpoints)
     {
         namedDescription = new NamedDescription(name.toLowerCase().trim(), description);
         this.endPoints = endpoints;
@@ -102,6 +110,12 @@ public class HTTPAPICaller
         return this;
     }
 
+    protected <V extends HTTPAPICaller> V setEndPoints( Map<String, HTTPAPIEndPoint<?,?>> endPoints)
+    {
+        this.endPoints = endPoints;
+        return (V) this;
+    }
+
     public HTTPAuthorization getHTTPAuthorization()
     {
         return httpAuthorization;
@@ -112,9 +126,9 @@ public class HTTPAPICaller
         return okHttpClient;
     }
 
-    public HTTPAPICaller setOkHttpClient(OkHttpClient okHttpClient) {
+    public <V extends HTTPAPICaller> V setOkHttpClient(OkHttpClient okHttpClient) {
         this.okHttpClient = okHttpClient;
-        return this;
+        return (V)this;
     }
 
     public boolean equals(Object obj)
@@ -136,46 +150,46 @@ public class HTTPAPICaller
         return domain;
     }
 
-    protected HTTPAPICaller setDomain(String domain)
+    protected <V extends HTTPAPICaller> V setDomain(String domain)
     {
         this.domain = domain;
-        return this;
+        return (V)this;
     }
 
-    public synchronized HTTPAPICaller updateURL(String url)
+    public synchronized <V extends HTTPAPICaller> V updateURL(String url)
     {
         url = FilterType.URL.validate(url);
         for(HTTPAPIEndPoint<?,?> haep : endPoints.values())
             haep.getConfig().setURL(url);
-        return this;
+        return (V)this;
     }
 
-    public synchronized HTTPAPICaller updateRateController(RateController rc)
+    public synchronized <V extends HTTPAPICaller> V updateRateController(RateController rc)
     {
         for(HTTPAPIEndPoint<?,?> haep : endPoints.values())
             haep.setRateController(rc);
-        return this;
+        return (V)this;
     }
 
-    public synchronized HTTPAPICaller updateExecutor(Executor executor)
+    public synchronized <V extends HTTPAPICaller> V updateExecutor(Executor executor)
     {
         for(HTTPAPIEndPoint<?,?> haep : endPoints.values())
             haep.setExecutor(executor);
-        return this;
+        return (V)this;
     }
 
-    public synchronized HTTPAPICaller updateScheduler(TaskSchedulerProcessor tps)
+    public synchronized <V extends HTTPAPICaller> V updateScheduler(TaskSchedulerProcessor tps)
     {
         for(HTTPAPIEndPoint<?,?> haep : endPoints.values())
             haep.setScheduler(tps);
-        return this;
+        return (V)this;
     }
 
-    public synchronized HTTPAPICaller updateOkHttpClient(OkHttpClient okHttpClient)
+    public synchronized <V extends HTTPAPICaller> V updateOkHttpClient(OkHttpClient okHttpClient)
     {
         for(HTTPAPIEndPoint<?,?> haep : endPoints.values())
             haep.setOkHttpClient(okHttpClient);
-        return this;
+        return (V)this;
     }
 
 
@@ -191,7 +205,7 @@ public class HTTPAPICaller
 
     public <I,O> HTTPCallback<I,O> asyncCall(String endpointName, I input, ConsumerCallback<O> consumerCallback, long delayInMillis)
     {
-        HTTPAPIEndPoint<I,O> endPoint = endPoints.get(SUS.toCanonicalID('.', domain, endpointName));
+        HTTPAPIEndPoint<I,O> endPoint = (HTTPAPIEndPoint<I, O>) endPoints.get(SUS.toCanonicalID('.', domain, endpointName));
         if (endPoint == null)
             throw new IllegalArgumentException("endpoint " + endpointName + " not found");
         Callback<I,O> callback = new Callback<>(input, consumerCallback);
@@ -222,12 +236,12 @@ public class HTTPAPICaller
 
     public <I,O> O syncCall(String endpointName, I input) throws IOException
     {
-        HTTPAPIEndPoint<I,O> endPoint = endPoints.get(SUS.toCanonicalID('.', domain, endpointName));
+        HTTPAPIEndPoint<I,O> endPoint = (HTTPAPIEndPoint<I, O>) endPoints.get(SUS.toCanonicalID('.', domain, endpointName));
         return endPoint.syncCall(input, httpAuthorization).getData();
     }
 
     public <I,O> HTTPAPIEndPoint<I,O> lookupEndPoint(String endpointName)
     {
-        return endPoints.get(SUS.toCanonicalID('.', domain, endpointName));
+        return (HTTPAPIEndPoint<I, O>) endPoints.get(SUS.toCanonicalID('.', domain, endpointName));
     }
 }

@@ -14,6 +14,14 @@ public class NamedValue<V>
     private final NVGenericMap properties = new NVGenericMap();
     public NamedValue(){}
 
+
+    public NamedValue(Enum<?> name, V value)
+    {
+        this.name = name instanceof GetName ? ((GetName) name).getName() : "" + name;
+        this.value = value;
+    }
+
+
     public NamedValue(String name, V value)
     {
         this.name = name;
