@@ -58,6 +58,16 @@ public class SUS
         return (array != null && array.length != 0);
     }
 
+    public static boolean areAllDataZero(byte[] buffer, int offset, int length)
+    {
+        for(int i = offset; i < offset + length; i++)
+        {
+            if(buffer[i] != 0)
+                return false;
+        }
+        return true;
+    }
+
     /**
      * Convert a NVEntity to NVGenericMap
      * @param nve to be converted

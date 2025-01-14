@@ -17,6 +17,7 @@ package org.zoxweb.shared.util;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -84,6 +85,19 @@ public class SharedStringUtilTest {
 		String test = "Hello World";
 		System.out.println(SharedStringUtil.repeatSequence(test, 3, "*"));
 		System.out.println(SharedStringUtil.repeatSequence(test, 3));
+	}
+
+	@Test public void partialParse()
+	{
+		String token = "a1:b2:c3*d4::::DA:darta";
+		System.out.println(Arrays.toString(SharedStringUtil.parseToken(token, 0, false, "*")));
+
+		System.out.println(Arrays.toString(SharedStringUtil.parseToken(token, 3, false, "*", ":", "da")));
+
+		String gpio = "gpio_0:marwan:https://yahoo.com";
+
+		System.out.println(Arrays.toString(SharedStringUtil.parseToken(gpio, 2, false, "*", ":")));
+		System.out.println(Arrays.toString(SharedStringUtil.parseToken(gpio, 0, false, "*", ":")));
 	}
 
 }

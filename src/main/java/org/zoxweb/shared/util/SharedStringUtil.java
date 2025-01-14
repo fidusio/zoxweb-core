@@ -401,6 +401,53 @@ public final class SharedStringUtil
 		return val;
 	}
 
+	public static String[] parseToken(String token, int matchCount, boolean ignoreCase, String ...toMatches)
+	{
+		List<String> matches = new ArrayList<>();
+		boolean moreToMatch;
+		int lastIndex = 0;
+		String tokenToProcess = ignoreCase ? token.toUpperCase() : token;
+		boolean found;
+		do
+		{
+			found = false;
+			moreToMatch = false;
+			for (String toMatch : toMatches)
+			{
+
+				int matchIndex = tokenToProcess.indexOf(ignoreCase ? toMatch.toUpperCase() : toMatch, lastIndex);
+				if(matchIndex != -1)
+				{
+					// we have a match
+					String toAdd = token.substring(lastIndex, matchIndex);
+					if(SUS.isNotEmpty(toAdd))
+						matches.add(toAdd);
+					found = true;
+					lastIndex = matchIndex + toMatch.length();
+					// break loop
+					break;
+				}
+			}
+			if(matchCount > 0 && matches.size() < matchCount)
+			{
+				moreToMatch = true;
+			}
+			else if (matchCount < 1 && found)
+			{
+				moreToMatch = true;
+			}
+
+		}while(moreToMatch && found);
+
+		String toAdd = token.substring(lastIndex);
+		if(SUS.isNotEmpty(toAdd))
+			matches.add(toAdd);
+
+
+
+		return matches.toArray(new String[0]);
+	}
+
 	/**
 	 * Extracts the value between the prefix and postfix string.
 	 * @param str
