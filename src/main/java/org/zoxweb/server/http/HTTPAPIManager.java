@@ -230,10 +230,13 @@ public final class HTTPAPIManager
             endPointMap.put(haep.toCanonicalID(), haep);
         }
         apiCaller.setEndPoints(endPointMap);
-        HTTPAuthorization authorization = props.getValue(HTTPAPIBuilder.Prop.AUTHZ);
-        String url = props.getValue(HTTPAPIBuilder.Prop.URL);
-        if(authorization != null) apiCaller.setHTTPAuthorization(authorization);
-        if(url != null) apiCaller.updateURL(url);
+        if(props != null)
+        {
+            HTTPAuthorization authorization = props.getValue(HTTPAPIBuilder.Prop.AUTHZ);
+            String url = props.getValue(HTTPAPIBuilder.Prop.URL);
+            if (authorization != null) apiCaller.setHTTPAuthorization(authorization);
+            if (url != null) apiCaller.updateURL(url);
+        }
         return apiCaller.setDomain(domain);
     }
 
