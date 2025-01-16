@@ -17,13 +17,15 @@ package org.zoxweb.server.http;
 
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.logging.LogWrapper;
-import org.zoxweb.server.logging.LoggerUtil;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.http.*;
 import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.net.ProxyType;
-import org.zoxweb.shared.util.*;
+import org.zoxweb.shared.util.Const;
+import org.zoxweb.shared.util.ParamUtil;
+import org.zoxweb.shared.util.RateCounter;
+import org.zoxweb.shared.util.SharedStringUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -108,7 +110,6 @@ public final class HTTPCallTool
 
     public static void main(String ...args)
     {
-        LoggerUtil.enableDefaultLogger("org.zoxweb");
         try
         {
             TaskUtil.setThreadMultiplier(8);

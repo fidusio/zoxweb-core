@@ -1,6 +1,5 @@
 package org.zoxweb.server.security;
 
-import org.zoxweb.server.logging.LoggerUtil;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.server.util.cache.JWTTokenCache;
@@ -22,7 +21,6 @@ public class JWTCacheTest {
             long ttl = index < args.length ? Const.TimeInMillis.toMillis(args[index++]) : Const.TimeInMillis.SECOND.MILLIS*45;
             TaskUtil.defaultTaskProcessor();
 
-            LoggerUtil.enableDefaultLogger("org.zoxweb");
             JWTTokenCache cache = new JWTTokenCache(ttl, TaskUtil.defaultTaskScheduler());
             long sizeOfAllTockens = 0;
             long ts = System.currentTimeMillis();

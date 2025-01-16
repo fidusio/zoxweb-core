@@ -18,7 +18,8 @@ public class LogWrapper {
 
     public LogWrapper(String loggerName)
     {
-        this.logger = Logger.getLogger(loggerName);
+        this(Logger.getLogger(loggerName));
+        LoggerUtil.configureLogger(logger);
     }
 
     public Logger getLogger()

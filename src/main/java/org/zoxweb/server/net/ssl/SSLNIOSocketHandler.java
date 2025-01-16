@@ -20,7 +20,6 @@ import org.zoxweb.server.fsm.TriggerConsumer;
 import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.logging.LogWrapper;
-import org.zoxweb.server.logging.LoggerUtil;
 import org.zoxweb.server.net.BaseSessionCallback;
 import org.zoxweb.server.net.NIOSocket;
 import org.zoxweb.server.net.ProtocolHandler;
@@ -300,7 +299,7 @@ public class SSLNIOSocketHandler
 	@SuppressWarnings("resource")
     public static void main(String... args)
     {
-    	LoggerUtil.enableDefaultLogger("org.zoxweb");
+
 		try
 		{
 			ParamUtil.ParamMap params = ParamUtil.parse("-", args);

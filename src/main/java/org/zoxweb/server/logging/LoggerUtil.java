@@ -15,19 +15,12 @@
  */
 package org.zoxweb.server.logging;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
+import org.zoxweb.server.util.DateUtil;
+
+import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.logging.ConsoleHandler;
-import java.util.logging.FileHandler;
-import java.util.logging.LogRecord;
-import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
-import org.zoxweb.server.util.DateUtil;
+import java.util.logging.*;
 
 /**
  * Logger utility class.
@@ -39,7 +32,24 @@ public final class LoggerUtil
 	public static final String PRODUCTION_FORMAT = "%1$tY-%1$tm-%1$td %1$tH:%1$tM:%1$tS %4$-6s : %2$s %5$s%6$s%n";
 	public static final String DEFAULT_FORMAT = "%1$s %4$-6s : %2$s-%5$s%6$s%n";
 	public static final String DEFAULT_FORMAT_INTERNAL = "[%1$s][%2$s::%3$s][%4$s]:%5$s: %6$s %n";
+	public static final ConsoleHandler PRODUCTION_HANDLER = new ConsoleHandler();
+	static
+	{
+		PRODUCTION_HANDLER.setFormatter(new SimpleFormatter() {
 
+			@Override
+			public synchronized String format(LogRecord lr) {
+				return String.format(DEFAULT_FORMAT_INTERNAL,
+						DateUtil.DEFAULT_DATE_FORMAT_TZ.format(new Date(lr.getMillis())),
+						lr.getSourceClassName(),
+						lr.getSourceMethodName(),
+						lr.getLevel().getLocalizedName(),
+						Thread.currentThread(),
+						lr.getMessage()
+				);
+			}
+		});
+	}
 
 	private LoggerUtil()
 	{
@@ -103,25 +113,43 @@ public final class LoggerUtil
 		System.setProperty("java.util.logging.SimpleFormatter.format", format);
 	}
 
-	public static void enableDefaultLogger(String loggerHeader)
-  {
-    Logger mainLogger = Logger.getLogger(loggerHeader);
-    mainLogger.setUseParentHandlers(false);
-    ConsoleHandler handler = new ConsoleHandler();
-    handler.setFormatter(new SimpleFormatter() {
+//	public static void enableDefaultLogger(String loggerHeader)
+//	{
+//		Logger mainLogger = Logger.getLogger(loggerHeader);
+//		mainLogger.setUseParentHandlers(false);
+//		ConsoleHandler handler = new ConsoleHandler();
+//		handler.setFormatter(new SimpleFormatter() {
+//
+//		  @Override
+//		  public synchronized String format(LogRecord lr) {
+//			return String.format(DEFAULT_FORMAT_INTERNAL,
+//				DateUtil.DEFAULT_DATE_FORMAT_TZ.format(new Date(lr.getMillis())),
+//				lr.getSourceClassName(),
+//				lr.getSourceMethodName(),
+//				lr.getLevel().getLocalizedName(),
+//				Thread.currentThread(),
+//				lr.getMessage()
+//			);
+//		  }
+//		});
+//		mainLogger.addHandler(handler);
+//	}
 
-      @Override
-      public synchronized String format(LogRecord lr) {
-        return String.format(DEFAULT_FORMAT_INTERNAL,
-            DateUtil.DEFAULT_DATE_FORMAT_TZ.format(new Date(lr.getMillis())),
-            lr.getSourceClassName(),
-            lr.getSourceMethodName(),
-            lr.getLevel().getLocalizedName(),
-            Thread.currentThread(),
-            lr.getMessage()
-        );
-      }
-    });
-    mainLogger.addHandler(handler);
-  }
+	public static void configureLogger(Logger logger) {
+		// Remove existing handlers (if any)
+		for (Handler handler : logger.getHandlers()) {
+			logger.removeHandler(handler);
+		}
+
+		// Attach the handler to the logger
+		logger.addHandler(PRODUCTION_HANDLER);
+
+		// Set the logger level (optional)
+		logger.setLevel(Level.ALL);
+
+		// Disable use of parent handlers
+		logger.setUseParentHandlers(false);
+	}
+
+
 }

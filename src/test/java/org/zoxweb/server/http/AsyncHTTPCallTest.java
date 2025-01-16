@@ -1,9 +1,11 @@
 package org.zoxweb.server.http;
 
 import org.zoxweb.server.logging.LogWrapper;
-import org.zoxweb.server.logging.LoggerUtil;
 import org.zoxweb.server.task.TaskUtil;
-import org.zoxweb.shared.http.*;
+import org.zoxweb.shared.http.HTTPAPIResult;
+import org.zoxweb.shared.http.HTTPMessageConfig;
+import org.zoxweb.shared.http.HTTPMessageConfigInterface;
+import org.zoxweb.shared.http.HTTPMethod;
 import org.zoxweb.shared.util.BiDataEncoder;
 import org.zoxweb.shared.util.NVGenericMap;
 import org.zoxweb.shared.util.ParamUtil;
@@ -48,7 +50,6 @@ public class AsyncHTTPCallTest
             String rate = params.stringValue("rate");
             int repeat = params.intValue("repeat");
             RateController rc = new RateController("test", rate);
-            LoggerUtil.enableDefaultLogger("org.zoxweb");
             HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit(url, uri, HTTPMethod.GET, false);
             BiDataEncoder<HTTPMessageConfigInterface, Void, HTTPMessageConfigInterface> dataEncoder = new BiDataEncoder<HTTPMessageConfigInterface, Void, HTTPMessageConfigInterface>() {
                 @Override
