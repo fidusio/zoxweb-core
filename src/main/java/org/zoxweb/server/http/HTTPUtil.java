@@ -41,6 +41,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.BiFunction;
 
 /**
  * Contains HTTP utility functionalities.
@@ -931,33 +932,65 @@ public class HTTPUtil
 	public static String formatURI(String uri, NVGenericMap parameters)
 			throws UnsupportedEncodingException
 	{
+//		if(uri != null && parameters != null)
+//		{
+//			boolean override = !uri.endsWith("/");
+//			List<String> paramNames = parseURIParameters(uri);
+//			for (String paramName : paramNames)
+//			{
+//				Object value = parameters.getValue(paramName);
+//				uri = SharedStringUtil.embedText(uri, "{" + paramName + "}",
+//						value != null ? URLEncoder.encode("" + value, SharedStringUtil.UTF_8) : "");
+//			}
+//			if(override && uri.endsWith("/") && uri.length() > 1)
+//				uri = uri.substring(0, uri.length() - 1); // condition met to remove the last /
+//		}
+//		return uri;
+
+		return formatURI(uri, parameters, (p,v) -> v.getValue(p));
+	}
+
+
+
+	public static <U> String formatURI(String uri, U parameters, BiFunction<String, U, Object> func)
+			throws UnsupportedEncodingException
+	{
 		if(uri != null && parameters != null)
 		{
+			boolean override = !uri.endsWith("/");
 			List<String> paramNames = parseURIParameters(uri);
 			for (String paramName : paramNames)
 			{
-				Object value = parameters.getValue(paramName);
+				Object value = func.apply(paramName, parameters);//parameters.getValue(paramName);
 				uri = SharedStringUtil.embedText(uri, "{" + paramName + "}",
 						value != null ? URLEncoder.encode("" + value, SharedStringUtil.UTF_8) : "");
 			}
+			if(override && uri.endsWith("/") && uri.length() > 1)
+				uri = uri.substring(0, uri.length() - 1); // condition met to remove the last /
 		}
 		return uri;
+
+
 	}
 
 	public static String formatURI(String uri, Map<String, Object> parameters)
 			throws UnsupportedEncodingException
 	{
-		if(uri != null & parameters != null)
-		{
-			List<String> paramNames = parseURIParameters(uri);
-			for (String paramName : paramNames)
-			{
-				Object value = parameters.get(paramName);
-				uri = SharedStringUtil.embedText(uri, "{" + paramName + "}",
-						value != null ? URLEncoder.encode("" + value, SharedStringUtil.UTF_8) : "");
-			}
-		}
-		return uri;
+//		if(uri != null & parameters != null)
+//		{
+//			boolean override = !uri.endsWith("/");
+//			List<String> paramNames = parseURIParameters(uri);
+//			for (String paramName : paramNames)
+//			{
+//				Object value = parameters.get(paramName);
+//				uri = SharedStringUtil.embedText(uri, "{" + paramName + "}",
+//						value != null ? URLEncoder.encode("" + value, SharedStringUtil.UTF_8) : "");
+//			}
+//			if(override && uri.endsWith("/") && uri.length() > 1)
+//				uri = uri.substring(0, uri.length() - 1);
+//		}
+//		return uri;
+		return formatURI(uri, parameters, (p,v) -> v.get(p));
 	}
 
 
@@ -965,6 +998,7 @@ public class HTTPUtil
 	{
 		if ( list != null && params != null)
 		{
+
 			for (String param : params)
 			{
 				GetNameValue<String> gnvs = SharedUtil.lookupNV(list, param);

@@ -69,8 +69,38 @@ public class PathParameterTest {
 
         System.out.println(metaPath);
         System.out.println(uri);
+    }
 
+    @Test
+    public void parseFormatParametersFixedEnd() throws UnsupportedEncodingException {
+        String metaPath = "/path/{param1}/{param2}/token/{param3}/";
 
+        System.out.println(HTTPUtil.parseURIParameters(metaPath));
+        NVGenericMap nvgm = new NVGenericMap().build("param1", "value1")
+                .build(new NVInt("param2", 25))
+                .build("param3", null);
+        String uri = HTTPUtil.formatURI(metaPath, nvgm);
+
+        System.out.println(metaPath);
+        System.out.println(uri);
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("param1", "batata");
+        params.put("param2", 1.75);
+        params.put("param3", true);
+
+        uri = HTTPUtil.formatURI(metaPath, params);
+
+        System.out.println(metaPath);
+        System.out.println(uri);
+        uri = HTTPUtil.formatURI(metaPath, params);
+
+        System.out.println(metaPath);
+        System.out.println(uri);
+        uri = HTTPUtil.formatURI(metaPath, new NVGenericMap());
+
+        System.out.println(metaPath);
+        System.out.println(uri);
     }
 
     @Test
