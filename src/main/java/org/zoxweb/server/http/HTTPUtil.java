@@ -932,21 +932,6 @@ public class HTTPUtil
 	public static String formatURI(String uri, NVGenericMap parameters)
 			throws UnsupportedEncodingException
 	{
-//		if(uri != null && parameters != null)
-//		{
-//			boolean override = !uri.endsWith("/");
-//			List<String> paramNames = parseURIParameters(uri);
-//			for (String paramName : paramNames)
-//			{
-//				Object value = parameters.getValue(paramName);
-//				uri = SharedStringUtil.embedText(uri, "{" + paramName + "}",
-//						value != null ? URLEncoder.encode("" + value, SharedStringUtil.UTF_8) : "");
-//			}
-//			if(override && uri.endsWith("/") && uri.length() > 1)
-//				uri = uri.substring(0, uri.length() - 1); // condition met to remove the last /
-//		}
-//		return uri;
-
 		return formatURI(uri, parameters, (p,v) -> v.getValue(p));
 	}
 
@@ -955,7 +940,7 @@ public class HTTPUtil
 	public static <U> String formatURI(String uri, U parameters, BiFunction<String, U, Object> func)
 			throws UnsupportedEncodingException
 	{
-		if(uri != null && parameters != null)
+		if(uri != null && parameters != null && func != null)
 		{
 			boolean override = !uri.endsWith("/");
 			List<String> paramNames = parseURIParameters(uri);
@@ -970,26 +955,11 @@ public class HTTPUtil
 		}
 		return uri;
 
-
 	}
 
 	public static String formatURI(String uri, Map<String, Object> parameters)
 			throws UnsupportedEncodingException
 	{
-//		if(uri != null & parameters != null)
-//		{
-//			boolean override = !uri.endsWith("/");
-//			List<String> paramNames = parseURIParameters(uri);
-//			for (String paramName : paramNames)
-//			{
-//				Object value = parameters.get(paramName);
-//				uri = SharedStringUtil.embedText(uri, "{" + paramName + "}",
-//						value != null ? URLEncoder.encode("" + value, SharedStringUtil.UTF_8) : "");
-//			}
-//			if(override && uri.endsWith("/") && uri.length() > 1)
-//				uri = uri.substring(0, uri.length() - 1);
-//		}
-//		return uri;
 		return formatURI(uri, parameters, (p,v) -> v.get(p));
 	}
 
