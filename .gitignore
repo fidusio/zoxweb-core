@@ -35,12 +35,12 @@ test-classes/
 #.settings
 .settings/
 
-.project
 
 
 #project
 *.project
 *.classpath
+*.vscode
 
 #old GWT (1.5) created this dir
 .gwt-tmp/
