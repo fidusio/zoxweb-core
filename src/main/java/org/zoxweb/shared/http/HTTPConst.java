@@ -15,12 +15,6 @@ public final class HTTPConst
     public final static String TEXT_PLAIN = "text/plain";
     public final static String TEXT_YAML = "text/yaml";
 
-
-
-
-
-
-    public static final String WEB_SOCKET_UUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
     public static final GetNameValue<String> CHARSET_UTF_8 = new NVPair("charset", SharedStringUtil.UTF_8);
 
 

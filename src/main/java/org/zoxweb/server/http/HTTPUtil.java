@@ -65,7 +65,7 @@ public class HTTPUtil
 		try
 		{
 			lock.lock();
-			secWebSocketAcceptBytes = HashUtil.getMessageDigestSilent("SHA-1").digest(SharedStringUtil.getBytes(secWebSocketKey + HTTPConst.WEB_SOCKET_UUID));
+			secWebSocketAcceptBytes = HashUtil.getMessageDigestSilent("SHA-1").digest(SharedStringUtil.getBytes(secWebSocketKey + HTTPWSProto.WEB_SOCKET_UUID));
 		}
 		finally
 		{

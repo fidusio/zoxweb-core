@@ -15,7 +15,8 @@
  */
 package org.zoxweb.server.io;
 
-import org.zoxweb.shared.util.BytesArray;
+import org.zoxweb.shared.protocol.BytesArray;
+import org.zoxweb.shared.protocol.DataBufferController;
 import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedStringUtil;
 import org.zoxweb.shared.util.SharedUtil;
@@ -28,7 +29,7 @@ import java.util.Arrays;
  */
 public class UByteArrayOutputStream 
 	extends ByteArrayOutputStream 
-	implements Externalizable, BytesArrayAccess
+	implements Externalizable, DataBufferController
 {
 
 	/**
