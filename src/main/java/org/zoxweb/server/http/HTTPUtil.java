@@ -30,6 +30,7 @@ import org.zoxweb.shared.data.SimpleMessage;
 import org.zoxweb.shared.http.*;
 import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.protocol.Delimiter;
+import org.zoxweb.shared.protocol.HTTPWSProto;
 import org.zoxweb.shared.protocol.MessageStatus;
 import org.zoxweb.shared.util.*;
 

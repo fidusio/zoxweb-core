@@ -1,6 +1,6 @@
-package org.zoxweb.shared.protocol;
+package org.zoxweb.shared.util;
 
-import org.zoxweb.shared.util.SUS;
+import java.util.Arrays;
 
 public class BytesArray
 {
@@ -24,5 +24,30 @@ public class BytesArray
     public BytesArray(byte[] array)
     {
         this(array, 0, array.length, true);
+    }
+
+
+    public int byteAt(int index)
+    {
+        int byteIndex = offset + index;
+        if(byteIndex > length)
+            throw new ArrayIndexOutOfBoundsException(index + " out of bound length: " + length);
+        return array[byteIndex];
+    }
+
+
+    public String toString()
+    {
+        return SUS.toCanonicalID(',', array.length, offset, length);
+    }
+
+    public String asString()
+    {
+        return new String(array, offset, length);
+    }
+
+    public byte[] asBytes()
+    {
+        return Arrays.copyOfRange(array, offset, offset + length);
     }
 }

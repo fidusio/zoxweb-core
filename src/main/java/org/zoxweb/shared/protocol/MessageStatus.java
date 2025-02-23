@@ -23,4 +23,5 @@ public enum MessageStatus
 	COMPLETE,
 	PARTIAL,
 	INVALID,
+	UNPROCESSED,
 }

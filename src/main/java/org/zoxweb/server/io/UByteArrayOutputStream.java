@@ -15,8 +15,8 @@
  */
 package org.zoxweb.server.io;
 
-import org.zoxweb.shared.protocol.BytesArray;
-import org.zoxweb.shared.protocol.DataBufferController;
+import org.zoxweb.shared.util.BytesArray;
+import org.zoxweb.shared.util.DataBufferController;
 import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedStringUtil;
 import org.zoxweb.shared.util.SharedUtil;
@@ -268,6 +268,35 @@ public class UByteArrayOutputStream
 	}
 
 	/**
+	 * @param from
+	 * @param to
+	 * @param length
+	 * @return
+	 */
+//	@Override
+//	public synchronized int move(int from, int to, int length)
+//	{
+//
+//		int delta = from - to;
+//		//System.out.println("delta: " + delta);
+//		if(delta > 0)
+//		{
+//			if(from + length > size())
+//				throw new IndexOutOfBoundsException();
+//
+//			System.arraycopy(buf, from, buf, to, length);
+//			//System.arraycopy(buf, from + length, buf, from, count-(from + length));
+//			this.count -= delta;
+//		}
+//		else if (delta < 0)
+//		{
+//			System.arraycopy(buf, to, buf, from, length);
+//		}
+//
+//		return size();
+//	}
+
+	/**
 	 * Insert a string at the specified location
 	 * @param index
 	 * @param str
@@ -440,33 +469,33 @@ public class UByteArrayOutputStream
 		
 		count = newCount;
 	}
-	
+
 	/**
-	 * Shift the data left.
+	 * Shift the data left, basically shrinking the buffer this method is useful and efficient for protocol parsing and processing
 	 * @param from start index
-	 * @param to end index
+	 * @param to end index with constraint to < from
+	 * @return the buffer size after the shift
+	 * @throws IndexOutOfBoundsException in case the from and to are out of bound
 	 */
-	public synchronized void shiftLeft(int from, int to)
+	public synchronized int shiftLeft(int from, int to)
 	{
-		if (from < 0 || to < 0 || from > count || to > count || to > from)
+		if (to < 0 || from > count || to > count || to > from)
 		{
 			throw new IndexOutOfBoundsException("Size " + count + " from " + from + " to " + to);
 		}
 		
 		if (from == count && to == 0)
 		{
+			// basically resetting the buffer
 			count = 0;
-			return;
 		}
-		
-		if (from == to)
+		else if (from != to)
 		{
-			return;
+			System.arraycopy(buf, from, buf, to, count - from);
+			count = count - (from - to);
 		}
-		
-		System.arraycopy(buf, from, buf, to, count - from);
-		
-		count = count - (from-to);
+
+		return count;
 	}
 	
 	/**
@@ -493,7 +522,7 @@ public class UByteArrayOutputStream
 	public synchronized String toString(boolean withContent)
 	{
 		StringBuilder sb = new StringBuilder();
-		sb.append("Size  " + size() + "Buffer Length " + buf.length);
+		sb.append("Size  " + size() + " Buffer Length " + buf.length);
 		if(withContent) {
 			sb.append("\n");
 			sb.append(SharedStringUtil.toString(buf, 0, size()));
