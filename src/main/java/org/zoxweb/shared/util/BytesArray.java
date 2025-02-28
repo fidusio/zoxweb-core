@@ -1,14 +1,16 @@
 package org.zoxweb.shared.util;
 
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class BytesArray
 {
-    public final byte[] array;
+    private final byte[] array;
     public final int offset;
     public final int length;
+    private final AtomicBoolean valid;
 
-    public BytesArray(byte[] array, int offset, int length, boolean checkBoundary)
+    public BytesArray(AtomicBoolean valid, byte[] array, int offset, int length, boolean checkBoundary)
     {
         SUS.checkIfNulls("Byte array null", array);
         if (checkBoundary && (offset < 0 || length < 0 || (offset + length > array.length)))
@@ -16,14 +18,15 @@ public class BytesArray
         this.array = array;
         this.offset = offset;
         this.length = length;
+        this.valid = valid != null ? valid : new AtomicBoolean(true);
     }
-    public BytesArray(byte[] array, int offset, int length)
+    public BytesArray(AtomicBoolean valid, byte[] array, int offset, int length)
     {
-       this(array, offset, length, true);
+       this(valid, array, offset, length, true);
     }
-    public BytesArray(byte[] array)
+    public BytesArray(AtomicBoolean valid, byte[] array)
     {
-        this(array, 0, array.length, true);
+        this(valid, array, 0, array.length, true);
     }
 
 
@@ -38,7 +41,7 @@ public class BytesArray
 
     public String toString()
     {
-        return SUS.toCanonicalID(',', array.length, offset, length);
+        return SUS.toCanonicalID(',', isValid(), array.length, offset, length);
     }
 
     public String asString()
@@ -49,5 +52,10 @@ public class BytesArray
     public byte[] asBytes()
     {
         return Arrays.copyOfRange(array, offset, offset + length);
+    }
+
+    public boolean isValid()
+    {
+        return valid.get();
     }
 }

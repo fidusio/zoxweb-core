@@ -144,7 +144,8 @@ public class HTTPWSFrame
                             dataBuffer.writeAt(startOffset + dataIndex + i, b);
                         }
                     }
-                    data = new BytesArray(dataBuffer.getInternalBuffer(), dataIndex + startOffset, dataLength);
+                    data = dataBuffer.toBytesArray(false, dataIndex + startOffset, dataLength);
+//                            new BytesArray(dataBuffer.getInternalBuffer(), dataIndex + startOffset, dataLength);
                 }
             }
         }

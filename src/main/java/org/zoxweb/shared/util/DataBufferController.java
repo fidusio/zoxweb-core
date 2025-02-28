@@ -15,6 +15,8 @@
  */
 package org.zoxweb.shared.util;
 
+import java.io.ByteArrayInputStream;
+
 /**
  * The internal buffer access interface.
  */
@@ -134,4 +136,11 @@ public interface DataBufferController
 	 * @throws IndexOutOfBoundsException in case the from and to are out of bound
 	 */
 	int shiftLeft(int from, int to);
+
+
+	/**
+	 *  @return ByteArrayInputStream, the data in the input stream after the call are immutable,
+	 *  the implementing class create a new buffer and size() = 0
+	 */
+	ByteArrayInputStream toByteArrayInputStream();
 }

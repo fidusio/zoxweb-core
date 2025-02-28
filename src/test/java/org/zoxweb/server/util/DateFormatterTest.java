@@ -35,7 +35,7 @@ public class DateFormatterTest {
 	}
 	
 	@Test
-	public void testParsePatial()
+	public void testParsePartial()
 	{
 		
 		System.out.println(TimestampFilter.SINGLETON.validate("2017-10-13T22:50:18.437Z"));

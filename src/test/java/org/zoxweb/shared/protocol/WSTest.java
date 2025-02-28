@@ -65,7 +65,7 @@ public class WSTest
             System.out.println(f + " index " + frame.byteIndex(f));
         }
         BytesArray data = frame.data();
-        System.out.println("Message: " + new String(data.array, data.offset, data.length));
+        System.out.println("Message: " + data.asString());
     }
 
     @Test
@@ -106,11 +106,14 @@ public class WSTest
         }
         data = frame.data();
 
-        String str = data.asString();
         System.out.println("FrameSize: " + frame.frameSize() +  " Data: " + data.length  + " " + data.offset + " \"" + data.asString() + '\"');
 
         System.out.println("baos size: " + baos.size());
         to = baos.shiftLeft(frame.data().offset, to);
+        assert data.isValid();
         System.out.println("to : " + to + "\n" +baos.toString());
+
+        baos.toByteArrayInputStream();
+        assert !data.isValid();
     }
 }

@@ -23,6 +23,7 @@ import org.zoxweb.shared.util.SharedUtil;
 
 import java.io.*;
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * The UByteArrayOutputStream class.
@@ -32,6 +33,7 @@ public class UByteArrayOutputStream
 	implements Externalizable, DataBufferController
 {
 
+	private AtomicBoolean valid = new AtomicBoolean(true);
 	/**
 	 * Create a byte array output stream.
 	 */
@@ -98,16 +100,19 @@ public class UByteArrayOutputStream
 		buf = (byte[])((ObjectInputStream)in).readUnshared();
 		
 	}
-	
+
+
 	/**
 	 * This method will transfer the data to ByteArrayInputStream and reset the UByteArrayOutputStream
-	 * @return ByteArrayInputStream
+	 * @return ByteArrayInputStream, the data in the input stream after the call are immutable, the implementing class create a new buffer and size() = 0
 	 */
 	public synchronized ByteArrayInputStream toByteArrayInputStream()
 	{
 		byte[] tempBuf = buf;
 		int tempCount = size();
 		buf = new byte[32];
+		valid.set(false);
+		valid = new AtomicBoolean(true);
 		reset();
 		
 		return new ByteArrayInputStream(tempBuf, 0 , tempCount);
@@ -590,9 +595,9 @@ public class UByteArrayOutputStream
 	{
 		if(copy)
 		{
-			return new BytesArray(copyBytes(offset, offset+length), 0, length);
+			return new BytesArray(valid, copyBytes(offset, offset+length), 0, length);
 		}
-		return new BytesArray(getInternalBuffer(), offset, length);
+		return new BytesArray(valid, getInternalBuffer(), offset, length);
 	}
 
 
