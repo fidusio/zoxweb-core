@@ -2,7 +2,7 @@ package org.zoxweb.shared.util;
 
 public interface BaseSubjectID<T>
 {
-  public enum SubjectType
+  enum SubjectType
   {
     PHONE,
     TABLET,
@@ -11,6 +11,7 @@ public interface BaseSubjectID<T>
     DEVICE,
     GATEWAY,
     ENTITY,
+    SYSTEM,
     UNKNOWN
   }
 
