@@ -5,16 +5,16 @@ import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.io.UByteArrayOutputStream;
 import org.zoxweb.server.net.PlainSessionCallback;
 import org.zoxweb.server.net.ssl.SSLSessionCallback;
-import org.zoxweb.shared.util.InstanceCreator;
+import org.zoxweb.shared.util.InstanceFactory;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
 public class EchoProtocol
 {
-    private final static InstanceCreator<PlainSessionCallback> echoPIC = EchoSession::new;
+    private final static InstanceFactory.InstanceCreator<PlainSessionCallback> echoPIC = EchoSession::new;
 
-    private final static InstanceCreator<SSLSessionCallback> echoSIC = SSLEchoSession::new;
+    private final static InstanceFactory.InstanceCreator<SSLSessionCallback> echoSIC = SSLEchoSession::new;
 
     public static class EchoSession
         extends PlainSessionCallback

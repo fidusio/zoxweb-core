@@ -1,14 +1,14 @@
 package org.zoxweb.server.net;
 
 
-import org.zoxweb.shared.util.InstanceCreator;
+import org.zoxweb.shared.util.InstanceFactory;
 
 public class NIOSocketHandlerFactory
         extends ProtocolFactoryBase<NIOSocketHandler>
 {
 
     private  Class<? extends BaseSessionCallback> cbClass;
-    private InstanceCreator<PlainSessionCallback> instanceCreator;
+    private InstanceFactory.InstanceCreator<PlainSessionCallback> instanceCreator;
 
     public NIOSocketHandlerFactory(){}
 
@@ -18,7 +18,7 @@ public class NIOSocketHandlerFactory
         this.cbClass = cbClass;
 
     }
-    public NIOSocketHandlerFactory(InstanceCreator<PlainSessionCallback> instanceCreator)
+    public NIOSocketHandlerFactory(InstanceFactory.InstanceCreator<PlainSessionCallback> instanceCreator)
     {
         this.instanceCreator = instanceCreator;
     }

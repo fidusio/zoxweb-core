@@ -100,17 +100,15 @@ public class ReflectionUtil
 
 		public boolean isClassAnnotatedBy(Class<? extends Annotation> c)
 		{
-			SUS.checkIfNulls("Class can't be null", c);
-			if(classAnnotations != null) {
-				for (Annotation a : classAnnotations) {
-					if (a.annotationType().equals(c))
-						return true;
-				}
-			}
-			return false;
+			return getMatchingClassAnnotation(c) != null;
 		}
 
 		public boolean isMethodAnnotatedBy(Method m, Class<? extends Annotation> c)
+		{
+			return getMatchingMethodAnnotation(m, c) != null;
+		}
+
+		public <V extends Annotation> V  getMatchingMethodAnnotation(Method m, Class<? extends Annotation> c)
 		{
 			SUS.checkIfNulls("Method or class can't be null", m,c);
 			MethodAnnotations methodAnnotations = methodsAnnotations.get(m);
@@ -119,10 +117,24 @@ public class ReflectionUtil
 			{
 				for (Annotation a : methodAnnotations.methodAnnotations) {
 					if (a.annotationType().equals(c))
-						return true;
+						return (V) a;
 				}
 			}
-			return false;
+			return null;
+		}
+
+
+
+		public <V extends Annotation> V  getMatchingClassAnnotation(Class<? extends Annotation> c)
+		{
+			SUS.checkIfNulls("Class can't be null", c);
+			if(classAnnotations != null) {
+				for (Annotation a : classAnnotations) {
+					if (a.annotationType().equals(c))
+						return (V)a;
+				}
+			}
+			return null;
 		}
 
 //		public boolean isMethodAnnotatedBy(String m, Class<? extends Annotation> c)

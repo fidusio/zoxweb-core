@@ -5,7 +5,7 @@ import org.zoxweb.server.net.BaseSessionCallback;
 import org.zoxweb.server.net.ProtocolFactoryBase;
 import org.zoxweb.shared.data.ConfigDAO;
 import org.zoxweb.shared.net.IPAddress;
-import org.zoxweb.shared.util.InstanceCreator;
+import org.zoxweb.shared.util.InstanceFactory;
 
 public class SSLNIOSocketHandlerFactory
         extends ProtocolFactoryBase<SSLNIOSocketHandler>
@@ -14,13 +14,13 @@ public class SSLNIOSocketHandlerFactory
     private IPAddress remoteConnection;
     private SSLContextInfo sslContext;
     private Class<? extends BaseSessionCallback> scClass;
-    private InstanceCreator<SSLSessionCallback> instanceCreator;
+    private InstanceFactory.InstanceCreator<SSLSessionCallback> instanceCreator;
 
     public SSLNIOSocketHandlerFactory()
     {
         complexSetup = false;
     }
-    public SSLNIOSocketHandlerFactory(SSLContextInfo sslContext, InstanceCreator<SSLSessionCallback> instanceCreator)
+    public SSLNIOSocketHandlerFactory(SSLContextInfo sslContext, InstanceFactory.InstanceCreator<SSLSessionCallback> instanceCreator)
     {
         this();
         this.sslContext = sslContext;
