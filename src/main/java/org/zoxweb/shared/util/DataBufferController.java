@@ -16,6 +16,8 @@
 package org.zoxweb.shared.util;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * The internal buffer access interface.
@@ -143,4 +145,11 @@ public interface DataBufferController
 	 *  the implementing class create a new buffer and size() = 0
 	 */
 	ByteArrayInputStream toByteArrayInputStream();
+
+	/**
+	 * Write the whole content to output stream
+	 * @param out stream
+	 * @throws IOException in case of error
+	 */
+	void writeTo(OutputStream out) throws IOException;
 }

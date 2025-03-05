@@ -37,21 +37,33 @@ public class ReflectionUtil
 
 	public static class MethodAnnotations
 	{
-		public final Annotation[] methodAnnotations;
+		private final List<Annotation> methodAnnotations = new ArrayList<>();
 		public final Map<Parameter, Annotation> parametersAnnotations;
 		public final Method method;
 		public MethodAnnotations(Method method, Annotation[] methodAnnotations, Map<Parameter, Annotation> parametersAnnotations)
 		{
 			this.method = method;
-			this.methodAnnotations = methodAnnotations;
+			for (Annotation a : methodAnnotations)
+				this.methodAnnotations.add(a);
+
 			this.parametersAnnotations = parametersAnnotations;
 		}
 
 		public String toString()
 		{
-			return "ma:" + Arrays.toString(methodAnnotations) + " pa:" + parametersAnnotations;
+			return "ma:" + methodAnnotations + " pa:" + parametersAnnotations;
 		}
 
+		public Annotation[] methodAnnotations()
+		{
+			return methodAnnotations.toArray(new Annotation[0]);
+		}
+
+		public MethodAnnotations add(Annotation a)
+		{
+			methodAnnotations.add(a);
+			return this;
+		}
 
 	}
 

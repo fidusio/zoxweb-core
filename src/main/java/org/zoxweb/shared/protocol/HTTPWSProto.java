@@ -72,11 +72,11 @@ public class HTTPWSProto
     }
 
 
-    public static void formatFrame(DataBufferController dataBuffer, boolean fin, OpCode opcode, byte[] maskingKey, String data)
+    public static DataBufferController formatFrame(DataBufferController dataBuffer, boolean fin, OpCode opcode, byte[] maskingKey, String data)
     {
-        formatFrame(dataBuffer, fin, opcode, maskingKey, data != null ? SharedStringUtil.toBytes(data) : null);
+        return formatFrame(dataBuffer, fin, opcode, maskingKey, data != null ? SharedStringUtil.toBytes(data) : null);
     }
-    public static void formatFrame(DataBufferController dataBuffer, boolean fin, OpCode opcode, byte[] maskingKey, byte[] data)
+    public static DataBufferController formatFrame(DataBufferController dataBuffer, boolean fin, OpCode opcode, byte[] maskingKey, byte[] data)
     {
         if(maskingKey != null)
         {
@@ -131,6 +131,8 @@ public class HTTPWSProto
                 dataBuffer.write(data);
         }
 
+
+        return dataBuffer;
     }
 
 
