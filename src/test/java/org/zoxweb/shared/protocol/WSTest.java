@@ -183,13 +183,14 @@ public class WSTest
             System.out.println(frame);
             System.out.println(frame.data().asString());
             pos += frame.frameSize();
-        }
 
+        }
+        baos.shiftLeft(pos, 0);
         baos.write(is.read());
-        frame = HTTPWSFrame.parse(baos, pos);
+        frame = HTTPWSFrame.parse(baos, 0);
         System.out.println(frame);
         System.out.println(frame.data().asString());
-        assert pos + frame.frameSize() == baos.size();
+        assert frame.frameSize() == baos.size();
 
     }
 }
