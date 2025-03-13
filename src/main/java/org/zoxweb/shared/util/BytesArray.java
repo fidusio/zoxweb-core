@@ -12,7 +12,7 @@ public class BytesArray
 
     public BytesArray(AtomicBoolean valid, byte[] array, int offset, int length, boolean checkBoundary)
     {
-        SUS.checkIfNulls("Byte array null", array);
+        SUS.checkIfNull("Byte array null", array);
         if (checkBoundary && (offset < 0 || length < 0 || (offset + length > array.length)))
             throw new IndexOutOfBoundsException("Invalid offset and length " + offset + " ," + length + " ," + (offset + length) + " ," + array.length);
         this.array = array;
@@ -39,11 +39,6 @@ public class BytesArray
     }
 
 
-    public String toString()
-    {
-        return SUS.toCanonicalID(',', isValid(), array.length, offset, length);
-    }
-
     public String asString()
     {
         return new String(array, offset, length);
@@ -57,5 +52,14 @@ public class BytesArray
     public boolean isValid()
     {
         return valid.get();
+    }
+
+    @Override
+    public String toString() {
+        return "BytesArray{" +
+                "offset=" + offset +
+                ", length=" + length +
+                ", valid=" + isValid() +
+                '}';
     }
 }

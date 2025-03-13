@@ -16,11 +16,32 @@ public class HTTPWSFrame
 
 
 
-    public HTTPWSFrame(DataBufferController dataBuffer, int startOffset)
+    private HTTPWSFrame(DataBufferController dataBuffer, int startOffset)
     {
         this.dataBuffer = dataBuffer;
         this.startOffset = startOffset;
     }
+
+
+    public static HTTPWSFrame parse(DataBufferController dataBuffer, int startOffset)
+    {
+        HTTPWSFrame ret = new HTTPWSFrame(dataBuffer, startOffset);
+        if(ret.frameSize() != -1)
+        {
+            ret.data();
+            if (ret.opCode() == null)
+            {
+                throw new ProtocolException("Invalid Opcode " + ret.rawOpCode());
+            }
+
+            return ret;
+        }
+
+        return null;
+    }
+
+
+
 
     /**
      * @return true if the frame is the end of the message
@@ -63,9 +84,17 @@ public class HTTPWSFrame
     @Override
     public HTTPWSProto.OpCode opCode()
     {
-
-        return HTTPWSProto.OpCode.decode(dataBuffer.byteAt(startOffset + HTTPWSProto.WSFrameField.OP_CODE.byteIndex));
+        return HTTPWSProto.OpCode.decode(rawOpCode());
     }
+
+    /**
+     * @return the raw value id the opcode
+     */
+    @Override
+    public int rawOpCode() {
+        return dataBuffer.byteAt(startOffset + HTTPWSProto.WSFrameField.OP_CODE.byteIndex);
+    }
+
 
     /**
      * If true the payload is masked and maskingKey must return byte[4]
@@ -145,7 +174,6 @@ public class HTTPWSFrame
                         }
                     }
                     data = dataBuffer.toBytesArray(false, dataIndex + startOffset, dataLength);
-//                            new BytesArray(dataBuffer.getInternalBuffer(), dataIndex + startOffset, dataLength);
                 }
             }
         }
@@ -253,10 +281,11 @@ public class HTTPWSFrame
             int byteCounter = HTTPWSProto.WSFrameField.MASK_BIT.byteIndex + 1;
             // 2 bytes minimum size of a frame
             int dataLengthByte = dataLengthByte();
+            // could be 125 or 126
 
             if(isMasked())
             {
-                // we have 4 byte of mask
+                // we should count for 4 bytes of mask
                 byteCounter +=4;
             }
 
@@ -276,11 +305,11 @@ public class HTTPWSFrame
             }
             else if (dataLengthByte == 126)
             {
-
-                if (dataBuffer.size() >= afterOffset(byteCounter + 2))
+                byteCounter += 2;
+                if (dataBuffer.size() >= afterOffset(byteCounter))
                 {
                     // 2 bytes for the 16 bit length
-                    byteCounter += (2 + dataLength());
+                    byteCounter += dataLength();
                     if(dataBuffer.size() >= byteCounter)
                     {
                         fullMessageSize = byteCounter;
@@ -308,4 +337,16 @@ public class HTTPWSFrame
         return val > 0 ? startOffset + val : -1;
     }
 
+    @Override
+    public String toString() {
+        return "HTTPWSFrame{" +
+                "startOffset=" + startOffset +
+                //", dataBuffer=" + dataBuffer +
+                ", opCode=" + opCode() +
+                ", isFin=" + isFin() +
+                ", fullMessageSize=" + fullMessageSize +
+                ", status=" + status +
+                ", data=" + data +
+                '}';
+    }
 }

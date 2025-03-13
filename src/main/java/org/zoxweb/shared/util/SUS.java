@@ -110,6 +110,12 @@ public class SUS
         return ret;
     }
 
+
+    public static void checkIfNull(String str, Object obj)
+    {
+        checkIfNulls(str, obj);
+    }
+
     /**
      * Checks all the objs if any of them is null it will throw a NullPointerException.
      * @param msg NullPointerException message

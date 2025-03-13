@@ -111,12 +111,10 @@ public class UByteArrayOutputStream
 		byte[] tempBuf = buf;
 		int tempCount = size();
 		buf = new byte[32];
-		valid.set(false);
-		valid = new AtomicBoolean(true);
-		reset();
+		// YES super not the current one
+		super.reset();
 		
 		return new ByteArrayInputStream(tempBuf, 0 , tempCount);
-		
 	}
 
 	/**
@@ -139,7 +137,7 @@ public class UByteArrayOutputStream
 	
 	/**
 	 * Return the first index of matching bytes in contained within the stream
-	 * @param match
+	 * @param match for byte array matching
 	 * @return index of the match, -1 no match found
 	 */
 	public int indexOf(byte[] match)
@@ -149,11 +147,11 @@ public class UByteArrayOutputStream
 	
 	/**
 	 * 
-	 * @param startAt
-	 * @param match
-	 * @param offset
-	 * @param length
-	 * @return index
+	 * @param startAt index inclusive
+	 * @param match byte array to match
+	 * @param offset offset relative to the internal bye array
+	 * @param length of the match
+	 * @return index -1 not found or index of the first match
 	 */
 	public int indexOf(int startAt, byte[] match, int offset, int length)
 	{
@@ -184,7 +182,7 @@ public class UByteArrayOutputStream
 	}
 	
 	/**
-	 * @param index 
+	 * @param index of the byte
 	 * @return the integer at index.
 	 */
 	public int intAt(int index)
@@ -205,9 +203,9 @@ public class UByteArrayOutputStream
 				
 				if (i < baos1.size())
 				{
-					diff = (byte) ((byte)diff-(byte)buff1[i]);
+					diff = (byte) (diff-buff1[i]);
 				}
-				ret.write((byte) diff);
+				ret.write(diff);
 			}
 			
 		}
@@ -217,8 +215,8 @@ public class UByteArrayOutputStream
 	
 	/**
 	 * 
-	 * @param baos1
-	 * @param baos2
+	 * @param baos1 to compare
+	 * @param baos2 to compare
 	 * @return true if equals
 	 */
 	public static boolean areEqual(UByteArrayOutputStream baos1, UByteArrayOutputStream baos2)
@@ -259,7 +257,7 @@ public class UByteArrayOutputStream
 
 	/**
 	 * Write a string to the data buffer
-	 * @param str
+	 * @param str converted to bytes
 	 */
 	public void write(String str)
 	{
@@ -272,40 +270,12 @@ public class UByteArrayOutputStream
 		write(buf, 0, buf.length);
 	}
 
-	/**
-	 * @param from
-	 * @param to
-	 * @param length
-	 * @return
-	 */
-//	@Override
-//	public synchronized int move(int from, int to, int length)
-//	{
-//
-//		int delta = from - to;
-//		//System.out.println("delta: " + delta);
-//		if(delta > 0)
-//		{
-//			if(from + length > size())
-//				throw new IndexOutOfBoundsException();
-//
-//			System.arraycopy(buf, from, buf, to, length);
-//			//System.arraycopy(buf, from + length, buf, from, count-(from + length));
-//			this.count -= delta;
-//		}
-//		else if (delta < 0)
-//		{
-//			System.arraycopy(buf, to, buf, from, length);
-//		}
-//
-//		return size();
-//	}
 
 	/**
 	 * Insert a string at the specified location
-	 * @param index
-	 * @param str
-	 * @throws IndexOutOfBoundsException 
+	 * @param index where to insert str
+	 * @param str to be inserted
+	 * @throws IndexOutOfBoundsException in case of error
 	 */
 	public synchronized void insertAt(int index, String str)
 			throws IndexOutOfBoundsException 
@@ -318,7 +288,7 @@ public class UByteArrayOutputStream
 	 * 
 	 * @param index location
 	 * @param b byte value
-	 * @throws IndexOutOfBoundsException 
+	 * @throws IndexOutOfBoundsException in case of error
 	 */
 	public synchronized void writeAt(int index, byte b)
 			throws IndexOutOfBoundsException 
@@ -348,7 +318,7 @@ public class UByteArrayOutputStream
 	 * Insert a byte array at the specified location
 	 * @param index where to insert the buffer
 	 * @param array data buffer to be inserted
-	 * @throws IndexOutOfBoundsException 
+	 * @throws IndexOutOfBoundsException in case of error
 	 */
 	public void insertAt(int index, byte[] array)
 			throws IndexOutOfBoundsException 
@@ -421,7 +391,7 @@ public class UByteArrayOutputStream
 	@Override
 	public synchronized boolean equals(Object obj) 
 	{
-		if (obj != null && obj instanceof UByteArrayOutputStream)
+		if (obj instanceof UByteArrayOutputStream)
 		{
 			synchronized (obj) 
 			{
@@ -475,6 +445,21 @@ public class UByteArrayOutputStream
 		count = newCount;
 	}
 
+
+
+	public void reset()
+	{
+		reset(false);
+	}
+
+	public synchronized void reset(boolean zero)
+	{
+		super.reset();
+		resetValid();
+		if(zero)
+			Arrays.fill(buf, (byte)0);
+	}
+
 	/**
 	 * Shift the data left, basically shrinking the buffer this method is useful and efficient for protocol parsing and processing
 	 * @param from start index
@@ -500,7 +485,15 @@ public class UByteArrayOutputStream
 			count = count - (from - to);
 		}
 
+		resetValid();
 		return count;
+	}
+
+
+	private synchronized void resetValid()
+	{
+		valid.set(false);
+		valid = new AtomicBoolean(true);
 	}
 	
 	/**
@@ -526,8 +519,7 @@ public class UByteArrayOutputStream
 
 	public synchronized String toString(boolean withContent)
 	{
-		StringBuilder sb = new StringBuilder();
-		sb.append("Size  " + size() + " Buffer Length " + buf.length);
+		StringBuilder sb = new StringBuilder("Size  " + size() + " Buffer Length " + buf.length);
 		if(withContent) {
 			sb.append("\n");
 			sb.append(SharedStringUtil.toString(buf, 0, size()));
@@ -595,7 +587,7 @@ public class UByteArrayOutputStream
 	{
 		if(copy)
 		{
-			return new BytesArray(valid, copyBytes(offset, offset+length), 0, length);
+			return new BytesArray(null, copyBytes(offset, offset+length), 0, length);
 		}
 		return new BytesArray(valid, getInternalBuffer(), offset, length);
 	}
