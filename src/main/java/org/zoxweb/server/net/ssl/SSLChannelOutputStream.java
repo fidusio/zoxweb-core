@@ -28,7 +28,7 @@ public class SSLChannelOutputStream extends BaseChannelOutputStream {
      * @return the number of encrypted data sent
      * @throws IOException in case of error
      */
-    protected synchronized int write(ByteBuffer bb) throws IOException
+    public synchronized int write(ByteBuffer bb) throws IOException
     {
         int written = -1;
         if (config.getHandshakeStatus() == NOT_HANDSHAKING)

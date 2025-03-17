@@ -65,5 +65,5 @@ public abstract class BaseChannelOutputStream extends OutputStream {
         }
     }
 
-    protected abstract int write(ByteBuffer byteBuffer) throws IOException;
+    public abstract int write(ByteBuffer byteBuffer) throws IOException;
 }
