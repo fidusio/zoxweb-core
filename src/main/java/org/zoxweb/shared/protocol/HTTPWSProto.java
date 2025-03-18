@@ -72,67 +72,61 @@ public class HTTPWSProto
     }
 
 
-    public static DataBufferController formatFrame(DataBufferController dataBuffer, boolean fin, OpCode opcode, byte[] maskingKey, String data)
+    public static BytesArray formatFrame(DataBufferController dataBuffer, boolean fin, OpCode opcode, byte[] maskingKey, String data)
     {
         return formatFrame(dataBuffer, fin, opcode, maskingKey, data != null ? SharedStringUtil.toBytes(data) : null);
     }
-    public static DataBufferController formatFrame(DataBufferController dataBuffer, boolean fin, OpCode opcode, byte[] maskingKey, byte[] data)
+    public static BytesArray formatFrame(DataBufferController dataBuffer, boolean fin, OpCode opcode, byte[] maskingKey, byte[] data)
     {
-        if(maskingKey != null)
+        synchronized (dataBuffer)
         {
-            if (maskingKey.length != 4)
-                throw new IllegalArgumentException("Invalid payload mask length " + maskingKey.length);
-        }
-
-        // First byte: FIN flag and opcode
-        int firstByte = 0;
-        if (fin) {
-            firstByte |= 0x80;  // set FIN bit
-        }
-        firstByte |= (opcode.opCode() & 0x0F); // lower 4 bits for opcode
-        dataBuffer.write(firstByte);
-
-        // Second byte: no mask (0) and payload length
-        int payloadLength = (data != null) ? data.length : 0;
-
-        if (payloadLength <= 125)
-        {
-            dataBuffer.write(maskingKey != null ? payloadLength | 0x80 : payloadLength);
-        }
-        else if (payloadLength <= 0xFFFF) { // fits in 16 bits
-            dataBuffer.write(maskingKey != null ? 126 | 0x80 : 126);
-            dataBuffer.write((payloadLength >> 8) & 0xFF);
-            dataBuffer.write(payloadLength & 0xFF);
-        }
-        else {
-            dataBuffer.write(maskingKey != null ? 127 | 0x80 : 127);
-            // Write the payload length as an 8-byte long (big-endian)
-            for (int i = 7; i >= 0; i--) {
-                dataBuffer.write((int) (payloadLength >> (8 * i)) & 0xFF);
+            int start = dataBuffer.size();
+            if (maskingKey != null) {
+                if (maskingKey.length != 4)
+                    throw new IllegalArgumentException("Invalid payload mask length " + maskingKey.length);
             }
-        }
-        if(maskingKey != null)
-        {
-            dataBuffer.write(maskingKey);
-        }
 
+            // First byte: FIN flag and opcode
+            int firstByte = 0;
+            if (fin) {
+                firstByte |= 0x80;  // set FIN bit
+            }
+            firstByte |= (opcode.opCode() & 0x0F); // lower 4 bits for opcode
+            dataBuffer.write(firstByte);
 
-        // Write the payload data directly (server-to-client frames are not masked)
-        if (data != null)
-        {
-            if (maskingKey != null)
-            {
-                for(int i = 0; i < data.length; i++)
-                {
-                    dataBuffer.write(data[i] ^ maskingKey[i % 4] );
+            // Second byte: no mask (0) and payload length
+            int payloadLength = (data != null) ? data.length : 0;
+
+            if (payloadLength <= 125) {
+                dataBuffer.write(maskingKey != null ? payloadLength | 0x80 : payloadLength);
+            } else if (payloadLength <= 0xFFFF) { // fits in 16 bits
+                dataBuffer.write(maskingKey != null ? 126 | 0x80 : 126);
+                dataBuffer.write((payloadLength >> 8) & 0xFF);
+                dataBuffer.write(payloadLength & 0xFF);
+            } else {
+                dataBuffer.write(maskingKey != null ? 127 | 0x80 : 127);
+                // Write the payload length as an 8-byte long (big-endian)
+                for (int i = 7; i >= 0; i--) {
+                    dataBuffer.write((int) (payloadLength >> (8 * i)) & 0xFF);
                 }
             }
-            else
-                dataBuffer.write(data);
+            if (maskingKey != null) {
+                dataBuffer.write(maskingKey);
+            }
+
+
+            // Write the payload data directly (server-to-client frames are not masked)
+            if (data != null) {
+                if (maskingKey != null) {
+                    for (int i = 0; i < data.length; i++) {
+                        dataBuffer.write(data[i] ^ maskingKey[i % 4]);
+                    }
+                } else
+                    dataBuffer.write(data);
+            }
+
+            return dataBuffer.toBytesArray(false, start, dataBuffer.size() - start);
         }
-
-
-        return dataBuffer;
     }
 
 

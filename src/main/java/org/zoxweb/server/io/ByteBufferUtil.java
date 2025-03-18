@@ -16,6 +16,7 @@
 package org.zoxweb.server.io;
 
 import org.zoxweb.server.util.ServerUtil;
+import org.zoxweb.shared.util.BytesArray;
 import org.zoxweb.shared.util.Const;
 import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SimpleQueue;
@@ -321,6 +322,38 @@ public class ByteBufferUtil
 			for(UByteArrayOutputStream bb: buffers)
 				SINGLETON.cache0(bb);
 		}
+	}
+
+
+	public static byte[] toBytes(ByteBuffer buffer, boolean flip)
+	{
+		if (buffer != null)
+		{
+			if (flip)
+				buffer.flip();
+			// Create a new array sized to the remaining elements in the ByteBuffer
+			byte[] bytes = new byte[buffer.remaining()];
+			buffer.get(bytes);
+			return bytes;
+		}
+
+		return null;
+	}
+
+	public static ByteBuffer toByteBuffer(BytesArray ba)
+	{
+		if (ba != null)
+		{
+
+			if (!ba.isValid())
+				throw new IllegalArgumentException("byte array not valid");
+
+			byte[] bytes = ba.asBytes();
+
+			return allocateByteBuffer(BufferType.HEAP, bytes, 0, bytes.length, false);
+		}
+
+		return null;
 	}
 
 	/**

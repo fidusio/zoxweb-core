@@ -58,6 +58,9 @@ public class SUS
         return (array != null && array.length != 0);
     }
 
+
+
+
     public static boolean areAllDataZero(byte[] buffer, int offset, int length)
     {
         for(int i = offset; i < offset + length; i++)

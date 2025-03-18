@@ -1,4 +1,4 @@
-package org.zoxweb.shared.protocol;
+package org.zoxweb.shared.util;
 
 public class ProtocolException
 extends RuntimeException

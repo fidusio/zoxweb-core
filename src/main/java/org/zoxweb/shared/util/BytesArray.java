@@ -1,5 +1,7 @@
 package org.zoxweb.shared.util;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -32,6 +34,7 @@ public class BytesArray
 
     public int byteAt(int index)
     {
+        checkValidity();
         int byteIndex = offset + index;
         if(byteIndex > length)
             throw new ArrayIndexOutOfBoundsException(index + " out of bound length: " + length);
@@ -41,12 +44,22 @@ public class BytesArray
 
     public String asString()
     {
+        checkValidity();
         return new String(array, offset, length);
     }
 
     public byte[] asBytes()
     {
+        checkValidity();
         return Arrays.copyOfRange(array, offset, offset + length);
+    }
+
+    public BytesArray copy()
+    {
+        checkValidity();
+        BytesArray ret = new BytesArray(null ,asBytes());
+        checkValidity();// we must perform double validation
+        return ret;
     }
 
     public boolean isValid()
@@ -61,5 +74,23 @@ public class BytesArray
                 ", length=" + length +
                 ", valid=" + isValid() +
                 '}';
+    }
+
+    public void writeTo(OutputStream os, boolean flush) throws IOException {
+        if(isValid())
+        {
+            os.write(array, offset, length);
+            if (flush)
+                os.flush();
+
+        }
+        else
+            throw new IOException("Byte buffer invalid");
+    }
+
+    private void checkValidity()
+    {
+        if(!isValid())
+            throw new ProtocolException("Invalid BytesArray");
     }
 }

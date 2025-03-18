@@ -75,7 +75,7 @@ public class WSTest
     {
         UByteArrayOutputStream baos = new UByteArrayOutputStream();
         int to = baos.size();
-        HTTPWSProto.formatFrame(baos, false, HTTPWSProto.OpCode.TEXT, null, "{hell ni how zdravo Здравейте Привет مرحبا}");
+        HTTPWSProto.formatFrame(baos, false, HTTPWSProto.OpCode.TEXT, null, "{hello ni how zdravo Здравейте Привет مرحبا}");
         //int startIndex = baos.size();
         HTTPWSFrame frame = HTTPWSFrame.parse(baos, to);
         BytesArray data = frame.data();
@@ -88,7 +88,7 @@ public class WSTest
 
         System.out.println("startIndex: " + to  + " \"" + baos+ '\"');
 
-        HTTPWSProto.formatFrame(baos, false, HTTPWSProto.OpCode.TEXT, null, "{hell ni how zdravo Здравейте Привет مرحبا}");
+        HTTPWSProto.formatFrame(baos, false, HTTPWSProto.OpCode.TEXT, null, "{hello ni how zdravo Здравейте Привет مرحبا}");
         frame = HTTPWSFrame.parse(baos, to);
         data = frame.data();
         to = baos.shiftLeft(data.offset, to);
@@ -124,11 +124,11 @@ public class WSTest
     {
         UByteArrayOutputStream baos = new UByteArrayOutputStream();
 
-        HTTPWSProto.formatFrame(baos, false, HTTPWSProto.OpCode.TEXT, null, "{1-hell ni how zdravo Здравейте Привет مرحبا}");
+        HTTPWSProto.formatFrame(baos, false, HTTPWSProto.OpCode.TEXT, null, "{1-hello ni how zdravo Здравейте Привет مرحبا}");
 
-        HTTPWSProto.formatFrame(baos, false, HTTPWSProto.OpCode.TEXT, null, "{2-hell ni how zdravo Здравейте Привет مرحبا}");
-        HTTPWSProto.formatFrame(baos, false, HTTPWSProto.OpCode.TEXT, null, "{3-hell ni how zdravo Здравейте Привет مرحبا}");
-        HTTPWSProto.formatFrame(baos, true, HTTPWSProto.OpCode.TEXT, null, "{4-hell ni how zdravo Здравейте Привет مرحبا}");
+        HTTPWSProto.formatFrame(baos, false, HTTPWSProto.OpCode.TEXT, null, "{2-hello ni how zdravo Здравейте Привет مرحبا}");
+        HTTPWSProto.formatFrame(baos, false, HTTPWSProto.OpCode.TEXT, null, "{3-hello ni how zdravo Здравейте Привет مرحبا}");
+        HTTPWSProto.formatFrame(baos, true, HTTPWSProto.OpCode.TEXT, null, "{4-hello ni how zdravo Здравейте Привет مرحبا}");
 
         HTTPWSFrame frame = null;
         int pos = 0;
@@ -140,11 +140,11 @@ public class WSTest
         }
 
         baos.reset();
-        HTTPWSProto.formatFrame(baos, false, HTTPWSProto.OpCode.TEXT, null, "{1-hell ni how zdravo Здравейте Привет مرحبا}");
+        HTTPWSProto.formatFrame(baos, false, HTTPWSProto.OpCode.TEXT, null, "{1-hello ni how zdravo Здравейте Привет مرحبا}");
 
-        HTTPWSProto.formatFrame(baos, false, HTTPWSProto.OpCode.TEXT, null, "{2-2-hell ni how zdravo Здравейте Привет مرحبا}");
-        HTTPWSProto.formatFrame(baos, false, HTTPWSProto.OpCode.TEXT, null, "{3-3-3-hell ni how zdravo Здравейте Привет مرحبا}");
-        HTTPWSProto.formatFrame(baos, true, HTTPWSProto.OpCode.TEXT, null, "{4-4-4-4-hell ni how zdravo Здравейте Привет مرحبا}");
+        HTTPWSProto.formatFrame(baos, false, HTTPWSProto.OpCode.TEXT, null, "{2-2-hello ni how zdravo Здравейте Привет مرحبا}");
+        HTTPWSProto.formatFrame(baos, false, HTTPWSProto.OpCode.TEXT, null, "{3-3-3-hello ni how zdravo Здравейте Привет مرحبا}");
+        HTTPWSProto.formatFrame(baos, true, HTTPWSProto.OpCode.TEXT, null, "{4-4-4-4-hello ni how zdravo Здравейте Привет مرحبا}");
 
         while((frame = HTTPWSFrame.parse(baos, 0)) != null)
         {
@@ -161,12 +161,12 @@ public class WSTest
     public void parsePartialFrames() throws IOException {
         UByteArrayOutputStream baos = new UByteArrayOutputStream();
 
-        HTTPWSProto.formatFrame(baos, true, HTTPWSProto.OpCode.TEXT, null, "{1-hell ni how zdravo Здравейте Привет مرحبا}");
+        HTTPWSProto.formatFrame(baos, true, HTTPWSProto.OpCode.TEXT, null, "{1-hello ni how zdravo Здравейте Привет مرحبا}");
 
-        HTTPWSProto.formatFrame(baos, true, HTTPWSProto.OpCode.TEXT, null, "{2-hell ni how zdravo Здравейте Привет مرحبا}");
-        HTTPWSProto.formatFrame(baos, true, HTTPWSProto.OpCode.TEXT, null, "{3-hell ni how zdravo Здравейте Привет مرحبا}");
+        HTTPWSProto.formatFrame(baos, true, HTTPWSProto.OpCode.TEXT, null, "{2-hello ni how zdravo Здравейте Привет مرحبا}");
+        HTTPWSProto.formatFrame(baos, true, HTTPWSProto.OpCode.TEXT, null, "{3-hello ni how zdravo Здравейте Привет مرحبا}");
         UByteArrayOutputStream baosPartial = new UByteArrayOutputStream();
-        HTTPWSProto.formatFrame(baosPartial, true, HTTPWSProto.OpCode.TEXT, null, "{4-hell ni how zdravo Здравейте Привет مرحبا}");
+        HTTPWSProto.formatFrame(baosPartial, true, HTTPWSProto.OpCode.TEXT, null, "{4-hello ni how zdravo Здравейте Привет مرحبا}");
 
         InputStream is = baosPartial.toByteArrayInputStream();
         int toCopy = is.available();
