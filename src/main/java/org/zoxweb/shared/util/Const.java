@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class Const {
 
-  public static final String LOGGER_NAME = "zoxweb-core";
+ // public static final String LOGGER_NAME = "zoxweb-core";
   public static final String TOKEN_TAG = "$$TAG$$";
   public static final Object[] EMPTY_ARRAY = new Object[0];
   public static final byte[] EMPTY_BYTE_ARRAY = new byte[0];
@@ -35,30 +35,34 @@ public class Const {
   //public static final String UTF8 = "UTF-8";
 
   public enum JavaClassVersion {
-    VER_UNKNOWN("UNKNOWN", "UNKNOWN", 0, 0),
+    VER_UNKNOWN("UNKNOWN", "UNKNOWN", 0, 0, false),
     //VER_1_0("1.0", 45, 3),
-    VER_1_1("1.1","1.1", 45, 3),
-    VER_1_2("1.2","1.2", 46, 0),
-    VER_1_3("1.3","1.3", 47, 0),
-    VER_1_4("1.4","1.4", 48, 0),
-    VER_1_5("5","1.5", 49, 0),
-    VER_1_6("6", "1.6", 50, 0),
-    VER_1_7("7","1.7", 51, 0),
-    VER_1_8("8","1.8", 52, 0),
-    VER_1_9("9","1.9", 53, 0),
-    VER_10("10","10", 53, 0),
-    VER_11("11", "11", 55, 0),
-    VER_12("12", "12", 56, 0),
-    VER_13("13", "13", 57, 0),
-    VER_14("14", "14", 58, 0),
-    VER_15("15", "15", 59, 0),
-    VER_16("16", "16", 60, 0),
-    VER_17("17", "17", 61, 0),
-    VER_18("18", "18", 62, 0),
-    VER_19("19", "19", 63, 0),
-    VER_20("20", "20", 64, 0),
-    VER_21("21", "21", 65, 0),
-    VER_22("22", "22", 66, 0),
+    VER_1_1("1.1","1.1", 45, 3, true),
+    VER_1_2("1.2","1.2", 46, 0,true),
+    VER_1_3("1.3","1.3", 47, 0, true),
+    VER_1_4("1.4","1.4", 48, 0, true),
+    VER_1_5("5","1.5", 49, 0, true),
+    VER_1_6("6", "1.6", 50, 0, true),
+    VER_1_7("7","1.7", 51, 0, true),
+    VER_1_8("8","1.8", 52, 0, true),
+    VER_1_9("9","1.9", 53, 0, false),
+    VER_10("10","10", 53, 0, false),
+    VER_11("11", "11", 55, 0, true),
+    VER_12("12", "12", 56, 0, false),
+    VER_13("13", "13", 57, 0, false),
+    VER_14("14", "14", 58, 0, false),
+    VER_15("15", "15", 59, 0, false),
+    VER_16("16", "16", 60, 0, false),
+    VER_17("17", "17", 61, 0, true),
+    VER_18("18", "18", 62, 0, false),
+    VER_19("19", "19", 63, 0, false),
+    VER_20("20", "20", 64, 0, false),
+    VER_21("21", "21", 65, 0, true),
+    VER_22("22", "22", 66, 0, false),
+    VER_23("23", "23", 67, 0, false),
+    VER_24("24", "24", 68, 0, false),
+    VER_25("25", "25", 69, 0, true),
+
     ;
 
     public final String VERSION;
@@ -66,12 +70,14 @@ public class Const {
 
     public final int MAJOR;
     public final int MINOR;
+    public final boolean IS_LTS;
 
-    JavaClassVersion(String version, String altVersion, int major, int minor) {
+    JavaClassVersion(String version, String altVersion, int major, int minor, boolean isLTS) {
       this.VERSION = version;
       this.ALT_VERSION = altVersion;
       this.MAJOR = major;
       this.MINOR = minor;
+      this.IS_LTS = isLTS;
     }
 
     public static JavaClassVersion lookup(String javaVersion)

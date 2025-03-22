@@ -15,22 +15,21 @@
  */
 package org.zoxweb;
 
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-import java.util.logging.Logger;
-
+import com.google.gson.Gson;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.server.util.ServerUtil;
 import org.zoxweb.shared.data.AddressDAO;
 import org.zoxweb.shared.data.SystemInfoDAO;
 import org.zoxweb.shared.net.InetAddressDAO;
 import org.zoxweb.shared.net.NetworkInterfaceDAO;
-import org.zoxweb.shared.util.*;
 import org.zoxweb.shared.util.Const.TimeInMillis;
+import org.zoxweb.shared.util.*;
 import org.zoxweb.shared.util.SharedBase64.Base64Type;
 
-import com.google.gson.Gson;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+import java.util.logging.Logger;
 
 public class JSONTest {
 
@@ -46,7 +45,7 @@ public class JSONTest {
 		NVGenericMap nvgm;
 		
 	}
-	private static Logger log = Logger.getLogger(Const.LOGGER_NAME);
+	private static Logger log = Logger.getLogger(JSONTest.class.getName());
 
 	public static void main (String[] args) {
 

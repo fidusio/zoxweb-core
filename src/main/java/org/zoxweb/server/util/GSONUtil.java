@@ -19,6 +19,7 @@ import com.google.gson.*;
 import com.google.gson.internal.bind.JsonTreeWriter;
 import com.google.gson.stream.JsonWriter;
 import org.zoxweb.server.filters.TimestampFilter;
+import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.shared.api.APIException;
 import org.zoxweb.shared.db.*;
 import org.zoxweb.shared.filters.FilterType;
@@ -44,7 +45,6 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 
 /**
@@ -66,7 +66,7 @@ public final class GSONUtil
 
 
 	public static boolean SIMPLE_FORMAT = false;
-	private static final Logger log = Logger.getLogger(Const.LOGGER_NAME);
+	public static final LogWrapper log = new LogWrapper(GSONUtil.class).setEnabled(true);
 
 	private static final AtomicLong counter = new AtomicLong();
 	
@@ -273,7 +273,7 @@ public final class GSONUtil
         } catch (ParseException e) {
           // TODO Auto-generated catch block
           //e.printStackTrace();
-		  log.info(jp + " Exception: " + e);
+		  log.getLogger().info(jp + " Exception: " + e);
         }
         return null;
       }
@@ -418,7 +418,7 @@ public final class GSONUtil
 		builder = new GsonBuilder();
 		builder.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES);
 		builder.setPrettyPrinting();
-		log.info("Created");
+		log.getLogger().info("Created");
 	}
 	
 	public static Gson create(boolean pretty)
@@ -1392,7 +1392,7 @@ public final class GSONUtil
 					}
 					else
                     {
-                        log.info("Array guess failed " + jne);
+                        log.getLogger().info("Array guess failed " + jne);
                     }
 					
 					
@@ -1801,7 +1801,7 @@ public final class GSONUtil
 		
 		JsonElement je = JsonParser.parseString(json);
 		
-		log.log(Level.FINE, "JSONElement created from json (String): " + je);
+		log.getLogger().log(Level.FINE, "JSONElement created from json (String): " + je);
 		
 		if (je instanceof JsonObject)
 		{
@@ -2046,8 +2046,8 @@ public final class GSONUtil
 		catch(InstantiationException | InvocationTargetException | NoSuchMethodException ie )
         {
 		    ie.printStackTrace();
-			log.info("Error class:" + clazz);
-			log.info("" + jo.toString());
+			log.getLogger().info("Error class:" + clazz);
+			log.getLogger().info("" + jo.toString());
 			throw new APIException(ie.getMessage(), Reason.NOT_FOUND);
 //			if (ie instanceof InstantiationException)
 //				throw (InstantiationException)ie;
@@ -2096,7 +2096,7 @@ public final class GSONUtil
 							}
 //							catch (InstantiationException ie)
 //							{
-//								log.info("nvc:" + nvc.getName() + ":" + nvc.getMetaTypeBase());
+//								log.getLogger().info("nvc:" + nvc.getName() + ":" + nvc.getMetaTypeBase());
 //								throw ie;
 //							}
 							//nvl.getValue().add( toNVPair( jobj));		

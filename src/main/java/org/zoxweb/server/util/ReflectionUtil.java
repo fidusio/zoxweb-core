@@ -16,6 +16,7 @@
 package org.zoxweb.server.util;
 
 
+import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.shared.annotation.ParamProp;
 import org.zoxweb.shared.util.SUS;
 
@@ -32,19 +33,20 @@ import java.util.*;
 public class ReflectionUtil
 {
 
+	public static LogWrapper log = new LogWrapper(ReflectionUtil.class);
 
 
 
 	public static class MethodAnnotations
 	{
-		private final List<Annotation> methodAnnotations = new ArrayList<>();
+		private final Map<Class<? extends Annotation>, Annotation> methodAnnotations = new LinkedHashMap<>();
 		public final Map<Parameter, Annotation> parametersAnnotations;
 		public final Method method;
 		public MethodAnnotations(Method method, Annotation[] methodAnnotations, Map<Parameter, Annotation> parametersAnnotations)
 		{
 			this.method = method;
 			for (Annotation a : methodAnnotations)
-				this.methodAnnotations.add(a);
+				add(a);
 
 			this.parametersAnnotations = parametersAnnotations;
 		}
@@ -56,12 +58,18 @@ public class ReflectionUtil
 
 		public Annotation[] methodAnnotations()
 		{
-			return methodAnnotations.toArray(new Annotation[0]);
+			return methodAnnotations.values().toArray(new Annotation[0]);
 		}
 
-		public MethodAnnotations add(Annotation a)
+
+		public boolean matchAnnotation(Class<? extends Annotation> a)
 		{
-			methodAnnotations.add(a);
+			return methodAnnotations.get(a) != null;
+		}
+
+		public synchronized MethodAnnotations add(Annotation a)
+		{
+			this.methodAnnotations.put(a.annotationType(), a);
 			return this;
 		}
 
@@ -73,6 +81,7 @@ public class ReflectionUtil
 		private final Class<?> clazz;
 		private Annotation[] classAnnotations;
 		private Map<Method, MethodAnnotations> methodsAnnotations = new LinkedHashMap<Method, MethodAnnotations>();
+		private Map<Class< ?extends Annotation>, Method[]> matchingMethods = new HashMap<>();
 
 		public AnnotationMap(Class<?> c)
 		{
@@ -105,6 +114,29 @@ public class ReflectionUtil
 			return false;
 		}
 
+		public Method[] matchingMethods(Class<?extends Annotation> annotationClass)
+		{
+			Method[] ret = matchingMethods.get(annotationClass);
+			if(ret == null)
+			{
+				synchronized (this)
+				{
+					if(ret == null)
+					{
+						List<Method> match = new ArrayList<>();
+						for (MethodAnnotations ma : methodsAnnotations.values())
+						{
+							if (ma.matchAnnotation(annotationClass))
+								match.add(ma.method);
+						}
+						ret = match.toArray(new Method[0]);
+						matchingMethods.put(annotationClass, ret);
+					}
+				}
+			}
+			return ret.length == 0 ? null : ret;
+		}
+
 		public String toString()
 		{
 			return clazz.getName() + "," + Arrays.toString(classAnnotations) + ":" + methodsAnnotations;
@@ -127,10 +159,12 @@ public class ReflectionUtil
 
 			if(methodAnnotations != null)
 			{
-				for (Annotation a : methodAnnotations.methodAnnotations) {
-					if (a.annotationType().equals(c))
-						return (V) a;
-				}
+
+				return (V)methodAnnotations.methodAnnotations.get(c);
+//				for (Annotation a : methodAnnotations.methodAnnotations.values()) {
+//					if (a.annotationType().equals(c))
+//						return (V) a;
+//				}
 			}
 			return null;
 		}

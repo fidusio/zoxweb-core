@@ -15,30 +15,22 @@
  */
 package org.zoxweb.server.util;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
-import java.util.logging.Logger;
-
 import org.zoxweb.server.io.IOUtil;
+import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.shared.data.ApplicationConfigDAO;
 import org.zoxweb.shared.data.ApplicationConfigDAO.ApplicationDefaultParam;
-import org.zoxweb.shared.util.Const;
 import org.zoxweb.shared.util.GetValue;
 import org.zoxweb.shared.util.NVGenericMap;
 import org.zoxweb.shared.util.SharedBase64.Base64Type;
 import org.zoxweb.shared.util.SharedStringUtil;
 import org.zoxweb.shared.util.SharedUtil;
 
+import java.io.*;
+
 public class ApplicationConfigManager
 {
 
-	private static final transient Logger log = Logger.getLogger(Const.LOGGER_NAME);
+	public static final LogWrapper log = new LogWrapper(ApplicationConfigManager.class).setEnabled(true);
 	public static final ApplicationConfigManager SINGLETON = new ApplicationConfigManager();
 	public static final GetValue<?>[] DEFAULT_DIR_NAMES = { ApplicationDefaultParam.CONF_DIR,
 															ApplicationDefaultParam.CACHE_DIR,
@@ -106,7 +98,7 @@ public class ApplicationConfigManager
 		if (!defaultFile.exists())
 		{
 			System.out.println(ApplicationConfigDAO.DEFAULT_APPLICATION_ENV_VAR + "=" + getDefaultApplicationEnvVar());
-			log.info( defaultFile + " not found");
+			log.getLogger().info( defaultFile + " not found");
 			throw new FileNotFoundException(defaultFile.getName());
 		}
 		
@@ -194,7 +186,7 @@ public class ApplicationConfigManager
 	
 	public static File locateFile(String filename)
 	{
-		//log.info(getDefaultApplicationEnvVar() + "/" + filename);
+		//log.getLogger().info(getDefaultApplicationEnvVar() + "/" + filename);
 		return new File(getDefaultApplicationEnvVar(), filename);
 	}
 
