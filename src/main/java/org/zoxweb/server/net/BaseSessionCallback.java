@@ -1,11 +1,13 @@
 package org.zoxweb.server.net;
 
+import java.io.Closeable;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
 
 public abstract class BaseSessionCallback<CF>
         extends SessionCallback<CF, ByteBuffer, OutputStream>
+        implements Closeable
 {
     private InetAddress remoteAddress;
 

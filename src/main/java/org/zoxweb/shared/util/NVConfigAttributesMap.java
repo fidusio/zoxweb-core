@@ -28,19 +28,19 @@ public interface NVConfigAttributesMap
 	 * This method returns the attributes map.
 	 * @return  the attributes map.
 	 */
-	public List<NVConfigNameMap> getAttribuesMap();
+	List<NVConfigNameMap> getAttribuesMap();
 	
 	/**
 	 * This method sets the attributes map.
 	 * @param list
 	 */
-	public void setAttributesMap(List<NVConfigNameMap> list);
+	void setAttributesMap(List<NVConfigNameMap> list);
 	
 	/**
 	 * This method looks up the attributes map based on given string input.
 	 * @param attributeNameOrAttributeMappedName
 	 * @return matching  attributes map
 	 */
-	public NVConfigNameMap lookup(String attributeNameOrAttributeMappedName);
+	NVConfigNameMap lookup(String attributeNameOrAttributeMappedName);
 	
 }

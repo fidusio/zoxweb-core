@@ -3,8 +3,10 @@ package org.zoxweb.server.util;
 import org.junit.jupiter.api.Test;
 import org.zoxweb.shared.util.NVGenericMap;
 import org.zoxweb.shared.util.NVInt;
+import org.zoxweb.shared.util.NVPair;
 import org.zoxweb.shared.util.NVStringList;
 
+import java.util.Date;
 import java.util.Objects;
 
 public class GSONUtilTest {
@@ -79,4 +81,18 @@ public class GSONUtilTest {
         nvsl = GSONUtil.fromJSONDefault(json, NVStringList.class);
         System.out.println(nvsl);
     }
+
+    @Test
+    public void timestamp()
+    {
+        NVGenericMap response = new NVGenericMap();
+        response.add(new NVPair("current_time", DateUtil.DEFAULT_GMT_MILLIS.format(new Date())));
+        String json = GSONUtil.toJSONDefault(response, true);
+        System.out.println(json);
+        response = GSONUtil.fromJSONDefault(json, NVGenericMap.class);
+
+        System.out.println(DateUtil.DEFAULT_GMT_MILLIS.format((long)response.getValue("current_time")));
+
+    }
+
 }

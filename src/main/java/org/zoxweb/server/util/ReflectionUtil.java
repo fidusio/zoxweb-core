@@ -18,6 +18,7 @@ package org.zoxweb.server.util;
 
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.shared.annotation.ParamProp;
+import org.zoxweb.shared.util.Const;
 import org.zoxweb.shared.util.SUS;
 
 import java.lang.annotation.Annotation;
@@ -81,7 +82,7 @@ public class ReflectionUtil
 		private final Class<?> clazz;
 		private Annotation[] classAnnotations;
 		private Map<Method, MethodAnnotations> methodsAnnotations = new LinkedHashMap<Method, MethodAnnotations>();
-		private Map<Class< ?extends Annotation>, Method[]> matchingMethods = new HashMap<>();
+		//private Map<Class< ?extends Annotation>, Method[]> matchingMethods = new HashMap<>();
 
 		public AnnotationMap(Class<?> c)
 		{
@@ -109,32 +110,29 @@ public class ReflectionUtil
 			if(o instanceof AnnotationMap)
 				if(((AnnotationMap) o).getAnnotatedClass().equals(getAnnotatedClass()))
 					return true;
-
-
 			return false;
 		}
 
+
 		public Method[] matchingMethods(Class<?extends Annotation> annotationClass)
 		{
-			Method[] ret = matchingMethods.get(annotationClass);
-			if(ret == null)
+			Method[] ret;
+
+			synchronized (this)
 			{
-				synchronized (this)
+
+				List<Method> match = new ArrayList<>();
+				for (MethodAnnotations ma : methodsAnnotations.values())
 				{
-					if(ret == null)
-					{
-						List<Method> match = new ArrayList<>();
-						for (MethodAnnotations ma : methodsAnnotations.values())
-						{
-							if (ma.matchAnnotation(annotationClass))
-								match.add(ma.method);
-						}
-						ret = match.toArray(new Method[0]);
-						matchingMethods.put(annotationClass, ret);
-					}
+					if (ma.matchAnnotation(annotationClass))
+						match.add(ma.method);
 				}
+				ret = match.toArray(new Method[0]);
+				if (ret.length == 0)
+					ret = null;
+
 			}
-			return ret.length == 0 ? null : ret;
+			return ret;
 		}
 
 		public String toString()
@@ -159,17 +157,10 @@ public class ReflectionUtil
 
 			if(methodAnnotations != null)
 			{
-
 				return (V)methodAnnotations.methodAnnotations.get(c);
-//				for (Annotation a : methodAnnotations.methodAnnotations.values()) {
-//					if (a.annotationType().equals(c))
-//						return (V) a;
-//				}
 			}
 			return null;
 		}
-
-
 
 		public <V extends Annotation> V  getMatchingClassAnnotation(Class<? extends Annotation> c)
 		{
@@ -182,21 +173,6 @@ public class ReflectionUtil
 			}
 			return null;
 		}
-
-//		public boolean isMethodAnnotatedBy(String m, Class<? extends Annotation> c)
-//		{
-//			SUS.checkIfNulls("Method or class can't be null", m,c);
-//			Annotation[] annotations = methodsAnnotations.get(m);
-//			if(annotations != null)
-//			{
-//				for (Annotation a : annotations) {
-//					if (a.annotationType().equals(c))
-//						return true;
-//				}
-//			}
-//			return false;
-//		}
-
 
 	}
 
@@ -473,6 +449,100 @@ public class ReflectionUtil
 	}
 
 
+	public static int parameterIndex(Method m, int startIndex, Class<?> parameterType)
+	{
+
+		Parameter[] parameters = m .getParameters();
+		if(parameters.length != 0)
+		{
+			if (startIndex < 0 || startIndex > parameters.length)
+			{
+				throw  new IndexOutOfBoundsException(parameters.length + " startIndex " + parameters.length);
+			}
+			for(int i = startIndex; i < parameters.length; i++)
+			{
+				Class<?> toCheck = parameters[i].getType();
+				if(toCheck.isPrimitive() && !parameterType.isPrimitive())
+				{
+					toCheck = Const.wrap(toCheck);
+				}
+
+				if (toCheck.isAssignableFrom(parameterType))
+					return i;
+			}
+
+		}
+		return -1;
+	}
+
+	public static boolean doesMethodSupportParameters(boolean strict, Method m, Class<?> ...parameterTypes)
+	{
+
+		Parameter[] methodParameter = m.getParameters();
+
+		if (parameterTypes.length > methodParameter.length && strict)
+		{
+			return false;
+		}
+
+		int[] indexMatches = new int[methodParameter.length];
+		Arrays.fill(indexMatches, -1);
+
+		int fromIndex = 0;
+		for (int i = 0; i < parameterTypes.length; i++)
+		{
+			int index = parameterIndex(m, fromIndex, parameterTypes[i]);
+			if (index == -1)
+			{
+				if (strict)
+					return false;
+			}
+			else
+			{
+				if (indexMatches[index] == -1) {
+					indexMatches[index] = i;
+					fromIndex = 0;
+				}
+				else
+				{
+					fromIndex = index + 1;
+					i--;
+				}
+			}
+		}
+
+
+
+		if(strict)
+		{
+
+			for (int val : indexMatches)
+				if (val == -1)
+					return false;
+		}
+		else
+		{
+			int matchCount = 0;
+			for(int i = 0; i < indexMatches.length; i++)
+			{
+				if(indexMatches[i] != -1)
+					matchCount++;
+			}
+
+
+			if(indexMatches.length > 0 && matchCount == 0)
+				return false;
+		}
+
+		return true;
+	}
+
+
+	public Method matchMethod(Class<?> clazz, String methodName, Class<?> ...parameters) throws NoSuchMethodException {
+		return clazz.getMethod(methodName, parameters);
+	}
+
+
 	public static Object invokeMethod(Object source, ReflectionUtil.MethodAnnotations methodAnnotations, Map<String, Object> incomingData)
 			throws InvocationTargetException, IllegalAccessException
 	{
@@ -503,6 +573,52 @@ public class ReflectionUtil
 		result = methodAnnotations.method.invoke(source, values);
 
 		return result;
+	}
+
+
+
+	public static Object[] arrangeMethodParameters(boolean strict, Method method, Object... inputValues)
+	{
+		Object[] values = new Object[method.getParameters().length];
+		if(inputValues.length > values.length && strict)
+			throw new IndexOutOfBoundsException("Too many parameters " + inputValues.length + " > " +values.length);
+
+		Arrays.fill(values, null);
+		int fromIndex = 0;
+		for(int i = 0; i < inputValues.length; i++)
+		{
+			if(inputValues[i] != null)
+			{
+				int mappedIndex = parameterIndex(method, fromIndex , inputValues[i].getClass());
+
+				if(mappedIndex != -1)
+				{
+					if(values[mappedIndex] == null)
+					{
+						values[mappedIndex] = inputValues[i];
+						fromIndex = 0;
+
+					}
+					else
+					{
+						fromIndex = mappedIndex + 1;
+						i--;
+					}
+
+				}
+				else if (strict)
+					throw new IllegalArgumentException("Parameter not found " + inputValues[i]);
+			}
+		}
+		return values;
+
+	}
+
+
+	public static Object invokeMethod(boolean strict, Object source, Method method , Object... inputValues)
+			throws InvocationTargetException, IllegalAccessException
+	{
+		return method.invoke(source, arrangeMethodParameters(strict, method, inputValues));
 	}
 
 	public static <T> T createBean(String className)

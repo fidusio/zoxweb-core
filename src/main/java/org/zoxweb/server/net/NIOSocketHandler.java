@@ -62,6 +62,7 @@ public class NIOSocketHandler
 			IOUtil.close(phSChannel);
 			IOUtil.close(sessionCallback.get());
 			ByteBufferUtil.cache(phBB);
+			IOUtil.close(sessionCallback);
 		}
 	}
 

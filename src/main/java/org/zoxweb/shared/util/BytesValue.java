@@ -55,16 +55,6 @@ public interface BytesValue<V>
 	{
 		public byte[] toBytes(Short in)
 		{
-//			int val = in.intValue();
-//			byte buffer[] = new byte[Short.SIZE/Byte.SIZE];
-//
-//			for (int i = buffer.length; i > 0; i--)
-//			{
-//				buffer[i-1] = (byte)val;
-//				val = val >> 8;
-//			}
-//
-//			return buffer;
 			
 			return toBytes(null, 0, in);
 		}
