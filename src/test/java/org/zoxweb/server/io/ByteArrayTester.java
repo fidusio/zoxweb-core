@@ -15,6 +15,8 @@
  */
 package org.zoxweb.server.io;
 
+import org.junit.jupiter.api.Test;
+import org.zoxweb.shared.util.BytesArray;
 import org.zoxweb.shared.util.Const;
 import org.zoxweb.shared.util.Const.TypeInBytes;
 import org.zoxweb.shared.util.SharedStringUtil;
@@ -31,7 +33,8 @@ import java.util.List;
 public class ByteArrayTester
 {
 
-	public static void main(String args[])
+	@Test
+	public void test1()
     {
 
 		try
@@ -278,6 +281,20 @@ public class ByteArrayTester
 			e.printStackTrace();
 
 		}
+
+	}
+
+
+	@Test
+	public void testBytesArray()
+	{
+		BytesArray ba = new BytesArray(null, SharedStringUtil.getBytes("Hello"));
+
+		ByteBuffer bb = ByteBufferUtil.toByteBuffer(ba);
+
+		System.out.println(new String(ByteBufferUtil.toBytes(bb,  false)));
+
+
 
 	}
 

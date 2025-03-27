@@ -350,7 +350,7 @@ public class ByteBufferUtil
 
 			byte[] bytes = ba.asBytes();
 
-			return allocateByteBuffer(BufferType.HEAP, bytes, 0, bytes.length, false);
+			return allocateByteBuffer(BufferType.HEAP, bytes, 0, bytes.length, true);
 		}
 
 		return null;

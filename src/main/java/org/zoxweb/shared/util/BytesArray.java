@@ -36,7 +36,7 @@ public class BytesArray
     {
         checkValidity();
         int byteIndex = offset + index;
-        if(byteIndex > length)
+        if(byteIndex > array.length)
             throw new ArrayIndexOutOfBoundsException(index + " out of bound length: " + length);
         return array[byteIndex];
     }
