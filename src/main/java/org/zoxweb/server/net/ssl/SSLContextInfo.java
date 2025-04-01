@@ -1,6 +1,6 @@
 package org.zoxweb.server.net.ssl;
 
-import org.zoxweb.server.security.CryptoUtil;
+import org.zoxweb.server.security.SecUtil;
 import org.zoxweb.shared.util.GetName;
 import org.zoxweb.shared.util.InstanceFactory;
 
@@ -37,7 +37,7 @@ public class SSLContextInfo
 
 
     public SSLContextInfo(KeyStore ks, char[] keyStorePassword, String[] protocols, String[] ciphers) throws GeneralSecurityException {
-        this(CryptoUtil.initSSLContext("TLS", null, ks, keyStorePassword, keyStorePassword, null),
+        this(SecUtil.SINGLETON.initSSLContext("TLS", null, ks, keyStorePassword, keyStorePassword, null),
                 protocols,
                 ciphers);
     }

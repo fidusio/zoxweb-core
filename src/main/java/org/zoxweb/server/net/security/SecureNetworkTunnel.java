@@ -20,7 +20,7 @@ import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.net.NIOSocket;
 import org.zoxweb.server.net.NIOTunnel.NIOTunnelFactory;
 import org.zoxweb.server.net.NetworkTunnel;
-import org.zoxweb.server.security.CryptoUtil;
+import org.zoxweb.server.security.SecUtil;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.net.IPAddress;
@@ -120,7 +120,7 @@ public class SecureNetworkTunnel
 			
 			
 			//System.setProperty("javax.net.debug","all");
-			SSLContext sslc = CryptoUtil.initSSLContext(ksc.keystore_file, ksc.keystore_type, ksc.keystore_password.toCharArray(),  
+			SSLContext sslc = SecUtil.SINGLETON.initSSLContext(ksc.keystore_file, ksc.keystore_type, ksc.keystore_password.toCharArray(),
 					ksc.alias_password != null ?  ksc.alias_password.toCharArray() : null, null, null);
 			
 	

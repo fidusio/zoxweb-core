@@ -71,12 +71,15 @@ package org.zoxweb.shared.security;
  *      unwrap()        ...             Finished
  */
 
-import org.zoxweb.server.security.CryptoUtil;
+import org.zoxweb.server.security.SecUtil;
 import org.zoxweb.shared.crypto.CryptoConst;
 
-import javax.net.ssl.*;
-import javax.net.ssl.SSLEngineResult.*;
-import java.nio.*;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLEngine;
+import javax.net.ssl.SSLEngineResult;
+import javax.net.ssl.SSLEngineResult.HandshakeStatus;
+import javax.net.ssl.SSLSession;
+import java.nio.ByteBuffer;
 
 public class SSLEngineSimpleDemo {
 
@@ -162,7 +165,7 @@ public class SSLEngineSimpleDemo {
 //        sslCtx.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
 //
 //        sslc = sslCtx;
-        sslc = CryptoUtil.initSSLContext(keyStoreFile, CryptoConst.PKCS12, passwd.toCharArray(), null, null,null);
+        sslc = SecUtil.SINGLETON.initSSLContext(keyStoreFile, CryptoConst.PKCS12, passwd.toCharArray(), null, null,null);
     }
 
     /*

@@ -303,7 +303,7 @@ public class AESCrypt {
     try {
       //debug = dbg;
       setPassword(password);
-      random = CryptoUtil.defaultSecureRandom();
+      random = SecUtil.SINGLETON.defaultSecureRandom();
       digest = MessageDigest.getInstance(DIGEST_ALG);
       cipher = Cipher.getInstance(CRYPT_TRANS);
       hmac = Mac.getInstance(HMAC_ALG);

@@ -23,7 +23,7 @@ import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.net.BaseSessionCallback;
 import org.zoxweb.server.net.NIOSocket;
 import org.zoxweb.server.net.ProtocolHandler;
-import org.zoxweb.server.security.CryptoUtil;
+import org.zoxweb.server.security.SecUtil;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.util.ParamUtil;
@@ -344,7 +344,7 @@ public class SSLNIOSocketHandler
 
 
 			//TaskUtil.setThreadMultiplier(4);
-			SSLContext sslContext = CryptoUtil.initSSLContext(keystore, ksType, ksPassword.toCharArray(), null, null ,null);
+			SSLContext sslContext = SecUtil.SINGLETON.initSSLContext(keystore, ksType, ksPassword.toCharArray(), null, null ,null);
 
 			new NIOSocket(TaskUtil.defaultTaskProcessor(), TaskUtil.defaultTaskScheduler()).
 					addServerSocket(new InetSocketAddress(port), 512, new SSLNIOSocketHandlerFactory(new SSLContextInfo(sslContext), remoteAddress));

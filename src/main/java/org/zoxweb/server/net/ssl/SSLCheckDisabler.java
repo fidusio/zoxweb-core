@@ -44,6 +44,7 @@ public class SSLCheckDisabler
   private final TrustManager[] trustAllCerts;
   private final HostnameVerifier allHostsValid;
   private final X509Certificate[] certificates = new X509Certificate[]{};
+  private final SSLContext checkDisabledSSLContext;
 
 
 
@@ -69,9 +70,9 @@ public class SSLCheckDisabler
       };
 
       // Install the all-trusting trust manager
-      SSLContext sc = SSLContext.getInstance("SSL");
-      sc.init(null, trustAllCerts, new SecureRandom());
-      disabledSSLFactory = sc.getSocketFactory();
+      checkDisabledSSLContext = SSLContext.getInstance("TLS");
+      checkDisabledSSLContext.init(null, trustAllCerts, new SecureRandom());
+      disabledSSLFactory = checkDisabledSSLContext.getSocketFactory();
       // Create all-trusting host name verifier
       allHostsValid = (hostname, session) -> true;
     }
@@ -109,6 +110,12 @@ public class SSLCheckDisabler
   public TrustManager[] getTrustManagers()
   {
     return trustAllCerts;
+  }
+
+
+  public SSLContext getCheckDisabledSSLContext()
+  {
+    return checkDisabledSSLContext;
   }
 
 }

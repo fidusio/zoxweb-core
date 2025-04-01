@@ -31,7 +31,7 @@ public class CryptoPerf {
     }
 
     public static Result generateRandomNumber(CryptoConst.SecureRandomType randomType, int byteSize, int count) throws NoSuchAlgorithmException {
-        SecureRandom sr = CryptoUtil.newSecureRandom(randomType);
+        SecureRandom sr = SecUtil.SINGLETON.newSecureRandom(randomType);
         byte buffer[] = new byte[byteSize];
         //HashSet<Object> set = new HashSet<>();
 

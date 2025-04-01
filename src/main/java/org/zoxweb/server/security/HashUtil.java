@@ -298,7 +298,7 @@ public class HashUtil {
       if (saltIteration < 0) {
         saltIteration = 0;
       }
-      SecureRandom random = CryptoUtil.defaultSecureRandom();
+      SecureRandom random = SecUtil.SINGLETON.defaultSecureRandom();
       salt = new byte[saltLength];
       random.nextBytes(salt);
       MessageDigest md = MessageDigest.getInstance(algo.getName());

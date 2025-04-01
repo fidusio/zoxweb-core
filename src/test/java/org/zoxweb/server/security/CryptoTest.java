@@ -15,10 +15,11 @@
  */
 package org.zoxweb.server.security;
 
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import org.zoxweb.shared.util.SharedBase64;
 import org.zoxweb.shared.util.SharedStringUtil;
+
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 
 public class CryptoTest {
 
@@ -26,7 +27,7 @@ public class CryptoTest {
     SecureRandom sr = null;
 
     try {
-      sr = CryptoUtil.defaultSecureRandom();
+      sr = SecUtil.SINGLETON.defaultSecureRandom();
     } catch (NoSuchAlgorithmException e) {
       e.printStackTrace();
     }

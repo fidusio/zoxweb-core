@@ -69,40 +69,40 @@ public class CryptoUtil {
 
   //public static final int SALT_LENGTH = 32;
 
-  public static byte[] generateRandomBytes(SecureRandom sr, int size)
-      throws NullPointerException, IllegalArgumentException, NoSuchAlgorithmException {
-    if (size < 1) {
-      throw new IllegalArgumentException("invalid size " + size + " must be greater than zero.");
-    }
+//  public static byte[] generateRandomBytes(SecureRandom sr, int size)
+//      throws NullPointerException, IllegalArgumentException, NoSuchAlgorithmException {
+//    if (size < 1) {
+//      throw new IllegalArgumentException("invalid size " + size + " must be greater than zero.");
+//    }
+//
+//    if (sr == null) {
+//      sr = SecUtil.SINGLETON.defaultSecureRandom();
+//    }
+//
+//    byte[] ret = new byte[size];
+//    sr.nextBytes(ret);
+//
+//    return ret;
+//  }
 
-    if (sr == null) {
-      sr = defaultSecureRandom();
-    }
 
-    byte[] ret = new byte[size];
-    sr.nextBytes(ret);
-
-    return ret;
-  }
-
-
-  public static SecureRandom newSecureRandom(SecureRandomType srt)
-      throws NoSuchAlgorithmException {
-    switch (srt) {
-      case SECURE_RANDOM_VM_STRONG:
-        // very bad and blocking on linux
-        // not recommended yet
-        return SecureRandom.getInstanceStrong();
-      case SECURE_RANDOM_VM_DEFAULT:
-        return new SecureRandom();
-      case NATIVE:
-        return SecureRandom.getInstance(SecureRandomType.NATIVE.getName());
-      case SHA1PRNG:
-        return SecureRandom.getInstance(SecureRandomType.SHA1PRNG.getName());
-      default:
-        return SecureRandom.getInstance(SECURE_RANDOM_ALGO.getName());
-    }
-  }
+//  public static SecureRandom newSecureRandom(SecureRandomType srt)
+//      throws NoSuchAlgorithmException {
+//    switch (srt) {
+//      case SECURE_RANDOM_VM_STRONG:
+//        // very bad and blocking on linux
+//        // not recommended yet
+//        return SecureRandom.getInstanceStrong();
+//      case SECURE_RANDOM_VM_DEFAULT:
+//        return new SecureRandom();
+//      case NATIVE:
+//        return SecureRandom.getInstance(SecureRandomType.NATIVE.getName());
+//      case SHA1PRNG:
+//        return SecureRandom.getInstance(SecureRandomType.SHA1PRNG.getName());
+//      default:
+//        return SecureRandom.getInstance(SECURE_RANDOM_ALGO.getName());
+//    }
+//  }
 
 
   public static String base64URLHmacSHA256(String secret, String data)
@@ -119,31 +119,31 @@ public class CryptoUtil {
     return sha256HMAC.doFinal(data);
   }
 
-  public static SecureRandom defaultSecureRandom()
-      throws NoSuchAlgorithmException {
-    if (SECURE_RANDOM_ALGO == null) {
-      try {
-        LOCK.lock();
-
-        if (SECURE_RANDOM_ALGO == null) {
-          for (SecureRandomType srt : SecureRandomType.values()) {
-            try {
-              newSecureRandom(srt);
-              SECURE_RANDOM_ALGO = srt;
-              //System.out.println("Default secure algorithm:"+srt);
-              break;
-            } catch (NoSuchAlgorithmException e) {
-              //e.printStackTrace();
-            }
-          }
-        }
-      } finally {
-        LOCK.unlock();
-      }
-    }
-
-    return newSecureRandom(SECURE_RANDOM_ALGO);
-  }
+//  public static SecureRandom defaultSecureRandom()
+//      throws NoSuchAlgorithmException {
+//    if (SECURE_RANDOM_ALGO == null) {
+//      try {
+//        LOCK.lock();
+//
+//        if (SECURE_RANDOM_ALGO == null) {
+//          for (SecureRandomType srt : SecureRandomType.values()) {
+//            try {
+//              newSecureRandom(srt);
+//              SECURE_RANDOM_ALGO = srt;
+//              //System.out.println("Default secure algorithm:"+srt);
+//              break;
+//            } catch (NoSuchAlgorithmException e) {
+//              //e.printStackTrace();
+//            }
+//          }
+//        }
+//      } finally {
+//        LOCK.unlock();
+//      }
+//    }
+//
+//    return newSecureRandom(SECURE_RANDOM_ALGO);
+//  }
 
   public static EncryptedKey rekeyEncrytedKey(final EncryptedKey toBeRekeyed,
                                               String originalKey, String newKey)
@@ -400,104 +400,104 @@ public class CryptoUtil {
     return ks.getKey(alias, aliasPassword != null ? aliasPassword.toCharArray() : null);
   }
 
-  public static SSLContext initSSLContext(String keyStoreFilename,
-                                          String keyStoreType,
-                                          final char[] keyStorePassword,
-                                          final char[] crtPassword,
-                                          String trustStoreFilename,
-                                          final char[] trustStorePassword)
-      throws GeneralSecurityException, IOException {
-
-    return initSSLContext("TLS", null, new File(keyStoreFilename),
-            keyStoreType,
-            keyStorePassword,
-            crtPassword,
-            trustStoreFilename != null ? new File(trustStoreFilename) : null, trustStorePassword);
-
-  }
-
-
-  public static SSLContext initSSLContext(String protocol,
-                                          final Provider provider,
-                                          final File keyStoreFilename,
-                                          String keyStoreType,
-                                          final char[] keyStorePassword,
-                                          final char[] crtPassword,
-                                          final File trustStoreFilename,
-                                          final char[] trustStorePassword)
-          throws GeneralSecurityException, IOException {
-    FileInputStream ksfis = null;
-    FileInputStream tsfis = null;
-
-    try {
-      ksfis = new FileInputStream(keyStoreFilename);
-      tsfis = trustStoreFilename != null ? new FileInputStream(trustStoreFilename) : null;
-      return initSSLContext(protocol, provider, ksfis, keyStoreType, keyStorePassword, crtPassword, tsfis,trustStorePassword);
-    } finally {
-      IOUtil.close(ksfis);
-      IOUtil.close(tsfis);
-    }
-
-  }
-
-  public static SSLContext initSSLContext(String protocol,
-                                          final Provider provider,
-                                          final InputStream keyStoreIS,
-                                          String keyStoreType,
-                                          final char[] keyStorePassword,
-                                          final char[] crtPassword,
-                                          final InputStream trustStoreIS,
-                                          final char[] trustStorePassword)
-      throws GeneralSecurityException, IOException {
-    KeyStore ks = CryptoUtil.loadKeyStore(keyStoreIS, keyStoreType, keyStorePassword);
-    KeyStore ts = null;
-    KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
-    TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
-
-    if (trustStoreIS != null) {
-      ts = CryptoUtil.loadKeyStore(trustStoreIS, keyStoreType, trustStorePassword);
-    }
-
-    if (crtPassword != null) {
-      kmf.init(ks, crtPassword);
-      tmf.init(ts != null ? ts : ks);
-    } else {
-      kmf.init(ks, keyStorePassword);
-      tmf.init(ts != null ? ts : ks);
-    }
-
-    SSLContext sslContext = provider != null ? SSLContext.getInstance(protocol != null ? protocol : "TLS", provider) : SSLContext.getInstance("TLS");
-    sslContext.init(kmf.getKeyManagers(), null, defaultSecureRandom());
-    return sslContext;
-  }
-
-  public static SSLContext initSSLContext(final String protocol,
-                                          final Provider provider,
-                                          final KeyStore keyStore,
-                                          final char[] keyStorePassword,
-                                          final char[] crtPassword,
-                                          final KeyStore trustStore)
-          throws GeneralSecurityException
-  {
-
-
-    KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
-    TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
-
-
-
-    if (crtPassword != null) {
-      kmf.init(keyStore, crtPassword);
-      tmf.init(keyStore != null ? trustStore : keyStore);
-    } else {
-      kmf.init(keyStore, keyStorePassword);
-      tmf.init(trustStore != null ? trustStore : keyStore);
-    }
-
-    SSLContext sslContext = provider != null ? SSLContext.getInstance(protocol != null ? protocol : "TLS", provider) : SSLContext.getInstance("TLS");
-    sslContext.init(kmf.getKeyManagers(), null, defaultSecureRandom());
-    return sslContext;
-  }
+//  public static SSLContext initSSLContext(String keyStoreFilename,
+//                                          String keyStoreType,
+//                                          final char[] keyStorePassword,
+//                                          final char[] crtPassword,
+//                                          String trustStoreFilename,
+//                                          final char[] trustStorePassword)
+//      throws GeneralSecurityException, IOException {
+//
+//    return initSSLContext("TLS", null, new File(keyStoreFilename),
+//            keyStoreType,
+//            keyStorePassword,
+//            crtPassword,
+//            trustStoreFilename != null ? new File(trustStoreFilename) : null, trustStorePassword);
+//
+//  }
+//
+//
+//  public static SSLContext initSSLContext(String protocol,
+//                                          final Provider provider,
+//                                          final File keyStoreFilename,
+//                                          String keyStoreType,
+//                                          final char[] keyStorePassword,
+//                                          final char[] crtPassword,
+//                                          final File trustStoreFilename,
+//                                          final char[] trustStorePassword)
+//          throws GeneralSecurityException, IOException {
+//    FileInputStream ksfis = null;
+//    FileInputStream tsfis = null;
+//
+//    try {
+//      ksfis = new FileInputStream(keyStoreFilename);
+//      tsfis = trustStoreFilename != null ? new FileInputStream(trustStoreFilename) : null;
+//      return initSSLContext(protocol, provider, ksfis, keyStoreType, keyStorePassword, crtPassword, tsfis,trustStorePassword);
+//    } finally {
+//      IOUtil.close(ksfis);
+//      IOUtil.close(tsfis);
+//    }
+//
+//  }
+//
+//  public static SSLContext initSSLContext(String protocol,
+//                                          final Provider provider,
+//                                          final InputStream keyStoreIS,
+//                                          String keyStoreType,
+//                                          final char[] keyStorePassword,
+//                                          final char[] crtPassword,
+//                                          final InputStream trustStoreIS,
+//                                          final char[] trustStorePassword)
+//      throws GeneralSecurityException, IOException {
+//    KeyStore ks = CryptoUtil.loadKeyStore(keyStoreIS, keyStoreType, keyStorePassword);
+//    KeyStore ts = null;
+//    KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
+//    TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
+//
+//    if (trustStoreIS != null) {
+//      ts = CryptoUtil.loadKeyStore(trustStoreIS, keyStoreType, trustStorePassword);
+//    }
+//
+//    if (crtPassword != null) {
+//      kmf.init(ks, crtPassword);
+//      tmf.init(ts != null ? ts : ks);
+//    } else {
+//      kmf.init(ks, keyStorePassword);
+//      tmf.init(ts != null ? ts : ks);
+//    }
+//
+//    SSLContext sslContext = provider != null ? SSLContext.getInstance(protocol != null ? protocol : "TLS", provider) : SSLContext.getInstance("TLS");
+//    sslContext.init(kmf.getKeyManagers(), null, defaultSecureRandom());
+//    return sslContext;
+//  }
+//
+//  public static SSLContext initSSLContext(final String protocol,
+//                                          final Provider provider,
+//                                          final KeyStore keyStore,
+//                                          final char[] keyStorePassword,
+//                                          final char[] crtPassword,
+//                                          final KeyStore trustStore)
+//          throws GeneralSecurityException
+//  {
+//
+//
+//    KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
+//    TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
+//
+//
+//
+//    if (crtPassword != null) {
+//      kmf.init(keyStore, crtPassword);
+//      tmf.init(keyStore != null ? trustStore : keyStore);
+//    } else {
+//      kmf.init(keyStore, keyStorePassword);
+//      tmf.init(trustStore != null ? trustStore : keyStore);
+//    }
+//
+//    SSLContext sslContext = provider != null ? SSLContext.getInstance(protocol != null ? protocol : "TLS", provider) : SSLContext.getInstance("TLS");
+//    sslContext.init(kmf.getKeyManagers(), null, defaultSecureRandom());
+//    return sslContext;
+//  }
 
   public static void updateKeyPasswordInKeyStore(final InputStream keyStoreIS,
       String keyStoreType,
@@ -627,9 +627,9 @@ public class CryptoUtil {
       int arraySize,
       int hashIteration)
       throws NoSuchAlgorithmException {
-    SecureRandom random = defaultSecureRandom();
+    SecureRandom random = SecUtil.SINGLETON.defaultSecureRandom();
 
-    byte[] bytes = generateRandomBytes(random, arraySize);
+    byte[] bytes = SecUtil.SINGLETON.generateRandomBytes(random, arraySize);
 
     digest.reset();
     digest.update(bytes);
@@ -975,7 +975,7 @@ public class CryptoUtil {
 
   public static KeyPair generateKeyPair(String keyCanonicalID)
           throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, NoSuchProviderException {
-    return generateKeyPair(keyCanonicalID, null, defaultSecureRandom());
+    return generateKeyPair(keyCanonicalID, null, SecUtil.SINGLETON.defaultSecureRandom());
   }
 
   public static KeyPair generateKeyPair(CanonicalID keyCanonicalID, String provider, SecureRandom sr)
@@ -989,10 +989,8 @@ public class CryptoUtil {
 
     CryptoConst.PKInfo pkInfo = CryptoConst.PKInfo.parse(keyCanonicalID);
 
-
-
     if(sr == null)
-      sr = defaultSecureRandom(); // get the default secure random
+      sr = SecUtil.SINGLETON.defaultSecureRandom(); // get the default secure random
     KeyPairGenerator keyPairGenerator = provider != null ? KeyPairGenerator.getInstance(pkInfo.getType(), provider) : KeyPairGenerator.getInstance(pkInfo.getType());
     RSAKeyGenParameterSpec h;
 
@@ -1014,7 +1012,7 @@ public class CryptoUtil {
 
   public static KeyPair generateKeyPair(String type, String provider, AlgorithmParameterSpec keySpec, SecureRandom random) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException {
     KeyPairGenerator kpg = KeyPairGenerator.getInstance(type, provider);
-    kpg.initialize(keySpec, random != null ? random : defaultSecureRandom());
+    kpg.initialize(keySpec, random != null ? random : SecUtil.SINGLETON.defaultSecureRandom());
     return kpg.generateKeyPair();
   }
 

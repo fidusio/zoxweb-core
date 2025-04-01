@@ -21,8 +21,8 @@ import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.net.NIOTunnel.NIOTunnelFactory;
 import org.zoxweb.server.net.security.IPBlockerListener;
 import org.zoxweb.server.net.security.SecureNetworkTunnel;
-import org.zoxweb.server.security.CryptoUtil;
 import org.zoxweb.server.net.ssl.SSLContextInfo;
+import org.zoxweb.server.security.SecUtil;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.app.AppCreatorDefault;
@@ -195,7 +195,7 @@ extends AppCreatorDefault<NIOSocket, ConfigDAO>
 								Class pClass = Class.forName(providerName);
 								provider = (Provider) pClass.getDeclaredConstructor().newInstance();
 							}
-							SSLContext sslContext = CryptoUtil.initSSLContext(protocol, provider, IOUtil.locateFile(config.getProperties().getValue("keystore_file")),
+							SSLContext sslContext = SecUtil.SINGLETON.initSSLContext(protocol, provider, IOUtil.locateFile(config.getProperties().getValue("keystore_file")),
 																		config.getProperties().getValue("keystore_type"),
 																		ksPassword.toCharArray(),  
 																		aliasPassword != null ?  aliasPassword.toCharArray() : null,

@@ -297,7 +297,7 @@ public class EncryptedContentTest {
     }
 
     if (args.length > 2) {
-      CryptoUtil.SECURE_RANDOM_ALGO = SecureRandomType.lookup(args[i++]);
+      SecUtil.SINGLETON.SECURE_RANDOM_ALGO = SecureRandomType.lookup(args[i++]);
     }
 
     for (int t = 0; t < threadCount; t++) {

@@ -15,13 +15,12 @@
  */
 package org.zoxweb.server.util;
 
+import org.zoxweb.server.security.SecUtil;
+import org.zoxweb.shared.util.SimpleQueue;
+
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.concurrent.locks.Lock;
-
-import org.zoxweb.server.security.CryptoUtil;
-import org.zoxweb.server.util.LockQueue;
-import org.zoxweb.shared.util.SimpleQueue;
 
 public class LockQueueTest {
 
@@ -102,8 +101,8 @@ public class LockQueueTest {
 		}
 		
 		try {
-			CryptoUtil.defaultSecureRandom();
-			CryptoUtil.defaultSecureRandom();
+			SecUtil.SINGLETON.defaultSecureRandom();
+			SecUtil.SINGLETON.defaultSecureRandom();
 		} catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();
 		}
