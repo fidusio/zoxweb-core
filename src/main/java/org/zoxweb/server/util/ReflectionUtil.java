@@ -631,6 +631,7 @@ public class ReflectionUtil
 	{
 		return createBean(Class.forName(className));
 	}
+
 	public static <T> T createBean(Class<?> clazz)
 			throws
 			NoSuchMethodException,

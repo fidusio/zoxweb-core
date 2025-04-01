@@ -17,14 +17,14 @@ public class HTTPEndPointTest
     {
         hep = new HTTPEndPoint();
         hep.setName("test");
-        hep.setBean("org.zoxweb.shared.data.AddressDAO");
-        hep.setMethods(HTTPMethod.GET, HTTPMethod.POST);
+        hep.setBeanClassName("org.zoxweb.shared.data.AddressDAO");
+        hep.setHTTPMethods(HTTPMethod.GET, HTTPMethod.POST);
         hep.setPaths("/ping/{detailed}", "/info/{level}/{detailed}");
 
         sysHep = new HTTPEndPoint();
         sysHep.setName("system");
-        sysHep.setBean("org.zoxweb.shared.data.AddressDAO");
-        sysHep.setMethods(HTTPMethod.GET, HTTPMethod.POST);
+        sysHep.setBeanClassName("org.zoxweb.shared.data.AddressDAO");
+        sysHep.setHTTPMethods(HTTPMethod.GET, HTTPMethod.POST);
         sysHep.setPaths("/system/reboot", "/system/shutdown");
     }
 

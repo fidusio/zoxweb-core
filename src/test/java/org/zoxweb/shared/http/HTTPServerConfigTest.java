@@ -29,8 +29,8 @@ public class HTTPServerConfigTest {
 
     for (HTTPEndPoint ep : hsc.getEndPoints())
     {
-      System.out.println(ep.getMethods().getClass() + " " + Arrays.toString(ep.getMethods()));
-      System.out.println(SharedUtil.toCanonicalID(',', ep.getName(), ep.getBean()));
+      System.out.println(ep.getHTTPMethods().getClass() + " " + Arrays.toString(ep.getHTTPMethods()));
+      System.out.println(SharedUtil.toCanonicalID(',', ep.getName(), ep.getBeanClassName()));
       System.out.println(ep);
     }
 

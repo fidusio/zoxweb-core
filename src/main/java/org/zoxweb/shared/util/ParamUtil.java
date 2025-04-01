@@ -6,10 +6,7 @@ package org.zoxweb.shared.util;
 
 import org.zoxweb.shared.data.ParamInfo;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ParamUtil {
     private ParamUtil(){}
@@ -22,8 +19,10 @@ public class ParamUtil {
 
     public static class ParamInfoList
     {
-        Map<String, ParamInfo> byName = new LinkedHashMap<String, ParamInfo>();
-        Map<String, ParamInfo> byParam = new LinkedHashMap<String, ParamInfo>();
+        private Map<String, ParamInfo> byName = new LinkedHashMap<String, ParamInfo>();
+        private Map<String, ParamInfo> byParam = new LinkedHashMap<String, ParamInfo>();
+
+
 
 
         public ParamInfoList add(String name, ParamInfo.ValueType valueType, String param, boolean mandatory, boolean caseSensitive)
@@ -72,6 +71,8 @@ public class ParamUtil {
         private Map<String, List<String>> map = new LinkedHashMap<String, List<String>>();
         private boolean ignoreCase = false;
         private final int counter;
+        private Set<String> hidden = new HashSet<>();
+
         private ParamMap(boolean ignoreCase, Map<String, List<String>> map, int  length)
         {
             this.map = map;
@@ -105,6 +106,30 @@ public class ParamUtil {
            }
 
            throw new IllegalArgumentException(name + " value not found or no valid");
+        }
+
+        /**
+         * Hide parameters from being exposed via toString()
+         * @param params to be hidden
+         * @return this
+         */
+        public ParamMap hide(String ...params)
+        {
+            for (String param: params)
+                hidden.add(param);
+            return this;
+        }
+
+        /**
+         * Expose hidden parameters
+         * @param params to be re-exposed
+         * @return this
+         */
+        public ParamMap expose(String ...params)
+        {
+            for (String param: params)
+                hidden.remove(param);
+            return this;
         }
 
         public int smartIntValue(String name, Integer defaultValue)
@@ -385,10 +410,24 @@ public class ParamUtil {
         }
 
         @Override
-        public String toString() {
+        public String toString()
+        {
+            Map<String, List<String>> toExpose = map;
+            if(!hidden.isEmpty())
+            {
+                toExpose = new LinkedHashMap<>();
+                for(Map.Entry<String, List<String>> kv : map.entrySet())
+                {
+                    if(!hidden.contains(kv.getKey()))
+                    {
+                        toExpose.put(kv.getKey(), kv.getValue());
+                    }
+                }
+
+            }
             return "ParamMap{" +
                     "ignoreCase=" + ignoreCase +
-                    ", map=" + map +
+                    ", map=" + toExpose +
 
                     '}';
         }

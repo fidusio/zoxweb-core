@@ -13,10 +13,10 @@ extends SecurityProfile
     public enum Param
             implements GetNVConfig
     {
-        BEAN(NVConfigManager.createNVConfig("bean", "Bean class name", "Bean", false, true, String.class)),
+        BEAN_CLASS_NAME(NVConfigManager.createNVConfig("bean", "Bean class name", "Bean", false, true, String.class)),
         PATHS(NVConfigManager.createNVConfig("paths", "Paths", "Paths", false, true, NVStringList.class)),
-        METHODS(NVConfigManager.createNVConfig("methods", "HTTP Methods", "Methods", false, true, HTTPMethod[].class)),
-        PROTOCOLS(NVConfigManager.createNVConfig("protocols", "Http, Https...", "Protocols", false, true, URIScheme[].class)),
+        HTTP_METHODS(NVConfigManager.createNVConfig("methods", "HTTP Methods", "Methods", false, true, HTTPMethod[].class)),
+        //PROTOCOLS(NVConfigManager.createNVConfig("protocols", "Http, Https...", "Protocols", false, true, URIScheme[].class)),
         INPUT_CONTENT_TYPE(NVConfigManager.createNVConfig("input_content_type", "InputContentType", "IContentType", false, true, String.class)),
         OUTPUT_CONTENT_TYPE(NVConfigManager.createNVConfig("output_content_type", "OutputContentType", "OContentType", false, true, String.class)),
         ;
@@ -61,18 +61,18 @@ extends SecurityProfile
     {
         String ret = lookupValue(DataConst.DataParam.NAME);
         if(ret == null)
-            ret = getBean();
+            ret = getBeanClassName();
         return ret;
     }
 
-    public String getBean()
+    public String getBeanClassName()
     {
-        return lookupValue(Param.BEAN);
+        return lookupValue(Param.BEAN_CLASS_NAME);
     }
 
-    public void setBean(String beanClassName)
+    public void setBeanClassName(String beanClassName)
     {
-        setValue(Param.BEAN, beanClassName);
+        setValue(Param.BEAN_CLASS_NAME, beanClassName);
     }
 
     public String getOutputContentType()
@@ -148,45 +148,45 @@ extends SecurityProfile
         return false;
     }
 
-    public HTTPMethod[] getMethods()
+    public HTTPMethod[] getHTTPMethods()
     {
-        return ((NVEnumList)lookup(Param.METHODS)).getValues(new HTTPMethod[0]);
+        return ((NVEnumList)lookup(Param.HTTP_METHODS)).getValues(new HTTPMethod[0]);
     }
 
-    public boolean isMethodSupported(String httpMethod)
+    public boolean isHTTPMethodSupported(String httpMethod)
     {
-        return isMethodSupported((HTTPMethod)SharedUtil.lookupEnum(httpMethod, HTTPMethod.values()));
+        return isHTTPMethodSupported((HTTPMethod)SharedUtil.lookupEnum(httpMethod, HTTPMethod.values()));
     }
-    public boolean isMethodSupported(HTTPMethod httpMethod)
+    public boolean isHTTPMethodSupported(HTTPMethod httpMethod)
     {
-        NVEnumList methodList = (NVEnumList)lookup(Param.METHODS);
+        NVEnumList methodList = (NVEnumList)lookup(Param.HTTP_METHODS);
         return methodList.getValue().size() > 0 ? methodList.contains(httpMethod) : true;
     }
 
-    public void setMethods(HTTPMethod ...methods)
+    public void setHTTPMethods(HTTPMethod ...methods)
     {
-        ((NVEnumList)lookup(Param.METHODS)).setValues(methods);
+        ((NVEnumList)lookup(Param.HTTP_METHODS)).setValues(methods);
     }
 
 
 
-    public URIScheme[] getProtocols()
-    {
-        return ((NVEnumList)lookup(Param.PROTOCOLS)).getValues(new URIScheme[0]);
-    }
-
-    public boolean isProtocolSupported(String protocol)
-    {
-        return isProtocolSupported((URIScheme)SharedUtil.lookupEnum(protocol, URIScheme.values()));
-    }
-    public boolean isProtocolSupported(URIScheme protocol)
-    {
-        NVEnumList protocolList = (NVEnumList)lookup(Param.PROTOCOLS);
-        return protocolList.getValue().size() > 0 ? protocolList.contains(protocol) : true;
-    }
-
-    public void setProtocols(URIScheme ...protocols)
-    {
-        ((NVEnumList)lookup(Param.PROTOCOLS)).setValues(protocols);
-    }
+//    public URIScheme[] getProtocols()
+//    {
+//        return ((NVEnumList)lookup(Param.PROTOCOLS)).getValues(new URIScheme[0]);
+//    }
+//
+//    public boolean isProtocolSupported(String protocol)
+//    {
+//        return isProtocolSupported((URIScheme)SharedUtil.lookupEnum(protocol, URIScheme.values()));
+//    }
+//    public boolean isProtocolSupported(URIScheme protocol)
+//    {
+//        NVEnumList protocolList = (NVEnumList)lookup(Param.PROTOCOLS);
+//        return protocolList.getValue().size() > 0 ? protocolList.contains(protocol) : true;
+//    }
+//
+//    public void setProtocols(URIScheme ...protocols)
+//    {
+//        ((NVEnumList)lookup(Param.PROTOCOLS)).setValues(protocols);
+//    }
 }

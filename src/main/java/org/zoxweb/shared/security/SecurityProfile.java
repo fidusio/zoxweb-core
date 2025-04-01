@@ -4,6 +4,7 @@ package org.zoxweb.shared.security;
 import org.zoxweb.shared.crypto.CryptoConst;
 import org.zoxweb.shared.crypto.CryptoConst.AuthenticationType;
 import org.zoxweb.shared.data.PropertyDAO;
+import org.zoxweb.shared.http.URIScheme;
 import org.zoxweb.shared.util.*;
 
 import java.util.List;
@@ -23,6 +24,7 @@ implements ResourceSecurity
         PERMISSIONS(NVConfigManager.createNVConfig("permissions", "Permission tokens", "Permissions", false, true, NVStringSet.class)),
         ROLES(NVConfigManager.createNVConfig("roles", "Role tokens", "Roles", false, true, NVStringSet.class)),
         RESTRICTIONS(NVConfigManager.createNVConfig("restrictions", "Restrictions", "Restrictions", false, true, NVStringSet.class)),
+        PROTOCOLS(NVConfigManager.createNVConfig("protocols", "Http, Https...", "Protocols", false, true, URIScheme[].class)),
 
 
         ;
@@ -175,5 +177,25 @@ implements ResourceSecurity
             }
         }
         return authenticationTypes;
+    }
+
+    public URIScheme[] getProtocols()
+    {
+        return ((NVEnumList)lookup(Param.PROTOCOLS)).getValues(new URIScheme[0]);
+    }
+
+    public boolean isProtocolSupported(String protocol)
+    {
+        return isProtocolSupported((URIScheme)SharedUtil.lookupEnum(protocol, URIScheme.values()));
+    }
+    public boolean isProtocolSupported(URIScheme protocol)
+    {
+        NVEnumList protocolList = (NVEnumList)lookup(Param.PROTOCOLS);
+        return protocolList.getValue().size() > 0 ? protocolList.contains(protocol) : true;
+    }
+
+    public void setProtocols(URIScheme ...protocols)
+    {
+        ((NVEnumList)lookup(Param.PROTOCOLS)).setValues(protocols);
     }
 }
