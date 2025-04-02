@@ -16,7 +16,7 @@
 package org.zoxweb.server.http;
 
 import org.zoxweb.server.io.FileInfoStreamSource;
-import org.zoxweb.server.security.CryptoUtil;
+import org.zoxweb.server.security.SecUtil;
 import org.zoxweb.shared.http.*;
 import org.zoxweb.shared.security.JWT;
 import org.zoxweb.shared.security.JWTToken;
@@ -121,7 +121,7 @@ public class HTTPRequestAttributes
 			{
 				try
 				{
-					JWT jwt = CryptoUtil.parseJWT(temp.getToken());
+					JWT jwt = SecUtil.SINGLETON.parseJWT(temp.getToken());
 					jwtToken = new JWTToken();
 					jwtToken.setJWT(jwt);
 					jwtToken.setToken(temp.getToken());

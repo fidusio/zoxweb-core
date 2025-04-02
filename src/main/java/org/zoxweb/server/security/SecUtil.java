@@ -1,14 +1,18 @@
 package org.zoxweb.server.security;
 
 import org.zoxweb.server.io.IOUtil;
+import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.server.util.ReflectionUtil;
 import org.zoxweb.shared.annotation.SecurityProp;
 import org.zoxweb.shared.crypto.CryptoConst;
-import org.zoxweb.shared.security.ResourceSecurity;
-import org.zoxweb.shared.security.SecurityProfile;
+import org.zoxweb.shared.security.*;
+import org.zoxweb.shared.util.NVGenericMap;
 import org.zoxweb.shared.util.SUS;
+import org.zoxweb.shared.util.SharedBase64;
 import org.zoxweb.shared.util.SharedStringUtil;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
@@ -21,13 +25,142 @@ import java.security.*;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class SecUtil {
+public final class SecUtil {
     public static CryptoConst.SecureRandomType SECURE_RANDOM_ALGO = null;
-
     public static final SecUtil SINGLETON = new SecUtil();
     private final Map<Method, ResourceSecurity> methodResourceSecurityMap = new LinkedHashMap<>();
+    private SecUtil() {}
 
-    private SecUtil() {
+
+
+
+    public  JWT parseJWT(String token)
+        throws InstantiationException, IllegalAccessException, ClassNotFoundException, NullPointerException, IllegalArgumentException {
+      SUS.checkIfNulls("Null token", token);
+      String[] tokens = token.trim().split("\\.");
+
+      if (tokens.length < 2 || tokens.length > 3) {
+        throw new IllegalArgumentException("Invalid token JWT token");
+      }
+
+      NVGenericMap nvgmHeader = GSONUtil.fromJSONGenericMap(
+          SharedBase64.decodeAsString(SharedBase64.Base64Type.URL, tokens[JWT.JWTField.HEADER.ordinal()]),
+          JWTHeader.NVC_JWT_HEADER,
+          SharedBase64.Base64Type.URL);//GSONUtil.fromJSON(SharedBase64.decodeAsString(Base64Type.URL,tokens[JWTField.HEADER.ordinal()]), JWTHeader.class);
+      NVGenericMap nvgmPayload = GSONUtil.fromJSONGenericMap(
+          SharedBase64.decodeAsString(SharedBase64.Base64Type.URL, tokens[JWT.JWTField.PAYLOAD.ordinal()]),
+          JWTPayload.NVC_JWT_PAYLOAD, SharedBase64.Base64Type.URL);
+      if (nvgmPayload == null) {
+        throw new SecurityException("Invalid JWT");
+      }
+      JWT ret = new JWT();
+
+      //jwtPayload = GSONUtil.fromJSON(SharedStringUtil.toString(SharedBase64.decode(Base64Type.URL,tokens[JWTToken.PAYLOAD.ordinal()])), JWTPayload.class);
+      JWTPayload jwtPayload = ret.getPayload();
+      JWTHeader jwtHeader = ret.getHeader();
+      if (jwtHeader == null || jwtPayload == null) {
+        throw new SecurityException("Invalid JWT");
+      }
+      jwtPayload.setProperties(nvgmPayload);
+      jwtHeader.setProperties(nvgmHeader);
+
+      SUS.checkIfNulls("Null jwt header or parameters", jwtHeader, jwtHeader.getJWTAlgorithm());
+  //		JWT ret = new JWT();
+      //ret.setHeader(jwtHeader);
+      //ret.setPayload(jwtPayload);
+      switch (jwtHeader.getJWTAlgorithm()) {
+        case HS256:
+        case HS512:
+        case RS256:
+        case RS512:
+        case ES256:
+        case ES512:
+          if (tokens.length != JWT.JWTField.values().length) {
+            throw new IllegalArgumentException("Invalid token JWT token length expected 3");
+          }
+          ret.setHash(tokens[JWT.JWTField.HASH.ordinal()]);
+          break;
+        case none:
+          if (tokens.length != JWT.JWTField.values().length - 1) {
+            throw new IllegalArgumentException("Invalid token JWT token length expected 2");
+          }
+          break;
+      }
+
+      return ret;
+    }
+
+    public  JWT decodeJWT(String key, String token)
+        throws IOException,
+        SecurityException, NullPointerException, IllegalArgumentException, GeneralSecurityException {
+      return decodeJWT(key != null ? SharedStringUtil.getBytes(key) : null, token);
+    }
+
+    public  JWT decodeJWT(byte[] key, String token)
+        throws IOException,
+        SecurityException, GeneralSecurityException {
+
+      JWT jwt;
+      try {
+        jwt = parseJWT(token);
+      } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+        throw new SecurityException();
+      }
+
+
+      String[] tokens = token.trim().split("\\.");
+      CryptoConst.JWTAlgo jwtAlgo = jwt.getHeader().getJWTAlgorithm();
+      switch (jwtAlgo) {
+        case HS256:
+        case HS384:
+        case HS512:
+          SUS.checkIfNulls("Null key", key);
+          if (tokens.length != JWT.JWTField.values().length) {
+            throw new SecurityException("Invalid token");
+          }
+          Mac shaHMAC = HashUtil.getMac(jwtAlgo.getSignatureAlgo());
+          SecretKeySpec secret_key = new SecretKeySpec(key, jwtAlgo.getSignatureAlgo().getName());
+          shaHMAC.init(secret_key);
+          shaHMAC.update(SharedStringUtil.getBytes(tokens[JWT.JWTField.HEADER.ordinal()]));
+
+          shaHMAC.update((byte) '.');
+          byte[] b64Hash = shaHMAC.doFinal(SharedStringUtil.getBytes(tokens[JWT.JWTField.PAYLOAD.ordinal()]));
+
+          if (!SharedBase64.encodeAsString(SharedBase64.Base64Type.URL, b64Hash).equals(jwt.getHash())) {
+            throw new SecurityException("Invalid token");
+          }
+          break;
+
+        case none:
+          if (tokens.length != JWT.JWTField.values().length - 1) {
+            throw new SecurityException("Invalid token");
+          }
+          break;
+        case RS256:
+        case RS384:
+        case RS512:
+        case ES256:
+        case ES384:
+        case ES512:
+          SUS.checkIfNulls("Null key", key);
+          if (tokens.length != JWT.JWTField.values().length) {
+            throw new SecurityException("Invalid token");
+          }
+          PublicKey publicKey = CryptoUtil.generatePublicKey(jwtAlgo.getSignatureAlgo().getCryptoAlgo().getName(),key);
+
+          if (!CryptoUtil.verify(jwtAlgo.getSignatureAlgo(), publicKey,
+              SharedStringUtil.getBytes(
+                  tokens[JWT.JWTField.HEADER.ordinal()] + "." + tokens[JWT.JWTField.PAYLOAD.ordinal()]),
+              SharedBase64.decode(SharedBase64.Base64Type.URL, jwt.getHash()))) {
+            throw new SecurityException("Invalid token");
+          }
+          break;
+
+      }
+
+      return jwt;
     }
 
     /**
