@@ -16,10 +16,7 @@ import javax.crypto.spec.SecretKeySpec;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.lang.reflect.Method;
 import java.security.*;
 import java.util.LinkedHashMap;
@@ -386,5 +383,56 @@ public final class SecUtil {
         sr.nextBytes(ret);
 
         return ret;
+    }
+
+
+    public String secProvidersToString(boolean detailed)
+    {
+        StringBuilder sb = new StringBuilder();
+
+        // Loop over each provider and print its details
+        for (Provider provider : Security.getProviders())
+        {
+            if(sb.length() > 0 )
+                sb.append('\n');
+            sb.append(secProviderToString(provider, detailed));
+        }
+        return sb.toString();
+    }
+
+    public String secProviderToString(Provider provider, boolean detailed)
+    {
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+
+
+        // Loop over each provider and print its details
+
+        pw.println("Provider: " + provider.getName());
+        pw.println("Version: " + provider.getVersion());
+        pw.println("Info: " + provider.getInfo());
+
+        // Print the services offered by this provider
+        if (detailed)
+            provider.getServices().forEach(service -> {
+                pw.println("\t" + service);
+            });
+
+
+        return sw.toString();
+    }
+
+    public synchronized int addProvider(Provider provider)
+    {
+        SUS.checkIfNulls("Null provider", provider);
+        Provider[] providers = Security.getProviders();
+        for (int i = 0; i < providers.length; i++)
+        {
+            if (providers[i].equals(provider))
+            {
+                return i;
+            }
+        }
+        return Security.addProvider(provider);
     }
 }

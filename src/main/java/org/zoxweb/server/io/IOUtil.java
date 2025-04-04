@@ -25,6 +25,7 @@ import java.net.*;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -603,5 +604,30 @@ public class IOUtil
 	public static Proxy toProxy(IPAddress proxyInfo)
 	{
 		return new Proxy(toProxyType(proxyInfo.getProxyType()), new InetSocketAddress(proxyInfo.getInetAddress(), proxyInfo.getPort()));
+	}
+
+	public static boolean isFileInDirectory(String directoryPathStr, String filePathStr)
+	{
+		try
+		{
+			Path filePath = Paths.get(filePathStr).toRealPath();
+			Path directoryPath = Paths.get(directoryPathStr).toRealPath();
+
+			return filePath.startsWith(directoryPath);
+		} catch (IOException e) {
+		}
+		return false;
+	}
+
+	public static boolean isFileInDirectory(File directory, File file) {
+		try {
+			String fileCanonicalPath = file.getCanonicalPath();
+			String directoryCanonicalPath = directory.getCanonicalPath();
+
+			return fileCanonicalPath.startsWith(directoryCanonicalPath + File.separator);
+		} catch (IOException e) {
+		}
+
+		return false;
 	}
 }

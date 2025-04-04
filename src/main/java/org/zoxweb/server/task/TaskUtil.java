@@ -16,16 +16,14 @@
 package org.zoxweb.server.task;
 
 import org.zoxweb.server.util.DefaultEvenManager;
+import org.zoxweb.server.util.ServerUtil;
 import org.zoxweb.shared.data.events.BaseEventObject;
 import org.zoxweb.shared.data.events.EventListenerManager;
 import org.zoxweb.shared.util.SUS;
-import org.zoxweb.shared.util.SharedUtil;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 public class TaskUtil
 {
@@ -35,7 +33,7 @@ public class TaskUtil
 	private static EventListenerManager<BaseEventObject<?>,?> EV_MANAGER = null;
 
 	private static Thread mainThread;
-	private static final Lock LOCK = new ReentrantLock();
+	//private static final Lock LOCK = new ReentrantLock();
 	
 	private static int maxTasks = 1000;
 	private static int threadMultiplier = 4;
@@ -50,12 +48,12 @@ public class TaskUtil
 	public static void setMaxTasksQueue(int taskQueueMaxSize) {
 		if (TASK_PROCESSOR == null) {
 			try {
-				LOCK.lock();
+				ServerUtil.LOCK.lock();
 				if (TASK_PROCESSOR == null && taskQueueMaxSize > 50) {
 					maxTasks = taskQueueMaxSize;
 				}
 			} finally {
-				LOCK.unlock();
+				ServerUtil.LOCK.unlock();
 			}
 		}
 	}
@@ -63,12 +61,12 @@ public class TaskUtil
 	public static void setThreadMultiplier(int multiplier) {
 		if (TASK_PROCESSOR == null) {
 			try {
-				LOCK.lock();
+				ServerUtil.LOCK.lock();
 				if (TASK_PROCESSOR == null && multiplier > 2) {
 					threadMultiplier = multiplier;
 				}
 			} finally {
-				LOCK.unlock();
+				ServerUtil.LOCK.unlock();
 			}
 		}
 	}
@@ -77,24 +75,24 @@ public class TaskUtil
 	{
 		if (TASK_PROCESSOR == null) {
 			try {
-				LOCK.lock();
+				ServerUtil.LOCK.lock();
 				if (TASK_PROCESSOR == null && threadCount > 2) {
 					tpThreadCount = threadCount;
 				}
 			} finally {
-				LOCK.unlock();
+				ServerUtil.LOCK.unlock();
 			}
 		}
 	}
 	public static void setMinTaskProcessorThreadCount(int minThreadCount){
 		if (TASK_PROCESSOR == null) {
 			try {
-				LOCK.lock();
+				ServerUtil.LOCK.lock();
 				if (TASK_PROCESSOR == null && minThreadCount > 2) {
 					minTPThreadCount = minThreadCount;
 				}
 			} finally {
-				LOCK.unlock();
+				ServerUtil.LOCK.unlock();
 			}
 		}
 	}
@@ -115,7 +113,7 @@ public class TaskUtil
 	public static TaskProcessor defaultTaskProcessor() {
 		if (TASK_PROCESSOR == null) {
 			try {
-				LOCK.lock();
+				ServerUtil.LOCK.lock();
 				if (TASK_PROCESSOR == null) {
 					int threadCount = tpThreadCount;
 					if (threadCount < 2 )
@@ -129,7 +127,7 @@ public class TaskUtil
 					TASK_PROCESSOR = new TaskProcessor("DE",maxTasks, threadCount, Thread.NORM_PRIORITY, false);
 				}
 			} finally {
-				LOCK.unlock();
+				ServerUtil.LOCK.unlock();
 			}
 		}
 		
@@ -139,13 +137,13 @@ public class TaskUtil
 	public static TaskSchedulerProcessor defaultTaskScheduler() {
 		if (TASK_SCHEDULER == null) {
 			try {
-				LOCK.lock();
+				ServerUtil.LOCK.lock();
 				
 				if (TASK_SCHEDULER == null) {
 					TASK_SCHEDULER = new TaskSchedulerProcessor(defaultTaskProcessor());
 				}
 			} finally {
-				LOCK.unlock();
+				ServerUtil.LOCK.unlock();
 			}
 		}
 		
@@ -156,13 +154,13 @@ public class TaskUtil
 	{
 		if (EV_MANAGER == null) {
 			try {
-				LOCK.lock();
+				ServerUtil.LOCK.lock();
 
 				if (EV_MANAGER == null) {
 					EV_MANAGER = new DefaultEvenManager();
 				}
 			} finally {
-				LOCK.unlock();
+				ServerUtil.LOCK.unlock();
 			}
 		}
 
@@ -176,13 +174,13 @@ public class TaskUtil
 	public static TaskSchedulerProcessor simpleTaskScheduler() {
 		if (TASK_SIMPLE_SCHEDULER == null) {
 			try {
-				LOCK.lock();
+				ServerUtil.LOCK.lock();
 
 				if (TASK_SIMPLE_SCHEDULER == null) {
 					TASK_SIMPLE_SCHEDULER = new TaskSchedulerProcessor();
 				}
 			} finally {
-				LOCK.unlock();
+				ServerUtil.LOCK.unlock();
 			}
 		}
 
@@ -355,7 +353,7 @@ public class TaskUtil
 	{
 		if (mainThread == null)
 		{
-			LOCK.lock();
+			ServerUtil.LOCK.lock();
 			try
 			{
 				if (mainThread == null)
@@ -363,7 +361,7 @@ public class TaskUtil
 			}
 			finally
 			{
-				LOCK.unlock();
+				ServerUtil.LOCK.unlock();
 			}
 		}
 
