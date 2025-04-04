@@ -422,6 +422,11 @@ public final class SecUtil {
         return sw.toString();
     }
 
+    /**
+     * Add a security resource provider
+     * @param provider to be added
+     * @return the index on the provider in the array of providers
+     */
     public synchronized int addProvider(Provider provider)
     {
         SUS.checkIfNulls("Null provider", provider);
