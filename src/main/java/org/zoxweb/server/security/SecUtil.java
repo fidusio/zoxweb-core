@@ -170,7 +170,8 @@ public final class SecUtil {
     public synchronized ResourceSecurity applyAndCacheSecurityProfile(Method method, SecurityProfile securityProfile) {
         SUS.checkIfNulls("Method null", method);
         SecurityProp sp = ReflectionUtil.getAnnotationFromMethod(method, SecurityProp.class);
-        if (sp != null) {
+        if (sp != null)
+        {
             ResourceSecurity ret = applySecurityProp(securityProfile != null ? securityProfile : new SecurityProfile(), sp);
             methodResourceSecurityMap.put(method, ret);
             return ret;
@@ -429,6 +430,11 @@ public final class SecUtil {
      */
     public synchronized int addProvider(Provider provider)
     {
+        return addProviderAt(provider, 0);
+    }
+
+    public synchronized int addProviderAt(Provider provider, int position)
+    {
         SUS.checkIfNulls("Null provider", provider);
         Provider[] providers = Security.getProviders();
         for (int i = 0; i < providers.length; i++)
@@ -438,6 +444,18 @@ public final class SecUtil {
                 return i;
             }
         }
-        return Security.addProvider(provider);
+        return Security.insertProviderAt(provider, position);
     }
+
+    public synchronized boolean removeProvider(String name)
+    {
+        Security.removeProvider(name);
+        return Security.getProvider(name) == null;
+    }
+
+    public synchronized Provider getProvider(String name)
+    {
+        return Security.getProvider(name);
+    }
+
 }

@@ -81,19 +81,22 @@ public class ReflectionTest
 
     @Test
     public void methodParameterMatch() throws NoSuchMethodException {
-        Method params8 = ToTest.class.getMethod("params8", String.class, int.class, float.class, String[].class, boolean.class, OutputStream.class, String.class, String.class);
-        Method param1 = ToTest.class.getMethod("param1", String.class);
-        Method param0 = ToTest.class.getMethod("param0");
+        Method method8 = ToTest.class.getMethod("params8", String.class, int.class, float.class, String[].class, boolean.class, OutputStream.class, String.class, String.class);
+        Method method1 = ToTest.class.getMethod("param1", String.class);
+        Method method0 = ToTest.class.getMethod("param0");
 
-        assert ReflectionUtil.doesMethodSupportParameters(true, params8, String.class, int.class, float.class, String[].class, boolean.class, String.class, String.class, OutputStream.class);
-        assert ReflectionUtil.doesMethodSupportParameters(true, param0);
-        assert ReflectionUtil.doesMethodSupportParameters(false, param0);
-        assert ReflectionUtil.doesMethodSupportParameters(true, param1, String.class);
-        assert !ReflectionUtil.doesMethodSupportParameters(false, param1, int.class);
-        assert ReflectionUtil.doesMethodSupportParameters(false, params8, int.class);
-        assert !ReflectionUtil.doesMethodSupportParameters(false, params8, double.class);
+        assert ReflectionUtil.doesMethodSupportParameters(true, method8, String.class, int.class, float.class, String[].class, boolean.class, String.class, String.class, OutputStream.class);
+        assert ReflectionUtil.doesMethodSupportParameters(true, method0);
+        assert ReflectionUtil.doesMethodSupportParameters(false, method0);
+        assert ReflectionUtil.doesMethodSupportParameters(true, method1, String.class);
+        assert !ReflectionUtil.doesMethodSupportParameters(false, method1, int.class);
+        assert ReflectionUtil.doesMethodSupportParameters(false, method8, int.class);
+        assert !ReflectionUtil.doesMethodSupportParameters(false, method8, double.class);
 
-        assert ReflectionUtil.doesMethodSupportParameters(false, param1, String.class, int.class);
+        assert ReflectionUtil.doesMethodSupportParameters(false, method1, String.class, int.class);
+
+        assert  ReflectionUtil.doesMethodSupportParameters(true, method1, 1, String.class);
+        assert ReflectionUtil.doesMethodSupportParameters(false, method8, 4, String.class, int.class, float.class, String[].class, boolean.class, String.class, String.class, OutputStream.class);
 
     }
 }

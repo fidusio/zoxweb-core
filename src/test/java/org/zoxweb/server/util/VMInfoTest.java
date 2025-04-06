@@ -49,6 +49,8 @@ public class VMInfoTest {
 		for (int i = 0; i < 10; i++) {
 			tsp.queue( log, new AppointmentDefault(Const.TimeInMillis.MILLI.MILLIS*(5+i)), new VMMonitorTask(Const.SizeInBytes.M), log);
 		}
+
+		System.getProperties().list(System.out);
 		
 	}
 

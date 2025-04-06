@@ -21,7 +21,7 @@ package org.zoxweb.shared.util;
 public interface NVEntityContainer 
 {
 	
-	public NVEntity contains(String refID);
+	NVEntity contains(String refID);
 	
-	public NVEntity contains(NVEntity nve);
+	NVEntity contains(NVEntity nve);
 }

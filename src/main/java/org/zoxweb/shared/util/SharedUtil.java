@@ -1087,7 +1087,55 @@ public class SharedUtil
 		}
 		
 		return null;
-	}	
+	}
+
+
+	public static <T> List<List<T>> combinationsAsList(boolean addEmpty, T ...array) {
+		List<List<T>> powerSet = new ArrayList<>();
+		// Start with the empty subset
+		List<T> empty = new ArrayList<>();
+		powerSet.add(empty);
+
+		// For each element, add it to all existing subsets to form new subsets
+		for (T element : array) {
+			// Remember current number of subsets so far
+			int n = powerSet.size();
+			for (int i = 0; i < n; i++) {
+				// Create a new subset from the existing subset
+				List<T> subset = new ArrayList<>(powerSet.get(i));
+				subset.add(element);
+				powerSet.add(subset);
+			}
+		}
+
+		if(!addEmpty)
+			powerSet.remove(empty);
+		return powerSet;
+	}
+
+
+	public static <T> Set<Set<T>> combinationsAsSet(boolean addEmpty, T ...array) {
+		Set<Set<T>> powerSet = new LinkedHashSet<>();
+		// Start with the empty subset
+		Set<T> empty = new LinkedHashSet<>();
+		powerSet.add(empty);
+
+		// For each element, add it to all existing subsets to form new subsets
+		for (T element : array) {
+			// Remember current number of subsets so far
+			Set<T>[] arraySets = powerSet.toArray(new Set[0]);
+			for (int i = 0; i < arraySets.length; i++) {
+				// Create a new subset from the existing subset
+				Set<T> subset = new HashSet<>(arraySets[i]);
+				subset.add(element);
+				powerSet.add(subset);
+			}
+		}
+
+		if(!addEmpty)
+			powerSet.remove(empty);
+		return powerSet;
+	}
 	
 	/**
 	 * This method converts an object array into a string.

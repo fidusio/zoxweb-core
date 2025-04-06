@@ -216,12 +216,12 @@ public final class ServerUtil
 		
 		for( Object o : objs)
 		{
-			enc.writeObject( o);
+			enc.writeObject(o);
 		}
 
 		enc.flush();
-		IOUtil.close( enc);
-		IOUtil.close( os);
+		IOUtil.close(enc);
+		IOUtil.close(os);
 	}
 
 	/**
@@ -233,7 +233,7 @@ public final class ServerUtil
     {
 		SystemInfoDAO ret = new SystemInfoDAO();
 
-		Map.Entry<?, ?> all[] = System.getProperties().entrySet().toArray( new Map.Entry[0]);
+		Map.Entry<?, ?>[] all = System.getProperties().entrySet().toArray( new Map.Entry[0]);
 
 		for ( Map.Entry<?, ?>e : all)
 		{
@@ -407,6 +407,8 @@ public final class ServerUtil
         {
 			e.printStackTrace();
 		}
+
+		System.out.println("Done");
 	}
 
 

@@ -538,6 +538,69 @@ public class ReflectionUtil
 	}
 
 
+	public static boolean doesMethodSupportParameters(boolean strict, Method m, int parameterCount, Class<?> ...parameterTypes)
+	{
+
+		Parameter[] methodParameter = m.getParameters();
+
+		if (parameterTypes.length > methodParameter.length && strict)
+		{
+			return false;
+		}
+
+		int[] indexMatches = new int[methodParameter.length];
+		Arrays.fill(indexMatches, -1);
+
+		int fromIndex = 0;
+		for (int i = 0; i < parameterCount; i++)
+		{
+			int index = parameterIndex(m, fromIndex, parameterTypes[i]);
+			if (index == -1)
+			{
+				if (strict)
+					return false;
+			}
+			else
+			{
+				if (indexMatches[index] == -1) {
+					indexMatches[index] = i;
+					fromIndex = 0;
+				}
+				else
+				{
+					fromIndex = index + 1;
+					i--;
+				}
+			}
+		}
+
+
+
+		if(strict)
+		{
+
+			for (int val : indexMatches)
+				if (val == -1)
+					return false;
+		}
+		else
+		{
+			int matchCount = 0;
+			for(int i = 0; i < indexMatches.length; i++)
+			{
+				if(indexMatches[i] != -1)
+					matchCount++;
+			}
+
+
+			if(indexMatches.length > 0 && matchCount == 0)
+				return false;
+		}
+
+		return true;
+	}
+
+
 	public Method matchMethod(Class<?> clazz, String methodName, Class<?> ...parameters) throws NoSuchMethodException {
 		return clazz.getMethod(methodName, parameters);
 	}

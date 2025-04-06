@@ -33,8 +33,8 @@ import org.zoxweb.shared.util.NVConfigEntity.ArrayType;
  * to set up systems.
  * @author mnael
  * @version $Revision: 1.25 $
- * @lastModifiedBy $Author: mnael $
- * @lastModifiedAt $Date: 2015/12/11 00:10:30 $
+ * {@code @lastModifiedBy} $Author: mnael $
+ * {@code @lastModifiedAt} $Date: 2025/4/5 17:18:30 $
  */
 @SuppressWarnings("serial")
 public class SystemInfoDAO
@@ -66,7 +66,7 @@ public class SystemInfoDAO
 	@SuppressWarnings("unchecked")
 	public ArrayValues<NVPair> getSystemProperties() 
 	{
-		return ((ArrayValues<NVPair>) lookup(SYSTEM_PROPS));
+		return lookup(SYSTEM_PROPS);
 	}
 	
 	/**
