@@ -42,7 +42,7 @@ public class SharedUtil
 	 * Checks all the objs if any of them is null it will throw a NullPointerException.
 	 * @param msg to be added to the NullPointerException
 	 * @param objs to be checked
-	 * @throws NullPointerException
+	 * @throws NullPointerException if any of the Object is null
 	 * @deprecated
 	 * Use {@link SUS#checkIfNulls(String, Object...)}instead.
 	 */

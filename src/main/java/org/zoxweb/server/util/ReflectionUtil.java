@@ -81,7 +81,7 @@ public class ReflectionUtil
 
 		private final Class<?> clazz;
 		private Annotation[] classAnnotations;
-		private Map<Method, MethodAnnotations> methodsAnnotations = new LinkedHashMap<Method, MethodAnnotations>();
+		private final Map<Method, MethodAnnotations> methodsAnnotations = new LinkedHashMap<>();
 		//private Map<Class< ?extends Annotation>, Method[]> matchingMethods = new HashMap<>();
 
 		public AnnotationMap(Class<?> c)
@@ -108,8 +108,7 @@ public class ReflectionUtil
 		public boolean equals(Object o)
 		{
 			if(o instanceof AnnotationMap)
-				if(((AnnotationMap) o).getAnnotatedClass().equals(getAnnotatedClass()))
-					return true;
+                return ((AnnotationMap) o).getAnnotatedClass().equals(getAnnotatedClass());
 			return false;
 		}
 
@@ -378,7 +377,7 @@ public class ReflectionUtil
 				}
 			}
 		}
-		if(match.size() > 0)
+		if(!match.isEmpty())
 			return match.toArray(new Annotation[0]);
 		return null;
 	}
@@ -621,7 +620,7 @@ public class ReflectionUtil
 			if (tempValue != null && tempValue instanceof List)
 			{
 				List<?> list = (List<?>) tempValue;
-				if(list.size() > 0)
+				if(!list.isEmpty())
 				{
 					tempValue = ArrayCopier.copy(parameters[i].getType(), list.toArray());
 				}

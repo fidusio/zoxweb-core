@@ -1,5 +1,6 @@
-package org.zoxweb.shared.protocol;
+package org.zoxweb.shared.http;
 
+import org.zoxweb.shared.protocol.MessageStatus;
 import org.zoxweb.shared.util.BytesArray;
 import org.zoxweb.shared.util.DataBufferController;
 import org.zoxweb.shared.util.ProtocolException;

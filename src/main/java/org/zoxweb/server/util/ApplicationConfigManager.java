@@ -148,7 +148,7 @@ public class ApplicationConfigManager
 
 		if (vars != null)
 		{
-			String values[] = new String[vars.length+1];
+			String[] values = new String[vars.length+1];
 			int index = 0;
 			values[index++] = base;
 
@@ -179,7 +179,7 @@ public class ApplicationConfigManager
 		}
 		finally
         {
-			IOUtil.close( fos);
+			IOUtil.close(fos);
 		}	
 	}
 	
@@ -270,7 +270,7 @@ public class ApplicationConfigManager
 			}
 			finally
             {
-				// this close is required just in case we encouter IO error
+				// this close is required just in case we encounter IO error
 				// to prevent unclosed file descriptors
 				IOUtil.close(is);
 			}
