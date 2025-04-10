@@ -20,7 +20,6 @@ import org.zoxweb.server.fsm.TriggerConsumer;
 import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.logging.LogWrapper;
-import org.zoxweb.server.net.BaseSessionCallback;
 import org.zoxweb.server.net.NIOSocket;
 import org.zoxweb.server.net.ProtocolHandler;
 import org.zoxweb.server.security.SecUtil;
@@ -144,9 +143,9 @@ public class SSLNIOSocketHandler
 
 	private volatile SSLConnectionHelper sslDispatcher = null;
 	private volatile SSLSessionConfig config = null;
-	final public IPAddress remoteConnection;
-	final private SSLContextInfo sslContext;
-	private volatile SSLSessionCallback sessionCallback;
+	public final IPAddress remoteConnection;
+	private final SSLContextInfo sslContext;
+	private final SSLSessionCallback sessionCallback;
 	private final boolean simpleStateMachine;
 	///private StaticSSLStateMachine staticSSLStateMachine = null;
 
@@ -179,7 +178,7 @@ public class SSLNIOSocketHandler
 			this.sessionCallback = sessionCallback;
 		}
 
-		SUS.checkIfNulls("Session callback can't be null", this.sessionCallback);
+		//SUS.checkIfNulls("Session callback can't be null", this.sessionCallback);
 	}
 	
 	@Override
@@ -201,10 +200,16 @@ public class SSLNIOSocketHandler
 	}
 
 	@Override
-	public boolean isClosed() {
-		return isClosed.get() && config != null && !config.sslChannel.isOpen();
+	public boolean isClosed()
+	{
+		return isClosed.get() || (config != null && config.sslChannel != null && !config.sslChannel.isOpen());
 	}
 
+
+	/**
+	 * This method is exposed at the package level purposely
+	 * @return SSLContextInfo
+	 */
 	SSLContextInfo getSSLContextInfo()
 	{
 		return sslContext;
@@ -220,13 +225,15 @@ public class SSLNIOSocketHandler
 			config.beginHandshake(false);
 
 			if (log.isEnabled()) log.getLogger().info("AcceptNewData: " + key);
+
+			// channel selection data coming from ssl channel or tunnel response
 			if (key.channel() == config.sslChannel && config.sslChannel.isConnected())
 			{
 				sslDispatcher.publish(config.getHandshakeStatus(), sessionCallback);
 			}
 			else if (key.channel() == config.remoteChannel && config.remoteChannel.isConnected())
 			{
-				// this is the tunnel section
+				// this is the tunnel section connection
 				int bytesRead;
 				do {
 					bytesRead = config.remoteChannel.isConnected() ? config.remoteChannel.read(config.inRemoteData) : -1;
@@ -291,36 +298,19 @@ public class SSLNIOSocketHandler
 		getSelectorController().register(asc, SelectionKey.OP_READ, this, isBlocking);
 	}
 
+
 //	@Override
-//	public void setupConnection(AbstractSelectableChannel asc, boolean isBlocking) throws IOException
-//	{
-//		config = new SSLSessionConfig(sslContext);
-//		config.selectorController = getSelectorController();
-//		config.sslChannel = (SocketChannel) asc;
-//		config.remoteAddress = remoteAddress;
-//		config.sslOutputStream = new SSLChannelOutputStream(config, 512 );
-//		sessionCallback.setConfig(config);
-//		sslDispatcher = new CustomSSLStateMachine(this);
-//		sessionCallback.setProtocolHandler(this);
-//		// not sure about
-//		// start the handshake here
-//		//config.beginHandshake(false);
-//		getSelectorController().register(asc, SelectionKey.OP_READ, this, isBlocking);
+//	public void setSessionCallback(BaseSessionCallback<?> sessionCallback) {
+//		//if it is a tunnel we should throw exception
+//		if(!(sessionCallback instanceof SSLSessionCallback))
+//		{
+//			throw new IllegalArgumentException("sessionCallback is not instance of SSLSessionCallback");
+//		}
+//
+//		this.sessionCallback = (SSLSessionCallback) sessionCallback;
+//		this.sessionCallback.setConfig(config);
+//		this.sessionCallback.setProtocolHandler(this);
 //	}
-
-
-	@Override
-	public void setSessionCallback(BaseSessionCallback<?> sessionCallback) {
-		//if it is a tunnel we should throw exception
-		if(!(sessionCallback instanceof SSLSessionCallback))
-		{
-			throw new IllegalArgumentException("sessionCallback is not instance of SSLSessionCallback");
-		}
-
-		this.sessionCallback = (SSLSessionCallback) sessionCallback;
-		this.sessionCallback.setConfig(config);
-		this.sessionCallback.setProtocolHandler(this);
-	}
 
 
 

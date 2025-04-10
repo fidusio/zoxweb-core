@@ -35,7 +35,7 @@ public class NIOSocketHandler
     private static final LogWrapper log = new LogWrapper(NIOSocketHandler.class).setEnabled(false);
 	private volatile ByteBuffer phBB = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.DIRECT, 1024);
 
-	private PlainSessionCallback sessionCallback;
+	private final PlainSessionCallback sessionCallback;
 
 	public NIOSocketHandler(PlainSessionCallback psc)
 	{
@@ -57,10 +57,8 @@ public class NIOSocketHandler
 	@Override
 	protected void close_internal() throws IOException
     {
-		IOUtil.close(phSChannel);
-		IOUtil.close(sessionCallback);
+		IOUtil.close(phSChannel, sessionCallback);
 		ByteBufferUtil.cache(phBB);
-		//IOUtil.close(sessionCallback);
 	}
 
 
@@ -69,13 +67,8 @@ public class NIOSocketHandler
 	{
 		try
     	{
-
-
 			if(sessionCallback.getConfig() == null)
-			{
 				sessionCallback.setConfig(new ChannelOutputStream(this, phSChannel, 512));
-
-			}
 
 			int read;
     		do
@@ -84,18 +77,14 @@ public class NIOSocketHandler
 				read = phSChannel.isConnected()? phSChannel.read(phBB) : -1;
 
     			if (read > 0)
-    			{
 					sessionCallback.accept(phBB);
-    			}
     		}
     		while(read > 0);
     		
     		if (read == -1)
     		{
     			if (log.isEnabled()) log.getLogger().info("+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+Read:" + read);
-
 				IOUtil.close(this);
-
 				if (log.isEnabled()) log.getLogger().info(key + ":" + key.isValid()+ " " + Thread.currentThread() + " " + TaskUtil.defaultTaskProcessor().availableExecutorThreads());
     		}
     	}
@@ -117,20 +106,20 @@ public class NIOSocketHandler
 
 	}
 
-	@Override
-	public void setSessionCallback(BaseSessionCallback<?> sessionCallback) {
-		if(!(sessionCallback instanceof PlainSessionCallback))
-		{
-			throw new IllegalArgumentException("sessionCallback is not instance of PlainSessionCallback");
-		}
-
-		this.sessionCallback = (PlainSessionCallback) sessionCallback;
-		if(this.sessionCallback.getConfig() == null)
-		{
-			this.sessionCallback.setConfig(new ChannelOutputStream(this, phSChannel, 512));
-			sessionCallback.setProtocolHandler(this);
-		}
-	}
+//	@Override
+//	public void setSessionCallback(BaseSessionCallback<?> sessionCallback) {
+//		if(!(sessionCallback instanceof PlainSessionCallback))
+//		{
+//			throw new IllegalArgumentException("sessionCallback is not instance of PlainSessionCallback");
+//		}
+//
+//		this.sessionCallback = (PlainSessionCallback) sessionCallback;
+//		if(this.sessionCallback.getConfig() == null)
+//		{
+//			this.sessionCallback.setConfig(new ChannelOutputStream(this, phSChannel, 512));
+//			sessionCallback.setProtocolHandler(this);
+//		}
+//	}
 
 
 	@SuppressWarnings("resource")

@@ -14,9 +14,9 @@ public abstract class BaseSessionCallback<CF>
 
     public abstract BaseChannelOutputStream get();
 
-    public ProtocolHandler getProtocolHandler() {
-        return protocolHandler;
-    }
+//    public ProtocolHandler getProtocolHandler() {
+//        return protocolHandler;
+//    }
 
     public void setProtocolHandler(ProtocolHandler protocolHandler)
     {

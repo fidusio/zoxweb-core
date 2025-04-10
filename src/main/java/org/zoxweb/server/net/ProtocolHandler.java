@@ -120,9 +120,9 @@ public abstract class ProtocolHandler
 
 
 
-	public void setSessionCallback(BaseSessionCallback<?> sessionCallback) {
-		throw new UnsupportedOperationException("Can't set session callback");
-	}
+//	public void setSessionCallback(BaseSessionCallback<?> sessionCallback) {
+//		throw new UnsupportedOperationException("Can't set session callback");
+//	}
 
 	public void close() throws IOException
 	{
