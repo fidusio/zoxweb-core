@@ -15,11 +15,11 @@
  */
 package org.zoxweb.server.net;
 
+import org.zoxweb.shared.util.CloseableType;
 import org.zoxweb.shared.util.GetDescription;
 import org.zoxweb.shared.util.GetName;
 import org.zoxweb.shared.util.NVGenericMap;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
@@ -30,7 +30,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
 public abstract class ProtocolHandler
-	implements GetName, GetDescription, Closeable, Consumer<SelectionKey>
+	implements GetName, GetDescription, CloseableType, Consumer<SelectionKey>
 {
 
 	private static final AtomicLong ID_COUNTER = new AtomicLong();
@@ -124,4 +124,19 @@ public abstract class ProtocolHandler
 		throw new UnsupportedOperationException("Can't set session callback");
 	}
 
+	public void close() throws IOException
+	{
+		if(!isClosed.getAndSet(true))
+		{
+			close_internal();
+		}
+	}
+
+	@Override
+	public boolean isClosed()
+	{
+		return isClosed.get()  || (phSChannel != null && !phSChannel.isOpen());
+	}
+
+	abstract  protected void close_internal() throws IOException;
 }

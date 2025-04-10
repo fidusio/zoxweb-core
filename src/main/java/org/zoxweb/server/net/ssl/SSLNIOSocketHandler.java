@@ -83,6 +83,7 @@ public class SSLNIOSocketHandler
 	private static class TunnelCallback extends SSLSessionCallback
 	{
 
+
 		@Override
 		public void exception(Exception e) {
 			// exception handling
@@ -126,6 +127,14 @@ public class SSLNIOSocketHandler
 		public void close() throws IOException {
 			IOUtil.close(get());
 		}
+
+		/**
+		 * @return
+		 */
+		@Override
+		public boolean isClosed() {
+			return get() != null && get().isClosed();
+		}
 	}
 
 
@@ -133,11 +142,11 @@ public class SSLNIOSocketHandler
 
     public static final LogWrapper log = new LogWrapper(SSLNIOSocketHandler.class).setEnabled(false);
 
-	private SSLConnectionHelper sslDispatcher = null;
-	private SSLSessionConfig config = null;
+	private volatile SSLConnectionHelper sslDispatcher = null;
+	private volatile SSLSessionConfig config = null;
 	final public IPAddress remoteConnection;
 	final private SSLContextInfo sslContext;
-	private SSLSessionCallback sessionCallback;
+	private volatile SSLSessionCallback sessionCallback;
 	private final boolean simpleStateMachine;
 	///private StaticSSLStateMachine staticSSLStateMachine = null;
 
@@ -186,17 +195,15 @@ public class SSLNIOSocketHandler
 	}
 
 	@Override
-	public void close()
+	protected void close_internal() throws IOException
     {
-		if (!isClosed.getAndSet(true))
-		{
-			if (config != null)
-				config.close();
-			IOUtil.close(sessionCallback);
-		}
-
+		IOUtil.close(config, sessionCallback);
 	}
 
+	@Override
+	public boolean isClosed() {
+		return isClosed.get() && config != null && !config.sslChannel.isOpen();
+	}
 
 	SSLContextInfo getSSLContextInfo()
 	{
@@ -229,14 +236,14 @@ public class SSLNIOSocketHandler
 				if (bytesRead == -1) {
 					if (log.isEnabled())
 						log.getLogger().info("SSL-CHANNEL-CLOSED-NEED_UNWRAP: " + config.getHandshakeStatus() + " bytesRead: " + bytesRead);
-					close();
+					IOUtil.close(this);
 				}
 			}
     	}
     	catch(Exception e)
     	{
     		e.printStackTrace();
-    		close();
+			IOUtil.close(this);
 			if (log.isEnabled()) log.getLogger().info(System.currentTimeMillis() + ":Connection end " + key + ":" + key.isValid() + " " + TaskUtil.availableThreads(getExecutor()));
     	}
 		if (log.isEnabled()) log.getLogger().info( "End of SSLNIOSocket-ACCEPT  available thread:" + TaskUtil.availableThreads(getExecutor()));
@@ -254,7 +261,7 @@ public class SSLNIOSocketHandler
 			config.selectorController = getSelectorController();
 			config.sslChannel = (SocketChannel) asc;
 			config.remoteConnection = remoteConnection;
-			config.sslOutputStream = new SSLChannelOutputStream(config, 512 );
+			config.sslOutputStream = new SSLChannelOutputStream(this, config, 512 );
 			sessionCallback.setConfig(config);
 			sslDispatcher = new CustomSSLStateMachine(this);
 			sessionCallback.setProtocolHandler(this);
@@ -272,7 +279,7 @@ public class SSLNIOSocketHandler
 			config.selectorController = getSelectorController();
 			config.sslChannel = (SocketChannel) asc;
 			config.remoteConnection = remoteConnection;
-			config.sslOutputStream = new SSLChannelOutputStream(config, 512);
+			config.sslOutputStream = new SSLChannelOutputStream(this, config, 512);
 			sessionCallback.setConfig(config);
 			sessionCallback.setProtocolHandler(this);
 			sslStateMachine.start(true);

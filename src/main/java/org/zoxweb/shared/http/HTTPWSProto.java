@@ -224,6 +224,11 @@ public class HTTPWSProto
 
 
         /**
+         * @return the unique id of the frame
+         */
+        long id();
+
+        /**
          * If true the payload is masked and maskingKey must return byte[4]
          * @return true is the payload is masked usually a client request
          */

@@ -6,13 +6,12 @@ import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.net.SelectorController;
 import org.zoxweb.shared.net.IPAddress;
+import org.zoxweb.shared.util.CloseableType;
 import org.zoxweb.shared.util.SUS;
-import org.zoxweb.shared.util.SharedUtil;
 
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLEngineResult;
 import javax.net.ssl.SSLException;
-import java.io.Closeable;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
@@ -20,7 +19,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 
 public class SSLSessionConfig
-    implements Closeable
+    implements CloseableType
 
 {
     public final static LogWrapper log = new LogWrapper(SSLSessionConfig.class.getName()).setEnabled(false);

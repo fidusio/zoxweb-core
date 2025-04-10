@@ -12,9 +12,9 @@ public class ChannelOutputStream
         extends BaseChannelOutputStream
 {
 
-    public ChannelOutputStream(ByteChannel byteChannel, int outAppBufferSize)
+    public ChannelOutputStream(ProtocolHandler ph, ByteChannel byteChannel, int outAppBufferSize)
     {
-        super(byteChannel, outAppBufferSize);
+        super(ph, byteChannel, outAppBufferSize);
     }
 
 
@@ -27,14 +27,24 @@ public class ChannelOutputStream
      */
     public synchronized int write(ByteBuffer bb) throws IOException
     {
-        return ByteBufferUtil.smartWrite(null, outChannel, bb);
+        try
+        {
+            return ByteBufferUtil.smartWrite(null, outChannel, bb);
+        }
+        catch (IOException e)
+        {
+            IOUtil.close(this);
+            throw e;
+        }
     }
 
-    public void close()
+    public void close() throws IOException
     {
+
         if(!isClosed.getAndSet(true))
         {
-            IOUtil.close(outChannel);
+            if(log.isEnabled()) log.getLogger().info("Calling close" );
+            IOUtil.close(outChannel, protocolHandler);
             ByteBufferUtil.cache(outAppData);
             //ByteBufferUtil.cache(oneByteBuffer);
         }

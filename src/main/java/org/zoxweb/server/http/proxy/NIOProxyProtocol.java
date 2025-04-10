@@ -194,19 +194,18 @@ public class NIOProxyProtocol
 	}
 
 	@Override
-	public void close() throws IOException
+	protected void close_internal() throws IOException
 	{
-		if(!isClosed.getAndSet(true))
-		{
-			IOUtil.close(phSChannel);
 
-			if (channelRelay != null) {
-				IOUtil.close(channelRelay);
-			} else {
-				IOUtil.close(remoteChannel);
-			}
-			ByteBufferUtil.cache(sourceBB);
+		IOUtil.close(phSChannel);
+
+		if (channelRelay != null) {
+			IOUtil.close(channelRelay);
+		} else {
+			IOUtil.close(remoteChannel);
 		}
+		ByteBufferUtil.cache(sourceBB);
+
 	}
 
 	@Override

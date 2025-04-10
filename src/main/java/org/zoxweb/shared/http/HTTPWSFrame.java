@@ -5,6 +5,8 @@ import org.zoxweb.shared.util.BytesArray;
 import org.zoxweb.shared.util.DataBufferController;
 import org.zoxweb.shared.util.ProtocolException;
 
+import java.util.concurrent.atomic.AtomicLong;
+
 public class HTTPWSFrame
     implements HTTPWSProto.WSFrameInfo
 {
@@ -14,6 +16,9 @@ public class HTTPWSFrame
     private int fullMessageSize = -1;
     private MessageStatus status = MessageStatus.UNPROCESSED;
     private BytesArray data = null;
+    private static final AtomicLong counter = new AtomicLong(0);
+    private long id = 0;
+
 
 
 
@@ -22,6 +27,7 @@ public class HTTPWSFrame
     {
         this.dataBuffer = dataBuffer;
         this.startOffset = startOffset;
+
     }
 
 
@@ -35,12 +41,14 @@ public class HTTPWSFrame
             {
                 throw new ProtocolException("Invalid Opcode " + ret.rawOpCode());
             }
-
+            ret.id = counter.incrementAndGet();
             return ret;
         }
 
         return null;
     }
+
+
 
 
 
@@ -95,6 +103,15 @@ public class HTTPWSFrame
     @Override
     public int rawOpCode() {
         return dataBuffer.byteAt(startOffset + HTTPWSProto.WSFrameField.OP_CODE.byteIndex);
+    }
+
+    /**
+     * @return the unique id of the frame
+     */
+    @Override
+    public long id()
+    {
+        return id;
     }
 
 
@@ -342,7 +359,8 @@ public class HTTPWSFrame
     @Override
     public String toString() {
         return "HTTPWSFrame{" +
-                "startOffset=" + startOffset +
+                "id=" + id +
+                ", startOffset=" + startOffset +
                 //", dataBuffer=" + dataBuffer +
                 ", opCode=" + opCode() +
                 ", isFin=" + isFin() +

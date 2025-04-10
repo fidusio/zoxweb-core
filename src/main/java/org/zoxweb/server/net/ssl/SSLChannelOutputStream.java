@@ -2,7 +2,9 @@ package org.zoxweb.server.net.ssl;
 
 
 import org.zoxweb.server.io.ByteBufferUtil;
+import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.net.BaseChannelOutputStream;
+import org.zoxweb.server.net.ProtocolHandler;
 import org.zoxweb.shared.util.SharedUtil;
 
 import javax.net.ssl.SSLEngineResult;
@@ -15,9 +17,9 @@ import static javax.net.ssl.SSLEngineResult.HandshakeStatus.NOT_HANDSHAKING;
 public class SSLChannelOutputStream extends BaseChannelOutputStream {
     private final SSLSessionConfig config;
 
-    protected SSLChannelOutputStream(SSLSessionConfig config, int outAppBufferSize)
+    protected SSLChannelOutputStream(ProtocolHandler protocolHandler, SSLSessionConfig config, int outAppBufferSize)
     {
-        super(config.sslChannel, outAppBufferSize);
+        super(protocolHandler, config.sslChannel, outAppBufferSize);
         this.config = config;
     }
 
@@ -43,7 +45,16 @@ public class SSLChannelOutputStream extends BaseChannelOutputStream {
                     throw new IOException(result.getStatus() + " invalid state context buffer size " +
                             SharedUtil.toCanonicalID(',', config.outSSLNetData.capacity(),config.outSSLNetData.limit(),config.outSSLNetData.position()));
                 case OK:
-                   written = ByteBufferUtil.smartWrite(null, outChannel, config.outSSLNetData);
+                    try
+                    {
+                        written = ByteBufferUtil.smartWrite(null, outChannel, config.outSSLNetData);
+                    }
+                    catch (IOException e)
+                    {
+                        //e.printStackTrace();
+                        IOUtil.close(this);
+                        throw e;
+                    }
                     break;
                 case CLOSED:
                    throw new IOException("Closed");
@@ -57,14 +68,16 @@ public class SSLChannelOutputStream extends BaseChannelOutputStream {
         return written;
     }
 
-    public void close()
+    public void close() throws IOException
     {
+        //log.getLogger().info("Calling close: " + RuntimeUtil.stackTrace());
         if(!isClosed.getAndSet(true))
         {
-            config.close();
+            if(log.isEnabled()) log.getLogger().info("Calling close" );
+            IOUtil.close(config, protocolHandler);
             ByteBufferUtil.cache(outAppData);
-            //ByteBufferUtil.cache(oneByteBuffer);
         }
     }
+
 
 }

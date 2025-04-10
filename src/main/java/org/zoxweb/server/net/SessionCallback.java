@@ -11,10 +11,12 @@ import org.zoxweb.shared.task.ConsumerSupplierCallback;
  */
 public abstract class SessionCallback<CF, C, S> implements ConsumerSupplierCallback<C,S> {
     public static final LogWrapper log = new LogWrapper(SessionCallback.class);
-    private CF config;
+    protected volatile CF config;
+    protected volatile ProtocolHandler protocolHandler;
+
 
     public final CF getConfig(){return config;}
-    public void setConfig(CF config)
+    final public void setConfig(CF config)
     {
         this.config = config;
     }

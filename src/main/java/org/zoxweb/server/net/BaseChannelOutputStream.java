@@ -3,6 +3,8 @@ package org.zoxweb.server.net;
 import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.server.io.UByteArrayOutputStream;
 import org.zoxweb.server.logging.LogWrapper;
+import org.zoxweb.shared.util.CloseableType;
+import org.zoxweb.shared.util.SUS;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -10,7 +12,9 @@ import java.nio.ByteBuffer;
 import java.nio.channels.ByteChannel;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public abstract class BaseChannelOutputStream extends OutputStream {
+public abstract class BaseChannelOutputStream extends OutputStream
+    implements CloseableType
+{
     public static final LogWrapper log = new LogWrapper(BaseChannelOutputStream.class).setEnabled(false);
 
 
@@ -18,16 +22,20 @@ public abstract class BaseChannelOutputStream extends OutputStream {
     protected final ByteBuffer outAppData;
     protected final byte[] oneByteBuffer = new byte[1];
     protected final AtomicBoolean isClosed = new AtomicBoolean(false);
-    public BaseChannelOutputStream(ByteChannel outByteChannel, int outAppBufferSize)
+    protected final ProtocolHandler protocolHandler;
+    protected BaseChannelOutputStream(ProtocolHandler ph, ByteChannel outByteChannel, int outAppBufferSize)
     {
+        SUS.checkIfNulls("Protocol handler or channel can't be null ", ph, outByteChannel);
         this.outChannel = outByteChannel;
         if(outAppBufferSize > 0)
         {
             outAppData = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.DIRECT, outAppBufferSize);
+            this.protocolHandler = ph;
         }
         else
             throw new IllegalArgumentException("Invalid buffer size");
     }
+
 
     @Override
     public synchronized void write(int b) throws IOException
@@ -66,4 +74,9 @@ public abstract class BaseChannelOutputStream extends OutputStream {
     }
 
     public abstract int write(ByteBuffer byteBuffer) throws IOException;
+
+    public boolean isClosed()
+    {
+        return isClosed.get() || !outChannel.isOpen();
+    }
 }

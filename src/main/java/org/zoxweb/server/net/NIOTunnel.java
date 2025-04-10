@@ -109,15 +109,14 @@ public class NIOTunnel
 	}
 
 	@Override
-	public void close() throws IOException
+	protected void close_internal() throws IOException
     {
-		if(!isClosed.getAndSet(true))
-		{
-			IOUtil.close(destinationChannel);
-			IOUtil.close(phSChannel);
-			ByteBufferUtil.cache(sourceBB, destinationBB);
-			log.info("closed: " + sourceAddress + " - "   + remoteAddress);
-		}
+
+		IOUtil.close(destinationChannel);
+		IOUtil.close(phSChannel);
+		ByteBufferUtil.cache(sourceBB, destinationBB);
+		log.info("closed: " + sourceAddress + " - "   + remoteAddress);
+
 	}
 
 

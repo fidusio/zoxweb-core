@@ -53,6 +53,11 @@ public class EchoProtocol
         public void close() throws IOException {
 
         }
+
+        @Override
+        public boolean isClosed() {
+            return get()!= null && get().isClosed();
+        }
     }
 
     public static class SSLEchoSession
@@ -92,6 +97,14 @@ public class EchoProtocol
         @Override
         public void close() throws IOException {
 
+        }
+
+        /**
+         * @return
+         */
+        @Override
+        public boolean isClosed() {
+            return get()!= null && get().isClosed();
         }
     }
 

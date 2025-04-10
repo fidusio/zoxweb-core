@@ -76,12 +76,15 @@ public class BytesArray
                 '}';
     }
 
-    public void writeTo(OutputStream os, boolean flush) throws IOException {
+    public void writeTo(OutputStream os, boolean flush)
+            throws IOException
+    {
         if(isValid())
         {
             os.write(array, offset, length);
             if (flush)
                 os.flush();
+
 
         }
         else

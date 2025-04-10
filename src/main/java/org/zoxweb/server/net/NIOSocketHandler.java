@@ -55,15 +55,12 @@ public class NIOSocketHandler
 	}
 
 	@Override
-	public void close() throws IOException
+	protected void close_internal() throws IOException
     {
-		if(!isClosed.getAndSet(true))
-		{
-			IOUtil.close(phSChannel);
-			IOUtil.close(sessionCallback.get());
-			ByteBufferUtil.cache(phBB);
-			IOUtil.close(sessionCallback);
-		}
+		IOUtil.close(phSChannel);
+		IOUtil.close(sessionCallback);
+		ByteBufferUtil.cache(phBB);
+		//IOUtil.close(sessionCallback);
 	}
 
 
@@ -76,7 +73,8 @@ public class NIOSocketHandler
 
 			if(sessionCallback.getConfig() == null)
 			{
-				sessionCallback.setConfig(phSChannel);
+				sessionCallback.setConfig(new ChannelOutputStream(this, phSChannel, 512));
+
 			}
 
 			int read;
@@ -96,7 +94,7 @@ public class NIOSocketHandler
     		{
     			if (log.isEnabled()) log.getLogger().info("+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+Read:" + read);
 
-    			close();
+				IOUtil.close(this);
 
 				if (log.isEnabled()) log.getLogger().info(key + ":" + key.isValid()+ " " + Thread.currentThread() + " " + TaskUtil.defaultTaskProcessor().availableExecutorThreads());
     		}
@@ -129,7 +127,7 @@ public class NIOSocketHandler
 		this.sessionCallback = (PlainSessionCallback) sessionCallback;
 		if(this.sessionCallback.getConfig() == null)
 		{
-			this.sessionCallback.setConfig(phSChannel);
+			this.sessionCallback.setConfig(new ChannelOutputStream(this, phSChannel, 512));
 			sessionCallback.setProtocolHandler(this);
 		}
 	}

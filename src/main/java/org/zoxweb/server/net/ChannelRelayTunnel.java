@@ -84,23 +84,22 @@ public class  ChannelRelayTunnel
 		return "NIO Channel Relay Tunnel";
 	}
 
-	public void close() throws IOException 
+	protected void close_internal() throws IOException
 	{
-		if(!isClosed.getAndSet(true))
-		{
-			// TODO Auto-generated method stub
-			if (closeInterface != null) {
-				IOUtil.close(closeInterface);
-			} else {
-				IOUtil.close(readSource);
-				getSelectorController().cancelSelectionKey(currentSK);
 
-				if (autoCloseDestination) {
-					IOUtil.close(writeDestination);
-				}
-				ByteBufferUtil.cache(sBuffer);
+		// TODO Auto-generated method stub
+		if (closeInterface != null) {
+			IOUtil.close(closeInterface);
+		} else {
+			IOUtil.close(readSource);
+			getSelectorController().cancelSelectionKey(currentSK);
+
+			if (autoCloseDestination) {
+				IOUtil.close(writeDestination);
 			}
+			ByteBufferUtil.cache(sBuffer);
 		}
+
 	}
 	
 	
