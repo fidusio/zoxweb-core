@@ -99,14 +99,13 @@ public class RateCounter
 
     public RateCounter inc()
     {
-        register(0, 1);
-        return this;
+        return register(0, 1);
+
     }
 
     public RateCounter inc(long inc)
     {
-        register(0, inc);
-        return this;
+        return register(0, inc);
     }
 
     public synchronized RateCounter register(long delta, long inc)
@@ -123,7 +122,7 @@ public class RateCounter
         return timestamp;
     }
 
-    public  long stop()
+    public long stop()
     {
         return stop(1);
     }

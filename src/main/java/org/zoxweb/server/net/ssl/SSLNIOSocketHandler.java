@@ -199,6 +199,8 @@ public class SSLNIOSocketHandler
 		IOUtil.close(config, sessionCallback);
 	}
 
+
+
 	@Override
 	public boolean isClosed()
 	{
@@ -246,6 +248,7 @@ public class SSLNIOSocketHandler
 					IOUtil.close(this);
 				}
 			}
+
     	}
     	catch(Exception e)
     	{

@@ -1,11 +1,14 @@
 package org.zoxweb.shared.util;
 
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.concurrent.TimeUnit;
 
 public class RateController
     implements GetName, WaitTime<RateController>
 {
+
 
 
 
@@ -128,7 +131,19 @@ public class RateController
 
 
 
-
+    /**
+     * Returns the remaining delay associated with this object, in the
+     * given time unit.
+     *
+     * @param unit the time unit
+     * @return the remaining delay; zero or negative values indicate
+     * that the delay has already elapsed
+     */
+    @Override
+    public synchronized long getDelay(@NotNull TimeUnit unit)
+    {
+        return unit.convert(nextTime - System.currentTimeMillis(), TimeUnit.MILLISECONDS);
+    }
 
 
     /**

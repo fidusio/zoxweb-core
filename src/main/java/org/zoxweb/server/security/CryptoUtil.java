@@ -1000,7 +1000,7 @@ public class CryptoUtil {
 
   public static NVGenericMap certificateToNVGM(X509Certificate cert)
   {
-    NVGenericMap ret = SharedUtil.toNVGenericMap(cert.getSubjectX500Principal().getName(), "=",",", true);
+    NVGenericMap ret = SharedUtil.toNVGenericMap(null, cert.getSubjectX500Principal().getName(), "=",",", true);
     ret.add("type", cert.getType());
     NVGenericMap nvmg = publicKeyToNVGM(cert.getPublicKey());
     nvmg.setName("public_key");

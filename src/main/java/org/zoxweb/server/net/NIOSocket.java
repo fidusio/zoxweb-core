@@ -33,6 +33,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.InetSocketAddress;
+import java.net.StandardSocketOptions;
 import java.nio.channels.*;
 import java.nio.channels.spi.AbstractSelectableChannel;
 import java.util.Date;
@@ -223,7 +224,7 @@ public class NIOSocket
 						    try
 						    {
 
-
+								// read case
 						    	if (key.isReadable()
 									&& key.isValid()
 									&& key.channel().isOpen())
@@ -231,6 +232,8 @@ public class NIOSocket
 									// channel has data to read
 									// this is the reading part of the process
 							    	ProtocolHandler currentPP = (ProtocolHandler) key.attachment();
+									currentPP.updateUsage();
+
 									if (currentPP != null)
 							    	{
 							    		// very,very,very crucial setup prior to processing
@@ -281,7 +284,7 @@ public class NIOSocket
 								    	}
 							    	}
 
-							    } 
+							    } // server socket waiting for incoming connection
 						    	else if(key.isAcceptable()
 										&& key.isValid()
 										&& key.channel().isOpen())
@@ -289,6 +292,26 @@ public class NIOSocket
 							        // a connection was accepted by a ServerSocketChannel.
 							    	
 							    	SocketChannel sc = ((ServerSocketChannel)key.channel()).accept();
+									// os level detection of stale connection
+									//===================================================
+									// Enable TCP keep-alive.
+									sc.setOption(StandardSocketOptions.SO_KEEPALIVE, true);
+									// section to be included after upgrade to jdk11+
+									/*
+									  Set extended TCP keepalive options (Java 11+)
+									  TCP_KEEPIDLE corresponds roughly to tcp_keepalive_time (in seconds)
+									 */
+
+									//sc.setOption(ExtendedSocketOptions.TCP_KEEPIDLE, 60);
+
+									/* TCP_KEEPINTVL (in seconds) is the interval between keepalive probes.*/
+
+									//sc.setOption(ExtendedSocketOptions.TCP_KEEPINTVL, 10);
+
+									/* TCP_KEEPCOUNT is the number of probes to send before considering the connection dead*/
+
+									//sc.setOption(ExtendedSocketOptions.TCP_KEEPCOUNT, 3);
+									//===================================================
 									ProtocolFactory<?> protocolFactory = (ProtocolFactory<?>) key.attachment();
 									if(logger.isEnabled()) logger.getLogger().info("Accepted: " + sc + " psf:" + protocolFactory);
 							    	// check if the incoming connection is allowed

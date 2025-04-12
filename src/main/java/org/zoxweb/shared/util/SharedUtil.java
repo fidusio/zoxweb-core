@@ -2248,10 +2248,10 @@ public class SharedUtil
 	}
 
 
-	public static NVGenericMap toNVGenericMap(String str, String nvpSep, String regExp, boolean trim)
+	public static NVGenericMap toNVGenericMap(NVGenericMap nvgm, String str, String nvpSep, String regExp, boolean trim)
 	{
 		String[] pairs = SharedStringUtil.parseString(str, regExp, (CharSequence[]) null );
-		NVGenericMap ret = new NVGenericMap();
+		NVGenericMap ret = nvgm != null ? nvgm : new NVGenericMap();
 
 		for (String p : pairs)
 		{
@@ -2260,6 +2260,22 @@ public class SharedUtil
 			if (nv != null)
 			{
 				ret.add(nv);
+			}
+		}
+		return ret;
+	}
+
+
+	public static NVGenericMap toNVGenericMap(NVGenericMap nvgm, Collection<String> collection, String nvSep, boolean trim)
+	{
+		NVGenericMap ret = nvgm != null ? nvgm : new NVGenericMap();
+		for(String toParse : collection)
+		{
+			NVPair nv = toNVPair(toParse, nvSep, trim);
+
+			if (nv != null)
+			{
+				ret.build(nv);
 			}
 		}
 		return ret;

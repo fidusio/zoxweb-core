@@ -1,9 +1,8 @@
-package org.zoxweb.server.util;
+package org.zoxweb.shared.util;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.zoxweb.server.task.TaskUtil;
-import org.zoxweb.shared.util.Const;
 
 public class LifetimeTest
 {
@@ -48,7 +47,7 @@ public class LifetimeTest
     public void testExpireLifetime()
     {
         Lifetime lt = new Lifetime(System.currentTimeMillis(), 10, null, Const.TimeInMillis.MILLI.MILLIS*200);
-        System.out.println("isMAxUsed : " + lt.isMaxUsed());
+        System.out.println("isMAxUsed : " + lt.isExpired());
         System.out.println("nextWait : " + lt.nextWait());
         lt.close();
         assert lt.isClosed();

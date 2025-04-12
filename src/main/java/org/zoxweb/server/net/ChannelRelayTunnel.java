@@ -122,6 +122,7 @@ public class  ChannelRelayTunnel
 					if(log.isEnabled()) log.getLogger().info(ByteBufferUtil.toString(sBuffer));
 				}
 			}while(read > 0);
+
 			
 	    	if(read < 0) //end of stream we have to close 
 	    		IOUtil.close(this);

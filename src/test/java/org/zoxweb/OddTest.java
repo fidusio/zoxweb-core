@@ -21,10 +21,9 @@ public class OddTest {
         rc.start();
         for(int i=0; i < billions; i++)
             array[i] = billions - i;
-        assert(array.length == billions);
         Arrays.sort(array);
-        rc.stop();
-        System.out.println("It took: " + rc.getDeltas() + " millis " + Const.TimeInMillis.toString(rc.getDeltas()));
+        long stopTS = rc.stop();
+        System.out.println("It took: " + rc.getDeltas() + " millis " + Const.TimeInMillis.toString(rc.getDeltas()) + " stopTS: " + stopTS);
     }
     @Test
     public void countToBillion()

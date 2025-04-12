@@ -20,8 +20,4 @@ public interface WaitTime<T>
         return SharedUtil.signum( getDelay(TimeUnit.MILLISECONDS) - o.getDelay(TimeUnit.MILLISECONDS));
     }
 
-    @Override
-    default long getDelay(TimeUnit unit) {
-        return unit.convert(nextWait(), TimeUnit.MILLISECONDS);
-    }
 }

@@ -82,6 +82,30 @@ public class NVGenericMap
 	{
 		return getValue(name, null);
 	}
+
+
+	/**
+	 * This method can throw exception ClassCastException or number formating exception
+	 * @param name of hte parameter
+	 * @return long value
+	 * @exception RuntimeException it could NullPointer ClassCast ...
+	 */
+	public long getValueAsLong(GetName name)
+	{
+		return getValueAsLong(name.getName());
+	}
+
+	/**
+	 * This method can throw exception ClassCastException or number formating exception
+	 * @param name of hte parameter
+	 * @return long value
+	 * @exception RuntimeException it could NullPointer ClassCast ...
+	 */
+	public long getValueAsLong(String name)
+		throws RuntimeException
+	{
+		return Long.parseLong(getValue(name));
+	}
 	
 	@SuppressWarnings("unchecked")
 	public <V> V getValue(String name, V defaultValue)

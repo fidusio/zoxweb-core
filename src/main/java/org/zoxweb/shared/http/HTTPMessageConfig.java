@@ -736,6 +736,21 @@ public class HTTPMessageConfig
 		setValue(Params.ERROR_AS_EXCEPTION, errorAsException);
 	}
 
+	/**
+	 * @return the raw Keep-Alive header
+	 */
+	@Override
+	public GetNameValue<String> getHeaderKeepAlive() {
+		return (GetNameValue<String>) getHeaders().get(HTTPHeader.KEEP_ALIVE);
+	}
+
+	/**
+	 * @return the raw Connection header
+	 */
+	@Override
+	public GetNameValue<String> getHeaderConnection() {
+		return (GetNameValue<String>) getHeaders().get(HTTPHeader.CONNECTION);
+	}
 
 
 	@Override

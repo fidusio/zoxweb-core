@@ -1,6 +1,7 @@
-package org.zoxweb.server.util;
+package org.zoxweb.shared.util;
 
-import org.zoxweb.shared.util.*;
+
+import org.zoxweb.server.util.DateUtil;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -8,7 +9,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class Lifetime
     implements WaitTime<Lifetime>,
-        IsClosed, Identifier<Long>
+        IsClosed, Identifier<Long>, IsExpired
 {
 
     private static final AtomicLong INSTANCE_COUNTER = new AtomicLong();
@@ -24,7 +25,7 @@ public class Lifetime
     /**
      * Create a Lifetime object.
      * @param creationTimestamp when it was created
-     * @param maxUse maximum usage 0 fore ever
+     * @param maxUse maximum usage 0 forever
      * @param tu user time to convert to millis if null delay is in millis
      * @param delayBetweenUsage delay between usage in millis 0 not used
      */
@@ -118,7 +119,7 @@ public class Lifetime
      */
     public long nextWait()
     {
-        if (closed.get() || isMaxUsed())
+        if (closed.get() || isExpired())
             throw new IllegalStateException("lifetime expired");
 
         if (lastUseTimestamp == 0)
@@ -148,6 +149,15 @@ public class Lifetime
 
 
     /**
+     * @return true If the implementation is expired
+     */
+    @Override
+    public boolean isExpired()
+    {
+        return maxUse != 0 &&  usageCounter >= maxUse;
+    }
+
+    /**
      * @return maximum number of usage, 0 forever
      */
     public long getMaxUse()
@@ -171,13 +181,7 @@ public class Lifetime
     {
         return delayBetweenUsage;
     }
-    /**
-     * @return true if the maximum inc are reached
-     */
-    public boolean isMaxUsed()
-    {
-        return maxUse != 0 &&  usageCounter >= maxUse;
-    }
+
 
     @Override
     public void close()
@@ -188,7 +192,7 @@ public class Lifetime
 
     @Override
     public boolean isClosed() {
-        return closed.get() || isMaxUsed() || nextWait() < 0;
+        return closed.get() || isExpired() || nextWait() < 0;
     }
 
     /**
@@ -210,5 +214,20 @@ public class Lifetime
                 ", usageCounter= " + usageCounter +
                 ", closed= " + closed +
                 '}';
+    }
+
+
+
+    /**
+     * Returns the remaining delay associated with this object, in the
+     * given time unit.
+     *
+     * @param unit the time unit
+     * @return the remaining delay; zero or negative values indicate
+     * that the delay has already elapsed
+     */
+    @Override
+    public long getDelay(TimeUnit unit) {
+        return unit.convert(System.currentTimeMillis() - getLastTimeUsed(),TimeUnit.MILLISECONDS);
     }
 }

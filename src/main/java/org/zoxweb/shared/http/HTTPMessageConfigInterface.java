@@ -364,6 +364,17 @@ extends ReferenceID<String>, SetName, SetDescription
 
 
 	/**
+	 * @return the raw Keep-Alive header
+	 */
+	GetNameValue<String> getHeaderKeepAlive();
+
+	/**
+	 * @return the raw Connection header
+	 */
+	GetNameValue<String> getHeaderConnection();
+
+
+	/**
 	 * Set the user agent of the caller
 	 * @param userAgent to be set
 	 */

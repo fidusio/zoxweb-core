@@ -80,6 +80,7 @@ public class NIOSocketHandler
 					sessionCallback.accept(phBB);
     		}
     		while(read > 0);
+
     		
     		if (read == -1)
     		{

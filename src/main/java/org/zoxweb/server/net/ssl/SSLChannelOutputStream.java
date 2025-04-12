@@ -48,6 +48,7 @@ public class SSLChannelOutputStream extends BaseChannelOutputStream {
                     try
                     {
                         written = ByteBufferUtil.smartWrite(null, outChannel, config.outSSLNetData);
+                        protocolHandler.updateUsage();
                     }
                     catch (IOException e)
                     {

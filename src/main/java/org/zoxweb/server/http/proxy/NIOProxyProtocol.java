@@ -52,6 +52,8 @@ public class NIOProxyProtocol
 	
 	public static final String AUTHENTICATION = "AUTHENTICATION";
 
+
+
 	private static class RequestInfo
 	{
 		final HTTPMessageConfigInterface hmci;
@@ -208,6 +210,8 @@ public class NIOProxyProtocol
 
 	}
 
+
+
 	@Override
 	public void accept(SelectionKey key)
 	{
@@ -242,6 +246,7 @@ public class NIOProxyProtocol
 
     		}
     		while(read > 0);
+
 
     		if (read == -1)
     		{

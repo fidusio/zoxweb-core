@@ -15,10 +15,7 @@
  */
 package org.zoxweb.server.net;
 
-import org.zoxweb.shared.util.CloseableType;
-import org.zoxweb.shared.util.GetDescription;
-import org.zoxweb.shared.util.GetName;
-import org.zoxweb.shared.util.NVGenericMap;
+import org.zoxweb.shared.util.*;
 
 import java.io.IOException;
 import java.nio.channels.SelectionKey;
@@ -30,7 +27,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
 public abstract class ProtocolHandler
-	implements GetName, GetDescription, CloseableType, Consumer<SelectionKey>
+	implements GetName, GetDescription, CloseableType, UsageTracker, Consumer<SelectionKey>
 {
 
 	private static final AtomicLong ID_COUNTER = new AtomicLong();
@@ -42,7 +39,7 @@ public abstract class ProtocolHandler
 
 	protected volatile SocketChannel phSChannel;
 	protected volatile SelectionKey phSK;
-
+	private final AtomicLong lastUsage = new AtomicLong(-1);
 
 
 
@@ -53,6 +50,28 @@ public abstract class ProtocolHandler
 	protected ProtocolHandler()
 	{
 		
+	}
+
+
+
+
+	/**
+	 * @return last time used
+	 */
+	@Override
+	public long lastUsage()
+	{
+		return lastUsage.get();
+	}
+
+	/**
+	 * @return current usage update
+	 */
+	@Override
+	public long updateUsage()
+	{
+		lastUsage.set(System.currentTimeMillis());
+		return lastUsage.get();
 	}
 
 
@@ -124,7 +143,7 @@ public abstract class ProtocolHandler
 //		throw new UnsupportedOperationException("Can't set session callback");
 //	}
 
-	public void close() throws IOException
+	public final void close() throws IOException
 	{
 		if(!isClosed.getAndSet(true))
 		{

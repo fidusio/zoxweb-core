@@ -29,7 +29,9 @@ public class ChannelOutputStream
     {
         try
         {
-            return ByteBufferUtil.smartWrite(null, outChannel, bb);
+            int ret = ByteBufferUtil.smartWrite(null, outChannel, bb);
+            protocolHandler.updateUsage();
+            return ret;
         }
         catch (IOException e)
         {

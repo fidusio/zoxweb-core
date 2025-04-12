@@ -26,13 +26,13 @@ public interface LifeCycleMonitor<T>
      * @param t
      * @return
      */
-	public boolean created(T t);
+	boolean created(T t);
 
     /**
      *
      * @param t
      * @return
      */
-	public boolean terminated(T t);
+	boolean terminated(T t);
 
 }

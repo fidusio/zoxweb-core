@@ -1,7 +1,6 @@
 package org.zoxweb.server.http;
 
-import org.zoxweb.shared.util.NamedValue;
-import org.zoxweb.shared.util.SUS;
+import org.zoxweb.shared.util.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -144,6 +143,31 @@ public class HTTPHeaderParser {
             }
         }
         return result;
+    }
+
+    public static NVGenericMap parseHeaderValue(NVGenericMap nvgm, String headerValue)
+    {
+        NVGenericMap ret = nvgm != null ? nvgm : new NVGenericMap();
+        String[] parsed = headerValue.split(",");
+        if (parsed.length != 0)
+        {
+            for (String toParse : parsed)
+            {
+                NVPair nv = SharedUtil.toNVPair(toParse, "=", true);
+
+                if (nv != null)
+                {
+                    ret.build(nv);
+                }
+            }
+        }
+        else
+        {
+            ret = SharedUtil.toNVGenericMap(ret, headerValue, "=", null, true);
+
+        }
+
+        return ret;
     }
 
     private static Map<String, String> parseParameters(String paramsPart) {
