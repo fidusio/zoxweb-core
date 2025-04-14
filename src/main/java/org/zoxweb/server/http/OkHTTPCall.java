@@ -188,7 +188,7 @@ public class OkHTTPCall
 
 
 
-	private static final OkHttpClient sslEnabledClient = createOkHttpBuilder(null, null, HTTPMessageConfigInterface.DEFAULT_TIMEOUT_20_SECOND, true, 10, HTTPMessageConfigInterface.DEFAULT_TIMEOUT_20_SECOND).build();
+	private static final OkHttpClient sslEnabledClient = createOkHttpBuilder(null, null, HTTPMessageConfigInterface.DEFAULT_TIMEOUT_40_SECOND, true, 10, HTTPMessageConfigInterface.DEFAULT_TIMEOUT_20_SECOND).build();
 	private static final OkHttpClient sslDisabledClient = createOkHttpBuilder(null, null, HTTPMessageConfigInterface.DEFAULT_TIMEOUT_20_SECOND,false, 10, HTTPMessageConfigInterface.DEFAULT_TIMEOUT_20_SECOND).build();
 
 	private final OkHttpClient okHttpClient;

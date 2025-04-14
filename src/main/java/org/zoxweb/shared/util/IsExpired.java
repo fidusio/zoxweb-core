@@ -6,6 +6,12 @@ public interface IsExpired
     /**
      * @return true If the implementation is expired
      */
-    default boolean isExpired(){return false;};
+    default boolean isExpired(){return false;}
+
+
+    /**
+     * expire the implementation
+     */
+    default void expire(){}
 
 }

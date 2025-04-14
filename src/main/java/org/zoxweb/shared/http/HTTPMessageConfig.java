@@ -737,20 +737,44 @@ public class HTTPMessageConfig
 	}
 
 	/**
-	 * @return the raw Keep-Alive header
+	 * Lookup http header that has any of the matching values if a header do not exist or no matching values were found in the header values
+	 * this method will return null
+	 *
+	 * @param headerName    to look for
+	 * @param valuesToMatch to match
+	 * @return the header if the return conditions where met otherwise null
 	 */
 	@Override
-	public GetNameValue<String> getHeaderKeepAlive() {
-		return (GetNameValue<String>) getHeaders().get(HTTPHeader.KEEP_ALIVE);
+	public GetNameValue<String> lookupMatchingHeader(GetName headerName, String... valuesToMatch) {
+		return lookupMatchingHeader(headerName.getName(), valuesToMatch);
 	}
 
 	/**
-	 * @return the raw Connection header
+	 * Lookup http header that has any of the matching values if a header do not exist or no matching values were found in the header values
+	 * this method will return null
+	 *
+	 * @param headerName    to look for
+	 * @param valuesToMatch to match
+	 * @return the header if the return conditions where met otherwise null
 	 */
 	@Override
-	public GetNameValue<String> getHeaderConnection() {
-		return (GetNameValue<String>) getHeaders().get(HTTPHeader.CONNECTION);
+	public GetNameValue<String> lookupMatchingHeader(String headerName, String... valuesToMatch)
+	{
+		GetNameValue<String> ret = (GetNameValue<String>) getHeaders().get(headerName);
+		if (ret != null)
+		{
+			for (String toMatch : valuesToMatch)
+			{
+				if(SharedStringUtil.contains(ret.getValue(), toMatch, true))
+				{
+					return ret;
+				}
+			}
+		}
+
+		return null;
 	}
+
 
 
 	@Override

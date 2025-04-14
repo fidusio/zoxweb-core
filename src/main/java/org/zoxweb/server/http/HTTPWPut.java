@@ -203,7 +203,11 @@ public class HTTPWPut {
                         fileToData,
                         fileLocation,
                         filePassword);
-                System.out.println(hrd);
+
+                if(hrd.getStatus() == HTTPStatusCode.OK.CODE)
+                    System.out.println(hrd.getDataAsString());
+                else
+                    System.out.println(hrd);
             }
 
 

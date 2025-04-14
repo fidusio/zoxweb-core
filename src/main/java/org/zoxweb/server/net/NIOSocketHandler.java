@@ -17,7 +17,6 @@ package org.zoxweb.server.net;
 
 import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.server.io.IOUtil;
-import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.task.TaskUtil;
 
 import java.io.IOException;
@@ -32,7 +31,7 @@ import java.nio.channels.spi.AbstractSelectableChannel;
 public class NIOSocketHandler
     extends ProtocolHandler
 {
-    private static final LogWrapper log = new LogWrapper(NIOSocketHandler.class).setEnabled(false);
+
 	private volatile ByteBuffer phBB = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.DIRECT, 1024);
 
 	private final PlainSessionCallback sessionCallback;

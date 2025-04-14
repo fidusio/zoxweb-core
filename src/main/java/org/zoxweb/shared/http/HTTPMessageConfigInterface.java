@@ -364,14 +364,22 @@ extends ReferenceID<String>, SetName, SetDescription
 
 
 	/**
-	 * @return the raw Keep-Alive header
+	 * Lookup http header that has any of the matching values if a header do not exist or no matching values were found in the header values
+	 * this method will return null
+	 * @param headerName to look for
+	 * @param valuesToMatch to match
+	 * @return the header if the return conditions where met otherwise null
 	 */
-	GetNameValue<String> getHeaderKeepAlive();
+	GetNameValue<String> lookupMatchingHeader(GetName headerName, String ...valuesToMatch);
 
 	/**
-	 * @return the raw Connection header
+	 * Lookup http header that has any of the matching values if a header do not exist or no matching values were found in the header values
+	 * this method will return null
+	 * @param headerName to look for
+	 * @param valuesToMatch to match
+	 * @return the header if the return conditions where met otherwise null
 	 */
-	GetNameValue<String> getHeaderConnection();
+	GetNameValue<String> lookupMatchingHeader(String headerName, String ...valuesToMatch);
 
 
 	/**

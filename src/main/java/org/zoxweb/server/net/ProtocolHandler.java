@@ -15,6 +15,9 @@
  */
 package org.zoxweb.server.net;
 
+import org.zoxweb.server.io.IOUtil;
+import org.zoxweb.server.logging.LogWrapper;
+import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.shared.util.*;
 
 import java.io.IOException;
@@ -29,7 +32,33 @@ import java.util.function.Consumer;
 public abstract class ProtocolHandler
 	implements GetName, GetDescription, CloseableType, UsageTracker, Consumer<SelectionKey>
 {
+	public static final LogWrapper log = new LogWrapper(ProtocolHandler.class).setEnabled(false);
+	static class PHTimeout
+		implements Runnable
+	{
+		protected final Appointment timeout;
+		protected final ProtocolHandler ph;
+		PHTimeout(ProtocolHandler ph, long duration)
+		{
+			this.ph = ph;
+			timeout = TaskUtil.defaultTaskScheduler().queue(duration, this);
+		}
+		public void run()
+		{
+			if(System.currentTimeMillis() - ph.lastUsage() > timeout.getDelayInMillis())
+			{
+				IOUtil.close(ph);
+				log.getLogger().info("session timed out protocol handler closed.");
 
+			}
+			else
+			{
+				timeout.reset(false);
+			}
+		}
+	}
+
+	public static final long SESSION_TIMEOUT = (long)(Const.TimeInMillis.MINUTE.MILLIS*2.5);
 	private static final AtomicLong ID_COUNTER = new AtomicLong();
 
 	protected final long id = ID_COUNTER.incrementAndGet();
@@ -46,10 +75,14 @@ public abstract class ProtocolHandler
 	private volatile NVGenericMap properties = null;
 	protected volatile Executor executor;
 	protected final AtomicBoolean isClosed = new AtomicBoolean(false);
+	private final PHTimeout phTimeout;
+
 
 	protected ProtocolHandler()
 	{
-		
+		updateUsage();
+		phTimeout = new PHTimeout(this, SESSION_TIMEOUT);
+
 	}
 
 
@@ -148,6 +181,7 @@ public abstract class ProtocolHandler
 		if(!isClosed.getAndSet(true))
 		{
 			close_internal();
+			phTimeout.timeout.cancel();
 		}
 	}
 

@@ -15,6 +15,8 @@
  */
 package org.zoxweb.server.io;
 
+import org.zoxweb.shared.crypto.CryptoConst;
+import org.zoxweb.shared.crypto.HashResult;
 import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.net.ProxyType;
 import org.zoxweb.shared.util.SUS;
@@ -27,6 +29,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -493,6 +497,48 @@ public class IOUtil
 	    throws IOException
 	{
 		return relayStreams(is, os, closeBoth, closeBoth);
+	}
+
+	public static HashResult relayStreams(CryptoConst.HASHType hashType, InputStream is, OutputStream os, boolean both)
+			throws IOException
+	{
+		return relayStreams(hashType, is, os, both, both);
+	}
+
+
+	public static HashResult relayStreams(CryptoConst.HASHType hashType, InputStream is, OutputStream os, boolean closeIS, boolean closeOS)
+			throws IOException
+	{
+		long totalCopied = 0;
+		try
+		{
+			MessageDigest hash = MessageDigest.getInstance(hashType.getName());
+
+			try {
+				int read;
+				byte[] buffer = new byte[4096];
+				while ((read = is.read(buffer)) != -1) {
+					os.write(buffer, 0, read);
+					totalCopied += read;
+					hash.update(buffer, 0, read);
+				}
+				os.flush();
+			} finally {
+				if (closeIS || is instanceof CloseEnabledInputStream) {
+					close(is);
+				}
+
+				if (closeOS || os instanceof CloseEnabledOutputStream) {
+					close(os);
+				}
+			}
+
+			return new HashResult(hashType, hash.digest(), totalCopied);
+		}
+		catch (NoSuchAlgorithmException he)
+		{
+			throw new IOException(he);
+		}
 	}
 
     /**

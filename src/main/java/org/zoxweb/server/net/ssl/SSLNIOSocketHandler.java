@@ -19,7 +19,6 @@ import org.zoxweb.server.fsm.StateMachine;
 import org.zoxweb.server.fsm.TriggerConsumer;
 import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.server.io.IOUtil;
-import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.net.NIOSocket;
 import org.zoxweb.server.net.ProtocolHandler;
 import org.zoxweb.server.security.SecUtil;
@@ -139,7 +138,6 @@ public class SSLNIOSocketHandler
 
 
 
-    public static final LogWrapper log = new LogWrapper(SSLNIOSocketHandler.class).setEnabled(false);
 
 	private volatile SSLConnectionHelper sslDispatcher = null;
 	private volatile SSLSessionConfig config = null;
