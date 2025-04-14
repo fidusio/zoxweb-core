@@ -163,7 +163,7 @@ public final class HTTPCallTool
 
                 if (content != null)
                     hmci.setContent(content);
-                log.getLogger().info(GSONUtil.toJSONDefault(hmci,true));
+                log.getLogger().info("HMCI: " + GSONUtil.toJSONDefault(hmci,true));
                 HTTPAPIEndPoint<Void, byte[]> endpoint = new HTTPAPIEndPoint<Void, byte[]>(hmci)
                         .setExecutor(TaskUtil.defaultTaskProcessor());
 

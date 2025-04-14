@@ -94,7 +94,7 @@ public final class GSONUtil
 
 	private final static Gson DEFAULT_GSON_PRETTY = new GsonBuilder()
 			.registerTypeAdapter(NVGenericMap.class, new NVGenericMapSerDeserializer())
-			//.registerTypeHierarchyAdapter(NVEntity.class, new NVEntitySerDeserializer())
+			.registerTypeHierarchyAdapter(NVEntity.class, new NVEntitySerDeserializer())
 			.registerTypeAdapter(NVGenericMapList.class, new NVGenericMapListSerDeserializer())
 			.registerTypeAdapter(Date.class, new DateSerDeserializer())
 			.registerTypeAdapter(NVStringList.class, new NVStringListSerDeserializer())
