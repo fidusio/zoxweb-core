@@ -116,7 +116,7 @@ public class BytesValueFilter
 		{
 			try
             {
-				((NVPair)in).setValue(new String(value, SharedStringUtil.UTF_8));
+				((NVPair)in).setValue(new String(value, Const.UTF_8));
 			}
 			catch (UnsupportedEncodingException e)
             {
@@ -163,7 +163,7 @@ public class BytesValueFilter
 		{
             try
             {
-				return new String(value, offset, length, SharedStringUtil.UTF_8);
+				return new String(value, offset, length, Const.UTF_8);
 			}
 			catch (UnsupportedEncodingException e)
             {

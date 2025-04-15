@@ -50,7 +50,7 @@ public class AppIDURI
 		}
 		else
 		{
-			ret.rest = SharedStringUtil.EMPTY_STRING_ARRAY;
+			ret.rest = Const.EMPTY_STRING_ARRAY;
 		}
 		
 		

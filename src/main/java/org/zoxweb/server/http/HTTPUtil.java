@@ -461,7 +461,7 @@ public class HTTPUtil
 	{
 		if (SUS.isEmpty(charset))
 		{
-			charset = SharedStringUtil.UTF_8;
+			charset = Const.UTF_8;
 		}
 
 		StringBuilder sb = new StringBuilder();
@@ -517,7 +517,7 @@ public class HTTPUtil
 	{
 		if (SUS.isEmpty(charset))
 		{
-			charset = SharedStringUtil.UTF_8;
+			charset = Const.UTF_8;
 		}
 
 		UByteArrayOutputStream ret = ByteBufferUtil.allocateUBAOS(256);
@@ -949,7 +949,7 @@ public class HTTPUtil
 			{
 				Object value = func.apply(paramName, parameters);//parameters.getValue(paramName);
 				uri = SharedStringUtil.embedText(uri, "{" + paramName + "}",
-						value != null ? URLEncoder.encode("" + value, SharedStringUtil.UTF_8) : "");
+						value != null ? URLEncoder.encode("" + value, Const.UTF_8) : "");
 			}
 			if(override && uri.endsWith("/") && uri.length() > 1)
 				uri = uri.substring(0, uri.length() - 1); // condition met to remove the last /
@@ -1123,7 +1123,7 @@ public class HTTPUtil
 	public static List<HTTPMessageConfigInterface> extractFormsContent(HTTPResponseData rd, int cookieVersion) throws UnsupportedEncodingException, MalformedURLException
 	{
 		List<HTTPMessageConfigInterface> retList = new ArrayList<HTTPMessageConfigInterface>();
-		Document doc = 	Jsoup.parse( new String(rd.getData(), SharedStringUtil.UTF_8), "", Parser.xmlParser());
+		Document doc = 	Jsoup.parse( new String(rd.getData(), Const.UTF_8), "", Parser.xmlParser());
 
 		Elements elements = doc.select("form");
 
@@ -1185,7 +1185,7 @@ public class HTTPUtil
 			}
 			//ret.setParameters(params);
 			ret.setName(formName);
-			formAction = URLDecoder.decode(formAction,  SharedStringUtil.UTF_8);
+			formAction = URLDecoder.decode(formAction,  Const.UTF_8);
 			try
 			{
 				URL url = new URL(formAction);

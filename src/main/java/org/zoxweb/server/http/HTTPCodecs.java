@@ -78,7 +78,7 @@ public final class HTTPCodecs {
         {
           if (HTTPMediaType.lookup(hmci.getContentType()) == HTTPMediaType.MULTIPART_FORM_DATA)
           {
-            NamedValue<String> multipartFromData = HTTPHeaderParser.parseHeader(HTTPHeader.CONTENT_TYPE.getName() +": " + hmci.getContentType());
+            NamedValue<String> multipartFromData = HTTPHeaderParser.parseFullLineHeader(HTTPHeader.CONTENT_TYPE.getName() +": " + hmci.getContentType());
 
             String boundary = multipartFromData.getProperties().getValue(HTTPConst.CNP.BOUNDARY);
             if(log.isEnabled()) log.getLogger().info("boundary=" + boundary);
@@ -149,7 +149,7 @@ public final class HTTPCodecs {
                   if (indexEndOfHeader != -1 && indexEndOfHeader < endOfSubHeaders)
                   {
                     String fullHeader = ubaos.getString(headerIndex, indexEndOfHeader - headerIndex);
-                    NamedValue<String> header = HTTPHeaderParser.parseHeader(fullHeader);
+                    NamedValue<String> header = HTTPHeaderParser.parseFullLineHeader(fullHeader);
                     if (header != null) {
                       subPartRawHeaders.build(header);
 //                      log.getLogger().info("header: " + fullHeader + " end");

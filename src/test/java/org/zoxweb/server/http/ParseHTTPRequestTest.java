@@ -48,7 +48,7 @@ public class ParseHTTPRequestTest
         for (String header: headers)
         {
             System.out.println(header);
-            NamedValue<String> parsedHeader = HTTPHeaderParser.parseHeader(header);
+            NamedValue<String> parsedHeader = HTTPHeaderParser.parseFullLineHeader(header);
             System.out.println(parsedHeader);
             System.out.println("-----------------------------------------------------------");
 

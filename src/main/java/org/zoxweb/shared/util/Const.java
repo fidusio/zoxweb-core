@@ -31,6 +31,12 @@ public class Const {
   public static final String TOKEN_TAG = "$$TAG$$";
   public static final Object[] EMPTY_ARRAY = new Object[0];
   public static final byte[] EMPTY_BYTE_ARRAY = new byte[0];
+  //
+  public static final String UTF_8  = "utf-8";
+  public static final String UTF_16 = "utf-16";
+  public static final String TAG_ENVELOPE ="$$";
+  public static final String[] EMPTY_STRING_ARRAY = new String[0];
+  public static final String[] COMMENT_TAGS = {"#", "//"};
 
   //public static final String UTF8 = "UTF-8";
 

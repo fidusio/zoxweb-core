@@ -25,12 +25,12 @@ public interface RemoteID<T>
 	 * Get remote ID.
 	 * @return the object remote unique identifier
 	 */
-	public T getRemoteID();
+	T getRemoteID();
 	
 	/**
 	 * Set remote ID.
-	 * @param id
+	 * @param id to be set
 	 */
-	public void setRemoteID(T id);
+	void setRemoteID(T id);
 
 }

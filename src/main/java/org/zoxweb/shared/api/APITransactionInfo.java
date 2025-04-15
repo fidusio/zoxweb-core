@@ -28,53 +28,53 @@ public interface APITransactionInfo
 	 * Returns the message.
 	 * @return APINotificationMessage
 	 */
-	public APINotificationMessage getMessage();
+	APINotificationMessage getMessage();
 	
 	/**
 	 * Sets the message.
 	 * @param message
 	 */
-	public void setMessage(APINotificationMessage message);
+	void setMessage(APINotificationMessage message);
 	
 	
 	/**
 	 * Returns the delivery status.
 	 * @return APINotificationStatus
 	 */
-	public APINotificationStatus getDeliverStatus();
+	APINotificationStatus getDeliverStatus();
 	
 	/**
 	 * Sets the delivery status.
 	 * @param status
 	 */
-	public void setDeliverStatus(APINotificationStatus status);
+	void setDeliverStatus(APINotificationStatus status);
 
 	/**
 	 * Returns the updated time stamp.
 	 * @return the last itme updated in miilis
 	 */
-	public long getUpdateTimeStamp();
+	long getUpdateTimeStamp();
 	
 	/**
 	 * Sets the updated time stamp.
 	 * @param ts
 	 * @throws IllegalArgumentException
 	 */
-	public void setUpdateTimeStamp(long ts) 
+	void setUpdateTimeStamp(long ts)
 			throws IllegalArgumentException;
 
 	/**
 	 * Returns the created time stamp.
 	 * @return creation time stamp in millis.
 	 */
-	public long getCreateTimeStamp();
+	long getCreateTimeStamp();
 	
 	/**
 	 * Sets the created time stamp.
 	 * @param ts
 	 * @throws IllegalArgumentException
 	 */
-	public void setCreateTimeStamp(long ts)
+	void setCreateTimeStamp(long ts)
             throws IllegalArgumentException;
 
 }

@@ -179,7 +179,7 @@ public class SMTPProvider
 		         {
 		        	 //System.out.println("WE have TEXT message\b" + bodyContent);
 		        	 //msg.setHeader("Content-Type", "text/plain; charset=UTF-8");
-		        	 msg.setText(bodyContent, SharedStringUtil.UTF_8);
+		        	 msg.setText(bodyContent, Const.UTF_8);
 		         }
 
 		         // Send Message

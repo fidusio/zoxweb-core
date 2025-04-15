@@ -56,13 +56,6 @@ public final class SharedStringUtil
 		}
 	}
 
-    //
-    public static final String UTF_8  = "utf-8";
-    public static final String UTF_16 = "utf-16";
-    public static final String TAG_ENVELOPE ="$$";
-    public static final String[] EMPTY_STRING_ARRAY = new String[0];
-    public static final String[] COMMENT_TAGS = {"#", "//"};
-
 	/**
 	 * The constructor is declared private to prevent instantiation.
 	 */
@@ -71,12 +64,12 @@ public final class SharedStringUtil
 		
 	}
 
-	public static boolean isIncrementOk(String args[], int index)
+	public static boolean isIncrementOk(String[] args, int index)
     {
 		return isIncrementOk(args, index, 1);
 	}
 	
-	public static boolean isIncrementOk(String args[], int index, int increment)
+	public static boolean isIncrementOk(String[] args, int index, int increment)
     {
 		return index + increment <= args.length;
 	}
@@ -574,7 +567,7 @@ public final class SharedStringUtil
 
 		try
         {
-			return str.getBytes(UTF_8);
+			return str.getBytes(Const.UTF_8);
 		}
 		catch (UnsupportedEncodingException e)
         {
@@ -642,7 +635,7 @@ public final class SharedStringUtil
 
 		try
 		{
-			return new String(array, offset, length, UTF_8);
+			return new String(array, offset, length, Const.UTF_8);
 		}
 		catch (UnsupportedEncodingException e)
 		{
@@ -779,7 +772,7 @@ public final class SharedStringUtil
 		if (str != null)
 			return parseString(str, regex, filters);
 		
-		return EMPTY_STRING_ARRAY;
+		return Const.EMPTY_STRING_ARRAY;
 	}
 
 
@@ -819,7 +812,7 @@ public final class SharedStringUtil
 
 	public static boolean isComment(String line)
 	{
-	  return isComment(line, COMMENT_TAGS);
+	  return isComment(line, Const.COMMENT_TAGS);
 	}
 	
 	
@@ -1126,7 +1119,7 @@ public final class SharedStringUtil
 	
 	public static String tag(String str)
 	{
-		return tag(TAG_ENVELOPE,str, TAG_ENVELOPE);
+		return tag(Const.TAG_ENVELOPE,str, Const.TAG_ENVELOPE);
 	}
 	public static String tag(String leftRightTag, String str)
 	{

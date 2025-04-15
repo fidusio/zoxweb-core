@@ -26,6 +26,21 @@ public class HTTPHeaderParser {
     public  static final Pattern PARAMETER_PATTERN = Pattern.compile(
             "\\s*;\\s*([^=]+)=((?:\"(?:\\\\.|[^\"])*\"|[^;,\\s]*))");
 
+
+
+    public static NamedValue<String> parseHeader(GetName headerName, String headerValue)
+    {
+        return parseFullLineHeader(headerName.getName() +": " + headerValue.trim());
+
+    }
+
+    public static NamedValue<String> parseHeader(String headerName, String headerValue)
+    {
+        return parseFullLineHeader(headerName +": " + headerValue.trim());
+
+    }
+
+
     /**
      * Parses a full HTTP header string into its components.
      *
@@ -39,7 +54,7 @@ public class HTTPHeaderParser {
      * @param headerLine the HTTP header line to parse
      * @return a map containing the header name, main value, and parameters
      */
-    public static NamedValue<String> parseHeader(String headerLine)
+    public static NamedValue<String> parseFullLineHeader(String headerLine)
     {
         if (SUS.isEmpty(headerLine))
             return null;
@@ -145,30 +160,30 @@ public class HTTPHeaderParser {
         return result;
     }
 
-    public static NVGenericMap parseHeaderValue(NVGenericMap nvgm, String headerValue)
-    {
-        NVGenericMap ret = nvgm != null ? nvgm : new NVGenericMap();
-        String[] parsed = headerValue.split(",");
-        if (parsed.length != 0)
-        {
-            for (String toParse : parsed)
-            {
-                NVPair nv = SharedUtil.toNVPair(toParse, "=", true);
-
-                if (nv != null)
-                {
-                    ret.build(nv);
-                }
-            }
-        }
-        else
-        {
-            ret = SharedUtil.toNVGenericMap(ret, headerValue, "=", null, true);
-
-        }
-
-        return ret;
-    }
+//    public static NVGenericMap parseHeaderValue(NVGenericMap nvgm, String headerValue)
+//    {
+//        NVGenericMap ret = nvgm != null ? nvgm : new NVGenericMap();
+//        String[] parsed = headerValue.split(",");
+//        if (parsed.length != 0)
+//        {
+//            for (String toParse : parsed)
+//            {
+//                NVPair nv = SharedUtil.toNVPair(toParse, "=", true);
+//
+//                if (nv != null)
+//                {
+//                    ret.build(nv);
+//                }
+//            }
+//        }
+//        else
+//        {
+//            ret = SharedUtil.toNVGenericMap(ret, headerValue, "=", null, true);
+//
+//        }
+//
+//        return ret;
+//    }
 
     private static Map<String, String> parseParameters(String paramsPart) {
         Map<String, String> parameters = new HashMap<>();

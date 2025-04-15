@@ -19,6 +19,7 @@ import org.zoxweb.shared.crypto.CryptoConst;
 import org.zoxweb.shared.crypto.HashResult;
 import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.net.ProxyType;
+import org.zoxweb.shared.util.Const;
 import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedStringUtil;
 
@@ -304,7 +305,7 @@ public class IOUtil
 
 		while ((read = is.read(buffer, 0, buffer.length)) > 0)
 		{
-			sb.append(new String(buffer, 0, read, SharedStringUtil.UTF_8));
+			sb.append(new String(buffer, 0, read, Const.UTF_8));
 		}
 		
 		if ( close)

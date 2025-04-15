@@ -1,5 +1,7 @@
 package org.zoxweb.shared.http;
 
+import org.zoxweb.shared.util.GetName;
+
 import java.util.List;
 import java.util.Map;
 
@@ -31,10 +33,14 @@ public abstract class HTTPResponse
         return headers;
     }
 
-
-    public List<String> headerValues(String headersName)
+    public List<String> headerValues(GetName headerName)
     {
-        return headers.get(headersName);
+        return headerValues(headerName.getName());
+    }
+
+    public List<String> headerValues(String headerName)
+    {
+        return headers.get(headerName);
     }
     public String headerValue(String headerName)
     {
