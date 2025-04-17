@@ -27,19 +27,188 @@ public class HTTPHeaderParser {
             "\\s*;\\s*([^=]+)=((?:\"(?:\\\\.|[^\"])*\"|[^;,\\s]*))");
 
 
-
-    public static NamedValue<String> parseHeader(GetName headerName, String headerValue)
+    // A simple class to hold a parsed header element.
+    private static class HeaderValue
     {
-        return parseFullLineHeader(headerName.getName() +": " + headerValue.trim());
+        private final NVGenericMap nvgm = new NVGenericMap();
+        private NVGenericMap properties = null;
+
+        public HeaderValue(String  mainValue)
+        {
+            String[] tokens = mainValue.split("[= ]+");
+            if (tokens.length == 2) {
+                nvgm.build(tokens[0], tokens[1]);
+
+            }
+            else
+            {
+                nvgm.setName(mainValue);
+            }
+        }
+
+        public void addParameter(String name, String value)
+        {
+            if (properties == null)
+            {
+                synchronized (this)
+                {
+                    if(properties == null)
+                    {
+                        properties = new NVGenericMap("properties");
+                        nvgm.add(properties);
+                    }
+                }
+            }
+            properties.add(name, value);
+        }
+
+        @Override
+        public String toString() {
+            //return "HeaderValue [main-value=" + mainValue + ", parameters=" + parameters + "]";
+            return nvgm.toString();
+        }
+    }
+
+
+    public static NVGenericMap parseHeader(String fullHeaderLine)
+    {
+        String[] tokens = fullHeaderLine.split(":", 2);
+        if (tokens.length != 2)
+            throw new IllegalArgumentException("Invalid full line header " + fullHeaderLine);
+        return parseHeader(tokens[0], tokens[1]);
 
     }
 
-    public static NamedValue<String> parseHeader(String headerName, String headerValue)
+    public static NVGenericMap parseHeader(GetNameValue<String> header)
     {
-        return parseFullLineHeader(headerName +": " + headerValue.trim());
+        return parseHeader(header.getName(), header.getValue());
+    }
+
+    public static NVGenericMap parseHeader(GetName gn, String headerValues)
+    {
+        return parseHeader(gn.getName(), headerValues);
+    }
+
+    public static NVGenericMap parseHeader(String headerName, String headerValues)
+    {
+        NVGenericMap ret = new NVGenericMap(headerName);
+        List<HeaderValue> values = parseValue(headerValues);
+        // flatten values
+        for(HeaderValue value : values)
+        {
+            if (SUS.isEmpty(value.nvgm.getName()) && value.nvgm.size() == 1)
+            {
+                ret.add(value.nvgm.values()[0]);
+            }
+            else if (SUS.isEmpty(value.nvgm.getName()))
+            {
+                value.nvgm.setName(value.nvgm.values()[0].getName());
+                ret.add(value.nvgm);
+            }
+            else
+                ret.add(value.nvgm);
+        }
+        return ret;
 
     }
 
+
+    /**
+     * Parses an HTTP header value that may contain comma-separated items.
+     * Each item is split into a main value and (optionally) a list of parameters.
+     *
+     * Example header value:
+     *   text/html; q=0.8, application/xhtml+xml; q=0.9, image/webp; q=0.7, **; q=0.5
+     *
+     *   @param headerValues the raw header value (excluding the header name)
+     * @return a List of HeaderValue objects with a main value and parameters.
+     */
+    protected static List<HeaderValue> parseValue(String headerValues) {
+        List<HeaderValue> result = new ArrayList<>();
+        int len = headerValues.length();
+        StringBuilder current = new StringBuilder();
+        boolean inQuote = false;
+
+        // Loop through the header value and split on top-level commas.
+        for (int i = 0; i < len; i++) {
+            char c = headerValues.charAt(i);
+            if (c == '"') {
+                // Toggle inQuote status
+                inQuote = !inQuote;
+                current.append(c);
+            } else if (c == ',' && !inQuote) {
+                // Comma outside a quoted string: finish one element.
+                String element = current.toString();
+                if (!element.trim().isEmpty()) {
+                    result.add(parseElement(element.trim()));
+                }
+                current.setLength(0); // reset builder
+            } else {
+                current.append(c);
+            }
+        }
+        // Process last element if any.
+        if (current.length() > 0) {
+            result.add(parseElement(current.toString().trim()));
+        }
+        return result;
+    }
+
+    /**
+     * Parses a single header element.
+     * The element is assumed to be of the form:
+     *    main-value; param1=value1; param2="value, with, commas"
+     *
+     * @param element the header element string to parse.
+     * @return a HeaderValue containing the main value and a map of parameters.
+     */
+    private static HeaderValue parseElement(String element) {
+        int len = element.length();
+        StringBuilder current = new StringBuilder();
+        boolean inQuote = false;
+        List<String> tokens = new ArrayList<>();
+
+        // Loop through the element and split it on semicolons that are not in quotes.
+        for (int i = 0; i < len; i++) {
+            char c = element.charAt(i);
+            if (c == '"') {
+                inQuote = !inQuote;
+                current.append(c);
+            } else if (c == ';' && !inQuote) {
+                tokens.add(current.toString().trim());
+                current.setLength(0);
+            } else {
+                current.append(c);
+            }
+        }
+        if (current.length() > 0) {
+            tokens.add(current.toString().trim());
+        }
+
+        // The first token is the main value.
+        String mainValue = tokens.get(0);
+        HeaderValue hv = new HeaderValue(mainValue);
+
+        // Remaining tokens are parameters.
+        for (int i = 1; i < tokens.size(); i++) {
+            String token = tokens.get(i);
+            // Find the first '=' if any.
+            int eqIndex = token.indexOf('=');
+            if (eqIndex > 0) {
+                String name = token.substring(0, eqIndex).trim();
+                String value = token.substring(eqIndex + 1).trim();
+                // Remove surrounding quotes, if present.
+                if (value.length() >= 2 && value.startsWith("\"") && value.endsWith("\"")) {
+                    value = value.substring(1, value.length() - 1);
+                }
+                hv.addParameter(name, value);
+            } else if (!token.isEmpty()) {
+                // Parameter is a standalone token (e.g. no-cache in Cache-Control)
+                hv.addParameter(token, null);
+            }
+        }
+        return hv;
+    }
 
     /**
      * Parses a full HTTP header string into its components.
