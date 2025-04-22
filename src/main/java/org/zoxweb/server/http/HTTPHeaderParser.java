@@ -27,49 +27,6 @@ public class HTTPHeaderParser {
             "\\s*;\\s*([^=]+)=((?:\"(?:\\\\.|[^\"])*\"|[^;,\\s]*))");
 
 
-    // A simple class to hold a parsed header element.
-    private static class HeaderValue
-    {
-        private final NVGenericMap nvgm = new NVGenericMap();
-        private NVGenericMap properties = null;
-
-        public HeaderValue(String  mainValue)
-        {
-            String[] tokens = mainValue.split("[= ]+");
-            if (tokens.length == 2) {
-                nvgm.build(tokens[0], tokens[1]);
-
-            }
-            else
-            {
-                nvgm.setName(mainValue);
-            }
-        }
-
-        public void addParameter(String name, String value)
-        {
-            if (properties == null)
-            {
-                synchronized (this)
-                {
-                    if(properties == null)
-                    {
-                        properties = new NVGenericMap("properties");
-                        nvgm.add(properties);
-                    }
-                }
-            }
-            properties.add(name, value);
-        }
-
-        @Override
-        public String toString() {
-            //return "HeaderValue [main-value=" + mainValue + ", parameters=" + parameters + "]";
-            return nvgm.toString();
-        }
-    }
-
-
     public static NVGenericMap parseHeader(String fullHeaderLine)
     {
         String[] tokens = fullHeaderLine.split(":", 2);
@@ -92,21 +49,21 @@ public class HTTPHeaderParser {
     public static NVGenericMap parseHeader(String headerName, String headerValues)
     {
         NVGenericMap ret = new NVGenericMap(headerName);
-        List<HeaderValue> values = parseValue(headerValues);
+        List<NVGenericMap> values = parseValue(headerValues);
         // flatten values
-        for(HeaderValue value : values)
+        for(NVGenericMap nvgm : values)
         {
-            if (SUS.isEmpty(value.nvgm.getName()) && value.nvgm.size() == 1)
+            if (SUS.isEmpty(nvgm.getName()) && nvgm.size() == 1)
             {
-                ret.add(value.nvgm.values()[0]);
+                ret.add(nvgm.values()[0]);
             }
-            else if (SUS.isEmpty(value.nvgm.getName()))
+            else if (SUS.isEmpty(nvgm.getName()))
             {
-                value.nvgm.setName(value.nvgm.values()[0].getName());
-                ret.add(value.nvgm);
+                nvgm.setName(nvgm.values()[0].getName());
+                ret.add(nvgm);
             }
             else
-                ret.add(value.nvgm);
+                ret.add(nvgm);
         }
         return ret;
 
@@ -123,8 +80,8 @@ public class HTTPHeaderParser {
      *   @param headerValues the raw header value (excluding the header name)
      * @return a List of HeaderValue objects with a main value and parameters.
      */
-    protected static List<HeaderValue> parseValue(String headerValues) {
-        List<HeaderValue> result = new ArrayList<>();
+    protected static List<NVGenericMap> parseValue(String headerValues) {
+        List<NVGenericMap> result = new ArrayList<>();
         int len = headerValues.length();
         StringBuilder current = new StringBuilder();
         boolean inQuote = false;
@@ -154,6 +111,17 @@ public class HTTPHeaderParser {
         return result;
     }
 
+
+    private static void addParameter(NVGenericMap nvgm, String name, String value)
+    {
+        NVGenericMap properties = nvgm.getNV("properties");
+        if (properties == null)
+        {
+            properties = new NVGenericMap("properties");
+            nvgm.add(properties);
+        }
+        properties.add(name, value);
+    }
     /**
      * Parses a single header element.
      * The element is assumed to be of the form:
@@ -162,7 +130,7 @@ public class HTTPHeaderParser {
      * @param element the header element string to parse.
      * @return a HeaderValue containing the main value and a map of parameters.
      */
-    private static HeaderValue parseElement(String element) {
+    private static NVGenericMap parseElement(String element) {
         int len = element.length();
         StringBuilder current = new StringBuilder();
         boolean inQuote = false;
@@ -187,7 +155,18 @@ public class HTTPHeaderParser {
 
         // The first token is the main value.
         String mainValue = tokens.get(0);
-        HeaderValue hv = new HeaderValue(mainValue);
+        NVGenericMap nvgm = new NVGenericMap();
+        String[] mainValueTokens = mainValue.split("[= ]+");
+        if (mainValueTokens.length == 2) {
+            nvgm.build(mainValueTokens[0], mainValueTokens[1]);
+
+        }
+        else
+        {
+            nvgm.setName(mainValue);
+        }
+
+
 
         // Remaining tokens are parameters.
         for (int i = 1; i < tokens.size(); i++) {
@@ -201,13 +180,13 @@ public class HTTPHeaderParser {
                 if (value.length() >= 2 && value.startsWith("\"") && value.endsWith("\"")) {
                     value = value.substring(1, value.length() - 1);
                 }
-                hv.addParameter(name, value);
+                addParameter(nvgm, name, value);
             } else if (!token.isEmpty()) {
                 // Parameter is a standalone token (e.g. no-cache in Cache-Control)
-                hv.addParameter(token, null);
+                addParameter(nvgm, token, null);
             }
         }
-        return hv;
+        return nvgm;
     }
 
     /**

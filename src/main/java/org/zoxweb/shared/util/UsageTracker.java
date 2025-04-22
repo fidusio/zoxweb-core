@@ -6,7 +6,7 @@ public interface UsageTracker
 
      /**
       *
-      * @return last time used
+      * @return last usage
       */
      long lastUsage();
 
@@ -15,6 +15,9 @@ public interface UsageTracker
       * @return current usage update
       */
      long updateUsage();
+
+
+     long updateUsage(long value);
 
 
 }

@@ -5,9 +5,9 @@ import org.zoxweb.shared.http.*;
 import org.zoxweb.shared.util.*;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 
 public class HTTPWPut {
     private static final String dummy = "abcdefghijklmnopqrstuvwxyz0123456789";
@@ -34,7 +34,7 @@ public class HTTPWPut {
            {
                this.filename = file.getName();
                length = file.length();
-               is = new FileInputStream(file);
+               is = Files.newInputStream(file.toPath());
                mediaType = HTTPMediaType.lookupByExtension(fileToUpload);
                return;
            }

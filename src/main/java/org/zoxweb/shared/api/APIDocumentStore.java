@@ -15,23 +15,20 @@
  */
 package org.zoxweb.shared.api;
 
+import org.zoxweb.shared.security.AccessException;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
 
-import org.zoxweb.shared.api.APIException;
-import org.zoxweb.shared.api.APIFileInfoMap;
-import org.zoxweb.shared.api.APIServiceProvider;
-import org.zoxweb.shared.security.AccessException;
-
 /**
  * The API document store interface which extends API service provider interface.
  * @param <V>
  */
-public interface APIDocumentStore<V>
-	extends APIServiceProvider<V>
+public interface APIDocumentStore<P,S>
+	extends APIServiceProvider<P,S>
 {
 
 	/**

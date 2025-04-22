@@ -25,7 +25,7 @@ public interface APIAppManager
      * Retruns the APIDataStore.
      * @return
      */
-    APIDataStore<?> getAPIDataStore();
+    APIDataStore<?, ?> getAPIDataStore();
 
     /**
      * Set the APIDataStore.
@@ -33,7 +33,7 @@ public interface APIAppManager
      * @throws NullPointerException
      * @throws IllegalArgumentException
      */
-    void setAPIDataStore(APIDataStore<?> dataStore)
+    void setAPIDataStore(APIDataStore<?, ?> dataStore)
             throws NullPointerException, IllegalArgumentException;
     
     /**

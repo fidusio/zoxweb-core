@@ -35,7 +35,7 @@ import java.util.Properties;
  */
 @SuppressWarnings("serial")
 public class SMTPProvider
-    extends APIServiceProviderBase<Void>
+    extends APIServiceProviderBase<Void, Void>
 	implements APINotification<Void>
 {
 

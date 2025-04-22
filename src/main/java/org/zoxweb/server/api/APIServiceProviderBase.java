@@ -23,13 +23,12 @@ import org.zoxweb.shared.data.DataConst.APIProperty;
 import org.zoxweb.shared.util.Const;
 import org.zoxweb.shared.util.GetName;
 import org.zoxweb.shared.util.SUS;
-import org.zoxweb.shared.util.SharedUtil;
 
 import java.util.concurrent.atomic.AtomicLong;
 
 @SuppressWarnings("serial")
-public abstract class APIServiceProviderBase<V>
-	implements APIServiceProvider<V>
+public abstract class APIServiceProviderBase<P, S>
+	implements APIServiceProvider<P,S>
 {
 
 	private long lastAccessTS;

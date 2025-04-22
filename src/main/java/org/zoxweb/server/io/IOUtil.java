@@ -507,24 +507,39 @@ public class IOUtil
 	}
 
 
+	public static long relayStreams(MessageDigest md, InputStream is, OutputStream os)
+			throws IOException
+	{
+
+		long totalCopied = 0;
+		int read;
+		byte[] buffer = new byte[4096];
+		while ((read = is.read(buffer)) != -1)
+		{
+			os.write(buffer, 0, read);
+			totalCopied += read;
+			if(md != null)
+				md.update(buffer, 0, read);
+		}
+		os.flush();
+
+		return totalCopied;
+	}
+
+
 	public static HashResult relayStreams(CryptoConst.HASHType hashType, InputStream is, OutputStream os, boolean closeIS, boolean closeOS)
 			throws IOException
 	{
 		long totalCopied = 0;
 		try
 		{
-			MessageDigest hash = MessageDigest.getInstance(hashType.getName());
-
-			try {
-				int read;
-				byte[] buffer = new byte[4096];
-				while ((read = is.read(buffer)) != -1) {
-					os.write(buffer, 0, read);
-					totalCopied += read;
-					hash.update(buffer, 0, read);
-				}
-				os.flush();
-			} finally {
+			MessageDigest md = MessageDigest.getInstance(hashType.getName());
+			try
+			{
+				totalCopied = relayStreams(md, is, os);
+			}
+			finally
+			{
 				if (closeIS || is instanceof CloseEnabledInputStream) {
 					close(is);
 				}
@@ -534,7 +549,7 @@ public class IOUtil
 				}
 			}
 
-			return new HashResult(hashType, hash.digest(), totalCopied);
+			return new HashResult(hashType, md.digest(), totalCopied);
 		}
 		catch (NoSuchAlgorithmException he)
 		{
@@ -557,15 +572,8 @@ public class IOUtil
 		long totalCopied = 0;
 
 		try
-		{	
-			int read;
-			byte buffer [] = new byte[4096];
-			while((read = is.read( buffer)) != -1)
-			{
-				os.write(buffer, 0, read);
-				totalCopied+=read;
-			}
-			os.flush();
+		{
+			totalCopied = relayStreams(null, is, os);
 		}
 		finally
 		{

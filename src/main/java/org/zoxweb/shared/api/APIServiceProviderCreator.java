@@ -43,7 +43,7 @@ public interface APIServiceProviderCreator
 	 * @return APIServiceProvider
 	 * @throws APIException
 	 */
-	APIServiceProvider<?> createAPI(APIDataStore<?> dataStore, APIConfigInfo apiConfig ) 
+	APIServiceProvider<?, ?> createAPI(APIDataStore<?, ?> dataStore, APIConfigInfo apiConfig )
 			throws APIException;
 	
 	/**

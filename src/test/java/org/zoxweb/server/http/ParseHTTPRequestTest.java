@@ -5,10 +5,8 @@ import org.junit.jupiter.api.Test;
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.io.UByteArrayOutputStream;
 import org.zoxweb.server.util.GSONUtil;
-import org.zoxweb.shared.util.Const;
-import org.zoxweb.shared.util.NVGenericMap;
-import org.zoxweb.shared.util.NamedValue;
-import org.zoxweb.shared.util.RateCounter;
+import org.zoxweb.shared.http.HTTPHeader;
+import org.zoxweb.shared.util.*;
 
 import java.io.IOException;
 
@@ -95,7 +93,8 @@ public class ParseHTTPRequestTest
 
         System.out.println(rc  + " all " + Const.TimeInMillis.toString(System.currentTimeMillis() - ts));
 
-        System.out.println(GSONUtil.toJSONDefault(new NVGenericMap().build(HTTPHeaderParser.parseHeader("content-type: attachment; filename=\"file,: name.pdf\"; creation-date=\"Wed, 12 Feb 2020 16:00:00 GMT\", inline"))));
+        System.out.println(GSONUtil.toJSONDefault(new NVGenericMap().build(HTTPHeaderParser.parseHeader(new NVPair("content-type","attachment; filename=\"file,: name.pdf\"; creation-date=\"Wed, 12 Feb 2020 16:00:00 GMT\", inline")))));
+        System.out.println(GSONUtil.toJSONDefault(new NVGenericMap().build(HTTPHeaderParser.parseHeader(HTTPHeader.CONTENT_TYPE,"attachment; filename=\"file,: name.pdf\"; creation-date=\"Wed, 12 Feb 2020 16:00:00 GMT\", inline"))));
     }
 
     @Test
@@ -106,7 +105,7 @@ public class ParseHTTPRequestTest
                 "Content-Disposition: form-data; name=\"file\"; filename=\"example.pdf\"",
                 "Accept: text/html, application/xhtml+xml;q=0.9, image/webp;q=0.8, */*;q=0.7;q=0.9",
                 "Content-Type: multipart/form-data; boundary=bd1a40c9-9408-4b59-8d4b-f6693561887e",
-                "Authorization: Bearer jdlksjfgdksljgikjrtjtkrejtiohyu4o35hjhj5rk;charset=UTF-8",
+                "Authorization: Bearer jdlksjfgdksljgikjrtjtkrejtiohyu4o35hjhj5rk;charset=UTF-8", // this is invalid
                 "Connection: keep-alive, Upgrade"
         };
 

@@ -15,6 +15,7 @@
  */
 package org.zoxweb.server.http;
 
+import okhttp3.OkHttpClient;
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.task.TaskUtil;
@@ -22,6 +23,7 @@ import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.http.*;
 import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.net.ProxyType;
+import org.zoxweb.shared.task.ConsumerCallback;
 import org.zoxweb.shared.util.Const;
 import org.zoxweb.shared.util.ParamUtil;
 import org.zoxweb.shared.util.RateCounter;
@@ -33,13 +35,12 @@ import java.util.concurrent.atomic.AtomicLong;
 
 
 public final class HTTPCallTool
-        implements Runnable
 {
     private static final LogWrapper log = new LogWrapper(HTTPCallTool.class);
     private static final AtomicLong failCounter = new AtomicLong();
+    private static final AtomicLong successCounter = new AtomicLong();
 
 
-//    private final HTTPMessageConfigInterface hmci;
     private static boolean printResult;
 
 
@@ -63,6 +64,8 @@ public final class HTTPCallTool
             {
                 failCounter.incrementAndGet();
             }
+            else
+                successCounter.incrementAndGet();
 
             if(printResult) {
                 log.getLogger().info("Total: " + HTTPCall.HTTP_CALLS.getCounts() + " Fail: " + failCounter + " status: " + hrd.getStatus());
@@ -71,41 +74,10 @@ public final class HTTPCallTool
         }
     };
 
-    HTTPMessageConfigInterface hmci;
-    public HTTPCallTool(HTTPMessageConfigInterface hmci)
+
+    private static long totalCount()
     {
-        this.hmci = hmci;
-    }
-
-
-
-
-    public void run()
-    {
-        HTTPResponseData rd = null;
-        try
-        {
-            rd = OkHTTPCall.send(hmci);
-
-        }
-        catch(Exception e)
-        {
-            e.printStackTrace();
-            if(e instanceof HTTPCallException)
-            {
-                rd = ((HTTPCallException) e).getResponseData();
-            }
-        }
-        if(rd.getStatus() != HTTPStatusCode.OK.CODE)
-        {
-            failCounter.incrementAndGet();
-        }
-
-
-        if(printResult) {
-            log.getLogger().info("Total: " + HTTPCall.HTTP_CALLS.getCounts() + " Fail: " + failCounter + " status: " + rd.getStatus() + " length: " + rd.getData().length);
-            log.getLogger().info(rd.getDataAsString());
-        }
+        return successCounter.get() + failCounter.get();
     }
 
     public static void main(String ...args)
@@ -176,26 +148,94 @@ public final class HTTPCallTool
             log.getLogger().info("HTTP request counts: " + repeat + " per url");
 
 
-            long ts = System.currentTimeMillis();
 
+            OkHttpClient client = OkHTTPCall.createOkHttpBuilder(TaskUtil.defaultTaskProcessor(), null, HTTPMessageConfigInterface.DEFAULT_TIMEOUT_20_SECOND,false, 20, HTTPMessageConfigInterface.DEFAULT_TIMEOUT_20_SECOND).build();
+            OkHTTPCall[] httpCalls = new OkHTTPCall[hmcis.length];
+            for (int i = 0; i < hmcis.length; i++)
+            {
+                httpCalls[i] = new OkHTTPCall(client, hmcis[i]);
+            }
+            ConsumerCallback<HTTPResponse> cc = new ConsumerCallback<HTTPResponse>() {
+                @Override
+                public void exception(Exception e)
+                {
+                    failCounter.incrementAndGet();
+                    e.printStackTrace();
+                    if(e instanceof HTTPCallException)
+                    {
+                        HTTPResponseData rd = ((HTTPCallException) e).getResponseData();
+                    }
+
+                }
+                @Override
+                public void accept(HTTPResponse hrd)
+                {
+
+//                    if(hrd.getStatus() != HTTPStatusCode.OK.CODE)
+//                        failCounter.incrementAndGet();
+//                    else
+                        successCounter.incrementAndGet();
+
+
+
+//                    if(printResult) {
+//                        log.getLogger().info("Total: " + totalCount()+ " Fail: " + failCounter + " status: " + hrd.getStatus());
+//                        log.getLogger().info(SharedStringUtil.toString(((HTTPResponseData)hrd).getData()));
+//                    }
+
+                }
+            };
+            long ts = System.currentTimeMillis();
+//            for (int i = 0; i < repeat; i++)
+//            {
+//                for (OkHTTPCall httpCall : httpCalls)
+//                    httpCall.asyncRequest(cc);
+//
+//            }
             for(int i = 0; i < repeat; i++)
             {
 
-//                for(int j = 0; j < hmcis.length; j++)
-//                    TaskUtil.defaultTaskProcessor().execute(new HTTPCallTool(hmcis[j]));
                 for(HTTPAPIEndPoint<Void, byte[]>   endPoint : endpoints)
                     endPoint.asyncCall(callback);
+            }
 
+            ts = TaskUtil.waitIfBusy(25) - ts;
+            RateCounter rc = new RateCounter("OverAll");
+            rc.register(ts, totalCount());
+
+//            log.getLogger().info("OkHTTPCall stat: " + Const.TimeInMillis.toString(ts) + " to send: " + rc.getCounts() + " failed: " + failCounter+
+//                    " rate: " +  OkHTTPCall.OK_HTTP_CALLS.rate(Const.TimeInMillis.SECOND.MILLIS) + " per/second" + " average call duration: " + OkHTTPCall.OK_HTTP_CALLS.average() + " millis");
+
+            log.getLogger().info("ENDPOINT OkHTTPCall stat: " + Const.TimeInMillis.toString(ts) + " to send: " + rc.getCounts() + " failed: " + failCounter+
+                    " rate: " +  + rc.rate(Const.TimeInMillis.SECOND.MILLIS) + " per/second" + " average call duration: " + rc.average() + " millis");
+
+            ts = System.currentTimeMillis();
+            successCounter.set(0);
+            failCounter.set(0);
+//            for(int i = 0; i < repeat; i++)
+//            {
+//
+//                for(HTTPAPIEndPoint<Void, byte[]>   endPoint : endpoints)
+//                    endPoint.asyncCall(callback);
+//            }
+            for (int i = 0; i < repeat; i++)
+            {
+                for (OkHTTPCall httpCall : httpCalls)
+                    httpCall.asyncRequest(cc);
 
             }
             ts = TaskUtil.waitIfBusyThenClose(25) - ts;
-            RateCounter rc = new RateCounter("OverAll");
-            rc.register(ts, OkHTTPCall.OK_HTTP_CALLS.getCounts());
+            rc.reset().register(ts, totalCount());
 
-            log.getLogger().info("OkHTTPCall stat: " + Const.TimeInMillis.toString(ts) + " to send: " + OkHTTPCall.OK_HTTP_CALLS.getCounts() + " failed: " + failCounter+
-                    " rate: " +  OkHTTPCall.OK_HTTP_CALLS.rate(Const.TimeInMillis.SECOND.MILLIS) + " per/second" + " average call duration: " + OkHTTPCall.OK_HTTP_CALLS.average() + " millis");
+//            log.getLogger().info("OkHTTPCall stat: " + Const.TimeInMillis.toString(ts) + " to send: " + rc.getCounts() + " failed: " + failCounter+
+//                    " rate: " +  OkHTTPCall.OK_HTTP_CALLS.rate(Const.TimeInMillis.SECOND.MILLIS) + " per/second" + " average call duration: " + OkHTTPCall.OK_HTTP_CALLS.average() + " millis");
 
-            log.getLogger().info("App  stats: " + repeat + " it took " + Const.TimeInMillis.toString(ts)  +  " rate: " + rc.rate(Const.TimeInMillis.SECOND.MILLIS) + " per/second" + " average call duration: " + rc.average() + " millis");
+            log.getLogger().info("ASYNC OkHTTPCall stat: " + Const.TimeInMillis.toString(ts) + " to send: " + rc.getCounts() + " failed: " + failCounter+
+                    " rate: " +  + rc.rate(Const.TimeInMillis.SECOND.MILLIS) + " per/second" + " average call duration: " + rc.average() + " millis");
+
+
+
+//            log.getLogger().info("App  stats: " + repeat + " it took " + Const.TimeInMillis.toString(ts)  +  " rate: " + rc.rate(Const.TimeInMillis.SECOND.MILLIS) + " per/second" + " average call duration: " + rc.average() + " millis");
 
         }
         catch(Exception e)

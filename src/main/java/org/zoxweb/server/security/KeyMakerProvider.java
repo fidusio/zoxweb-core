@@ -98,7 +98,7 @@ public final class KeyMakerProvider
   }
 
 
-  public EncryptedKey createNVEntityKey(APIDataStore<?> dataStore, NVEntity nve, final byte[] key)
+  public EncryptedKey createNVEntityKey(APIDataStore<?, ?> dataStore, NVEntity nve, final byte[] key)
       throws NullPointerException, IllegalArgumentException, AccessException {
     SUS.checkIfNulls("User ID is null.", nve, key);
     if (nve.getSubjectGUID() == null || nve.getGUID() == null) {
@@ -121,7 +121,7 @@ public final class KeyMakerProvider
     return ekd;
   }
 
-  public byte[] getKey(APIDataStore<?> dataStore, final byte[] key, String... chainedIDs)
+  public byte[] getKey(APIDataStore<?, ?> dataStore, final byte[] key, String... chainedIDs)
       throws NullPointerException, IllegalArgumentException, AccessException
   {
     SUS.checkIfNulls("Null decryption key parameters", dataStore, chainedIDs);
@@ -146,14 +146,14 @@ public final class KeyMakerProvider
   }
 
 
-  public EncryptedKey lookupEncryptedKeyDOA(APIDataStore<?> dataStore, NVEntity nve)
+  public EncryptedKey lookupEncryptedKeyDOA(APIDataStore<?, ?> dataStore, NVEntity nve)
       throws NullPointerException, IllegalArgumentException, AccessException {
     SUS.checkIfNulls("Null parameters", dataStore, nve);
 
     return lookupEncryptedKeyDOA(dataStore, nve.getGUID(), nve.getSubjectGUID());
   }
 
-  public synchronized EncryptedKey lookupEncryptedKeyDOA(APIDataStore<?> dataStore,
+  public synchronized EncryptedKey lookupEncryptedKeyDOA(APIDataStore<?, ?> dataStore,
                                                          String dataRefGUID, String subjectGUID)
       throws NullPointerException, IllegalArgumentException, AccessException {
     SUS.checkIfNulls("Null parameters", dataStore, dataRefGUID);
@@ -175,7 +175,7 @@ public final class KeyMakerProvider
     return ekd;
   }
 
-  public synchronized final EncryptedKey lookupEncryptedKeyDOA(APIDataStore<?> dataStore,
+  public synchronized final EncryptedKey lookupEncryptedKeyDOA(APIDataStore<?, ?> dataStore,
                                                                String dataRefGUID)
           throws NullPointerException, IllegalArgumentException, AccessException {
     SUS.checkIfNulls("Null parameters", dataStore, dataRefGUID);

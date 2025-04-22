@@ -15,19 +15,19 @@ public interface APISecurityManager<S, O, I>
 	extends ShiroRealmStore<O,I>, ShiroRulesManager
 {
 	
-	Object encryptValue(APIDataStore<?> dataStore, NVEntity container, NVConfig nvc, NVBase<?> nvb, byte msKey[])
+	Object encryptValue(APIDataStore<?, ?> dataStore, NVEntity container, NVConfig nvc, NVBase<?> nvb, byte msKey[])
 			throws NullPointerException, IllegalArgumentException, AccessException;
 	
-	Object decryptValue(APIDataStore<?> dataStore, NVEntity container, NVBase<?> nvb, Object value, byte msKey[])
+	Object decryptValue(APIDataStore<?, ?> dataStore, NVEntity container, NVBase<?> nvb, Object value, byte msKey[])
 			throws NullPointerException, IllegalArgumentException, AccessException;
 	
-	 String decryptValue(APIDataStore<?> dataStore, NVEntity container, NVPair nvp, byte msKey[])
+	 String decryptValue(APIDataStore<?, ?> dataStore, NVEntity container, NVPair nvp, byte msKey[])
 				throws NullPointerException, IllegalArgumentException, AccessException;
 	 
-	 Object decryptValue(String userID, APIDataStore<?> dataStore, NVEntity container, Object value, byte msKey[])
+	 Object decryptValue(String userID, APIDataStore<?, ?> dataStore, NVEntity container, Object value, byte msKey[])
 				throws NullPointerException, IllegalArgumentException, AccessException;
 	 
-	 NVEntity decryptValues(APIDataStore<?> dataStore, NVEntity container, byte msKey[])
+	 NVEntity decryptValues(APIDataStore<?, ?> dataStore, NVEntity container, byte msKey[])
 				throws NullPointerException, IllegalArgumentException, AccessException;
 	 
 	 void associateNVEntityToSubjectUserID(NVEntity nve, String userID);

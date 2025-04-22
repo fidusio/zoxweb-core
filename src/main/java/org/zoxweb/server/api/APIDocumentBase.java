@@ -13,9 +13,9 @@ import java.io.OutputStream;
 import java.util.concurrent.locks.Lock;
 
 @SuppressWarnings("serial")
-abstract public class APIDocumentBase<V>
-	extends APIServiceProviderBase<V>
-	implements APIDocumentStore<V>
+abstract public class APIDocumentBase<P,S>
+	extends APIServiceProviderBase<P,S>
+	implements APIDocumentStore<P,S>
 {
 	
 	

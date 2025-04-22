@@ -17,14 +17,13 @@ package org.zoxweb.server.http;
 
 import okhttp3.*;
 import okio.BufferedSink;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.net.ssl.SSLCheckDisabler;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.http.*;
 import org.zoxweb.shared.net.IPAddress;
+import org.zoxweb.shared.task.ConsumerCallback;
 import org.zoxweb.shared.util.*;
 
 import javax.net.ssl.X509TrustManager;
@@ -55,7 +54,6 @@ public class OkHTTPCall
 		/**
 		 * @return
 		 */
-		@Nullable
 		@Override
 		public MediaType contentType()
 		{
@@ -75,7 +73,7 @@ public class OkHTTPCall
 		 * @throws IOException
 		 */
 		@Override
-		public void writeTo(@NotNull BufferedSink bufferedSink) throws IOException
+		public void writeTo(BufferedSink bufferedSink) throws IOException
 		{
 			InputStream is = null;
 			long totalRead = 0;
@@ -136,7 +134,7 @@ public class OkHTTPCall
 		/**
 		 * @return the content type
 		 */
-		@Nullable
+
 		@Override
 		public MediaType contentType() {
 			return mediaType;
@@ -155,22 +153,18 @@ public class OkHTTPCall
 		 * @throws IOException in case of error
 		 */
 		@Override
-		public void writeTo(@NotNull BufferedSink bufferedSink) throws IOException {
+		public void writeTo(BufferedSink bufferedSink)
+				throws IOException
+		{
 			if(content != null)
 			{
 				if(log.isEnabled()) log.getLogger().info("Content size : " + content.length);
 				ByteArrayInputStream inputStream = new ByteArrayInputStream(content);
 				byte[] buffer = new byte[4092]; // 8KB buffer
 				int bytesRead;
-				while ((bytesRead = inputStream.read(buffer)) != -1) {
-						try {
-							bufferedSink.write(buffer, 0, bytesRead);
-						}
-						catch (IOException e)
-						{
-						e.printStackTrace();
-						throw e;
-					}
+				while ((bytesRead = inputStream.read(buffer)) != -1)
+				{
+					bufferedSink.write(buffer, 0, bytesRead);
 				}
 
 				if(log.isEnabled()) log.getLogger().info("Finished");
@@ -188,8 +182,8 @@ public class OkHTTPCall
 
 
 
-	private static final OkHttpClient sslEnabledClient = createOkHttpBuilder(null, null, HTTPMessageConfigInterface.DEFAULT_TIMEOUT_40_SECOND, true, 10, HTTPMessageConfigInterface.DEFAULT_TIMEOUT_20_SECOND).build();
-	private static final OkHttpClient sslDisabledClient = createOkHttpBuilder(null, null, HTTPMessageConfigInterface.DEFAULT_TIMEOUT_20_SECOND,false, 10, HTTPMessageConfigInterface.DEFAULT_TIMEOUT_20_SECOND).build();
+	private static final OkHttpClient sslEnabledClient = createOkHttpBuilder(null, null, HTTPMessageConfigInterface.DEFAULT_TIMEOUT_40_SECOND, true, 20, HTTPMessageConfigInterface.DEFAULT_TIMEOUT_20_SECOND).build();
+	private static final OkHttpClient sslDisabledClient = createOkHttpBuilder(null, null, HTTPMessageConfigInterface.DEFAULT_TIMEOUT_20_SECOND,false, 20, HTTPMessageConfigInterface.DEFAULT_TIMEOUT_20_SECOND).build();
 
 	private final OkHttpClient okHttpClient;
 	public static OkHttpClient.Builder createOkHttpBuilder(ExecutorService executorService,
@@ -253,27 +247,11 @@ public class OkHTTPCall
 		}
 		else
 			okHttpClient = client;
-
 	}
 
 
-	/**
-	 * 
-	 * [Please state the purpose for this class or method because it will help the team for future maintenance ...].
-	 * 
-	 * @return HTTPResponseData
-	 * @throws IOException in case of error
-	 */
-	public HTTPResponseData sendRequest() throws IOException
-	{
-		if(!ENABLE_HTTP.get())
-			return null;
 
-		long ts = System.currentTimeMillis();
-
-
-
-
+	private Request buildRequest() throws IOException {
 		// check the HTTPMethod first
 		// based on the content type build the rest of the body
 		// check if application/x-www-form-urlencoded,  multipart/form-data
@@ -366,8 +344,82 @@ public class OkHTTPCall
 		Request request = requestBuilder.build();
 		if(log.isEnabled()) log.getLogger().info("request headers: " + request.headers().toMultimap());
 
+		return request;
+	}
 
 
+
+	public void asyncRequest(ConsumerCallback<HTTPResponse> callableConsumer)
+			throws IOException
+	{
+		SUS.checkIfNulls("CallableConsumer can't be null", callableConsumer);
+		Request request = buildRequest();
+		long ts = System.currentTimeMillis();
+
+		okHttpClient.newCall(request).enqueue(new Callback()
+		{
+			@Override
+			public void onFailure(Call call, IOException e)
+			{
+				callableConsumer.exception(e);
+			}
+
+
+			@Override
+			public void onResponse(Call call,  Response response)
+					throws IOException
+			{
+				ResponseBody responseBody = null;
+				Map<String, List<String>> respHeaders = null;
+				HTTPStatusCode responseStatusCode = null;
+				byte[] responseContent = null;
+				HTTPResponseData hrd = null;
+
+
+				try
+				{
+					if (log.isEnabled()) log.getLogger().info("response: " + response);
+
+					responseBody = response.body();
+					respHeaders = response.headers().toMultimap();
+					responseContent = responseBody.bytes();
+					responseStatusCode = HTTPStatusCode.statusByCode(response.code());
+
+
+					hrd = new HTTPResponseData(responseStatusCode.CODE, respHeaders, responseContent, System.currentTimeMillis() - ts);
+					if (!response.isSuccessful() && hmci.isHTTPErrorAsException()) {
+						callableConsumer.exception(new HTTPCallException(response.message(), hrd));
+					}
+					else
+					{
+						callableConsumer.accept(hrd);
+					}
+				}
+				finally
+				{
+					IOUtil.close(response);
+				}
+
+			}
+		});
+
+	}
+
+	/**
+	 * 
+	 * [Please state the purpose for this class or method because it will help the team for future maintenance ...].
+	 * 
+	 * @return HTTPResponseData
+	 * @throws IOException in case of error
+	 */
+	public HTTPResponseData sendRequest() throws IOException
+	{
+		if(!ENABLE_HTTP.get())
+			return null;
+
+		long ts = System.currentTimeMillis();
+
+		Request request = buildRequest();
 		Response response = null;
 		ResponseBody responseBody = null;
 		Map<String, List<String>> respHeaders = null;
@@ -395,233 +447,6 @@ public class OkHTTPCall
 		{
 			IOUtil.close(responseBody, response);
 		}
-
-
-
-		//rb.method(hmci.getMethod().getValue());
-
-
-
-
-//		ByteArrayOutputStream ret = null;
-//		int status;
-//		Map<String, List<String>> respHeaders = null;
-//		// format the payload first
-//		String encodedContentParams = HTTPUtil.formatParameters(hmci.getParameters().asArrayValuesString(), hmci.getCharset(), hmci.isURLEncodingEnabled(), hmci.getHTTPParameterFormatter());
-//
-//
-//		boolean embedPostPutParamsInURI = false;
-//		GetNameValue<String> contentType = hmci.getParameters().asArrayValuesString().get(HTTPHeader.CONTENT_TYPE.getName());
-//		if (contentType != null && contentType.getValue() != null && contentType.getValue().toLowerCase().indexOf("x-www-form-urlencoded") == -1)
-//		{
-//			embedPostPutParamsInURI = true;
-//		}
-//
-//		if (encodedContentParams.length() > 0)
-//		{
-//			switch(hmci.getMethod())
-//			{
-//
-//			case POST:
-//			case PUT:
-//				if (!embedPostPutParamsInURI || hmci.isMultiPartEncoding())
-//				{
-//					HTTPMultiPartUtil.preMultiPart(hmci);
-//					break;
-//				}
-//			case GET:
-//			case DELETE:
-//			case PATCH:
-//			case PURGE:
-//			case CONNECT:
-//			case COPY:
-//			case LINK:
-//			case LOCK:
-//			case PROPFIND:
-//			case TRACE:
-//			case UNLINK:
-//			case UNLOCK:
-//			case VIEW:
-//				// if we have a GET
-//
-//				break;
-//			default:
-//				break;
-//
-//
-//			}
-//		}
-//
-//		OutputStream os = null;
-//		InputStream is = null;
-//		InputStream isError = null;
-//		HttpURLConnection con = null;
-//		Proxy proxy = null;
-//
-//
-
-//		try
-//		{
-//
-////			if (proxy != null)
-////			{
-////				con = (HttpURLConnection) url.openConnection(proxy);
-////			}
-////			else
-////			{
-////				con = (HttpURLConnection) url.openConnection();
-////			}
-////
-//
-//
-//
-//			con.setRequestMethod(hmci.getMethod().toString());
-//
-//			con.setDoInput(true);
-//			con.setDoOutput(true);
-//			con.setAllowUserInteraction(true);
-//			con.setInstanceFollowRedirects(hmci.isRedirectEnabled());
-//			con.setConnectTimeout(hmci.getConnectTimeout());
-//			con.setReadTimeout(hmci.getReadTimeout());
-//
-//			URL url = new URL(hmci.getURL());
-//
-//
-//
-////			ArrayValues<GetNameValue<String>> reqHeaders = hcc.getHeaders().asArrayValuesString();
-//			// set the request headers
-//			if (hmci.getHeaders() != null)
-//			{
-//				for (GetNameValue<?> nvp : hmci.getHeaders().values())
-//				{
-//					con.setRequestProperty(nvp.getName(), ""+nvp.getValue());
-//				}
-//			}
-//
-//
-//			// set the authentication from url or hcc
-//			// if url.getUserInfo() is not null ?
-//			// if hcc.getUser() && hcc.getPassword() != null
-//			// if still null check if the HTTPAuthentication is not null
-//			GetNameValue<String> authorizationHeader = HTTPAuthScheme.BASIC.toHTTPHeader(url.getUserInfo(), null);
-//
-//			if(authorizationHeader == null && hmci.getAuthorization() != null)
-//			{
-//				authorizationHeader = hmci.getAuthorization().toHTTPHeader();
-//			}
-//
-//			if (authorizationHeader != null)
-//			{
-//				con.setRequestProperty(authorizationHeader.getName(), authorizationHeader.getValue());
-//			}
-//
-//
-//			// write the payload if it is a post
-//			if (!embedPostPutParamsInURI)
-//			{
-//				switch (hmci.getMethod())
-//				{
-//				case POST:
-//				case PUT:
-//					os = con.getOutputStream();
-//					if (hmci.isMultiPartEncoding())
-//					{
-//						HTTPMultiPartUtil.writeMultiPartContent(os, hmci.getBoundary(), hmci.getParameters().asArrayValuesString());
-//					}
-//					else
-//						os.write(encodedContentParams.getBytes());
-//					break;
-//					default:
-//
-//				}
-//			}
-//
-//
-//
-//
-//
-//			if (hmci.getContent() != null && hmci.getContent().length > 0)
-//			{
-//				if (os == null)
-//				{
-//					os = con.getOutputStream();
-//				}
-//
-//				os.write(hmci.getContent());
-//			}
-//
-//
-//			IOUtil.flush(os);
-//			status = (proxy != null && proxy.type() == Proxy.Type.SOCKS) ? 200 : con.getResponseCode();
-//
-//			// check if we have an error in the response
-//			isError = con.getErrorStream();
-//			if (isError != null)
-//			{
-//				ret  = IOUtil.inputStreamToByteArray(isError, false);
-//				respHeaders = con.getHeaderFields();
-//				HTTPResponseData hrd = new HTTPResponseData(status, respHeaders, ret.toByteArray(), System.currentTimeMillis() -ts );
-//				if (hmci.isHTTPErrorAsException())
-//					throw new HTTPCallException(con.getResponseMessage(),  hrd);
-//				else
-//					return hrd;
-//			}
-//
-//			HTTPStatusCode hsc = HTTPStatusCode.statusByCode(status);
-//
-//			if (hsc != null && hmci.isRedirectEnabled())
-//			{
-//				switch(hsc)
-//				{
-//				case MOVED_PERMANENTLY:
-//				case FOUND:
-//				case SEE_OTHER:
-//					NVPair cookie = HTTPUtil.extractCookie(con.getHeaderFields(), 0);
-//					if (cookie != null)
-//						hmci.getHeaders().add(cookie);
-//					String newURL = con.getHeaderField("Location");
-//
-//					hmci.setURI(null);
-//					hmci.setURL(newURL);
-//
-//					HTTPCall2 hccRedirect = new HTTPCall2(hmci);
-//					return hccRedirect.sendRequest();
-//
-//				default:
-//
-//
-//				}
-//			}
-//
-//
-//
-//			is = con.getInputStream();
-//
-//
-//
-//
-//			respHeaders = con.getHeaderFields();
-//
-//
-//		}
-//		finally
-//		{
-//			if ( con != null)
-//			{
-//			    try {
-//			      con.disconnect();
-//			    }
-//			    catch(Exception e) {}
-//			}
-//
-//			IOUtil.close(os);
-//			IOUtil.close(is);
-//			IOUtil.close(isError);
-//
-//		}
-//
-//
-//		HTTPResponseData hrd = new HTTPResponseData(status, respHeaders, ret != null ? ret.toByteArray() : null, System.currentTimeMillis() - ts);
 
 
 		return hrd;
@@ -656,39 +481,17 @@ public class OkHTTPCall
 			throws IOException
 	{
 
-		HTTPResponseData hrd;
-		try
-		{
-			hrd = new OkHTTPCall(okHttpClient, hmci).sendRequest();
-		}
-		catch(HTTPCallException e)
-		{
-
-			OK_HTTP_CALLS.register(e.getResponseData().getDuration());
-			throw e;
-		}
+		HTTPResponseData hrd = send(okHttpClient, hmci);
 		HTTPAPIResult<O> ret =  HTTPUtil.toHTTPResponseObject(hrd, clazz);
-		OK_HTTP_CALLS.register(hrd.getDuration());
 		return ret;
 	}
 
 	public static <O> HTTPAPIResult<O> send(OkHttpClient okHttpClient, HTTPMessageConfigInterface hmci, DataDecoder<HTTPResponseData, O> decoder)
 			throws IOException
 	{
-		HTTPResponseData hrd ;
-		try
-		{
-			hrd = new OkHTTPCall(okHttpClient, hmci).sendRequest();
-		}
-		catch(HTTPCallException e)
-		{
-
-			OK_HTTP_CALLS.register(e.getResponseData().getDuration());
-			throw e;
-		}
+		HTTPResponseData hrd = send(okHttpClient, hmci);
 		O result = decoder.decode(hrd);
 		HTTPAPIResult<O> ret = new HTTPAPIResult<O>(hrd.getStatus(), hrd.getHeaders(), result, hrd.getDuration());
-		OK_HTTP_CALLS.register(ret.getDuration());
 		return ret;
 	}
 }

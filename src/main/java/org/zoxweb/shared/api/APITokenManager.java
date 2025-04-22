@@ -15,31 +15,31 @@
  */
 package org.zoxweb.shared.api;
 
-import java.io.IOException;
-
 import org.zoxweb.shared.security.AccessException;
 import org.zoxweb.shared.util.ArrayValues;
 import org.zoxweb.shared.util.GetNameValue;
 import org.zoxweb.shared.util.NVPair;
+
+import java.io.IOException;
 
 /**
  * This interface must be implemented by APIProvider that requires and OAUTH2 token access
  */
 public interface APITokenManager {
 	
-	public APITokenDAO activateToken(APIDataStore<?> dataStore, String userID, APIConfigInfo apiToken, NVPair... params)
+	APITokenDAO activateToken(APIDataStore<?,?> dataStore, String userID, APIConfigInfo apiToken, NVPair... params)
 			throws NullPointerException, IllegalArgumentException, IOException, AccessException, APIException;
 	
 	
-	public APITokenDAO activateToken(APIDataStore<?> dataStore, ArrayValues<GetNameValue<String>> params)
+	APITokenDAO activateToken(APIDataStore<?, ?> dataStore, ArrayValues<GetNameValue<String>> params)
 			throws NullPointerException, IllegalArgumentException, IOException, AccessException, APIException;
 	
 	
-	public APITokenDAO refreshToken(APIDataStore<?> dataStore, String userID, APITokenDAO apiToken)
+	APITokenDAO refreshToken(APIDataStore<?, ?> dataStore, String userID, APITokenDAO apiToken)
 			throws NullPointerException, IllegalArgumentException, IOException, AccessException, APIException;
 	
 	
-	public String generateOAuthURL(APIDataStore<?> dataStore, String code)
+	String generateOAuthURL(APIDataStore<?, ?> dataStore, String code)
 			throws NullPointerException, IllegalArgumentException, AccessException;
 	
 	

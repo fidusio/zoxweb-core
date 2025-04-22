@@ -32,8 +32,8 @@ import java.util.Set;
  * @param <ST> 
  *
  */
-public interface APIDataStore<ST>
-	extends APIServiceProvider<ST>
+public interface APIDataStore<P,S>
+	extends APIServiceProvider<P, S>
 {
 	
 	/**

@@ -24,25 +24,25 @@ public interface KeyMaker
 	EncryptedKey createSubjectIDKey(SubjectIdentifier subjectID, final byte[]key)
 		throws NullPointerException, IllegalArgumentException, AccessException;
 	
-	EncryptedKey createNVEntityKey(APIDataStore<?> dataStore, NVEntity nve, final byte[] key)
+	EncryptedKey createNVEntityKey(APIDataStore<?, ?> dataStore, NVEntity nve, final byte[] key)
 		throws NullPointerException, IllegalArgumentException, AccessException;
 
 	
 	
-	byte[] getKey(APIDataStore<?> dataStore, final byte[] key, String ...chainedIDs) 
+	byte[] getKey(APIDataStore<?, ?> dataStore, final byte[] key, String ...chainedIDs)
 		throws NullPointerException, IllegalArgumentException, AccessException;
 	
 	byte[] getMasterKey()
 		throws NullPointerException, IllegalArgumentException, AccessException;
 
 
-	EncryptedKey lookupEncryptedKeyDOA(APIDataStore<?> dataStore, NVEntity nve)
+	EncryptedKey lookupEncryptedKeyDOA(APIDataStore<?, ?> dataStore, NVEntity nve)
 		throws NullPointerException, IllegalArgumentException, AccessException;
 
-	EncryptedKey lookupEncryptedKeyDOA(APIDataStore<?> dataStore, String dataRefGUID)
+	EncryptedKey lookupEncryptedKeyDOA(APIDataStore<?, ?> dataStore, String dataRefGUID)
 			throws NullPointerException, IllegalArgumentException, AccessException;
 	
-	EncryptedKey lookupEncryptedKeyDOA(APIDataStore<?> dataStore, String resourceRefGUID, String subjectGUID)
+	EncryptedKey lookupEncryptedKeyDOA(APIDataStore<?, ?> dataStore, String resourceRefGUID, String subjectGUID)
 		throws NullPointerException, IllegalArgumentException, AccessException;
 	
 }

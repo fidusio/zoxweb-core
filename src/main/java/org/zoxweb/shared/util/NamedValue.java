@@ -11,7 +11,7 @@ public class NamedValue<V>
 
     protected String name;
     protected V value;
-    private final NVGenericMap properties = new NVGenericMap();
+    private final NVGenericMap properties = new NVGenericMap("properties");
     public NamedValue(){}
 
 

@@ -24,7 +24,7 @@ import org.zoxweb.shared.util.SetName;
  * The API service provider interface.
  * @author mzebib
  */
-public interface APIServiceProvider<S>
+public interface APIServiceProvider<P, S>
 	extends SetDescription, 
 			SetName, 
 			CanonicalID {
@@ -33,20 +33,20 @@ public interface APIServiceProvider<S>
 	 * Returns the data store configuration info.
 	 * @return APIConfigInfo
 	 */
-	public APIConfigInfo getAPIConfigInfo();
+	APIConfigInfo getAPIConfigInfo();
 	
 	/**
 	 * Sets the data store configuration info.
 	 * @param configInfo object
 	 */
-	public void setAPIConfigInfo(APIConfigInfo configInfo);
+	void setAPIConfigInfo(APIConfigInfo configInfo);
 
 	/*
 	 * Connects to the data store
 	 * @return native connection 
 	 * @throws APIException in case of connection issues
 	 */
-	public S connect()
+	S connect()
 			throws APIException;
 	
 	/**
@@ -54,56 +54,56 @@ public interface APIServiceProvider<S>
 	 * @return native connection 
 	 * @throws APIException in case of connection issues
 	 */
-	public S newConnection()
+	P newConnection()
 			throws APIException;
 	
 	/**
 	 * Shuts down the data store.
 	 * @throws APIException in case of closure issue
 	 */
-	public void close() 
+	void close()
 			throws APIException;
 	
 	/**
 	 * Checks if the store is active.
 	 * @return true if active
 	 */
-	public boolean isProviderActive();
+	boolean isProviderActive();
 
 	/**
 	 * Returns the exception handler.
 	 * @returnAPIExceptionHandler
 	 */
-	public APIExceptionHandler getAPIExceptionHandler();
+	APIExceptionHandler getAPIExceptionHandler();
 	
 	/**
 	 * Sets the exception handler.
 	 * @param exceptionHandler object to map native exceptions to APIException
 	 */
-	public void setAPIExceptionHandler(APIExceptionHandler exceptionHandler);
+	void setAPIExceptionHandler(APIExceptionHandler exceptionHandler);
 	
 	/**
 	 * Lookup the property type based on the GetName property.
 	 * @param propertyName looking for 
 	 * @return typed value
 	 */
-	public <T> T lookupProperty(GetName propertyName);
+	<T> T lookupProperty(GetName propertyName);
 
 	/**
 	 * Returns last time it was used or accessed
 	 * @return time in millis last time accessed
 	 */
-	public long lastTimeAccessed();
+	long lastTimeAccessed();
 
 	/**
 	 * Returns the delta between NOW and last time the object was used
 	 * @return time in millis for inactivity
 	 */
-	public long inactivityDuration();
+	long inactivityDuration();
 	
 	/**
 	 * @return true if the current api instance is busy
 	 */
-	public boolean isBusy();
+	boolean isBusy();
 
 }

@@ -22,7 +22,7 @@ package org.zoxweb.shared.api;
  * @param <V>
  */
 public interface APINotification<V>
-	extends APIServiceProvider<V>
+	extends APIServiceProvider<V, V>
 {	
 	/**
 	 * This method sends a message and returns transaction information.
@@ -33,7 +33,7 @@ public interface APINotification<V>
 	 * @throws IllegalArgumentException
 	 * @throws APIException
 	 */
-	public APITransactionInfo sendAPIMessage(APIMessage message, APINotificationDelivery apind) 
+	APITransactionInfo sendAPIMessage(APIMessage message, APINotificationDelivery apind)
 			throws NullPointerException, IllegalArgumentException, APIException;
 	
 	/**
@@ -44,7 +44,7 @@ public interface APINotification<V>
 	 * @throws IllegalArgumentException
 	 * @throws APIException
 	 */
-	public APITransactionInfo updateTransactionInfo(APITransactionInfo transaction)  
+	APITransactionInfo updateTransactionInfo(APITransactionInfo transaction)
 			throws NullPointerException, IllegalArgumentException, APIException;
 	
 }

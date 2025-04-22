@@ -135,10 +135,10 @@ public class SMTPCreator
 	 * @return APIServiceProvider
 	 */
 	
-	public APIServiceProvider<Void> createAPI(APIDataStore<?> dataStore, APIConfigInfo apiConfig)
+	public APIServiceProvider<Void, Void> createAPI(APIDataStore<?, ?> dataStore, APIConfigInfo apiConfig)
         throws APIException
 	{
-		APIServiceProvider<Void> serviceProvider = new SMTPProvider();
+		APIServiceProvider<Void, Void> serviceProvider = new SMTPProvider();
 		serviceProvider.setAPIConfigInfo(apiConfig);
 		serviceProvider.setAPIExceptionHandler(SMTPExceptionHandler.SINGLETON);
 		return serviceProvider;

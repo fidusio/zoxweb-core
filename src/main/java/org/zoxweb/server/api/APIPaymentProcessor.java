@@ -4,8 +4,8 @@ import org.zoxweb.shared.accounting.FinancialTransactionDAO;
 import org.zoxweb.shared.api.APIServiceProvider;
 import org.zoxweb.shared.util.AppID;
 
-public interface APIPaymentProcessor<S>
-        extends APIServiceProvider<S>, AppID<String> {
+public interface APIPaymentProcessor<P, S>
+        extends APIServiceProvider<P, S>, AppID<String> {
 
     /**
      * Create transaction.

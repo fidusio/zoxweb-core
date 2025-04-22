@@ -103,7 +103,13 @@ public abstract class ProtocolHandler
 	@Override
 	public long updateUsage()
 	{
-		lastUsage.set(System.currentTimeMillis());
+		return updateUsage(System.currentTimeMillis());
+	}
+
+	@Override
+	public long updateUsage(long toUpdate)
+	{
+		lastUsage.set(toUpdate);
 		return lastUsage.get();
 	}
 
