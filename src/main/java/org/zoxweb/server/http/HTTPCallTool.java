@@ -221,7 +221,18 @@ public final class HTTPCallTool
             for (int i = 0; i < repeat; i++)
             {
                 for (OkHTTPCall httpCall : httpCalls)
-                    httpCall.asyncRequest(cc);
+                    TaskUtil.defaultTaskProcessor().execute(()->{
+                        try
+                        {
+                            httpCall.sendRequest();
+                            successCounter.incrementAndGet();
+                        }
+                        catch (Exception e)
+                        {
+                            failCounter.incrementAndGet();
+                        }
+                    });
+                    //httpCall.asyncRequest(cc);
 
             }
             ts = TaskUtil.waitIfBusyThenClose(25) - ts;
