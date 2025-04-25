@@ -185,13 +185,11 @@ public final class HTTPCallTool
 
                 }
             };
-            long ts = System.currentTimeMillis();
-//            for (int i = 0; i < repeat; i++)
-//            {
-//                for (OkHTTPCall httpCall : httpCalls)
-//                    httpCall.asyncRequest(cc);
-//
-//            }
+
+
+
+            RateCounter rc = new RateCounter("OverAll");;
+            rc.start();
             for(int i = 0; i < repeat; i++)
             {
 
@@ -199,17 +197,15 @@ public final class HTTPCallTool
                     endPoint.asyncCall(callback);
             }
 
-            ts = TaskUtil.waitIfBusy(25) - ts;
-            RateCounter rc = new RateCounter("OverAll");
-            rc.register(ts, totalCount());
+            TaskUtil.waitIfBusy(25);
 
-//            log.getLogger().info("OkHTTPCall stat: " + Const.TimeInMillis.toString(ts) + " to send: " + rc.getCounts() + " failed: " + failCounter+
-//                    " rate: " +  OkHTTPCall.OK_HTTP_CALLS.rate(Const.TimeInMillis.SECOND.MILLIS) + " per/second" + " average call duration: " + OkHTTPCall.OK_HTTP_CALLS.average() + " millis");
+            rc.stop(totalCount());
 
-            log.getLogger().info("ENDPOINT OkHTTPCall stat: " + Const.TimeInMillis.toString(ts) + " to send: " + rc.getCounts() + " failed: " + failCounter+
+
+            log.getLogger().info("ENDPOINT OkHTTPCall stat: " + Const.TimeInMillis.toString(rc.lastDeltaInMillis()) + " to send: " + rc.getCounts() + " failed: " + failCounter+
                     " rate: " +  + rc.rate(Const.TimeInMillis.SECOND.MILLIS) + " per/second" + " average call duration: " + rc.average() + " millis");
 
-            ts = System.currentTimeMillis();
+            rc.reset().start();
             successCounter.set(0);
             failCounter.set(0);
 //            for(int i = 0; i < repeat; i++)
@@ -220,11 +216,12 @@ public final class HTTPCallTool
 //            }
             for (int i = 0; i < repeat; i++)
             {
-                for (OkHTTPCall httpCall : httpCalls)
+                for (HTTPMessageConfigInterface request : hmcis)
                     TaskUtil.defaultTaskProcessor().execute(()->{
                         try
                         {
-                            httpCall.sendRequest();
+                            //request.sendRequest();
+                            OkHTTPCall.send(request);
                             successCounter.incrementAndGet();
                         }
                         catch (Exception e)
@@ -235,18 +232,18 @@ public final class HTTPCallTool
                     //httpCall.asyncRequest(cc);
 
             }
-            ts = TaskUtil.waitIfBusyThenClose(25) - ts;
-            rc.reset().register(ts, totalCount());
+            TaskUtil.waitIfBusy(25);
+            rc.stop(totalCount());
 
-//            log.getLogger().info("OkHTTPCall stat: " + Const.TimeInMillis.toString(ts) + " to send: " + rc.getCounts() + " failed: " + failCounter+
-//                    " rate: " +  OkHTTPCall.OK_HTTP_CALLS.rate(Const.TimeInMillis.SECOND.MILLIS) + " per/second" + " average call duration: " + OkHTTPCall.OK_HTTP_CALLS.average() + " millis");
 
-            log.getLogger().info("ASYNC OkHTTPCall stat: " + Const.TimeInMillis.toString(ts) + " to send: " + rc.getCounts() + " failed: " + failCounter+
+            log.getLogger().info("RAW OkHTTPCall stat: " + Const.TimeInMillis.toString(rc.lastDeltaInMillis()) + " to send: " + rc.getCounts() + " failed: " + failCounter+
                     " rate: " +  + rc.rate(Const.TimeInMillis.SECOND.MILLIS) + " per/second" + " average call duration: " + rc.average() + " millis");
 
 
+            log.getLogger().info(GSONUtil.toJSONDefault(TaskUtil.info(), true));
 
-//            log.getLogger().info("App  stats: " + repeat + " it took " + Const.TimeInMillis.toString(ts)  +  " rate: " + rc.rate(Const.TimeInMillis.SECOND.MILLIS) + " per/second" + " average call duration: " + rc.average() + " millis");
+            // shutdown the default executor and scheduler
+            TaskUtil.waitIfBusyThenClose(25);
 
         }
         catch(Exception e)

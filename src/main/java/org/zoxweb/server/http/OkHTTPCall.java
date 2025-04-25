@@ -371,11 +371,8 @@ public class OkHTTPCall
 			{
 				ResponseBody responseBody = null;
 				Map<String, List<String>> respHeaders = null;
-				HTTPStatusCode responseStatusCode = null;
 				byte[] responseContent = null;
 				HTTPResponseData hrd = null;
-
-
 				try
 				{
 					if (log.isEnabled()) log.getLogger().info("response: " + response);
@@ -383,10 +380,8 @@ public class OkHTTPCall
 					responseBody = response.body();
 					respHeaders = response.headers().toMultimap();
 					responseContent = responseBody.bytes();
-					responseStatusCode = HTTPStatusCode.statusByCode(response.code());
 
-
-					hrd = new HTTPResponseData(responseStatusCode.CODE, respHeaders, responseContent, System.currentTimeMillis() - ts);
+					hrd = new HTTPResponseData(response.code(), respHeaders, responseContent, System.currentTimeMillis() - ts);
 					if (!response.isSuccessful() && hmci.isHTTPErrorAsException()) {
 						callableConsumer.exception(new HTTPCallException(response.message(), hrd));
 					}
@@ -420,24 +415,20 @@ public class OkHTTPCall
 		long ts = System.currentTimeMillis();
 
 		Request request = buildRequest();
-		Response response = null;
 		ResponseBody responseBody = null;
 		Map<String, List<String>> respHeaders = null;
-		HTTPStatusCode responseStatusCode = null;
 		byte[] responseContent = null;
 		HTTPResponseData hrd = null;
+		Response response = null;
 		try
 		{
 			response = okHttpClient.newCall(request).execute();
-
 			if(log.isEnabled()) log.getLogger().info("response: " + response);
-
 			responseBody = response.body();
 			respHeaders = response.headers().toMultimap();
 			responseContent = responseBody.bytes();
-			responseStatusCode = HTTPStatusCode.statusByCode(response.code());
 
-			hrd = new HTTPResponseData(responseStatusCode.CODE, respHeaders, responseContent, System.currentTimeMillis() - ts);
+			hrd = new HTTPResponseData(response.code(), respHeaders, responseContent, System.currentTimeMillis() - ts);
 			if(!response.isSuccessful() && hmci.isHTTPErrorAsException())
 			{
 				throw new HTTPCallException(response.message(),  hrd);
@@ -445,8 +436,9 @@ public class OkHTTPCall
 		}
 		finally
 		{
-			IOUtil.close(responseBody, response);
+			IOUtil.close(response);
 		}
+
 
 
 		return hrd;

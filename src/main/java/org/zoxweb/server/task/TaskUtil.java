@@ -19,6 +19,7 @@ import org.zoxweb.server.util.DefaultEvenManager;
 import org.zoxweb.server.util.ServerUtil;
 import org.zoxweb.shared.data.events.BaseEventObject;
 import org.zoxweb.shared.data.events.EventListenerManager;
+import org.zoxweb.shared.util.NVGenericMap;
 import org.zoxweb.shared.util.SUS;
 
 import java.util.concurrent.Executor;
@@ -111,10 +112,13 @@ public class TaskUtil
 
 
 	public static TaskProcessor defaultTaskProcessor() {
-		if (TASK_PROCESSOR == null) {
-			try {
+		if (TASK_PROCESSOR == null)
+		{
+			try
+			{
 				ServerUtil.LOCK.lock();
-				if (TASK_PROCESSOR == null) {
+				if (TASK_PROCESSOR == null)
+				{
 					int threadCount = tpThreadCount;
 					if (threadCount < 2 )
 					{
@@ -124,9 +128,11 @@ public class TaskUtil
 							threadCount = minTPThreadCount;
 						}
 					}
-					TASK_PROCESSOR = new TaskProcessor("DE",maxTasks, threadCount, Thread.NORM_PRIORITY, false);
+					TASK_PROCESSOR = new TaskProcessor("DE" ,maxTasks, threadCount, Thread.NORM_PRIORITY, false);
 				}
-			} finally {
+			}
+			finally
+			{
 				ServerUtil.LOCK.unlock();
 			}
 		}
@@ -135,14 +141,18 @@ public class TaskUtil
 	}
 	
 	public static TaskSchedulerProcessor defaultTaskScheduler() {
-		if (TASK_SCHEDULER == null) {
-			try {
+		if (TASK_SCHEDULER == null)
+		{
+			try
+			{
 				ServerUtil.LOCK.lock();
 				
 				if (TASK_SCHEDULER == null) {
 					TASK_SCHEDULER = new TaskSchedulerProcessor(defaultTaskProcessor());
 				}
-			} finally {
+			}
+			finally
+			{
 				ServerUtil.LOCK.unlock();
 			}
 		}
@@ -309,10 +319,10 @@ public class TaskUtil
 		defaultEventManager().close();
 	}
 
-	public static String info()
-	{
-		return defaultTaskScheduler().toString();
-	}
+//	public static String info()
+//	{
+//		return defaultTaskScheduler().toString();
+//	}
 
 
 	/**
@@ -366,6 +376,16 @@ public class TaskUtil
 		}
 
 		return mainThread;
+	}
+
+
+	public static NVGenericMap info()
+	{
+		NVGenericMap ret = new NVGenericMap("task-util-info");
+
+		ret.add(defaultTaskProcessor().getProperties());
+		ret.add(defaultTaskScheduler().getProperties());
+		return ret;
 	}
 
 

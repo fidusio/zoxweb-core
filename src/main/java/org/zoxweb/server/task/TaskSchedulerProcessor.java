@@ -235,6 +235,8 @@ public class TaskSchedulerProcessor
 	private final long counterID = TSP_COUNTER.incrementAndGet();
 	private final ConcurrentSkipListSet<TaskSchedulerAppointment<?>> queue;
 
+	private final AtomicLong totalQueued = new AtomicLong(0);
+
 	private volatile long expiryTimestamp;
 	
 	public TaskSchedulerProcessor() {
@@ -342,7 +344,7 @@ public class TaskSchedulerProcessor
 			while(!queue.add(te)) {
 				te.appointment.setDelayInNanos(te.appointment.getDelayInMillis(), System.nanoTime());
 			}
-
+			totalQueued.incrementAndGet();
 			queue.notify();
 		}
 		
@@ -470,11 +472,12 @@ public class TaskSchedulerProcessor
 	public NVGenericMap getProperties()
 	{
 		NVGenericMap ret = new NVGenericMap();
-		ret.setName("task_scheduler");
+		ret.setName("task-scheduler");
 		ret.add(new NVLong("instance_id", counterID));
 		ret.add(new NVInt("pending_tasks", queue.size()));
 
 		ret.add("current_wait", Const.TimeInMillis.toString(waitTime()));
+		ret.add(new NVLong("total_queued", totalQueued.get()));
 
 
 		return ret;

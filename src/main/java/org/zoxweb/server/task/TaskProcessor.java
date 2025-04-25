@@ -740,14 +740,15 @@ public class TaskProcessor
 	@Override
 	public NVGenericMap getProperties() {
 		NVGenericMap ret = new NVGenericMap();
-		ret.setName("task_processor");
+		ret.setName("task-processor");
 		ret.add(new NVLong("instance_id", counterID));
 		ret.add(new NVInt("workers_capacity", workersQueue.capacity()));
 		ret.add(new NVInt("workers_available", workersQueue.size()));
 		ret.add(new NVInt("tasks_capacity", tasksQueue.capacity()));
 		ret.add(new NVInt("tasks_capacity_threshold", tasksQueue.getThreshold()));
 		ret.add(new NVInt("tasks_pending", tasksQueue.size()));
-		ret.add(new NVLong("total_task_executed", tasksExecutedCounter.get()));
+		ret.add(new NVLong("total_queued", totalQueued()));
+		ret.add(new NVLong("total_executed", totalExecutedTasks()));
 		return ret;
 	}
 
