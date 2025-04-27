@@ -1,14 +1,16 @@
 package org.zoxweb.shared.util;
 
+import org.junit.jupiter.api.Test;
+import org.zoxweb.server.security.CryptoUtil;
+
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
 
-import org.zoxweb.server.security.CryptoUtil;
-
 public class TokenTest
 {
-	public static void main(String ...args)
+	@Test
+	public void uuidTest()
 	{
 		UUID uuid = UUID.randomUUID();
 		uuid.getLeastSignificantBits();

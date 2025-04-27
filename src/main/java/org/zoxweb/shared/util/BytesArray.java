@@ -3,10 +3,14 @@ package org.zoxweb.shared.util;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class BytesArray
 {
+    public static final BytesArray EMPTY = new BytesArray(null, Const.EMPTY_BYTE_ARRAY);
+
+
     private final byte[] array;
     public final int offset;
     public final int length;
@@ -95,5 +99,19 @@ public class BytesArray
     {
         if(!isValid())
             throw new ProtocolException("Invalid BytesArray");
+    }
+
+    @Override
+    public boolean equals(Object o)
+    {
+        if (o == null || getClass() != o.getClass()) return false;
+        BytesArray that = (BytesArray) o;
+        return offset == that.offset && length == that.length && (valid.get() ==  that.valid.get()) && Objects.deepEquals(array, that.array);
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return Objects.hash(Arrays.hashCode(array), offset, length, valid);
     }
 }

@@ -132,15 +132,14 @@ public class HTTPRawMessage
 
 
 
-	private HTTPMethod  parseHTTPMethod()
+	private void  validateHTTPMethod()
 	{
 		int firstSpaceIndex = ubaos.indexOf(0, Delimiter.SPACE.getBytes());
 		if (firstSpaceIndex != -1)
 		{
 			String maybeHttpMethod = ubaos.getString(0, firstSpaceIndex);
-			// try to parse the method
-			HTTPMethod ret =  HTTPMethod.lookup(ubaos.getString(0, firstSpaceIndex));
-			if (ret == null)
+			// try to parse the http method
+			if (HTTPMethod.lookup(ubaos.getString(0, firstSpaceIndex)) == null)
 			{
 				throw new IllegalArgumentException("Invalid HTTP method " + maybeHttpMethod);
 			}
@@ -149,7 +148,7 @@ public class HTTPRawMessage
 		{
 			throw new IllegalArgumentException("HTTP method token too big");
 		}
-		return null;
+
 	}
 	
 	public synchronized boolean isMessageComplete()
@@ -193,10 +192,11 @@ public class HTTPRawMessage
 
 	public synchronized HTTPMessageConfigInterface parse(boolean client)
 	{
-		if(client)
-			parseHTTPMethod();
+		if(client && hmci.getMethod() == null)
+			validateHTTPMethod();
 
-		if (endOfHeadersIndex() == -1) {
+		if (endOfHeadersIndex == -1)
+		{
 			// detect end of message
 			endOfHeadersIndex = ubaos.indexOf(Delimiter.CRLFCRLF.getBytes());
 
@@ -221,7 +221,10 @@ public class HTTPRawMessage
 						case APPLICATION_OCTET_STREAM:
 							break;
 						case MULTIPART_FORM_DATA:
-							HTTPCodecs.MULTIPART_FORM_DATA.decode(this);
+							if (hmci.isChunkedEnabled())
+								HTTPCodecs.MULTIPART_FORM_DATA_CHUNKED.decode(this);
+							else
+								HTTPCodecs.MULTIPART_FORM_DATA.decode(this);
 							break;
 						case TEXT_CSV:
 
@@ -277,13 +280,14 @@ public class HTTPRawMessage
 //	}
 
 
-	public synchronized void reset()
+	public synchronized void reset(boolean hmciToo)
 	{
 		endOfHeadersIndex = -1;
 		parseIndex = 0;
 		firstLine = null;
 		ubaos.reset();
-		hmci = new HTTPMessageConfig();
+		if(hmciToo)
+			hmci = new HTTPMessageConfig();
 
 	}
 

@@ -58,7 +58,7 @@ public enum HTTPHeader
 	SERVER("Server"),
 	SET_COOKIE("Set-Cookie"),
 	STRICT_TRANSPORT_SECURITY("Strict-Transport-Security"),
-	TRANSFER_ENCODING("Transfer-Encoding"),
+	TRANSFER_ENCODING("Transfer-Encoding"),// chunked, compress, deflate, gzip, identity
 	UPGRADE("Upgrade"),
 	USER_AGENT("User-Agent"),
 	WWW_AUTHENTICATE("WWW-Authenticate"),

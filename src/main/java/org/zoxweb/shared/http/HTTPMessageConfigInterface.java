@@ -128,9 +128,14 @@ extends ReferenceID<String>, SetName, SetDescription
 	boolean isURLEncodingEnabled();
 
 	/**
-	 * @return true of content type  multipart/form-data
+	 * @return true of Content-Type  multipart/form-data
 	 */
 	boolean isMultipartFormDataEnabled();
+
+	/**
+	 * return true if Transfer-Encoding is of type chunked
+	 */
+	boolean isChunkedEnabled();
 
 	/**
 	 * enable url encoding

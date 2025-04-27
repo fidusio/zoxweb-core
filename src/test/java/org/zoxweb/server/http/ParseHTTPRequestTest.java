@@ -16,7 +16,7 @@ public class ParseHTTPRequestTest
     @BeforeAll
     public static void loadData() throws IOException
     {
-        rawRequest = IOUtil.inputStreamToByteArray(IOUtil.locateFile("multipart-raw-data.txt"), true);
+        rawRequest = IOUtil.inputStreamToByteArray(IOUtil.locateFile("multipart-raw-data-no-content-length.txt"), true);
     }
 
     @Test

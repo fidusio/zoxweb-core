@@ -113,6 +113,10 @@ public class TestNumber {
 	{
 		System.out.println(SharedUtil.parseInt("25"));
 		System.out.println(SharedUtil.parseInt("0xff"));
+
+		System.out.println(SharedUtil.parseInt("a"));
+		System.out.println(SharedUtil.parseInt("0x2000"));
+		System.out.println(Integer.parseInt("2000", 16));
 	}
 
 

@@ -78,6 +78,7 @@ public final class HTTPConst
         NO_CACHE_CONTROL(HTTPHeader.CACHE_CONTROL, "no-store, no-cache, must-revalidate, private"),
         UPGRADE_WEBSOCKET(HTTPHeader.UPGRADE, "websocket"),
         WWW_AUTHENTICATE(HTTPHeader.WWW_AUTHENTICATE, "Basic realm=\"xlogistx\""),
+        STRICT_TRANSPORT_SECURITY(HTTPHeader.STRICT_TRANSPORT_SECURITY, "max-age=31536000; includeSubDomains; preload"),
         X_CONTENT_TYPE_OPTIONS_NO_SNIFF("X-Content-Type-Options", " nosniff"),
 
         ;

@@ -1141,7 +1141,6 @@ public final class SharedStringUtil
 	public static byte[] hexToBytes(String str)
         throws IllegalArgumentException, NullPointerException
     {
-
 		str = str.toUpperCase().trim();
 
 		if (str.startsWith( "0X"))
@@ -1156,7 +1155,7 @@ public final class SharedStringUtil
 			throw new IllegalArgumentException("Not a valid hex format " + str);
 		}
 		
-		byte byteRet [] = new byte[len/2];
+		byte[] byteRet= new byte[len/2];
 
 		for (int i = 0; i < len; i+=2)
 		{
@@ -1309,7 +1308,7 @@ public final class SharedStringUtil
 	 * @param postToken
 	 * @return string of hex that represent the buffer content
 	 */
-	public static String bytesToHex(String preToken, byte buffer[], int offset, int len, String postToken)
+	public static String bytesToHex(String preToken, byte[] buffer, int offset, int len, String postToken)
     {
 		StringBuilder sb = null;
 		
@@ -1343,7 +1342,7 @@ public final class SharedStringUtil
 	 * @param postToken
 	 * @return string of hex that represent the buffer content
 	 */
-	public static String bytesToHex(byte buffer[], String postToken)
+	public static String bytesToHex(byte[] buffer, String postToken)
     {
 		return bytesToHex(null, buffer, 0, buffer.length, postToken);
 	}
@@ -1355,7 +1354,7 @@ public final class SharedStringUtil
 	 * @param postToken
 	 * @return string of hex that represent the buffer content
 	 */
-	public static String bytesToHex(String preToken, byte buffer[], String postToken)
+	public static String bytesToHex(String preToken, byte[] buffer, String postToken)
     {
 		return bytesToHex(preToken, buffer, 0, buffer.length, postToken);
 	}
@@ -1366,7 +1365,7 @@ public final class SharedStringUtil
 	 * @param buffer
 	 * @return string of hex that represent the buffer content
 	 */
-	public static String bytesToHex(String preToken, byte buffer[])
+	public static String bytesToHex(String preToken, byte[] buffer)
     {
 		return bytesToHex(preToken, buffer, 0, buffer.length, null);
 	}
@@ -1378,7 +1377,7 @@ public final class SharedStringUtil
 	 * @param len
 	 * @return string of hex that represent the buffer content
 	 */
-	public static String bytesToHex(byte buffer[], int offset, int len)
+	public static String bytesToHex(byte[] buffer, int offset, int len)
     {
 		return bytesToHex(null, buffer, offset, len, null);
 	}
@@ -1413,7 +1412,7 @@ public final class SharedStringUtil
 	 * @param buffer
 	 * @return string of hex that represent the buffer content
 	 */
-	public static String bytesToHex(byte buffer[])
+	public static String bytesToHex(byte[] buffer)
     {
 		return bytesToHex(null, buffer, 0, buffer.length, null);
 	}

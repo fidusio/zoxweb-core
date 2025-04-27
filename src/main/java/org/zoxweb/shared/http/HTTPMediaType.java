@@ -31,6 +31,7 @@ public enum HTTPMediaType
 	APPLICATION_JSON(HTTPConst.APPLICATION_JSON, "json"),
 	APPLICATION_PDF(HTTPConst.APPLICATION_PDF, "json"),
 	APPLICATION_OCTET_STREAM("application/octet-stream"),
+	CHUNKED("chunked"),
 	MULTIPART_FORM_DATA("multipart/form-data"),
 	TEXT_CSV(HTTPConst.TEXT_CSV, "csv"),
 	TEXT_CSS(HTTPConst.TEXT_CSS, "css"),

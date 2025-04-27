@@ -825,6 +825,18 @@ public class HTTPMessageConfig
 		return false;
 	}
 
+	/**
+	 * return true if Transfer-Encoding is of type chunked
+	 */
+	@Override
+	public boolean isChunkedEnabled() {
+		String mp = getHeaders().getValue(HTTPHeader.TRANSFER_ENCODING);
+		if (mp != null)// && mp.getValue() != null)
+		{
+			return SharedStringUtil.contains(mp, HTTPMediaType.CHUNKED.getValue(), true);
+		}
+		return false;
+	}
 
 
 //	@Override

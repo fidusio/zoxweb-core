@@ -107,13 +107,22 @@ public class SharedUtil
 		}
 		catch(NumberFormatException e){}
 
-		int index;
-		if((index = strInt.indexOf("x")) != -1 || (index = strInt.indexOf("X")) != -1)
-		{
-			strInt = strInt.substring(index+1);
-		}
+		return hexToInt(strInt);
+	}
 
-		return Integer.parseInt(strInt, 16);
+
+	public static int hexToInt(String strIn) throws NumberFormatException
+	{
+		String str = SUS.trimOrNull(strIn);
+		if(str == null)
+			throw new NumberFormatException("Invalid token to convert " + strIn);
+
+		int index;
+		if((index = str.indexOf("x")) != -1 || (index = str.indexOf("X")) != -1)
+		{
+			str = str.substring(index+1);
+		}
+		return Integer.parseInt(str, 16);
 	}
 
 
