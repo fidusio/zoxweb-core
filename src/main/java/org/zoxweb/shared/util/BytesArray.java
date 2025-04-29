@@ -124,4 +124,89 @@ public class BytesArray
     {
         return Objects.hash(Arrays.hashCode(array), offset, length, valid);
     }
+
+
+    /**
+     * Return the first index of matching bytes in contained within the stream
+     * @param match for byte array matching
+     * @return index of the match, -1 no match found
+     */
+    public int indexOf(byte[] match)
+    {
+        checkValidity();
+        return SharedUtil.indexOf(array, offset, offset + length, match, 0, match.length);
+    }
+
+
+
+    /**
+     *
+     * @param startAt index inclusive
+     * @param match byte array to match
+     * @param matchOffset offset relative to the internal bye array
+     * @param matchLength of the match
+     * @return index -1 not found or index of the first match
+     */
+    public int indexOf(int startAt, byte[] match, int matchOffset, int matchLength)
+    {
+        checkValidity();
+        if(startAt < 0)
+            throw new IllegalArgumentException("Negative start index " +startAt);
+
+        int ret =  SharedUtil.indexOf(array, offset + startAt, offset + length, match, matchOffset, matchLength);
+        return ret!=-1 ? ret-offset : -1;
+    }
+
+    public int indexOf(int startAt, byte[] match)
+    {
+        checkValidity();
+        if(startAt < 0)
+            throw new IllegalArgumentException("Negative start index " +startAt);
+        int ret =  SharedUtil.indexOf(array, offset + startAt, offset + length, match, 0, match.length);
+        return ret!=-1 ? ret-offset : -1;
+    }
+
+    public int indexOf(int startAt, String str)
+    {
+        checkValidity();
+        if(startAt < 0)
+            throw new IllegalArgumentException("Negative start index " +startAt);
+        byte[] match = SharedStringUtil.getBytes(str);
+        int ret =  SharedUtil.indexOf(array, offset + startAt, offset + length, match, 0, match.length);
+        return ret!=-1 ? ret-offset : -1;
+    }
+
+
+
+    public int indexOf(String str)
+    {
+        checkValidity();
+        int ret =  SharedUtil.indexOf(array, offset, offset + length,  str, 0, str.length(), false);
+        return ret!=-1 ? ret-offset : -1;
+    }
+
+    public int indexOfIgnoreCase(String str)
+    {
+        checkValidity();
+        int ret =  SharedUtil.indexOf(array, offset , offset + length,  str, 0, str.length(), true);
+        return ret!=-1 ? ret-offset : -1;
+    }
+
+    public String toString(int startIndex, int strLength)
+    {
+        checkValidity();
+        if(startIndex < 0 || strLength > (length - startIndex))
+            throw new IllegalArgumentException("Invalid index " + startIndex);
+        return new String(array, offset + startIndex, strLength);
+    }
+
+    public String toString(int startIndex)
+    {
+        checkValidity();
+        if(startIndex < 0 || startIndex > length)
+            throw new IllegalArgumentException("Negative start index " + startIndex);
+        return new String(array, offset + startIndex, length - startIndex);
+    }
+
+
 }

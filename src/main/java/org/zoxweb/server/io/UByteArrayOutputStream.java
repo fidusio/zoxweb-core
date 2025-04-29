@@ -149,13 +149,13 @@ public class UByteArrayOutputStream
 	 * 
 	 * @param startAt index inclusive
 	 * @param match byte array to match
-	 * @param offset offset relative to the internal bye array
-	 * @param length of the match
+	 * @param matchOffset offset relative to the internal bye array
+	 * @param matchLength of the match
 	 * @return index -1 not found or index of the first match
 	 */
-	public int indexOf(int startAt, byte[] match, int offset, int length)
+	public int indexOf(int startAt, byte[] match, int matchOffset, int matchLength)
 	{
-		return SharedUtil.indexOf(getInternalBuffer(), startAt, size(), match, offset, length);
+		return SharedUtil.indexOf(getInternalBuffer(), startAt, size(), match, matchOffset, matchLength);
 	}
 
 	public int indexOf(int startAt, byte[] match)
