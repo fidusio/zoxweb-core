@@ -262,6 +262,7 @@ public class HTTPRawMessage
 			parsedHeadersStatus = false;
 			parsingIndex = 0;
 			firstLine = null;
+			lastBytesArray = null;
 		}
 
 	}
