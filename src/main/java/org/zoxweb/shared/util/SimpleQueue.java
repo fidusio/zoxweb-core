@@ -27,17 +27,17 @@ public class SimpleQueue<O>
     implements SimpleQueueInterface<O> {
 	
 	private int size;
-	private QueueNode<O> head;
+	private final QueueNode<O> head;
 	private long totalQueued = 0;
 	private boolean equalityEnabled = true;
 
 	
 	/**
-	 * Create a empty queue.
+	 * Create an empty queue.
 	 */
 	public SimpleQueue()
 	{
-		head = new QueueNode<O>(null, null, null);
+		head = new QueueNode<>(null, null, null);
 		// make the last node point to the head node
 		size = 0;
 	}
@@ -61,9 +61,9 @@ public class SimpleQueue<O>
 	}
 
 	/**
-	 * This QueuceNode is a linked list class.
+	 * This QueueNode is a linked list class.
 	 */
-	 static class QueueNode<O>
+	 private static class QueueNode<O>
 	 {
 		QueueNode(O o, QueueNode<O> p, QueueNode<O> n)
 		{
@@ -96,18 +96,14 @@ public class SimpleQueue<O>
 	 */
 	public synchronized boolean queue(O toQueue)
 	{
-
-		/**
-		 * The implementation of this queue is based on the algorithm of a
-		 * circular double link list.
-		 * 
-		 */
+		// The implementation of this queue is based on the algorithm of a
+		// circular double linked list.
 		if (toQueue == null)
 		{
 			throw new IllegalArgumentException("Can't queue a null object");
 		}
 
-		QueueNode<O> newNode = new QueueNode<O>(toQueue, null, null);
+		QueueNode<O> newNode = new QueueNode<>(toQueue, null, null);
 
 		// empty queue
 		if (head.next == null && head.previous == null)
@@ -134,18 +130,18 @@ public class SimpleQueue<O>
 
 	/**
 	 * Dequeue an object, if the queue is empty it will return null.
-	 * @return first object or null 
+	 * @return first object or null if empty
 	 */
 	public synchronized O dequeue()
 	{
-		O retval = null;
+		O retVal = null;
 
 		// if the queue is not empty
 		if (head.next != null && head.previous != null)
 		{
 			
 			QueueNode<O> toRemove = head.previous;
-			retval = toRemove.obj;
+			retVal = toRemove.obj;
 
 			if (toRemove.previous == head)
 			{
@@ -167,7 +163,7 @@ public class SimpleQueue<O>
 			
 		}
 
-		return retval;
+		return retVal;
 
 	} // end dequeue()
 

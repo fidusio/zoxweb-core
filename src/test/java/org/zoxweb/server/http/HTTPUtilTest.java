@@ -58,6 +58,6 @@ public class HTTPUtilTest {
                 ;
 
         HTTPRawMessage hrm = new HTTPRawMessage(message);
-        System.out.println(hrm.parse(true));
+        System.out.println(hrm.parse());
     }
 }

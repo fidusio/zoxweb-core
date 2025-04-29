@@ -25,7 +25,7 @@ public class ParseHTTPRequestTest
        // System.out.println(rawRequest);
 
         HTTPRawMessage hrm = new HTTPRawMessage(rawRequest);
-        hrm.parse(true);
+        hrm.parse();
         System.out.println("is message complete: " + hrm.isMessageComplete());
         System.out.println(hrm.getHTTPMessageConfig().getBoundary());
         System.out.println(hrm.getHTTPMessageConfig().getHeaders());
@@ -44,7 +44,7 @@ public class ParseHTTPRequestTest
                 "Content-Disposition: form-data; name=\"file\"; filename=\"example.pdf\"",
                 "Accept: text/html, application/xhtml+xml;q=0.9, image/webp;q=0.8, */*;q=0.7;q=0.9",
                 "Content-Type: multipart/form-data; boundary=bd1a40c9-9408-4b59-8d4b-f6693561887e",
-                "Authorization: Bearer jdlksjfgdksljgikjrtjtkrejtiohyu4o35hjhj5rk;charset=UTF-8",
+                "Authorization: Bearer jdlksjfgdksljgikjrtjtkrejtiohyu4o35hjhj5rk",
                 "Connection: keep-alive, Upgrade"
             };
 

@@ -52,8 +52,8 @@ public final class HTTPCodecs {
         if (hrm.isMessageComplete())
         {
           if (HTTPMediaType.lookup(hmci.getContentType()) == HTTPMediaType.APPLICATION_WWW_URL_ENC) {
-            int index = hrm.endOfHeadersIndex() + Delimiter.CRLFCRLF.getBytes().length;
-            HTTPUtil.parseQuery(hmci.getParameters().asArrayValuesString(), hrm.getDataStream().getString(index),false);
+            //int index = hrm.endOfHeadersIndex() + Delimiter.CRLFCRLF.getBytes().length;
+            HTTPUtil.parseQuery(hmci.getParameters().asArrayValuesString(), hrm.getDataStream().getString(0),false);
             return hmci;
           }
         }
@@ -94,7 +94,7 @@ public final class HTTPCodecs {
 
               UByteArrayOutputStream ubaos = hrm.getDataStream();
               // check is boundaryEnd exit
-              if(ubaos.indexOf(hrm.endOfHeadersIndex(), boundaryEnd) == -1 )
+              if(ubaos.indexOf(0, boundaryEnd) == -1 )
               {
                 throw new IllegalArgumentException("boundary end " + SharedStringUtil.toString(boundaryEnd) + " not found");
               }
@@ -102,7 +102,7 @@ public final class HTTPCodecs {
               hmci.setBoundary(boundary);
 
               // we need to parse the payload next
-              int index = hrm.endOfHeadersIndex();
+              int index = 0;
               if(log.isEnabled()) log.getLogger().info("index of the end main headers: " + index);
 
               while((index = ubaos.indexOf(index, boundaryStart)) != -1)
@@ -274,7 +274,7 @@ public final class HTTPCodecs {
 
               UByteArrayOutputStream ubaos = hrm.getDataStream();
               // check is boundaryEnd exit
-              if(ubaos.indexOf(hrm.endOfHeadersIndex(), boundaryEnd) == -1 )
+              if(ubaos.indexOf(0, boundaryEnd) == -1 )
               {
                 throw new IllegalArgumentException("boundary end " + SharedStringUtil.toString(boundaryEnd) + " not found");
               }
@@ -282,7 +282,7 @@ public final class HTTPCodecs {
               //hmci.setBoundary(boundary);
 
               // we need to parse the payload next
-              int index = hrm.endOfHeadersIndex();
+              int index = 0;
               if(log.isEnabled()) log.getLogger().info("index of the end main headers: " + index);
 
               while((index = ubaos.indexOf(index, boundaryStart)) != -1)

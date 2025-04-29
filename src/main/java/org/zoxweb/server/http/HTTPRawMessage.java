@@ -17,15 +17,12 @@ package org.zoxweb.server.http;
 
 import org.zoxweb.server.io.UByteArrayOutputStream;
 import org.zoxweb.server.logging.LogWrapper;
+import org.zoxweb.shared.http.HTTPMediaType;
 import org.zoxweb.shared.http.HTTPMessageConfig;
 import org.zoxweb.shared.http.HTTPMessageConfigInterface;
 import org.zoxweb.shared.http.HTTPMethod;
-import org.zoxweb.shared.http.HTTPMediaType;
 import org.zoxweb.shared.protocol.Delimiter;
-import org.zoxweb.shared.util.GetNameValue;
-import org.zoxweb.shared.util.SUS;
-import org.zoxweb.shared.util.SharedStringUtil;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.*;
 
 import java.util.Arrays;
 
@@ -35,10 +32,11 @@ public class HTTPRawMessage
 	public static final LogWrapper log = new LogWrapper(HTTPRawMessage.class).setEnabled(false);
 
 	private final UByteArrayOutputStream ubaos;
-	private int endOfHeadersIndex = -1;
-	private int parseIndex = 0;
+	private boolean parsedHeadersStatus = false;
+	private int parsingIndex = 0;
 	private String firstLine = null;
-	private HTTPMessageConfigInterface hmci = new HTTPMessageConfig();
+	private volatile BytesArray lastBytesArray = null;
+	private volatile HTTPMessageConfigInterface hmci = new HTTPMessageConfig();
 
 
 	public HTTPRawMessage(String msg)
@@ -66,11 +64,7 @@ public class HTTPRawMessage
 	{
 		this.ubaos = ubaos;
 	}
-	
-	public String getFirstLine()
-	{
-		return firstLine;
-	}
+
 
 
 	public UByteArrayOutputStream getDataStream()
@@ -78,34 +72,48 @@ public class HTTPRawMessage
 		return ubaos;
 	}
 
-	private void parseRawHeaders(boolean client)
+	private boolean parseRawHeaders()
 	{
-		if (endOfHeadersIndex != -1)
+		if (!parsedHeadersStatus)
 		{
-			int lineCounter =0;
-			while (parseIndex < endOfHeadersIndex)
+			int endOfHeadersIndex = ubaos.indexOf(Delimiter.CRLFCRLF.getBytes());
+			if(endOfHeadersIndex != -1)
 			{
-				int endOfCurrentLine = ubaos.indexOf(parseIndex, Delimiter.CRLF.getBytes());//, 0, ProtocolDelimiter.CRLF.getBytes().length);
-				
-				if (endOfCurrentLine != -1)
+				int headersLineCounter = 0;
+				while (parsingIndex < endOfHeadersIndex)
 				{
-					lineCounter++;
-					String oneLine = new String(Arrays.copyOfRange(ubaos.getInternalBuffer(), parseIndex, endOfCurrentLine));
+					int endOfCurrentLine = ubaos.indexOf(parsingIndex, Delimiter.CRLF.getBytes());//, 0, ProtocolDelimiter.CRLF.getBytes().length);
 
-					if (lineCounter > 1)
-					{
-						GetNameValue<String> gnv = SharedUtil.toNVPair(oneLine, ":", true);
-						hmci.getHeaders().add(gnv);
-					}
-					else
-					{
-						firstLine = oneLine;
-						if(client)
+					if (endOfCurrentLine != -1) {
+						headersLineCounter++;
+						String currentHeaderLine = new String(Arrays.copyOfRange(ubaos.getInternalBuffer(), parsingIndex, endOfCurrentLine));
+
+						if (headersLineCounter > 1) {
+							GetNameValue<String> gnv = SharedUtil.toNVPair(currentHeaderLine, ":", true);
+							hmci.getHeaders().add(gnv);
+						}
+						else
 						{
-							String[] tokens = getFirstLine().split(" ");
-							for (int i = 0; i < tokens.length; i++) {
+							/*
+								first line of server request not part of the headers L=line H=header
+								=====================================================================================
+								(L1)  POST /system-upload HTTP/1.1\r\n
+								(H1) Authorization: Basic YWRtaW46YmF0YXRh\r\n
+								(H2) Content-Type: multipart/form-data; boundary=18117525-f472-4559-baee-e5b7e3480095\r\n
+								(H3) Content-Length: 709\r\n
+								(H4) Host: localhost:6443\r\n
+								(H5) Connection: Keep-Alive\r\n
+								(H6) Accept-Encoding: gzip\r\n
+								(H7) User-Agent: okhttp/5.0.0-alpha.14\r\n\r\n
+								=====================================================================================
+							 */
+
+							String[] tokens = currentHeaderLine.split(" ");
+							for (int i = 0; i < tokens.length; i++)
+							{
 								String token = tokens[i];
-								switch (i) {
+								switch (i)
+								{
 									case 0:
 										hmci.setMethod(HTTPMethod.lookup(token));
 										break;
@@ -117,16 +125,23 @@ public class HTTPRawMessage
 										break;
 								}
 							}
-							if(hmci.getMethod() == HTTPMethod.GET)
+							if (hmci.getMethod() == HTTPMethod.GET)
 							{
 								HTTPCodecs.WWW_URL_ENC.decode(this);
 							}
+
 						}
+						parsingIndex = endOfCurrentLine + Delimiter.CRLF.getBytes().length;
 					}
-					parseIndex = endOfCurrentLine+ Delimiter.CRLF.getBytes().length;
 				}
+				// fined parsing all the headers
+				// after that we are ready for content
+				ubaos.shiftLeft(endOfHeadersIndex + Delimiter.CRLFCRLF.getBytes().length, 0);
+				parsedHeadersStatus = true;
 			}
 		}
+
+		return parsedHeadersStatus;
 	}
 
 
@@ -153,65 +168,38 @@ public class HTTPRawMessage
 	
 	public synchronized boolean isMessageComplete()
 	{
-		if (endOfHeadersIndex != -1)
+		if (parsedHeadersStatus)
 		{
 			if (hmci.getContentLength() !=-1)
 			{
-				int currentLength = endOfHeadersIndex + hmci.getContentLength()  + Delimiter.CRLFCRLF.getBytes().length;
-				if(log.isEnabled())log.getLogger().info(SUS.toCanonicalID(',', hmci.getContentLength(), currentLength, endOfMessageIndex(), (currentLength - endOfMessageIndex()), Thread.currentThread()));
-				//new Throwable().printStackTrace();
-				return (currentLength == endOfMessageIndex());
+				if(log.isEnabled())log.getLogger().info(SUS.toCanonicalID(',', hmci.getContentLength(), ubaos.size(), (hmci.getContentLength() - ubaos.size())));
+				return (hmci.getContentLength() == ubaos.size());
 			}
-			return true;
+			else if (hmci.isChunkedEnabled())
+			{
+				return lastBytesArray == BytesArray.EMPTY;
+			}
+
 		}
 		return false;
 	}
 
 
 
-	public int endOfMessageIndex()
-	{
-		return ubaos.size();
-	}
-	
-	
-	public int endOfHeadersIndex()
-	{
-		return endOfHeadersIndex;
-	}
-	
-	public byte[] getRawHeaders()
-	{
-		if (endOfHeadersIndex != -1 )
-		{
-			return Arrays.copyOfRange(ubaos.getInternalBuffer(), 0, endOfHeadersIndex);
-		}
-		
-		return null;
-	}
 
-	public synchronized HTTPMessageConfigInterface parse(boolean client)
+	public synchronized HTTPMessageConfigInterface parse()
 	{
-		if(client && hmci.getMethod() == null)
+		if(hmci.getMethod() == null)
 			validateHTTPMethod();
 
-		if (endOfHeadersIndex == -1)
+
+		if (parseRawHeaders() && isMessageComplete())
 		{
-			// detect end of message
-			endOfHeadersIndex = ubaos.indexOf(Delimiter.CRLFCRLF.getBytes());
-
-			if (endOfHeadersIndex != -1) {
-				parseRawHeaders(client);
-			}
-		}
-
-		if (client && isMessageComplete())
-		{
-
-			if (hmci.getMethod() != HTTPMethod.GET) {
-
+			if (hmci.getMethod() != HTTPMethod.GET)
+			{
 				HTTPMediaType hmt = HTTPMediaType.lookup(hmci.getContentType());
-				if (hmt != null) {
+				if (hmt != null)
+				{
 					switch (hmt) {
 
 						case APPLICATION_WWW_URL_ENC:
@@ -239,7 +227,7 @@ public class HTTPRawMessage
 						case TEXT_YAML:
 
 						case APPLICATION_JSON:
-							hmci.setContent(ubaos.copyBytes(endOfHeadersIndex + Delimiter.CRLFCRLF.getBytes().length));
+							hmci.setContent(ubaos.copyBytes(0));
 							break;
 						case IMAGE_BMP:
 							break;
@@ -264,30 +252,17 @@ public class HTTPRawMessage
 		return hmci;
 	}
 
-//	public int getContentLength()
-//	{
-//		return contentLength;
-//	}
-//
-//	public byte[] getRawContent()
-//	{
-//		if (endOfHeadersIndex !=-1)
-//		{
-//			return Arrays.copyOfRange(ubaos.getInternalBuffer(), endOfHeadersIndex+4, endOfMessageIndex());
-//		}
-//
-//		return null;
-//	}
-
 
 	public synchronized void reset(boolean hmciToo)
 	{
-		endOfHeadersIndex = -1;
-		parseIndex = 0;
-		firstLine = null;
 		ubaos.reset();
 		if(hmciToo)
+		{
 			hmci = new HTTPMessageConfig();
+			parsedHeadersStatus = false;
+			parsingIndex = 0;
+			firstLine = null;
+		}
 
 	}
 
@@ -298,9 +273,9 @@ public class HTTPRawMessage
 	@Override
 	public String toString()
 	{
-		return "HTTPRawMessage [endOfMessage=" + endOfHeadersIndex
+		return "HTTPRawMessage [parsedHeadersStatus=" + parsedHeadersStatus
 				+ ", contentLength=" + hmci.getContentLength() + ", headers=" + hmci.getHeaders()
-				+ ", firstLine=" + firstLine + ", baos=" +ubaos.size()+"]";
+				+ ", firstLine=" + firstLine + ", baos=" + ubaos.size() + "]";
 	}
 
 }

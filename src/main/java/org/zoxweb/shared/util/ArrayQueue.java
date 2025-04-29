@@ -1,5 +1,7 @@
 package org.zoxweb.shared.util;
 
+import java.util.Arrays;
+
 public class ArrayQueue<O>
 implements SimpleQueueInterface<O>{
     protected volatile Object[] array;
@@ -18,8 +20,7 @@ implements SimpleQueueInterface<O>{
         head = 0;
         end = 0;
         size = 0;
-        for(int i = 0; i < array.length; i++)
-            array[i] = null;
+        Arrays.fill(array, null);
     }
 
     public int size()

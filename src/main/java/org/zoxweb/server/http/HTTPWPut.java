@@ -139,8 +139,11 @@ public class HTTPWPut {
 
 
         long ts = System.currentTimeMillis();
-        try {
+        try
+        {
             ParamUtil.ParamMap params = ParamUtil.parse("=", args);
+            params.hide("password");
+            System.out.println(params);
             String url = params.stringValue("url");
             String filePath = params.stringValue("file");
             String user = params.stringValue("user", true);
