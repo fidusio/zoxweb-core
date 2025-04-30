@@ -10,6 +10,8 @@ import org.zoxweb.shared.util.SharedBase64.Base64Type;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public final class HTTPCodecs {
@@ -166,7 +168,7 @@ public final class HTTPCodecs {
                 String name = null;
                 String filename = null;
                 String mediaType = null;
-                ByteArrayInputStream is = null;
+                List<BytesArray> lBytesArray = new ArrayList<>();
                 if (contentDisposition != null)
                 {
                   name = contentDisposition.getProperties().getValue("name");
@@ -180,24 +182,26 @@ public final class HTTPCodecs {
                 if (filename != null)
                 {
                   // we covert to input stream
-                  is = new ByteArrayInputStream(ubaos.getInternalBuffer(), startOfData, dataLength);
+                  lBytesArray.add(ubaos.toBytesArray(false, startOfData, dataLength));
                 }
 
-                if(log.isEnabled()) log.getLogger().info("name=" + name + " filename=" + filename + " mediaType=" + mediaType + " is=" + is);
+                if(log.isEnabled()) log.getLogger().info("name=" + name + " filename=" + filename + " mediaType=" + mediaType + " is=" + lBytesArray);
 
                 if (name != null)
                 {
-                  if (is != null && mediaType != null && HTTPMediaType.lookup(mediaType) != HTTPMediaType.APPLICATION_JSON)
+                  if (!lBytesArray.isEmpty() && mediaType != null && HTTPMediaType.lookup(mediaType) != HTTPMediaType.APPLICATION_JSON)
                   {
-                    NamedValue<InputStream> toAdd = new NamedValue<>();
-                    toAdd.setName(name).setValue(is);
+                    NamedValue<List<BytesArray>> toAdd = new NamedValue<>();
+                    toAdd.setName(name).setValue(lBytesArray);
                     if (filename != null)
                       toAdd.getProperties().build("filename", filename);
-                    if(mediaType != null)
-                      toAdd.getProperties().build("media-type", mediaType);
 
-                    toAdd.getProperties().build(new NVLong("length", is.available()));
+                    toAdd.getProperties().build("media-type", mediaType);
+
+                    toAdd.getProperties().build(new NVLong("length", lBytesArray.get(0).length));
                     if(log.isEnabled())  log.getLogger().info("toAdd: " + toAdd);
+                    // must add it a t the end
+                    lBytesArray.add(BytesArray.EMPTY);
                     hmci.getParameters().add(toAdd);
                   }
                   else

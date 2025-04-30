@@ -170,16 +170,20 @@ public class HTTPRawMessage
 	{
 		if (parsedHeadersStatus)
 		{
-			if (hmci.getContentLength() !=-1)
+			if (hmci.getContentLength() != -1)
 			{
+				// content length is set
 				if(log.isEnabled())log.getLogger().info(SUS.toCanonicalID(',', hmci.getContentLength(), ubaos.size(), (hmci.getContentLength() - ubaos.size())));
 				return (hmci.getContentLength() == ubaos.size());
 			}
 			else if (hmci.isChunkedEnabled())
 			{
+				// we have a chunked request
 				return lastBytesArray == BytesArray.EMPTY;
 			}
 
+			// default there is no content
+			return true;
 		}
 		return false;
 	}

@@ -240,8 +240,8 @@ public final class HTTPCallTool
                     " rate: " +  + rc.rate(Const.TimeInMillis.SECOND.MILLIS) + " per/second" + " average call duration: " + rc.average() + " millis");
 
 
-            log.getLogger().info(GSONUtil.toJSONDefault(TaskUtil.info(), true));
-
+//            log.getLogger().info(GSONUtil.toJSONDefault(TaskUtil.info(), true));
+//
             // shutdown the default executor and scheduler
             TaskUtil.waitIfBusyThenClose(25);
 
