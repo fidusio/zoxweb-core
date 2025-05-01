@@ -23,7 +23,7 @@ import java.util.concurrent.Delayed;
  * The appointment interface.
  */
 public interface Appointment
-	extends IsClosed, Delayed, WaitTime<Appointment>
+	extends CloseableType, Delayed, WaitTime<Appointment>
 {
 	
 	Comparator<Appointment> EQUAL_COMPARATOR = new AppointmentComparator();

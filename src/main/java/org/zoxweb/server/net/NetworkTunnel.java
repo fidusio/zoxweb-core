@@ -15,18 +15,17 @@
  */
 package org.zoxweb.server.net;
 
+import org.zoxweb.server.io.IOUtil;
+import org.zoxweb.shared.util.CloseableType;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.logging.Logger;
 
-import org.zoxweb.server.io.IOUtil;
-
-import org.zoxweb.shared.util.IsClosed;
-
 public class NetworkTunnel
-    implements IsClosed
+    implements CloseableType
 {
 	
 	
@@ -36,11 +35,11 @@ public class NetworkTunnel
 	
 
 	static class StreamRelay
-		implements Runnable, IsClosed
+		implements Runnable, CloseableType
 	{
 		private InputStream is;
 		private OutputStream os;
-	    IsClosed[] counterParts;
+		CloseableType[] counterParts;
 		private boolean closedStat = false;
 		StreamRelay(InputStream is, OutputStream os)
 		{
@@ -65,7 +64,7 @@ public class NetworkTunnel
 			
 				if (counterParts != null)
 				{
-					for (IsClosed ic : counterParts)
+					for (CloseableType ic : counterParts)
 					{
 						if(ic != null && !ic.isClosed())
 							IOUtil.close(ic);
@@ -125,8 +124,8 @@ public class NetworkTunnel
 		sr1 = new StreamRelay(s1.getInputStream(), s2.getOutputStream());
 		sr2 = new StreamRelay(s2.getInputStream(), s1.getOutputStream());
 		
-		sr1.counterParts = new IsClosed[] {sr2, this};
-		sr2.counterParts = new IsClosed[] {sr1};
+		sr1.counterParts = new CloseableType[] {sr2, this};
+		sr2.counterParts = new CloseableType[] {sr1};
 		sr1.start();
 		sr2.start();
 	}

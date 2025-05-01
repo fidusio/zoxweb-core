@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class Lifetime
     implements WaitTime<Lifetime>,
-        IsClosed, Identifier<Long>, IsExpired
+        CloseableType, Identifier<Long>, IsExpired
 {
 
     private static final AtomicLong INSTANCE_COUNTER = new AtomicLong();
