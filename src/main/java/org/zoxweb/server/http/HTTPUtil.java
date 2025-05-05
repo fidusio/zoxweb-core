@@ -919,7 +919,7 @@ public class HTTPUtil
 	public static String formatFullURL(HTTPMessageConfig hcc)
 			throws UnsupportedEncodingException
 	{
-		String encodedContentParams = HTTPUtil.formatParameters(hcc.getParameters().asArrayValuesString(), null, hcc.isURLEncodingEnabled(), hcc.getHTTPParameterFormatter());
+		String encodedContentParams = HTTPUtil.formatParameters(hcc.getParameters().asArrayValuesString(), null, hcc.isContentURLEncoded(), hcc.getHTTPParameterFormatter());
 		String urlURI = SharedStringUtil.concat(hcc.getURL(), hcc.getURI(), "/");
 
 		if (encodedContentParams.length() > 0)

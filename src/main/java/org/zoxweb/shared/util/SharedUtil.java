@@ -2335,26 +2335,26 @@ public class SharedUtil
 
 	/**
 	 * 
-	 * @param buffer
-	 * @param bufferStartIndex
-	 * @param bufferEndIndex
-	 * @param match
-	 * @param matchOffset
-	 * @param matchLen
-	 * @return matching index
+	 * @param buffer to look into
+	 * @param fromIndex start index of buffer
+	 * @param toIndex end index of buffer
+	 * @param match array to look for
+	 * @param matchOffset offset in match buffer
+	 * @param matchLen length of data from matchOffset
+	 * @return matching index inside buffer
 	 */
-	public static int indexOf(byte[] buffer, int bufferStartIndex, int bufferEndIndex, byte[] match, int matchOffset, int matchLen)
+	public static int indexOf(byte[] buffer, int fromIndex, int toIndex, byte[] match, int matchOffset, int matchLen)
     {
-		if (matchOffset < 0 || matchLen < 1 || (matchOffset+matchLen) > match.length || bufferEndIndex > buffer.length)
+		if (matchOffset < 0 || matchLen < 1 || (matchOffset+matchLen) > match.length || toIndex > buffer.length)
 		{
 			throw new IndexOutOfBoundsException();
 		}
 		
-		for (int i = bufferStartIndex; i < bufferEndIndex; i++)
+		for (int i = fromIndex; i < toIndex; i++)
 		{
 			int j = 0;
 			
-			for ( ; j < matchLen && j+i < bufferEndIndex; j++)
+			for ( ; j < matchLen && j+i < toIndex; j++)
 			{
 				if (buffer[i + j] != match[matchOffset + j])
 				{
@@ -2717,7 +2717,46 @@ public class SharedUtil
 			}
 		}
 	}
-	
+
+
+	public static boolean equals(IsValid validator, byte[] a1, int a1From, int a1To, byte[] a2, int a2From, int a2To) {
+		if (a1 == a2)
+			return true;
+
+		if (a1 == null || a2 == null)
+			return false;
+
+		int len = a1To - a1From;
+		if (a1From < 0 ||
+				a1To < 0 ||
+				a2From < 0 ||
+				a2To < 0 ||
+				len < 0 ||
+				(a2To - a2From) < 0 ||
+				len != a2To - a2From)
+			return false;
+
+		for (int i = 0; i < len; i++)
+		{
+			if((validator != null && !validator.isValid()) || a1[a1From + i] != a2[a2From + i])
+				return false;
+		}
+
+		return true;
+	}
+
+
+	public static int hashCode(byte[] a, int offset, int length)
+	{
+		if (a == null)
+			return 0;
+
+		int result = 1;
+		for (int i = 0; i < length; i++)
+			result = 31 * result + a[i+offset];
+
+		return result;
+	}
 	
 	
 	public static boolean equals(NVEntity nve1, NVEntity nve2)

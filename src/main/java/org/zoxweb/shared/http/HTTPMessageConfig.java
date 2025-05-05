@@ -804,7 +804,7 @@ public class HTTPMessageConfig
 
 
 	@Override
-	public boolean isURLEncodingEnabled()
+	public boolean isContentURLEncoded()
 	{
 		String mp = getHeaders().getValue(HTTPHeader.CONTENT_TYPE);
 		if (mp != null)// && mp.getValue() != null)
@@ -815,7 +815,7 @@ public class HTTPMessageConfig
 	}
 
 	@Override
-	public boolean isMultipartFormDataEnabled()
+	public boolean isContentMultipartFormData()
 	{
 		String mp = getHeaders().getValue(HTTPHeader.CONTENT_TYPE);
 		if (mp != null)// && mp.getValue() != null)
@@ -829,7 +829,7 @@ public class HTTPMessageConfig
 	 * return true if Transfer-Encoding is of type chunked
 	 */
 	@Override
-	public boolean isChunkedEnabled() {
+	public boolean isTransferChunked() {
 		String mp = getHeaders().getValue(HTTPHeader.TRANSFER_ENCODING);
 		if (mp != null)// && mp.getValue() != null)
 		{

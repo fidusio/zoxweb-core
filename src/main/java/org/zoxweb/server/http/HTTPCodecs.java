@@ -10,8 +10,6 @@ import org.zoxweb.shared.util.SharedBase64.Base64Type;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
 
 
 public final class HTTPCodecs {
@@ -20,22 +18,18 @@ public final class HTTPCodecs {
   private HTTPCodecs() {
   }
 
-  public static final DataDecoder<byte[], NVGenericMap> BytesToNVGM = (input) -> {
-    return GSONUtil.fromJSONGenericMap(SharedStringUtil.toString(input), null, Base64Type.DEFAULT);
-  };
+  public static final DataDecoder<byte[], NVGenericMap> BytesToNVGM = (input) -> GSONUtil.fromJSONGenericMap(SharedStringUtil.toString(input), null, Base64Type.DEFAULT);
 
-  public static final DataDecoder<HTTPResponseData, NVGenericMap> HRDToNVGM = (input) -> {
-    return GSONUtil.fromJSONDefault(input.getDataAsString(), NVGenericMap.class);
-  };
+  public static final DataDecoder<HTTPResponseData, NVGenericMap> HRDToNVGM = (input) -> GSONUtil.fromJSONDefault(input.getDataAsString(), NVGenericMap.class);
 
 
-  public static final DataDecoder<HTTPResponseData, NVGenericMap> NVGMDecoderPAS = (input)->
-          GSONUtil.fromJSONDefault(input.getDataAsString(), NVGenericMap.class, true);
+
+  public static final DataDecoder<HTTPResponseData, NVGenericMap> NVGMDecoderPAS = (input) -> GSONUtil.fromJSONDefault(input.getDataAsString(), NVGenericMap.class, true);
 
   public static final DataDecoder<HTTPResponseData, NVGenericMapList> HRDToNVGMList = (input) -> GSONUtil.fromJSONDefault(input.getDataAsString(), NVGenericMapList.class);
 
 
-  public static final DataDecoder<byte[], NVEntity> BytesToNVE = (input) -> GSONUtil.fromJSON(input);
+  public static final DataDecoder<byte[], NVEntity> BytesToNVE = GSONUtil::fromJSON;
 
 
   public static final DataDecoder<HTTPResponseData, NVEntity> HRDToNVE = (input) -> GSONUtil.fromJSON(input.getData());
@@ -54,7 +48,6 @@ public final class HTTPCodecs {
         if (hrm.isMessageComplete())
         {
           if (HTTPMediaType.lookup(hmci.getContentType()) == HTTPMediaType.APPLICATION_WWW_URL_ENC) {
-            //int index = hrm.endOfHeadersIndex() + Delimiter.CRLFCRLF.getBytes().length;
             HTTPUtil.parseQuery(hmci.getParameters().asArrayValuesString(), hrm.getDataStream().getString(0),false);
             return hmci;
           }
@@ -62,6 +55,73 @@ public final class HTTPCodecs {
     }
 
     return null;
+  };
+
+
+  public static final DataDecoder<HTTPRawMessage, HTTPRawMessage> TRANSFER_CHUNKED = (hrm)->
+  {
+    // the headers are already parsed
+    // we need to parse the body as chunks
+    // hex-size\r\n
+    // binary-data\r\n
+    //
+    UByteArrayOutputStream ubaos = hrm.getDataStream();
+
+
+    do
+    {
+      // parse the data size line in hex
+      int index = ubaos.indexOf(hrm.getDataMark(), Delimiter.CRLF.getBytes());
+      if(index == -1)
+        break;
+      String hexSize = ubaos.getString(hrm.getDataMark(), index - hrm.getDataMark());
+      int chunkSize = SharedUtil.hexToInt(hexSize);
+      if(chunkSize == 0)
+      {
+        // we have the last chunk
+        hrm.endOfContentReached();
+        // delete the last 0 chunk and trailing headers
+        ubaos.removeAt(hrm.getDataMark(), ubaos.size() - hrm.getDataMark());
+
+        // for now NO support for trailer header
+        break;
+      }
+
+      if(ubaos.size() >= (index + Delimiter.CRLF.length() + chunkSize + Delimiter.CRLF.length()))
+      {
+
+
+        if(ubaos.byteAt(index + Delimiter.CRLF.length() + chunkSize ) == '\r' &&
+                ubaos.byteAt(index + Delimiter.CRLF.length() + chunkSize + 1) == '\n')
+        {
+          // we have at least one full chunk
+
+          // 1. remove the hex-size\r\n
+          ubaos.shiftLeft(index + Delimiter.CRLF.length(), hrm.getDataMark());
+
+          // 2. remove the \r\n at the binary data
+          ubaos.removeAt(hrm.getDataMark() + chunkSize, Delimiter.CRLF.length());
+          hrm.incDataMark(chunkSize);
+
+          continue;
+        }
+        else
+        {
+          // we have a problem
+          log.getLogger().info(index + "The end of the chunked is missing " + index + Delimiter.CRLF.length() + chunkSize);
+        }
+      }
+      // datamark should be used by subsequent decoder as the end of HTTPRawMessage.getDataStream() as the end of the stream
+      // after processing the data they should invoke
+      // HTTPRawMessage.getDataStream().shiftLeft(datamark, 0)
+      // then set datamark to zero
+      // so the next call to TRANSFER_CHUNKED will process the remaining data
+      break;
+
+    }while(true);
+
+
+    return hrm;
   };
 
 
@@ -92,13 +152,13 @@ public final class HTTPCodecs {
 
               byte[] boundaryTag = SharedStringUtil.getBytes("--" + boundary);
               byte[] boundaryStart = SharedStringUtil.getBytes("--" + boundary + Delimiter.CRLF.getValue());
-              byte[] boundaryEnd = SharedStringUtil.getBytes("--" + boundary + "--");
+              byte[] boundaryEnd = SharedStringUtil.getBytes("--" + boundary + "--" + Delimiter.CRLF.getValue());
 
               UByteArrayOutputStream ubaos = hrm.getDataStream();
               // check is boundaryEnd exit
               if(ubaos.indexOf(0, boundaryEnd) == -1 )
               {
-                throw new IllegalArgumentException("boundary end " + SharedStringUtil.toString(boundaryEnd) + " not found");
+                throw new IllegalArgumentException("boundary end " + SharedStringUtil.toString(boundaryEnd).trim() + " not found");
               }
 
               hmci.setBoundary(boundary);
@@ -116,10 +176,10 @@ public final class HTTPCodecs {
                 int endOfSubHeaders = ubaos.indexOf(index, Delimiter.CRLFCRLF.getBytes());
                 if(endOfSubHeaders == -1)
                 { // we have a problem
-                  if (log.isEnabled()) log.getLogger().info(index + " end of sub headers missing from index " + index);
+                  log.getLogger().info(index + " end of sub headers missing from index " + index);
                 }
                 else
-                  endOfSubHeaders += Delimiter.CRLFCRLF.getBytes().length;
+                  endOfSubHeaders += Delimiter.CRLFCRLF.length();
 
 
                 int endOfSubPart = ubaos.indexOf(endOfSubHeaders, boundaryTag);
@@ -127,11 +187,11 @@ public final class HTTPCodecs {
 
 
                 if (log.isEnabled()) log.getLogger().info(index + " end of SubHeader: " + endOfSubHeaders + " end of SubPart" + " content\n{" +
-                        ubaos.getString(index, endOfSubPart - index - Delimiter.CRLF.getBytes().length) + "}");
+                        ubaos.getString(index, endOfSubPart - index - Delimiter.CRLF.length()) + "}");
 
 
                 int startOfData = endOfSubHeaders;
-                int dataLength = endOfSubPart - endOfSubHeaders - Delimiter.CRLF.getBytes().length;
+                int dataLength = endOfSubPart - endOfSubHeaders - Delimiter.CRLF.length();
 
                 if(log.isEnabled()) log.getLogger().info("data: \"" + ubaos.getString(startOfData, dataLength) +"\"");
 
@@ -157,7 +217,7 @@ public final class HTTPCodecs {
 //                      log.getLogger().info("header: " + fullHeader + " end");
                     }
                   }
-                  headerIndex = indexEndOfHeader + Delimiter.CRLF.getBytes().length;
+                  headerIndex = indexEndOfHeader + Delimiter.CRLF.length();
                 }
 
                 if(log.isEnabled()) log.getLogger().info("headers:\n" + subPartRawHeaders);
@@ -168,7 +228,8 @@ public final class HTTPCodecs {
                 String name = null;
                 String filename = null;
                 String mediaType = null;
-                List<BytesArray> lBytesArray = new ArrayList<>();
+                InputStream is = null;
+                //List<BytesArray> lBytesArray = new ArrayList<>();
                 if (contentDisposition != null)
                 {
                   name = contentDisposition.getProperties().getValue("name");
@@ -182,26 +243,26 @@ public final class HTTPCodecs {
                 if (filename != null)
                 {
                   // we covert to input stream
-                  lBytesArray.add(ubaos.toBytesArray(false, startOfData, dataLength));
+                  is = new ByteArrayInputStream(ubaos.getInternalBuffer(), startOfData, dataLength);
                 }
 
-                if(log.isEnabled()) log.getLogger().info("name=" + name + " filename=" + filename + " mediaType=" + mediaType + " is=" + lBytesArray);
+                if(log.isEnabled()) log.getLogger().info("name=" + name + " filename=" + filename + " mediaType=" + mediaType + " is=" + is);
 
                 if (name != null)
                 {
-                  if (!lBytesArray.isEmpty() && mediaType != null && HTTPMediaType.lookup(mediaType) != HTTPMediaType.APPLICATION_JSON)
+                  if (is != null  && mediaType != null && HTTPMediaType.lookup(mediaType) != HTTPMediaType.APPLICATION_JSON)
                   {
-                    NamedValue<List<BytesArray>> toAdd = new NamedValue<>();
-                    toAdd.setName(name).setValue(lBytesArray);
+                    NamedValue<InputStream> toAdd = new NamedValue<>();
+                    toAdd.setName(name).setValue(is);
                     if (filename != null)
                       toAdd.getProperties().build("filename", filename);
 
                     toAdd.getProperties().build("media-type", mediaType);
 
-                    toAdd.getProperties().build(new NVLong("length", lBytesArray.get(0).length));
+                    toAdd.getProperties().build(new NVLong("length", dataLength));
                     if(log.isEnabled())  log.getLogger().info("toAdd: " + toAdd);
                     // must add it a t the end
-                    lBytesArray.add(BytesArray.EMPTY);
+
                     hmci.getParameters().add(toAdd);
                   }
                   else
@@ -245,6 +306,11 @@ public final class HTTPCodecs {
 
 
 
+
+
+
+
+
   public static final DataDecoder<HTTPRawMessage, HTTPMessageConfigInterface> MULTIPART_FORM_DATA_CHUNKED = (hrm) ->
   {
 
@@ -257,7 +323,7 @@ public final class HTTPCodecs {
         if (hrm.isMessageComplete()) // this need to change we are doing partial processing
         {
 //          if (HTTPMediaType.lookup(hmci.getContentType()) == HTTPMediaType.MULTIPART_FORM_DATA)
-          if (hmci.isMultipartFormDataEnabled())
+          if (hmci.isContentMultipartFormData())
           {
             if (SUS.isEmpty(hmci.getBoundary()))
             {
@@ -278,10 +344,10 @@ public final class HTTPCodecs {
 
               UByteArrayOutputStream ubaos = hrm.getDataStream();
               // check is boundaryEnd exit
-              if(ubaos.indexOf(0, boundaryEnd) == -1 )
-              {
-                throw new IllegalArgumentException("boundary end " + SharedStringUtil.toString(boundaryEnd) + " not found");
-              }
+//              if(ubaos.indexOf(0, boundaryEnd) == -1 )
+//              {
+//                throw new IllegalArgumentException("boundary end " + SharedStringUtil.toString(boundaryEnd) + " not found");
+//              }
 
               //hmci.setBoundary(boundary);
 
@@ -295,25 +361,33 @@ public final class HTTPCodecs {
 
                 if(log.isEnabled()) log.getLogger().info("index of start of a part: "  + index);
                 // index point to the first --boundary\r\n
-                int endOfSubHeaders = ubaos.indexOf(index, Delimiter.CRLFCRLF.getBytes());
+                int endOfSubHeaders = ubaos.indexOf(index +boundaryStart.length, hrm.getDataMark(), Delimiter.CRLFCRLF.getBytes());
                 if(endOfSubHeaders == -1)
                 { // we have a problem
                   if (log.isEnabled()) log.getLogger().info(index + " end of sub headers missing from index " + index);
+                  break;
                 }
                 else
-                  endOfSubHeaders += Delimiter.CRLFCRLF.getBytes().length;
+                  endOfSubHeaders += Delimiter.CRLFCRLF.length();
 
+                // At this level have all the header data
+                // we should parse the header
 
-                int endOfSubPart = ubaos.indexOf(endOfSubHeaders, boundaryTag);
+                int endOfSubPart = ubaos.indexOf(endOfSubHeaders, hrm.getDataMark(), boundaryTag);
 
 
 
                 if (log.isEnabled()) log.getLogger().info(index + " end of SubHeader: " + endOfSubHeaders + " end of SubPart" + " content\n{" +
-                        ubaos.getString(index, endOfSubPart - index - Delimiter.CRLF.getBytes().length) + "}");
+                        ubaos.getString(index, endOfSubPart - index - Delimiter.CRLF.length()) + "}");
+
+
+
+
+
 
 
                 int startOfData = endOfSubHeaders;
-                int dataLength = endOfSubPart - endOfSubHeaders - Delimiter.CRLF.getBytes().length;
+                int dataLength = endOfSubPart - endOfSubHeaders - Delimiter.CRLF.length();
 
                 if(log.isEnabled()) log.getLogger().info("data: \"" + ubaos.getString(startOfData, dataLength) +"\"");
 
@@ -339,7 +413,7 @@ public final class HTTPCodecs {
 //                      log.getLogger().info("header: " + fullHeader + " end");
                     }
                   }
-                  headerIndex = indexEndOfHeader + Delimiter.CRLF.getBytes().length;
+                  headerIndex = indexEndOfHeader + Delimiter.CRLF.length();
                 }
 
                 if(log.isEnabled()) log.getLogger().info("headers:\n" + subPartRawHeaders);
@@ -377,8 +451,8 @@ public final class HTTPCodecs {
                     toAdd.setName(name).setValue(is);
                     if (filename != null)
                       toAdd.getProperties().build("filename", filename);
-                    if(mediaType != null)
-                      toAdd.getProperties().build("media-type", mediaType);
+
+                    toAdd.getProperties().build("media-type", mediaType);
 
                     toAdd.getProperties().build(new NVLong("length", is.available()));
                     if(log.isEnabled())  log.getLogger().info("toAdd: " + toAdd);
@@ -417,7 +491,15 @@ public final class HTTPCodecs {
         }
     }
 
-    return null;
+    return hmci;
   };
+
+
+  private static NamedValue<?> parseMultiPartHeader(HTTPRawMessage hrm, int startIndex, byte[] boundaryStart, byte[] boundaryEnd)
+  {
+    NamedValue<?> ret = null;
+
+    return ret;
+  }
 
 }

@@ -125,17 +125,17 @@ extends ReferenceID<String>, SetName, SetDescription
 	/**
 	 * @return true if url encoding is enabled
 	 */
-	boolean isURLEncodingEnabled();
+	boolean isContentURLEncoded();
 
 	/**
 	 * @return true of Content-Type  multipart/form-data
 	 */
-	boolean isMultipartFormDataEnabled();
+	boolean isContentMultipartFormData();
 
 	/**
 	 * return true if Transfer-Encoding is of type chunked
 	 */
-	boolean isChunkedEnabled();
+	boolean isTransferChunked();
 
 	/**
 	 * enable url encoding

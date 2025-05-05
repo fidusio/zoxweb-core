@@ -49,7 +49,7 @@ public enum Delimiter
      * Returns the name.
      * @return
      */
-	public final String getName()
+	public String getName()
 	{
 		return name();
 	}
@@ -58,7 +58,7 @@ public enum Delimiter
      * Returns the value.
      * @return
      */
-	public final String getValue()
+	public String getValue()
     {
 		return value;
 	}
@@ -70,6 +70,11 @@ public enum Delimiter
 	public final byte[] getBytes()
     {
 		return bytes;
+	}
+
+	public int length()
+	{
+		return bytes.length;
 	}
 
 	@Override

@@ -272,7 +272,7 @@ public class OkHTTPCall
 		String urlEncodedParameter = null;
 		// set the url
 		// if method is get and hmci.isURLEncodingEnabled() merge uri + encoded parameters
-		if (hmci.isURLEncodingEnabled())
+		if (hmci.isContentURLEncoded())
 		{
 			urlEncodedParameter = SharedStringUtil.trimOrNull(HTTPEncoder.URL_ENCODED.format(hmci.getParameters().asArrayValuesString().values()));
 			if (hmci.getMethod() == HTTPMethod.GET && urlEncodedParameter != null)
@@ -308,11 +308,11 @@ public class OkHTTPCall
 
 		// create the request body from hmci
 		RequestBody requestBody = null;
-		if(SUS.isNotEmpty(urlEncodedParameter) && hmci.isURLEncodingEnabled() && hmci.getMethod() != HTTPMethod.GET)
+		if(SUS.isNotEmpty(urlEncodedParameter) && hmci.isContentURLEncoded() && hmci.getMethod() != HTTPMethod.GET)
 		{
 			requestBody = new RBBinaryContent(null, urlEncodedParameter);
 		}
-		else if(hmci.isMultipartFormDataEnabled())
+		else if(hmci.isContentMultipartFormData())
 		{
 			MultipartBody.Builder mbBuilder = new MultipartBody.Builder().setType(MultipartBody.FORM);
 

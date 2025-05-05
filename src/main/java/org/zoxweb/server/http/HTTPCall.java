@@ -120,13 +120,13 @@ public class HTTPCall
 		int status;
 		Map<String, List<String>> respHeaders = null;
 		// format the payload first
-		String encodedContentParams = HTTPUtil.formatParameters(hcc.getParameters().asArrayValuesString(), hcc.getCharset(), hcc.isURLEncodingEnabled(), hcc.getHTTPParameterFormatter());
+		String encodedContentParams = HTTPUtil.formatParameters(hcc.getParameters().asArrayValuesString(), hcc.getCharset(), hcc.isContentURLEncoded(), hcc.getHTTPParameterFormatter());
 		String urlURI = fullURL();
 
 		boolean embedPostPutParamsInURI = false;
 		GetNameValue<String> contentType = hcc.getParameters().asArrayValuesString().get(HTTPHeader.CONTENT_TYPE.getName());
 //		if (contentType != null && contentType.getValue() != null && contentType.getValue().toLowerCase().indexOf("x-www-form-urlencoded") == -1)
-		if (hcc.isURLEncodingEnabled())
+		if (hcc.isContentURLEncoded())
 		{
 			embedPostPutParamsInURI = true;
 		}

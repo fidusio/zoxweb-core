@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class BytesArray
@@ -17,6 +16,7 @@ public class BytesArray
     public final int offset;
     public final int length;
     private final AtomicBoolean valid;
+    private volatile Integer hashCode = null;
 
     public BytesArray(AtomicBoolean valid, byte[] array, int offset, int length, boolean checkBoundary)
     {
@@ -27,6 +27,7 @@ public class BytesArray
         this.offset = offset;
         this.length = length;
         this.valid = valid != null ? valid : new AtomicBoolean(true);
+        //this.hashCode = SharedUtil.hashCode(array, offset, length);
     }
     public BytesArray(AtomicBoolean valid, byte[] array, int offset, int length)
     {
@@ -114,15 +115,35 @@ public class BytesArray
     @Override
     public boolean equals(Object o)
     {
-        if (o == null || getClass() != o.getClass()) return false;
+        if (o == null) return false;
+
+        if(o instanceof byte[])
+        {
+            byte[] input = (byte[])o;
+            return SharedUtil.equals(valid::get, array, offset, offset+length, input, 0, input.length);
+        }
+
+        if (getClass() != o.getClass()) return false;
+
         BytesArray that = (BytesArray) o;
-        return offset == that.offset && length == that.length && (valid.get() ==  that.valid.get()) && Objects.deepEquals(array, that.array);
+        return (length == that.length) && SharedUtil.equals(()-> valid.get() && that.valid.get(), array, offset, offset+length, that.array, that.offset, that.offset + that.length);
     }
 
     @Override
     public int hashCode()
     {
-        return Objects.hash(Arrays.hashCode(array), offset, length, valid);
+        if (hashCode == null)
+        {
+            synchronized (this)
+            {
+                if (hashCode == null)
+                {
+                    checkValidity();
+                    hashCode = SharedUtil.hashCode(array, offset, length);
+                }
+            }
+        }
+        return hashCode;//Objects.hash(Arrays.hashCode(array), offset, length, valid);
     }
 
 

@@ -33,9 +33,9 @@ public class HTTPRawMessage
 
 	private final UByteArrayOutputStream ubaos;
 	private boolean parsedHeadersStatus = false;
-	private int parsingIndex = 0;
+	private volatile int dataMark = 0;
 	private String firstLine = null;
-	private volatile BytesArray lastBytesArray = null;
+	private volatile boolean endOfContent = false;
 	private volatile HTTPMessageConfigInterface hmci = new HTTPMessageConfig();
 
 
@@ -80,13 +80,13 @@ public class HTTPRawMessage
 			if(endOfHeadersIndex != -1)
 			{
 				int headersLineCounter = 0;
-				while (parsingIndex < endOfHeadersIndex)
+				while (getDataMark() < endOfHeadersIndex)
 				{
-					int endOfCurrentLine = ubaos.indexOf(parsingIndex, Delimiter.CRLF.getBytes());//, 0, ProtocolDelimiter.CRLF.getBytes().length);
+					int endOfCurrentLine = ubaos.indexOf(getDataMark(), Delimiter.CRLF.getBytes());//, 0, ProtocolDelimiter.CRLF.getBytes().length);
 
 					if (endOfCurrentLine != -1) {
 						headersLineCounter++;
-						String currentHeaderLine = new String(Arrays.copyOfRange(ubaos.getInternalBuffer(), parsingIndex, endOfCurrentLine));
+						String currentHeaderLine = new String(Arrays.copyOfRange(ubaos.getInternalBuffer(), getDataMark(), endOfCurrentLine));
 
 						if (headersLineCounter > 1) {
 							GetNameValue<String> gnv = SharedUtil.toNVPair(currentHeaderLine, ":", true);
@@ -131,12 +131,14 @@ public class HTTPRawMessage
 							}
 
 						}
-						parsingIndex = endOfCurrentLine + Delimiter.CRLF.getBytes().length;
+						setDataMark(endOfCurrentLine + Delimiter.CRLF.getBytes().length);
+
 					}
 				}
 				// fined parsing all the headers
 				// after that we are ready for content
 				ubaos.shiftLeft(endOfHeadersIndex + Delimiter.CRLFCRLF.getBytes().length, 0);
+				setDataMark(0);
 				parsedHeadersStatus = true;
 			}
 		}
@@ -176,10 +178,10 @@ public class HTTPRawMessage
 				if(log.isEnabled())log.getLogger().info(SUS.toCanonicalID(',', hmci.getContentLength(), ubaos.size(), (hmci.getContentLength() - ubaos.size())));
 				return (hmci.getContentLength() == ubaos.size());
 			}
-			else if (hmci.isChunkedEnabled())
+			else if (hmci.isTransferChunked())
 			{
 				// we have a chunked request
-				return lastBytesArray == BytesArray.EMPTY;
+				return endOfContent;
 			}
 
 			// default there is no content
@@ -197,57 +199,66 @@ public class HTTPRawMessage
 			validateHTTPMethod();
 
 
-		if (parseRawHeaders() && isMessageComplete())
+		if (parseRawHeaders())
 		{
-			if (hmci.getMethod() != HTTPMethod.GET)
+			if (isMessageComplete())
 			{
-				HTTPMediaType hmt = HTTPMediaType.lookup(hmci.getContentType());
-				if (hmt != null)
-				{
-					switch (hmt) {
+				if (hmci.getMethod() != HTTPMethod.GET) {
+					HTTPMediaType hmt = HTTPMediaType.lookup(hmci.getContentType());
+					if (hmt != null) {
+						switch (hmt) {
 
-						case APPLICATION_WWW_URL_ENC:
-							HTTPCodecs.WWW_URL_ENC.decode(this);
-							break;
+							case APPLICATION_WWW_URL_ENC:
+								HTTPCodecs.WWW_URL_ENC.decode(this);
+								break;
 
-						case APPLICATION_OCTET_STREAM:
-							break;
-						case MULTIPART_FORM_DATA:
-							if (hmci.isChunkedEnabled())
-								HTTPCodecs.MULTIPART_FORM_DATA_CHUNKED.decode(this);
-							else
-								HTTPCodecs.MULTIPART_FORM_DATA.decode(this);
-							break;
-						case TEXT_CSV:
+							case APPLICATION_OCTET_STREAM:
+								break;
+							case MULTIPART_FORM_DATA:
+								if (hmci.isTransferChunked())
+									HTTPCodecs.MULTIPART_FORM_DATA_CHUNKED.decode(this);
+								else
+									HTTPCodecs.MULTIPART_FORM_DATA.decode(this);
+								break;
+							case TEXT_CSV:
 
-						case TEXT_CSS:
+							case TEXT_CSS:
 
-						case TEXT_HTML:
+							case TEXT_HTML:
 
-						case TEXT_JAVASCRIPT:
+							case TEXT_JAVASCRIPT:
 
-						case TEXT_PLAIN:
+							case TEXT_PLAIN:
 
-						case TEXT_YAML:
+							case TEXT_YAML:
 
-						case APPLICATION_JSON:
-							hmci.setContent(ubaos.copyBytes(0));
-							break;
-						case IMAGE_BMP:
-							break;
-						case IMAGE_GIF:
-							break;
-						case IMAGE_JPEG:
-							break;
-						case IMAGE_PNG:
-							break;
-						case IMAGE_SVG:
-							break;
-						case IMAGE_ICON:
-							break;
-						case IMAGE_TIF:
-							break;
+							case APPLICATION_JSON:
+								hmci.setContent(ubaos.copyBytes(0));
+								break;
+							case IMAGE_BMP:
+								break;
+							case IMAGE_GIF:
+								break;
+							case IMAGE_JPEG:
+								break;
+							case IMAGE_PNG:
+								break;
+							case IMAGE_SVG:
+								break;
+							case IMAGE_ICON:
+								break;
+							case IMAGE_TIF:
+								break;
+						}
 					}
+				}
+			}
+			else if (hmci.isTransferChunked())
+			{
+				HTTPCodecs.TRANSFER_CHUNKED.decode(this);
+				if (isMessageComplete())
+				{
+					HTTPCodecs.MULTIPART_FORM_DATA.decode(this);
 				}
 			}
 
@@ -264,11 +275,16 @@ public class HTTPRawMessage
 		{
 			hmci = new HTTPMessageConfig();
 			parsedHeadersStatus = false;
-			parsingIndex = 0;
+			setDataMark(0);
 			firstLine = null;
-			lastBytesArray = null;
+			endOfContent = false;
 		}
 
+	}
+
+	public synchronized void endOfContentReached()
+	{
+		endOfContent = true;
 	}
 
 	public HTTPMessageConfigInterface getHTTPMessageConfig() {
@@ -281,6 +297,22 @@ public class HTTPRawMessage
 		return "HTTPRawMessage [parsedHeadersStatus=" + parsedHeadersStatus
 				+ ", contentLength=" + hmci.getContentLength() + ", headers=" + hmci.getHeaders()
 				+ ", firstLine=" + firstLine + ", baos=" + ubaos.size() + "]";
+	}
+
+	protected int getDataMark()
+	{
+		return dataMark;
+	}
+
+	public synchronized void setDataMark(int index)
+	{
+		this.dataMark = index;
+	}
+
+	public synchronized int incDataMark(int inc)
+	{
+		this.dataMark += inc;
+		return  dataMark;
 	}
 
 }

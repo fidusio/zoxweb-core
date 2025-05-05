@@ -9,14 +9,17 @@ import org.zoxweb.shared.http.HTTPHeader;
 import org.zoxweb.shared.util.*;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 public class ParseHTTPRequestTest
 {
     public static UByteArrayOutputStream rawRequest;
+    public static UByteArrayOutputStream chunkedRequest;
     @BeforeAll
     public static void loadData() throws IOException
     {
         rawRequest = IOUtil.inputStreamToByteArray(IOUtil.locateFile("multipart-raw-data-no-content-length.txt"), true);
+        chunkedRequest = IOUtil.inputStreamToByteArray(IOUtil.locateFile("chunked-multipart-raw-full-request.bin"), true);
     }
 
     @Test
@@ -26,10 +29,54 @@ public class ParseHTTPRequestTest
 
         HTTPRawMessage hrm = new HTTPRawMessage(rawRequest);
         hrm.parse();
+
         System.out.println("is message complete: " + hrm.isMessageComplete());
         System.out.println(hrm.getHTTPMessageConfig().getBoundary());
         System.out.println(hrm.getHTTPMessageConfig().getHeaders());
         System.out.println(hrm.getHTTPMessageConfig().getParameters());
+
+
+    }
+
+
+    @Test
+    public void parseChunkedRequest() throws IOException {
+        // System.out.println(rawRequest);
+
+
+
+
+        HTTPRawMessage hrm = new HTTPRawMessage();
+        InputStream is = chunkedRequest.toByteArrayInputStream();
+        byte[] buffer = new byte[10];
+        int read;
+        int counter = 0;
+        int totalRead = 0;
+        while((read = is.read(buffer)) != -1 )
+        {
+            hrm.getDataStream().write(buffer, 0, read);
+            hrm.parse();
+            counter++;
+            totalRead += read;
+            if(counter % buffer.length == 0 || hrm.isMessageComplete()) {
+                System.out.println("[" + counter + "]" + " read: " + totalRead);
+                System.out.println(hrm.getHTTPMessageConfig().getParameters());
+                System.out.println("--------------------------------------------------");
+                //System.out.println("=================================\n" + hrm.getDataStream() + "=================================\n");
+            }
+
+            if(hrm.isMessageComplete()) {
+                System.out.println("Transfer chunked: " + hrm.getHTTPMessageConfig().isTransferChunked());
+                System.out.println("is message complete: " + hrm.isMessageComplete());
+                System.out.println(hrm.getHTTPMessageConfig().getBoundary());
+                System.out.println(hrm.getHTTPMessageConfig().getHeaders());
+                System.out.println(hrm.getHTTPMessageConfig().getParameters());
+                System.out.println("=================================\n" + hrm.getDataStream() + "=================================\n");
+            }
+
+        }
+
+
 
 
     }

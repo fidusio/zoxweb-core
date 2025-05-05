@@ -35,7 +35,7 @@ public final class CryptoConst
 	 * AES block size in bits 128 (16 bytes);
 	 */
 	public static final int AES_BLOCK_SIZE = 16;
-	public static final String[] PEM_KEY_FILTERS = {"BEGIN", "END", "PUBLIC", "KEY", "EC", "\n", " ", "PRIVATE"};
+	public static final String PEM_KEY_FILTER = "-----BEGIN [^-]+-----|-----END [^-]+-----|\\s+";
 
 	public static final String PKCS12 = "PKCS12";;
 	public static final String KEY_STORE_TYPE = "JCEKS";
@@ -534,7 +534,22 @@ public final class CryptoConst
 
 	public static String applyPemFilters(String pemToken)
 	{
-		return SharedStringUtil.filterString(pemToken, PEM_KEY_FILTERS);
+		/* Regex pieces the split() will REMOVE:
+		 *   1)  -----BEGIN …-----      (header)
+		 *   2)  -----END …-----        (footer)
+		 *   3)  all whitespace (line breaks, spaces, tabs)
+		 */
+		String[] chunks = pemToken.split(PEM_KEY_FILTER);
+
+		// concatenate the non-empty parts: that’s the pure Base-64 payload
+		StringBuilder sb = new StringBuilder();
+		for (String c : chunks) {
+			if (!c.isEmpty()) sb.append(c);
+		}
+		pemToken = sb.toString();   // <- final result
+
+
+		return pemToken;
 	}
 
 	public static class SubjectIDFilter

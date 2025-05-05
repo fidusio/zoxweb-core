@@ -28,7 +28,9 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class ByteArrayTester
 {
@@ -294,8 +296,28 @@ public class ByteArrayTester
 
 		System.out.println(new String(ByteBufferUtil.toBytes(bb,  false)));
 
+	}
 
 
+	@Test
+	public void testMapBytesArray()
+	{
+		Set<BytesArray> set = new HashSet<>();
+		int len = 100;
+		for (int i = 0; i < len; i++)
+		{
+			set.add(new BytesArray(null, new byte[]{(byte)(i+1), (byte) (i+2), (byte)(i+3), (byte)(i+4)}));
+		}
+
+		assert set.size() == len;
+		assert set.contains(new BytesArray(null, new byte[]{1,2,3,4}));
+		assert set.contains(new BytesArray(null, new byte[]{2,3,4,5}));
+
+
+		Set<Integer> intSet = new HashSet<>();
+		for(int i=0; i < 100 ; i++)
+			intSet.add(i);
+		assert intSet.contains(50);
 	}
 
 }
