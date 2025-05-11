@@ -21,6 +21,7 @@ import org.zoxweb.shared.data.RuntimeResultDAO.ResultAttribute;
 import org.zoxweb.shared.data.VMInfoDAO;
 import org.zoxweb.shared.util.Const;
 import org.zoxweb.shared.util.Const.JavaClassVersion;
+import org.zoxweb.shared.util.GetValue;
 import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedUtil;
 
@@ -32,6 +33,33 @@ import java.util.List;
 
 public class RuntimeUtil
 {
+
+	public enum ShellType
+		implements GetValue<String>
+	{
+
+		SH("/bin/sh"),
+		BASH("/bin/bash"),
+		;
+
+
+		private final String value;
+
+
+
+		ShellType(String value)
+		{
+			this.value = value;
+		}
+		/**
+		 * @return the name of the object
+		 */
+		@Override
+		public String getValue() {
+			return value;
+		}
+	}
+
 
 	public static class PIOs
 	{
@@ -363,14 +391,14 @@ public class RuntimeUtil
 	 * @throws IOException if the process couldn’t start
 	 * @throws InterruptedException if the current thread is interrupted while waiting
 	 */
-	public static int runScript(String shell, String scriptPath, String... args)
+	public static int runScript(ShellType shell, String scriptPath, String... args)
 			throws IOException, InterruptedException {
 		// Build the command: either run directly if executable, or via 'sh'
 		List<String> cmd = new ArrayList<>();
 		// If your script has a proper "#!/bin/sh" and +x permission, you can uncomment:
 		// cmd.add(scriptPath);
 		// Otherwise invoke via the shell:
-		cmd.add(shell);
+		cmd.add(shell.getValue());
 		cmd.add(scriptPath);
 		Collections.addAll(cmd, args);
 
