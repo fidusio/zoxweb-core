@@ -25,7 +25,10 @@ import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedUtil;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 public class RuntimeUtil
 {
@@ -320,6 +323,86 @@ public class RuntimeUtil
 
 		return 0;
 
+	}
+
+
+	/** Helper: run `ipset <args...>` and throw on non-zero exit. */
+	public static boolean exec(String... args)
+			throws IOException
+	{
+
+		ProcessBuilder pb = new ProcessBuilder(args);
+		pb.redirectErrorStream(true);
+		try {
+			Process p = pb.start();
+			// consume any output to avoid blocking
+			try (BufferedReader rdr = new BufferedReader(
+					new InputStreamReader(p.getInputStream()))) {
+				while (rdr.readLine() != null) { /* discard */ }
+			}
+			int rc = p.waitFor();
+			return (rc == 0);
+//            if (rc != 0) {
+//                throw new IOException(
+//                        "ipset " + String.join(" ", args) + " failed, rc=" + rc);
+//            }
+		} catch (InterruptedException e) {
+			throw new IOException("Failed to run ipset command", e);
+		}
+
+	}
+
+
+
+
+	/**
+	 * Runs the given Linux shell script with optional arguments.
+	 * @param scriptPath full path to your .sh file (must be executable or have a #! line)
+	 * @param args zero-or-more arguments to pass to the script
+	 * @return the script’s exit code (0 = success)
+	 * @throws IOException if the process couldn’t start
+	 * @throws InterruptedException if the current thread is interrupted while waiting
+	 */
+	public static int runScript(String shell, String scriptPath, String... args)
+			throws IOException, InterruptedException {
+		// Build the command: either run directly if executable, or via 'sh'
+		List<String> cmd = new ArrayList<>();
+		// If your script has a proper "#!/bin/sh" and +x permission, you can uncomment:
+		// cmd.add(scriptPath);
+		// Otherwise invoke via the shell:
+		cmd.add(shell);
+		cmd.add(scriptPath);
+		Collections.addAll(cmd, args);
+
+		ProcessBuilder pb = new ProcessBuilder(cmd);
+		// (Optional) set working dir or environment:
+		// pb.directory(new File("/path/to/dir"));
+		// Map<String,String> env = pb.environment();
+		// env.put("FOO","bar");
+
+		pb.redirectErrorStream(true);   // merge stderr into stdout
+
+		Process proc = pb.start();
+
+		// Read the output in a background thread (so pipe buffers don’t block)
+		Thread reader = new Thread(() -> {
+			try (BufferedReader r = new BufferedReader(
+					new InputStreamReader(proc.getInputStream()))) {
+				String line;
+				while ((line = r.readLine()) != null) {
+					System.out.println(line);
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		});
+		reader.setDaemon(true);
+		reader.start();
+
+		// Wait for the script to finish
+		int exit = proc.waitFor();
+		reader.join();
+		return exit;
 	}
 
 

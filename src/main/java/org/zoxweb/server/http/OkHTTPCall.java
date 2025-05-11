@@ -452,6 +452,12 @@ public class OkHTTPCall
 		return send(null, hmci);
 	}
 
+	public static  <O> HTTPAPIResult<O>  send(HTTPMessageConfigInterface hmci, Class<?> clazz)
+			throws IOException
+	{
+		return send(null, hmci, clazz);
+	}
+
 	public static HTTPResponseData send(OkHttpClient okHttpClient, HTTPMessageConfigInterface hmci)
 			throws IOException
 	{
