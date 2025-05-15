@@ -17,22 +17,23 @@ package org.zoxweb.shared.util;
 
 /**
  * The CRUD NVEntity interface.
+ *
  * @author mzebib
  */
 public interface CRUDNVEntity
-    extends CRUDEvent
-{
+        extends CRUDEvent {
 
-	/**
-	 * Returns NVEntity.
-	 * @return the nventity 
-	 */
-	public NVEntity getNVEntity();
-	
-	
-	/**
-	 * @return true if revision tracking is enabled 
-	 */
-	public boolean isRevisionTrackingEnabled();
+    /**
+     * Returns NVEntity.
+     *
+     * @return the nventity
+     */
+    NVEntity getNVEntity();
+
+
+    /**
+     * @return true if revision tracking is enabled
+     */
+    boolean isRevisionTrackingEnabled();
 
 }

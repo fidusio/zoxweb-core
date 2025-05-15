@@ -1,7 +1,6 @@
 package org.zoxweb.shared.util;
 
-public interface IsValid
-{
+public interface IsValid {
 
     boolean isValid();
 }

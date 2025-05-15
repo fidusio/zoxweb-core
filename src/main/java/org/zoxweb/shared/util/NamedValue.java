@@ -3,33 +3,32 @@ package org.zoxweb.shared.util;
 import java.io.Closeable;
 
 public class NamedValue<V>
-    extends NVBase<V>
-    implements GetNameValue<V>,
+        extends NVBase<V>
+        implements GetNameValue<V>,
         GetNVProperties,
-        AutoCloseable
-{
+        AutoCloseable {
 
     private final NVGenericMap properties = new NVGenericMap("properties");
-    public NamedValue(){}
+
+    public NamedValue() {
+    }
 
 
-
-    public NamedValue(String name)
-    {
+    public NamedValue(String name) {
         this.name = name;
     }
-    public NamedValue(Enum<?> name, V value)
-    {
+
+    public NamedValue(Enum<?> name, V value) {
         this.name = name instanceof GetName ? ((GetName) name).getName() : "" + name;
         this.value = value;
     }
 
 
-    public NamedValue(String name, V value)
-    {
+    public NamedValue(String name, V value) {
         this.name = name;
         this.value = value;
     }
+
     /**
      * @return the name of the object
      */
@@ -123,8 +122,7 @@ public class NamedValue<V>
      * @throws Exception if this resource cannot be closed
      */
     @Override
-    public void close() throws Exception
-    {
+    public void close() throws Exception {
         if (value != null && value instanceof AutoCloseable)
             ((AutoCloseable) value).close();
     }

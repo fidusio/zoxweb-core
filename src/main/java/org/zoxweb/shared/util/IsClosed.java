@@ -18,13 +18,13 @@ package org.zoxweb.shared.util;
 /**
  *
  */
-public interface IsClosed
-{
+public interface IsClosed {
 
-	/**
-	 * Checks if closed.
-	 * @return true if closed
-	 */
-	boolean isClosed();
+    /**
+     * Checks if closed.
+     *
+     * @return true if closed
+     */
+    boolean isClosed();
 
 }

@@ -19,121 +19,115 @@ import java.io.Serializable;
 
 /**
  * This is the base name value (NVBase) class that is the used by
- * subclasses within the package. This class contains methods that 
- * set and retrieve the following variables: reference ID, name, and 
+ * subclasses within the package. This class contains methods that
+ * set and retrieve the following variables: reference ID, name, and
  * value (of any data type based on NVBase).
- * @author mzebib
  *
  * @param <V>
+ * @author mzebib
  */
 @SuppressWarnings("serial")
 public class NVBase<V>
-    implements Serializable, SetNameValue<V>, ReferenceID<String>
-{
+        implements Serializable, SetNameValue<V>, ReferenceID<String> {
 
-	protected String referenceId;
-	protected String name;
-	protected V value;
+    protected String referenceId;
+    protected String name;
+    protected V value;
 
-	/**
-	 * This constructor maps GetNameValue to NVBase object.
-	 * @param nv
-	 */
-	public NVBase(GetNameValue<V> nv)
-    {
-		this(nv.getName(), nv.getValue());
-	}
-	
-	/**
-	 * This constructor maps GetName to NVBase object and 
-	 * generic value entered externally.
-	 * @param gn
-	 * @param v
-	 */
-	public NVBase(GetName gn, V v)
-    {
-		this(gn.getName(), v);
-	}
-	
-	/**
-	 * This constructor instantiates NVBase based
-	 * on name and generic type value.
-	 * @param name
-	 * @param value
-	 */
-	public NVBase(String name, V value)
-    {
-		// Note value must be set first
-		setValue(value);
-		// name set next NOT FIRST
-		setName(name);
-	}
+    /**
+     * This constructor maps GetNameValue to NVBase object.
+     *
+     * @param nv
+     */
+    public NVBase(GetNameValue<V> nv) {
+        this(nv.getName(), nv.getValue());
+    }
 
-	/**
-	 * The default constructor.
-	 */
-	public NVBase()
-    {
+    /**
+     * This constructor maps GetName to NVBase object and
+     * generic value entered externally.
+     *
+     * @param gn
+     * @param v
+     */
+    public NVBase(GetName gn, V v) {
+        this(gn.getName(), v);
+    }
 
-	}
+    /**
+     * This constructor instantiates NVBase based
+     * on name and generic type value.
+     *
+     * @param name
+     * @param value
+     */
+    public NVBase(String name, V value) {
+        // Note value must be set first
+        setValue(value);
+        // name set next NOT FIRST
+        setName(name);
+    }
 
-	/**
-	 * Returns the reference ID.
-	 */
-	public String getReferenceID()
-    {
-		return referenceId;
-	}
+    /**
+     * The default constructor.
+     */
+    public NVBase() {
 
-	/**
-	 * Returns the name.
-	 */
-	public String getName()
-    {
-		return name;
-	}
+    }
 
-	/**
-	 * Returns the value.
-	 */
-	public V getValue()
-    {
-		return value;
-	}
+    /**
+     * Returns the reference ID.
+     */
+    public String getReferenceID() {
+        return referenceId;
+    }
 
-	/**
-	 * Sets the reference ID.
-	 * @param referenceId
-	 */
-	public void setReferenceID(String referenceId)
-    {
-		this.referenceId = referenceId;
-	}
+    /**
+     * Returns the name.
+     */
+    public String getName() {
+        return name;
+    }
 
-	/**
-	 * Sets the name.
-	 * @param name
-	 */
-	public void setName(String name)
-    {
-		this.name = name;
-	}
+    /**
+     * Returns the value.
+     */
+    public V getValue() {
+        return value;
+    }
 
-	/**
-	 * Sets the value.
-	 * @param value
-	 */
-	public void setValue(V value)
-    {
-		this.value = value;
-	}
-	
-	/**
-	 * Returns a string containing reference ID, name and value.
-	 */
-	public String toString()
-    {
-		return "{" + (referenceId != null ? referenceId + "," : "") + name + ":" + value + "}";
-	}
-	
+    /**
+     * Sets the reference ID.
+     *
+     * @param referenceId
+     */
+    public void setReferenceID(String referenceId) {
+        this.referenceId = referenceId;
+    }
+
+    /**
+     * Sets the name.
+     *
+     * @param name
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    /**
+     * Sets the value.
+     *
+     * @param value
+     */
+    public void setValue(V value) {
+        this.value = value;
+    }
+
+    /**
+     * Returns a string containing reference ID, name and value.
+     */
+    public String toString() {
+        return "{" + (referenceId != null ? referenceId + "," : "") + name + ":" + value + "}";
+    }
+
 }

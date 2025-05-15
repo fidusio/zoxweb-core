@@ -19,45 +19,47 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-public interface KVMapStore<K,V>
-{
+public interface KVMapStore<K, V> {
 
 
-	boolean put(K key, V value);
-	//boolean map(K key, V value);
+    boolean put(K key, V value);
+    //boolean map(K key, V value);
 
-	V get(K key);
+    V get(K key);
 
-	boolean remove(K key);
+    boolean remove(K key);
 
-	V removeGet(K key);
-	
-	void clear(boolean all);
+    V removeGet(K key);
 
-	Iterator<K> exclusions();
-	
-	Iterator<V> values();
-	Iterator<K> keys();
+    void clear(boolean all);
 
-	Set<Map.Entry<K, V>> entrySet();
+    Iterator<K> exclusions();
 
-	void addExclusion(K exclusion);
+    Iterator<V> values();
+
+    Iterator<K> keys();
+
+    Set<Map.Entry<K, V>> entrySet();
+
+    void addExclusion(K exclusion);
 
 
-	/**
-	 * Return the count og object stored by the key value store
-	 * @return
-	 */
-	int size();
+    /**
+     * Return the count og object stored by the key value store
+     *
+     * @return
+     */
+    int size();
 
-	/**
-	 * If enabled, return in bytes of amount values stored
-	 * @return
-	 */
-	long dataSize();
+    /**
+     * If enabled, return in bytes of amount values stored
+     *
+     * @return
+     */
+    long dataSize();
 
-	long averageDataSize();
+    long averageDataSize();
 
-	long defaultExpirationPeriod();
-	
+    long defaultExpirationPeriod();
+
 }

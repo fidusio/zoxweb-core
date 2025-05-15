@@ -17,13 +17,14 @@ package org.zoxweb.shared.util;
 
 /**
  * The mandatory property interface.
+ *
  * @author mzebib
  */
-public interface IsMandatory
-{
-	/**
-	 * Checks if property is mandatory.
-	 * @return true if mandatory
-	 */
-	boolean isMandatory();
+public interface IsMandatory {
+    /**
+     * Checks if property is mandatory.
+     *
+     * @return true if mandatory
+     */
+    boolean isMandatory();
 }

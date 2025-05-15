@@ -12,16 +12,14 @@ import java.nio.file.Files;
 public class HTTPWPut {
     private static final String dummy = "abcdefghijklmnopqrstuvwxyz0123456789";
 
-    public static class FileToData
-    {
+    public static class FileToData {
 
         private final String filename;
         private final InputStream is;
         private HTTPMediaType mediaType;
         private final long length;
 
-        public FileToData(String fileToUpload, InputStream is, long length)
-        {
+        public FileToData(String fileToUpload, InputStream is, long length) {
             this.filename = fileToUpload;
             this.length = length;
             this.is = is;
@@ -29,56 +27,50 @@ public class HTTPWPut {
         }
 
         public FileToData(String fileToUpload) throws IOException {
-           File file = new File(fileToUpload);
-           if (file.exists())
-           {
-               this.filename = file.getName();
-               length = file.length();
-               is = Files.newInputStream(file.toPath());
-               mediaType = HTTPMediaType.lookupByExtension(fileToUpload);
-               return;
-           }
+            File file = new File(fileToUpload);
+            if (file.exists()) {
+                this.filename = file.getName();
+                length = file.length();
+                is = Files.newInputStream(file.toPath());
+                mediaType = HTTPMediaType.lookupByExtension(fileToUpload);
+                return;
+            }
 
 
-           String[] tokens = fileToUpload.split(":");
-           if (tokens.length != 2)
-               throw  new IllegalArgumentException("Invalid dummy filename : " + fileToUpload);
+            String[] tokens = fileToUpload.split(":");
+            if (tokens.length != 2)
+                throw new IllegalArgumentException("Invalid dummy filename : " + fileToUpload);
 
-           this.filename = tokens[0];
-           mediaType = HTTPMediaType.lookupByExtension(this.filename);
-           length = Const.SizeInBytes.parse(tokens[1]);
+            this.filename = tokens[0];
+            mediaType = HTTPMediaType.lookupByExtension(this.filename);
+            length = Const.SizeInBytes.parse(tokens[1]);
             UByteArrayOutputStream ubaos = new UByteArrayOutputStream();
             int len = dummy.length();
-            while (ubaos.size() < length)
-            {
-                ubaos.write(dummy.charAt(ubaos.size()%len));
+            while (ubaos.size() < length) {
+                ubaos.write(dummy.charAt(ubaos.size() % len));
 
             }
             is = ubaos.toByteArrayInputStream();
         }
 
-        public String getFilename()
-        {
+        public String getFilename() {
             return filename;
         }
 
-        public InputStream getInputStream()
-        {
+        public InputStream getInputStream() {
             return is;
         }
 
-        public HTTPMediaType getMediaType()
-        {
+        public HTTPMediaType getMediaType() {
             return mediaType;
         }
-        public FileToData setMediaType(HTTPMediaType hmt)
-        {
+
+        public FileToData setMediaType(HTTPMediaType hmt) {
             mediaType = hmt;
             return this;
         }
 
-        public long getLength()
-        {
+        public long getLength() {
             return length;
         }
 
@@ -100,8 +92,7 @@ public class HTTPWPut {
                                               FileToData fileToData,
                                               String remoteFileLocation,
                                               String remoteFilePassword)
-            throws IOException
-    {
+            throws IOException {
         fileToData.setMediaType(HTTPMediaType.APPLICATION_OCTET_STREAM);
         HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit(url, null, method, sslCheckEnabled);
         //hmci.getHeaders().build("Connection", "Close");
@@ -114,17 +105,14 @@ public class HTTPWPut {
         ;
 
         hmci.getParameters().build(nvc);
-        if (remoteFileLocation != null)
-        {
+        if (remoteFileLocation != null) {
             hmci.getParameters().build("file-location", remoteFileLocation);
         }
-        if(remoteFilePassword != null)
-        {
+        if (remoteFilePassword != null) {
             hmci.getParameters().build("file-password", remoteFilePassword);
         }
 
-        if (httpAuthorization != null)
-        {
+        if (httpAuthorization != null) {
             hmci.setAuthorization(httpAuthorization);
         }
 
@@ -134,11 +122,8 @@ public class HTTPWPut {
     public static void main(String[] args) {
 
 
-
-
         long ts = System.currentTimeMillis();
-        try
-        {
+        try {
             ParamUtil.ParamMap params = ParamUtil.parse("=", args);
             params.hide("password");
             System.out.println(params);
@@ -151,18 +136,13 @@ public class HTTPWPut {
             String filePassword = params.stringValue("file-password", true);
             int repeat = params.intValue("repeat", 1);
             HTTPMethod method = params.enumValue("method", HTTPMethod.POST, HTTPMethod.PUT);
-            if(method == null)
+            if (method == null)
                 method = HTTPMethod.POST;
-            boolean  disableSSL = params.booleanValue("dssl", true);
-
-
-
-
-
+            boolean disableSSL = params.booleanValue("dssl", true);
 
 
             //UByteArrayOutputStream baos = IOUtil.inputStreamToByteArray(inputStream, true);
-            for (int i=0; i < repeat; i++) {
+            for (int i = 0; i < repeat; i++) {
                 FileToData fileToData = new FileToData(filePath);
                 fileToData.setMediaType(HTTPMediaType.APPLICATION_OCTET_STREAM);
                 System.out.println(fileToData);
@@ -205,19 +185,14 @@ public class HTTPWPut {
                         fileLocation,
                         filePassword);
 
-                if(hrd.getStatus() == HTTPStatusCode.OK.CODE)
+                if (hrd.getStatus() == HTTPStatusCode.OK.CODE)
                     System.out.println(hrd.getDataAsString());
                 else
                     System.out.println(hrd);
             }
 
 
-
-
-
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             e.printStackTrace();
             System.err.println("Usage: java HTTPWPut <url=URL> <file=FilePath> [dssl=yes/no] [method=POST/PUT]");
         }

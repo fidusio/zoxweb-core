@@ -20,216 +20,181 @@ import org.zoxweb.shared.util.*;
 
 /**
  * The authorization the enum currently support Basic and Bearer
- * @author mnael
  *
+ * @author mnael
  */
 public enum HTTPAuthScheme
-	implements GetName
-{
-	
-	BASIC(CryptoConst.AuthenticationType.BASIC.getName())
-	{
-		public GetNameValue<String> toHTTPHeader(String ...args)
-		{
-			int index = 0;
-			String usernameAndMaybePassword = args.length > index ? args[index++] : null;
-			String password = args.length > index ? args[index++] : null;
-			
-			if(SUS.isNotEmpty(usernameAndMaybePassword) && SUS.isNotEmpty(password))
-			{
-			
-				return new NVPair(HTTPHeader.AUTHORIZATION,
-					BASIC.getName() + " " + new String(SharedBase64.encode(SharedStringUtil.getBytes(SharedUtil.toCanonicalID(':', usernameAndMaybePassword, password)))));
-			}
-			
-			if(SUS.isNotEmpty(usernameAndMaybePassword))
-			{
-				String authToken;
-				// if the username has the password like user:password
-				if (usernameAndMaybePassword.indexOf(':') != -1)
-				{
-					authToken = usernameAndMaybePassword;
-				}
-				else
-				{
-					authToken = usernameAndMaybePassword + ":";
-				}
+        implements GetName {
 
-				return new NVPair(HTTPHeader.AUTHORIZATION,
-					BASIC.getName() + " " + new String(SharedBase64.encode(SharedStringUtil.getBytes(authToken))));
-			}
-			
-			if(SUS.isNotEmpty(password))
-			{
-				return new NVPair(HTTPHeader.AUTHORIZATION,
-					BASIC.getName() + " " + new String(SharedBase64.encode(SharedStringUtil.getBytes(":"+password))));
-			}
-			
-			return null;
-		}
+    BASIC(CryptoConst.AuthenticationType.BASIC.getName()) {
+        public GetNameValue<String> toHTTPHeader(String... args) {
+            int index = 0;
+            String usernameAndMaybePassword = args.length > index ? args[index++] : null;
+            String password = args.length > index ? args[index++] : null;
 
-		@Override
-		public HTTPAuthorization toHTTPAuthentication(String value)
-		{
-			String[] tokens = SharedStringUtil.parseString(value, " ", true);
-			if(tokens.length > 1)
-			{
-				if (!BASIC.name().equalsIgnoreCase(tokens[0]))
-					throw new IllegalArgumentException("Not a basic authentication type " + tokens[0]);
+            if (SUS.isNotEmpty(usernameAndMaybePassword) && SUS.isNotEmpty(password)) {
 
-				value = tokens[1];
-			}
+                return new NVPair(HTTPHeader.AUTHORIZATION,
+                        BASIC.getName() + " " + new String(SharedBase64.encode(SharedStringUtil.getBytes(SharedUtil.toCanonicalID(':', usernameAndMaybePassword, password)))));
+            }
 
-			String fullToken = SharedStringUtil.toString((SharedBase64.decode(SharedBase64.Base64Type.DEFAULT, SharedStringUtil.getBytes(value))));
-			
-			
-			int columnIndex = fullToken.indexOf(':');
-			if (columnIndex == -1)
-			{
-				return null;
-			}
-			
-			
-			//String parsed[] = SharedStringUtil.parseString(fullToken, ":");
-			
-			String user = fullToken.substring(0, columnIndex);//parsed.length > index ? parsed[index++] : null;
-			String password = fullToken.substring(columnIndex+1);//parsed.length > index ? parsed[index++] : null;
-			
-			
-			
-			// TODO Auto-generated method stub
-			return new HTTPAuthorizationBasic(SharedStringUtil.trimOrNull(user), SharedStringUtil.trimOrNull(password));
-		}
-	},
-	BEARER(CryptoConst.AuthenticationType.BEARER.getName())
-	{
-		@Override
-		public GetNameValue<String> toHTTPHeader(String ...args)
-		{
-			if (args.length == 1) {
-				// TODO Auto-generated method stub
-				String token = args[0];
-				String[] tokens = SharedStringUtil.parseString(token, " ", true);
-				if(tokens.length > 1)
-				{
-					if (!BEARER.name().equalsIgnoreCase(tokens[0]))
-						throw new IllegalArgumentException("Not a bearer authentication type " + tokens[0]);
+            if (SUS.isNotEmpty(usernameAndMaybePassword)) {
+                String authToken;
+                // if the username has the password like user:password
+                if (usernameAndMaybePassword.indexOf(':') != -1) {
+                    authToken = usernameAndMaybePassword;
+                } else {
+                    authToken = usernameAndMaybePassword + ":";
+                }
 
-					token = tokens[1];
-				}
-				return new NVPair(HTTPHeader.AUTHORIZATION, BEARER.getName() + " " + token);
-			}
-			else if (args.length > 1)
-				return new NVPair(HTTPHeader.AUTHORIZATION, args[0]+ " " + args[1]);
-			
-			return null;
-		}
+                return new NVPair(HTTPHeader.AUTHORIZATION,
+                        BASIC.getName() + " " + new String(SharedBase64.encode(SharedStringUtil.getBytes(authToken))));
+            }
 
-		@Override
-		public HTTPAuthorization toHTTPAuthentication(String value)
-		{
-			// TODO Auto-generated method stub
-			return new HTTPAuthorization(HTTPAuthScheme.BEARER, value);
-		}
-		
-	},
-	GENERIC("GENERIC")
-			{
-				@Override
-				public GetNameValue<String> toHTTPHeader(String... args)
-				{
+            if (SUS.isNotEmpty(password)) {
+                return new NVPair(HTTPHeader.AUTHORIZATION,
+                        BASIC.getName() + " " + new String(SharedBase64.encode(SharedStringUtil.getBytes(":" + password))));
+            }
 
-					StringBuilder value = new StringBuilder();
-					for(String t : args)
-					{
-						t = SharedStringUtil.trimOrNull(t);
-						if (t != null)
-						{
-							if (value.length() > 0)
-							{
-								value.append(" ");
-							}
-							value.append(t);
-						}
-					}
-					if(value.length() > 0)
-						return new NVPair(HTTPHeader.AUTHORIZATION, value.toString());
+            return null;
+        }
 
-					return null;
-				}
+        @Override
+        public HTTPAuthorization toHTTPAuthentication(String value) {
+            String[] tokens = SharedStringUtil.parseString(value, " ", true);
+            if (tokens.length > 1) {
+                if (!BASIC.name().equalsIgnoreCase(tokens[0]))
+                    throw new IllegalArgumentException("Not a basic authentication type " + tokens[0]);
 
-				@Override
-				public HTTPAuthorization toHTTPAuthentication(String token) {
-					return new HTTPAuthorization(token);
-				}
-			},
+                value = tokens[1];
+            }
 
-	;
+            String fullToken = SharedStringUtil.toString((SharedBase64.decode(SharedBase64.Base64Type.DEFAULT, SharedStringUtil.getBytes(value))));
 
-	
-	private final String name;
-	
-	
-	
-	HTTPAuthScheme(String name)
-	{
-		this.name = name;
-	}
-	/**
-	 * @see org.zoxweb.shared.util.GetName#getName()
-	 */
-	@Override
-	public String getName()
-	{
-		// TODO Auto-generated method stub
-		return name;
-	}
-	
-	
-	public String toString()
-	{
-		return getName();
-	}
-	
-	abstract public GetNameValue<String> toHTTPHeader(String ...args);
-	
-	abstract public HTTPAuthorization toHTTPAuthentication(String value);
-	
-	
-	
-	
-	
 
-	public static HTTPAuthorization parse(GetNameValue<String> gnv)
-	{ 
-		if (gnv == null)
-			return null;
-		return parse(gnv.getValue());
-	}
-	
-	
-	public static HTTPAuthorization parse(String value)
-	{ 
-		if (value == null)
-		{
-			return null;
-		}
-		String[] tokens = SharedStringUtil.parseString(value, " ");
-		if (tokens == null || tokens.length == 0)
-		{
-			throw new IllegalArgumentException("Invalid authentication value " + value );
-		}
-		
-		int index = 0;
-		String typeStr =  tokens[index++];
-		HTTPAuthScheme type = SharedUtil.lookupEnum(typeStr, HTTPAuthScheme.values());
-		if (type == null)
-		{
-			return new HTTPAuthorization(typeStr, tokens[index++]);
-		}
-		
-		return type.toHTTPAuthentication(tokens[index++]);
-		
-	}
+            int columnIndex = fullToken.indexOf(':');
+            if (columnIndex == -1) {
+                return null;
+            }
+
+
+            //String parsed[] = SharedStringUtil.parseString(fullToken, ":");
+
+            String user = fullToken.substring(0, columnIndex);//parsed.length > index ? parsed[index++] : null;
+            String password = fullToken.substring(columnIndex + 1);//parsed.length > index ? parsed[index++] : null;
+
+
+            // TODO Auto-generated method stub
+            return new HTTPAuthorizationBasic(SharedStringUtil.trimOrNull(user), SharedStringUtil.trimOrNull(password));
+        }
+    },
+    BEARER(CryptoConst.AuthenticationType.BEARER.getName()) {
+        @Override
+        public GetNameValue<String> toHTTPHeader(String... args) {
+            if (args.length == 1) {
+                // TODO Auto-generated method stub
+                String token = args[0];
+                String[] tokens = SharedStringUtil.parseString(token, " ", true);
+                if (tokens.length > 1) {
+                    if (!BEARER.name().equalsIgnoreCase(tokens[0]))
+                        throw new IllegalArgumentException("Not a bearer authentication type " + tokens[0]);
+
+                    token = tokens[1];
+                }
+                return new NVPair(HTTPHeader.AUTHORIZATION, BEARER.getName() + " " + token);
+            } else if (args.length > 1)
+                return new NVPair(HTTPHeader.AUTHORIZATION, args[0] + " " + args[1]);
+
+            return null;
+        }
+
+        @Override
+        public HTTPAuthorization toHTTPAuthentication(String value) {
+            // TODO Auto-generated method stub
+            return new HTTPAuthorization(HTTPAuthScheme.BEARER, value);
+        }
+
+    },
+    GENERIC("GENERIC") {
+        @Override
+        public GetNameValue<String> toHTTPHeader(String... args) {
+
+            StringBuilder value = new StringBuilder();
+            for (String t : args) {
+                t = SharedStringUtil.trimOrNull(t);
+                if (t != null) {
+                    if (value.length() > 0) {
+                        value.append(" ");
+                    }
+                    value.append(t);
+                }
+            }
+            if (value.length() > 0)
+                return new NVPair(HTTPHeader.AUTHORIZATION, value.toString());
+
+            return null;
+        }
+
+        @Override
+        public HTTPAuthorization toHTTPAuthentication(String token) {
+            return new HTTPAuthorization(token);
+        }
+    },
+
+    ;
+
+
+    private final String name;
+
+
+    HTTPAuthScheme(String name) {
+        this.name = name;
+    }
+
+    /**
+     * @see org.zoxweb.shared.util.GetName#getName()
+     */
+    @Override
+    public String getName() {
+        // TODO Auto-generated method stub
+        return name;
+    }
+
+
+    public String toString() {
+        return getName();
+    }
+
+    abstract public GetNameValue<String> toHTTPHeader(String... args);
+
+    abstract public HTTPAuthorization toHTTPAuthentication(String value);
+
+
+    public static HTTPAuthorization parse(GetNameValue<String> gnv) {
+        if (gnv == null)
+            return null;
+        return parse(gnv.getValue());
+    }
+
+
+    public static HTTPAuthorization parse(String value) {
+        if (value == null) {
+            return null;
+        }
+        String[] tokens = SharedStringUtil.parseString(value, " ");
+        if (tokens == null || tokens.length == 0) {
+            throw new IllegalArgumentException("Invalid authentication value " + value);
+        }
+
+        int index = 0;
+        String typeStr = tokens[index++];
+        HTTPAuthScheme type = SharedUtil.lookupEnum(typeStr, HTTPAuthScheme.values());
+        if (type == null) {
+            return new HTTPAuthorization(typeStr, tokens[index++]);
+        }
+
+        return type.toHTTPAuthentication(tokens[index++]);
+
+    }
 
 }

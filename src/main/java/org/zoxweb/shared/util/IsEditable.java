@@ -17,14 +17,15 @@ package org.zoxweb.shared.util;
 
 /**
  * The editable property interface.
- * @author mzebib
  *
+ * @author mzebib
  */
 public interface IsEditable {
 
-	/**
-	 * Checks if property is editable.
-	 * @return true if editable
-	 */
-	boolean isEditable();
+    /**
+     * Checks if property is editable.
+     *
+     * @return true if editable
+     */
+    boolean isEditable();
 }

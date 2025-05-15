@@ -19,35 +19,37 @@ import java.util.List;
 
 /**
  * The array values interface.
+ *
  * @param <T>
  */
-public interface ArrayValues<T>
-{
+public interface ArrayValues<T> {
 
-	T get(String str);
+    T get(String str);
 
-	T get(GetName getName);
+    T get(GetName getName);
 
-	int size();
+    int size();
 
-	T[] values();
-	<V> V[] valuesAs(V[] v);
+    T[] values();
 
-	T add(T v);
+    <V> V[] valuesAs(V[] v);
 
-	T remove(T v);
+    T add(T v);
 
-	T remove(String str);
+    T remove(T v);
 
-	T remove(GetName getName);
-	void clear();
+    T remove(String str);
 
-	void add(T[]vals, boolean clear);
+    T remove(GetName getName);
 
-	List<T> search(String... criteria);
+    void clear();
 
-	boolean isFixed();
+    void add(T[] vals, boolean clear);
 
-	void setFixed(boolean isFixed);
-	
+    List<T> search(String... criteria);
+
+    boolean isFixed();
+
+    void setFixed(boolean isFixed);
+
 }
