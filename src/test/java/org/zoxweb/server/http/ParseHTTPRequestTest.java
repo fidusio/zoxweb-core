@@ -4,9 +4,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.io.UByteArrayOutputStream;
-import org.zoxweb.server.util.GSONUtil;
-import org.zoxweb.shared.http.HTTPHeader;
-import org.zoxweb.shared.util.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -87,10 +84,12 @@ public class ParseHTTPRequestTest
     @Test
     public void parseHeaderTest()
     {
-        String[] headers = {"Content-Type: text/html;charset=UTF-8; boundary=\"--exampleBoundary\", batata=232",
+        String[] headers = {"Content-Type: text/html;charset=UTF-8; boundary=\"--exampleBoundary\", bata; bata-type=232",
                 "Content-Disposition: form-data; name=\"file\"; filename=\"example.pdf\"",
                 "Accept: text/html, application/xhtml+xml;q=0.9, image/webp;q=0.8, */*;q=0.7;q=0.9",
                 "Content-Type: multipart/form-data; boundary=bd1a40c9-9408-4b59-8d4b-f6693561887e",
+                "Content-Type: application/json",
+                "Attachment: attachment; filename=\"file,: name.pdf\"; creation-date=\"Wed, 12 Feb 2020 16:00:00 GMT\", inline",
                 "Authorization: Bearer jdlksjfgdksljgikjrtjtkrejtiohyu4o35hjhj5rk",
                 "Connection: keep-alive, Upgrade"
             };
@@ -98,8 +97,9 @@ public class ParseHTTPRequestTest
         for (String header: headers)
         {
             System.out.println(header);
-            NamedValue<String> parsedHeader = HTTPHeaderParser.parseFullLineHeader(header);
-            System.out.println(parsedHeader);
+//            NamedValue<String> parsedHeader = HTTPHeaderParser.parseFullLineHeader(header);
+//            System.out.println(parsedHeader);
+            System.out.println("NEW ONE: " + HTTPHeaderParser.parseHTTPHeaderLine(header));
             System.out.println("-----------------------------------------------------------");
 
         }
@@ -108,61 +108,61 @@ public class ParseHTTPRequestTest
 
 
 
-    @Test
-    public void parseHeaderValue()
-    {
-        String[] headerValues = {
-                "form-data; name=\"file\"; filename=\"example.pdf\"",
-                "text/html, application/xhtml+xml;q=0.9, image/webp;q=0.8, */*;q=0.7",
-                "timeout=5, max=10",
-                "attachment; filename=\"file,: name.pdf\"; creation-date=\"Wed, 12 Feb 2020 16:00:00 GMT\", inline",
-                "text/html; q=0.8, application/xhtml+xml; q=0.9, image/webp; q=0.7, */*; q=0.5",
-                "Bearer 439iu5krjtjritu34iu5ij43l5kjewlrjlkejtewtre",
-                "no-cache, no-store, must-revalidate",
-                "text/html; charset=UTF-8",
-                "keep-alive, Upgrade"
+//    @Test
+//    public void parseHeaderValue()
+//    {
+//        String[] headerValues = {
+//                "form-data; name=\"file\"; filename=\"example.pdf\"",
+//                "text/html, application/xhtml+xml;q=0.9, image/webp;q=0.8, */*;q=0.7",
+//                "timeout=5, max=10",
+//                "attachment; filename=\"file,: name.pdf\"; creation-date=\"Wed, 12 Feb 2020 16:00:00 GMT\", inline",
+//                "text/html; q=0.8, application/xhtml+xml; q=0.9, image/webp; q=0.7, */*; q=0.5",
+//                "Bearer 439iu5krjtjritu34iu5ij43l5kjewlrjlkejtewtre",
+//                "no-cache, no-store, must-revalidate",
+//                "text/html; charset=UTF-8",
+//                "keep-alive, Upgrade"
+//
+//        };
+//        RateCounter rc = new RateCounter();
+//        long ts = System.currentTimeMillis();
+//        for(String hv: headerValues)
+//        {
+//
+//            System.out.println("=============================================================");
+//            System.out.println(hv);
+//            long delta = System.currentTimeMillis();
+//            NVGenericMap header = HTTPHeaderParser.parseHeader("toto", hv);
+//            delta =  System.currentTimeMillis() - delta;
+//            rc.register(delta);
+//            System.out.println(header);
+//            System.out.println("=============================================================\n");
+//        }
+//
+//        System.out.println(rc  + " all " + Const.TimeInMillis.toString(System.currentTimeMillis() - ts));
+//
+//        System.out.println(GSONUtil.toJSONDefault(new NVGenericMap().build(HTTPHeaderParser.parseHeader(new NVPair("content-type","attachment; filename=\"file,: name.pdf\"; creation-date=\"Wed, 12 Feb 2020 16:00:00 GMT\", inline")))));
+//        System.out.println(GSONUtil.toJSONDefault(new NVGenericMap().build(HTTPHeaderParser.parseHeader(HTTPHeader.CONTENT_TYPE,"attachment; filename=\"file,: name.pdf\"; creation-date=\"Wed, 12 Feb 2020 16:00:00 GMT\", inline"))));
+//    }
 
-        };
-        RateCounter rc = new RateCounter();
-        long ts = System.currentTimeMillis();
-        for(String hv: headerValues)
-        {
-
-            System.out.println("=============================================================");
-            System.out.println(hv);
-            long delta = System.currentTimeMillis();
-            NVGenericMap header = HTTPHeaderParser.parseHeader("toto", hv);
-            delta =  System.currentTimeMillis() - delta;
-            rc.register(delta);
-            System.out.println(header);
-            System.out.println("=============================================================\n");
-        }
-
-        System.out.println(rc  + " all " + Const.TimeInMillis.toString(System.currentTimeMillis() - ts));
-
-        System.out.println(GSONUtil.toJSONDefault(new NVGenericMap().build(HTTPHeaderParser.parseHeader(new NVPair("content-type","attachment; filename=\"file,: name.pdf\"; creation-date=\"Wed, 12 Feb 2020 16:00:00 GMT\", inline")))));
-        System.out.println(GSONUtil.toJSONDefault(new NVGenericMap().build(HTTPHeaderParser.parseHeader(HTTPHeader.CONTENT_TYPE,"attachment; filename=\"file,: name.pdf\"; creation-date=\"Wed, 12 Feb 2020 16:00:00 GMT\", inline"))));
-    }
-
-    @Test
-    public void parseFullHeaderTest()
-    {
-
-        String[] headers = {"Content-Type: text/html;charset=UTF-8; boundary=\"--exampleBoundary\", batata=232",
-                "Content-Disposition: form-data; name=\"file\"; filename=\"example.pdf\"",
-                "Accept: text/html, application/xhtml+xml;q=0.9, image/webp;q=0.8, */*;q=0.7;q=0.9",
-                "Content-Type: multipart/form-data; boundary=bd1a40c9-9408-4b59-8d4b-f6693561887e",
-                "Authorization: Bearer jdlksjfgdksljgikjrtjtkrejtiohyu4o35hjhj5rk;charset=UTF-8", // this is invalid
-                "Connection: keep-alive, Upgrade"
-        };
-
-        for (String header: headers)
-        {
-            System.out.println(header);
-            NVGenericMap parsedHeader = HTTPHeaderParser.parseHeader(header);
-            System.out.println(parsedHeader);
-            System.out.println("-----------------------------------------------------------");
-
-        }
-    }
+//    @Test
+//    public void parseFullHeaderTest()
+//    {
+//
+//        String[] headers = {"Content-Type: text/html;charset=UTF-8; boundary=\"--exampleBoundary\", batata=232",
+//                "Content-Disposition: form-data; name=\"file\"; filename=\"example.pdf\"",
+//                "Accept: text/html, application/xhtml+xml;q=0.9, image/webp;q=0.8, */*;q=0.7;q=0.9",
+//                "Content-Type: multipart/form-data; boundary=bd1a40c9-9408-4b59-8d4b-f6693561887e",
+//                "Authorization: Bearer jdlksjfgdksljgikjrtjtkrejtiohyu4o35hjhj5rk;charset=UTF-8", // this is invalid
+//                "Connection: keep-alive, Upgrade"
+//        };
+//
+//        for (String header: headers)
+//        {
+//            System.out.println(header);
+//            NVGenericMap parsedHeader = HTTPHeaderParser.parseHeader(header);
+//            System.out.println(parsedHeader);
+//            System.out.println("-----------------------------------------------------------");
+//
+//        }
+//    }
 }

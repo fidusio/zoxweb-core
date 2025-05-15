@@ -1014,6 +1014,21 @@ public final class GSONUtil
 						writer.name(nvc.getName()).value((Number) nve.lookupValue(nvc));
 					}
 				}
+				else if (nvc.getMetaTypeBase() == NamedValue.class)
+				{
+					Object value = nve.lookupValue(nvc);
+					if (value != null)
+					{
+						writer.name(nvc.getName());
+						if (value instanceof Number)
+							writer.value((Number) nve.lookupValue(nvc));
+						else if (value instanceof Boolean)
+							writer.value((Boolean) value);
+						else if (value instanceof String)
+							writer.value((String) value);
+
+					}
+				}
 				else if (nvc instanceof NVConfigEntity)
 				{
 					NVEntity tempNVE = nve.lookupValue(nvc);
@@ -2316,6 +2331,26 @@ public final class GSONUtil
 					else if (Number.class.equals(metaType))
 					{
 						((NVBase<Number>) nvb).setValue(SharedUtil.parseNumber(je.getAsString()));
+					}
+					else if(NamedValue.class.equals(metaType))
+					{
+						if (je.isJsonPrimitive())
+						{
+							JsonPrimitive jp = je.getAsJsonPrimitive();
+							NamedValue<Object> nv = (NamedValue<Object>) nvb;
+							if(jp.isString())
+							{
+								nv.setValue(jp.getAsString());
+							}
+							else if (jp.isBoolean())
+							{
+								nv.setValue(jp.getAsBoolean());
+							}
+							else if(jp.isNumber())
+							{
+								nv.setValue(jp.getAsNumber());
+							}
+						}
 					}
 				}
 			}

@@ -15,8 +15,7 @@ import java.io.InputStream;
 public final class HTTPCodecs {
   public final static LogWrapper log = new LogWrapper(HTTPCodecs.class).setEnabled(false);
 
-  private HTTPCodecs() {
-  }
+  private HTTPCodecs() {}
 
   public static final DataDecoder<byte[], NVGenericMap> BytesToNVGM = (input) -> GSONUtil.fromJSONGenericMap(SharedStringUtil.toString(input), null, Base64Type.DEFAULT);
 
@@ -140,7 +139,8 @@ public final class HTTPCodecs {
         {
           if (HTTPMediaType.lookup(hmci.getContentType()) == HTTPMediaType.MULTIPART_FORM_DATA)
           {
-            NamedValue<String> multipartFromData = HTTPHeaderParser.parseFullLineHeader(HTTPHeader.CONTENT_TYPE.getName() +": " + hmci.getContentType());
+            NamedValue<String> multipartFromData = (NamedValue<String>) HTTPHeaderParser.parseHTTPHeaderLine(HTTPHeader.CONTENT_TYPE.getName() +": " + hmci.getContentType());
+
 
             String boundary = multipartFromData.getProperties().getValue(HTTPConst.CNP.BOUNDARY);
             if(log.isEnabled()) log.getLogger().info("boundary=" + boundary);
@@ -211,10 +211,11 @@ public final class HTTPCodecs {
                   if (indexEndOfHeader != -1 && indexEndOfHeader < endOfSubHeaders)
                   {
                     String fullHeader = ubaos.getString(headerIndex, indexEndOfHeader - headerIndex);
-                    NamedValue<String> header = HTTPHeaderParser.parseFullLineHeader(fullHeader);
-                    if (header != null) {
-                      subPartRawHeaders.build(header);
-//                      log.getLogger().info("header: " + fullHeader + " end");
+                    if(SUS.isNotEmpty(fullHeader))
+                    {
+                      NamedValue<?> header = HTTPHeaderParser.parseHTTPHeaderLine(fullHeader);
+                      if (header != null)
+                        subPartRawHeaders.add(header);
                     }
                   }
                   headerIndex = indexEndOfHeader + Delimiter.CRLF.length();
@@ -252,8 +253,8 @@ public final class HTTPCodecs {
                 {
                   if (is != null  && mediaType != null && HTTPMediaType.lookup(mediaType) != HTTPMediaType.APPLICATION_JSON)
                   {
-                    NamedValue<InputStream> toAdd = new NamedValue<>();
-                    toAdd.setName(name).setValue(is);
+                    NamedValue<InputStream> toAdd = new NamedValue<>(name, is);
+
                     if (filename != null)
                       toAdd.getProperties().build("filename", filename);
 
@@ -320,14 +321,12 @@ public final class HTTPCodecs {
       case GET:
         break;
       default:
-        if (hrm.isMessageComplete()) // this need to change we are doing partial processing
+        if (hmci.isTransferChunked() && hmci.isContentMultipartFormData()) // this need to change we are doing partial processing
         {
-//          if (HTTPMediaType.lookup(hmci.getContentType()) == HTTPMediaType.MULTIPART_FORM_DATA)
-          if (hmci.isContentMultipartFormData())
-          {
+
             if (SUS.isEmpty(hmci.getBoundary()))
             {
-              NamedValue<String> multipartFromData = HTTPHeaderParser.parseFullLineHeader(HTTPHeader.CONTENT_TYPE.getName() + ": " + hmci.getContentType());
+              NamedValue<String> multipartFromData = (NamedValue<String>) HTTPHeaderParser.parseHTTPHeaderLine(HTTPHeader.CONTENT_TYPE.getName() + ": " + hmci.getContentType());
 
               String boundary = multipartFromData.getProperties().getValue(HTTPConst.CNP.BOUNDARY);
               hmci.setBoundary(boundary);
@@ -355,7 +354,7 @@ public final class HTTPCodecs {
               int index = 0;
               if(log.isEnabled()) log.getLogger().info("index of the end main headers: " + index);
 
-              while((index = ubaos.indexOf(index, boundaryStart)) != -1)
+              while((index = ubaos.indexOf(index, hrm.getDataMark(), boundaryStart)) != -1)
               {
                 index += boundaryStart.length;
 
@@ -407,7 +406,7 @@ public final class HTTPCodecs {
                   if (indexEndOfHeader != -1 && indexEndOfHeader < endOfSubHeaders)
                   {
                     String fullHeader = ubaos.getString(headerIndex, indexEndOfHeader - headerIndex);
-                    NamedValue<String> header = HTTPHeaderParser.parseFullLineHeader(fullHeader);
+                    NamedValue<?> header = HTTPHeaderParser.parseHTTPHeaderLine(fullHeader);
                     if (header != null) {
                       subPartRawHeaders.build(header);
 //                      log.getLogger().info("header: " + fullHeader + " end");
@@ -447,8 +446,7 @@ public final class HTTPCodecs {
                 {
                   if (is != null && mediaType != null && HTTPMediaType.lookup(mediaType) != HTTPMediaType.APPLICATION_JSON)
                   {
-                    NamedValue<InputStream> toAdd = new NamedValue<>();
-                    toAdd.setName(name).setValue(is);
+                    NamedValue<InputStream> toAdd = new NamedValue<>(name, is);
                     if (filename != null)
                       toAdd.getProperties().build("filename", filename);
 
@@ -487,7 +485,7 @@ public final class HTTPCodecs {
 
               return hmci;
             }
-          }
+
         }
     }
 

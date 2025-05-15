@@ -3,18 +3,21 @@ package org.zoxweb.shared.util;
 import java.io.Closeable;
 
 public class NamedValue<V>
+    extends NVBase<V>
     implements GetNameValue<V>,
         GetNVProperties,
         AutoCloseable
 {
 
-
-    protected String name;
-    protected V value;
     private final NVGenericMap properties = new NVGenericMap("properties");
     public NamedValue(){}
 
 
+
+    public NamedValue(String name)
+    {
+        this.name = name;
+    }
     public NamedValue(Enum<?> name, V value)
     {
         this.name = name instanceof GetName ? ((GetName) name).getName() : "" + name;
@@ -45,30 +48,29 @@ public class NamedValue<V>
         return value;
     }
 
-    /**
-     * Set name property.
-     *
-     * @param name
-     */
+//    /**
+//     * Set name property.
+//     *
+//     * @param name of the instance
+//     */
+//
+//    public void setName(String name)
+//    {
+//        this.name = name;
+//
+//    }
+//
+//    /**
+//     * Sets the value.
+//     *
+//     * @param value value of the instance
+//     */
+//    public void setValue(V value) {
+//        this.value = value;
+//    }
 
-    public NamedValue<V> setName(String name)
-    {
-        this.name = name;
-        return this;
-    }
-
     /**
-     * Sets the value.
-     *
-     * @param value
-     */
-    public NamedValue<V> setValue(V value) {
-        this.value = value;
-        return this;
-    }
-
-    /**
-     * @return
+     * @return the properties of the instance
      */
     @Override
     public NVGenericMap getProperties() {
@@ -92,7 +94,7 @@ public class NamedValue<V>
      * resource as closed, prior to throwing the exception. The {@code
      * close} method is unlikely to be invoked more than once and so
      * this ensures that the resources are released in a timely manner.
-     * Furthermore it reduces problems that could arise when the resource
+     * Furthermore, it reduces problems that could arise when the resource
      * wraps, or is wrapped, by another resource.
      *
      * <p><em>Implementers of this interface are also strongly advised

@@ -213,6 +213,17 @@ public final class SharedStringUtil
 		return false;
 	}
 
+	public static String unquote(String value)
+	{
+		if (value.startsWith("\"") && value.endsWith("\"")) {
+			// Remove the surrounding quotes
+			value = value.substring(1, value.length() - 1);
+			// Unescape any escaped quotes
+			//value = value.replace("\\\"", "\"");
+		}
+		return value;
+	}
+
 	public static String removeCharFromEnd(char toRemove, String str)
 	{
 		int indexToRemove = -1;

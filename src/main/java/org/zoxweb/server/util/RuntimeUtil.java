@@ -26,10 +26,7 @@ import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedUtil;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 public class RuntimeUtil
 {
@@ -381,6 +378,12 @@ public class RuntimeUtil
 	}
 
 
+	public static int runScript(ShellType shell, String scriptPath, Set<String> params)
+			throws IOException, InterruptedException
+	{
+		return runScript(shell, scriptPath, params != null ? params.toArray(new String[0]) : new String[0]);
+	}
+
 
 
 	/**
@@ -398,7 +401,8 @@ public class RuntimeUtil
 		// If your script has a proper "#!/bin/sh" and +x permission, you can uncomment:
 		// cmd.add(scriptPath);
 		// Otherwise invoke via the shell:
-		cmd.add(shell.getValue());
+		if (shell != null)
+			cmd.add(shell.getValue());
 		cmd.add(scriptPath);
 		Collections.addAll(cmd, args);
 

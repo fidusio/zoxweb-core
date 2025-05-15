@@ -37,6 +37,7 @@ public class HTTPRawMessage
 	private String firstLine = null;
 	private volatile boolean endOfContent = false;
 	private volatile HTTPMessageConfigInterface hmci = new HTTPMessageConfig();
+	private volatile NamedValue<?> pendingParameter = null;
 
 
 	public HTTPRawMessage(String msg)
@@ -97,7 +98,7 @@ public class HTTPRawMessage
 							/*
 								first line of server request not part of the headers L=line H=header
 								=====================================================================================
-								(L1)  POST /system-upload HTTP/1.1\r\n
+								(L1) POST /system-upload HTTP/1.1\r\n
 								(H1) Authorization: Basic YWRtaW46YmF0YXRh\r\n
 								(H2) Content-Type: multipart/form-data; boundary=18117525-f472-4559-baee-e5b7e3480095\r\n
 								(H3) Content-Length: 709\r\n
@@ -313,6 +314,16 @@ public class HTTPRawMessage
 	{
 		this.dataMark += inc;
 		return  dataMark;
+	}
+
+	public NamedValue<?> getPendingParameter()
+	{
+		return pendingParameter;
+	}
+
+	public void setPendingParameter(NamedValue<?> pending)
+	{
+		this.pendingParameter = pending;
 	}
 
 }

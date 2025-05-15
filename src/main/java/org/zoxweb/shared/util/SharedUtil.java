@@ -1778,6 +1778,10 @@ public class SharedUtil
 			{
 				return new NVStringSet(config.getName());
 			}
+			else if(NamedValue.class.equals(c))
+			{
+				return new NamedValue(config.getName());
+			}
 		}
 		
 		throw new IllegalArgumentException("Unsupported type " + config + " class:" + c);

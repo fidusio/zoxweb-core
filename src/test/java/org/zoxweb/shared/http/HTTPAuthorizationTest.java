@@ -1,7 +1,7 @@
 package org.zoxweb.shared.http;
 
 import org.junit.jupiter.api.Test;
-import org.zoxweb.server.http.HTTPCall;
+import org.zoxweb.server.http.OkHTTPCall;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.util.GetNameValue;
 import org.zoxweb.shared.util.NVConfigEntity;
@@ -80,14 +80,19 @@ public class HTTPAuthorizationTest {
 
         authToken = hmci.getAuthorization();
 
-
-        System.out.println(GSONUtil.toJSONDefault(hmci, true));
-        System.out.println(((NVConfigEntity)authToken.getNVConfig()).getAttributes());
+        String json = GSONUtil.toJSONDefault(hmci, true);
+        System.out.println(json);
+//        System.out.println(((NVConfigEntity)authToken.getNVConfig()).getAttributes());
+        System.out.println(authToken);
+        hmci = GSONUtil.fromJSONDefault(json, HTTPMessageConfig.class);
+        String json2 = GSONUtil.toJSONDefault(hmci, true);
+        assert json2.equals(json);
+        System.out.println(json2);
 
         try
         {
 
-            System.out.println(HTTPCall.send(hmci));
+            System.out.println(OkHTTPCall.send(hmci));
         }
         catch (Exception e)
         {

@@ -29,7 +29,7 @@ extends SetNameDAO
 
 
 	public static final NVConfig NVC_AUTH_SCHEME = NVConfigManager.createNVConfig("auth_scheme", null,"HTTPAuthScheme", false, true, HTTPAuthScheme.class);
-	public static final NVConfig NVC_TOKEN = NVConfigManager.createNVConfig("token", null,"Token", false, true, String.class);
+	public static final NVConfig NVC_TOKEN = NVConfigManager.createNVConfig("token", null,"Token", false, true, NamedValue.class);
 	//public static final NVConfig NVC_AUTH_SCHEME_OVERRIDE = NVConfigManager.createNVConfig("auth_scheme_override", null,"Token type override", false, true, String.class);
 	public static final NVConfigEntity NVC_HTTP_AUTHORIZATION = new NVConfigEntityLocal("http_authorization", null , null, true, false, false, false, HTTPAuthorization.class, SharedUtil.toNVConfigList(NVC_AUTH_SCHEME, NVC_TOKEN), null, false, SetNameDAO.NVC_NAME_DAO);
 
@@ -59,13 +59,39 @@ extends SetNameDAO
 	{
 		this(HTTPAuthScheme.GENERIC);
 
-		String[] parsed = SharedStringUtil.parseString(typePlusToken, " ", true);
-		if (parsed.length != 2)
-		{
+
+		typePlusToken = typePlusToken.trim();
+		String scheme;
+		int index = typePlusToken.indexOf(" ");
+		if(index == -1)
 			throw new IllegalArgumentException("Invalid token: " + typePlusToken);
+
+		scheme = typePlusToken.substring(0, index);
+
+		String tokenVal = typePlusToken.substring(index).trim();
+		if(SUS.isEmpty(tokenVal))
+			throw new IllegalArgumentException("Empty token value: " + tokenVal);
+
+
+		setName(scheme);
+		setToken(tokenVal);
+
+		String[] pairs = tokenVal.split(",\\s*");
+		NamedValue<?> token = lookup(NVC_TOKEN);
+		for (String pair : pairs) {
+			if (pair.isEmpty()) continue;
+			String[] nv = pair.split("=", 2);
+			String key = nv[0].trim();
+			if(nv.length > 1)
+			{
+				String val = nv[1].trim();
+				if (val.startsWith("\"") && val.endsWith("\"")) {
+					val = val.substring(1, val.length() - 1);
+				}
+				token.getProperties().build(key, val);
+			}
 		}
-		setName(parsed[0]);
-		setToken(parsed[1]);
+
 	}
 
 
@@ -93,14 +119,15 @@ extends SetNameDAO
 	 */
 	public String getToken()
 	{
-		return lookupValue(NVC_TOKEN);
+		return (String) lookup(NVC_TOKEN).getValue();
 	}
 	/**
 	 * @param token the token to set
 	 */
 	public void setToken(String token)
 	{
-		setValue(NVC_TOKEN, token);
+		NVBase<String> nvb = lookup(NVC_TOKEN);
+		nvb.setValue(token);
 	}
 
 

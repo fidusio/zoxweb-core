@@ -106,10 +106,8 @@ public class HTTPWPut {
         HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit(url, null, method, sslCheckEnabled);
         //hmci.getHeaders().build("Connection", "Close");
         hmci.setContentType(HTTPMediaType.MULTIPART_FORM_DATA);
-        NamedValue<InputStream> nvc = new NamedValue<>();
-        nvc.setValue(fileToData.getInputStream())
-                .setName("file")
-                .getProperties()
+        NamedValue<InputStream> nvc = new NamedValue<>("file", fileToData.getInputStream());
+        nvc.getProperties()
                 .build(HTTPConst.CNP.FILENAME, fileToData.getFilename())
                 .build(new NVLong(HTTPConst.CNP.CONTENT_LENGTH, fileToData.getLength()))
                 .build(new NVEnum(HTTPConst.CNP.MEDIA_TYPE, fileToData.getMediaType()))
