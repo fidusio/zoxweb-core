@@ -194,7 +194,7 @@ public class HTTPWPut {
 
         } catch (Exception e) {
             e.printStackTrace();
-            System.err.println("Usage: java HTTPWPut <url=URL> <file=FilePath> [dssl=yes/no] [method=POST/PUT]");
+            System.err.println("Usage: java HTTPWPut <url=URL> <file=FilePath> [user=username] [password=password] [dssl=yes/no] [method=POST/PUT]");
         }
 
         System.out.println("It took overall " + Const.TimeInMillis.toString((System.currentTimeMillis() - ts)));

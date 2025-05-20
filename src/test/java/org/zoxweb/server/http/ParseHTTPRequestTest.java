@@ -4,7 +4,13 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.io.UByteArrayOutputStream;
+import org.zoxweb.server.util.GSONUtil;
+import org.zoxweb.shared.http.HTTPHeader;
+import org.zoxweb.shared.http.HTTPMessageConfigInterface;
+import org.zoxweb.shared.protocol.ProtoMarker;
+import org.zoxweb.shared.util.*;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -38,47 +44,118 @@ public class ParseHTTPRequestTest {
     public void parseChunkedRequest() throws IOException {
         // System.out.println(rawRequest);
 
+        int[] byteArrayLength = {
+          2,3,10,64, 256, 1024
+        };
 
-        HTTPRawMessage hrm = new HTTPRawMessage();
-        InputStream is = chunkedRequest.toByteArrayInputStream();
-        byte[] buffer = new byte[10];
-        int read;
-        int counter = 0;
-        int totalRead = 0;
-        while ((read = is.read(buffer)) != -1) {
-            hrm.getDataStream().write(buffer, 0, read);
-            hrm.parse();
-            counter++;
-            totalRead += read;
-            if (counter % buffer.length == 0 || hrm.isMessageComplete()) {
-                System.out.println("[" + counter + "]" + " read: " + totalRead);
-                System.out.println(hrm.getHTTPMessageConfig().getParameters());
-                System.out.println("--------------------------------------------------");
-                //System.out.println("=================================\n" + hrm.getDataStream() + "=================================\n");
+        for(int b = 0; b < byteArrayLength.length; b++) {
+
+
+
+            HTTPRawMessage hrm = new HTTPRawMessage();
+            InputStream is = new ByteArrayInputStream(chunkedRequest.getInternalBuffer(), 0, chunkedRequest.size());
+            UByteArrayOutputStream file1Content = new UByteArrayOutputStream();
+            UByteArrayOutputStream file2Content = new UByteArrayOutputStream();
+            byte[] buffer = new byte[ byteArrayLength[b]];
+            System.out.println("Running test with byte buffer size " + buffer.length);
+            System.out.println("------------------------------------------------------------");
+            int read;
+            int counter = 0;
+            int totalRead = 0;
+            while ((read = is.read(buffer)) != -1 && !hrm.isMessageComplete()) {
+                hrm.getDataStream().write(buffer, 0, read);
+                HTTPMessageConfigInterface hmci = hrm.parse();
+                counter++;
+
+
+                totalRead += read;
+                if (hrm.areHeadersParsed()) {
+//                System.out.println("[" + counter + "]" + " read: " + totalRead);
+//                System.out.println(hrm.getHTTPMessageConfig().getParameters());
+//                System.out.println("incomplete Parameter: " + hrm.incompleteParam());
+//                System.out.println("is it chunked: " + hmci.isTransferChunked());
+//                System.out.println("++++++++++++++++++++++RAW DATA START +++++++++++++++++++++++");
+//                System.out.println(hrm.getDataStream());
+//                System.out.println("++++++++++++++++++++++RAW DATA END   +++++++++++++++++++++++");
+//                System.out.println("parameter size: " + hmci.getParameters().size());
+                    NamedValue<InputStream> nvs1 = hmci.getParameters().getNV("file1");
+                    NamedValue<InputStream> nvs2 = hmci.getParameters().getNV("file2");
+                    processStreams(nvs1, file1Content);
+                    processStreams(nvs2, file2Content);
+
+
+//                System.out.println("------------------------------------------------------------");
+                }
+
+                if (hrm.isMessageComplete()) {
+                    System.out.println("Message Complete " + "Transfer chunked: " + hrm.getHTTPMessageConfig().isTransferChunked());
+                    System.out.println("Message Complete " + "is message complete: " + hrm.isMessageComplete());
+                    System.out.println("Message Complete " + hrm.getHTTPMessageConfig().getBoundary());
+                    System.out.println("Message Complete " + hrm.getHTTPMessageConfig().getHeaders());
+                    System.out.println("Message Complete " + hrm.getHTTPMessageConfig().getParameters());
+//                System.out.println("=================================\n" +"Message Complete " +  hrm.getDataStream() + "=================================\n");
+//
+//                System.out.println("Full parameters\n" + hmci.getParameters());
+                    NamedValue<InputStream> nvs1 = hmci.getParameters().getNV("file1");
+                    NamedValue<InputStream> nvs2 = hmci.getParameters().getNV("file2");
+
+                    print(nvs1, file1Content);
+                    print(nvs2, file2Content);
+                    System.out.println("\n\n\n");
+                    //System.out.println(hrm.getDataStream().size() + " ******************************************* dataStream \n" + hrm.getDataStream() + "\n********************************************** dataStream\n");
+
+                }
+
             }
-
-            if (hrm.isMessageComplete()) {
-                System.out.println("Transfer chunked: " + hrm.getHTTPMessageConfig().isTransferChunked());
-                System.out.println("is message complete: " + hrm.isMessageComplete());
-                System.out.println(hrm.getHTTPMessageConfig().getBoundary());
-                System.out.println(hrm.getHTTPMessageConfig().getHeaders());
-                System.out.println(hrm.getHTTPMessageConfig().getParameters());
-                System.out.println("=================================\n" + hrm.getDataStream() + "=================================\n");
-            }
-
         }
 
+    }
 
+
+    private static void processStreams(NamedValue<InputStream> nvs, UByteArrayOutputStream fileContent)
+            throws IOException
+    {
+        if(nvs != null)
+        {
+            boolean lastChunk = nvs.getProperties().getValue(ProtoMarker.LAST_CHUNK);
+            boolean transferCompleted = nvs.getProperties().getValue(ProtoMarker.TRANSFER_COMPLETED, false);
+
+//            System.out.println("()()()()()()()()()()()() lastChunk: " + lastChunk + " transferCompleted: " + transferCompleted);
+            if(!transferCompleted)
+                IOUtil.relayStreams(nvs.getValue(), fileContent, true);
+            if(lastChunk)
+                nvs.getProperties().build(new NVBoolean(ProtoMarker.TRANSFER_COMPLETED, true));
+        }
+    }
+
+    private static void print(NamedValue<InputStream> nvs) throws IOException {
+        if (nvs != null)
+        {
+            System.out.println(nvs.getName() + " : file ******************************************");
+            System.out.println(IOUtil.inputStreamToString(nvs.getValue(), true));
+            System.out.println(nvs.getName() + " : end file ******************************************");
+        }
+    }
+
+    private static void print(NamedValue<InputStream> nvs, UByteArrayOutputStream baos) throws IOException {
+        if (nvs != null && baos != null)
+        {
+            System.out.println(baos.size() + " " + nvs.getName() + " : content ******************************************");
+            System.out.println(baos);
+            System.out.println(nvs.getName() + " : end content ******************************************");
+        }
     }
 
 
     @Test
     public void parseHeaderTest() {
-        String[] headers = {"Content-Type: text/html;charset=UTF-8; boundary=\"--exampleBoundary\", bata; bata-type=232",
+        String[] headers = {
+                "Content-Type: text/html;charset=UTF-8; boundary=\"--exampleBoundary\"",
                 "Content-Disposition: form-data; name=\"file\"; filename=\"example.pdf\"",
                 "Accept: text/html, application/xhtml+xml;q=0.9, image/webp;q=0.8, */*;q=0.7;q=0.9",
                 "Content-Type: multipart/form-data; boundary=bd1a40c9-9408-4b59-8d4b-f6693561887e",
                 "Content-Type: application/json",
+                "Content-Length: " + Long.MAX_VALUE,
                 "Attachment: attachment; filename=\"file,: name.pdf\"; creation-date=\"Wed, 12 Feb 2020 16:00:00 GMT\", inline",
                 "Authorization: Bearer jdlksjfgdksljgikjrtjtkrejtiohyu4o35hjhj5rk",
                 "Connection: keep-alive, Upgrade"
@@ -86,71 +163,36 @@ public class ParseHTTPRequestTest {
 
         for (String header : headers) {
             System.out.println(header);
-//            NamedValue<String> parsedHeader = HTTPHeaderParser.parseFullLineHeader(header);
-//            System.out.println(parsedHeader);
-            System.out.println("NEW ONE: " + HTTPHeaderParser.parseHTTPHeaderLine(header));
+            System.out.println("NEW ONE: " + HTTPHeaderParser.parseFullHeaderLine(header));
             System.out.println("-----------------------------------------------------------");
-
         }
 
     }
 
 
-//    @Test
-//    public void parseHeaderValue()
-//    {
-//        String[] headerValues = {
-//                "form-data; name=\"file\"; filename=\"example.pdf\"",
-//                "text/html, application/xhtml+xml;q=0.9, image/webp;q=0.8, */*;q=0.7",
-//                "timeout=5, max=10",
-//                "attachment; filename=\"file,: name.pdf\"; creation-date=\"Wed, 12 Feb 2020 16:00:00 GMT\", inline",
-//                "text/html; q=0.8, application/xhtml+xml; q=0.9, image/webp; q=0.7, */*; q=0.5",
-//                "Bearer 439iu5krjtjritu34iu5ij43l5kjewlrjlkejtewtre",
-//                "no-cache, no-store, must-revalidate",
-//                "text/html; charset=UTF-8",
-//                "keep-alive, Upgrade"
-//
-//        };
-//        RateCounter rc = new RateCounter();
-//        long ts = System.currentTimeMillis();
-//        for(String hv: headerValues)
-//        {
-//
-//            System.out.println("=============================================================");
-//            System.out.println(hv);
-//            long delta = System.currentTimeMillis();
-//            NVGenericMap header = HTTPHeaderParser.parseHeader("toto", hv);
-//            delta =  System.currentTimeMillis() - delta;
-//            rc.register(delta);
-//            System.out.println(header);
-//            System.out.println("=============================================================\n");
-//        }
-//
-//        System.out.println(rc  + " all " + Const.TimeInMillis.toString(System.currentTimeMillis() - ts));
-//
-//        System.out.println(GSONUtil.toJSONDefault(new NVGenericMap().build(HTTPHeaderParser.parseHeader(new NVPair("content-type","attachment; filename=\"file,: name.pdf\"; creation-date=\"Wed, 12 Feb 2020 16:00:00 GMT\", inline")))));
-//        System.out.println(GSONUtil.toJSONDefault(new NVGenericMap().build(HTTPHeaderParser.parseHeader(HTTPHeader.CONTENT_TYPE,"attachment; filename=\"file,: name.pdf\"; creation-date=\"Wed, 12 Feb 2020 16:00:00 GMT\", inline"))));
-//    }
+    @Test
+    public void parseHeaderValue() {
+        String[] headerValues = {"form-data; name=\"file\"; filename=\"example.pdf\"", "text/html, application/xhtml+xml;q=0.9, image/webp;q=0.8, */*;q=0.7", "timeout=5, max=10", "attachment; filename=\"file,: name.pdf\"; creation-date=\"Wed, 12 Feb 2020 16:00:00 GMT\", inline", "text/html; q=0.8, application/xhtml+xml; q=0.9, image/webp; q=0.7, */*; q=0.5", "Bearer 439iu5krjtjritu34iu5ij43l5kjewlrjlkejtewtre", "no-cache, no-store, must-revalidate", "text/html; charset=UTF-8", "keep-alive, Upgrade"
 
-//    @Test
-//    public void parseFullHeaderTest()
-//    {
-//
-//        String[] headers = {"Content-Type: text/html;charset=UTF-8; boundary=\"--exampleBoundary\", batata=232",
-//                "Content-Disposition: form-data; name=\"file\"; filename=\"example.pdf\"",
-//                "Accept: text/html, application/xhtml+xml;q=0.9, image/webp;q=0.8, */*;q=0.7;q=0.9",
-//                "Content-Type: multipart/form-data; boundary=bd1a40c9-9408-4b59-8d4b-f6693561887e",
-//                "Authorization: Bearer jdlksjfgdksljgikjrtjtkrejtiohyu4o35hjhj5rk;charset=UTF-8", // this is invalid
-//                "Connection: keep-alive, Upgrade"
-//        };
-//
-//        for (String header: headers)
-//        {
-//            System.out.println(header);
-//            NVGenericMap parsedHeader = HTTPHeaderParser.parseHeader(header);
-//            System.out.println(parsedHeader);
-//            System.out.println("-----------------------------------------------------------");
-//
-//        }
-//    }
+        };
+        RateCounter rc = new RateCounter();
+        long ts = System.currentTimeMillis();
+        for (String hv : headerValues) {
+
+            System.out.println("=============================================================");
+            System.out.println(hv);
+            long delta = System.currentTimeMillis();
+            NamedValue<?> header = HTTPHeaderParser.parseHeader("toto", hv);
+            delta = System.currentTimeMillis() - delta;
+            rc.register(delta);
+            System.out.println(header);
+            System.out.println("=============================================================\n");
+        }
+
+        System.out.println(rc + " all " + Const.TimeInMillis.toString(System.currentTimeMillis() - ts));
+
+        System.out.println(GSONUtil.toJSONDefault(new NVGenericMap().build(HTTPHeaderParser.parseHeader(new NVPair("content-type", "attachment; filename=\"file,: name.pdf\"; creation-date=\"Wed, 12 Feb 2020 16:00:00 GMT\", inline")))));
+        System.out.println(GSONUtil.toJSONDefault(new NVGenericMap().build(HTTPHeaderParser.parseHeader(HTTPHeader.CONTENT_TYPE, "attachment; filename=\"file,: name.pdf\"; creation-date=\"Wed, 12 Feb 2020 16:00:00 GMT\", inline"))));
+    }
+
 }

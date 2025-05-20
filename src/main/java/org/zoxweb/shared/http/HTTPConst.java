@@ -100,6 +100,11 @@ public final class HTTPConst
             this.name = name;
             this.value = value;
         }
+
+        public String toString()
+        {
+            return name + ": " + value;
+        }
         @Override
         public String getName() {
             return name;

@@ -1,0 +1,36 @@
+POST /upload HTTP/1.1
+Host: example.com
+User-Agent: TestClient/2.0
+Transfer-Encoding: chunked
+Content-Type: multipart/form-data; boundary=BOUNDARY987654
+Connection: keep-alive
+
+51
+--BOUNDARY987654
+Content-Disposition: form-data; name="param1"
+
+regularValue
+
+77
+--BOUNDARY987654
+Content-Disposition: form-data; name="file1"; filename="fileA.txt"
+Content-Type: text/plain
+
+ABCDE
+5
+FGHIJ
+7
+KLMNO
+
+75
+--BOUNDARY987654
+Content-Disposition: form-data; name="meta"
+Content-Type: application/json
+
+{"x":1,"y":"test"}
+
+14
+--BOUNDARY987654--
+
+0
+

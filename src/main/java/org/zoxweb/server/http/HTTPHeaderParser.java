@@ -1,10 +1,8 @@
 package org.zoxweb.server.http;
 
 import org.zoxweb.shared.http.HTTPAuthorization;
-import org.zoxweb.shared.util.GetName;
-import org.zoxweb.shared.util.NVGenericMap;
-import org.zoxweb.shared.util.NamedValue;
-import org.zoxweb.shared.util.SUS;
+import org.zoxweb.shared.http.HTTPHeader;
+import org.zoxweb.shared.util.*;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -35,38 +33,46 @@ public class HTTPHeaderParser {
     }
 
 
-    public static NamedValue<?> parseHTTPHeader(GetName gn, String rawValue) {
-        return parseHTTPHeader(gn.getName(), rawValue);
+    public static NamedValue<?> parseHeader(GetNameValue<String> httpHeaderNV) {
+        return parseHeader(httpHeaderNV.getName(), httpHeaderNV.getValue());
     }
 
-    public static NamedValue<?> parseHTTPHeader(String httpHeaderName, String rawValue) {
-        httpHeaderName = httpHeaderName.trim();
-        rawValue = rawValue.trim();
+    public static NamedValue<?> parseHeader(GetName headerName, String headerValue) {
+        return parseHeader(headerName.getName(), headerValue);
+    }
+
+    public static NamedValue<?> parseHeader(String headerName, String headerValue) {
+        headerName = headerName.trim();
+        headerValue = headerValue.trim();
         NamedValue<?> ret = null;
-        if (httpHeaderName.equalsIgnoreCase("Cookie")) {
 
-            ret = new NamedValue<>(httpHeaderName, rawValue);
-            // Cookie: name1=value1; name2=value2
-            for (String cookiePair : rawValue.split(";\\s*")) {
-                if (cookiePair.isEmpty()) continue;
-                String[] nv = cookiePair.split("=", 2);
-                ret.getProperties().build(nv[0].trim(), nv.length > 1 ? nv[1] : "");
-            }
 
+        if (headerName.equalsIgnoreCase(HTTPHeader.CONTENT_LENGTH.getName())) {
+            ret = new NamedValue<>(headerName, Long.parseLong(headerValue));
         }
-        if (httpHeaderName.equalsIgnoreCase("Keep-Alive")) {
+        else if (headerName.equalsIgnoreCase("Cookie")) {
 
-            ret = new NamedValue<>(httpHeaderName, rawValue);
+            ret = new NamedValue<>(headerName, headerValue);
             // Cookie: name1=value1; name2=value2
-            for (String cookiePair : rawValue.split(",\\s*")) {
+            for (String cookiePair : headerValue.split(";\\s*")) {
                 if (cookiePair.isEmpty()) continue;
                 String[] nv = cookiePair.split("=", 2);
                 ret.getProperties().build(nv[0].trim(), nv.length > 1 ? nv[1] : "");
             }
 
-        } else if (httpHeaderName.equalsIgnoreCase("Authorization")) {
-            HTTPAuthorization httpAuthorization = new HTTPAuthorization(rawValue);
-            ret = new NamedValue<>(httpHeaderName, rawValue);
+        } else if (headerName.equalsIgnoreCase("Keep-Alive")) {
+
+            ret = new NamedValue<>(headerName, headerValue);
+            // Cookie: name1=value1; name2=value2
+            for (String cookiePair : headerValue.split(",\\s*")) {
+                if (cookiePair.isEmpty()) continue;
+                String[] nv = cookiePair.split("=", 2);
+                ret.getProperties().build(nv[0].trim(), nv.length > 1 ? nv[1] : "");
+            }
+
+        } else if (headerName.equalsIgnoreCase("Authorization")) {
+            HTTPAuthorization httpAuthorization = new HTTPAuthorization(headerValue);
+            ret = new NamedValue<>(headerName, headerValue);
             NamedValue<String> internalToken = httpAuthorization.lookup(HTTPAuthorization.NVC_TOKEN);
             if (internalToken.getProperties().size() > 0) {
                 NVGenericMap.copy(internalToken.getProperties(), ret.getProperties(), false);
@@ -77,7 +83,7 @@ public class HTTPHeaderParser {
             ret.getProperties().build("auth_token", httpAuthorization.getToken());
         } else {
             // Generic header: split values by commas, params by semicolons
-            Matcher cm = COMMA_PATTERN.matcher(rawValue);
+            Matcher cm = COMMA_PATTERN.matcher(headerValue);
             NVGenericMap values = new NVGenericMap("header_values");
             //List<NamedValue<?>> list = new ArrayList<>();
             while (cm.find()) {
@@ -101,10 +107,10 @@ public class HTTPHeaderParser {
 
 
             if (values.size() > 1)
-                ret = new NamedValue(httpHeaderName, values);
+                ret = new NamedValue(headerName, values);
             else if (values.size() == 1) {
                 NamedValue<?>[] toRet = values.valuesAs(new NamedValue[0]);
-                toRet[0].setName(httpHeaderName);
+                toRet[0].setName(headerName);
                 ret = toRet[0];
 
             }
@@ -124,11 +130,11 @@ public class HTTPHeaderParser {
      * |--------------------------- rawValue 0-------------------------------------------------|
      * extract the header name first
      *
-     * @param headerLine the HTTP header line to parse
+     * @param fullHeaderLine the HTTP header line to parse
      * @return a map containing the header name, main value, and parameters
      */
-    public static NamedValue<?> parseHTTPHeaderLine(String headerLine) {
-        String[] parts = separateHeaderNameFromValue(headerLine);
-        return parseHTTPHeader(parts[0], parts[1]);
+    public static NamedValue<?> parseFullHeaderLine(String fullHeaderLine) {
+        String[] parts = separateHeaderNameFromValue(fullHeaderLine);
+        return parseHeader(parts[0], parts[1]);
     }
 }

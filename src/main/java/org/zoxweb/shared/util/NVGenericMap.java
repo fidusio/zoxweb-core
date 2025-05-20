@@ -106,6 +106,16 @@ public class NVGenericMap
         return defaultValue;
     }
 
+    public <V> V getValue(GetName name, V defaultValue) {
+        GetNameValue<?> ret = get(name);
+
+        if (ret != null) {
+            return (V) ret.getValue();
+        }
+
+        return defaultValue;
+    }
+
     /**
      * @see org.zoxweb.shared.util.ArrayValues#size()
      */

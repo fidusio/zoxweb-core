@@ -2,9 +2,10 @@ package org.zoxweb.shared.protocol;
 
 import org.zoxweb.shared.util.CloseableType;
 import org.zoxweb.shared.util.GetNVProperties;
+import org.zoxweb.shared.util.SubjectID;
 
-public interface ProtocolSession<S>
-    extends GetNVProperties, CloseableType
+public interface ProtoSession<S, T>
+    extends GetNVProperties, CloseableType, SubjectID<T>
 {
     /**
      * @return the actual session associated with the implementation
