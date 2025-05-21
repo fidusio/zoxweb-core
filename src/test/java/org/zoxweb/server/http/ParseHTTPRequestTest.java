@@ -21,7 +21,7 @@ public class ParseHTTPRequestTest {
     @BeforeAll
     public static void loadData() throws IOException {
         rawRequest = IOUtil.inputStreamToByteArray(IOUtil.locateFile("multipart-raw-data-no-content-length.txt"), true);
-        chunkedRequest = IOUtil.inputStreamToByteArray(IOUtil.locateFile("chunked-multipart-raw-full-request.bin"), true);
+        chunkedRequest = IOUtil.inputStreamToByteArray(IOUtil.locateFile("chunked-multipart-raw-full-2-request.bin"), true);
     }
 
     @Test
@@ -45,18 +45,21 @@ public class ParseHTTPRequestTest {
         // System.out.println(rawRequest);
 
         int[] byteArrayLength = {
-          2,3,10,64, 256, 1024
+                2, 3, 10, 64, 256, 1024
         };
 
-        for(int b = 0; b < byteArrayLength.length; b++) {
+//        int[] byteArrayLength = {
+//                2,
+//        };
 
+        for (int b = 0; b < byteArrayLength.length; b++) {
 
 
             HTTPRawMessage hrm = new HTTPRawMessage();
             InputStream is = new ByteArrayInputStream(chunkedRequest.getInternalBuffer(), 0, chunkedRequest.size());
             UByteArrayOutputStream file1Content = new UByteArrayOutputStream();
             UByteArrayOutputStream file2Content = new UByteArrayOutputStream();
-            byte[] buffer = new byte[ byteArrayLength[b]];
+            byte[] buffer = new byte[byteArrayLength[b]];
             System.out.println("Running test with byte buffer size " + buffer.length);
             System.out.println("------------------------------------------------------------");
             int read;
@@ -113,24 +116,23 @@ public class ParseHTTPRequestTest {
 
 
     private static void processStreams(NamedValue<InputStream> nvs, UByteArrayOutputStream fileContent)
-            throws IOException
-    {
-        if(nvs != null)
-        {
+            throws IOException {
+        HTTPCodecs.log.setEnabled(true);
+        if (nvs != null) {
             boolean lastChunk = nvs.getProperties().getValue(ProtoMarker.LAST_CHUNK);
             boolean transferCompleted = nvs.getProperties().getValue(ProtoMarker.TRANSFER_COMPLETED, false);
 
 //            System.out.println("()()()()()()()()()()()() lastChunk: " + lastChunk + " transferCompleted: " + transferCompleted);
-            if(!transferCompleted)
+            if (!transferCompleted)
                 IOUtil.relayStreams(nvs.getValue(), fileContent, true);
-            if(lastChunk)
+            if (lastChunk)
                 nvs.getProperties().build(new NVBoolean(ProtoMarker.TRANSFER_COMPLETED, true));
         }
+        HTTPCodecs.log.setEnabled(false);
     }
 
     private static void print(NamedValue<InputStream> nvs) throws IOException {
-        if (nvs != null)
-        {
+        if (nvs != null) {
             System.out.println(nvs.getName() + " : file ******************************************");
             System.out.println(IOUtil.inputStreamToString(nvs.getValue(), true));
             System.out.println(nvs.getName() + " : end file ******************************************");
@@ -138,8 +140,7 @@ public class ParseHTTPRequestTest {
     }
 
     private static void print(NamedValue<InputStream> nvs, UByteArrayOutputStream baos) throws IOException {
-        if (nvs != null && baos != null)
-        {
+        if (nvs != null && baos != null) {
             System.out.println(baos.size() + " " + nvs.getName() + " : content ******************************************");
             System.out.println(baos);
             System.out.println(nvs.getName() + " : end content ******************************************");

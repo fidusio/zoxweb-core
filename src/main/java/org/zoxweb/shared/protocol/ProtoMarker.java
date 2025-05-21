@@ -18,44 +18,40 @@ package org.zoxweb.shared.protocol;
 import org.zoxweb.shared.util.GetName;
 
 public enum ProtoMarker
-    implements GetName
-{
-	START,
-	END,
-	HEADER_START,
-	HEADER_END,
-	CONTENT_START,
-	CONTENT_END,
-	BOUNDARY_TAG("boundary-tag"),
-	BOUNDARY_START("boundary-start"),
-	BOUNDARY_END("boundary-end"),
-//	BOUNDARY_CONTENT_END("boundary-content-end"),
-	SUB_CONTENT_START_INDEX("content-start-index"),
+        implements GetName {
+    START,
+    END,
+    HEADER_START,
+    HEADER_END,
+    CONTENT_START,
+    CONTENT_END,
+    BOUNDARY_TAG("boundary-tag"),
+    BOUNDARY_START_TAG("boundary-start"),
+    BOUNDARY_FINAL_TAG("boundary-end"),
+    BOUNDARY_CONTENT_END_TAG("boundary-content-end"),
+    SUB_CONTENT_START_INDEX("content-start-index"),
 
-	LAST_CHUNK("last-chunk"),
-	TRANSFER_COMPLETED("transfer-completed"),
-	;
+    LAST_CHUNK("last-chunk"),
+    TRANSFER_COMPLETED("transfer-completed"),
+    ;
 
-	private final String name;
+    private final String name;
 
-	ProtoMarker(String name)
-	{
-		this.name= name.toLowerCase();
-	}
-	ProtoMarker()
-    {
-		this.name= name().toLowerCase();
-	}
+    ProtoMarker(String name) {
+        this.name = name.toLowerCase();
+    }
 
-	@Override
-	public String getName()
-    {
-		return name;
-	}
-	
-	public String toString()
-    {
-		return getName();
-	}
+    ProtoMarker() {
+        this.name = name().toLowerCase();
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    public String toString() {
+        return getName();
+    }
 
 }
