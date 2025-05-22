@@ -14,10 +14,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class HTTPAPIEndPoint<I,O>
-    implements CanonicalID, GetNVProperties
-
-{
+public class HTTPAPIEndPoint<I, O>
+        implements CanonicalID, GetNVProperties {
     private HTTPMessageConfigInterface config;
     private RateController rateController;
     private BiDataEncoder<HTTPMessageConfigInterface, I, HTTPMessageConfigInterface> dataEncoder;
@@ -33,22 +31,18 @@ public class HTTPAPIEndPoint<I,O>
     private NVGenericMap properties = new NVGenericMap();
 
 
-
     private class ToRun
-            implements Runnable
-    {
-        private final HTTPCallback<I,O> callback;
+            implements Runnable {
+        private final HTTPCallback<I, O> callback;
         private final HTTPAuthorization authorization;
-        ToRun(HTTPCallback<I,O> callback, HTTPAuthorization authorization)
-        {
+
+        ToRun(HTTPCallback<I, O> callback, HTTPAuthorization authorization) {
             this.callback = callback;
             this.authorization = authorization;
         }
 
-        public void run()
-        {
-            try
-            {
+        public void run() {
+            try {
                 HTTPResponseData hrd = OkHTTPCall.send(getOkHttpClient(), createHMCI(callback.get(), authorization));
                 HTTPAPIResult<?> hapir = new HTTPAPIResult<>(hrd.getStatus(),
                         hrd.getHeaders(),
@@ -65,11 +59,8 @@ public class HTTPAPIEndPoint<I,O>
     }
 
 
-
-
-    public HTTPAPIEndPoint<I,O> copy(boolean newRateController)
-    {
-        HTTPAPIEndPoint<I,O> ret = new HTTPAPIEndPoint<>(config, positiveResults);
+    public HTTPAPIEndPoint<I, O> copy(boolean newRateController) {
+        HTTPAPIEndPoint<I, O> ret = new HTTPAPIEndPoint<>(config, positiveResults);
         ret.setName(getName())
                 .setDescription(getDescription())
                 .setDataEncoder(dataEncoder)
@@ -81,16 +72,14 @@ public class HTTPAPIEndPoint<I,O>
         ret.domain = domain;
         ret.rateController = rateController;
 
-        if (rateController != null && newRateController)
-        {
+        if (rateController != null && newRateController) {
             ret.setRateController(new RateController(rateController.getName(), rateController.getRate(), rateController.getRateUnit()));
         }
 
         return ret;
     }
 
-    public HTTPAPIEndPoint(HTTPMessageConfigInterface config, Map<Integer, HTTPStatusCode> positiveResults)
-    {
+    public HTTPAPIEndPoint(HTTPMessageConfigInterface config, Map<Integer, HTTPStatusCode> positiveResults) {
         this.config = config;
         if (positiveResults != null)
             this.positiveResults = positiveResults;
@@ -98,135 +87,108 @@ public class HTTPAPIEndPoint<I,O>
             this.positiveResults = new HashMap<>();
     }
 
-    public HTTPAPIEndPoint(HTTPMessageConfigInterface config)
-    {
+    public HTTPAPIEndPoint(HTTPMessageConfigInterface config) {
         this(config, null);
     }
 
 
-
-    public HTTPAPIEndPoint<I,O> setConfig(HTTPMessageConfigInterface hmci)
-    {
+    public HTTPAPIEndPoint<I, O> setConfig(HTTPMessageConfigInterface hmci) {
         this.config = hmci;
         return this;
     }
 
-    public HTTPMessageConfigInterface getConfig()
-    {
+    public HTTPMessageConfigInterface getConfig() {
         return config;
     }
 
-    public HTTPAPIEndPoint<I,O> setRateController(RateController rateController)
-    {
+    public HTTPAPIEndPoint<I, O> setRateController(RateController rateController) {
         this.rateController = rateController;
         return this;
     }
 
-    public HTTPAPIEndPoint<I,O> setDataDecoder(DataDecoder<HTTPResponseData, O> dataDecoder)
-    {
+    public HTTPAPIEndPoint<I, O> setDataDecoder(DataDecoder<HTTPResponseData, O> dataDecoder) {
         this.dataDecoder = dataDecoder;
         return this;
     }
 
-    public HTTPAPIEndPoint<I,O> setDataEncoder(BiDataEncoder<HTTPMessageConfigInterface, I, HTTPMessageConfigInterface> dataEncoder)
-    {
+    public HTTPAPIEndPoint<I, O> setDataEncoder(BiDataEncoder<HTTPMessageConfigInterface, I, HTTPMessageConfigInterface> dataEncoder) {
         this.dataEncoder = dataEncoder;
         return this;
     }
 
-    public String getDomain()
-    {
+    public String getDomain() {
         return domain;
     }
 
-    public HTTPAPIEndPoint<I,O> setDomain(String domain)
-    {
+    public HTTPAPIEndPoint<I, O> setDomain(String domain) {
         domain = SharedStringUtil.trimOrNull(domain);
-        if (domain != null)
-        {
+        if (domain != null) {
             if (domain.endsWith("."))
-                domain = domain.substring(0, domain.length() -1);
+                domain = domain.substring(0, domain.length() - 1);
         }
         this.domain = domain;
         return this;
     }
 
-    public String toCanonicalID()
-    {
+    public String toCanonicalID() {
         return SharedUtil.toCanonicalID(true, '.', domain, getName());
     }
 
 
-
-
-    public HTTPAPIEndPoint<I,O> setName(String name)
-    {
+    public HTTPAPIEndPoint<I, O> setName(String name) {
         namedDescription.setName(name);
         return this;
     }
 
-    public HTTPAPIEndPoint<I,O> setDescription(String desciption)
-    {
+    public HTTPAPIEndPoint<I, O> setDescription(String desciption) {
         namedDescription.setDescription(desciption);
         return this;
     }
 
-    public String getName()
-    {
+    public String getName() {
         return namedDescription.getName();
     }
 
-    public String getDescription()
-    {
+    public String getDescription() {
         return namedDescription.getDescription();
     }
 
-    public OkHttpClient getOkHttpClient()
-    {
+    public OkHttpClient getOkHttpClient() {
         return okHttpClient;
     }
 
-    public HTTPAPIEndPoint<I,O> setOkHttpClient(OkHttpClient okHttpClient)
-    {
+    public HTTPAPIEndPoint<I, O> setOkHttpClient(OkHttpClient okHttpClient) {
         this.okHttpClient = okHttpClient;
         return this;
     }
 
 
-    public HTTPAPIEndPoint<I,O> setExecutor(Executor exec)
-    {
+    public HTTPAPIEndPoint<I, O> setExecutor(Executor exec) {
         this.executor = exec;
         return this;
     }
 
-    public HTTPAPIEndPoint<I,O> setScheduler(TaskSchedulerProcessor scheduler)
-    {
+    public HTTPAPIEndPoint<I, O> setScheduler(TaskSchedulerProcessor scheduler) {
         this.tsp = scheduler;
         return this;
     }
 
-    public ScheduledExecutorService getScheduler()
-    {
+    public ScheduledExecutorService getScheduler() {
         return tsp;
     }
 
 
-
-
-
     public HTTPAPIResult<O> syncCall(I input)
-            throws IOException
-    {
+            throws IOException {
         return syncCall(input, null);
     }
 
 
-    public HTTPAPIResult<O> syncCall(I input, HTTPAuthorization authorization) throws IOException
-    {
+    public HTTPAPIResult<O> syncCall(I input, HTTPAuthorization authorization) throws IOException {
         checkRateController();
         HTTPResponseData hrd = OkHTTPCall.send(getOkHttpClient(), createHMCI(input, authorization));
         HTTPAPIResult<O> hapir = null;
-        if(dataDecoder != null)
+        if (dataDecoder != null)
             hapir = new HTTPAPIResult<O>(hrd.getStatus(), hrd.getHeaders(), dataDecoder.decode(hrd), hrd.getDuration());
         else
             hapir = (HTTPAPIResult<O>) new HTTPAPIResult<byte[]>(hrd.getStatus(), hrd.getHeaders(), hrd.getData(), hrd.getDuration());
@@ -237,9 +199,8 @@ public class HTTPAPIEndPoint<I,O>
 
 
     private void checkRateController()
-            throws IOException
-    {
-        if(rateController == null)
+            throws IOException {
+        if (rateController == null)
             return;
         // first check without affecting rate controller
         boolean send = rateController.isPastThreshold(false);
@@ -249,9 +210,8 @@ public class HTTPAPIEndPoint<I,O>
             throw new IOException("Rate controller timeout threshold reached: " + rateController);
     }
 
-    public HTTPAPIEndPoint<I,O> syncCall(HTTPCallback<I,O> callback, HTTPAuthorization authorization)
-            throws IOException
-    {
+    public HTTPAPIEndPoint<I, O> syncCall(HTTPCallback<I, O> callback, HTTPAuthorization authorization)
+            throws IOException {
         checkRateController();
         ToRun toRun = new ToRun(callback, authorization);
         toRun.run();
@@ -260,9 +220,7 @@ public class HTTPAPIEndPoint<I,O>
     }
 
 
-
-    private HTTPMessageConfigInterface createHMCI(I input, HTTPAuthorization authorization)
-    {
+    private HTTPMessageConfigInterface createHMCI(I input, HTTPAuthorization authorization) {
 
         HTTPMessageConfigInterface ret = HTTPMessageConfig.createAndInit(config.getURL(), config.getURI(), config.getMethod(), config.isSecureCheckEnabled());
         NVGenericMap.copy(config.getHeaders(), ret.getHeaders(), true);
@@ -288,24 +246,21 @@ public class HTTPAPIEndPoint<I,O>
     }
 
 
-    public HTTPAPIEndPoint<I,O> asyncCall(HTTPCallback<I,O> callback)
-    {
+    public HTTPAPIEndPoint<I, O> asyncCall(HTTPCallback<I, O> callback) {
         return asyncCall(callback, null, rateController != null ? rateController.nextWait() : 0);
     }
 
-    public HTTPAPIEndPoint<I,O>  asyncCall(HTTPCallback<I,O> callback, HTTPAuthorization authorization)
-    {
+    public HTTPAPIEndPoint<I, O> asyncCall(HTTPCallback<I, O> callback, HTTPAuthorization authorization) {
         return asyncCall(callback, authorization, rateController != null ? rateController.nextWait() : 0);
     }
 
 
-    public HTTPAPIEndPoint<I,O> asyncCall(HTTPCallback<I,O> callback, HTTPAuthorization authorization, long delayInMillis)
-    {
+    public HTTPAPIEndPoint<I, O> asyncCall(HTTPCallback<I, O> callback, HTTPAuthorization authorization, long delayInMillis) {
         ToRun toRun = new ToRun(callback, authorization);
 
-        if(tsp != null)
+        if (tsp != null)
             tsp.schedule(toRun, delayInMillis, TimeUnit.MILLISECONDS);
-        else if(executor != null)
+        else if (executor != null)
             executor.execute(toRun);
         else
             throw new IllegalArgumentException("No executor or scheduler found can't execute");
@@ -314,23 +269,18 @@ public class HTTPAPIEndPoint<I,O>
     }
 
 
-    public long successCount()
-    {
+    public long successCount() {
         return successCounter.get();
     }
 
-    public long failedCount()
-    {
+    public long failedCount() {
         return failedCounter.get();
     }
 
 
-
-    public HTTPAPIEndPoint<I,O> setPositiveResults(int ...httpStatusCodes) {
-        if (httpStatusCodes != null)
-        {
-            for (int statusCode : httpStatusCodes)
-            {
+    public HTTPAPIEndPoint<I, O> setPositiveResults(int... httpStatusCodes) {
+        if (httpStatusCodes != null) {
+            for (int statusCode : httpStatusCodes) {
                 HTTPStatusCode hsc = HTTPStatusCode.statusByCode(statusCode);
                 if (hsc != null)
                     positiveResults.put(statusCode, hsc);
@@ -339,12 +289,10 @@ public class HTTPAPIEndPoint<I,O>
         return this;
     }
 
-    public synchronized HTTPAPIEndPoint<I,O> setPositiveResults(List<Integer> httpStatusCodes) {
-        if (httpStatusCodes != null)
-        {
+    public synchronized HTTPAPIEndPoint<I, O> setPositiveResults(List<Integer> httpStatusCodes) {
+        if (httpStatusCodes != null) {
             positiveResults.clear();
-            for (int statusCode : httpStatusCodes)
-            {
+            for (int statusCode : httpStatusCodes) {
                 HTTPStatusCode hsc = HTTPStatusCode.statusByCode(statusCode);
                 if (hsc != null)
                     positiveResults.put(statusCode, hsc);
@@ -353,36 +301,29 @@ public class HTTPAPIEndPoint<I,O>
         return this;
     }
 
-    public HTTPAPIEndPoint<I,O> setPositiveResults(HTTPStatusCode ...httpStatusCodes)
-    {
-        if(httpStatusCodes != null)
-        {
-            for (HTTPStatusCode statusCode : httpStatusCodes)
-            {
+    public HTTPAPIEndPoint<I, O> setPositiveResults(HTTPStatusCode... httpStatusCodes) {
+        if (httpStatusCodes != null) {
+            for (HTTPStatusCode statusCode : httpStatusCodes) {
                 positiveResults.put(statusCode.CODE, statusCode);
             }
         }
         return this;
     }
 
-    public NVGenericMap getProperties()
-    {
+    public NVGenericMap getProperties() {
         return properties;
     }
 
-    public HTTPAPIEndPoint<I,O> setProperties(NVGenericMap properties)
-    {
+    public HTTPAPIEndPoint<I, O> setProperties(NVGenericMap properties) {
         this.properties = properties;
-        if(properties != null)
-        {
+        if (properties != null) {
             setPositiveResults((List<Integer>) properties.getValue("positive_result_codes"));
         }
 
         return this;
     }
 
-    public HTTPStatusCode lookupPositiveResult(int statusCode)
-    {
+    public HTTPStatusCode lookupPositiveResult(int statusCode) {
         return positiveResults.get(statusCode);
     }
 }

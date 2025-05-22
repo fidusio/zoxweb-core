@@ -189,7 +189,13 @@ public class HTTPRawMessage
 
 
         if (parseRawHeaders()) {
-            if (isMessageComplete()) {
+            if (hmci.isTransferChunked()) {
+                HTTPCodecs.TRANSFER_CHUNKED.decode(this);
+                if (areHeadersParsed()) {
+                    HTTPCodecs.MULTIPART_FORM_DATA_CHUNKED.decode(this);
+                }
+            }
+            else if (isMessageComplete()) {
                 if (hmci.getMethod() != HTTPMethod.GET) {
                     HTTPMediaType hmt = HTTPMediaType.lookup(hmci.getContentType());
                     if (hmt != null) {
@@ -202,9 +208,9 @@ public class HTTPRawMessage
                             case APPLICATION_OCTET_STREAM:
                                 break;
                             case MULTIPART_FORM_DATA:
-                                if (hmci.isTransferChunked())
-                                    HTTPCodecs.MULTIPART_FORM_DATA_CHUNKED.decode(this);
-                                else
+//                                if (hmci.isTransferChunked())
+//                                    HTTPCodecs.MULTIPART_FORM_DATA_CHUNKED.decode(this);
+//                                else
                                     HTTPCodecs.MULTIPART_FORM_DATA.decode(this);
                                 break;
                             case TEXT_CSV:
@@ -238,11 +244,6 @@ public class HTTPRawMessage
                                 break;
                         }
                     }
-                }
-            } else if (hmci.isTransferChunked()) {
-                HTTPCodecs.TRANSFER_CHUNKED.decode(this);
-                if (areHeadersParsed()) {
-                    HTTPCodecs.MULTIPART_FORM_DATA_CHUNKED.decode(this);
                 }
             }
 

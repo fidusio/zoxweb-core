@@ -5,31 +5,28 @@ import org.zoxweb.shared.util.GetName;
 import org.zoxweb.shared.util.NVGenericMap;
 import org.zoxweb.shared.util.NamedValue;
 
-public interface HTTPAPIBuilder
-{
+public interface HTTPAPIBuilder {
     enum Prop
-            implements GetName
-    {
+            implements GetName {
         URL("url"),
         AUTHZ("authz"),
 
         ;
         private final String name;
-        Prop(String name)
-        {
+
+        Prop(String name) {
             this.name = name;
         }
+
         /**
          * @return the name of the object
          */
         @Override
-        public String getName()
-        {
+        public String getName() {
             return name;
         }
 
-        public static NVGenericMap toProp(String url, HTTPAuthorization authorization)
-        {
+        public static NVGenericMap toProp(String url, HTTPAuthorization authorization) {
             NVGenericMap ret = new NVGenericMap();
             return ret.build(URL, url).build(new NamedValue<>(AUTHZ, authorization));
         }
