@@ -73,8 +73,10 @@ public class ByteBufferUtil {
                     cachedByteArrays.put(ba.length, usq);
                 }
 
-                if (usq.size() < CACHE_LIMIT)
+                if (usq.size() < CACHE_LIMIT) {
+                    Arrays.fill(ba, (byte)0);
                     usq.queue(ba);
+                }
             }
     }
 

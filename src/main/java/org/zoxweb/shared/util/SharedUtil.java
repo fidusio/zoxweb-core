@@ -1893,7 +1893,13 @@ public class SharedUtil {
      * @return matching index inside buffer
      */
     public static int indexOf(byte[] buffer, int fromIndex, int toIndex, byte[] match, int matchOffset, int matchLen) {
-        if (matchOffset < 0 || matchLen < 1 || (matchOffset + matchLen) > match.length || toIndex > buffer.length) {
+        return indexOf(buffer.length, buffer, fromIndex, toIndex, match, matchOffset, matchLen);
+    }
+
+
+
+    public static int indexOf(int bufferLimit, byte[] buffer, int fromIndex, int toIndex, byte[] match, int matchOffset, int matchLen) {
+        if (matchOffset < 0 || matchLen < 1 || (matchOffset + matchLen) > match.length || toIndex > bufferLimit || bufferLimit > buffer.length) {
             throw new IndexOutOfBoundsException();
         }
 

@@ -28,8 +28,10 @@ public enum ProtoMarker
     BOUNDARY_TAG("boundary-tag"),
     BOUNDARY_START_TAG("boundary-start"),
     BOUNDARY_FINAL_TAG("boundary-end"),
+    BOUNDARY_FINAL_TAG_SIMPLE("boundary-end-simple"),
     BOUNDARY_CONTENT_END_TAG("boundary-content-end"),
     SUB_CONTENT_START_INDEX("content-start-index"),
+    END_OF_CONTENT_INDEX("end-of-content-index"),
 
     LAST_CHUNK("last-chunk"),
     TRANSFER_COMPLETED("transfer-completed"),
