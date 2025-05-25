@@ -64,58 +64,70 @@ public final class HTTPCodecs {
         // binary-data\r\n
         //
         UByteArrayOutputStream ubaos = hrm.getDataStream();
-        if (log.isEnabled()) log.getLogger().info("TRANSFER_CHUNKED entry point");
+        if (log.isEnabled()) log.getLogger().info("TRANSFER_CHUNKED entry point\n");
+        if (!hrm.isEndOfChunkedContentReached())
+            do {
+                // parse the data size line in hex
+                int index = ubaos.indexOf(hrm.getDataMark(), Delimiter.CRLF.getBytes());
+                if (log.isEnabled()) log.getLogger().info("index of chunk marker : " + index);
+                if (index == -1)
+                    break;
+                String hexSize = ubaos.getString(hrm.getDataMark(), index - hrm.getDataMark());
+                if (log.isEnabled())
+                    log.getLogger().info("dataMark : " + hrm.getDataMark() + " match index: " + index + " ubaos size: " + ubaos.size());
+                int chunkSize = SharedUtil.hexToInt(hexSize);
+                if (log.isEnabled()) log.getLogger().info("chunk size : " + chunkSize);
+                if (chunkSize == 0) {
+                    // we have the last chunk
 
-        do {
-            // parse the data size line in hex
-            int index = ubaos.indexOf(hrm.getDataMark(), Delimiter.CRLF.getBytes());
-            if (index == -1)
-                break;
-            String hexSize = ubaos.getString(hrm.getDataMark(), index - hrm.getDataMark());
-            int chunkSize = SharedUtil.hexToInt(hexSize);
-            if (chunkSize == 0) {
-                // we have the last chunk
-                if (!hrm.getHTTPMessageConfig().isMultiPartEncoding())
-                    hrm.endOfContentReached();
-                // delete the last 0 chunk and trailing headers
-                ubaos.removeAt(hrm.getDataMark(), ubaos.size() - hrm.getDataMark());
+                    hrm.endOfChunksReached();
+                    // delete the last 0 chunk and trailing headers
+                    ubaos.removeAt(hrm.getDataMark(), ubaos.size() - hrm.getDataMark());
 
-                // for now NO support for trailer header
-                break;
-            }
-
-            if (log.isEnabled())
-                log.getLogger().info("we have a chunk of size " + chunkSize + " raw data buffer size " + ubaos.size() + " dataMark: " + hrm.getDataMark());
-
-            if (ubaos.size() >= (index + Delimiter.CRLF.length() + chunkSize + Delimiter.CRLF.length())) {
-
-
-                if (ubaos.byteAt(index + Delimiter.CRLF.length() + chunkSize) == '\r' &&
-                        ubaos.byteAt(index + Delimiter.CRLF.length() + chunkSize + 1) == '\n') {
-                    // we have at least one full chunk
-
-                    // 1. remove the hex-size\r\n
-                    ubaos.shiftLeft(index + Delimiter.CRLF.length(), hrm.getDataMark());
-
-                    // 2. remove the \r\n at the binary data
-                    ubaos.removeAt(hrm.getDataMark() + chunkSize, Delimiter.CRLF.length());
-                    hrm.incDataMark(chunkSize);
-                    if (log.isEnabled())
-                        log.getLogger().info("we have a at least one FULL chunk dataMark " + hrm.getDataMark() + " raw data buffer size " + ubaos.size());
-                    continue;
-                } else {
-                    // we have a problem
-                    log.getLogger().info(index + "The end of the chunked is missing " + index + Delimiter.CRLF.length() + chunkSize);
+                    // for now NO support for trailer header
+                    break;
                 }
-            }
-            // datamark should be used by subsequent decoder as the end of HTTPRawMessage.getDataStream() as the end of the stream
-            // after processing the data they should invoke
-            // HTTPRawMessage.getDataStream().shiftLeft(datamark, 0)
-            // then set datamark to zero
-            // so the next call to TRANSFER_CHUNKED will process the remaining data
-            break;
 
-        } while (true);
+                if (log.isEnabled())
+                    log.getLogger().info("we have a chunk of size " + chunkSize + " raw data buffer size " + ubaos.size() + " dataMark: " + hrm.getDataMark() + " @ " + index);
+
+                if (ubaos.size() >= (index + Delimiter.CRLF.length() + chunkSize + Delimiter.CRLF.length())) {
+                    byte r = ubaos.byteAt(index + Delimiter.CRLF.length() + chunkSize);
+                    byte n = ubaos.byteAt(index + Delimiter.CRLF.length() + chunkSize + 1);
+
+
+                    if (r == '\r' && n == '\n') {
+                        // we have at least one full chunk
+
+                        // 1. remove the hex-size\r\n
+                        ubaos.shiftLeft(index + Delimiter.CRLF.length(), hrm.getDataMark());
+
+                        hrm.incDataMark(chunkSize);
+                        // 2. remove the \r\n at the end of binary data
+//                        ubaos.shiftLeft(hrm.getDataMark() + Delimiter.CRLF.length(), hrm.getDataMark());
+                        ubaos.removeAt(hrm.getDataMark(), Delimiter.CRLF.length());
+
+
+                        if (log.isEnabled())
+                            log.getLogger().info("After the cleanup chunk of size " + chunkSize + " raw data buffer size " + ubaos.size() + " dataMark: " + hrm.getDataMark() + " @ " + index + "\n" + ubaos);
+
+//                    if (log.isEnabled())
+//                        log.getLogger().info("we have a at least one FULL chunk dataMark " + hrm.getDataMark() + " raw data buffer size " + ubaos.size());
+//
+                        continue;
+                    } else {
+                        // we have a problem
+                        log.getLogger().info(index + " The end of the chunked is missing " + (index + Delimiter.CRLF.length() + chunkSize));
+                    }
+                }
+                // datamark should be used by subsequent decoder as the end of HTTPRawMessage.getDataStream() as the end of the stream
+                // after processing the data they should invoke
+                // HTTPRawMessage.getDataStream().shiftLeft(datamark, 0)
+                // then set datamark to zero
+                // so the next call to TRANSFER_CHUNKED will process the remaining data
+                break;
+
+            } while (true);
 
 
         return hrm;
@@ -288,7 +300,8 @@ public final class HTTPCodecs {
                 case GET:
                     break;
                 default:
-                    if (hmci.isContentMultipartFormData() && hmci.isTransferChunked()) // this need to change we are doing partial processing
+                    //boolean continueProcessing = (hmci.isTransferChunked() && hmci.isContentMultipartFormData()) || (hmci.isContentMultipartFormData() && hrm.isMessageComplete());
+                    if (!hrm.isMessageComplete()) // this need to change we are doing partial processing
                     {
 
                         if (SUS.isEmpty(hmci.getBoundary())) {
@@ -298,19 +311,18 @@ public final class HTTPCodecs {
                             hmci.setBoundary(boundary);
                             if (log.isEnabled()) log.getLogger().info("boundary=" + boundary);
                             hrm.getProperties()
-                                    .build(new NVBlob(ProtoMarker.BOUNDARY_TAG, SharedStringUtil.getBytes("--" + hmci.getBoundary())))
-                                    .build(new NVBlob(ProtoMarker.BOUNDARY_CONTENT_END_TAG, SharedStringUtil.getBytes(Delimiter.CRLF.getValue() + "--" + hmci.getBoundary())))
-                                    .build(new NVBlob(ProtoMarker.BOUNDARY_FINAL_TAG, SharedStringUtil.getBytes(Delimiter.CRLF.getValue() + "--" + hmci.getBoundary() + "--" + Delimiter.CRLF.getValue())))
-                                    .build(new NVBlob(ProtoMarker.BOUNDARY_START_TAG, SharedStringUtil.getBytes("--" + hmci.getBoundary() + Delimiter.CRLF.getValue())));
+                                    //        --BOUNDARY\r\n
+                                    .build(new NVBlob(ProtoMarker.BOUNDARY_START_TAG, SharedStringUtil.getBytes("--" + hmci.getBoundary() + Delimiter.CRLF.getValue())))
+                                    //   \r\n\--BOUNDARY\r\n
+                                    .build(new NVBlob(ProtoMarker.BOUNDARY_CONTENT_END_TAG, SharedStringUtil.getBytes(Delimiter.CRLF.getValue() + "--" + hmci.getBoundary() + Delimiter.CRLF.getValue())))
+                                    //   \r\n\--BOUNDARY--\r\n
+                                    .build(new NVBlob(ProtoMarker.BOUNDARY_FINAL_TAG, SharedStringUtil.getBytes(Delimiter.CRLF.getValue() + "--" + hmci.getBoundary() + "--" + Delimiter.CRLF.getValue())));
 
                         }
 
 
                         if (SUS.isNotEmpty(hmci.getBoundary())) {
-                            //byte[] boundaryTag = hrm.getProperties().getValue(ProtoMarker.BOUNDARY_TAG);
-                            byte[] boundaryContentEndTag = hrm.getProperties().getValue(ProtoMarker.BOUNDARY_CONTENT_END_TAG);
-//                            byte[] boundaryStartTag = hrm.getProperties().getValue(ProtoMarker.BOUNDARY_START_TAG);
-                            byte[] boundaryFinalTag = hrm.getProperties().getValue(ProtoMarker.BOUNDARY_FINAL_TAG);
+                            final int safetyBufferLength = ((byte[]) hrm.getProperties().getValue(ProtoMarker.BOUNDARY_FINAL_TAG)).length + 10;
 
                             // At this stage we hava multipart/form-data content type
                             // we need to start parsing the content
@@ -320,147 +332,153 @@ public final class HTTPCodecs {
                             // check the last param if it exists
 
                             NamedValue<InputStream> pIncompleteParam = (NamedValue<InputStream>) hrm.incompleteParam();
-                            int index;
+
                             // check the last param if it exists
                             if (pIncompleteParam != null) {
                                 // find the end of the message
-                                index = ubaos.indexOf(hrm.getLastParsedDataIndex(), hrm.getDataMark(), boundaryContentEndTag);
-                                if (index == -1) {
+                                int indexEndOfContent = indexEndOfContent(hrm, hrm.getLastProcessedDataIndex());
+                                if (indexEndOfContent == -1) {
                                     // safety measure we take the longest tag
-                                    int safetyIndex = hrm.getDataMark() - boundaryFinalTag.length;
-                                    if (safetyIndex > hrm.getLastParsedDataIndex()) {
-
-                                        UByteArrayInputStream is = new UByteArrayInputStream(ubaos.getInternalBuffer(), hrm.getLastParsedDataIndex(), safetyIndex - hrm.getLastParsedDataIndex(),
+                                    int safetyIndex = hrm.getDataMark() - safetyBufferLength;
+                                    if (safetyIndex > hrm.getLastProcessedDataIndex()) {
+                                        int lastDataMark = hrm.getDataMark();
+                                        int lengthToAdd = safetyIndex - hrm.getLastProcessedDataIndex();
+                                        UByteArrayInputStream is = new UByteArrayInputStream(ubaos.getInternalBuffer(), hrm.getLastProcessedDataIndex(), lengthToAdd,
                                                 () -> {
-
-                                                    //if (log.isEnabled())
                                                     if (log.isEnabled())
-                                                        log.getLogger().info("***CLOSE Incomplete**** " + pIncompleteParam.getName());
-                                                    hrm.getDataStream().shiftLeft(safetyIndex, 0);
-                                                    hrm.setLastParsedDataIndex(0);
-                                                    hrm.setDataMark(hrm.getDataMark() - safetyIndex);
+                                                        log.getLogger().info("*** 2---- CLOSE Incomplete**** " + pIncompleteParam.getName() + " lastDataMark: " + lastDataMark + " " + toString(hrm));
+
+                                                    // Shrink the dataStream() buffer DO NOT TOUCH
+                                                    hrm.getDataStream().shiftLeft(hrm.getLastProcessedDataIndex(), 0);
+                                                    hrm.setDataMark(hrm.getDataMark() - hrm.getLastProcessedDataIndex());
+                                                    hrm.setLastProcessedDataIndex(0);
                                                 });
                                         pIncompleteParam.setValue(is);
-                                        hrm.setLastParsedDataIndex(safetyIndex);
-                                    } else
-                                        pIncompleteParam.setValue(new UByteArrayInputStream(Const.EMPTY_BYTE_ARRAY));
-                                    return hmci;
+                                        hrm.setLastProcessedDataIndex(safetyIndex);
+                                        return hmci;
+                                    } else {
+                                        // nothing to do
+                                        return hmci;
+                                    }
+
                                 } else {
-
-                                    int indexEndOfContent = ubaos.indexOf(hrm.getLastParsedDataIndex(), hrm.getDataMark(), boundaryFinalTag);
-
-                                    UByteArrayInputStream is = new UByteArrayInputStream(ubaos.getInternalBuffer(), hrm.getLastParsedDataIndex(), index - hrm.getLastParsedDataIndex());
+                                    // we have reached the end
+                                    if (log.isEnabled())
+                                        log.getLogger().info("We a have the end of the partial file getLastProcessedDataIndex " + hrm.getLastProcessedDataIndex() + " indexEndOfContent: " + indexEndOfContent);
+                                    UByteArrayInputStream is = new UByteArrayInputStream(ubaos.getInternalBuffer(), hrm.getLastProcessedDataIndex(), indexEndOfContent - hrm.getLastProcessedDataIndex());
                                     pIncompleteParam.setValue(is);
                                     pIncompleteParam.getProperties().build(new NVBoolean(ProtoMarker.LAST_CHUNK, true));
                                     hrm.incompleteParam(null);
-//                                if(ubaos.indexOf(0, hrm.getDataMark(), hrm.getProperties().getValue(ProtoMarker.BOUNDARY_START)) != -1)
-//                                    // we are done
-//                                    return hmci;
 
-                                    hrm.setLastParsedDataIndex(index + Delimiter.CRLF.length());
-                                    if (indexEndOfContent == index) {
-                                        // we have reached the end of the request
-                                        hrm.endOfContentReached();
-                                    }
-
-                                    return hmci;
-//                                index += ((byte[])hrm.getProperties().getValue(ProtoMarker.BOUNDARY_START)).length;
+                                    hrm.setLastProcessedDataIndex(indexEndOfContent);
 
                                 }
                             }
 
                             if (log.isEnabled())
-                                log.getLogger().info("Before while lastParsedDataIndex: " + hrm.getLastParsedDataIndex());
-                            while ((multiPartFullHeader = parseCompleteMultiPartHeaders(hrm, hrm.getLastParsedDataIndex())) != null) {
+                                log.getLogger().info("Before while lastParsedDataIndex: " + hrm.getLastProcessedDataIndex());
+                            while ((multiPartFullHeader = parseCompleteMultiPartHeaders(hrm, hrm.getLastProcessedDataIndex())) != null) {
                                 // we have a full header
                                 NamedValue<?> contentDisposition = multiPartFullHeader.getNV(HTTPHeader.CONTENT_DISPOSITION);
                                 NamedValue<?> contentType = multiPartFullHeader.getNV(HTTPHeader.CONTENT_TYPE);
                                 NamedValue<?> contentLength = multiPartFullHeader.getNV(HTTPHeader.CONTENT_LENGTH);
-                                boolean isAFile = contentDisposition.getProperties().get("filename") != null;
-                                int dataContentStartIndex = multiPartFullHeader.getValue(ProtoMarker.SUB_CONTENT_START_INDEX);
+                                boolean isAFile = multiPartFullHeader.getValue(ProtoMarker.IS_FILE);
 
-                                int indexEndOfPart = ubaos.indexOf(dataContentStartIndex, hrm.getDataMark(), boundaryContentEndTag);
+                                int dataContentStartIndex = multiPartFullHeader.getValue(ProtoMarker.SUB_CONTENT_START_INDEX);
+                                int dataContentEndIndex = multiPartFullHeader.getValue(ProtoMarker.SUB_CONTENT_END_INDEX);
 
                                 String fieldName = contentDisposition.getProperties().getValue("name");
 
                                 if (log.isEnabled())
-                                    log.getLogger().info(hmci.getBoundary() + " DataMark: " + hrm.getDataMark() + " indexEndOfPart: " + indexEndOfPart + " dataContentStartIndex: " + dataContentStartIndex + " isAFile: " + isAFile);
+                                    log.getLogger().info(hmci.getBoundary() + " DataMark: " + hrm.getDataMark() + " dataContentStartIndex: " + dataContentEndIndex + " dataContentEndIndex: " + dataContentEndIndex + " isAFile: " + isAFile);
 
 
                                 if (isAFile) {
-                                    NamedValue<InputStream> paramFileToAdd = new NamedValue<>();
-                                    paramFileToAdd.setName(fieldName);
-                                    paramFileToAdd.getProperties().build(contentDisposition.getProperties().get("filename"))
-                                            .build(contentType.getName(), "" + contentType.getValue());
-                                    if (contentLength != null) {
-                                        paramFileToAdd.getProperties().build(new NVLong(contentLength.getName(), (long) contentLength.getValue()));
-                                    }
-                                    paramFileToAdd.getProperties().build(new NVBoolean(ProtoMarker.LAST_CHUNK, indexEndOfPart != -1));
-                                    if (indexEndOfPart == -1) {
+                                    ;
 
-                                        int safetyIndex = hrm.getDataMark() - boundaryFinalTag.length;
+                                    if (dataContentEndIndex == -1) {
+                                        // we have a partial file content
+                                        int safetyIndex = hrm.getDataMark() - safetyBufferLength;
                                         if (safetyIndex > dataContentStartIndex) {
+                                            NamedValue<InputStream> paramFileToAdd = new NamedValue<>();
+                                            paramFileToAdd.setName(fieldName);
+                                            paramFileToAdd.getProperties().build(contentDisposition.getProperties().get("filename"))
+                                                    .build(contentType.getName(), "" + contentType.getValue());
+                                            if (contentLength != null) {
+                                                paramFileToAdd.getProperties().build(new NVLong(contentLength.getName(), (long) contentLength.getValue()));
+                                            }
+                                            paramFileToAdd.getProperties().build(new NVBoolean(ProtoMarker.LAST_CHUNK, false));
+                                            hmci.getParameters().add(paramFileToAdd);
+                                            int lastDataMark = hrm.getDataMark();
                                             UByteArrayInputStream is = new UByteArrayInputStream(ubaos.getInternalBuffer(), dataContentStartIndex, safetyIndex - dataContentStartIndex
                                                     , () -> {
-                                                //if (log.isEnabled())
+
                                                 if (log.isEnabled())
-                                                    log.getLogger().info("***CLOSE first incomplete **** " + paramFileToAdd.getName());
-                                                hrm.getDataStream().shiftLeft(safetyIndex, 0);
-                                                hrm.setLastParsedDataIndex(0);
-                                                hrm.setDataMark(hrm.getDataMark() - safetyIndex);
+                                                    log.getLogger().info("*** 1---CLOSE first incomplete **** " + paramFileToAdd.getName() + " lastDataMark: " + lastDataMark + " " + toString(hrm));
+
+                                                // Shrink the dataStream() buffer DO NOT TOUCH
+                                                hrm.getDataStream().shiftLeft(hrm.getLastProcessedDataIndex(), 0);
+                                                hrm.setDataMark(hrm.getDataMark() - hrm.getLastProcessedDataIndex());
+                                                hrm.setLastProcessedDataIndex(0);
 
                                             });
+                                            hrm.setLastProcessedDataIndex(safetyIndex);
                                             paramFileToAdd.setValue(is);
-                                            hrm.setLastParsedDataIndex(safetyIndex);
-                                        } else {
-                                            paramFileToAdd.setValue(UByteArrayInputStream.EMPTY_INPUT_STREAM);
-                                            hrm.setLastParsedDataIndex(dataContentStartIndex);
+                                            hrm.incompleteParam(paramFileToAdd);
                                         }
+                                        return hmci;
 
-                                        // we have partial file data
-                                        hrm.incompleteParam(paramFileToAdd);
+                                    } else {
+                                        // We have a complete file with it s content
+                                        NamedValue<InputStream> paramFileToAdd = new NamedValue<>();
+                                        paramFileToAdd.setName(fieldName);
+                                        paramFileToAdd.getProperties().build(contentDisposition.getProperties().get("filename"))
+                                                .build(contentType.getName(), "" + contentType.getValue());
+                                        if (contentLength != null) {
+                                            paramFileToAdd.getProperties().build(new NVLong(contentLength.getName(), (long) contentLength.getValue()));
+                                        }
+                                        paramFileToAdd.getProperties().build(new NVBoolean(ProtoMarker.LAST_CHUNK, true));
                                         hmci.getParameters().add(paramFileToAdd);
 
-                                        if (log.isEnabled())
-                                            log.getLogger().info("adding incomplete file: " + paramFileToAdd);
-                                    } else {
-                                        // the file is completed
-                                        UByteArrayInputStream is = new UByteArrayInputStream(ubaos.getInternalBuffer(), dataContentStartIndex, indexEndOfPart - dataContentStartIndex);
+
+                                        UByteArrayInputStream is = new UByteArrayInputStream(ubaos.getInternalBuffer(), dataContentStartIndex, dataContentEndIndex - dataContentStartIndex);
                                         paramFileToAdd.setValue(is);
+                                        hmci.getParameters().add(paramFileToAdd);
                                         if (log.isEnabled())
                                             log.getLogger().info("adding completed file: " + paramFileToAdd);
                                         // update index here
+
                                     }
 
-                                    hmci.getParameters().add(paramFileToAdd);
-                                } else if (indexEndOfPart != -1) {
-                                    String value = ubaos.getString(dataContentStartIndex, indexEndOfPart - dataContentStartIndex);
+                                } else {
+                                    // it is not a file
+                                    String value = ubaos.getString(dataContentStartIndex, dataContentEndIndex - dataContentStartIndex);
                                     if (contentType != null && HTTPMediaType.lookup((String) contentType.getValue()) == HTTPMediaType.APPLICATION_JSON) {
                                         NVGenericMap nvgm = GSONUtil.fromJSONDefault(value, NVGenericMap.class);
                                         nvgm.setName(fieldName);
                                         hmci.getParameters().build(nvgm);
                                         if (log.isEnabled()) log.getLogger().info("adding nvmg: " + nvgm);
-
                                         // update index here
                                     } else {
                                         NVPair nvp = new NVPair(fieldName, value);
                                         hmci.getParameters().build(nvp);
+
                                         if (log.isEnabled()) log.getLogger().info("adding nvp: " + nvp);
                                     }
 
                                 }
 
-                                if (indexEndOfPart == -1)
+                                if (dataContentEndIndex == -1)
                                     break;
 
 
-                                int indexEndOfContent = ubaos.indexOf(indexEndOfPart, hrm.getDataMark(), boundaryFinalTag);
-
-                                hrm.setLastParsedDataIndex(indexEndOfPart);
-                                if (indexEndOfContent == indexEndOfPart) {
-                                    hrm.endOfContentReached();
-                                    break;
-                                }
+//                                int indexEndOfBoundaryFinalTag = ubaos.indexOf(dataContentEndIndex, hrm.getDataMark(), boundaryFinalTag);
+//
+//                                hrm.setLastParsedDataIndex(dataContentEndIndex);
+////                                if (indexEndOfBoundaryFinalTag != -1) {
+////                                    hrm.endOfContentReached();
+////                                    break;
+////                                }
 
 
                                 // continue processing
@@ -489,25 +507,53 @@ public final class HTTPCodecs {
     };
 
 
+    private static String toString(HTTPRawMessage hrm) {
+        return "++DataMark: " + hrm.getDataMark() + " LastProcessedDataIndex: " + hrm.getLastProcessedDataIndex() + " UBAOS Size: " + hrm.getDataStream().size() + " --";
+    }
+
+    private static int indexEndOfContent(HTTPRawMessage hrm, int startIndex) {
+        if (startIndex > hrm.getDataMark())
+            return -1;
+
+        UByteArrayOutputStream ubaos = hrm.getDataStream();
+        byte[] boundaryContentEndMarker = hrm.getProperties().getValue(ProtoMarker.BOUNDARY_CONTENT_END_TAG);
+        byte[] boundaryEndMarker = hrm.getProperties().getValue(ProtoMarker.BOUNDARY_FINAL_TAG);
+
+        int indexEndOfContent = ubaos.indexOf(startIndex, hrm.getDataMark(), boundaryContentEndMarker);
+        int indexEndOfFullContent = ubaos.indexOf(startIndex, hrm.getDataMark(), boundaryEndMarker);
+
+        if (indexEndOfContent == -1 && indexEndOfFullContent != -1) {
+            if (log.isEnabled())
+                log.getLogger().info("indexEndOfContent: " + indexEndOfContent + " indexEndOfFullContent: " + indexEndOfFullContent);
+            indexEndOfContent = indexEndOfFullContent;
+            hrm.endOfContentReached();
+        }
+        return indexEndOfContent;
+
+    }
+
     private static NVGenericMap parseCompleteMultiPartHeaders(HTTPRawMessage hrm, int startIndex) {
-        NVGenericMap ret = null;
+
         // 1 we need to find the BOUNDARY_START
         UByteArrayOutputStream ubaos = hrm.getDataStream();
         if (log.isEnabled()) log.getLogger().info("StartIndex: " + startIndex);
-//        byte[] boundaryContentEndTag = hrm.getProperties().getValue(ProtoMarker.BOUNDARY_CONTENT_END_TAG);
-        byte[] boundaryStartTag = hrm.getProperties().getValue(ProtoMarker.BOUNDARY_START_TAG);
-//        byte[] boundaryFinalTag = hrm.getProperties().getValue(ProtoMarker.BOUNDARY_FINAL_TAG);
+        byte[] boundaryStartMarker = hrm.getProperties().getValue(ProtoMarker.BOUNDARY_START_TAG);
 
-        int indexOfBoundaryStart = ubaos.indexOf(startIndex, hrm.getDataMark(), boundaryStartTag);
+
+        int indexOfBoundaryStart = ubaos.indexOf(startIndex, hrm.getDataMark(), boundaryStartMarker);
         // 2 the end of the headers \r\n\r\n
         if (indexOfBoundaryStart != -1) {
-            int endOfSubHeadersIndex = ubaos.indexOf(startIndex, hrm.getDataMark(), Delimiter.CRLFCRLF.getBytes());
+            int endOfSubHeadersIndex = ubaos.indexOf(indexOfBoundaryStart + boundaryStartMarker.length, hrm.getDataMark(), Delimiter.CRLFCRLF.getBytes());
+//            if (log.isEnabled())
+//                log.getLogger().info("startIndex, indexOfBoundaryStart, endOfSubHeadersIndex, indexEndOfContent, indexOfFinalTag: " + SharedUtil.toCanonicalID(',', startIndex, indexOfBoundaryStart, endOfSubHeadersIndex, indexEndOfContent, indexOfFinalTag));
+
 
             if (endOfSubHeadersIndex != -1) {
+                int indexEndOfContent = indexEndOfContent(hrm, indexOfBoundaryStart + boundaryStartMarker.length);
                 // we have full headers
                 // we can parse of the part headers
-                ret = new NVGenericMap();
-                int index = indexOfBoundaryStart + boundaryStartTag.length;
+                NVGenericMap ret = new NVGenericMap();
+                int index = indexOfBoundaryStart + boundaryStartMarker.length;
                 do {
                     int endOfHeaderLineIndex = ubaos.indexOf(index, hrm.getDataMark(), Delimiter.CRLF.getBytes());
                     if (endOfHeaderLineIndex != -1) {
@@ -517,30 +563,42 @@ public final class HTTPCodecs {
                         NamedValue<?> nv = HTTPHeaderParser.parseFullHeaderLine(wholeHeaderLine);
                         ret.add(nv);
                         if (endOfSubHeadersIndex == endOfHeaderLineIndex) {
-
                             index = -1;
-                            NVInt nvint = new NVInt(ProtoMarker.SUB_CONTENT_START_INDEX, endOfSubHeadersIndex + Delimiter.CRLFCRLF.length());
-                            ret.build(nvint);
-                            if (log.isEnabled()) log.getLogger().info("" + nvint);
+                            NVInt startOfContentNV = new NVInt(ProtoMarker.SUB_CONTENT_START_INDEX, endOfSubHeadersIndex + Delimiter.CRLFCRLF.length());
+                            ret.build(startOfContentNV).build(new NVInt(ProtoMarker.SUB_CONTENT_END_INDEX, indexEndOfContent));
+                            if (log.isEnabled()) log.getLogger().info(startOfContentNV.toString());
                         } else
                             index = endOfHeaderLineIndex + Delimiter.CRLF.length();
-
                         if (log.isEnabled()) log.getLogger().info("index: " + index + " ret: " + ret);
 
                     }
 
                 } while (index != -1);
+
+                NamedValue<?> contentDisposition = ret.getNV(HTTPHeader.CONTENT_DISPOSITION);
+                boolean isAFile = contentDisposition.getProperties().get("filename") != null;
+                ret.add(new NVBoolean(ProtoMarker.IS_FILE, isAFile));
+
+                // check if we have a full multipart content
+                if (indexEndOfContent == -1) {
+                    if (isAFile) {
+                        // we have a file with end unknown
+                        //hrm.setLastParsedDataIndex(endOfSubHeadersIndex + Delimiter.CRLFCRLF.length());
+                        return ret;
+                    }
+
+                } else {
+                    // we have a full parameter with its content
+                    hrm.setLastProcessedDataIndex(indexEndOfContent + Delimiter.CRLF.length());
+                    return ret;
+                }
             }
         }
-//        else if (ubaos.indexOf(startIndex, hrm.getDataMark(), hrm.getProperties().getValue(ProtoMarker.BOUNDARY_FINAL_TAG)) != -1) {
-//            // we are done
-//            hrm.endOfContentReached();
-//        }
 
         // 3 try to find the next BOUNDARY_START
         //   If not found we have partial content
         //   If found we have a full content
-        return ret;
+        return null;
     }
 
 }

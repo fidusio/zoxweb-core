@@ -12,7 +12,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
-public class ChunkedMultipartUploader {
+public class OkHTTPChunkedMultipartUploader {
 
     public static void main(String[] args) throws IOException {
         if (args.length < 4) {
@@ -35,16 +35,6 @@ public class ChunkedMultipartUploader {
 
         String userpass = username + ":" + password;
         String basicAuth = "Basic " + Base64.getEncoder().encodeToString(userpass.getBytes(StandardCharsets.UTF_8));
-
-        // Build multipart body (OkHttp will use chunked transfer if file is large)
-//        MultipartBody.Builder multipartBuilder = new MultipartBody.Builder()
-//                .setType(MultipartBody.FORM)
-////                .addFormDataPart("username", username)
-////                .addFormDataPart("password", password)
-//                .addFormDataPart("file", file.getName(),
-//                        RequestBody.create(file, MediaType.parse("application/octet-stream")));
-//
-//        RequestBody requestBody = multipartBuilder.build();
 
 
         RequestBody streamBody = new RequestBody() {

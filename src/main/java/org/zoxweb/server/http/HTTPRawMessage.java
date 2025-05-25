@@ -34,7 +34,9 @@ public class HTTPRawMessage
     private final UByteArrayOutputStream ubaos;
     private volatile boolean parsedHeadersStatus = false;
     private volatile int dataMark = 0;
-    private volatile int indexOfLastParsedData = 0;
+    private volatile int indexOfLastProcessedData = 0;
+
+    private boolean endOfChunkedContentReached = false;
     private volatile String firstLine = null;
     private volatile boolean endOfContent = false;
     private volatile HTTPMessageConfigInterface hmci = new HTTPMessageConfig();
@@ -125,7 +127,7 @@ public class HTTPRawMessage
 
                     }
                 }
-                // fined parsing all the headers
+                // finished parsing all the headers
                 // after that we are ready for content
                 ubaos.shiftLeft(endOfHeadersIndex + Delimiter.CRLFCRLF.getBytes().length, 0);
                 setDataMark(0);
@@ -137,17 +139,15 @@ public class HTTPRawMessage
     }
 
 
-    public int getLastParsedDataIndex()
-    {
-        return indexOfLastParsedData;
+    public synchronized int getLastProcessedDataIndex() {
+        return indexOfLastProcessedData;
     }
 
-    public synchronized void setLastParsedDataIndex(int indexOfLastParsedData)
-    {
+    public synchronized void setLastProcessedDataIndex(int indexOfLastParsedData) {
         if (indexOfLastParsedData > dataMark)
-            throw new IllegalArgumentException("indexOfLastParsedData: " +indexOfLastParsedData + " > dataMark: " + dataMark);
+            throw new IllegalArgumentException("indexOfLastParsedData: " + indexOfLastParsedData + " > dataMark: " + dataMark);
 
-        this.indexOfLastParsedData = indexOfLastParsedData;
+        this.indexOfLastProcessedData = indexOfLastParsedData;
     }
 
     private void validateHTTPMethod() {
@@ -164,6 +164,7 @@ public class HTTPRawMessage
 
     }
 
+
     public synchronized boolean isMessageComplete() {
         if (areHeadersParsed()) {
             if (hmci.getContentLength() != -1) {
@@ -172,8 +173,9 @@ public class HTTPRawMessage
                     log.getLogger().info(SUS.toCanonicalID(',', hmci.getContentLength(), ubaos.size(), (hmci.getContentLength() - ubaos.size())));
                 return (hmci.getContentLength() == ubaos.size());
             } else if (hmci.isTransferChunked()) {
-                // we have a chunked request
-                return endOfContent;
+                if (hmci.isMultiPartEncoding())// we have a chunked request
+                    return endOfContent;
+                return isEndOfChunkedContentReached();
             }
 
             // default there is no content
@@ -191,11 +193,10 @@ public class HTTPRawMessage
         if (parseRawHeaders()) {
             if (hmci.isTransferChunked()) {
                 HTTPCodecs.TRANSFER_CHUNKED.decode(this);
-                if (areHeadersParsed()) {
+                if (hmci.isMultiPartEncoding()) {
                     HTTPCodecs.MULTIPART_FORM_DATA_CHUNKED.decode(this);
                 }
-            }
-            else if (isMessageComplete()) {
+            } else if (isMessageComplete()) {
                 if (hmci.getMethod() != HTTPMethod.GET) {
                     HTTPMediaType hmt = HTTPMediaType.lookup(hmci.getContentType());
                     if (hmt != null) {
@@ -208,10 +209,7 @@ public class HTTPRawMessage
                             case APPLICATION_OCTET_STREAM:
                                 break;
                             case MULTIPART_FORM_DATA:
-//                                if (hmci.isTransferChunked())
-//                                    HTTPCodecs.MULTIPART_FORM_DATA_CHUNKED.decode(this);
-//                                else
-                                    HTTPCodecs.MULTIPART_FORM_DATA.decode(this);
+                                HTTPCodecs.MULTIPART_FORM_DATA.decode(this);
                                 break;
                             case TEXT_CSV:
 
@@ -262,6 +260,7 @@ public class HTTPRawMessage
             firstLine = null;
             endOfContent = false;
             lastParam = null;
+            endOfChunkedContentReached = false;
             properties.clear();
         }
     }
@@ -272,6 +271,14 @@ public class HTTPRawMessage
 
     public synchronized void endOfContentReached() {
         endOfContent = true;
+    }
+
+    public synchronized void endOfChunksReached() {
+        endOfChunkedContentReached = true;
+    }
+
+    public boolean isEndOfChunkedContentReached() {
+        return endOfChunkedContentReached;
     }
 
     public HTTPMessageConfigInterface getHTTPMessageConfig() {
