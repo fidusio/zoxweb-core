@@ -17,7 +17,6 @@ package org.zoxweb.server.io;
 
 import org.zoxweb.shared.util.BytesArray;
 import org.zoxweb.shared.util.DataBufferController;
-import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedStringUtil;
 import org.zoxweb.shared.util.SharedUtil;
 
@@ -100,10 +99,11 @@ public class UByteArrayOutputStream
         byte[] tempBuf = buf;
         int tempCount = size();
         buf = new byte[32];
-        // YES super not the current one
-        super.reset();
+        count = 0;
+        // the old valid don't modify it is since old buf is read only now
+        valid = new AtomicBoolean(true);
 
-        return new ByteArrayInputStream(tempBuf, 0, tempCount);
+        return new UByteArrayInputStream(tempBuf, 0, tempCount);
     }
 
     /**
@@ -440,20 +440,29 @@ public class UByteArrayOutputStream
     }
 
     /**
-     * Returns the internal buffer.
-     *
+     * Returns the internal buffer, this method must be used with extreme care.
+     * If you don't know what you are doing DON'T USED IT.
      * @return internal buffer
      */
     public byte[] getInternalBuffer() {
         return buf;
     }
 
+    /**
+     * @param startIndex from the internal buffer
+     * @return a string from the startIndex till size()
+     */
     public String getString(int startIndex) {
         int length = size() - startIndex;
         return SharedStringUtil.toString(getInternalBuffer(), startIndex, length);
     }
 
-
+    /**
+     *
+     * @param indexStart from the internal buffer
+     * @param length of the String
+     * @return a string from start index with the requested length
+     */
     public String getString(int indexStart, int length) {
         return SharedStringUtil.toString(getInternalBuffer(), indexStart, length);
     }
@@ -468,45 +477,45 @@ public class UByteArrayOutputStream
         return sb.toString();
     }
 
-    /**
-     * Write entire inner content to output stream based ong block size
-     *
-     * @param os        to write the data to
-     * @param blockSize to sent per write
-     * @return data send
-     * @throws IOException is case error
-     */
-    public synchronized int writeTo(OutputStream os, int blockSize) throws IOException {
-        return writeTo(os, blockSize, size());
-    }
-
-    /**
-     * Write inner content to output steam based on block size and max bytes to write
-     *
-     * @param os        to write the data to
-     * @param blockSize to sent per write
-     * @param maxBytes  to be sent
-     * @return data send
-     * @throws IOException is case error
-     */
-    public synchronized int writeTo(OutputStream os, int blockSize, int maxBytes) throws IOException {
-        SUS.checkIfNulls("Null outputStream", os);
-        if (blockSize < 1 || size() == 0 || maxBytes < 1 || maxBytes > size())
-            throw new IllegalArgumentException("Invalid block size: " + blockSize + " size: " + size());
-        if (blockSize > maxBytes)
-            blockSize = maxBytes;
-
-        int offset = 0;
-        do {
-            os.write(getInternalBuffer(), offset, blockSize);
-            offset += blockSize;
-            if (offset + blockSize > size()) {
-                blockSize = size() - offset;
-            }
-        }
-        while (offset != maxBytes);
-        return maxBytes;
-    }
+//    /**
+//     * Write entire inner content to output stream based ong block size
+//     *
+//     * @param os        to write the data to
+//     * @param blockSize to sent per write
+//     * @return data send
+//     * @throws IOException is case error
+//     */
+//    public synchronized int writeTo(OutputStream os, int blockSize) throws IOException {
+//        return writeTo(os, blockSize, size());
+//    }
+//
+//    /**
+//     * Write inner content to output steam based on block size and max bytes to write
+//     *
+//     * @param os        to write the data to
+//     * @param blockSize to sent per write
+//     * @param maxBytes  to be sent
+//     * @return data send
+//     * @throws IOException is case error
+//     */
+//    public synchronized int writeTo(OutputStream os, int blockSize, int maxBytes) throws IOException {
+//        SUS.checkIfNulls("Null outputStream", os);
+//        if (blockSize < 1 || size() == 0 || maxBytes < 1 || maxBytes > size())
+//            throw new IllegalArgumentException("Invalid block size: " + blockSize + " size: " + size());
+//        if (blockSize > maxBytes)
+//            blockSize = maxBytes;
+//
+//        int offset = 0;
+//        do {
+//            os.write(getInternalBuffer(), offset, blockSize);
+//            offset += blockSize;
+//            if (offset + blockSize > size()) {
+//                blockSize = size() - offset;
+//            }
+//        }
+//        while (offset != maxBytes);
+//        return maxBytes;
+//    }
 
     /**
      * @param copy if true will return a copy of the data if false direct access to the internal buff in this mode use it with extreme care

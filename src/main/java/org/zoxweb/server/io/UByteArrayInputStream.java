@@ -54,7 +54,7 @@ public class UByteArrayInputStream
         this(buf, offset, length, null);
     }
 
-    public UByteArrayInputStream(byte[] buf,Runnable afterClose) {
+    public UByteArrayInputStream(byte[] buf, Runnable afterClose) {
         this(buf, 0, buf.length, afterClose);
     }
 

@@ -104,16 +104,11 @@ public final class HTTPCodecs {
 
                         hrm.incDataMark(chunkSize);
                         // 2. remove the \r\n at the end of binary data
-//                        ubaos.shiftLeft(hrm.getDataMark() + Delimiter.CRLF.length(), hrm.getDataMark());
                         ubaos.removeAt(hrm.getDataMark(), Delimiter.CRLF.length());
-
 
                         if (log.isEnabled())
                             log.getLogger().info("After the cleanup chunk of size " + chunkSize + " raw data buffer size " + ubaos.size() + " dataMark: " + hrm.getDataMark() + " @ " + index + "\n" + ubaos);
 
-//                    if (log.isEnabled())
-//                        log.getLogger().info("we have a at least one FULL chunk dataMark " + hrm.getDataMark() + " raw data buffer size " + ubaos.size());
-//
                         continue;
                     } else {
                         // we have a problem
@@ -129,14 +124,12 @@ public final class HTTPCodecs {
 
             } while (true);
 
-
         return hrm;
     };
 
 
     public static final DataDecoder<HTTPRawMessage, HTTPMessageConfigInterface> MULTIPART_FORM_DATA = (hrm) ->
     {
-
         HTTPMessageConfigInterface hmci = hrm.getHTTPMessageConfig();
         switch (hmci.getMethod()) {
             case GET:
