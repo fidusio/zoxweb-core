@@ -1,7 +1,7 @@
 package org.zoxweb.shared.util;
 
 
-import org.jetbrains.annotations.NotNull;
+
 
 import java.util.concurrent.TimeUnit;
 
@@ -140,7 +140,7 @@ public class RateController
      * that the delay has already elapsed
      */
     @Override
-    public synchronized long getDelay(@NotNull TimeUnit unit)
+    public synchronized long getDelay(TimeUnit unit)
     {
         return unit.convert(nextTime - System.currentTimeMillis(), TimeUnit.MILLISECONDS);
     }

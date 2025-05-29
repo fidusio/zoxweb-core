@@ -147,7 +147,7 @@ public class ParseHTTPRequestTest {
 
         int[] byteArrayLength = {
 
-                2, 3, 10, 15, 64, 1024
+                1, 2, 3, 10, 15, 64, 1024
         };
 
         HTTPCodecs.log.setEnabled(false);
@@ -201,9 +201,6 @@ public class ParseHTTPRequestTest {
                     }
 
 
-
-
-
 //                System.out.println("------------------------------------------------------------");
                 }
 
@@ -220,7 +217,7 @@ public class ParseHTTPRequestTest {
 
 
 //                    print(nvs, fileContent);
-                    System.out.println("\n\n\n");
+                    System.out.println("total read: " + totalRead + " counter: " + counter + "\n\n\n");
                     //System.out.println(hrm.getDataStream().size() + " ******************************************* dataStream \n" + hrm.getDataStream() + "\n********************************************** dataStream\n");
                     break;
                 }
@@ -241,12 +238,10 @@ public class ParseHTTPRequestTest {
 //            HTTPCodecs.log.setEnabled(true);
             boolean lastChunk = nvs.getProperties().getValue(ProtoMarker.LAST_CHUNK);
 
-
-//            System.out.println("()()()()()()()()()()()() lastChunk: " + lastChunk + " transferCompleted: " + transferCompleted);
             int dataToProcess = nvs.getValue().available();
 
             IOUtil.relayStreams(nvs.getValue(), fileContent, true);
-            if(dataToProcess > 0 )
+            if (dataToProcess > 0)
                 System.out.println("DataToProcess: " + dataToProcess + " fileContent size: " + fileContent.size());
 //            HTTPCodecs.log.setEnabled(false);
             return lastChunk;

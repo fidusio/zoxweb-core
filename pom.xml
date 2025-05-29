@@ -66,7 +66,7 @@
     <jakarta-mail.version>2.0.1</jakarta-mail.version>
     <jsoup.version>RELEASE</jsoup.version>
     <junit.version>5.12.0</junit.version>
-    <okhttp.version>RELEASE</okhttp.version>
+    <okhttp.version>5.0.0-alpha.14</okhttp.version>
   </properties>
 
 
