@@ -24,410 +24,402 @@ import org.zoxweb.shared.util.*;
 import java.io.*;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.jar.JarInputStream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 public class JarTool {
-	
-	private JarTool() {
-		
-	}
-	
-	public static URL findClassJarURL(Class<?> entryPointClass)
-    {
-		return entryPointClass.getProtectionDomain().getCodeSource().getLocation();
-	}
 
-	public static Map<String, URL> findFilesInJarAndExpandAsTempFiles(String jarFilename, boolean deleteOnExit, String... searchCriteria)
-        throws IOException
-    {
-		HashMap<String, URL>  jarURLs = new HashMap<String, URL>();
-		MatchPatternFilter mpf = MatchPatternFilter.createMatchFilter(searchCriteria);
-		File jarFile = new File(jarFilename);
-		JarFile jf  = null;
+    private JarTool() {
 
-		try
-        {
-			jf = new JarFile( jarFile);
-			Enumeration < JarEntry> eje = jf.entries();
-			jarURLs.put( jarFilename, jarFile.toURI().toURL());
-			FileOutputStream fos = null;
-			
-			while(eje.hasMoreElements())
-            {
-				JarEntry je = eje.nextElement();
-			
-				// look up for embedded jar files
-				
-				if (mpf.match(je.getName()))
-				{
-					//System.out.println("jar found:" + je.getName());
-					try
-                    {
-						String fileExt = SharedStringUtil.valueAfterRightToken(je.getName(), ".");
-						if (fileExt.equals(je.getName()))
-						{
-							fileExt = "";
-						}
+    }
 
-						int length = je.getName().length() - fileExt.length();
-						// replace / with _
-						File tempFile = File.createTempFile(je.getName().substring(0, length), fileExt);
+    public static URL findClassJarURL(Class<?> entryPointClass) {
+        return entryPointClass.getProtectionDomain().getCodeSource().getLocation();
+    }
 
-						if (deleteOnExit)
-						{
-							tempFile.deleteOnExit();
-						}
-						
-						fos = new FileOutputStream(tempFile);
-						
-						IOUtil.relayStreams(jf.getInputStream( je), fos, true);
+    public static Map<String, URL> findFilesInJarAndExpandAsTempFiles(String jarFilename, boolean deleteOnExit, String... searchCriteria)
+            throws IOException {
+        HashMap<String, URL> jarURLs = new HashMap<String, URL>();
+        MatchPatternFilter mpf = MatchPatternFilter.createMatchFilter(searchCriteria);
+        File jarFile = new File(jarFilename);
+        JarFile jf = null;
 
-						jarURLs.put(je.getName(), tempFile.toURI().toURL());
-					}
-					catch( Exception e)
-                    {
-						e.printStackTrace();
-					}
-					finally
-                    {
-						IOUtil.close(fos);
-					}
-				}
-			}
-		}
-		finally
-        {
-			IOUtil.close(jf);
-		}
-		
-		return jarURLs;
-	}
+        try {
+            jf = new JarFile(jarFile);
+            Enumeration<JarEntry> eje = jf.entries();
+            jarURLs.put(jarFilename, jarFile.toURI().toURL());
+            FileOutputStream fos = null;
 
-	/**
+            while (eje.hasMoreElements()) {
+                JarEntry je = eje.nextElement();
+
+                // look up for embedded jar files
+
+                if (mpf.match(je.getName())) {
+                    //System.out.println("jar found:" + je.getName());
+                    try {
+                        String fileExt = SharedStringUtil.valueAfterRightToken(je.getName(), ".");
+                        if (fileExt.equals(je.getName())) {
+                            fileExt = "";
+                        }
+
+                        int length = je.getName().length() - fileExt.length();
+                        // replace / with _
+                        File tempFile = File.createTempFile(je.getName().substring(0, length), fileExt);
+
+                        if (deleteOnExit) {
+                            tempFile.deleteOnExit();
+                        }
+
+                        fos = new FileOutputStream(tempFile);
+
+                        IOUtil.relayStreams(jf.getInputStream(je), fos, true);
+
+                        jarURLs.put(je.getName(), tempFile.toURI().toURL());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    } finally {
+                        IOUtil.close(fos);
+                    }
+                }
+            }
+        } finally {
+            IOUtil.close(jf);
+        }
+
+        return jarURLs;
+    }
+
+    /**
      * Loads library from current JAR archive
-     * 
+     * <p>
      * The file from JAR is copied into system temporary directory and then loaded. The temporary file is deleted after exiting.
      * Method uses String as filename because the pathname is "abstract", not system-dependent.
-     * 
+     *
      * @param path The filename inside JAR as absolute path (beginning with '/'), e.g. /package/File.ext
-     * @throws IOException If temporary file creation or read/write operation fails
+     * @throws IOException              If temporary file creation or read/write operation fails
      * @throws IllegalArgumentException If source file (param path) does not exist
      * @throws IllegalArgumentException If the path is not absolute or if the filename is shorter than three characters (restriction).
      */
     public static void loadLibraryFromJar(String path)
-        throws IOException
-    {
-        if (!path.startsWith("/"))
-        {
+            throws IOException {
+        if (!path.startsWith("/")) {
             throw new IllegalArgumentException("The path to be absolute (start with '/').");
         }
- 
+
         // Obtain filename from path
         String[] parts = path.split("/");
         String filename = (parts.length > 1) ? parts[parts.length - 1] : null;
- 
+
         // Split filename to prexif and suffix (extension)
         String prefix = "";
         String suffix = null;
 
-        if (filename != null)
-        {
+        if (filename != null) {
             parts = filename.split("\\.", 2);
             prefix = parts[0];
-            suffix = (parts.length > 1) ? "."+parts[parts.length - 1] : null; // Thanks, davs! :-)
+            suffix = (parts.length > 1) ? "." + parts[parts.length - 1] : null; // Thanks, davs! :-)
         }
- 
+
         // Check if the filename is okay
-        if (filename == null || prefix.length() < 3)
-        {
+        if (filename == null || prefix.length() < 3) {
             throw new IllegalArgumentException("The filename has to be at least 3 characters long.");
         }
- 
+
         // Prepare temporary file
         File temp = File.createTempFile(prefix, suffix);
         temp.deleteOnExit();
- 
-        if (!temp.exists())
-        {
+
+        if (!temp.exists()) {
             throw new FileNotFoundException("File " + temp.getAbsolutePath() + " does not exist.");
         }
- 
+
         // Prepare buffer for data copying
         byte[] buffer = new byte[1024];
         int readBytes;
- 
+
         // Open and check input stream
         InputStream is = JarTool.class.getResourceAsStream(path);
-        if (is == null)
-        {
+        if (is == null) {
             throw new FileNotFoundException("File " + path + " was not found inside JAR.");
         }
- 
+
         // Open output stream and copy data between source file in JAR and the temporary file
         OutputStream os = new FileOutputStream(temp);
-        try
-        {
-            while ((readBytes = is.read(buffer)) != -1)
-            {
+        try {
+            while ((readBytes = is.read(buffer)) != -1) {
                 os.write(buffer, 0, readBytes);
             }
-        }
-        finally
-        {
+        } finally {
             // If read/write fails, close streams safely before throwing an exception
             os.close();
             is.close();
         }
- 
+
         // Finally, load the library
         System.load(temp.getAbsolutePath());
     }
 
-	public static ClassLoader createClassLoader( HashMap<String, URL> urls, ClassLoader parent)
-    {
-		URL[] all = urls.entrySet().toArray( new URL[0]);
+    public static ClassLoader createClassLoader(HashMap<String, URL> urls, ClassLoader parent) {
+        URL[] all = urls.entrySet().toArray(new URL[0]);
 
-		if (parent == null)
-		{
-			return new URLClassLoader( all);
-		}
-		else
-        {
-			return new URLClassLoader( all, parent);
-		}
-	}
+        if (parent == null) {
+            return new URLClassLoader(all);
+        } else {
+            return new URLClassLoader(all, parent);
+        }
+    }
 
 
+    public static String[] zipList(String zipFilename, String... patterns)
+            throws IOException {
+        return zipList(new File(zipFilename), patterns);
+    }
+
+    public static String[] zipList(File zipFile, String... patterns)
+            throws IOException {
+        FileInputStream fis = null;
+        try {
+            fis = new FileInputStream(zipFile);
+            return zipList(fis, patterns);
+        } finally {
+            IOUtil.close(fis);
+        }
+    }
 
 
-	public static String[] zipList(String zipFilename, String ...patterns)
-			throws IOException
-	{
-		return zipList(new File(zipFilename), patterns);
-	}
+    public static String[] zipList(InputStream zipStream, String... patterns)
+            throws IOException {
+        List<String> ret = new ArrayList<>();
+        try (ZipInputStream zipIs = zipStream instanceof ZipInputStream ? (ZipInputStream) zipStream : new ZipInputStream(zipStream)) {
+            ZipEntry ze = null;
+            MatchPatternFilter mpf = patterns != null && patterns.length > 0 && patterns[0] != null ? MatchPatternFilter.createMatchFilter(patterns) : null;
 
-	public static String[] zipList(File zipFile, String ...patterns)
-			throws IOException
-	{
-		FileInputStream fis = null;
-		try
-		{
-			fis = new FileInputStream(zipFile);
-			return zipList(fis, patterns);
-		}
-		finally
-		{
-			IOUtil.close(fis);
-		}
-	}
+            while ((ze = zipIs.getNextEntry()) != null) {
+                if (!ze.isDirectory()) {
 
+                    if (mpf != null) {
+                        if (!mpf.match(ze.getName()))
+                            continue; // no match found
+                    }
+                    ret.add(ze.getName());
+                }
+            }
+        }
+        return ret.toArray(new String[0]);
+    }
 
+    public static DataDAO[] loadContents(String zipFilename, String... patterns)
+            throws IOException {
+        return loadContents(new File(zipFilename), patterns);
+    }
 
+    public static DataDAO[] loadContents(File zipFile, String... patterns)
+            throws IOException {
+        FileInputStream fis = null;
+        try {
+            fis = new FileInputStream(zipFile);
+            return loadContents(fis, patterns);
+        } finally {
+            IOUtil.close(fis);
+        }
+    }
 
-
-	public static String[] zipList(InputStream zipStream, String ...patterns)
-			throws IOException
-	{
-		List<String> ret = new ArrayList<>();
-		try(ZipInputStream zipIs = zipStream instanceof ZipInputStream ? (ZipInputStream) zipStream : new ZipInputStream(zipStream)) {
-			ZipEntry ze = null;
-			MatchPatternFilter mpf = patterns != null && patterns.length > 0 && patterns[0]  != null ? MatchPatternFilter.createMatchFilter(patterns) : null;
-
-			while ((ze = zipIs.getNextEntry()) != null)
-			{
-				if (!ze.isDirectory()) {
-
-					if (mpf != null)
-					{
-						if (!mpf.match(ze.getName()))
-							continue; // no match found
-					}
-					ret.add(ze.getName());
-				}
-			}
-		}
-		return ret.toArray(new String[0]);
-	}
-
-	public static DataDAO[] loadContents(String zipFilename, String ...patterns)
-			throws IOException
-	{
-		return loadContents(new File(zipFilename), patterns);
-	}
-
-	public static DataDAO[] loadContents(File zipFile, String ...patterns)
-			throws IOException
-	{
-		FileInputStream fis = null;
-		try
-		{
-			fis = new FileInputStream(zipFile);
-			return loadContents(fis, patterns);
-		}
-		finally
-		{
-			IOUtil.close(fis);
-		}
-	}
+    public static void zipISToOutputPath(ZipInputStream zis, Path outputPath) throws IOException {
+        try {
+            ZipEntry entry;
+            while ((entry = zis.getNextEntry()) != null) {
+                Path entryPath = outputPath.resolve(entry.getName());
+                if (entry.isDirectory()) {
+                    Files.createDirectories(entryPath);
+                } else {
+                    Files.createDirectories(entryPath.getParent());
+                    try (OutputStream out = Files.newOutputStream(entryPath)) {
+                        byte[] buffer = new byte[4096];
+                        int len;
+                        while ((len = zis.read(buffer)) != -1) {
+                            out.write(buffer, 0, len);
+                        }
+                    }
+                }
+                zis.closeEntry();
+            }
+        } finally {
+            IOUtil.close(zis);
+        }
+    }
 
 
+    public static DataDAO[] loadContents(InputStream zipStream, String... patterns)
+            throws IOException {
+        List<DataDAO> ret = new ArrayList<>();
+        try (ZipInputStream zipIs = zipStream instanceof ZipInputStream ? (ZipInputStream) zipStream : new ZipInputStream(zipStream)) {
+            ZipEntry ze = null;
+            MatchPatternFilter mpf = patterns != null && patterns.length > 0 && patterns[0] != null ? MatchPatternFilter.createMatchFilter(patterns) : null;
+            UByteArrayOutputStream ubaos = new UByteArrayOutputStream();
+            byte[] buffer = new byte[1024];
+            while ((ze = zipIs.getNextEntry()) != null) {
+                if (!ze.isDirectory()) {
 
-	public static DataDAO[] loadContents(InputStream zipStream, String ...patterns)
-			throws IOException
-	{
-		List<DataDAO> ret = new ArrayList<>();
-		try(ZipInputStream zipIs = zipStream instanceof ZipInputStream ? (ZipInputStream) zipStream : new ZipInputStream(zipStream)) {
-			ZipEntry ze = null;
-			MatchPatternFilter mpf = patterns != null && patterns.length > 0 && patterns[0]  != null ? MatchPatternFilter.createMatchFilter(patterns) : null;
-			UByteArrayOutputStream ubaos = new UByteArrayOutputStream();
-			byte[] buffer = new byte[1024];
-			while ((ze = zipIs.getNextEntry()) != null)
-			{
-				if (!ze.isDirectory()) {
+                    if (mpf != null) {
+                        if (!mpf.match(ze.getName()))
+                            continue; // no match found
+                    }
 
-					if (mpf != null)
-					{
-						if (!mpf.match(ze.getName()))
-							continue; // no match found
-					}
+                    ubaos.reset();
+                    int read;
+                    while ((read = zipIs.read(buffer)) > 0) {
+                        ubaos.write(buffer, 0, read);
+                    }
+                    DataDAO toAdd = new DataDAO();
 
-					ubaos.reset();
-					int read;
-					while((read = zipIs.read(buffer)) > 0)
-					{
-						ubaos.write(buffer, 0 , read);
-					}
-					DataDAO toAdd = new DataDAO();
-
-					toAdd.setFullName(ze.getName());
-					toAdd.setName(SharedStringUtil.valueAfterRightToken(ze.getName(), "/"));
-					toAdd.setDescription(ze.getComment());
-					toAdd.setData(ubaos.toByteArray());
+                    toAdd.setFullName(ze.getName());
+                    toAdd.setName(SharedStringUtil.valueAfterRightToken(ze.getName(), "/"));
+                    toAdd.setDescription(ze.getComment());
+                    toAdd.setData(ubaos.toByteArray());
 
 
-					ret.add(toAdd);
-				}
-			}
-		}
-		return ret.toArray(new DataDAO[0]);
-	}
+                    ret.add(toAdd);
+                }
+            }
+        }
+        return ret.toArray(new DataDAO[0]);
+    }
+
+    public static ZipInputStream convertToZipIS(InputStream is)
+            throws IOException {
+        try {
+            if(is instanceof ByteArrayInputStream)
+                return new ZipInputStream(is);
+            UByteArrayOutputStream baos = new UByteArrayOutputStream();
+            byte[] buffer = new byte[4096];
+            int read;
+            while ((read = is.read(buffer)) != -1) {
+                baos.write(buffer, 0, read);
+            }
+            return new ZipInputStream(baos.toByteArrayInputStream());
+        } finally {
+            if(!(is instanceof ByteArrayInputStream))
+                IOUtil.close(is);
+        }
+    }
+
+    public static JarInputStream convertToJarIS(InputStream is)
+            throws IOException {
+        try {
+            if(is instanceof ByteArrayInputStream)
+                return new JarInputStream(is);
+
+            UByteArrayOutputStream baos = new UByteArrayOutputStream();
+            byte[] buffer = new byte[4096];
+            int read;
+            while ((read = is.read(buffer)) != -1) {
+                baos.write(buffer, 0, read);
+            }
+            return new JarInputStream(baos.toByteArrayInputStream());
+        } finally {
+            if(!(is instanceof ByteArrayInputStream))
+                IOUtil.close(is);
+        }
+    }
 
 
-	public static void main(String ...args)
-	{
-		try
-		{
-			ParamUtil.ParamMap paramMap = ParamUtil.parse("=", args);
+    public static void main(String... args) {
+        try {
+            ParamUtil.ParamMap paramMap = ParamUtil.parse("=", args);
 
-			System.out.println(paramMap);
-			System.out.println("files: " + Arrays.toString(paramMap.namelessValues()));
-			String pattern = paramMap.stringValue("pattern", null, true);
+            System.out.println(paramMap);
+            System.out.println("files: " + Arrays.toString(paramMap.namelessValues()));
+            String pattern = paramMap.stringValue("pattern", null, true);
 
 
+            RateCounter rc = new RateCounter("ZipExtraction");
+            long ts = System.currentTimeMillis();
 
-			RateCounter rc = new RateCounter("ZipExtraction");
-			long ts = System.currentTimeMillis();
-
-			for (String zipFile : paramMap.namelessValues())
-			{
+            for (String zipFile : paramMap.namelessValues()) {
 
 
-				GetNameValue<String> load = paramMap.asNVPair("load");
-				if (load != null)
-				{
-					DataDAO[] matches = loadContents(zipFile, pattern);
-					System.out.println("Zip File: " + zipFile + " matches found: " + matches.length);
+                GetNameValue<String> load = paramMap.asNVPair("load");
+                if (load != null) {
+                    DataDAO[] matches = loadContents(zipFile, pattern);
+                    System.out.println("Zip File: " + zipFile + " matches found: " + matches.length);
 
-					for (DataDAO matched : matches) {
-						rc.inc();
-						System.out.println("\t\t" + SharedUtil.toCanonicalID(':', matched.getName(), matched.getFullName(), matched.getData().length));
-						//System.out.println(SharedStringUtil.toString(matched.getData()));
-					}
-				}
-				else
-				{
-					String[] matches = zipList(zipFile, pattern);
-					System.out.println("Zip File: " + zipFile + " matches found: " + matches.length);
+                    for (DataDAO matched : matches) {
+                        rc.inc();
+                        System.out.println("\t\t" + SharedUtil.toCanonicalID(':', matched.getName(), matched.getFullName(), matched.getData().length));
+                        //System.out.println(SharedStringUtil.toString(matched.getData()));
+                    }
+                } else {
+                    String[] matches = zipList(zipFile, pattern);
+                    System.out.println("Zip File: " + zipFile + " matches found: " + matches.length);
 
-					for (String matched : matches) {
-						rc.inc();
-						System.out.println("\t\t" + matched);
-					}
-				}
-			}
+                    for (String matched : matches) {
+                        rc.inc();
+                        System.out.println("\t\t" + matched);
+                    }
+                }
+            }
 
-			rc.registerTimeStamp(ts);
-			System.out.println(rc + " " + Const.TimeInMillis.toString(rc.getDeltas()));
+            rc.registerTimeStamp(ts);
+            System.out.println(rc + " " + Const.TimeInMillis.toString(rc.getDeltas()));
 
 
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
-		}
-		catch(Exception e)
-		{
-			e.printStackTrace();
-		}
-	}
+    public static byte[] gzip(String str)
+            throws NullPointerException, IllegalArgumentException, IOException {
+        return gzip(SharedStringUtil.getBytes(str));
+    }
 
-	public static byte[] gzip(String str)
-			throws NullPointerException, IllegalArgumentException, IOException
-	{
-		return gzip(SharedStringUtil.getBytes(str));
-	}
+    public static byte[] gzip(byte[] content)
+            throws NullPointerException, IllegalArgumentException, IOException {
+        SUS.checkIfNulls("Can't zip null content", content);
 
-	public static byte[] gzip(byte[] content)
-			throws NullPointerException, IllegalArgumentException, IOException
-	{
-		SUS.checkIfNulls("Can't zip null content", content);
+        if (content.length == 0) {
+            throw new IllegalArgumentException("Content is empty");
+        }
 
-		if (content.length == 0)
-		{
-			throw new IllegalArgumentException("Content is empty");
-		}
+        ByteArrayOutputStream output = null;
+        GZIPOutputStream gzipOutputStream = null;
 
-		ByteArrayOutputStream output = null;
-		GZIPOutputStream gzipOutputStream = null;
+        try {
+            output = new ByteArrayOutputStream(content.length);
+            gzipOutputStream = new GZIPOutputStream(output);
+            gzipOutputStream.write(content);
+            gzipOutputStream.flush();
+            gzipOutputStream.finish();
+            return output.toByteArray();
+        } finally {
+            IOUtil.close(gzipOutputStream);
+        }
+    }
 
-		try
-		{
-			output = new ByteArrayOutputStream(content.length);
-			gzipOutputStream = new GZIPOutputStream(output);
-			gzipOutputStream.write(content);
-			gzipOutputStream.flush();
-			gzipOutputStream.finish();
-			return output.toByteArray();
-		}
-		finally
-		{
-			IOUtil.close(gzipOutputStream);
-		}
-	}
+    public static byte[] gunzip(byte[] content)
+            throws NullPointerException, IllegalArgumentException, IOException {
+        SUS.checkIfNulls("Can't zip null content", content);
 
-	public static byte[] gunzip(byte[] content)
-			throws NullPointerException, IllegalArgumentException, IOException
-	{
-		SUS.checkIfNulls("Can't zip null content", content);
+        if (content.length == 0) {
+            throw new IllegalArgumentException("Content is empty");
+        }
 
-		if (content.length == 0)
-		{
-			throw new IllegalArgumentException("Content is empty");
-		}
+        GZIPInputStream gzipInputStream = null;
 
-		GZIPInputStream gzipInputStream = null;
-
-		try
-		{
-			return IOUtil.inputStreamToByteArray(new GZIPInputStream(new ByteArrayInputStream(content)), false).toByteArray();
-		}
-		finally
-		{
-			IOUtil.close(gzipInputStream);
-		}
-	}
+        try {
+            return IOUtil.inputStreamToByteArray(new GZIPInputStream(new ByteArrayInputStream(content)), false).toByteArray();
+        } finally {
+            IOUtil.close(gzipInputStream);
+        }
+    }
 
 }

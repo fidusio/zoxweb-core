@@ -2218,7 +2218,8 @@ public class SharedUtil {
             return false;
 
         for (int i = 0; i < len; i++) {
-            if ((validator != null && !validator.isValid()) || a1[a1From + i] != a2[a2From + i])
+            if ((validator != null && !validator.isValid()) ||
+                    a1[a1From + i] != a2[a2From + i])
                 return false;
         }
 

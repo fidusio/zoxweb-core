@@ -26,6 +26,7 @@ import org.zoxweb.shared.util.SharedStringUtil;
 import java.io.*;
 import java.net.*;
 import java.nio.file.DirectoryStream;
+import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -105,6 +106,32 @@ public class IOUtil {
         }
 
         return null;
+    }
+
+
+    public static void printFileSystem(FileSystem fs) throws IOException {
+        for (Path root : fs.getRootDirectories()) {
+            Files.walk(root)
+                    .forEach(path -> {
+                        Path relPath = root.relativize(path);
+                        String display = relPath.toString().isEmpty() ? root.toString() : relPath.toString();
+                        System.out.print(display);
+                    });
+        }
+    }
+
+    public static String toStringFileSystem(FileSystem fs) throws IOException {
+        StringBuilder sb = new StringBuilder();
+        for (Path root : fs.getRootDirectories()) {
+            Files.walk(root)
+                    .forEach(path -> {
+                        Path relPath = root.relativize(path);
+                        sb.append(relPath.toString().isEmpty() ? root.toString() : relPath.toString());
+                        sb.append("\n");
+
+                    });
+        }
+        return sb.toString();
     }
 
     /**

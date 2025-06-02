@@ -7,14 +7,19 @@ import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class BytesArray {
+public class BytesArray
+    implements IsValid {
+
+
     public static final BytesArray EMPTY = new BytesArray(null, Const.EMPTY_BYTE_ARRAY);
 
 
     private final byte[] array;
     public final int offset;
     public final int length;
-    private final AtomicBoolean valid;
+
+    // volatile on purpose DO NOT CONVERT to final
+    private volatile AtomicBoolean valid;
     private volatile Integer hashCode = null;
 
     public BytesArray(AtomicBoolean valid, byte[] array, int offset, int length, boolean checkBoundary) {
@@ -24,8 +29,7 @@ public class BytesArray {
         this.array = array;
         this.offset = offset;
         this.length = length;
-        this.valid = valid != null ? valid : new AtomicBoolean(true);
-        //this.hashCode = SharedUtil.hashCode(array, offset, length);
+        this.valid = valid; // valid != null ? valid : new AtomicBoolean(true);
     }
 
     public BytesArray(AtomicBoolean valid, byte[] array, int offset, int length) {
@@ -34,6 +38,9 @@ public class BytesArray {
 
     public BytesArray(AtomicBoolean valid, byte[] array) {
         this(valid, array, 0, array.length, true);
+    }
+    public BytesArray(byte[] array) {
+        this(null, array, 0, array.length, true);
     }
 
 
@@ -64,7 +71,7 @@ public class BytesArray {
     }
 
     public boolean isValid() {
-        return valid.get();
+        return valid == null || valid.get();
     }
 
     @Override
@@ -107,13 +114,13 @@ public class BytesArray {
 
         if (o instanceof byte[]) {
             byte[] input = (byte[]) o;
-            return SharedUtil.equals(valid::get, array, offset, offset + length, input, 0, input.length);
+            return SharedUtil.equals(this, array, offset, offset + length, input, 0, input.length);
         }
 
         if (getClass() != o.getClass()) return false;
 
         BytesArray that = (BytesArray) o;
-        return (length == that.length) && SharedUtil.equals(() -> valid.get() && that.valid.get(), array, offset, offset + length, that.array, that.offset, that.offset + that.length);
+        return (length == that.length) && SharedUtil.equals(() -> isValid() && that.isValid(), array, offset, offset + length, that.array, that.offset, that.offset + that.length);
     }
 
     @Override
@@ -126,7 +133,7 @@ public class BytesArray {
                 }
             }
         }
-        return hashCode;//Objects.hash(Arrays.hashCode(array), offset, length, valid);
+        return hashCode;
     }
 
 

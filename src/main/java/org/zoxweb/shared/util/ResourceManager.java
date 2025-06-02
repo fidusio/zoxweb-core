@@ -21,6 +21,7 @@ public class ResourceManager
 		HTTP_SERVER("HttpServer"),
 		PROXY_SERVER("ProxyServer"),
 		SYSTEM_INFO("SystemInfo"),
+		FILE_SYSTEM("FileSystem"),
 		
 		;
 
