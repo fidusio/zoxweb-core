@@ -35,7 +35,6 @@ import org.zoxweb.shared.protocol.MessageStatus;
 import org.zoxweb.shared.util.*;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.*;
@@ -265,14 +264,14 @@ public class HTTPUtil {
         outputStream.write(Delimiter.CRLF.getBytes());
 
 
-        InputStream contentIS = hmci.getContentAsIS();
-        if(contentIS != null)
-            IOUtil.relayStreams(hmci.getContentAsIS(), outputStream, true, false);
-//        if (hmci.getContent() != null)
-//            outputStream.write(hmci.getContent());
-//        else if (hmci.getContentAsIS() != null) {
+//        InputStream contentIS = hmci.getContentAsIS();
+//        if(contentIS != null)
 //            IOUtil.relayStreams(hmci.getContentAsIS(), outputStream, true, false);
-//        }
+        if (hmci.getContent() != null)
+            outputStream.write(hmci.getContent());
+        else if (hmci.getContentAsIS() != null) {
+            IOUtil.relayStreams(hmci.getContentAsIS(), outputStream, true, false);
+        }
 
         return outputStream;
     }
