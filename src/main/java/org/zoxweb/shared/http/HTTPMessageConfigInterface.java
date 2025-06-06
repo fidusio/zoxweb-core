@@ -18,6 +18,8 @@ package org.zoxweb.shared.http;
 import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.util.*;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 /**
@@ -163,6 +165,10 @@ extends ReferenceID<String>, SetName, SetDescription
 	 * @return content
 	 */
 	byte[] getContent();
+
+	InputStream getContentAsIS();
+
+	void setContentAsIS(InputStream is) throws IOException;
 	
 	/**
 	 * @return content length

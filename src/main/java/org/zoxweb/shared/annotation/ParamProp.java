@@ -1,7 +1,6 @@
 package org.zoxweb.shared.annotation;
 
 import org.zoxweb.shared.util.Const;
-import org.zoxweb.shared.util.GetName;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -23,6 +22,12 @@ public @interface ParamProp {
      * @return
      */
     boolean optional() default false;
+
+    /**
+     * If true the whole URI
+     * @return true the parameter is the whole uri
+     */
+    boolean uri() default false;
 
     /**
      * Parameter input source

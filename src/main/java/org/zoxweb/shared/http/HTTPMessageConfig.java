@@ -20,6 +20,9 @@ import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.util.*;
 import org.zoxweb.shared.util.NVConfigEntity.ArrayType;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 /**
@@ -84,6 +87,8 @@ public class HTTPMessageConfig
 			return cType;
 		}
 	}
+
+	private volatile InputStream contentAsIS = null;
 
 	/**
 	 * This NVConfigEntity type constant is set to an instantiation of a NVConfigEntityLocal object based on AddressDAO.
@@ -299,6 +304,32 @@ public class HTTPMessageConfig
 	public byte[] getContent()
 	{
 		return lookupValue(Params.CONTENT);
+	}
+
+	/**
+	 * @return
+	 */
+	@Override
+	public synchronized InputStream getContentAsIS() {
+		if(contentAsIS != null)
+			return contentAsIS;
+
+		if(getContent() != null)
+			return new ByteArrayInputStream(getContent());
+
+		return null;
+	}
+
+	/**
+	 * @param is
+	 */
+	@Override
+	public synchronized void setContentAsIS(InputStream is) throws IOException {
+		contentAsIS = is;
+		if (contentAsIS != null)
+		{
+			setContentLength(contentAsIS.available());
+		}
 	}
 
 	/**
@@ -654,7 +685,7 @@ public class HTTPMessageConfig
 	 * Value -1 not set
 	 */
 	@Override
-	public int getContentLength() 
+	public synchronized int getContentLength()
 	{
 		
 		String contentValue = getHeaders().getValue(HTTPHeader.CONTENT_LENGTH);///SharedUtil.getValue(getHeaders().get(HTTPHeaderName.CONTENT_LENGTH.getName()));

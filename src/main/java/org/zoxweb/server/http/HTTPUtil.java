@@ -21,6 +21,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.parser.Parser;
 import org.jsoup.select.Elements;
 import org.zoxweb.server.io.ByteBufferUtil;
+import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.io.UByteArrayOutputStream;
 import org.zoxweb.server.security.HashUtil;
 import org.zoxweb.server.util.GSONUtil;
@@ -34,6 +35,7 @@ import org.zoxweb.shared.protocol.MessageStatus;
 import org.zoxweb.shared.util.*;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.*;
 import java.security.NoSuchAlgorithmException;
@@ -232,6 +234,43 @@ public class HTTPUtil {
         }
 
         return ubaos;
+    }
+
+    public static OutputStream writeHTTPResponse(HTTPMessageConfigInterface hmci, OutputStream outputStream, GetNameValue<?>... headers)
+    throws IOException
+    {
+        SUS.checkIfNulls("hmci or outputstream null", hmci, outputStream);
+
+        if (headers != null)
+            for (GetNameValue<?> header : headers)
+                hmci.getHeaders().add(header);
+
+        HTTPVersion hv = hmci.getHTTPVersion();
+        if (hv == null)
+            hv = HTTPVersion.HTTP_1_1;
+        // write the first line
+        outputStream.write(SharedStringUtil.getBytes(hv.getValue() + " " + hmci.getHTTPStatusCode().CODE + " " + hmci.getHTTPStatusCode().REASON + Delimiter.CRLF.getValue()));
+        // set content length if available
+        if (hmci.getContent() != null && hmci.getContent().length > 0) {
+            hmci.setContentLength(hmci.getContent().length);
+        }
+        // write headers
+        for (GetNameValue<String> header : hmci.getHeaders().asArrayValuesString().values()) {
+            // header.getName() + ": " + header.getValue())
+            outputStream.write(HTTPConst.toBytes(header));
+            // header end of line
+            outputStream.write(Delimiter.CRLF.getBytes());
+        }
+        // header separator
+        outputStream.write(Delimiter.CRLF.getBytes());
+
+        if (hmci.getContent() != null)
+            outputStream.write(hmci.getContent());
+        else if (hmci.getContentAsIS() != null) {
+            IOUtil.relayStreams(hmci.getContentAsIS(), outputStream, true, false);
+        }
+
+        return outputStream;
     }
 
     public static UByteArrayOutputStream formatResponse(HTTPResponseData rd, UByteArrayOutputStream ubaos, GetNameValue<?>... headers) {
