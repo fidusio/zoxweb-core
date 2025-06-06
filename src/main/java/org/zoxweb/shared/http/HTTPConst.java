@@ -2,9 +2,9 @@ package org.zoxweb.shared.http;
 
 import org.zoxweb.shared.util.*;
 
-public final class HTTPConst
-{
-    private HTTPConst(){}
+public final class HTTPConst {
+    private HTTPConst() {
+    }
 
     public final static String APPLICATION_JSON = "application/json";
     public final static String APPLICATION_PDF = "application/pdf";
@@ -22,8 +22,7 @@ public final class HTTPConst
      * HTTP Common-Name parameters
      */
     public enum CNP
-            implements GetName
-    {
+            implements GetName {
         MEDIA_TYPE("media-type"),
         FILENAME("filename"),
         CONTENT_LENGTH("content-length"),
@@ -31,45 +30,40 @@ public final class HTTPConst
 
         ;
         private final String name;
-        CNP(String name)
-        {
+
+        CNP(String name) {
             this.name = name;
         }
 
-        public String getName()
-        {
+        public String getName() {
             return name;
         }
 
-        public String toString()
-        {
+        public String toString() {
             return getName();
         }
     }
+
     public enum HTTPValue
-        implements GetValue<String>
-    {
+            implements GetValue<String> {
         CLOSE("close"),
         KEEP_ALIVE("keep-alive"),
         NO_CACHE("no-cache"),
         NO_STORE("no-store"),
-        UPGRADE("upgrade")
-        ;
+        UPGRADE("upgrade");
         private final String value;
-        HTTPValue(String value)
-        {
+
+        HTTPValue(String value) {
             this.value = value;
         }
 
-        public String getValue()
-        {
+        public String getValue() {
             return value;
         }
     }
 
     public enum CommonHeader
-            implements GetNameValue<String>
-    {
+            implements GetNameValue<String> {
         CONNECTION_CLOSE(HTTPHeader.CONNECTION, "close"),
         CONNECTION_KEEP_ALIVE(HTTPHeader.CONNECTION, "keep-alive"),
         CONNECTION_UPGRADE(HTTPHeader.CONNECTION, "upgrade"),
@@ -85,26 +79,24 @@ public final class HTTPConst
         private final String name;
         private final String value;
 
-        CommonHeader(GetNameValue<String> gnv)
-        {
+        CommonHeader(GetNameValue<String> gnv) {
             this.name = gnv.getName();
             this.value = gnv.getValue();
         }
 
-        CommonHeader(GetName name, String value)
-        {
+        CommonHeader(GetName name, String value) {
             this(name.getName(), value);
         }
-        CommonHeader(String name, String value)
-        {
+
+        CommonHeader(String name, String value) {
             this.name = name;
             this.value = value;
         }
 
-        public String toString()
-        {
+        public String toString() {
             return name + ": " + value;
         }
+
         @Override
         public String getName() {
             return name;
@@ -117,39 +109,31 @@ public final class HTTPConst
     }
 
 
-    public static GetNameValue<String> toHTTPHeader(GetName gn, GetValue<?>...values)
-    {
+    public static GetNameValue<String> toHTTPHeader(GetName gn, GetValue<?>... values) {
         return toHTTPHeader(gn.getName(), values);
     }
 
 
-    public static GetNameValue<String> toHTTPHeader(GetName gn, String ...values)
-    {
+    public static GetNameValue<String> toHTTPHeader(GetName gn, String... values) {
         return toHTTPHeader(gn.getName(), values);
     }
 
 
-    public static GetNameValue<String> toHTTPHeader(String name, GetValue<?> ...values)
-    {
+    public static GetNameValue<String> toHTTPHeader(String name, GetValue<?>... values) {
         StringBuilder headerValue = new StringBuilder();
 
-        if(values != null)
-        {
-            for(GetValue<?> value: values)
-            {
+        if (values != null) {
+            for (GetValue<?> value : values) {
                 if (headerValue.length() > 0)
                     headerValue.append("; ");
 
-                if (value != null && value.getValue() != null)
-                {
+                if (value != null && value.getValue() != null) {
 
-                    if (value instanceof GetNameValue)
-                    {
-                        headerValue.append(((GetNameValue<?>)value).getName());
+                    if (value instanceof GetNameValue) {
+                        headerValue.append(((GetNameValue<?>) value).getName());
                         headerValue.append("=");
                         headerValue.append(value.getValue());
-                    }
-                    else
+                    } else
                         headerValue.append(value.getValue());
                 }
 
@@ -160,14 +144,11 @@ public final class HTTPConst
     }
 
 
-    public static GetNameValue<String> toHTTPHeader(String name, String ...values)
-    {
+    public static GetNameValue<String> toHTTPHeader(String name, String... values) {
         StringBuilder headerValue = new StringBuilder();
 
-        if(values != null)
-        {
-            for(String value: values)
-            {
+        if (values != null) {
+            for (String value : values) {
                 if (headerValue.length() > 0)
                     headerValue.append("; ");
 
@@ -180,29 +161,23 @@ public final class HTTPConst
         return new NVPair(name, headerValue.toString());
     }
 
-    public static GetNameValue<String> toHTTPHeader(GetName name, GetNameValue<?> ...gnvs)
-    {
+    public static GetNameValue<String> toHTTPHeader(GetName name, GetNameValue<?>... gnvs) {
         return toHTTPHeader(name.getName(), gnvs);
     }
 
 
-    public static GetNameValue<String> toHTTPHeader(String name, GetNameValue<?> ...gnvs)
-    {
+    public static GetNameValue<String> toHTTPHeader(String name, GetNameValue<?>... gnvs) {
 
         StringBuilder headerValue = new StringBuilder();
 
-        if(gnvs != null)
-        {
-            for(GetNameValue<?> gnv: gnvs)
-            {
+        if (gnvs != null) {
+            for (GetNameValue<?> gnv : gnvs) {
                 if (headerValue.length() > 0)
                     headerValue.append("; ");
 
-                if (gnv !=null && !SUS.isEmpty(gnv.getName()))
-                {
+                if (gnv != null && !SUS.isEmpty(gnv.getName())) {
                     headerValue.append(gnv.getName());
-                    if(gnv.getValue() != null)
-                    {
+                    if (gnv.getValue() != null) {
                         headerValue.append('=');
                         headerValue.append(gnv.getValue());
                     }
@@ -214,16 +189,13 @@ public final class HTTPConst
     }
 
 
-    public static String toString(GetNameValue<?> gnv)
-    {
+    public static String toString(GetNameValue<?> gnv) {
         return gnv.getName() + ": " + gnv.getValue();
     }
 
-    public static byte[] toBytes(GetNameValue<?> gnv)
-    {
+    public static byte[] toBytes(GetNameValue<?> gnv) {
         return SharedStringUtil.getBytes(gnv.getName() + ": " + gnv.getValue());
     }
-
 
 
 }

@@ -35,6 +35,7 @@ import org.zoxweb.shared.protocol.MessageStatus;
 import org.zoxweb.shared.util.*;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.*;
@@ -237,8 +238,7 @@ public class HTTPUtil {
     }
 
     public static OutputStream writeHTTPResponse(HTTPMessageConfigInterface hmci, OutputStream outputStream, GetNameValue<?>... headers)
-    throws IOException
-    {
+            throws IOException {
         SUS.checkIfNulls("hmci or outputstream null", hmci, outputStream);
 
         if (headers != null)
@@ -251,7 +251,7 @@ public class HTTPUtil {
         // write the first line
         outputStream.write(SharedStringUtil.getBytes(hv.getValue() + " " + hmci.getHTTPStatusCode().CODE + " " + hmci.getHTTPStatusCode().REASON + Delimiter.CRLF.getValue()));
         // set content length if available
-        if (hmci.getContent() != null && hmci.getContent().length > 0) {
+        if (hmci.getHeaders().getNV(HTTPHeader.CONTENT_LENGTH) == null && hmci.getContent() != null) {
             hmci.setContentLength(hmci.getContent().length);
         }
         // write headers
@@ -264,11 +264,15 @@ public class HTTPUtil {
         // header separator
         outputStream.write(Delimiter.CRLF.getBytes());
 
-        if (hmci.getContent() != null)
-            outputStream.write(hmci.getContent());
-        else if (hmci.getContentAsIS() != null) {
+
+        InputStream contentIS = hmci.getContentAsIS();
+        if(contentIS != null)
             IOUtil.relayStreams(hmci.getContentAsIS(), outputStream, true, false);
-        }
+//        if (hmci.getContent() != null)
+//            outputStream.write(hmci.getContent());
+//        else if (hmci.getContentAsIS() != null) {
+//            IOUtil.relayStreams(hmci.getContentAsIS(), outputStream, true, false);
+//        }
 
         return outputStream;
     }

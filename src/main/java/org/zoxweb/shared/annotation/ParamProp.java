@@ -13,24 +13,28 @@ public @interface ParamProp {
 
     /**
      * Name of the parameter
+     *
      * @return name
      */
     String name();
 
     /**
      * If optional return true
+     *
      * @return
      */
     boolean optional() default false;
 
     /**
      * If true the whole URI
+     *
      * @return true the parameter is the whole uri
      */
     boolean uri() default false;
 
     /**
      * Parameter input source
+     *
      * @return
      */
     Const.ParamSource source() default Const.ParamSource.PATH;
