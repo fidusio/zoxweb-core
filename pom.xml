@@ -218,7 +218,6 @@
             <groupId>org.eclipse.angus</groupId>
             <artifactId>angus-mail</artifactId>
             <version>${angus.version}</version>
-            <!--      <scope>runtime</scope>-->
         </dependency>
 
         <!--<dependency>
