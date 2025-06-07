@@ -42,6 +42,7 @@ import java.util.stream.Stream;
 
 public class IOUtil {
 
+    public static final int DEFAULT_BUFFER_SIZE = 8196;
     //public static final SimpleDateFormat SDF = new SimpleDateFormat("[yyyy-MM-dd HH:mm:ss.SSS] ");
 
     private IOUtil() {
@@ -235,13 +236,13 @@ public class IOUtil {
 
     public static long countInputStreamBytes(InputStream is, boolean close)
             throws IOException {
-        byte[] buffer = ByteBufferUtil.allocateByteArray(4096);
+        byte[] buffer = ByteBufferUtil.allocateByteArray(DEFAULT_BUFFER_SIZE);
         int read;
-        long ret = 0;
+        long counter = 0;
 
         try {
             while ((read = is.read(buffer, 0, buffer.length)) != -1) {
-                ret += read;
+                counter += read;
             }
 
         } finally {
@@ -252,7 +253,7 @@ public class IOUtil {
         }
 
 
-        return ret;
+        return counter;
 
     }
 
@@ -287,7 +288,7 @@ public class IOUtil {
      */
     public static String inputStreamToString(InputStream is, boolean close)
             throws IOException {
-        byte[] buffer = ByteBufferUtil.allocateByteArray(4096);
+        byte[] buffer = ByteBufferUtil.allocateByteArray(DEFAULT_BUFFER_SIZE);
         StringBuilder sb = new StringBuilder();
         int read;
         try {
@@ -327,14 +328,14 @@ public class IOUtil {
      * Read the all the content of an input stream and return it as a byte array
      *
      * @param is    to be read
-     * @param close if true is will closed after reading
+     * @param close if true it will be closed after reading
      * @return byte array
      * @throws IOException
      */
     public static UByteArrayOutputStream inputStreamToByteArray(InputStream is, boolean close)
             throws IOException {
         UByteArrayOutputStream baos = new UByteArrayOutputStream();
-        byte[] buffer = ByteBufferUtil.allocateByteArray(4096);
+        byte[] buffer = ByteBufferUtil.allocateByteArray(DEFAULT_BUFFER_SIZE);
         try {
             int read;
 
@@ -481,7 +482,7 @@ public class IOUtil {
 
         long totalCopied = 0;
         int read;
-        byte[] buffer = ByteBufferUtil.allocateByteArray(4096);
+        byte[] buffer = ByteBufferUtil.allocateByteArray(DEFAULT_BUFFER_SIZE);
         try {
             while ((read = is.read(buffer)) != -1) {
                 os.write(buffer, 0, read);

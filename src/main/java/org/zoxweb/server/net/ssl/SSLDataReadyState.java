@@ -7,25 +7,21 @@ import org.zoxweb.shared.util.RateCounter;
 import static javax.net.ssl.SSLEngineResult.HandshakeStatus.NOT_HANDSHAKING;
 
 public class SSLDataReadyState
-        extends State
-{
+        extends State {
     static RateCounter rcNotHandshaking = new RateCounter("NotHandshaking");
 
-    static class NotHandshaking extends TriggerConsumer<SSLSessionCallback>
-    {
+    static class NotHandshaking extends TriggerConsumer<SSLSessionCallback> {
         NotHandshaking() {
             super(NOT_HANDSHAKING);
         }
 
         @Override
-        public void accept(SSLSessionCallback callback)
-        {
-            rcNotHandshaking.register(SSLUtil._notHandshaking((SSLSessionConfig)getStateMachine().getConfig(), callback));
+        public void accept(SSLSessionCallback callback) {
+            rcNotHandshaking.register(SSLUtil._notHandshaking((SSLSessionConfig) getStateMachine().getConfig(), callback));
         }
     }
 
-    public SSLDataReadyState()
-    {
+    public SSLDataReadyState() {
         super(SSLStateMachine.SessionState.DATA_READY);
         register(new NotHandshaking());
     }

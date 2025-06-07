@@ -10,21 +10,20 @@ import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 
 public class SSLContextInfo
-    implements InstanceFactory.InstanceCreator<SSLEngine>
-{
+        implements InstanceFactory.InstanceCreator<SSLEngine> {
 
     public enum Param
-        implements GetName
-    {
+            implements GetName {
         PROTOCOLS("protocols"),
         CIPHERS("ciphers"),
         ;
 
         private final String name;
-        Param(String name)
-        {
+
+        Param(String name) {
             this.name = name;
         }
+
         @Override
         public String getName() {
             return name;
@@ -42,28 +41,23 @@ public class SSLContextInfo
                 ciphers);
     }
 
-    public SSLContextInfo(SSLContext sslContext)
-    {
+    public SSLContextInfo(SSLContext sslContext) {
         this(sslContext, null, null);
     }
 
-    public SSLContextInfo(SSLContext sslContext, String[] protocols, String[] ciphers)
-    {
+    public SSLContextInfo(SSLContext sslContext, String[] protocols, String[] ciphers) {
         this.sslContext = sslContext;
         this.protocols = protocols;
         this.ciphers = ciphers;
     }
 
 
-    public SSLEngine newInstance()
-    {
+    public SSLEngine newInstance() {
         SSLEngine ret = sslContext.createSSLEngine();
-        if(protocols != null && protocols.length > 0)
-        {
+        if (protocols != null && protocols.length > 0) {
             ret.setEnabledProtocols(protocols);
         }
-        if(ciphers != null && ciphers.length > 0)
-        {
+        if (ciphers != null && ciphers.length > 0) {
             ret.setEnabledCipherSuites(ciphers);
         }
 

@@ -34,88 +34,79 @@ import java.security.cert.X509Certificate;
  * of the connection
  */
 public class SSLCheckDisabler
-    implements SSLSocketProp {
+        implements SSLSocketProp {
 
-  /**
-   * The SINGLETON class created
-   */
-  public static final SSLCheckDisabler SINGLETON = new SSLCheckDisabler();
-  private final SSLSocketFactory disabledSSLFactory;
-  private final TrustManager[] trustAllCerts;
-  private final HostnameVerifier allHostsValid;
-  private final X509Certificate[] certificates = new X509Certificate[]{};
-  private final SSLContext checkDisabledSSLContext;
+    /**
+     * The SINGLETON class created
+     */
+    public static final SSLCheckDisabler SINGLETON = new SSLCheckDisabler();
+    private final SSLSocketFactory disabledSSLFactory;
+    private final TrustManager[] trustAllCerts;
+    private final HostnameVerifier allHostsValid;
+    private final X509Certificate[] certificates = new X509Certificate[]{};
+    private final SSLContext checkDisabledSSLContext;
 
 
+    private SSLCheckDisabler() {
+        try {
+            trustAllCerts = new TrustManager[]{
+                    new X509TrustManager() {
+                        public X509Certificate[] getAcceptedIssuers() {
+                            return certificates;
+                        }
 
-  private SSLCheckDisabler()
-  {
-    try
-    {
-      trustAllCerts = new TrustManager[]{
-              new X509TrustManager()
-              {
-                public X509Certificate[] getAcceptedIssuers() {
-                  return certificates;
-                }
+                        public void checkClientTrusted(X509Certificate[] certs, String authType) {
 
-                public void checkClientTrusted(X509Certificate[] certs, String authType) {
+                        }
 
-                }
+                        public void checkServerTrusted(X509Certificate[] certs, String authType) {
 
-                public void checkServerTrusted(X509Certificate[] certs, String authType) {
+                        }
+                    }
+            };
 
-                }
-              }
-      };
+            // Install the all-trusting trust manager
+            checkDisabledSSLContext = SSLContext.getInstance("TLS");
+            checkDisabledSSLContext.init(null, trustAllCerts, new SecureRandom());
+            disabledSSLFactory = checkDisabledSSLContext.getSocketFactory();
+            // Create all-trusting host name verifier
+            allHostsValid = (hostname, session) -> true;
+        } catch (KeyManagementException | NoSuchAlgorithmException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
 
-      // Install the all-trusting trust manager
-      checkDisabledSSLContext = SSLContext.getInstance("TLS");
-      checkDisabledSSLContext.init(null, trustAllCerts, new SecureRandom());
-      disabledSSLFactory = checkDisabledSSLContext.getSocketFactory();
-      // Create all-trusting host name verifier
-      allHostsValid = (hostname, session) -> true;
-    }
-    catch (KeyManagementException |NoSuchAlgorithmException e)
-    {
-      e.printStackTrace();
-      throw new RuntimeException(e);
+
     }
 
-
-  }
-
-  /**
-   * Return the bogus SSL factory
-   */
-  public SSLSocketFactory getSSLFactory() {
-    return disabledSSLFactory;
-  }
-
-  /**
-   * Return the bogus hostname verifier
-   */
-  public HostnameVerifier getHostnameVerifier() {
-    return allHostsValid;
-  }
-
-  public void updateURLConnection(URLConnection con) {
-    if (con instanceof HttpsURLConnection)
-    {
-      ((HttpsURLConnection) con).setSSLSocketFactory(getSSLFactory());
-      ((HttpsURLConnection) con).setHostnameVerifier(getHostnameVerifier());
+    /**
+     * Return the bogus SSL factory
+     */
+    public SSLSocketFactory getSSLFactory() {
+        return disabledSSLFactory;
     }
-  }
 
-  public TrustManager[] getTrustManagers()
-  {
-    return trustAllCerts;
-  }
+    /**
+     * Return the bogus hostname verifier
+     */
+    public HostnameVerifier getHostnameVerifier() {
+        return allHostsValid;
+    }
+
+    public void updateURLConnection(URLConnection con) {
+        if (con instanceof HttpsURLConnection) {
+            ((HttpsURLConnection) con).setSSLSocketFactory(getSSLFactory());
+            ((HttpsURLConnection) con).setHostnameVerifier(getHostnameVerifier());
+        }
+    }
+
+    public TrustManager[] getTrustManagers() {
+        return trustAllCerts;
+    }
 
 
-  public SSLContext getCheckDisabledSSLContext()
-  {
-    return checkDisabledSSLContext;
-  }
+    public SSLContext getCheckDisabledSSLContext() {
+        return checkDisabledSSLContext;
+    }
 
 }

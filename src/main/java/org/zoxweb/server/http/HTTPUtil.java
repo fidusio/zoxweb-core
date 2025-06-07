@@ -190,7 +190,8 @@ public class HTTPUtil {
     }
 
 
-    public static UByteArrayOutputStream formatErrorResponse(HTTPCallException e, UByteArrayOutputStream ubaos, GetNameValue<?>... headers) {
+    public static UByteArrayOutputStream formatErrorResponse(HTTPCallException e, UByteArrayOutputStream ubaos, GetNameValue<?>... headers)
+            throws IOException {
         if (e.getMessageConfig() != null) {
             return formatResponse(e.getMessageConfig(), ubaos, headers);
         } else if (e.getResponseData() != null) {
@@ -200,7 +201,8 @@ public class HTTPUtil {
     }
 
 
-    public static UByteArrayOutputStream formatResponse(HTTPMessageConfigInterface hmci, UByteArrayOutputStream ubaos, GetNameValue<?>... headers) {
+    public static UByteArrayOutputStream formatResponse(HTTPMessageConfigInterface hmci, UByteArrayOutputStream ubaos, GetNameValue<?>... headers)
+            throws IOException {
         if (ubaos == null)
             ubaos = ByteBufferUtil.allocateUBAOS(256);
         else
@@ -216,7 +218,11 @@ public class HTTPUtil {
         // write the first line
         ubaos.write(hv.getValue() + " " + hmci.getHTTPStatusCode().CODE + " " + hmci.getHTTPStatusCode().REASON + Delimiter.CRLF.getValue());
         // set content length if available
-        if (hmci.getContent() != null && hmci.getContent().length > 0) {
+//        if (hmci.getContent() != null && hmci.getContent().length > 0) {
+//            hmci.setContentLength(hmci.getContent().length);
+//        }
+
+        if (hmci.getHeaders().getNV(HTTPHeader.CONTENT_LENGTH) == null && hmci.getContent() != null) {
             hmci.setContentLength(hmci.getContent().length);
         }
         // write headers
@@ -229,8 +235,14 @@ public class HTTPUtil {
         // header separator
         ubaos.write(Delimiter.CRLF.getValue().getBytes());
 
-        if (hmci.getContent() != null && hmci.getContent().length > 0) {
+//        if (hmci.getContent() != null && hmci.getContent().length > 0) {
+//            ubaos.write(hmci.getContent());
+//        }
+
+        if (hmci.getContent() != null)
             ubaos.write(hmci.getContent());
+        else if (hmci.getContentAsIS() != null) {
+            IOUtil.relayStreams(hmci.getContentAsIS(), ubaos, true, false);
         }
 
         return ubaos;
@@ -267,9 +279,11 @@ public class HTTPUtil {
 //        InputStream contentIS = hmci.getContentAsIS();
 //        if(contentIS != null)
 //            IOUtil.relayStreams(hmci.getContentAsIS(), outputStream, true, false);
-        if (hmci.getContent() != null)
-            outputStream.write(hmci.getContent());
-        else if (hmci.getContentAsIS() != null) {
+//        if (hmci.getContent() != null)
+//            outputStream.write(hmci.getContent());
+//        else
+
+        if (hmci.getContentAsIS() != null) {
             IOUtil.relayStreams(hmci.getContentAsIS(), outputStream, true, false);
         }
 

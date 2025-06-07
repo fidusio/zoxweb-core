@@ -297,8 +297,10 @@ public class HTTPMessageConfig
         if (contentAsIS != null)
             return contentAsIS;
 
-        if (getContent() != null)
-            return new ByteArrayInputStream(getContent());
+        if (getContent() != null) {
+            contentAsIS = new ByteArrayInputStream(getContent());
+            return contentAsIS;
+        }
 
         return null;
     }
