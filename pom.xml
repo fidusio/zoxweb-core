@@ -65,7 +65,7 @@
         <angus.version>2.0.3</angus.version>
         <jsoup.version>RELEASE</jsoup.version>
         <junit.version>5.12.0</junit.version>
-        <okhttp.version>5.0.0-alpha.14</okhttp.version>
+        <okhttp.version>4.12.0</okhttp.version>
     </properties>
 
 
