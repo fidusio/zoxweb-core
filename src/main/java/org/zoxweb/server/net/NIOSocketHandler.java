@@ -18,6 +18,7 @@ package org.zoxweb.server.net;
 import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.task.TaskUtil;
+import org.zoxweb.shared.util.Const;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -32,7 +33,7 @@ public class NIOSocketHandler
     extends ProtocolHandler
 {
 
-	private volatile ByteBuffer phBB = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.DIRECT, 1024);
+	private volatile ByteBuffer phBB = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.DIRECT, (int)Const.SizeInBytes.K.SIZE);
 
 	private final PlainSessionCallback sessionCallback;
 
@@ -67,7 +68,7 @@ public class NIOSocketHandler
 		try
     	{
 			if(sessionCallback.getConfig() == null)
-				sessionCallback.setConfig(new ChannelOutputStream(this, phSChannel, 512));
+				sessionCallback.setConfig(new ChannelOutputStream(this, phSChannel, (int)Const.SizeInBytes.K.SIZE));
 
 			int read;
     		do
