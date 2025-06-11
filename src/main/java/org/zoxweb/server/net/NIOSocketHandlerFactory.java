@@ -4,40 +4,34 @@ package org.zoxweb.server.net;
 import org.zoxweb.shared.util.InstanceFactory;
 
 public class NIOSocketHandlerFactory
-        extends ProtocolFactoryBase<NIOSocketHandler>
-{
+        extends ProtocolFactoryBase<NIOSocketHandler> {
 
-    private  Class<? extends BaseSessionCallback> cbClass;
+    private Class<? extends BaseSessionCallback> cbClass;
     private InstanceFactory.InstanceCreator<PlainSessionCallback> instanceCreator;
 
-    public NIOSocketHandlerFactory(){}
+    public NIOSocketHandlerFactory() {
+    }
 
 
-    public NIOSocketHandlerFactory(Class<? extends BaseSessionCallback> cbClass)
-    {
+    public NIOSocketHandlerFactory(Class<? extends BaseSessionCallback> cbClass) {
         this.cbClass = cbClass;
 
     }
-    public NIOSocketHandlerFactory(InstanceFactory.InstanceCreator<PlainSessionCallback> instanceCreator)
-    {
+
+    public NIOSocketHandlerFactory(InstanceFactory.InstanceCreator<PlainSessionCallback> instanceCreator) {
         this.instanceCreator = instanceCreator;
     }
 
 
-
     @Override
-    public NIOSocketHandler newInstance()
-    {
+    public NIOSocketHandler newInstance() {
         PlainSessionCallback sc = null;
-        try
-        {
+        try {
             if (instanceCreator != null)
                 sc = instanceCreator.newInstance();
-            else if(cbClass != null)
+            else if (cbClass != null)
                 sc = (PlainSessionCallback) cbClass.getDeclaredConstructor().newInstance();
-        }
-        catch(Exception e)
-        {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return new NIOSocketHandler(sc);
@@ -48,17 +42,13 @@ public class NIOSocketHandlerFactory
         // TODO Auto-generated method stub
         return "NIOPlainSocketFactory";
     }
-    public void init()
-    {
-        try
-        {
-            if(getProperties().getValue("session_callback") != null)
-            {
+
+    public void init() {
+        try {
+            if (getProperties().getValue("session_callback") != null) {
                 cbClass = (Class<PlainSessionCallback>) Class.forName(getProperties().getValue("session_callback"));
             }
-        }
-        catch(Exception e)
-        {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 

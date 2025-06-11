@@ -9,43 +9,33 @@ import java.nio.channels.ByteChannel;
 
 
 public class ChannelOutputStream
-        extends BaseChannelOutputStream
-{
+        extends BaseChannelOutputStream {
 
-    public ChannelOutputStream(ProtocolHandler ph, ByteChannel byteChannel, int outAppBufferSize)
-    {
+    public ChannelOutputStream(ProtocolHandler ph, ByteChannel byteChannel, int outAppBufferSize) {
         super(ph, byteChannel, outAppBufferSize);
     }
 
 
-
     /**
-     *
      * @param bb buffer sent over the wire
      * @return the number of byte sent
      * @throws IOException in case of error
      */
-    public synchronized int write(ByteBuffer bb) throws IOException
-    {
-        try
-        {
+    public synchronized int write(ByteBuffer bb) throws IOException {
+        try {
             int ret = ByteBufferUtil.smartWrite(null, outChannel, bb);
             protocolHandler.updateUsage();
             return ret;
-        }
-        catch (IOException e)
-        {
+        } catch (IOException e) {
             IOUtil.close(this);
             throw e;
         }
     }
 
-    public void close() throws IOException
-    {
+    public void close() throws IOException {
 
-        if(!isClosed.getAndSet(true))
-        {
-            if(log.isEnabled()) log.getLogger().info("Calling close" );
+        if (!isClosed.getAndSet(true)) {
+            if (log.isEnabled()) log.getLogger().info("Calling close");
             IOUtil.close(outChannel, protocolHandler);
             ByteBufferUtil.cache(outAppData);
             //ByteBufferUtil.cache(oneByteBuffer);

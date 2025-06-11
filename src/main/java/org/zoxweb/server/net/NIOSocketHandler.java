@@ -30,82 +30,72 @@ import java.nio.channels.spi.AbstractSelectableChannel;
 
 
 public class NIOSocketHandler
-    extends ProtocolHandler
-{
+        extends ProtocolHandler {
 
-	private volatile ByteBuffer phBB = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.DIRECT, (int)Const.SizeInBytes.K.SIZE);
+    private volatile ByteBuffer phBB = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.DIRECT, (int) Const.SizeInBytes.K.SIZE);
 
-	private final PlainSessionCallback sessionCallback;
+    private final PlainSessionCallback sessionCallback;
 
-	public NIOSocketHandler(PlainSessionCallback psc)
-	{
-		this.sessionCallback = psc;
-	}
-	
-	@Override
-	public String getName()
-	{
-		return "NIOTunnel";
-	}
+    public NIOSocketHandler(PlainSessionCallback psc) {
+        this.sessionCallback = psc;
+    }
 
-	@Override
-	public String getDescription() 
-	{
-		return "NIO Tunnel";
-	}
+    @Override
+    public String getName() {
+        return "NIOTunnel";
+    }
 
-	@Override
-	protected void close_internal() throws IOException
-    {
-		IOUtil.close(phSChannel, sessionCallback);
-		ByteBufferUtil.cache(phBB);
-	}
+    @Override
+    public String getDescription() {
+        return "NIO Tunnel";
+    }
+
+    @Override
+    protected void close_internal() throws IOException {
+        IOUtil.close(phSChannel, sessionCallback);
+        ByteBufferUtil.cache(phBB);
+    }
 
 
-	@Override
-	public void accept(SelectionKey key)
-	{
-		try
-    	{
-			if(sessionCallback.getConfig() == null)
-				sessionCallback.setConfig(new ChannelOutputStream(this, phSChannel, (int)Const.SizeInBytes.K.SIZE));
+    @Override
+    public void accept(SelectionKey key) {
+        try {
+            if (sessionCallback.getConfig() == null)
+                sessionCallback.setConfig(new ChannelOutputStream(this, phSChannel, (int) Const.SizeInBytes.K.SIZE));
 
-			int read;
-    		do
-            {
-				((Buffer) phBB).clear();
-				read = phSChannel.isConnected()? phSChannel.read(phBB) : -1;
+            int read;
+            do {
+                ((Buffer) phBB).clear();
+                read = phSChannel.isConnected() ? phSChannel.read(phBB) : -1;
 
-    			if (read > 0)
-					sessionCallback.accept(phBB);
-    		}
-    		while(read > 0);
+                if (read > 0)
+                    sessionCallback.accept(phBB);
+            }
+            while (read > 0);
 
-    		
-    		if (read == -1)
-    		{
-    			if (log.isEnabled()) log.getLogger().info("+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+Read:" + read);
-				IOUtil.close(this);
-				if (log.isEnabled()) log.getLogger().info(key + ":" + key.isValid()+ " " + Thread.currentThread() + " " + TaskUtil.defaultTaskProcessor().availableExecutorThreads());
-    		}
-    	}
-    	catch(Exception e)
-    	{
-    		if (log.isEnabled()) e.printStackTrace();
-    		IOUtil.close(this);
-			if (log.isEnabled()) log.getLogger().info(System.currentTimeMillis() + ":Connection end " + key + ":" + key.isValid()+ " " + Thread.currentThread() + " " + TaskUtil.defaultTaskProcessor().availableExecutorThreads());
-    		
-    	}
-	}
 
-	public void setupConnection(AbstractSelectableChannel asc, boolean isBlocking) throws IOException
-	{
-		phSChannel = (SocketChannel) asc;
-		getSelectorController().register(phSChannel, SelectionKey.OP_READ, this, isBlocking);
-		sessionCallback.setProtocolHandler(this);
-		sessionCallback.setRemoteAddress(((InetSocketAddress)phSChannel.getRemoteAddress()).getAddress());
+            if (read == -1) {
+                if (log.isEnabled()) log.getLogger().info("+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+Read:" + read);
+                IOUtil.close(this);
+                if (log.isEnabled())
+                    log.getLogger().info(key + ":" + key.isValid() + " " + Thread.currentThread() + " " + TaskUtil.defaultTaskProcessor().availableExecutorThreads());
+            }
+        } catch (Exception e) {
+            if (log.isEnabled()) e.printStackTrace();
+            IOUtil.close(this);
+            if (log.isEnabled())
+                log.getLogger().info(System.currentTimeMillis() + ":Connection end " + key + ":" + key.isValid() + " " + Thread.currentThread() + " " + TaskUtil.defaultTaskProcessor().availableExecutorThreads());
 
-	}
+        }
+    }
+
+    public void setupConnection(AbstractSelectableChannel asc, boolean isBlocking) throws IOException {
+        phSChannel = (SocketChannel) asc;
+        getSelectorController().register(phSChannel, SelectionKey.OP_READ, this, isBlocking);
+        sessionCallback.setProtocolHandler(this);
+        sessionCallback.setRemoteAddress(((InetSocketAddress) phSChannel.getRemoteAddress()).getAddress());
+
+    }
 
 //	@Override
 //	public void setSessionCallback(BaseSessionCallback<?> sessionCallback) {
@@ -123,26 +113,22 @@ public class NIOSocketHandler
 //	}
 
 
-	@SuppressWarnings("resource")
-    public static void main(String... args)
-    {
-		try
-		{
-			int index = 0;
-			int port = Integer.parseInt(args[index++]);
-			Class<? extends PlainSessionCallback> clazz = (Class<? extends PlainSessionCallback>) Class.forName(args[index++]);
-			TaskUtil.setThreadMultiplier(8);
-			
-			
-			new NIOSocket(TaskUtil.defaultTaskProcessor(), TaskUtil.defaultTaskScheduler()).addServerSocket(new InetSocketAddress(port), 128, new NIOSocketHandlerFactory(clazz));
-		}
-		catch(Exception e)
-		{
-			e.printStackTrace();
-			TaskUtil.defaultTaskScheduler().close();
-			TaskUtil.defaultTaskProcessor().close();
-		}
-	}
+    @SuppressWarnings("resource")
+    public static void main(String... args) {
+        try {
+            int index = 0;
+            int port = Integer.parseInt(args[index++]);
+            Class<? extends PlainSessionCallback> clazz = (Class<? extends PlainSessionCallback>) Class.forName(args[index++]);
+            TaskUtil.setThreadMultiplier(8);
+
+
+            new NIOSocket(TaskUtil.defaultTaskProcessor(), TaskUtil.defaultTaskScheduler()).addServerSocket(new InetSocketAddress(port), 128, new NIOSocketHandlerFactory(clazz));
+        } catch (Exception e) {
+            e.printStackTrace();
+            TaskUtil.defaultTaskScheduler().close();
+            TaskUtil.defaultTaskProcessor().close();
+        }
+    }
 
 
 }

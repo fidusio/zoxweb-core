@@ -13,8 +13,7 @@ import java.nio.channels.ByteChannel;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class BaseChannelOutputStream extends OutputStream
-    implements CloseableType
-{
+        implements CloseableType {
     public static final LogWrapper log = new LogWrapper(BaseChannelOutputStream.class).setEnabled(false);
 
 
@@ -23,47 +22,40 @@ public abstract class BaseChannelOutputStream extends OutputStream
     protected final byte[] oneByteBuffer = new byte[1];
     protected final AtomicBoolean isClosed = new AtomicBoolean(false);
     protected final ProtocolHandler protocolHandler;
-    protected BaseChannelOutputStream(ProtocolHandler ph, ByteChannel outByteChannel, int outAppBufferSize)
-    {
+
+    protected BaseChannelOutputStream(ProtocolHandler ph, ByteChannel outByteChannel, int outAppBufferSize) {
         SUS.checkIfNulls("Protocol handler or channel can't be null ", ph, outByteChannel);
         this.outChannel = outByteChannel;
-        if(outAppBufferSize > 0)
-        {
+        if (outAppBufferSize > 0) {
             outAppData = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.DIRECT, outAppBufferSize);
             this.protocolHandler = ph;
-        }
-        else
+        } else
             throw new IllegalArgumentException("Invalid buffer size");
     }
 
 
     @Override
-    public synchronized void write(int b) throws IOException
-    {
+    public synchronized void write(int b) throws IOException {
         oneByteBuffer[0] = (byte) b;
-        write(oneByteBuffer, 0 ,1);
+        write(oneByteBuffer, 0, 1);
     }
 
-    public void write(UByteArrayOutputStream ubaos, boolean reset) throws IOException
-    {
-        synchronized (ubaos)
-        {
+    public void write(UByteArrayOutputStream ubaos, boolean reset) throws IOException {
+        synchronized (ubaos) {
             write(ubaos.getInternalBuffer(), 0, ubaos.size());
-            if(reset)
+            if (reset)
                 ubaos.reset();
         }
     }
 
     @Override
-    public synchronized void write(byte[] b, int off, int len) throws IOException
-    {
+    public synchronized void write(byte[] b, int off, int len) throws IOException {
         if (off > b.length || len > (b.length - off) || off < 0 || len < 0)
             throw new IndexOutOfBoundsException();
         // len == 0 condition implicitly handled by loop bounds
-        while(off < len)
-        {
+        while (off < len) {
             int tempLen = len - off;
-            if(tempLen > (outAppData.capacity() - outAppData.position()))
+            if (tempLen > (outAppData.capacity() - outAppData.position()))
                 tempLen = outAppData.capacity() - outAppData.position();
 
 
@@ -75,8 +67,7 @@ public abstract class BaseChannelOutputStream extends OutputStream
 
     public abstract int write(ByteBuffer byteBuffer) throws IOException;
 
-    public boolean isClosed()
-    {
+    public boolean isClosed() {
         return isClosed.get() || !outChannel.isOpen();
     }
 }

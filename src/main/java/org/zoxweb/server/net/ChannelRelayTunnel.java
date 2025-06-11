@@ -29,142 +29,121 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 
 
-public class  ChannelRelayTunnel
-	extends ProtocolHandler
-{
+public class ChannelRelayTunnel
+        extends ProtocolHandler {
 
 
-	private static final LogWrapper log = new LogWrapper(ChannelRelayTunnel.class).setEnabled(false);
+    private static final LogWrapper log = new LogWrapper(ChannelRelayTunnel.class).setEnabled(false);
 
-	private ByteChannel readSource;
-	private ByteChannel writeDestination;
-	private SelectionKey currentSK = null;
-	private SelectionKey writeChannelSK;
-	private final boolean autoCloseDestination;
-	private Closeable closeInterface = null;
+    private ByteChannel readSource;
+    private ByteChannel writeDestination;
+    private SelectionKey currentSK = null;
+    private SelectionKey writeChannelSK;
+    private final boolean autoCloseDestination;
+    private Closeable closeInterface = null;
 
-	private ByteBuffer sBuffer;
-	
-	
-	
-	public ChannelRelayTunnel(int bufferSize, SocketChannel readSource,
-			  				  SocketChannel writeDestination, SelectionKey writeChannelSK, boolean autoCloseDestination,
-			  				  SelectorController sc)
-	{
-		this(bufferSize, readSource, writeDestination, writeChannelSK, autoCloseDestination, sc, null);
-	}
-	
-	
-	
-	public ChannelRelayTunnel(int bufferSize, SocketChannel readSource,
-							  SocketChannel writeDestination, SelectionKey writeChannelSK,boolean autoCloseDestination,
-							  SelectorController sc, Closeable closeInterface)
-	{
-		//this.origin = origin;
-		sBuffer = ByteBufferUtil.allocateByteBuffer(BufferType.DIRECT, bufferSize);
-		this.readSource = readSource;
-		this.writeDestination = writeDestination;
-		this.writeChannelSK = writeChannelSK;
-		this.autoCloseDestination = autoCloseDestination;
-		this.closeInterface = closeInterface;
-		setSelectorController(sc);
-		
-	}
-	
-	
-	
-	public String getName() {
-		// TODO Auto-generated method stub
-		return "ChannelRelayTunnel";
-	}
-	
+    private ByteBuffer sBuffer;
 
-	public String getDescription() {
-		// TODO Auto-generated method stub
-		return "NIO Channel Relay Tunnel";
-	}
 
-	protected void close_internal() throws IOException
-	{
+    public ChannelRelayTunnel(int bufferSize, SocketChannel readSource,
+                              SocketChannel writeDestination, SelectionKey writeChannelSK, boolean autoCloseDestination,
+                              SelectorController sc) {
+        this(bufferSize, readSource, writeDestination, writeChannelSK, autoCloseDestination, sc, null);
+    }
 
-		// TODO Auto-generated method stub
-		if (closeInterface != null) {
-			IOUtil.close(closeInterface);
-		} else {
-			IOUtil.close(readSource);
-			getSelectorController().cancelSelectionKey(currentSK);
 
-			if (autoCloseDestination) {
-				IOUtil.close(writeDestination);
-			}
-			ByteBufferUtil.cache(sBuffer);
-		}
+    public ChannelRelayTunnel(int bufferSize, SocketChannel readSource,
+                              SocketChannel writeDestination, SelectionKey writeChannelSK, boolean autoCloseDestination,
+                              SelectorController sc, Closeable closeInterface) {
+        //this.origin = origin;
+        sBuffer = ByteBufferUtil.allocateByteBuffer(BufferType.DIRECT, bufferSize);
+        this.readSource = readSource;
+        this.writeDestination = writeDestination;
+        this.writeChannelSK = writeChannelSK;
+        this.autoCloseDestination = autoCloseDestination;
+        this.closeInterface = closeInterface;
+        setSelectorController(sc);
 
-	}
-	
-	
-	public synchronized void accept(SelectionKey key)
-	{
-		
-		try
-		{
-			
-			if (key != null)
-				currentSK = key;
-			int read;
-			do
-			{
-				((Buffer)sBuffer).clear();
-				read = ((SocketChannel)currentSK.channel()).read(sBuffer);
-				if (read > 0)
-				{
-					ByteBufferUtil.write(writeDestination, sBuffer);
-					if(log.isEnabled()) log.getLogger().info(ByteBufferUtil.toString(sBuffer));
-				}
-			}while(read > 0);
+    }
 
-			
-	    	if(read < 0) //end of stream we have to close 
-	    		IOUtil.close(this);
-	    	
-		}
-		catch(Exception e)
-		{
-			if(log.isEnabled()) log.getLogger().info("error:" +e);
-			if (!(e instanceof IOException))
-				e.printStackTrace();
-			IOUtil.close(this);
-		}
-		
-		notifyAll();
-		
-	}
-	
-	
-	
-	
-	public synchronized void waitThenStopReading(SelectionKey sk)
-	{
-		while(sk.isValid() && !sk.isReadable() && sk.channel().isOpen())
-		{
-			try 
-			{
-				wait(100);
-				if(log.isEnabled()) log.getLogger().info("after wait");
-			} 
-			catch (InterruptedException e)
-			{
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		if (currentSK != null)
-			getSelectorController().cancelSelectionKey(currentSK);
-		else
-			IOUtil.close(this);
-		
-	}
 
+    public String getName() {
+        // TODO Auto-generated method stub
+        return "ChannelRelayTunnel";
+    }
+
+
+    public String getDescription() {
+        // TODO Auto-generated method stub
+        return "NIO Channel Relay Tunnel";
+    }
+
+    protected void close_internal() throws IOException {
+
+        // TODO Auto-generated method stub
+        if (closeInterface != null) {
+            IOUtil.close(closeInterface);
+        } else {
+            IOUtil.close(readSource);
+            getSelectorController().cancelSelectionKey(currentSK);
+
+            if (autoCloseDestination) {
+                IOUtil.close(writeDestination);
+            }
+            ByteBufferUtil.cache(sBuffer);
+        }
+
+    }
+
+
+    public synchronized void accept(SelectionKey key) {
+
+        try {
+
+            if (key != null)
+                currentSK = key;
+            int read;
+            do {
+                ((Buffer) sBuffer).clear();
+                read = ((SocketChannel) currentSK.channel()).read(sBuffer);
+                if (read > 0) {
+                    ByteBufferUtil.write(writeDestination, sBuffer);
+                    if (log.isEnabled()) log.getLogger().info(ByteBufferUtil.toString(sBuffer));
+                }
+            } while (read > 0);
+
+
+            if (read < 0) //end of stream we have to close
+                IOUtil.close(this);
+
+        } catch (Exception e) {
+            if (log.isEnabled()) log.getLogger().info("error:" + e);
+            if (!(e instanceof IOException))
+                e.printStackTrace();
+            IOUtil.close(this);
+        }
+
+        notifyAll();
+
+    }
+
+
+    public synchronized void waitThenStopReading(SelectionKey sk) {
+        while (sk.isValid() && !sk.isReadable() && sk.channel().isOpen()) {
+            try {
+                wait(100);
+                if (log.isEnabled()) log.getLogger().info("after wait");
+            } catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+        if (currentSK != null)
+            getSelectorController().cancelSelectionKey(currentSK);
+        else
+            IOUtil.close(this);
+
+    }
 
 
 }

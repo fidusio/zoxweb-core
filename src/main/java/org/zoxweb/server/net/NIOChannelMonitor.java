@@ -8,24 +8,22 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 
 public class NIOChannelMonitor
-implements Runnable
-{
+        implements Runnable {
     public static final LogWrapper logger = new LogWrapper(NIOChannelMonitor.class);
     private final SelectionKey sk;
     private final long timestamp;
     private final SelectorController selectorController;
-    public NIOChannelMonitor(SelectionKey sk, SelectorController selector)
-    {
+
+    public NIOChannelMonitor(SelectionKey sk, SelectorController selector) {
         timestamp = System.currentTimeMillis();
         selectorController = selector;
         this.sk = sk;
     }
+
     @Override
-    public void run()
-    {
+    public void run() {
         SocketChannel sc = (SocketChannel) sk.channel();
-        try
-        {
+        try {
             if (!sc.isConnected() || sk.isConnectable()) {
                 IOUtil.close(sc);
                 selectorController.cancelSelectionKey(sk);
@@ -34,9 +32,7 @@ implements Runnable
                 if (logger.isEnabled())
                     logger.getLogger().info("Connection timed out: " + sk + " it took " + Const.TimeInMillis.toString(System.currentTimeMillis() - timestamp));
             }
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             IOUtil.close(sc);
         }
 

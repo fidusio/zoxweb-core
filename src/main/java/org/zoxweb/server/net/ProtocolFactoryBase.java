@@ -20,58 +20,55 @@ import org.zoxweb.shared.util.NVGenericMap;
 
 
 public abstract class ProtocolFactoryBase<P extends ProtocolHandler>
-	implements ProtocolFactory<P>
-{
+        implements ProtocolFactory<P> {
 
-	private volatile InetFilterRulesManager incomingInetFilterRulesManager;
-	private volatile InetFilterRulesManager outgoingInetFilterRulesManager;
+    private volatile InetFilterRulesManager incomingInetFilterRulesManager;
+    private volatile InetFilterRulesManager outgoingInetFilterRulesManager;
 
-	private final NVGenericMap properties = new NVGenericMap();
-
-
-	protected boolean complexSetup = false;
-	
-
-	
+    private final NVGenericMap properties = new NVGenericMap();
 
 
-	@Override
-	public boolean isBlocking() {
-		// TODO Auto-generated method stub
-		return false;
-	}
+    protected boolean complexSetup = false;
 
 
-	@Override
-	public InetFilterRulesManager getIncomingInetFilterRulesManager() {
-		// TODO Auto-generated method stub
-		return incomingInetFilterRulesManager;
-	}
+    @Override
+    public boolean isBlocking() {
+        // TODO Auto-generated method stub
+        return false;
+    }
 
-	@Override
-	public void setIncomingInetFilterRulesManager(InetFilterRulesManager incomingIFRM) {
-		// TODO Auto-generated method stub
-		incomingInetFilterRulesManager = incomingIFRM;
-	}
-	
-	
-	@Override
-	public InetFilterRulesManager getOutgoingInetFilterRulesManager() {
-		// TODO Auto-generated method stub
-		return outgoingInetFilterRulesManager;
-	}
 
-	@Override
-	public void setOutgoingInetFilterRulesManager(InetFilterRulesManager incomingIFRM) {
-		// TODO Auto-generated method stub
-		outgoingInetFilterRulesManager = incomingIFRM;
-	}
+    @Override
+    public InetFilterRulesManager getIncomingInetFilterRulesManager() {
+        // TODO Auto-generated method stub
+        return incomingInetFilterRulesManager;
+    }
 
-	public NVGenericMap getProperties()
-	{
-		return properties;
-	}
+    @Override
+    public void setIncomingInetFilterRulesManager(InetFilterRulesManager incomingIFRM) {
+        // TODO Auto-generated method stub
+        incomingInetFilterRulesManager = incomingIFRM;
+    }
 
-	public boolean isComplexSetup(){return complexSetup;}
+
+    @Override
+    public InetFilterRulesManager getOutgoingInetFilterRulesManager() {
+        // TODO Auto-generated method stub
+        return outgoingInetFilterRulesManager;
+    }
+
+    @Override
+    public void setOutgoingInetFilterRulesManager(InetFilterRulesManager incomingIFRM) {
+        // TODO Auto-generated method stub
+        outgoingInetFilterRulesManager = incomingIFRM;
+    }
+
+    public NVGenericMap getProperties() {
+        return properties;
+    }
+
+    public boolean isComplexSetup() {
+        return complexSetup;
+    }
 
 }

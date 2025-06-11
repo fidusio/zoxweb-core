@@ -20,50 +20,56 @@ import org.zoxweb.shared.util.GetName;
 import org.zoxweb.shared.util.InstanceFactory;
 
 public interface ProtocolFactory<P extends ProtocolHandler>
-extends GetName, GetNVProperties, InstanceFactory.InstanceCreator<P>
-{
+        extends GetName, GetNVProperties, InstanceFactory.InstanceCreator<P> {
 
 
-	/**
-	 * True if the factory is of blocking type
-	 * @return blocking status
-	 */
-	boolean isBlocking();
+    /**
+     * True if the factory is of blocking type
+     *
+     * @return blocking status
+     */
+    boolean isBlocking();
 
-	/**
-	 * Set the filer rule manager for incoming connections
-	 * @return incoming filter manager
-	 */
-	InetFilterRulesManager getIncomingInetFilterRulesManager();
+    /**
+     * Set the filer rule manager for incoming connections
+     *
+     * @return incoming filter manager
+     */
+    InetFilterRulesManager getIncomingInetFilterRulesManager();
 
-	/**
-	 * Set the incoming filter rule manager.
-	 * @param incomingIFRM input filter manager
-	 */
-	void setIncomingInetFilterRulesManager(InetFilterRulesManager incomingIFRM);
-	
-	/**
-	 * Get the outgoing connection rule manager if applicable
-	 * @return outgoing filter
-	 */
-	InetFilterRulesManager getOutgoingInetFilterRulesManager();
-	/**
-	 * Set the outgoing connection rule manager if applicable
-	 * @param outgoingIFRM outgoing filter
-	 */
-	void setOutgoingInetFilterRulesManager(InetFilterRulesManager outgoingIFRM);
+    /**
+     * Set the incoming filter rule manager.
+     *
+     * @param incomingIFRM input filter manager
+     */
+    void setIncomingInetFilterRulesManager(InetFilterRulesManager incomingIFRM);
+
+    /**
+     * Get the outgoing connection rule manager if applicable
+     *
+     * @return outgoing filter
+     */
+    InetFilterRulesManager getOutgoingInetFilterRulesManager();
+
+    /**
+     * Set the outgoing connection rule manager if applicable
+     *
+     * @param outgoingIFRM outgoing filter
+     */
+    void setOutgoingInetFilterRulesManager(InetFilterRulesManager outgoingIFRM);
 
 
-	/**
-	 * Init the protocol factory
-	 */
-	void init();
+    /**
+     * Init the protocol factory
+     */
+    void init();
 
 
-	/**
-	 * If true it suggest to use a thread for the connection setup if a thread pool is available
-	 * @return the setup mode
-	 */
-	boolean isComplexSetup();
-	
+    /**
+     * If true it suggest to use a thread for the connection setup if a thread pool is available
+     *
+     * @return the setup mode
+     */
+    boolean isComplexSetup();
+
 }

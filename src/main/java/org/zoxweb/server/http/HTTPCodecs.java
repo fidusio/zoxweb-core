@@ -215,6 +215,7 @@ public final class HTTPCodecs {
 
                                 NamedValue<String> contentDisposition = (NamedValue<String>) subPartRawHeaders.get(HTTPHeader.CONTENT_DISPOSITION);
                                 NamedValue<String> contentType = (NamedValue<String>) subPartRawHeaders.get(HTTPHeader.CONTENT_TYPE);
+                                NamedValue<String> location = (NamedValue<String>) subPartRawHeaders.get(HTTPHeader.LOCATION);
                                 String name = null;
                                 String filename = null;
                                 String mediaType = null;
@@ -240,8 +241,11 @@ public final class HTTPCodecs {
                                     if (is != null && mediaType != null && HTTPMediaType.lookup(mediaType) != HTTPMediaType.APPLICATION_JSON) {
                                         NamedValue<InputStream> toAdd = new NamedValue<>(name, is);
 
-                                        if (filename != null)
+                                        if (filename != null) {
                                             toAdd.getProperties().build("filename", filename);
+                                            if(location != null)
+                                                toAdd.getProperties().build(location.getName(), location.getValue());
+                                        }
 
                                         toAdd.getProperties().build("media-type", mediaType);
 
@@ -375,6 +379,7 @@ public final class HTTPCodecs {
                                 NamedValue<?> contentDisposition = multiPartFullHeader.getNV(HTTPHeader.CONTENT_DISPOSITION);
                                 NamedValue<?> contentType = multiPartFullHeader.getNV(HTTPHeader.CONTENT_TYPE);
                                 NamedValue<?> contentLength = multiPartFullHeader.getNV(HTTPHeader.CONTENT_LENGTH);
+                                NamedValue<?> location = multiPartFullHeader.getNV(HTTPHeader.LOCATION);
                                 boolean isAFile = multiPartFullHeader.getValue(ProtoMarker.IS_FILE);
 
                                 int dataContentStartIndex = multiPartFullHeader.getValue(ProtoMarker.SUB_CONTENT_START_INDEX);
@@ -387,7 +392,6 @@ public final class HTTPCodecs {
 
 
                                 if (isAFile) {
-                                    ;
 
                                     if (dataContentEndIndex == -1) {
                                         // we have a partial file content
@@ -401,6 +405,9 @@ public final class HTTPCodecs {
                                                 paramFileToAdd.getProperties().build(new NVLong(contentLength.getName(), (long) contentLength.getValue()));
                                             }
                                             paramFileToAdd.getProperties().build(new NVBoolean(ProtoMarker.LAST_CHUNK, false));
+                                            if(location != null && location.getValue() !=null)
+                                                paramFileToAdd.getProperties().build(location.getName(), ""+location.getValue());
+
                                             hmci.getParameters().add(paramFileToAdd);
                                             int lastDataMark = hrm.getDataMark();
                                             UByteArrayInputStream is = new UByteArrayInputStream(ubaos.getInternalBuffer(), dataContentStartIndex, safetyIndex - dataContentStartIndex
@@ -431,9 +438,10 @@ public final class HTTPCodecs {
                                             paramFileToAdd.getProperties().build(new NVLong(contentLength.getName(), (long) contentLength.getValue()));
                                         }
                                         paramFileToAdd.getProperties().build(new NVBoolean(ProtoMarker.LAST_CHUNK, true));
+                                        if(location != null && location.getValue() !=null)
+                                            paramFileToAdd.getProperties().build(location.getName(), ""+location.getValue());
+
                                         hmci.getParameters().add(paramFileToAdd);
-
-
                                         UByteArrayInputStream is = new UByteArrayInputStream(ubaos.getInternalBuffer(), dataContentStartIndex, dataContentEndIndex - dataContentStartIndex);
                                         paramFileToAdd.setValue(is);
                                         hmci.getParameters().add(paramFileToAdd);

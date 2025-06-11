@@ -276,6 +276,7 @@ public class ParseHTTPRequestTest {
                 "Accept: text/html, application/xhtml+xml;q=0.9, image/webp;q=0.8, */*;q=0.7;q=0.9",
                 "Content-Type: multipart/form-data; boundary=bd1a40c9-9408-4b59-8d4b-f6693561887e",
                 "Content-Type: application/json",
+                "Location: file:///web/downloadable/",
                 "Content-Length: " + Long.MAX_VALUE,
                 "Attachment: attachment; filename=\"file,: name.pdf\"; creation-date=\"Wed, 12 Feb 2020 16:00:00 GMT\", inline",
                 "Authorization: Bearer jdlksjfgdksljgikjrtjtkrejtiohyu4o35hjhj5rk",

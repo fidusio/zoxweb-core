@@ -8,18 +8,13 @@ import java.nio.ByteBuffer;
 
 public abstract class BaseSessionCallback<CF>
         extends SessionCallback<CF, ByteBuffer, OutputStream>
-        implements CloseableType
-{
+        implements CloseableType {
     private InetAddress remoteAddress;
 
     public abstract BaseChannelOutputStream get();
 
-//    public ProtocolHandler getProtocolHandler() {
-//        return protocolHandler;
-//    }
 
-    public void setProtocolHandler(ProtocolHandler protocolHandler)
-    {
+    public void setProtocolHandler(ProtocolHandler protocolHandler) {
         this.protocolHandler = protocolHandler;
     }
 

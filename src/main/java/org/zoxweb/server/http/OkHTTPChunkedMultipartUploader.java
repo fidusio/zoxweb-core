@@ -14,17 +14,9 @@ import java.util.Base64;
 
 public class OkHTTPChunkedMultipartUploader {
 
-    public static void main(String[] args) throws IOException {
-        if (args.length < 4) {
-            System.err.println("Usage: java ChunkedMultipartUploader <url> <username> <password> <filepath>");
-            System.exit(1);
-        }
-
-        String url = args[0];
-        String username = args[1];
-        String password = args[2];
-        String filepath = args[3];
-
+    public static void uploadFile(String url, String username, String password, String filepath, String remoteLocation)
+            throws IOException
+    {
         OkHttpClient client = OkHTTPCall.createOkHttpBuilder(null, null, HTTPMessageConfigInterface.DEFAULT_TIMEOUT_20_SECOND, false, 20, HTTPMessageConfigInterface.DEFAULT_TIMEOUT_40_SECOND).build();
 
         File file = new File(filepath);
@@ -60,9 +52,12 @@ public class OkHTTPChunkedMultipartUploader {
             }
         };
 
+
         MultipartBody.Builder multipartBuilder = new MultipartBody.Builder()
                 .setType(MultipartBody.FORM)
                 .addFormDataPart("file", file.getName(), streamBody);
+//        if(remoteLocation != null)
+//            multipartBuilder.addFormDataPart("Location", remoteLocation);
 
         RequestBody requestBody = multipartBuilder.build();
 
@@ -79,5 +74,22 @@ public class OkHTTPChunkedMultipartUploader {
             System.out.println(response.body() != null ? response.body().string() : "No response body");
             System.out.println("It took " + Const.TimeInMillis.toString(System.currentTimeMillis() - ts));
         }
+    }
+
+
+    public static void main(String[] args) throws IOException {
+        if (args.length < 4) {
+            System.err.println("Usage: java ChunkedMultipartUploader <url> <username> <password> <filepath>");
+            System.exit(1);
+        }
+
+        int index = 0;
+        String url = args[index++];
+        String username = args[index++];
+        String password = args[index++];
+        String filepath = args[index++];
+        String remoteLocation = index < args.length ? args[index++] : null;
+
+        uploadFile(url, username, password, filepath, remoteLocation);
     }
 }

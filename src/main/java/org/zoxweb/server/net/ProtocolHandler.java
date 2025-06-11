@@ -30,172 +30,148 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
 public abstract class ProtocolHandler
-	implements GetName, GetDescription, CloseableType, UsageTracker, Consumer<SelectionKey>
-{
-	public static final LogWrapper log = new LogWrapper(ProtocolHandler.class).setEnabled(false);
-	static class PHTimeout
-		implements Runnable
-	{
-		protected final Appointment timeout;
-		protected final ProtocolHandler ph;
-		PHTimeout(ProtocolHandler ph, long duration)
-		{
-			this.ph = ph;
-			timeout = TaskUtil.defaultTaskScheduler().queue(duration, this);
-		}
-		public void run()
-		{
-			if(System.currentTimeMillis() - ph.lastUsage() > timeout.getDelayInMillis())
-			{
-				IOUtil.close(ph);
-				log.getLogger().info("session timed out protocol handler closed.");
+        implements GetName, GetDescription, CloseableType, UsageTracker, Consumer<SelectionKey> {
+    public static final LogWrapper log = new LogWrapper(ProtocolHandler.class).setEnabled(false);
 
-			}
-			else
-			{
-				timeout.reset(false);
-			}
-		}
-	}
+    static class PHTimeout
+            implements Runnable {
+        protected final Appointment timeout;
+        protected final ProtocolHandler ph;
 
-	public static final long SESSION_TIMEOUT = (long)(Const.TimeInMillis.MINUTE.MILLIS*2.5);
-	private static final AtomicLong ID_COUNTER = new AtomicLong();
+        PHTimeout(ProtocolHandler ph, long duration) {
+            this.ph = ph;
+            timeout = TaskUtil.defaultTaskScheduler().queue(duration, this);
+        }
 
-	protected final long id = ID_COUNTER.incrementAndGet();
+        public void run() {
+            if (System.currentTimeMillis() - ph.lastUsage() > timeout.getDelayInMillis()) {
+                IOUtil.close(ph);
+                log.getLogger().info("session timed out protocol handler closed.");
 
-	private volatile SelectorController selectorController;
-	private volatile InetFilterRulesManager outgoingInetFilterRulesManager;
+            } else {
+                timeout.reset(false);
+            }
+        }
+    }
 
-	protected volatile SocketChannel phSChannel;
-	protected volatile SelectionKey phSK;
-	private final AtomicLong lastUsage = new AtomicLong(-1);
+    public static final long SESSION_TIMEOUT = (long) (Const.TimeInMillis.MINUTE.MILLIS * 2.5);
+    private static final AtomicLong ID_COUNTER = new AtomicLong();
+
+    protected final long id = ID_COUNTER.incrementAndGet();
+
+    private volatile SelectorController selectorController;
+    private volatile InetFilterRulesManager outgoingInetFilterRulesManager;
+
+    protected volatile SocketChannel phSChannel;
+    protected volatile SelectionKey phSK;
+    private final AtomicLong lastUsage = new AtomicLong(-1);
 
 
-
-	private volatile NVGenericMap properties = null;
-	protected volatile Executor executor;
-	protected final AtomicBoolean isClosed = new AtomicBoolean(false);
-	private final PHTimeout phTimeout;
-
-
-	protected ProtocolHandler()
-	{
-		updateUsage();
-		phTimeout = new PHTimeout(this, SESSION_TIMEOUT);
-
-	}
+    private volatile NVGenericMap properties = null;
+    protected volatile Executor executor;
+    protected final AtomicBoolean isClosed = new AtomicBoolean(false);
+    private final PHTimeout phTimeout;
 
 
+    protected ProtocolHandler() {
+        updateUsage();
+        phTimeout = new PHTimeout(this, SESSION_TIMEOUT);
+
+    }
 
 
-	/**
-	 * @return last time used
-	 */
-	@Override
-	public long lastUsage()
-	{
-		return lastUsage.get();
-	}
+    /**
+     * @return last time used
+     */
+    @Override
+    public long lastUsage() {
+        return lastUsage.get();
+    }
 
-	/**
-	 * @return current usage update
-	 */
-	@Override
-	public long updateUsage()
-	{
-		return updateUsage(System.currentTimeMillis());
-	}
+    /**
+     * @return current usage update
+     */
+    @Override
+    public long updateUsage() {
+        return updateUsage(System.currentTimeMillis());
+    }
 
-	@Override
-	public long updateUsage(long toUpdate)
-	{
-		lastUsage.set(toUpdate);
-		return lastUsage.get();
-	}
+    @Override
+    public long updateUsage(long toUpdate) {
+        lastUsage.set(toUpdate);
+        return lastUsage.get();
+    }
 
 
+    public long getID() {
+        return id;
+    }
 
 
-
-	public long getID(){return id;}
-
-
-	/**
-	 * @return the selector
-	 */
-	public SelectorController getSelectorController() 
-	{
-		return selectorController;
-	}
+    /**
+     * @return the selector
+     */
+    public SelectorController getSelectorController() {
+        return selectorController;
+    }
 
 
-	/**
-	 * @param selectorController the selector to set
-	 */
-	public void setSelectorController(SelectorController selectorController)
-	{
-		this.selectorController = selectorController;
-	}
+    /**
+     * @param selectorController the selector to set
+     */
+    public void setSelectorController(SelectorController selectorController) {
+        this.selectorController = selectorController;
+    }
 
 
-	public void setupConnection(AbstractSelectableChannel asc, boolean isBlocking) throws IOException
-	{
-		phSChannel = (SocketChannel) asc;
-		getSelectorController().register(phSChannel, SelectionKey.OP_READ, this, isBlocking);
-	}
+    public void setupConnection(AbstractSelectableChannel asc, boolean isBlocking) throws IOException {
+        phSChannel = (SocketChannel) asc;
+        getSelectorController().register(phSChannel, SelectionKey.OP_READ, this, isBlocking);
+    }
 
 
-	public InetFilterRulesManager getOutgoingInetFilterRulesManager() 
-	{
-		return outgoingInetFilterRulesManager;
-	}
+    public InetFilterRulesManager getOutgoingInetFilterRulesManager() {
+        return outgoingInetFilterRulesManager;
+    }
 
 
-	public void setOutgoingInetFilterRulesManager(InetFilterRulesManager inetFilterRulesManager) 
-	{
-		this.outgoingInetFilterRulesManager = inetFilterRulesManager;
-	}
+    public void setOutgoingInetFilterRulesManager(InetFilterRulesManager inetFilterRulesManager) {
+        this.outgoingInetFilterRulesManager = inetFilterRulesManager;
+    }
 
 
-	public void setProperties(NVGenericMap prop)
-	{
-		properties = prop;
-	}
-	
-	public NVGenericMap getProperties()
-	{
-		return properties;
-	}
-	public void setExecutor(Executor exec)
-	{
-		this.executor = exec;
-	}
+    public void setProperties(NVGenericMap prop) {
+        properties = prop;
+    }
 
-	public Executor getExecutor()
-	{
-		return executor;
-	}
+    public NVGenericMap getProperties() {
+        return properties;
+    }
 
+    public void setExecutor(Executor exec) {
+        this.executor = exec;
+    }
+
+    public Executor getExecutor() {
+        return executor;
+    }
 
 
 //	public void setSessionCallback(BaseSessionCallback<?> sessionCallback) {
 //		throw new UnsupportedOperationException("Can't set session callback");
 //	}
 
-	public final void close() throws IOException
-	{
-		if(!isClosed.getAndSet(true))
-		{
-			close_internal();
-			phTimeout.timeout.cancel();
-		}
-	}
+    public final void close() throws IOException {
+        if (!isClosed.getAndSet(true)) {
+            close_internal();
+            phTimeout.timeout.cancel();
+        }
+    }
 
-	@Override
-	public boolean isClosed()
-	{
-		return isClosed.get()  || (phSChannel != null && !phSChannel.isOpen());
-	}
+    @Override
+    public boolean isClosed() {
+        return isClosed.get() || (phSChannel != null && !phSChannel.isOpen());
+    }
 
-	abstract  protected void close_internal() throws IOException;
+    abstract protected void close_internal() throws IOException;
 }
