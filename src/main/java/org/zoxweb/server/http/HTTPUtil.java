@@ -201,7 +201,7 @@ public class HTTPUtil {
     }
 
 
-    public static UByteArrayOutputStream formatResponse(HTTPMessageConfigInterface hmci, UByteArrayOutputStream ubaos, GetNameValue<?>... headers)
+    public static UByteArrayOutputStream formatResponseHeaders(HTTPMessageConfigInterface hmci, UByteArrayOutputStream ubaos, GetNameValue<?>... headers)
             throws IOException {
         if (ubaos == null)
             ubaos = ByteBufferUtil.allocateUBAOS(256);
@@ -235,10 +235,13 @@ public class HTTPUtil {
         // header separator
         ubaos.write(Delimiter.CRLF.getValue().getBytes());
 
-//        if (hmci.getContent() != null && hmci.getContent().length > 0) {
-//            ubaos.write(hmci.getContent());
-//        }
+        return ubaos;
+    }
 
+    public static UByteArrayOutputStream formatResponse(HTTPMessageConfigInterface hmci, UByteArrayOutputStream ubaos, GetNameValue<?>... headers)
+            throws IOException {
+
+        ubaos = formatResponseHeaders(hmci, ubaos, headers);
         if (hmci.getContent() != null)
             ubaos.write(hmci.getContent());
         else if (hmci.getContentAsIS() != null) {
@@ -248,42 +251,17 @@ public class HTTPUtil {
         return ubaos;
     }
 
-    public static OutputStream writeHTTPResponse(HTTPMessageConfigInterface hmci, OutputStream outputStream, GetNameValue<?>... headers)
+    public static OutputStream writeHTTPResponse(UByteArrayOutputStream memBuffer, HTTPMessageConfigInterface hmci, OutputStream outputStream, GetNameValue<?>... headers)
             throws IOException {
         SUS.checkIfNulls("hmci or outputstream null", hmci, outputStream);
+        memBuffer = formatResponseHeaders(hmci, memBuffer, headers);
 
-        if (headers != null)
-            for (GetNameValue<?> header : headers)
-                hmci.getHeaders().add(header);
-
-        HTTPVersion hv = hmci.getHTTPVersion();
-        if (hv == null)
-            hv = HTTPVersion.HTTP_1_1;
-        // write the first line
-        outputStream.write(SharedStringUtil.getBytes(hv.getValue() + " " + hmci.getHTTPStatusCode().CODE + " " + hmci.getHTTPStatusCode().REASON + Delimiter.CRLF.getValue()));
-        // set content length if available
-        if (hmci.getHeaders().getNV(HTTPHeader.CONTENT_LENGTH) == null && hmci.getContent() != null) {
-            hmci.setContentLength(hmci.getContent().length);
-        }
-        // write headers
-        for (GetNameValue<String> header : hmci.getHeaders().asArrayValuesString().values()) {
-            // header.getName() + ": " + header.getValue())
-            outputStream.write(HTTPConst.toBytes(header));
-            // header end of line
-            outputStream.write(Delimiter.CRLF.getBytes());
-        }
-        // header separator
-        outputStream.write(Delimiter.CRLF.getBytes());
-
-
-//        InputStream contentIS = hmci.getContentAsIS();
-//        if(contentIS != null)
-//            IOUtil.relayStreams(hmci.getContentAsIS(), outputStream, true, false);
-//        if (hmci.getContent() != null)
-//            outputStream.write(hmci.getContent());
-//        else
-
-        if (hmci.getContentAsIS() != null) {
+        byte[] content = hmci.getContent();
+        if (content != null && content.length <= Const.SizeInBytes.K.SIZE * 16) {
+            memBuffer.write(content);
+            memBuffer.writeTo(outputStream);
+        } else if (hmci.getContentAsIS() != null) {
+            memBuffer.writeTo(outputStream);
             IOUtil.relayStreams(hmci.getContentAsIS(), outputStream, true, false);
         }
 

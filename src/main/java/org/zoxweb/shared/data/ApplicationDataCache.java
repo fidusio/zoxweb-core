@@ -15,22 +15,16 @@
  */
 package org.zoxweb.shared.data;
 
+import org.zoxweb.shared.util.*;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import org.zoxweb.shared.util.CRUD;
-import org.zoxweb.shared.util.CRUDOperation;
-import org.zoxweb.shared.util.DynamicEnumMap;
-import org.zoxweb.shared.util.DynamicEnumMapManager;
-import org.zoxweb.shared.util.NVBase;
-import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVEntity;
-
 public class ApplicationDataCache
 {
 	
-	public class NVEntityManager
+	public static class NVEntityManager
 		implements CRUDOperation<NVEntity>
 	{
 		protected HashMap<String, NVEntity> nveCache = new HashMap<String, NVEntity>();
@@ -126,6 +120,7 @@ public class ApplicationDataCache
 					{
 						// update the dynaic enum map
 						DynamicEnumMapManager.SINGLETON.addDynamicEnumMap((DynamicEnumMap) nvb);
+
 					}
 					break;
 				default:

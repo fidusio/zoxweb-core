@@ -15,6 +15,7 @@
  */
 package org.zoxweb;
 
+import org.junit.jupiter.api.Test;
 import org.zoxweb.server.util.JarTool;
 import org.zoxweb.shared.util.QuickLZ;
 import org.zoxweb.shared.util.SharedStringUtil;
@@ -24,7 +25,9 @@ import java.util.zip.GZIPOutputStream;
 
 public class QuickLZTest {
 
-  public static void main(String[] args) {
+
+  @Test
+  public void testLZ(){
 
     try {
       String str = "MarioMarioMarioMarioMarioMarioMarioMarioMarioMarioMarioMarioMarioMarioMarioMarioMarioMarioMarioMarioMarioNAELNAELNAELNAELNAELNAELNAELNAELNAELNAELNAELNAELNAELNAELNAELNAELNAELNAELNAELNAELNAELNAELNAELNAELNAELNAELNAELNAELNAELNAELNAELNAELNAELNAELNAELNAELNAELNAELNAELNAELNAELNAELNAELNAELNAELNAELNAELNAELNAELNAELNAELNAELNAELNAELNAELNAELNAELNAELNAELNAELNAELNAEL";
