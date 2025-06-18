@@ -29,7 +29,7 @@ public class Const {
 
     // public static final String LOGGER_NAME = "zoxweb-core";
     public static final String TOKEN_TAG = "$$TAG$$";
-    public static final Object[] EMPTY_ARRAY = new Object[0];
+    public static final Object[] EMPTY_OBJECT_ARRAY = new Object[0];
     public static final byte[] EMPTY_BYTE_ARRAY = new byte[0];
     //
     public static final String UTF_8 = "utf-8";
@@ -192,7 +192,7 @@ public class Const {
         }
     }
 
-    public enum SourceOrigin {
+    public enum OriginSource {
         LOCAL,
         REMOTE,
         UNKNOWN,
@@ -378,9 +378,10 @@ public class Const {
         }
 
 
-        public long sizeInBytes(long size) {
-            return SIZE * size;
+        public long mult(long sizeMultiplier) {
+            return SIZE * sizeMultiplier;
         }
+        public int mult(int sizeMultiplier) {return (int) SIZE * sizeMultiplier;}
 
         @Override
         public String getName() {
@@ -487,6 +488,7 @@ public class Const {
             this.UNIT = unit;
         }
 
+
         public String[] getTokens() {
             return tokens;
         }
@@ -504,6 +506,8 @@ public class Const {
 
             return toMillis(time);
         }
+
+
 
         public static TimeInMillis toTimeInMillis(String unit) {
             int index = unit.indexOf("/");
@@ -662,15 +666,15 @@ public class Const {
         /**
          * multiply MILLIS*val
          *
-         * @param val to multiplied with
+         * @param durationMultiplier to multiplied with
          * @return MILLIS*val
          */
-        public long mult(int val) {
-            return MILLIS * val;
+        public long mult(int durationMultiplier) {
+            return MILLIS * durationMultiplier;
         }
 
-        public long mult(long val) {
-            return MILLIS * val;
+        public long mult(long durationMultiplier) {
+            return MILLIS * durationMultiplier;
         }
 
 

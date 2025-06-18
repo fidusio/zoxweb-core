@@ -158,7 +158,7 @@ public class EncryptedContentTest {
         System.out.println(
             "from json encrypted:" + SharedStringUtil.bytesToHex(ekdFromJSON.getEncryptedData()));
 
-        ekd = CryptoUtil.rekeyEncrytedKey(ekd, "password", "newpassword");
+        ekd = CryptoUtil.rekeyEncryptedKey(ekd, "password", "newpassword");
         key = CryptoUtil.decryptEncryptedData(ekd, "newpassword");
 
         System.out.println("rekeyed         key:" + SharedStringUtil.bytesToHex(key));

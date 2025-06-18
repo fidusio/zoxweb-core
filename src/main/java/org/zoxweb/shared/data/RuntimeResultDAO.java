@@ -24,122 +24,116 @@ import org.zoxweb.shared.util.SharedUtil;
 
 /**
  *
- *
  */
 @SuppressWarnings("serial")
 public class RuntimeResultDAO
-    extends SetNameDescriptionDAO
-{
-	
-	public enum ResultAttribute
-        implements GetNVConfig
-	{
-		EXIT_CODE(NVConfigManager.createNVConfig("exit_code", "Process exit code", "ExitCode", false, true, int.class)),
-		OUTPUT(NVConfigManager.createNVConfig("output", "Process input stream", "Output", false, true, String.class)),
-		ERROR(NVConfigManager.createNVConfig("error", "Process error stream", "Error", false, true, String.class)),
-		
-		;	
-	
-		private final NVConfig nvc;
-		
-		ResultAttribute(NVConfig nvc)
-		{
-			this.nvc = nvc;
-		}
-		
-		public NVConfig getNVConfig() 
-		{
-			return nvc;
-		}
-	}
-	
-	public static final NVConfigEntity RUNTIME_RESULT_DAO = new NVConfigEntityLocal(
-																						"runtime_result_dao", 
-																						null, 
-																						"RuntimeResultDAO", 
-																						true, 
-																						false, 
-																						false, 
-																						false, 
-																						RuntimeResultDAO.class, 
-																						SharedUtil.extractNVConfigs(ResultAttribute.values()), 
-																						null, 
-																						false, 
-																						SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO
-																					);
-	
-	/**
-	 * The default constructor.
-	 */
-	public RuntimeResultDAO()
-	{
-		super(RUNTIME_RESULT_DAO);
-	}
-	
-	/**
-	 * This constructor instantiates RuntimeResultDAO object based on given values.
-	 * @param exitCode
-	 * @param outputData
-	 */
-	public RuntimeResultDAO(int exitCode, String outputData) 
-	{
-		this();
-		setExitCode(exitCode);
-		setOutputData(outputData);
-	}
+        extends SetNameDescriptionDAO {
 
-	/**
-	 * Gets the exit code.
-	 * @return exit code
-	 */
-	public int getExitCode()
-	{
-		return lookupValue(ResultAttribute.EXIT_CODE);
-	}
+    public enum ResultAttribute
+            implements GetNVConfig {
+        EXIT_CODE(NVConfigManager.createNVConfig("exit_code", "Process exit code", "ExitCode", false, true, int.class)),
+        OUTPUT(NVConfigManager.createNVConfig("output", "Process input stream", "Output", false, true, String.class)),
+        ERROR(NVConfigManager.createNVConfig("error", "Process error stream", "Error", false, true, String.class)),
 
-	/**
-	 * Sets the exit.
-	 * @param exitCode
-	 */
-	public void setExitCode(int exitCode)
-	{
-		setValue(ResultAttribute.EXIT_CODE, exitCode);
-	}
+        ;
 
-	/**
-	 * Gets the output data.
-	 * @return output data
-	 */
-	public String getOutputData()
-	{
-		return lookupValue(ResultAttribute.OUTPUT);
-	}
+        private final NVConfig nvc;
 
-	/**
-	 * Sets the output data.
-	 * @param outputData
-	 */
-	public void setOutputData(String outputData)
-	{
-		setValue(ResultAttribute.OUTPUT, outputData);
-	}
-	
-	/**
-	 * Returns the error data.
-	 * @return error data
-	 */
-	public String getErrorData()
-	{
-		return lookupValue(ResultAttribute.ERROR);
-	}
+        ResultAttribute(NVConfig nvc) {
+            this.nvc = nvc;
+        }
 
-	/**
-	 * Sets the error data.
-	 * @param errorData
-	 */
-	public void setErrorData(String errorData)
-	{
-		setValue(ResultAttribute.ERROR, errorData);
-	}
+        public NVConfig getNVConfig() {
+            return nvc;
+        }
+    }
+
+    public static final NVConfigEntity RUNTIME_RESULT_DAO = new NVConfigEntityLocal(
+            "runtime_result_dao",
+            null,
+            "RuntimeResultDAO",
+            true,
+            false,
+            false,
+            false,
+            RuntimeResultDAO.class,
+            SharedUtil.extractNVConfigs(ResultAttribute.values()),
+            null,
+            false,
+            SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO
+    );
+
+    /**
+     * The default constructor.
+     */
+    public RuntimeResultDAO() {
+        super(RUNTIME_RESULT_DAO);
+    }
+
+    /**
+     * This constructor instantiates RuntimeResultDAO object based on given values.
+     *
+     * @param exitCode
+     * @param outputData
+     */
+    public RuntimeResultDAO(int exitCode, String outputData) {
+        this();
+        setExitCode(exitCode);
+        setOutputData(outputData);
+    }
+
+    /**
+     * Gets the exit code.
+     *
+     * @return exit code
+     */
+    public int getExitCode() {
+        return lookupValue(ResultAttribute.EXIT_CODE);
+    }
+
+    /**
+     * Sets the exit.
+     *
+     * @param exitCode
+     */
+    public void setExitCode(int exitCode) {
+        setValue(ResultAttribute.EXIT_CODE, exitCode);
+    }
+
+    /**
+     * Gets the output data.
+     *
+     * @return output data
+     */
+    public String getOutputData() {
+        return lookupValue(ResultAttribute.OUTPUT);
+    }
+
+    /**
+     * Sets the output data.
+     *
+     * @param outputData
+     */
+    public void setOutputData(String outputData) {
+        setValue(ResultAttribute.OUTPUT, outputData);
+    }
+
+    /**
+     * Returns the error data.
+     *
+     * @return error data
+     */
+    public String getErrorData() {
+        return lookupValue(ResultAttribute.ERROR);
+    }
+
+    /**
+     * Sets the error data.
+     *
+     * @param errorData
+     */
+    public void setErrorData(String errorData) {
+        setValue(ResultAttribute.ERROR, errorData);
+    }
 
 }

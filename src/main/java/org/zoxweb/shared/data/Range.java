@@ -5,10 +5,9 @@ import org.zoxweb.shared.util.*;
 
 @SuppressWarnings("serial")
 public class Range<T extends Comparable<T>>
-    extends CanonicalIDDAO
-{
+        extends CanonicalIDDAO {
 
-    public static final String NUMBER_PATTERN= "[-]?[0-9]*\\.?[0-9]+";
+    public static final String NUMBER_PATTERN = "[-]?[0-9]*\\.?[0-9]+";
 
     /**
      * Include start, end in {@link Range}
@@ -33,28 +32,23 @@ public class Range<T extends Comparable<T>>
         /**
          * {@link Range} exclusive of start and end
          */
-        NONE("(", ")")
-
-        ;
+        NONE("(", ")");
 
         public final String START_TOKEN;
         public final String END_TOKEN;
         public final String PATTERN;
-        Inclusive(String startToken, String endToken)
-        {
+
+        Inclusive(String startToken, String endToken) {
             START_TOKEN = startToken;
             END_TOKEN = endToken;
-            PATTERN = "^\\" + START_TOKEN + NUMBER_PATTERN + "," + NUMBER_PATTERN +"\\" + END_TOKEN + "$";
+            PATTERN = "^\\" + START_TOKEN + NUMBER_PATTERN + "," + NUMBER_PATTERN + "\\" + END_TOKEN + "$";
         }
 
 
-        public static Inclusive match(String token)
-        {
+        public static Inclusive match(String token) {
             token = token.replaceAll("\\s+", "");
-            for(Inclusive i : Inclusive.values())
-            {
-                if(token.matches(i.PATTERN))
-                {
+            for (Inclusive i : Inclusive.values()) {
+                if (token.matches(i.PATTERN)) {
                     return i;
                 }
             }
@@ -63,7 +57,6 @@ public class Range<T extends Comparable<T>>
 
 
     }
-
 
 
     public enum Param
@@ -105,11 +98,9 @@ public class Range<T extends Comparable<T>>
     );
 
 
-
     public Range() {
         super(NVC_RANGE);
     }
-
 
 
     /**
@@ -127,11 +118,9 @@ public class Range<T extends Comparable<T>>
     /**
      * Create a range with {@link Inclusive#START}
      *
-     * @param start
-     *<br/> Not null safe
-     * @param end
-     *<br/> Not null safe
-     *<br/>Auto switched if start > end
+     * @param start <br/> Not null safe
+     * @param end   <br/> Not null safe
+     *              <br/>Auto switched if start > end
      */
     public Range(T start, T end) {
 
@@ -139,27 +128,24 @@ public class Range<T extends Comparable<T>>
     }
 
     /**
-     * @param start
-     *<br/> Not null safe
-     * @param end
-     *<br/> Not null safe
-     *<br/>Auto switched if start > end
-     *@param inclusive
-     *<br/>If null {@link Inclusive#START} used
+     * @param start     <br/> Not null safe
+     * @param end       <br/> Not null safe
+     *                  <br/>Auto switched if start > end
+     * @param inclusive <br/>If null {@link Inclusive#START} used
      */
     public Range(T start, T end, Inclusive inclusive) {
         this();
 
-        if((start == null) || (end == null)) {
+        if ((start == null) || (end == null)) {
 
             throw new NullPointerException("Invalid null start / end value");
         }
         setInclusive(inclusive);
 
-        if( isBigger(start, end) ) {
+        if (isBigger(start, end)) {
             setStart(end);
             setEnd(start);
-        }else {
+        } else {
             setStart(start);
             setEnd(end);
         }
@@ -173,10 +159,8 @@ public class Range<T extends Comparable<T>>
     /**
      * Check if this {@link Range} contains t
      *
-     *@param t
-     *<br/>Not null safe
-     *@return
-     *false for any value of t, if this.start equals this.end
+     * @param t <br/>Not null safe
+     * @return false for any value of t, if this.start equals this.end
      */
     public boolean within(T t) {
 
@@ -186,16 +170,13 @@ public class Range<T extends Comparable<T>>
     /**
      * Check if this {@link Range} contains t
      *
-     *@param t
-     *<br/>Not null safe
-     *@param inclusive
-     *<br/>If null  used
-     *@return
-     *false for any value of t, if this.start equals this.end
+     * @param t         <br/>Not null safe
+     * @param inclusive <br/>If null  used
+     * @return false for any value of t, if this.start equals this.end
      */
     public boolean within(T t, Inclusive inclusive) {
 
-        if(t == null) {
+        if (t == null) {
 
             throw new NullPointerException("Invalid null value");
         }
@@ -205,24 +186,24 @@ public class Range<T extends Comparable<T>>
         switch (inclusive) {
 
             case NONE:
-                return ( isBigger(t, getStart()) && isSmaller(t, getEnd()) );
+                return (isBigger(t, getStart()) && isSmaller(t, getEnd()));
 
             case BOTH:
-                return ( ! isBigger(getStart(), t)  && ! isBigger(t, getEnd()) ) ;
+                return (!isBigger(getStart(), t) && !isBigger(t, getEnd()));
 
-            case START: default:
-                return ( ! isBigger(getStart(), t)  &&  isBigger(getEnd(), t) ) ;
+            case START:
+            default:
+                return (!isBigger(getStart(), t) && isBigger(getEnd(), t));
 
             case END:
-                return ( isBigger(t, getStart())  &&  ! isBigger(t, getEnd()) ) ;
+                return (isBigger(t, getStart()) && !isBigger(t, getEnd()));
         }
     }
 
     /**
      * Check if this {@link Range} contains other range
      *
-     * @return
-     * false for any value of range, if this.start equals this.end
+     * @return false for any value of range, if this.start equals this.end
      */
     public boolean within(Range<T> range) {
 
@@ -232,8 +213,7 @@ public class Range<T extends Comparable<T>>
     /**
      * Check if this {@link Range} intersects with other range
      *
-     * @return
-     * false for any value of range, if this.start equals this.end
+     * @return false for any value of range, if this.start equals this.end
      */
     public boolean intersects(Range<T> range) {
 
@@ -261,20 +241,19 @@ public class Range<T extends Comparable<T>>
      * range.getStart() >= intoOtherRange.getStart() and <br/>
      * range.getEnd() <= intoOtherRange.getEnd()
      * It does not guarantee into.contains(range)==true which depends also on
-
+     *
      * @param range
-     * @param into
-     * <br>Both not null safe
+     * @param into  <br>Both not null safe
      */
-    public static <T extends Comparable<T>>	Range<T> fit(Range<T> range,
-                                                            Range<T> into) {
-        if(isBigger(into.getStart(), range.getStart()) //start too small
-                || isBigger(range.getStart(),into.getEnd())) { //start too big
+    public static <T extends Comparable<T>> Range<T> fit(Range<T> range,
+                                                         Range<T> into) {
+        if (isBigger(into.getStart(), range.getStart()) //start too small
+                || isBigger(range.getStart(), into.getEnd())) { //start too big
             range.setStart(into.getStart());
         }
 
-        if(isBigger(into.getStart(), range.getEnd()) //end too small
-                || isBigger(range.getEnd(),into.getEnd())) { //start too big
+        if (isBigger(into.getStart(), range.getEnd()) //end too small
+                || isBigger(range.getEnd(), into.getEnd())) { //start too big
             range.setEnd(into.getEnd());
         }
 
@@ -286,18 +265,18 @@ public class Range<T extends Comparable<T>>
      * range.getStart() <= intoOtherRange.getStart() and <br/>
      * range.getEnd() >= intoOtherRange.getEnd() <br/>
      * It does not guarantee range.contains(toContain)==true which depends also on
+     *
      * @param range
-     * @param toContain
-     * <br>Both not null safe
+     * @param toContain <br>Both not null safe
      */
-    public static <T extends Comparable<T>>	Range<T> expand(Range<T> range,
-                                                               Range<T> toContain) {
-        if(isBigger(range.getStart(), toContain.getStart()) //start too big
-                || isBigger(range.getStart(),toContain.getEnd())) { //start too big
+    public static <T extends Comparable<T>> Range<T> expand(Range<T> range,
+                                                            Range<T> toContain) {
+        if (isBigger(range.getStart(), toContain.getStart()) //start too big
+                || isBigger(range.getStart(), toContain.getEnd())) { //start too big
             range.setStart(toContain.getStart());
         }
 
-        if(isBigger(toContain.getStart(), range.getEnd()) //end too small
+        if (isBigger(toContain.getStart(), range.getEnd()) //end too small
                 || isBigger(toContain.getEnd(), range.getEnd())) { //end too small
             range.setEnd(toContain.getEnd());
         }
@@ -308,21 +287,20 @@ public class Range<T extends Comparable<T>>
     /**
      * Returns T which is within min (inclusive) , max (inclusive)
      *
-     *@param value, min, max
-     * <br/>Not null safe
-     * <br/> if min > max they are switched
-     * @return
-     * min if value is smaller than min
+     * @param value, min, max
+     *               <br/>Not null safe
+     *               <br/> if min > max they are switched
+     * @return min if value is smaller than min
      * <br/>max if value is bigger than max
      * <br/>value otherwise
      */
-    public static <T extends Comparable<T>>	T setWithin(T value, T min, T max) {
+    public static <T extends Comparable<T>> T setWithin(T value, T min, T max) {
         Range<T> range = new Range<>(min, max, Inclusive.BOTH);
-        if( Range.isBigger(value, range.getEnd())){
+        if (Range.isBigger(value, range.getEnd())) {
 
             value = range.getEnd();
 
-        }else if(Range.isBigger(range.getStart(), value)) {
+        } else if (Range.isBigger(range.getStart(), value)) {
 
             value = range.getStart();
         }
@@ -335,7 +313,7 @@ public class Range<T extends Comparable<T>>
      */
     @Override
     public String toString() {
-        return  getInclusive().START_TOKEN + getStart() + ", " + getEnd() + getInclusive().END_TOKEN;
+        return getInclusive().START_TOKEN + getStart() + ", " + getEnd() + getInclusive().END_TOKEN;
     }
 
     // ///////////////////////////////////////////////////////////
@@ -345,7 +323,9 @@ public class Range<T extends Comparable<T>>
     /**
      * @return the start value
      */
-    public T getStart() { return lookupValue(Param.START); }
+    public T getStart() {
+        return lookupValue(Param.START);
+    }
 
     /**
      * Set the start value
@@ -355,12 +335,12 @@ public class Range<T extends Comparable<T>>
      */
     public Range<T> setStart(T start) {
 
-        if(isAutoSwitch && (start.compareTo(getEnd())>0)) {
+        if (isAutoSwitch && (start.compareTo(getEnd()) > 0)) {
             setValue(Param.START, getEnd());
             setValue(Param.END, start);
             //this.start = end;
             //this.end  = start;
-        }else {
+        } else {
             //this.start = start;
             setValue(Param.START, start);
         }
@@ -370,24 +350,20 @@ public class Range<T extends Comparable<T>>
     }
 
 
-    public int getLoopStart()
-    {
+    public int getLoopStart() {
         int loopStart = ((Number) getStart()).intValue();
-        switch (getInclusive())
-        {
+        switch (getInclusive()) {
             case END:
             case NONE:
                 loopStart++;
                 break;
         }
-       return loopStart;
+        return loopStart;
     }
 
-    public int getLoopEnd()
-    {
+    public int getLoopEnd() {
         int loopEnd = ((Number) getEnd()).intValue();
-        switch (getInclusive())
-        {
+        switch (getInclusive()) {
             case BOTH:
             case END:
                 loopEnd++;
@@ -397,9 +373,11 @@ public class Range<T extends Comparable<T>>
     }
 
     /**
-     * @return  the end value
+     * @return the end value
      */
-    public T getEnd() {  return lookupValue(Param.END);  }
+    public T getEnd() {
+        return lookupValue(Param.END);
+    }
 
     /**
      * Set the end value
@@ -407,14 +385,14 @@ public class Range<T extends Comparable<T>>
      * <br/>If {@link #isAutoSwitch} is set to true, and  start > end
      * they are switched
      */
-    public  Range<T> setEnd(T end) {
+    public Range<T> setEnd(T end) {
 
-        if(isAutoSwitch && (getStart().compareTo(end)>0)) {
+        if (isAutoSwitch && (getStart().compareTo(end) > 0)) {
             setValue(Param.END, getStart());
             setValue(Param.START, end);
             //this.end  = start;
             //this.start = end;
-        }else {
+        } else {
             setValue(Param.END, end);
             //this.end = end;
         }
@@ -422,27 +400,27 @@ public class Range<T extends Comparable<T>>
         return this;
     }
 
-    public String getUnit()
-    {
+    public String getUnit() {
         return lookupValue(Param.UNIT);
     }
 
-    public void setUnit(String unit)
-    {
+    public void setUnit(String unit) {
         setValue(Param.UNIT, unit);
     }
 
     /**
      * @return the inclusive type
      */
-    public Inclusive getInclusive() { return lookupValue(Param.INCLUSIVE); }
+    public Inclusive getInclusive() {
+        return lookupValue(Param.INCLUSIVE);
+    }
 
     /**
      * Set the inclusive type
-     * @param inclusive
-     *<br/>If null {@link Inclusive#START} used
+     *
+     * @param inclusive <br/>If null {@link Inclusive#START} used
      */
-    public  Range<T> setInclusive(Inclusive inclusive) {
+    public Range<T> setInclusive(Inclusive inclusive) {
 
         inclusive = (inclusive == null) ? Inclusive.BOTH : inclusive;
         setValue(Param.INCLUSIVE, inclusive);
@@ -452,7 +430,9 @@ public class Range<T extends Comparable<T>>
     /**
      * Get {@link #isAutoSwitch}
      */
-    public boolean isAutoSwitch() { return isAutoSwitch; }
+    public boolean isAutoSwitch() {
+        return isAutoSwitch;
+    }
 
     /**
      * Set {@link #isAutoSwitch}
@@ -464,56 +444,43 @@ public class Range<T extends Comparable<T>>
     }
 
 
-
-    public static Range toRange(String rangeToken)
-    {
+    public static Range toRange(String rangeToken) {
         return toRange(rangeToken, null, null, null);
     }
 
-    public static Range toRange(String rangeToken, String name, String unit)
-    {
+    public static Range toRange(String rangeToken, String name, String unit) {
         return toRange(rangeToken, null, name, unit);
     }
 
 
-    public static Range toRange(String token, Class<? extends Number> override, String name, String unit)
-    {
+    public static Range toRange(String token, Class<? extends Number> override, String name, String unit) {
         token = token.replaceAll("\\s+", "");
         Inclusive type = Inclusive.match(token);
-        if(type == null)
+        if (type == null)
             throw new IllegalArgumentException("Invalid range type:" + token);
 
         String[] tokens = SharedStringUtil.parseString(token, ",", type.START_TOKEN, type.END_TOKEN);
 
-        if(tokens.length != 2)
-        {
+        if (tokens.length != 2) {
             throw new IllegalArgumentException("Invalid range:" + token);
         }
         Number start = SharedUtil.parseNumber(tokens[0]);
         Number end = SharedUtil.parseNumber(tokens[1]);
         Number[] vals = SharedUtil.normalizeNumbers(start, end);
 
-        if(override == null)
+        if (override == null)
             override = vals[0].getClass();
 
 
-
         Range ret = null;
-        if (override == Integer.class)
-        {
+        if (override == Integer.class) {
             ret = new Range<Integer>(vals[0].intValue(), vals[1].intValue(), type);
-        }
-        else if (override == Long.class)
-        {
+        } else if (override == Long.class) {
             ret = new Range<Long>(vals[0].longValue(), vals[1].longValue(), type);
-        }
-        else if (override == Float.class)
-        {
+        } else if (override == Float.class) {
             ret = new Range<Float>(vals[0].floatValue(), vals[1].floatValue(), type);
-        }
-        else if (override == Double.class)
-        {
-            ret =  new Range<Double>(vals[0].doubleValue(), vals[1].doubleValue(), type);
+        } else if (override == Double.class) {
+            ret = new Range<Double>(vals[0].doubleValue(), vals[1].doubleValue(), type);
         }
 
         if (ret != null) {
@@ -523,7 +490,6 @@ public class Range<T extends Comparable<T>>
 
         return ret;
     }
-
 
 
 }

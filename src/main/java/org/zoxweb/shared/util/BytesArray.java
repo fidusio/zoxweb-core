@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -68,6 +69,13 @@ public class BytesArray
         BytesArray ret = new BytesArray(null, asBytes());
         checkValidity();// we must perform double validation
         return ret;
+    }
+
+
+    public ByteBuffer wrap()
+    {
+        checkValidity();
+        return ByteBuffer.wrap(array, offset, length);
     }
 
     public boolean isValid() {

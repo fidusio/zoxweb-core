@@ -26,138 +26,138 @@ public final class SecUtil {
     public static CryptoConst.SecureRandomType SECURE_RANDOM_ALGO = null;
     public static final SecUtil SINGLETON = new SecUtil();
     private final Map<Method, ResourceSecurity> methodResourceSecurityMap = new LinkedHashMap<>();
-    private SecUtil() {}
 
-
-
-
-    public  JWT parseJWT(String token)
-        throws InstantiationException, IllegalAccessException, ClassNotFoundException, NullPointerException, IllegalArgumentException {
-      SUS.checkIfNulls("Null token", token);
-      String[] tokens = token.trim().split("\\.");
-
-      if (tokens.length < 2 || tokens.length > 3) {
-        throw new IllegalArgumentException("Invalid token JWT token");
-      }
-
-      NVGenericMap nvgmHeader = GSONUtil.fromJSONGenericMap(
-          SharedBase64.decodeAsString(SharedBase64.Base64Type.URL, tokens[JWT.JWTField.HEADER.ordinal()]),
-          JWTHeader.NVC_JWT_HEADER,
-          SharedBase64.Base64Type.URL);//GSONUtil.fromJSON(SharedBase64.decodeAsString(Base64Type.URL,tokens[JWTField.HEADER.ordinal()]), JWTHeader.class);
-      NVGenericMap nvgmPayload = GSONUtil.fromJSONGenericMap(
-          SharedBase64.decodeAsString(SharedBase64.Base64Type.URL, tokens[JWT.JWTField.PAYLOAD.ordinal()]),
-          JWTPayload.NVC_JWT_PAYLOAD, SharedBase64.Base64Type.URL);
-      if (nvgmPayload == null) {
-        throw new SecurityException("Invalid JWT");
-      }
-      JWT ret = new JWT();
-
-      //jwtPayload = GSONUtil.fromJSON(SharedStringUtil.toString(SharedBase64.decode(Base64Type.URL,tokens[JWTToken.PAYLOAD.ordinal()])), JWTPayload.class);
-      JWTPayload jwtPayload = ret.getPayload();
-      JWTHeader jwtHeader = ret.getHeader();
-      if (jwtHeader == null || jwtPayload == null) {
-        throw new SecurityException("Invalid JWT");
-      }
-      jwtPayload.setProperties(nvgmPayload);
-      jwtHeader.setProperties(nvgmHeader);
-
-      SUS.checkIfNulls("Null jwt header or parameters", jwtHeader, jwtHeader.getJWTAlgorithm());
-  //		JWT ret = new JWT();
-      //ret.setHeader(jwtHeader);
-      //ret.setPayload(jwtPayload);
-      switch (jwtHeader.getJWTAlgorithm()) {
-        case HS256:
-        case HS512:
-        case RS256:
-        case RS512:
-        case ES256:
-        case ES512:
-          if (tokens.length != JWT.JWTField.values().length) {
-            throw new IllegalArgumentException("Invalid token JWT token length expected 3");
-          }
-          ret.setHash(tokens[JWT.JWTField.HASH.ordinal()]);
-          break;
-        case none:
-          if (tokens.length != JWT.JWTField.values().length - 1) {
-            throw new IllegalArgumentException("Invalid token JWT token length expected 2");
-          }
-          break;
-      }
-
-      return ret;
+    private SecUtil() {
     }
 
-    public  JWT decodeJWT(String key, String token)
-        throws IOException,
-        SecurityException, NullPointerException, IllegalArgumentException, GeneralSecurityException {
-      return decodeJWT(key != null ? SharedStringUtil.getBytes(key) : null, token);
+
+    public JWT parseJWT(String token)
+            throws InstantiationException, IllegalAccessException, ClassNotFoundException, NullPointerException, IllegalArgumentException {
+        SUS.checkIfNulls("Null token", token);
+        String[] tokens = token.trim().split("\\.");
+
+        if (tokens.length < 2 || tokens.length > 3) {
+            throw new IllegalArgumentException("Invalid token JWT token");
+        }
+
+        NVGenericMap nvgmHeader = GSONUtil.fromJSONGenericMap(
+                SharedBase64.decodeAsString(SharedBase64.Base64Type.URL, tokens[JWT.JWTField.HEADER.ordinal()]),
+                JWTHeader.NVC_JWT_HEADER,
+                SharedBase64.Base64Type.URL);//GSONUtil.fromJSON(SharedBase64.decodeAsString(Base64Type.URL,tokens[JWTField.HEADER.ordinal()]), JWTHeader.class);
+        NVGenericMap nvgmPayload = GSONUtil.fromJSONGenericMap(
+                SharedBase64.decodeAsString(SharedBase64.Base64Type.URL, tokens[JWT.JWTField.PAYLOAD.ordinal()]),
+                JWTPayload.NVC_JWT_PAYLOAD, SharedBase64.Base64Type.URL);
+        if (nvgmPayload == null) {
+            throw new SecurityException("Invalid JWT");
+        }
+        JWT ret = new JWT();
+
+        //jwtPayload = GSONUtil.fromJSON(SharedStringUtil.toString(SharedBase64.decode(Base64Type.URL,tokens[JWTToken.PAYLOAD.ordinal()])), JWTPayload.class);
+        JWTPayload jwtPayload = ret.getPayload();
+        JWTHeader jwtHeader = ret.getHeader();
+        if (jwtHeader == null || jwtPayload == null) {
+            throw new SecurityException("Invalid JWT");
+        }
+        jwtPayload.setProperties(nvgmPayload);
+        jwtHeader.setProperties(nvgmHeader);
+
+        SUS.checkIfNulls("Null jwt header or parameters", jwtHeader, jwtHeader.getJWTAlgorithm());
+        //		JWT ret = new JWT();
+        //ret.setHeader(jwtHeader);
+        //ret.setPayload(jwtPayload);
+        switch (jwtHeader.getJWTAlgorithm()) {
+            case HS256:
+            case HS512:
+            case RS256:
+            case RS512:
+            case ES256:
+            case ES512:
+                if (tokens.length != JWT.JWTField.values().length) {
+                    throw new IllegalArgumentException("Invalid token JWT token length expected 3");
+                }
+                ret.setHash(tokens[JWT.JWTField.HASH.ordinal()]);
+                break;
+            case none:
+                if (tokens.length != JWT.JWTField.values().length - 1) {
+                    throw new IllegalArgumentException("Invalid token JWT token length expected 2");
+                }
+                break;
+        }
+
+        return ret;
     }
 
-    public  JWT decodeJWT(byte[] key, String token)
-        throws IOException,
-        SecurityException, GeneralSecurityException {
+    public JWT decodeJWT(String key, String token)
+            throws IOException,
+            SecurityException, NullPointerException, IllegalArgumentException, GeneralSecurityException {
+        return decodeJWT(key != null ? SharedStringUtil.getBytes(key) : null, token);
+    }
 
-      JWT jwt;
-      try {
-        jwt = parseJWT(token);
-      } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-        throw new SecurityException();
-      }
+    public JWT decodeJWT(byte[] key, String token)
+            throws IOException,
+            SecurityException, GeneralSecurityException {
+
+        JWT jwt;
+        try {
+            jwt = parseJWT(token);
+        } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            throw new SecurityException();
+        }
 
 
-      String[] tokens = token.trim().split("\\.");
-      CryptoConst.JWTAlgo jwtAlgo = jwt.getHeader().getJWTAlgorithm();
-      switch (jwtAlgo) {
-        case HS256:
-        case HS384:
-        case HS512:
-          SUS.checkIfNulls("Null key", key);
-          if (tokens.length != JWT.JWTField.values().length) {
-            throw new SecurityException("Invalid token");
-          }
-          Mac shaHMAC = HashUtil.getMac(jwtAlgo.getSignatureAlgo());
-          SecretKeySpec secret_key = new SecretKeySpec(key, jwtAlgo.getSignatureAlgo().getName());
-          shaHMAC.init(secret_key);
-          shaHMAC.update(SharedStringUtil.getBytes(tokens[JWT.JWTField.HEADER.ordinal()]));
+        String[] tokens = token.trim().split("\\.");
+        CryptoConst.JWTAlgo jwtAlgo = jwt.getHeader().getJWTAlgorithm();
+        switch (jwtAlgo) {
+            case HS256:
+            case HS384:
+            case HS512:
+                SUS.checkIfNulls("Null key", key);
+                if (tokens.length != JWT.JWTField.values().length) {
+                    throw new SecurityException("Invalid token");
+                }
+                Mac shaHMAC = HashUtil.getMac(jwtAlgo.getSignatureAlgo());
+                SecretKeySpec secret_key = new SecretKeySpec(key, jwtAlgo.getSignatureAlgo().getName());
+                shaHMAC.init(secret_key);
+                shaHMAC.update(SharedStringUtil.getBytes(tokens[JWT.JWTField.HEADER.ordinal()]));
 
-          shaHMAC.update((byte) '.');
-          byte[] b64Hash = shaHMAC.doFinal(SharedStringUtil.getBytes(tokens[JWT.JWTField.PAYLOAD.ordinal()]));
+                shaHMAC.update((byte) '.');
+                byte[] b64Hash = shaHMAC.doFinal(SharedStringUtil.getBytes(tokens[JWT.JWTField.PAYLOAD.ordinal()]));
 
-          if (!SharedBase64.encodeAsString(SharedBase64.Base64Type.URL, b64Hash).equals(jwt.getHash())) {
-            throw new SecurityException("Invalid token");
-          }
-          break;
+                if (!SharedBase64.encodeAsString(SharedBase64.Base64Type.URL, b64Hash).equals(jwt.getHash())) {
+                    throw new SecurityException("Invalid token");
+                }
+                break;
 
-        case none:
-          if (tokens.length != JWT.JWTField.values().length - 1) {
-            throw new SecurityException("Invalid token");
-          }
-          break;
-        case RS256:
-        case RS384:
-        case RS512:
-        case ES256:
-        case ES384:
-        case ES512:
-          SUS.checkIfNulls("Null key", key);
-          if (tokens.length != JWT.JWTField.values().length) {
-            throw new SecurityException("Invalid token");
-          }
-          PublicKey publicKey = CryptoUtil.generatePublicKey(jwtAlgo.getSignatureAlgo().getCryptoAlgo().getName(),key);
+            case none:
+                if (tokens.length != JWT.JWTField.values().length - 1) {
+                    throw new SecurityException("Invalid token");
+                }
+                break;
+            case RS256:
+            case RS384:
+            case RS512:
+            case ES256:
+            case ES384:
+            case ES512:
+                SUS.checkIfNulls("Null key", key);
+                if (tokens.length != JWT.JWTField.values().length) {
+                    throw new SecurityException("Invalid token");
+                }
+                PublicKey publicKey = CryptoUtil.generatePublicKey(jwtAlgo.getSignatureAlgo().getCryptoAlgo().getName(), key);
 
-          if (!CryptoUtil.verify(jwtAlgo.getSignatureAlgo(), publicKey,
-              SharedStringUtil.getBytes(
-                  tokens[JWT.JWTField.HEADER.ordinal()] + "." + tokens[JWT.JWTField.PAYLOAD.ordinal()]),
-              SharedBase64.decode(SharedBase64.Base64Type.URL, jwt.getHash()))) {
-            throw new SecurityException("Invalid token");
-          }
-          break;
+                if (!CryptoUtil.verify(jwtAlgo.getSignatureAlgo(), publicKey,
+                        SharedStringUtil.getBytes(
+                                tokens[JWT.JWTField.HEADER.ordinal()] + "." + tokens[JWT.JWTField.PAYLOAD.ordinal()]),
+                        SharedBase64.decode(SharedBase64.Base64Type.URL, jwt.getHash()))) {
+                    throw new SecurityException("Invalid token");
+                }
+                break;
 
-      }
+        }
 
-      return jwt;
+        return jwt;
     }
 
     /**
@@ -170,8 +170,7 @@ public final class SecUtil {
     public synchronized ResourceSecurity applyAndCacheSecurityProfile(Method method, SecurityProfile securityProfile) {
         SUS.checkIfNulls("Method null", method);
         SecurityProp sp = ReflectionUtil.getAnnotationFromMethod(method, SecurityProp.class);
-        if (sp != null)
-        {
+        if (sp != null) {
             ResourceSecurity ret = applySecurityProp(securityProfile != null ? securityProfile : new SecurityProfile(), sp);
             methodResourceSecurityMap.put(method, ret);
             return ret;
@@ -346,8 +345,7 @@ public final class SecUtil {
     }
 
     public SecureRandom defaultSecureRandom()
-            throws NoSuchAlgorithmException
-    {
+            throws NoSuchAlgorithmException {
         if (SECURE_RANDOM_ALGO == null) {
 
             synchronized (this) {
@@ -387,22 +385,19 @@ public final class SecUtil {
     }
 
 
-    public String secProvidersToString(boolean detailed)
-    {
+    public String secProvidersToString(boolean detailed) {
         StringBuilder sb = new StringBuilder();
 
         // Loop over each provider and print its details
-        for (Provider provider : Security.getProviders())
-        {
-            if(sb.length() > 0 )
+        for (Provider provider : Security.getProviders()) {
+            if (sb.length() > 0)
                 sb.append('\n');
             sb.append(secProviderToString(provider, detailed));
         }
         return sb.toString();
     }
 
-    public String secProviderToString(Provider provider, boolean detailed)
-    {
+    public String secProviderToString(Provider provider, boolean detailed) {
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
 
@@ -425,36 +420,31 @@ public final class SecUtil {
 
     /**
      * Add a security resource provider
+     *
      * @param provider to be added
      * @return the index on the provider in the array of providers
      */
-    public synchronized int addProvider(Provider provider)
-    {
+    public synchronized int addProvider(Provider provider) {
         return addProviderAt(provider, 0);
     }
 
-    public synchronized int addProviderAt(Provider provider, int position)
-    {
+    public synchronized int addProviderAt(Provider provider, int position) {
         SUS.checkIfNulls("Null provider", provider);
         Provider[] providers = Security.getProviders();
-        for (int i = 0; i < providers.length; i++)
-        {
-            if (providers[i].equals(provider))
-            {
+        for (int i = 0; i < providers.length; i++) {
+            if (providers[i].equals(provider)) {
                 return i;
             }
         }
         return Security.insertProviderAt(provider, position);
     }
 
-    public synchronized boolean removeProvider(String name)
-    {
+    public synchronized boolean removeProvider(String name) {
         Security.removeProvider(name);
         return Security.getProvider(name) == null;
     }
 
-    public synchronized Provider getProvider(String name)
-    {
+    public synchronized Provider getProvider(String name) {
         return Security.getProvider(name);
     }
 

@@ -10,26 +10,21 @@ import java.util.Scanner;
 
 public class PasswordToHash {
 
-    private static void error(String msg, int errorCode)
-    {
+    private static void error(String msg, int errorCode) {
         System.err.println("**Error**: " + msg);
         System.err.println("usage: [aglo] [iteration] [password]");
         System.exit(errorCode);
     }
 
-    public static void main(String[] args)
-    {
-        try
-        {
+    public static void main(String[] args) {
+        try {
             int index = 0;
             String algo = args[index++];
             int iteration = Integer.parseInt(args[index++]);
             String rawPassword = index < args.length ? args[index] : null;
-            if(rawPassword == null)
-            {
+            if (rawPassword == null) {
                 Console console = System.console();
-                if (console != null)
-                {
+                if (console != null) {
                     char[] passwd1 = console.readPassword("Enter your password: ");
                     char[] passwd2 = console.readPassword("Re enter your password: ");
                     if (!Arrays.equals(passwd1, passwd2))
@@ -37,9 +32,7 @@ public class PasswordToHash {
 
                     rawPassword = SharedStringUtil.toString(passwd1);
 
-                }
-                else
-                {
+                } else {
                     // use the scanner
                     Scanner scanner = new Scanner(System.in);
                     System.out.print("Enter password:");
@@ -59,11 +52,9 @@ public class PasswordToHash {
             System.out.println(passwordDAO.toCanonicalID());
 
             HashUtil.validatePassword(passwordDAO, rawPassword);
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             e.printStackTrace();
-            error("error", -1 );
+            error("error", -1);
 
         }
 

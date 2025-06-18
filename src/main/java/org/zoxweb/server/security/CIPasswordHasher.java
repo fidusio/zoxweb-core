@@ -1,63 +1,50 @@
 package org.zoxweb.server.security;
 
+import org.zoxweb.shared.crypto.CIPassword;
 import org.zoxweb.shared.crypto.CredentialHasher;
 import org.zoxweb.shared.crypto.CryptoConst;
-import org.zoxweb.shared.crypto.CIPassword;
 import org.zoxweb.shared.security.AccessException;
 import org.zoxweb.shared.util.SUS;
-import org.zoxweb.shared.util.SharedUtil;
 
 import java.security.NoSuchAlgorithmException;
 
 public class CIPasswordHasher
-implements CredentialHasher<CIPassword>
-{
+        implements CredentialHasher<CIPassword> {
     private CryptoConst.HASHType hashType;
 
     private int iteration;
 
-    public CIPasswordHasher(){}
+    public CIPasswordHasher() {
+    }
 
-    public CIPasswordHasher(CryptoConst.HASHType hashType, int iteration)
-    {
+    public CIPasswordHasher(CryptoConst.HASHType hashType, int iteration) {
         setHashType(hashType);
         setIteration(iteration);
     }
 
     @Override
-    public CIPassword hash(String password)
-    {
-        try
-        {
+    public CIPassword hash(String password) {
+        try {
             return HashUtil.toPassword(hashType, 0, iteration, password);
-        }
-        catch(NoSuchAlgorithmException e)
-        {
+        } catch (NoSuchAlgorithmException e) {
             throw new AccessException(e.getMessage());
         }
     }
 
     @Override
-    public CIPassword hash(byte[] password)
-    {
-        try
-        {
+    public CIPassword hash(byte[] password) {
+        try {
             return HashUtil.toPassword(hashType, 0, iteration, password);
-        }
-        catch(NoSuchAlgorithmException e)
-        {
+        } catch (NoSuchAlgorithmException e) {
             throw new AccessException(e.getMessage());
         }
     }
 
     @Override
     public CIPassword hash(char[] password) {
-        try
-        {
+        try {
             return HashUtil.toPassword(hashType, 0, iteration, new String(password));
-        }
-        catch(NoSuchAlgorithmException e)
-        {
+        } catch (NoSuchAlgorithmException e) {
             throw new AccessException(e.getMessage());
         }
     }
@@ -67,14 +54,12 @@ implements CredentialHasher<CIPassword>
         return iteration;
     }
 
-    public CIPasswordHasher setIteration(int iteration)
-    {
-        if(getHashType() == CryptoConst.HASHType.BCRYPT)
-        {
-            if(iteration < 4 || iteration > 31)
+    public CIPasswordHasher setIteration(int iteration) {
+        if (getHashType() == CryptoConst.HASHType.BCRYPT) {
+            if (iteration < 4 || iteration > 31)
                 throw new IllegalArgumentException("Invalid Bcrypt cost factor " + iteration);
         }
-        if(iteration < 1 || iteration > 8196)
+        if (iteration < 1 || iteration > 8196)
             throw new IllegalArgumentException("Iteration out of range " + iteration);
 
 
