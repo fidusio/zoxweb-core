@@ -277,7 +277,7 @@ public class BCrypt {
      * @param lr  an array containing the two 32-bit half blocks
      * @param off the position in the array of the blocks
      */
-    private void encipher(int lr[], int off) {
+    private void encipher(int[] lr, int off) {
         int i, n, l = lr[off], r = lr[off + 1];
 
         l ^= this.P[0];
@@ -309,7 +309,7 @@ public class BCrypt {
      *              non-benign sign extension
      * @return correct and buggy next word of material from data as int[2]
      */
-    private static int[] streamtowords(byte data[], int offp[], int signp[]) {
+    private static int[] streamtowords(byte[] data, int[] offp, int[] signp) {
         int i;
         int words[] = {0, 0};
         int off = offp[0];
@@ -336,7 +336,7 @@ public class BCrypt {
      * @param offp a "pointer" (as a one-entry array) to the current offset into data
      * @return the next word of material from data
      */
-    private static int streamtoword(byte data[], int offp[]) {
+    private static int streamtoword(byte[] data, int[] offp) {
         int signp[] = {0};
         return streamtowords(data, offp, signp)[0];
     }
@@ -348,7 +348,7 @@ public class BCrypt {
      * @param offp a "pointer" (as a one-entry array) to the current offset into data
      * @return the next word of material from data
      */
-    private static int streamtoword_bug(byte data[], int offp[]) {
+    private static int streamtoword_bug(byte[] data, int[] offp) {
         int signp[] = {0};
         return streamtowords(data, offp, signp)[1];
     }
@@ -368,7 +368,7 @@ public class BCrypt {
      * @param sign_ext_bug true to implement the 2x bug
      * @param safety       bit 16 is set when the safety measure is requested
      */
-    private void key(byte key[], boolean sign_ext_bug, int safety) {
+    private void key(byte[] key, boolean sign_ext_bug, int safety) {
         int i;
         int koffp[] = {0};
         int lr[] = {0, 0};
@@ -404,7 +404,7 @@ public class BCrypt {
      * @param sign_ext_bug true to implement the 2x bug
      * @param safety       bit 16 is set when the safety measure is requested
      */
-    private void ekskey(byte data[], byte key[], boolean sign_ext_bug, int safety) {
+    private void ekskey(byte[] data, byte[] key, boolean sign_ext_bug, int safety) {
         int i;
         int koffp[] = {0}, doffp[] = {0};
         int lr[] = {0, 0};
@@ -482,7 +482,7 @@ public class BCrypt {
      * @param safety       bit 16 is set when the safety measure is requested
      * @return an array containing the binary hashed password
      */
-    private byte[] crypt_raw(byte password[], byte salt[], int log_rounds, boolean sign_ext_bug, int safety,
+    private byte[] crypt_raw(byte[] password, byte[] salt, int log_rounds, boolean sign_ext_bug, int safety,
                              boolean for_check) {
         int cdata[] = bf_crypt_ciphertext.clone();
         int clen = cdata.length;
@@ -717,7 +717,7 @@ public class BCrypt {
      * @param hashed    the previously-hashed password
      * @return true if the passwords match, false otherwise
      */
-    public static boolean checkpw(String plaintext, String hashed) {
+    public static boolean isAMatch(String plaintext, String hashed) {
         byte[] passwordb = SharedStringUtil.getBytes(plaintext);
         return equalsNoEarlyReturn(hashed, hashpwforcheck(passwordb, hashed));
     }
@@ -730,7 +730,7 @@ public class BCrypt {
      * @return true if the passwords match, false otherwise
      * @since 5.3
      */
-    public static boolean checkpw(byte[] passwordb, String hashed) {
+    public static boolean isAMatch(byte[] passwordb, String hashed) {
         return equalsNoEarlyReturn(hashed, hashpwforcheck(passwordb, hashed));
     }
 

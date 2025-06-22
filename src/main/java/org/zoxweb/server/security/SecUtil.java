@@ -26,6 +26,7 @@ public final class SecUtil {
     public static CryptoConst.SecureRandomType SECURE_RANDOM_ALGO = null;
     public static final SecUtil SINGLETON = new SecUtil();
     private final Map<Method, ResourceSecurity> methodResourceSecurityMap = new LinkedHashMap<>();
+    private volatile SecureRandom defaultSecureRandom = null;
 
     private SecUtil() {
     }
@@ -344,15 +345,14 @@ public final class SecUtil {
         }
     }
 
-    public SecureRandom defaultSecureRandom()
-            throws NoSuchAlgorithmException {
-        if (SECURE_RANDOM_ALGO == null) {
+    public SecureRandom defaultSecureRandom() {
+        if (SECURE_RANDOM_ALGO == null && defaultSecureRandom == null) {
 
             synchronized (this) {
-                if (SECURE_RANDOM_ALGO == null) {
+                if (SECURE_RANDOM_ALGO == null && defaultSecureRandom == null) {
                     for (CryptoConst.SecureRandomType srt : CryptoConst.SecureRandomType.values()) {
                         try {
-                            newSecureRandom(srt);
+                            defaultSecureRandom = newSecureRandom(srt);
                             SECURE_RANDOM_ALGO = srt;
                             //System.out.println("Default secure algorithm:"+srt);
                             break;
@@ -365,11 +365,16 @@ public final class SecUtil {
 
         }
 
-        return newSecureRandom(SECURE_RANDOM_ALGO);
+        return defaultSecureRandom;
+    }
+
+    public byte[] generateRandomBytes(int size)
+            throws NullPointerException, IllegalArgumentException {
+        return generateRandomBytes(null, size);
     }
 
     public byte[] generateRandomBytes(SecureRandom sr, int size)
-            throws NullPointerException, IllegalArgumentException, NoSuchAlgorithmException {
+            throws NullPointerException, IllegalArgumentException {
         if (size < 1) {
             throw new IllegalArgumentException("invalid size " + size + " must be greater than zero.");
         }

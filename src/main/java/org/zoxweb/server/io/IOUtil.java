@@ -471,7 +471,7 @@ public class IOUtil {
         return relayStreams(is, os, closeBoth, closeBoth);
     }
 
-    public static HashResult relayStreams(CryptoConst.HASHType hashType, InputStream is, OutputStream os, boolean both)
+    public static HashResult relayStreams(CryptoConst.HashType hashType, InputStream is, OutputStream os, boolean both)
             throws IOException {
         return relayStreams(hashType, is, os, both, both);
     }
@@ -498,7 +498,7 @@ public class IOUtil {
     }
 
 
-    public static HashResult relayStreams(CryptoConst.HASHType hashType, InputStream is, OutputStream os, boolean closeIS, boolean closeOS)
+    public static HashResult relayStreams(CryptoConst.HashType hashType, InputStream is, OutputStream os, boolean closeIS, boolean closeOS)
             throws IOException {
         long totalCopied = 0;
         try {

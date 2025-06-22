@@ -151,7 +151,34 @@ public final class CryptoConst
 		}
 	}
 
-	public enum HASHType
+	public enum HashProperty
+		implements GetName
+	{
+		ITERATIONS("iterations"),
+		LOG("log"),
+		MEMORY("memory"),
+		PARALLELISM("parallelism"),
+		ROUNDS("rounds")
+
+
+
+		;
+		private final String name;
+		HashProperty(String name)
+		{
+			this.name = name;
+		}
+
+		public String getName()
+		{
+			return name;
+		}
+	}
+
+
+
+
+	public enum HashType
             implements GetName
     {
 		MD5("MD5"),
@@ -161,13 +188,14 @@ public final class CryptoConst
 		SHA_384("SHA-384"),
 		SHA_512("SHA-512"),
 
-		BCRYPT("BCRYPT")
-
+		BCRYPT("BCRYPT"),
+		ARGON2("ARGON2"),
+		PBKDF2("PBKDF2"),
         ;
 
 		private final String name;
 
-		HASHType(String name)
+		HashType(String name)
         {
 			this.name = name;
 		}
@@ -184,9 +212,9 @@ public final class CryptoConst
 			return getName();
 		}
 		
-		public static HASHType lookup(String mdName)
+		public static HashType lookup(String mdName)
         {
-			return (HASHType) SharedUtil.lookupEnum(mdName, HASHType.values());
+			return (HashType) SharedUtil.lookupEnum(mdName, HashType.values());
 		}
 	}
 
@@ -213,25 +241,25 @@ public final class CryptoConst
 			return name;
 		}
 		
-		public static HASHType toMDType(String name)
+		public static HashType toMDType(String name)
         {
 			return toMDType((DataMDType)SharedUtil.lookupEnum(name, DataMDType.values()));
 		}
 		
-		public static HASHType toMDType(DataMDType dmdt)
+		public static HashType toMDType(DataMDType dmdt)
         {
-			HASHType ret = null;
+			HashType ret = null;
 			switch(dmdt)
 			{
 			case MD5_ENCRYPTED:
 				
 			case MD5_ORIGINAL:
-				ret = HASHType.MD5;
+				ret = HashType.MD5;
 				break;
 			case SHA_256_ENCRYPTED:
 			
 			case SHA_256_ORIGINAL:
-				ret = HASHType.SHA_256;
+				ret = HashType.SHA_256;
 				break;
 			}
 			

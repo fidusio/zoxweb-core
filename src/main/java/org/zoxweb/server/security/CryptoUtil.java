@@ -153,7 +153,7 @@ public class CryptoUtil {
         ekd.setHMACAlgoName(CryptoConst.SignatureAlgo.HMAC_SHA_256.getName());
 
         // create iv vector
-        MessageDigest digest = HashUtil.getMessageDigest(CryptoConst.HASHType.SHA_256);
+        MessageDigest digest = HashUtil.getMessageDigest(CryptoConst.HashType.SHA_256);
         //IvParameterSpec ivSpec = new IvParameterSpec(generateRandomHashedBytes(digest, AES_BLOCK_SIZE, DEFAULT_ITERATION));
         IvParameterSpec ivSpec = new IvParameterSpec(
                 generateKey(CryptoConst.CryptoAlgo.AES, (Const.TypeInBytes.BYTE.sizeInBits(CryptoConst.AES_256_KEY_SIZE) / 2)).getEncoded());
@@ -266,7 +266,7 @@ public class CryptoUtil {
             BadPaddingException,
             SignatureException {
         // create iv vector
-        MessageDigest digest = HashUtil.getMessageDigest(CryptoConst.HASHType.SHA_256);
+        MessageDigest digest = HashUtil.getMessageDigest(CryptoConst.HashType.SHA_256);
         IvParameterSpec ivSpec = new IvParameterSpec(ekd.getIV());
         SecretKeySpec aesKey = new SecretKeySpec(
                 hashWithIterations(digest, ivSpec.getIV(), key, hashIteration, true), CryptoConst.CryptoAlgo.AES.getName());

@@ -15,7 +15,7 @@
  */
 package org.zoxweb.shared.crypto;
 
-import org.zoxweb.shared.crypto.CryptoConst.HASHType;
+import org.zoxweb.shared.crypto.CryptoConst.HashType;
 import org.zoxweb.shared.data.PropertyDAO;
 import org.zoxweb.shared.security.CredentialInfo;
 import org.zoxweb.shared.util.*;
@@ -35,9 +35,9 @@ public class CIPassword
 	private enum Param
         implements GetNVConfig
     {
-		HASH_ITERATION(NVConfigManager.createNVConfig("hash_iteration", "Hash iteration", "HashIteration", false, true, Integer.class)),
+		//HASH_ITERATION(NVConfigManager.createNVConfig("hash_iteration", "Hash iteration", "HashIteration", false, true, Integer.class)),
 		SALT(NVConfigManager.createNVConfig("salt", "The password salt", "Salt", false, true, byte[].class)),
-		PASSWORD(NVConfigManager.createNVConfig("password", "The password", "Password", false, true, byte[].class)),
+		HASH(NVConfigManager.createNVConfig("hash", "The password hash", "Hash", false, true, byte[].class)),
 
         ;
 
@@ -65,7 +65,7 @@ public class CIPassword
 		super(NVCE_CI_PASSWORD);
 	}
 
-	public synchronized void setName(HASHType mdt)
+	public synchronized void setName(HashType mdt)
     {
 		SUS.checkIfNulls("Null Message Digest", mdt);
 		
@@ -76,7 +76,7 @@ public class CIPassword
     {
 		SUS.checkIfNulls("Null Message Digest", name);
 
-		HASHType mdt = HASHType.lookup(name);
+		HashType mdt = HashType.lookup(name);
 
 		if (mdt == null)
 		{
@@ -86,19 +86,23 @@ public class CIPassword
 		super.setName(mdt.getName());
 	}
 
-	public synchronized int getHashIteration()
+	public int getHashIterations()
     {
-		return lookupValue(Param.HASH_ITERATION);
+		NVInt iterations =  getProperties().getNV(CryptoConst.HashProperty.ITERATIONS);
+		if(iterations != null)
+			return iterations.getValue();
+
+		return -1;
 	}
 
-	public synchronized void setHashIteration(int salt_iteration)
+	public synchronized void setHashIterations(int iterations)
     {
-		if (salt_iteration < 0)
+		if (iterations < 0)
 		{
-			throw new IllegalArgumentException("Invalid iteration value:" + salt_iteration);
+			throw new IllegalArgumentException("Invalid iteration value:" + iterations);
 		}
 
-		setValue(Param.HASH_ITERATION, salt_iteration);
+		getProperties().build(new NVInt(CryptoConst.HashProperty.ITERATIONS, iterations));
 	}
 
 	public synchronized byte[] getSalt()
@@ -111,19 +115,19 @@ public class CIPassword
 		setValue( Param.SALT, salt);
 	}
 
-	public synchronized byte[] getPassword()
+	public synchronized byte[] getPasswordHash()
     {
-		return lookupValue(Param.PASSWORD);
+		return lookupValue(Param.HASH);
 	}
 
-	public synchronized void setPassword(byte[] password)
+	public synchronized void setPasswordHash(byte[] password)
     {
-		setValue(Param.PASSWORD, password);
+		setValue(Param.HASH, password);
 	}
 
-	public void setPassword(String password)
+	public void setPasswordHash(String password)
 	{
-		setPassword(SharedStringUtil.getBytes(password));
+		setPasswordHash(SharedStringUtil.getBytes(password));
 	}
 
 	@Override
@@ -131,7 +135,7 @@ public class CIPassword
     {
 		if(getCanonicalID() != null)
 			return getCanonicalID();
-		return SharedUtil.toCanonicalID(':', getName(),getHashIteration(), SharedStringUtil.bytesToHex(getSalt()), SharedStringUtil.bytesToHex( getPassword()));
+		return SharedUtil.toCanonicalID(':', getName(), getHashIterations(), SharedStringUtil.bytesToHex(getSalt()), SharedStringUtil.bytesToHex( getPasswordHash()));
 	}
 
 	public static CIPassword fromCanonicalID(String passwordCanonicalID)
@@ -147,10 +151,10 @@ public class CIPassword
 			BCryptHash bCryptHash = new BCryptHash(passwordCanonicalID);
 			CIPassword ret = new CIPassword();
 			ret.setSalt(SharedStringUtil.getBytes(bCryptHash.salt));
-			ret.setPassword(bCryptHash.hash);
-			ret.setHashIteration(bCryptHash.logRound);
+			ret.setPasswordHash(bCryptHash.hash);
+			ret.setHashIterations(bCryptHash.logRound);
 			ret.setCanonicalID(bCryptHash.toCanonicalID());
-			ret.setName(HASHType.BCRYPT);
+			ret.setName(HashType.BCRYPT);
 			return ret;
 		}
 		catch (Exception e)
@@ -164,16 +168,16 @@ public class CIPassword
 		switch(tokens.length)
 		{
 		case 3:
-			ret.setHashIteration(Integer.parseInt(tokens[0]));
+			ret.setHashIterations(Integer.parseInt(tokens[0]));
 			ret.setSalt(SharedStringUtil.hexToBytes(tokens[1]));
-			ret.setPassword(SharedStringUtil.hexToBytes(tokens[2]));
+			ret.setPasswordHash(SharedStringUtil.hexToBytes(tokens[2]));
 			ret.setName("sha-256");
 			break;
 		case 4:
 			ret.setName(tokens[0].toLowerCase());
-			ret.setHashIteration(Integer.parseInt(tokens[1]));
+			ret.setHashIterations(Integer.parseInt(tokens[1]));
 			ret.setSalt(SharedStringUtil.hexToBytes(tokens[2]));
-			ret.setPassword(SharedStringUtil.hexToBytes(tokens[3]));
+			ret.setPasswordHash(SharedStringUtil.hexToBytes(tokens[3]));
 			break;
 		default:
 			throw new IllegalArgumentException("Invalid password format");	

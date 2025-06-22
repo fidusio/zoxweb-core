@@ -64,6 +64,7 @@ public class HashUtil {
 
     public static final int SALT_LENGTH = 32;
 
+
     /**
      * Returns a salted PBKDF2 hash of the password.
      *
@@ -162,7 +163,7 @@ public class HashUtil {
     }
 
 
-    public static MessageDigest getMessageDigest(CryptoConst.HASHType hashType) throws NoSuchAlgorithmException {
+    public static MessageDigest getMessageDigest(CryptoConst.HashType hashType) throws NoSuchAlgorithmException {
         return getMessageDigest(hashType.getName());
     }
 
@@ -202,21 +203,21 @@ public class HashUtil {
     }
 
     public static boolean isBCryptPasswordValid(String password, String bCryptHash) {
-        return BCrypt.checkpw(password, bCryptHash);
+        return BCrypt.isAMatch(password, bCryptHash);
     }
 
     public static boolean isBCryptPasswordValid(byte[] password, String bCryptHash) {
-        return BCrypt.checkpw(password, bCryptHash);
+        return BCrypt.isAMatch(password, bCryptHash);
     }
 
     public static CIPassword toPassword(String algo, int saltLength, int saltIteration,
                                         String password)
             throws NullPointerException, IllegalArgumentException, NoSuchAlgorithmException {
         SUS.checkIfNulls("Null parameter", algo, password);
-        return toPassword(CryptoConst.HASHType.lookup(algo), saltLength, saltIteration, password);
+        return toPassword(CryptoConst.HashType.lookup(algo), saltLength, saltIteration, password);
     }
 
-    public static CIPassword toPassword(CryptoConst.HASHType algo, int saltLength, int saltIteration,
+    public static CIPassword toPassword(CryptoConst.HashType algo, int saltLength, int saltIteration,
                                         String password)
             throws NullPointerException, IllegalArgumentException, NoSuchAlgorithmException {
         SUS.checkIfNulls("Null parameter", algo, password);
@@ -225,7 +226,7 @@ public class HashUtil {
 
     public static CIPassword toBCryptPassword(String password, int logRounds) {
         try {
-            return toPassword(CryptoConst.HASHType.BCRYPT, 0, logRounds, password);
+            return toPassword(CryptoConst.HashType.BCRYPT, 0, logRounds, password);
         } catch (NoSuchAlgorithmException e) {
             throw new SecurityException(e);
         }
@@ -234,7 +235,7 @@ public class HashUtil {
 
     public static CIPassword toBCryptPassword(byte[] password, int logRounds) {
         try {
-            return toPassword(CryptoConst.HASHType.BCRYPT, 0, logRounds, password);
+            return toPassword(CryptoConst.HashType.BCRYPT, 0, logRounds, password);
         } catch (NoSuchAlgorithmException e) {
             throw new SecurityException(e);
         }
@@ -243,7 +244,7 @@ public class HashUtil {
 
     public static CIPassword toBCryptPassword(String password) {
         try {
-            return toPassword(CryptoConst.HASHType.BCRYPT, 0, 10, password);
+            return toPassword(CryptoConst.HashType.BCRYPT, 0, 10, password);
         } catch (NoSuchAlgorithmException e) {
             throw new SecurityException(e);
         }
@@ -252,14 +253,14 @@ public class HashUtil {
 
     public static CIPassword toBCryptPassword(byte[] password) {
         try {
-            return toPassword(CryptoConst.HASHType.BCRYPT, 0, 10, password);
+            return toPassword(CryptoConst.HashType.BCRYPT, 0, 10, password);
         } catch (NoSuchAlgorithmException e) {
             throw new SecurityException(e);
         }
     }
 
 
-    public static CIPassword toPassword(CryptoConst.HASHType algo, int saltLength, int saltIteration,
+    public static CIPassword toPassword(CryptoConst.HashType algo, int saltLength, int saltIteration,
                                         byte[] password)
             throws NullPointerException, IllegalArgumentException, NoSuchAlgorithmException {
         SUS.checkIfNulls("Null parameter", algo, password);
@@ -269,10 +270,10 @@ public class HashUtil {
         byte[] hashedPassword = null;
         byte[] salt = null;
 
-        CIPassword passwordDAO = new CIPassword();
-        if (algo == CryptoConst.HASHType.BCRYPT) {
+        CIPassword ciPassword = new CIPassword();
+        if (algo == CryptoConst.HashType.BCRYPT) {
             BCryptHash bcryptHash = toBCryptHash(saltIteration, password);
-            passwordDAO.setCanonicalID(bcryptHash.toCanonicalID());
+            ciPassword.setCanonicalID(bcryptHash.toCanonicalID());
             salt = SharedStringUtil.getBytes(bcryptHash.salt);
             hashedPassword = SharedStringUtil.getBytes(bcryptHash.hash);
         } else {
@@ -291,12 +292,12 @@ public class HashUtil {
         }
 
 
-        passwordDAO.setSalt(salt);
-        passwordDAO.setPassword(hashedPassword);
-        passwordDAO.setHashIteration(saltIteration);
-        passwordDAO.setName(algo);
+        ciPassword.setSalt(salt);
+        ciPassword.setPasswordHash(hashedPassword);
+        ciPassword.setHashIterations(saltIteration);
+        ciPassword.setName(algo);
 
-        return passwordDAO;
+        return ciPassword;
     }
 
 
@@ -334,9 +335,9 @@ public class HashUtil {
     public static CIPassword mergeContent(CIPassword password, CIPassword toMerge) {
         synchronized (password) {
             password.setName(toMerge.getName());
-            password.setHashIteration(toMerge.getHashIteration());
+            password.setHashIterations(toMerge.getHashIterations());
             password.setSalt(toMerge.getSalt());
-            password.setPassword(toMerge.getPassword());
+            password.setPasswordHash(toMerge.getPasswordHash());
         }
 
         return password;
@@ -345,14 +346,14 @@ public class HashUtil {
     public static boolean isPasswordValid(final CIPassword passwordDAO, String password)
             throws NullPointerException, IllegalArgumentException, NoSuchAlgorithmException {
         SUS.checkIfNulls("Null values", passwordDAO, password);
-        if (CryptoConst.HASHType.lookup(passwordDAO.getName()) == CryptoConst.HASHType.BCRYPT) {
+        if (CryptoConst.HashType.lookup(passwordDAO.getName()) == CryptoConst.HashType.BCRYPT) {
             return isBCryptPasswordValid(password, passwordDAO.getCanonicalID());
         } else {
             byte[] genHash = hashWithIterations(MessageDigest.getInstance(passwordDAO.getName()),
-                    passwordDAO.getSalt(), SharedStringUtil.getBytes(password), passwordDAO.getHashIteration(),
+                    passwordDAO.getSalt(), SharedStringUtil.getBytes(password), passwordDAO.getHashIterations(),
                     false);
 
-            return SUS.slowEquals(genHash, passwordDAO.getPassword());
+            return SUS.slowEquals(genHash, passwordDAO.getPasswordHash());
         }
     }
 
@@ -372,15 +373,15 @@ public class HashUtil {
     }
 
 
-    public static String hashAsBase64(CryptoConst.HASHType algo, byte[] data) throws NoSuchAlgorithmException {
+    public static String hashAsBase64(CryptoConst.HashType algo, byte[] data) throws NoSuchAlgorithmException {
         return SharedBase64.encodeAsString(SharedBase64.Base64Type.DEFAULT, hash(algo, data));
     }
 
-    public static String hashAsBase64(CryptoConst.HASHType algo, String msg) throws NoSuchAlgorithmException {
+    public static String hashAsBase64(CryptoConst.HashType algo, String msg) throws NoSuchAlgorithmException {
         return SharedBase64.encodeAsString(SharedBase64.Base64Type.DEFAULT, hash(algo, SharedStringUtil.getBytes(msg)));
     }
 
-    public static byte[] hash(CryptoConst.HASHType algo, byte[] data) throws NoSuchAlgorithmException {
+    public static byte[] hash(CryptoConst.HashType algo, byte[] data) throws NoSuchAlgorithmException {
         return hash(algo.getName(), data);
     }
 

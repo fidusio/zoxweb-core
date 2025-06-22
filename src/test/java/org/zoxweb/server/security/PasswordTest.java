@@ -14,7 +14,7 @@ import java.util.Arrays;
 public class PasswordTest {
     @Test
     public void createPassword() throws NoSuchAlgorithmException {
-        CIPassword p = HashUtil.toPassword(CryptoConst.HASHType.SHA_256, 24, 8192, "P!ssw2rd");
+        CIPassword p = HashUtil.toPassword(CryptoConst.HashType.SHA_256, 24, 8192, "P!ssw2rd");
         System.out.println(GSONUtil.toJSONDefault(p, true));
        // p.setSalt(CryptoUtil.generateRandomHashedBytes());
     }
@@ -41,7 +41,7 @@ public class PasswordTest {
         Assertions.assertTrue(HashUtil.isPasswordValid(parsed, "password"));
 
 
-        CIPassword bPassword = HashUtil.toPassword(CryptoConst.HASHType.BCRYPT, 0, 10, "P!ssw2rd");
+        CIPassword bPassword = HashUtil.toPassword(CryptoConst.HashType.BCRYPT, 0, 10, "P!ssw2rd");
         System.out.println(GSONUtil.toJSONDefault(bPassword));
         Assertions.assertTrue(HashUtil.isPasswordValid(bPassword, "P!ssw2rd"));
 
@@ -58,8 +58,8 @@ public class PasswordTest {
 
         String salted = BCrypt.gensalt(9);
         String hashedPW = BCrypt.hashpw("password", salted);
-        BCrypt.checkpw("password",hashedPW);
-        bPassword = HashUtil.toPassword(CryptoConst.HASHType.BCRYPT, 0, 9, "P!ssw2rd");
+        assert BCrypt.isAMatch("password",hashedPW);
+        bPassword = HashUtil.toPassword(CryptoConst.HashType.BCRYPT, 0, 9, "P!ssw2rd");
         System.out.println(GSONUtil.toJSONDefault(bPassword));
         Assertions.assertTrue(HashUtil.isPasswordValid(bPassword, "P!ssw2rd"));
     }
