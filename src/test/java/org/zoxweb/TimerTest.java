@@ -19,26 +19,26 @@ import org.zoxweb.server.util.ServerUtil;
 
 public class TimerTest {
 
-	public static void runTest(long nanos) {
-		long delta = System.nanoTime();
+    public static void runTest(long nanos) {
+        long delta = System.nanoTime();
 
-		long error = ServerUtil.delay(nanos);
+        long error = ServerUtil.delay(nanos);
 
-		delta = System.nanoTime() - delta;
-		
-		System.out.println("Total time in nanos:" + delta + " requeued time:" + nanos + " error:" + (error));
-	}
+        delta = System.nanoTime() - delta;
 
-	public static void main(String[] args) {
-		for (int i=0; i < 3; i++)
-			for (String param : args) {
-				try {
-					runTest(Long.parseLong(param));
-				} catch(Exception e) {
-					e.printStackTrace();
-				}
-		}
-		
-	}
+        System.out.println("Total time in nanos:" + delta + " requeued time:" + nanos + " error:" + (error));
+    }
+
+    public static void main(String[] args) {
+        for (int i = 0; i < 3; i++)
+            for (String param : args) {
+                try {
+                    runTest(Long.parseLong(param));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
+    }
 
 }

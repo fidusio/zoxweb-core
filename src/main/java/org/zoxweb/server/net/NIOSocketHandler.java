@@ -32,7 +32,7 @@ import java.nio.channels.spi.AbstractSelectableChannel;
 public class NIOSocketHandler
         extends ProtocolHandler {
 
-    private volatile ByteBuffer phBB = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.DIRECT, (int) Const.SizeInBytes.K.SIZE);
+    private volatile ByteBuffer phBB = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, (int) Const.SizeInBytes.K.SIZE);
 
     private final PlainSessionCallback sessionCallback;
 

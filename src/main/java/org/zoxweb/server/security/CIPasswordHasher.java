@@ -14,8 +14,6 @@ public class CIPasswordHasher
     private int iterations;
     private final String name;
 
-//    public CIPasswordHasher() {
-//    }
 
     public CIPasswordHasher(String name, CryptoConst.HashType hashType, int iterations) {
         this.name = name;

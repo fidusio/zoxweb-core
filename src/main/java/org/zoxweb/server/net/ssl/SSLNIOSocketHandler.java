@@ -373,7 +373,7 @@ public class SSLNIOSocketHandler
 					try
 					{
 
-						config.inRemoteData = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.DIRECT, ByteBufferUtil.DEFAULT_BUFFER_SIZE);
+						config.inRemoteData = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, 512);
 						config.remoteChannel = SocketChannel.open((new InetSocketAddress(config.remoteConnection.getInetAddress(), config.remoteConnection.getPort())));
 						getSelectorController().register(config.remoteChannel, SelectionKey.OP_READ, this, false);
 						//sessionCallback.setRemoteSocket(config.remoteChannel);

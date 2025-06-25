@@ -15,6 +15,7 @@
  */
 package org.zoxweb;
 
+import org.junit.jupiter.api.Test;
 import org.zoxweb.shared.util.BytesValue;
 import org.zoxweb.shared.util.Const;
 import org.zoxweb.shared.util.SharedBase64;
@@ -23,88 +24,89 @@ import java.nio.ByteBuffer;
 
 public class PrimitiveTest {
 
-  public static void main(String[] args) {
+    @Test
+    public void test() {
 
-    int intVals[] = {
-        1,
-        0,
-        123456789,
-        -1,
-        1000,
-        Integer.MAX_VALUE,
-        Integer.MIN_VALUE
-    };
-
-    for (int v : intVals) {
-      byte[] bytes = BytesValue.INT.toBytes(v);
-      System.out.println("INT: " + BytesValue.INT.toValue(bytes) + ":" + v);
-      System.out.println(new String(SharedBase64.encode(bytes)));
-    }
-
-    long longVals[] =
-        {
-            1,
-            0,
-            123456789,
-            -1,
-            1000,
-            Integer.MAX_VALUE,
-            Integer.MIN_VALUE,
-            (long) Long.MAX_VALUE,
-            (long) Long.MIN_VALUE
+        int[] intVals = {
+                1,
+                0,
+                123456789,
+                -1,
+                1000,
+                Integer.MAX_VALUE,
+                Integer.MIN_VALUE
         };
 
-    for (long v : longVals) {
-      Long value = Long.valueOf(v);
-      long delta = System.nanoTime();
-      byte[] bytesJ = ByteBuffer.allocate(Long.SIZE / Byte.SIZE).putLong(value).array();
-      delta = System.nanoTime() - delta;
+        for (int v : intVals) {
+            byte[] bytes = BytesValue.INT.toBytes(v);
+            System.out.println("INT: " + BytesValue.INT.toValue(bytes) + ":" + v);
+            System.out.println(new String(SharedBase64.encode(bytes)));
+        }
 
-      long deltaZW = System.nanoTime();
-      byte[] bytes = BytesValue.LONG.toBytes(value);
-      deltaZW = System.nanoTime() - deltaZW;
+        long[] longVals =
+                {
+                        1,
+                        0,
+                        123456789,
+                        -1,
+                        1000,
+                        Integer.MAX_VALUE,
+                        Integer.MIN_VALUE,
+                        (long) Long.MAX_VALUE,
+                        (long) Long.MIN_VALUE
+                };
 
-      System.out.println(
-          "LONG:  " + BytesValue.LONG.toValue(bytes) + ":" + v + " zw:" + Const.TimeInMillis
-              .nanosToString(deltaZW) + ":" + Const.TimeInMillis.nanosToString(delta) + ":"
-              + Const.TimeInMillis.nanosToString(delta - deltaZW));
-      System.out.println(
-          "LONG: " + BytesValue.LONG.toValue(bytesJ) + ":" + v + " zw:" + Const.TimeInMillis
-              .nanosToString(deltaZW) + ":" + Const.TimeInMillis.nanosToString(delta) + ":"
-              + Const.TimeInMillis.nanosToString(delta - deltaZW));
-      System.out.println(new String(SharedBase64.encode(bytes)));
+        for (long v : longVals) {
+            Long value = v;
+            long delta = System.nanoTime();
+            byte[] bytesJ = ByteBuffer.allocate(Long.SIZE / Byte.SIZE).putLong(value).array();
+            delta = System.nanoTime() - delta;
+
+            long deltaZW = System.nanoTime();
+            byte[] bytes = BytesValue.LONG.toBytes(value);
+            deltaZW = System.nanoTime() - deltaZW;
+
+            System.out.println(
+                    "LONG:  " + BytesValue.LONG.toValue(bytes) + ":" + v + " zw:" + Const.TimeInMillis
+                            .nanosToString(deltaZW) + ":" + Const.TimeInMillis.nanosToString(delta) + ":"
+                            + Const.TimeInMillis.nanosToString(delta - deltaZW));
+            System.out.println(
+                    "LONG: " + BytesValue.LONG.toValue(bytesJ) + ":" + v + " zw:" + Const.TimeInMillis
+                            .nanosToString(deltaZW) + ":" + Const.TimeInMillis.nanosToString(delta) + ":"
+                            + Const.TimeInMillis.nanosToString(delta - deltaZW));
+            System.out.println(new String(SharedBase64.encode(bytes)));
+        }
+
+        float[] floatVals =
+                {
+                        1,
+                        0,
+                        123456789,
+                        -1,
+                        1000,
+                        Float.MAX_VALUE,
+                        Float.MIN_VALUE,
+                };
+
+        for (float v : floatVals) {
+            Float value = Float.valueOf(v);
+            long delta = System.nanoTime();
+            byte[] bytesJ = ByteBuffer.allocate(Float.SIZE / Byte.SIZE).putFloat(value).array();
+            delta = System.nanoTime() - delta;
+
+            long deltaZW = System.nanoTime();
+            byte[] bytes = BytesValue.FLOAT.toBytes(value);
+            deltaZW = System.nanoTime() - deltaZW;
+
+            System.out.println(
+                    "Float:  " + BytesValue.FLOAT.toValue(bytes) + ":" + v + " zw:" + Const.TimeInMillis
+                            .nanosToString(deltaZW) + ":" + Const.TimeInMillis.nanosToString(delta) + ":"
+                            + Const.TimeInMillis.nanosToString(delta - deltaZW));
+            System.out.println(
+                    "FloatJ: " + BytesValue.FLOAT.toValue(bytesJ) + ":" + v + " zw:" + Const.TimeInMillis
+                            .nanosToString(deltaZW) + ":" + Const.TimeInMillis.nanosToString(delta) + ":"
+                            + Const.TimeInMillis.nanosToString(delta - deltaZW));
+            System.out.println(new String(SharedBase64.encode(bytes)));
+        }
     }
-
-    float floatVals[] =
-        {
-            1,
-            0,
-            123456789,
-            -1,
-            1000,
-            Float.MAX_VALUE,
-            Float.MIN_VALUE,
-        };
-
-    for (float v : floatVals) {
-      Float value = Float.valueOf(v);
-      long delta = System.nanoTime();
-      byte[] bytesJ = ByteBuffer.allocate(Float.SIZE / Byte.SIZE).putFloat(value).array();
-      delta = System.nanoTime() - delta;
-
-      long deltaZW = System.nanoTime();
-      byte[] bytes = BytesValue.FLOAT.toBytes(value);
-      deltaZW = System.nanoTime() - deltaZW;
-
-      System.out.println(
-          "Float:  " + BytesValue.FLOAT.toValue(bytes) + ":" + v + " zw:" + Const.TimeInMillis
-              .nanosToString(deltaZW) + ":" + Const.TimeInMillis.nanosToString(delta) + ":"
-              + Const.TimeInMillis.nanosToString(delta - deltaZW));
-      System.out.println(
-          "FloatJ: " + BytesValue.FLOAT.toValue(bytesJ) + ":" + v + " zw:" + Const.TimeInMillis
-              .nanosToString(deltaZW) + ":" + Const.TimeInMillis.nanosToString(delta) + ":"
-              + Const.TimeInMillis.nanosToString(delta - deltaZW));
-      System.out.println(new String(SharedBase64.encode(bytes)));
-    }
-  }
 }

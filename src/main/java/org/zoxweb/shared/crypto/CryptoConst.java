@@ -158,7 +158,10 @@ public final class CryptoConst
 		LOG("log"),
 		MEMORY("memory"),
 		PARALLELISM("parallelism"),
-		ROUNDS("rounds")
+		ROUNDS("rounds"),
+		VERSION("version"),
+		SALT("salt"),
+		HASH("hash")
 
 
 

@@ -15,35 +15,25 @@
  */
 package org.zoxweb.server.security;
 
+import org.junit.jupiter.api.Test;
 import org.zoxweb.shared.util.SharedBase64;
 import org.zoxweb.shared.util.SharedStringUtil;
 
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-
 public class CryptoTest {
+    @Test
+    public void secureRandom() {
+        System.out.println(SecUtil.SINGLETON.defaultSecureRandom().getAlgorithm());
+        byte[] randomBytes = new byte[768 / 8];
+        SecUtil.SINGLETON.defaultSecureRandom().nextBytes(randomBytes);
 
-  public static void main(String[] args) {
-    SecureRandom sr = null;
-
-    try {
-      sr = SecUtil.SINGLETON.defaultSecureRandom();
-    } catch (NoSuchAlgorithmException e) {
-      e.printStackTrace();
+        for (int i = 0; i < 20; i++) {
+            long ts = System.nanoTime();
+            SecUtil.SINGLETON.defaultSecureRandom().nextBytes(randomBytes);
+            ts = System.nanoTime() - ts;
+            System.out.println(
+                    ts + "\tnanos\t" + new String(SharedBase64.encode(randomBytes)) + ":" + SharedStringUtil
+                            .bytesToHex(randomBytes));
+        }
     }
-
-    System.out.println(sr.getAlgorithm());
-    byte[] randomBytes = new byte[768 / 8];
-    sr.nextBytes(randomBytes);
-
-    for (int i = 0; i < 20; i++) {
-      long ts = System.nanoTime();
-      sr.nextBytes(randomBytes);
-      ts = System.nanoTime() - ts;
-      System.out.println(
-          ts + "\tnanos\t" + new String(SharedBase64.encode(randomBytes)) + ":" + SharedStringUtil
-              .bytesToHex(randomBytes));
-    }
-  }
 
 }
