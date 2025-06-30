@@ -4,17 +4,14 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class BytesArray
+public final class BytesArray
     implements IsValid {
 
 
     public static final BytesArray EMPTY = new BytesArray(null, Const.EMPTY_BYTE_ARRAY);
-
-
     private final byte[] array;
     public final int offset;
     public final int length;
@@ -59,6 +56,9 @@ public class BytesArray
         return new String(array, offset, length);
     }
 
+    /**
+     * @return a copy of the byte array if you want the direct access {@link #getArray()}
+     */
     public byte[] asBytes() {
         checkValidity();
         return Arrays.copyOfRange(array, offset, offset + length);
@@ -69,13 +69,6 @@ public class BytesArray
         BytesArray ret = new BytesArray(null, asBytes());
         checkValidity();// we must perform double validation
         return ret;
-    }
-
-
-    public ByteBuffer wrap()
-    {
-        checkValidity();
-        return ByteBuffer.wrap(array, offset, length);
     }
 
     public boolean isValid() {
@@ -111,11 +104,19 @@ public class BytesArray
             throw new IOException("Byte buffer invalid");
     }
 
-    private void checkValidity() {
+    public void checkValidity() {
         if (!isValid())
             throw new ProtocolException("Invalid BytesArray");
     }
 
+    /**
+     * @return the internal byte array use with extreme caution
+     */
+    public byte[] getArray()
+    {
+        checkValidity();
+        return array;
+    }
     @Override
     public boolean equals(Object o) {
         if (o == null) return false;

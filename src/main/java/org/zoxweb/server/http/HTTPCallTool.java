@@ -15,7 +15,7 @@
  */
 package org.zoxweb.server.http;
 
-import okhttp3.OkHttpClient;
+//import okhttp3.OkHttpClient;
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.task.TaskUtil;
@@ -149,11 +149,11 @@ public final class HTTPCallTool
 
 
 
-            OkHttpClient client = OkHTTPCall.createOkHttpBuilder(TaskUtil.defaultTaskProcessor(), null, HTTPMessageConfigInterface.DEFAULT_TIMEOUT_20_SECOND,false, 20, HTTPMessageConfigInterface.DEFAULT_TIMEOUT_20_SECOND).build();
+            //OkHttpClient client = OkHTTPCall.createOkHttpBuilder(TaskUtil.defaultTaskProcessor(), null, HTTPMessageConfigInterface.DEFAULT_TIMEOUT_20_SECOND,false, 20, HTTPMessageConfigInterface.DEFAULT_TIMEOUT_20_SECOND).build();
             OkHTTPCall[] httpCalls = new OkHTTPCall[hmcis.length];
             for (int i = 0; i < hmcis.length; i++)
             {
-                httpCalls[i] = new OkHTTPCall(client, hmcis[i]);
+                httpCalls[i] = new OkHTTPCall(hmcis[i]);
             }
             ConsumerCallback<HTTPResponse> cc = new ConsumerCallback<HTTPResponse>() {
                 @Override

@@ -46,7 +46,7 @@ public class AnnotationScanTest {
        assert(result!=null);
        assert(result.getClassAnnotations() != null);
        assert(!result.getMethodsAnnotations().isEmpty());
-       assert(result.isClassAnnotatedBy(SecurityProp.class));
+       assert(result.isClassAnnotatedByType(SecurityProp.class));
 
        result =  ReflectionUtil.scanClassAnnotations(ToBeTested.class, MappedProp.class);
        assert(result != null);

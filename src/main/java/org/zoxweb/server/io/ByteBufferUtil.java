@@ -74,7 +74,7 @@ public class ByteBufferUtil {
                 }
 
                 if (usq.size() < CACHE_LIMIT) {
-                    Arrays.fill(ba, (byte)0);
+                    Arrays.fill(ba, (byte) 0);
                     usq.queue(ba);
                 }
             }
@@ -106,7 +106,7 @@ public class ByteBufferUtil {
     private byte[] toByteArray0(int length) {
         if (length < 0)
             throw new IllegalArgumentException("byte array size < 0 " + length);
-        if(length == 0)
+        if (length == 0)
             return Const.EMPTY_BYTE_ARRAY;
 
         UniqueSimpleQueue<byte[]> usq = null;
@@ -121,6 +121,13 @@ public class ByteBufferUtil {
             ba = new byte[length];
 
         return ba;
+    }
+
+    public static ByteBuffer wrap(BytesArray ba) {
+
+        ba.checkValidity();
+        return ByteBuffer.wrap(ba.getArray(), ba.offset, ba.length);
+
     }
 
     private ByteBuffer toByteBuffer0(BufferType bType, byte[] buffer, int offset, int length, boolean copy) {
