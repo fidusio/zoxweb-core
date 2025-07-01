@@ -1,4 +1,4 @@
-package org.zoxweb.shared.security;
+package org.zoxweb.server.security;
 
 import org.zoxweb.server.util.ReflectionUtil;
 
@@ -11,9 +11,9 @@ import java.util.Map;
  */
 public interface SecureInvoker {
 
-    <V> V invoke(boolean strict, Object bean, Method method, Object... parameters)
+    <V> V invoke(boolean authCheck, boolean strict, Object bean, Method method, Object... parameters)
             throws InvocationTargetException, IllegalAccessException;
 
-    <V> V invoke(boolean strict, Object bean, ReflectionUtil.MethodAnnotations methodAnnotations, Map<String, Object> parameters)
+    <V> V invoke(boolean authCheck, Object bean, ReflectionUtil.MethodAnnotations methodAnnotations, Map<String, Object> parameters)
             throws InvocationTargetException, IllegalAccessException;
 }
