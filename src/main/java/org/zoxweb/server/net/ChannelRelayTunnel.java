@@ -56,6 +56,7 @@ public class ChannelRelayTunnel
                               SocketChannel writeDestination, SelectionKey writeChannelSK, boolean autoCloseDestination,
                               SelectorController sc, Closeable closeInterface) {
         //this.origin = origin;
+        super(true);
         sBuffer = ByteBufferUtil.allocateByteBuffer(BufferType.DIRECT, bufferSize);
         this.readSource = readSource;
         this.writeDestination = writeDestination;

@@ -1,15 +1,13 @@
 package org.zoxweb.shared.util;
 
 
-
-
-
 import org.zoxweb.shared.data.ParamInfo;
 
 import java.util.*;
 
 public class ParamUtil {
-    private ParamUtil(){}
+    private ParamUtil() {
+    }
 
 //    public static class ParamType
 //        implements GetName
@@ -17,16 +15,12 @@ public class ParamUtil {
 //        private String name;
 //    }
 
-    public static class ParamInfoList
-    {
+    public static class ParamInfoList {
         private Map<String, ParamInfo> byName = new LinkedHashMap<String, ParamInfo>();
         private Map<String, ParamInfo> byParam = new LinkedHashMap<String, ParamInfo>();
 
 
-
-
-        public ParamInfoList add(String name, ParamInfo.ValueType valueType, String param, boolean mandatory, boolean caseSensitive)
-        {
+        public ParamInfoList add(String name, ParamInfo.ValueType valueType, String param, boolean mandatory, boolean caseSensitive) {
 
             ParamInfo toAdd = new ParamInfo();
             toAdd.setName(name);
@@ -40,128 +34,112 @@ public class ParamUtil {
         }
 
 
-        public ParamInfoList add(ParamInfo pi)
-        {
+        public ParamInfoList add(ParamInfo pi) {
             byName.put(pi.getName().toLowerCase(), pi);
-            if(pi.getParam() != null)
-            {
+            if (pi.getParam() != null) {
                 byParam.put(pi.getParam().toLowerCase(), pi);
             }
             return this;
         }
-        public ParamInfo lookup(String paramName)
-        {
-            ParamInfo ret =  byName.get(paramName.toLowerCase());
-            if(ret == null)
+
+        public ParamInfo lookup(String paramName) {
+            ParamInfo ret = byName.get(paramName.toLowerCase());
+            if (ret == null)
                 ret = byParam.get(paramName.toLowerCase());
 
             return ret;
         }
 
 
-        public String toString()
-        {
-            return byName+"\n" + byParam;
+        public String toString() {
+            return byName + "\n" + byParam;
         }
 
     }
 
-    public static class ParamMap
-    {
+    public static class ParamMap {
         private Map<String, List<String>> map = new LinkedHashMap<String, List<String>>();
         private boolean ignoreCase = false;
         private final int counter;
         private Set<String> hidden = new HashSet<>();
 
-        private ParamMap(boolean ignoreCase, Map<String, List<String>> map, int  length)
-        {
+        private ParamMap(boolean ignoreCase, Map<String, List<String>> map, int length) {
             this.map = map;
             this.ignoreCase = ignoreCase;
             this.counter = length;
         }
 
-        public int intValue(int index)
-        {
-            return intValue(""+index);
+        public int intValue(int index) {
+            return intValue("" + index);
         }
 
-        public int intValue(String name)
-        {
+        public int intValue(String name) {
             return intValue(name, null);
         }
 
-        public int intValue(String name, Integer defaultValue)
-        {
-           List<String> ret = lookup(name);
-           if(ret == null)
-           {
-               if(defaultValue == null)
-                throw new IllegalArgumentException("Parameter " + name + " not found");
-               return defaultValue;
-           }
+        public int intValue(String name, Integer defaultValue) {
+            List<String> ret = lookup(name);
+            if (ret == null) {
+                if (defaultValue == null)
+                    throw new IllegalArgumentException("Parameter " + name + " not found");
+                return defaultValue;
+            }
 
-           if (ret.size() == 1)
-           {
-               return Integer.parseInt(ret.get(0));
-           }
+            if (ret.size() == 1) {
+                return Integer.parseInt(ret.get(0));
+            }
 
-           throw new IllegalArgumentException(name + " value not found or no valid");
+            throw new IllegalArgumentException(name + " value not found or no valid");
         }
 
         /**
          * Hide parameters from being exposed via toString()
+         *
          * @param params to be hidden
          * @return this
          */
-        public ParamMap hide(String ...params)
-        {
-            for (String param: params)
+        public ParamMap hide(String... params) {
+            for (String param : params)
                 hidden.add(param);
             return this;
         }
 
         /**
          * Expose hidden parameters
+         *
          * @param params to be re-exposed
          * @return this
          */
-        public ParamMap expose(String ...params)
-        {
-            for (String param: params)
+        public ParamMap expose(String... params) {
+            for (String param : params)
                 hidden.remove(param);
             return this;
         }
 
-        public int smartIntValue(String name, Integer defaultValue)
-        {
+        public int smartIntValue(String name, Integer defaultValue) {
             List<String> ret = lookup(name);
-            if(ret == null)
-            {
-                if(defaultValue == null)
+            if (ret == null) {
+                if (defaultValue == null)
                     throw new IllegalArgumentException("Parameter " + name + " not found");
                 return defaultValue;
             }
 
-            if (ret.size() == 1)
-            {
+            if (ret.size() == 1) {
                 return SharedUtil.parseInt(ret.get(0));
             }
 
             throw new IllegalArgumentException(name + " value not found or no valid");
         }
 
-        public long smartLongValue(String name, Long defaultValue)
-        {
+        public long smartLongValue(String name, Long defaultValue) {
             List<String> ret = lookup(name);
-            if(ret == null)
-            {
-                if(defaultValue == null)
+            if (ret == null) {
+                if (defaultValue == null)
                     throw new IllegalArgumentException("Parameter " + name + " not found");
                 return defaultValue;
             }
 
-            if (ret.size() == 1)
-            {
+            if (ret.size() == 1) {
                 return SharedUtil.parseLong(ret.get(0));
             }
 
@@ -169,28 +147,23 @@ public class ParamUtil {
         }
 
 
-        public float floatValue(int index)
-        {
-            return floatValue(""+index);
+        public float floatValue(int index) {
+            return floatValue("" + index);
         }
 
-        public float floatValue(String name)
-        {
+        public float floatValue(String name) {
             return floatValue(name, null);
         }
 
-        public float floatValue(String name, Float defaultValue)
-        {
+        public float floatValue(String name, Float defaultValue) {
             List<String> ret = lookup(name);
-            if(ret == null)
-            {
-                if(defaultValue == null)
+            if (ret == null) {
+                if (defaultValue == null)
                     throw new IllegalArgumentException("Parameter " + name + " not found");
                 return defaultValue;
             }
 
-            if (ret.size() == 1)
-            {
+            if (ret.size() == 1) {
                 return Float.parseFloat(ret.get(0));
             }
 
@@ -198,29 +171,23 @@ public class ParamUtil {
         }
 
 
-
-        public int hexValue(int index)
-        {
-            return hexValue(""+index);
+        public int hexValue(int index) {
+            return hexValue("" + index);
         }
 
-        public int hexValue(String name)
-        {
+        public int hexValue(String name) {
             return hexValue(name, null);
         }
 
-        public int hexValue(String name, Integer defaultValue)
-        {
+        public int hexValue(String name, Integer defaultValue) {
             List<String> ret = lookup(name);
-            if(ret == null)
-            {
-                if(defaultValue == null)
+            if (ret == null) {
+                if (defaultValue == null)
                     throw new IllegalArgumentException("Parameter " + name + " not found");
                 return defaultValue;
             }
 
-            if (ret.size() == 1)
-            {
+            if (ret.size() == 1) {
                 return Integer.parseInt(ret.get(0), 16);
             }
 
@@ -230,31 +197,26 @@ public class ParamUtil {
         /**
          * @return the number of parameters without name
          */
-        public int namelessCount()
-        {
+        public int namelessCount() {
             return counter;
         }
 
-        public long longValue(int index)
-        {
-            return intValue(""+index);
+        public long longValue(int index) {
+            return intValue("" + index);
         }
 
-        public long longValue(String name)
-        {
+        public long longValue(String name) {
             return longValue(name, null);
         }
-        public long longValue(String name, Long defaultValue)
-        {
+
+        public long longValue(String name, Long defaultValue) {
             List<String> ret = lookup(name);
-            if(ret == null)
-            {
-                if(defaultValue == null)
+            if (ret == null) {
+                if (defaultValue == null)
                     throw new IllegalArgumentException("Parameter " + name + " not found");
                 return defaultValue;
             }
-            if (ret.size() == 1)
-            {
+            if (ret.size() == 1) {
                 return Long.parseLong(ret.get(0));
             }
 
@@ -262,73 +224,60 @@ public class ParamUtil {
         }
 
 
-        public double doubleValue(int index)
-        {
-            return intValue(""+index);
+        public double doubleValue(int index) {
+            return intValue("" + index);
         }
 
-        public double doubleValue(String name)
-        {
+        public double doubleValue(String name) {
             return doubleValue(name, null);
         }
-        public double doubleValue(String name, Double defaultValue)
-        {
+
+        public double doubleValue(String name, Double defaultValue) {
             List<String> ret = lookup(name);
-            if(ret == null)
-            {
-                if(defaultValue == null)
+            if (ret == null) {
+                if (defaultValue == null)
                     throw new IllegalArgumentException("Parameter " + name + " not found");
                 return defaultValue;
             }
 
-            if (ret.size() == 1)
-            {
+            if (ret.size() == 1) {
                 return Double.parseDouble(ret.get(0));
             }
 
             throw new IllegalArgumentException(name + " value not found or no valid");
         }
 
-        public <E extends Enum<?>> E enumValue(String name, Enum<?> ...enums)
-        {
+        public <E extends Enum<?>> E enumValue(String name, Enum<?>... enums) {
             List<String> ret = lookup(name);
-            if (ret != null && ret.size() == 1)
-            {
+            if (ret != null && ret.size() == 1) {
                 return SharedUtil.lookupEnum(ret.get(0), enums);
             }
-           return null;
+            return null;
         }
 
-        public boolean parameterExists(String name)
-        {
+        public boolean parameterExists(String name) {
             List<String> ret = lookup(name);
             return (ret != null && ret.size() == 1);
         }
 
-        public boolean nameExists(String name)
-        {
+        public boolean nameExists(String name) {
             return lookup(name) != null;
         }
 
 
-
-        public boolean booleanValue(String name)
-        {
+        public boolean booleanValue(String name) {
             return booleanValue(name, true);
         }
 
-        public boolean booleanValue(String name, boolean notFoundOk)
-        {
+        public boolean booleanValue(String name, boolean notFoundOk) {
             List<String> ret = lookup(name);
-            if(ret == null)
-            {
-                if(!notFoundOk)
+            if (ret == null) {
+                if (!notFoundOk)
                     throw new IllegalArgumentException("Parameter " + name + " not found");
                 return false;
             }
 
-            if (ret.size() == 1)
-            {
+            if (ret.size() == 1) {
                 return Const.Bool.lookupValue(ret.get(0));
 
             }
@@ -336,37 +285,31 @@ public class ParamUtil {
             throw new IllegalArgumentException(name + " value not found or no valid");
         }
 
-        public String stringValue(int index)
-        {
-            return stringValue(""+index);
+        public String stringValue(int index) {
+            return stringValue("" + index);
         }
-        public String stringValue(String name)
-        {
+
+        public String stringValue(String name) {
             return stringValue(name, null, false);
         }
 
-        public String stringValue(String name, boolean nullOk)
-        {
+        public String stringValue(String name, boolean nullOk) {
             return stringValue(name, null, nullOk);
         }
 
-        public String stringValue(String name, String defaultValue)
-        {
+        public String stringValue(String name, String defaultValue) {
             return stringValue(name, defaultValue, true);
         }
 
-        public String stringValue(String name, String defaultValue, boolean nullOk)
-        {
+        public String stringValue(String name, String defaultValue, boolean nullOk) {
             List<String> ret = lookup(name);
-            if(ret == null || ret.isEmpty())
-            {
-                if(defaultValue == null && !nullOk)
+            if (ret == null || ret.isEmpty()) {
+                if (defaultValue == null && !nullOk)
                     throw new IllegalArgumentException("Parameter " + name + " not found");
                 return defaultValue;
             }
 
-            if (ret.size() == 1)
-            {
+            if (ret.size() == 1) {
                 return ret.get(0);
             }
 
@@ -374,24 +317,20 @@ public class ParamUtil {
         }
 
 
-        public List<String> lookup(int index)
-        {
-            return lookup(""+index);
+        public List<String> lookup(int index) {
+            return lookup("" + index);
         }
 
-        public List<String> lookup(String name)
-        {
-            if(ignoreCase)
-            {
+        public List<String> lookup(String name) {
+            if (ignoreCase) {
                 name = name.toLowerCase();
             }
-            
+
             return map.get(name);
-             
+
         }
 
-        public NVPair asNVPair(String name)
-        {
+        public NVPair asNVPair(String name) {
             List<String> ret = map.get(name);
             if (ret != null && ret.size() > 0)
                 return new NVPair(name, ret.get(0));
@@ -399,27 +338,22 @@ public class ParamUtil {
             return null;
         }
 
-        public String[] namelessValues(String ...toAppend)
-        {
+        public String[] namelessValues(String... toAppend) {
             List<String> ret = new ArrayList<String>();
             SharedUtil.addTo(ret, toAppend);
-            for (int i=0 ; i < namelessCount(); i++){
+            for (int i = 0; i < namelessCount(); i++) {
                 ret.add(stringValue((i)));
             }
             return ret.toArray(new String[0]);
         }
 
         @Override
-        public String toString()
-        {
+        public String toString() {
             Map<String, List<String>> toExpose = map;
-            if(!hidden.isEmpty())
-            {
+            if (!hidden.isEmpty()) {
                 toExpose = new LinkedHashMap<>();
-                for(Map.Entry<String, List<String>> kv : map.entrySet())
-                {
-                    if(!hidden.contains(kv.getKey()))
-                    {
+                for (Map.Entry<String, List<String>> kv : map.entrySet()) {
+                    if (!hidden.contains(kv.getKey())) {
                         toExpose.put(kv.getKey(), kv.getValue());
                     }
                 }
@@ -434,68 +368,52 @@ public class ParamUtil {
     }
 
 
-
-    public static ParamMap parse(String nvTag, String ...args)
-    {
+    public static ParamMap parse(String nvTag, String... args) {
         return parse(nvTag, true, 0, args);
     }
 
-    public static ParamMap parse(String nvTag, int index, String ...args)
-    {
+    public static ParamMap parse(String nvTag, int index, String... args) {
         return parse(nvTag, true, index, args);
     }
 
-    public static ParamMap parse(String nvTag, boolean ignoreCase, String ...args)
-    {
-        return parse(nvTag,ignoreCase, 0, args);
+    public static ParamMap parse(String nvTag, boolean ignoreCase, String... args) {
+        return parse(nvTag, ignoreCase, 0, args);
     }
 
 
-    public static ParamMap parse(String nvTag, boolean ignoreCase, int index, String ...args)
-    {
+    public static ParamMap parse(String nvTag, boolean ignoreCase, int index, String... args) {
         Map<String, List<String>> retMap = new LinkedHashMap<String, List<String>>();
 
 
         int counter = 0;
-        for(; index < args.length; index++)
-        {
-            if (!SUS.isEmpty(args[index]))
-            {
+        for (; index < args.length; index++) {
+            if (!SUS.isEmpty(args[index])) {
                 String name = null;
                 String value = null;
-                if(args[index].startsWith(nvTag))
-                {
+                if (args[index].startsWith(nvTag)) {
                     name = args[index++];
-                    if (index < args.length)
-                    {
+                    if (index < args.length) {
                         value = args[index];
                     }
-                }
-                else if(args[index].indexOf('=') != -1)
-                {
+                } else if (args[index].indexOf('=') != -1) {
                     // we have name=value
                     NVPair nvp = SharedUtil.toNVPair(args[index]);
                     name = nvp.getName();
                     value = nvp.getValue();
-                }
-                else
-                {
+                } else {
                     value = args[index];
                 }
 
-                if(name == null)
-                {
+                if (name == null) {
                     name = "" + counter++;
                 }
 
-                if(ignoreCase)
-                {
+                if (ignoreCase) {
                     name = name.toLowerCase();
                 }
 
 
-                if(retMap.get(name) == null)
-                {
+                if (retMap.get(name) == null) {
                     retMap.put(name, new ArrayList<String>());
                 }
 
@@ -508,22 +426,18 @@ public class ParamUtil {
     }
 
 
-    public static ParamMap parse(ParamInfoList piList, String ...args)
-    {
+    public static ParamMap parse(ParamInfoList piList, String... args) {
         return parse(piList, 0, args);
     }
 
-    public static ParamMap parse(ParamInfoList piList, int index, String ...args)
-    {
+    public static ParamMap parse(ParamInfoList piList, int index, String... args) {
         Map<String, List<String>> retMap = new LinkedHashMap<String, List<String>>();
 
 
         int counter = 0;
         ParamInfo lastMulti = null;
-        for(; index < args.length; index++)
-        {
-            if (!SUS.isEmpty(args[index]))
-            {
+        for (; index < args.length; index++) {
+            if (!SUS.isEmpty(args[index])) {
                 String name = null;
                 String value = null;
 
@@ -531,54 +445,42 @@ public class ParamUtil {
                 ParamInfo pi = piList.lookup(args[index]);
 
 
-                if(pi==null)
-                {
-                    if (lastMulti != null)
-                    {
+                if (pi == null) {
+                    if (lastMulti != null) {
                         value = args[index];
                         pi = lastMulti;
                         name = pi.getParam();
                         if (name == null)
                             name = pi.getName();
-                    }
-                    else
-                    {
+                    } else {
                         lastMulti = null;
                         name = "" + counter++;
                         value = args[index];
                     }
-                }
-                else
-                {
+                } else {
                     lastMulti = null;
                     name = pi.getParam();
                     if (name == null)
                         name = pi.getName();
 
-                    if (pi.getValueType() == ParamInfo.ValueType.NONE)
-                    {
+                    if (pi.getValueType() == ParamInfo.ValueType.NONE) {
                         value = name;
-                    }
-                    else if (pi.getValueType() == ParamInfo.ValueType.MULTI)
-                    {
+                    } else if (pi.getValueType() == ParamInfo.ValueType.MULTI) {
                         lastMulti = pi;
                         value = args[++index];
 
-                    }
-                    else
-                    {
+                    } else {
                         value = args[++index];
                     }
 
                 }
 
-                if(lookup(name, retMap) == null)
-                {
+                if (lookup(name, retMap) == null) {
                     ArrayList<String> al = new ArrayList<String>();
-                    if(pi != null)
-                      put(pi, al, retMap);
+                    if (pi != null)
+                        put(pi, al, retMap);
                     else
-                      put(name, al, retMap);
+                        put(name, al, retMap);
 
                 }
 
@@ -592,24 +494,51 @@ public class ParamUtil {
         return new ParamMap(true, retMap, counter);
     }
 
-    private static List<String> lookup(String key, Map<String, List<String>> map)
-    {
+    private static List<String> lookup(String key, Map<String, List<String>> map) {
         return map.get(key.toLowerCase());
     }
 
-    private static void put(String key, List<String> list, Map<String, List<String>> map)
-    {
-        if(key != null)
+    private static void put(String key, List<String> list, Map<String, List<String>> map) {
+        if (key != null)
             map.put(key.toLowerCase(), list);
     }
 
-    private static void put(ParamInfo key, List<String> list, Map<String, List<String>> map)
-    {
+    private static void put(ParamInfo key, List<String> list, Map<String, List<String>> map) {
         put(key.getParam(), list, map);
         put(key.getName(), list, map);
     }
 
 
+    /**
+     * Parse (n1,v1),(n2,v2)... as a List<GetNameValue>
+     *
+     * @param input string to be parsed
+     * @return list of GetNameValue
+     */
+    public static List<GetNameValue<String>> parseGroupedValues(String input) {
+
+        List<GetNameValue<String>> result = new ArrayList<>();
+
+
+        if (SUS.isNotEmpty(input)) {
+            String[] parts = input.split("\\)\\s*,\\s*\\(");
+
+            for (String part : parts) {
+                // 2) Remove any leading "(" or trailing ")" (plus spaces)
+                part = part.replaceAll("^\\s*\\(\\s*|\\s*\\)\\s*$", "");
+                if (part.isEmpty()) continue;
+
+                // 3) Split name/value on comma with optional spaces, limit to 2
+                String[] nv = part.split("\\s*,\\s*", 2);
+                if (nv.length == 2) {
+                    String name = nv[0].trim();
+                    String value = nv.length > 1 ? nv[1].trim() : "";
+                    result.add(new NVPair(name, value));
+                }
+            }
+        }
+        return result;
+    }
 
 
 }

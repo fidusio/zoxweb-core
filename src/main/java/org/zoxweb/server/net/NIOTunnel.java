@@ -84,6 +84,7 @@ public class NIOTunnel
     final private IPAddress remoteAddress;
 
     public NIOTunnel(IPAddress remoteAddress) {
+        super(true);
         this.remoteAddress = remoteAddress;
     }
 

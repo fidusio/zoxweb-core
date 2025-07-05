@@ -37,6 +37,7 @@ public class NIOSocketHandler
     private final PlainSessionCallback sessionCallback;
 
     public NIOSocketHandler(PlainSessionCallback psc) {
+        super(true);
         this.sessionCallback = psc;
     }
 

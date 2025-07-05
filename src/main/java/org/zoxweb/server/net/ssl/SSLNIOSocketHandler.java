@@ -161,6 +161,7 @@ public class SSLNIOSocketHandler
 	public SSLNIOSocketHandler(SSLContextInfo sslContext, SSLSessionCallback sessionCallback, boolean simpleStateMachine,
 							   IPAddress rc)
 	{
+		super(true);
 		SUS.checkIfNulls("context  can't be null", sslContext);
 		this.sslContext = sslContext;
 		remoteConnection = rc;

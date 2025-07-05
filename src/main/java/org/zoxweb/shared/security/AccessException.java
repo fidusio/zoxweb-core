@@ -18,108 +18,94 @@ package org.zoxweb.shared.security;
 import org.zoxweb.shared.util.ExceptionReason;
 
 /**
- * This exception is caused by a security access revocation 
- * @author mnael
+ * This exception is caused by a security access revocation
  *
+ * @author mnael
  */
 @SuppressWarnings("serial")
 public class AccessException
-    extends RuntimeException
-    implements ExceptionReason
-{
-	private String urlRedirect = null;
-	private boolean reload = false;
-	private int statusCode = -1;
-	
-	
-	
-	private Reason reason = Reason.ACCESS_DENIED;
-	
-	public AccessException()
-	{
-		super();
-		
-	}
-	
-	public AccessException(String message)
-	{
-		super(message);
-	}
-	
-	public AccessException(String message, Reason reason)
-	{
-		super(message);
-		this.reason = reason;
-	}
-
-	public AccessException(String message, String urlRedirect)
-	{
-		this(message, urlRedirect, false);
-		
-	}
-	
-	public AccessException(String message, String urlRedirect, boolean reload)
-	{
-		super(message);
-		this.urlRedirect = urlRedirect;
-		this.reload = reload;
-	}
-
-	/**
-	 * Get the url redirect
-	 * @return the url redirect
-	 */
-	public String getURLRedirect()
-	{
-		return urlRedirect;
-	}
-	
-	
-	/**
-	 * Set the redirect url optional
-	 * @param urlRedirect
-	 */
-	public void setURLRedirect(String urlRedirect)
-	{
-		this.urlRedirect = urlRedirect;
-	}
-	
-	public boolean isReloadRequired()
-	{
-		return reload;
-	}
-	
-	public void setReloadRequired(boolean reload)
-	{
-		this.reload = reload;
-	}
-	
-	
-	
+        extends RuntimeException
+        implements ExceptionReason {
+    private String urlRedirect = null;
+    private boolean reload = false;
+    private int statusCode = -1;
 
 
-	public Reason getReason()
-	{
-		// TODO Auto-generated method stub
-		return reason;
-	}
+    private Reason reason = Reason.ACCESS_DENIED;
 
-	public void setReason(Reason reason) 
-	{
-		// TODO Auto-generated method stub
-		this.reason = reason;
-	}
+    public AccessException() {
+        super();
 
-  @Override
-  public int getStatusCode() {
-    // TODO Auto-generated method stub
-    return statusCode;
-  }
+    }
 
-  @Override
-  public void setStatusCode(int code) {
-    // TODO Auto-generated method stub
-    statusCode = code;
-  }
-	
+    public AccessException(String message) {
+        super(message);
+    }
+
+    public AccessException(String message, Reason reason) {
+        super(message);
+        this.reason = reason;
+    }
+
+    public AccessException(String message, String urlRedirect) {
+        this(message, urlRedirect, false);
+
+    }
+
+    public AccessException(String message, String urlRedirect, boolean reload) {
+        super(message);
+        this.urlRedirect = urlRedirect;
+        this.reload = reload;
+    }
+
+    /**
+     * Get the url redirect
+     *
+     * @return the url redirect
+     */
+    public String getURLRedirect() {
+        return urlRedirect;
+    }
+
+
+    /**
+     * Set the redirect url optional
+     *
+     * @param urlRedirect
+     */
+    public void setURLRedirect(String urlRedirect) {
+        this.urlRedirect = urlRedirect;
+    }
+
+    public boolean isReloadRequired() {
+        return reload;
+    }
+
+    public void setReloadRequired(boolean reload) {
+        this.reload = reload;
+    }
+
+
+    public Reason getReason() {
+        // TODO Auto-generated method stub
+        return reason;
+    }
+
+    public void setReason(Reason reason) {
+        // TODO Auto-generated method stub
+        this.reason = reason;
+    }
+
+    @Override
+    public int getStatusCode() {
+        // TODO Auto-generated method stub
+        return statusCode;
+    }
+
+    @Override
+    public void setStatusCode(int code) {
+        // TODO Auto-generated method stub
+        statusCode = code;
+    }
+
 }

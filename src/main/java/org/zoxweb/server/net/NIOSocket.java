@@ -148,7 +148,7 @@ public class NIOSocket
 
     public SelectionKey addDatagramChannel(DatagramChannel dc, ProtocolFactory<?> psf) throws IOException {
         SUS.checkIfNulls("Null values", dc, psf);
-        SelectionKey sk = selectorController.register(dc, SelectionKey.OP_ACCEPT, psf, false);
+        SelectionKey sk = selectorController.register(dc, SelectionKey.OP_READ, psf.newInstance(), false);
         logger.getLogger().info(dc + " added");
 
         return sk;

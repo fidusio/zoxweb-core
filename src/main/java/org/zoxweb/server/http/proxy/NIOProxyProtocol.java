@@ -179,6 +179,7 @@ public class NIOProxyProtocol
 
 	private NIOProxyProtocol()
 	{
+		super(true);
 		sourceBB =  ByteBufferUtil.allocateByteBuffer(BufferType.DIRECT);
 	}
 	

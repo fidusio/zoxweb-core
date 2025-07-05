@@ -15,6 +15,7 @@ implements KVMapStore<K,V>
 	protected final Set<K> exclusionFilter;
 	protected final DataSizeReader<V> sizeReader;
 	protected final AtomicLong dataSize = new AtomicLong();
+	protected DataEncoder<K,K> keyFilter = null;
 
 
 	public KVMapStoreDefault(Map<K,V> map)
@@ -40,6 +41,7 @@ implements KVMapStore<K,V>
 	{
 		if (key != null && value != null)
 		{
+			key = keyFilter != null ? keyFilter.encode(key) : key;
 			if (!exclusionFilter.contains(key))
 			{
 				V oldValue = mapCache.put(key, value);
@@ -64,7 +66,7 @@ implements KVMapStore<K,V>
 	@Override
 	public synchronized V get(K key) {
 		// TODO Auto-generated method stub
-		return mapCache.get(key);
+		return mapCache.get(keyFilter != null ? keyFilter.encode(key) : key);
 	}
 
 	@Override

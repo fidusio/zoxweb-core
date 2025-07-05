@@ -16,34 +16,31 @@
 package org.zoxweb.shared.security;
 
 /**
- * Exception used to General Security issues 
- * 
+ * Exception used to General Security issues
  */
 @SuppressWarnings("serial")
 public class AccessSecurityException
-    extends AccessException
-{
-	public AccessSecurityException()
-	{
-		super();
-	}
-	
-	public AccessSecurityException(String message)
-	{
-		super(message);
-	}
-	
-	
-	public AccessSecurityException(String message, String urlRedirect)
-	{
-		super(message, urlRedirect, false);
-		
-	}
-	
-	public AccessSecurityException(String message, String urlRedirect, boolean reload)
-	{
-		super(message, urlRedirect, reload);
-	}
-	
-	
+        extends AccessException {
+    public AccessSecurityException() {
+        super();
+    }
+
+    public AccessSecurityException(String message) {
+        super(message);
+    }
+
+    public AccessSecurityException(String message, Reason reason) {
+        super(message, reason);
+    }
+
+
+    public AccessSecurityException(String message, String urlRedirect) {
+        super(message, urlRedirect, false);
+    }
+
+    public AccessSecurityException(String message, String urlRedirect, boolean reload) {
+        super(message, urlRedirect, reload);
+    }
+
+
 }

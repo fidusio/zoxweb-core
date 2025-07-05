@@ -73,9 +73,12 @@ public abstract class ProtocolHandler
     private final PHTimeout phTimeout;
 
 
-    protected ProtocolHandler() {
+    protected ProtocolHandler(boolean enableTimeout) {
         updateUsage();
-        phTimeout = new PHTimeout(this, SESSION_TIMEOUT);
+        if(enableTimeout)
+            phTimeout = new PHTimeout(this, SESSION_TIMEOUT);
+        else
+            phTimeout = null;
 
     }
 
@@ -164,7 +167,8 @@ public abstract class ProtocolHandler
     public final void close() throws IOException {
         if (!isClosed.getAndSet(true)) {
             close_internal();
-            phTimeout.timeout.cancel();
+            if(phTimeout != null)
+                phTimeout.timeout.cancel();
         }
     }
 
