@@ -16,11 +16,11 @@
 package org.zoxweb.shared.net;
 
 
-import java.util.HashMap;
-import java.util.HashSet;
-
 import org.zoxweb.shared.util.KVMapStoreDefault;
 import org.zoxweb.shared.util.SharedStringUtil;
+
+import java.util.HashMap;
+import java.util.HashSet;
 
 
 public class IPMapCache 
@@ -42,7 +42,7 @@ extends KVMapStoreDefault<String, String>
 			{
 				
 				{
-					mapCache.put(ipAddress, macAddress);
+					put(ipAddress, macAddress);
 					return true;
 				}
 			}

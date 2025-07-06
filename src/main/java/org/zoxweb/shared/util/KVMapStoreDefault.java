@@ -11,7 +11,7 @@ public class KVMapStoreDefault<K,V>
 implements KVMapStore<K,V>
 {
 
-	protected final Map<K, V> mapCache;
+	private final Map<K, V> mapCache;
 	protected final Set<K> exclusionFilter;
 	protected final DataSizeReader<V> sizeReader;
 	protected final AtomicLong dataSize = new AtomicLong();
@@ -41,7 +41,8 @@ implements KVMapStore<K,V>
 	{
 		if (key != null && value != null)
 		{
-			key = keyFilter != null ? keyFilter.encode(key) : key;
+			key = toKey(key);
+
 			if (!exclusionFilter.contains(key))
 			{
 				V oldValue = mapCache.put(key, value);
@@ -56,6 +57,11 @@ implements KVMapStore<K,V>
 
 		return false;
 	}
+
+	private K toKey(K key)
+	{
+		return keyFilter != null ? keyFilter.encode(key) : key;
+	}
 	
 //	@Override
 //	public  boolean map(K key, V value)
@@ -66,13 +72,13 @@ implements KVMapStore<K,V>
 	@Override
 	public synchronized V get(K key) {
 		// TODO Auto-generated method stub
-		return mapCache.get(keyFilter != null ? keyFilter.encode(key) : key);
+		return mapCache.get(toKey(key));
 	}
 
 	@Override
 	public synchronized boolean remove(K key) {
 		// TODO Auto-generated method stub
-		V oldValue = mapCache.remove(key);
+		V oldValue = mapCache.remove(toKey(key));
 		if(sizeReader != null) {
 			long toSubtract = sizeReader.size(oldValue);
 
@@ -82,9 +88,15 @@ implements KVMapStore<K,V>
 	}
 
 
+	protected Map<K,V> getMapCache()
+	{
+		return mapCache;
+	}
+
+
 	public synchronized V removeGet(K key) {
 		// TODO Auto-generated method stub
-		V oldValue = mapCache.remove(key);
+		V oldValue = mapCache.remove(toKey(key));
 		if(sizeReader != null) {
 			long toSubtract = sizeReader.size(oldValue);
 
@@ -133,7 +145,7 @@ implements KVMapStore<K,V>
 	@Override
 	public synchronized void addExclusion(K exclusion)
 	{
-		exclusionFilter.add(exclusion);
+		exclusionFilter.add(toKey(exclusion));
 	}
 
 	@Override
