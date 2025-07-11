@@ -40,6 +40,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -50,8 +51,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class NIOSocket
         implements Runnable, DaemonController, Closeable {
     public static final LogWrapper logger = new LogWrapper(NIOSocket.class).setEnabled(false);
-    //public static boolean debug = false;
-    private AtomicBoolean live = new AtomicBoolean(true);
+    private final AtomicBoolean live = new AtomicBoolean(true);
     private final SelectorController selectorController;
     private final Executor executor;
     private final TaskSchedulerProcessor tsp;
@@ -64,12 +64,6 @@ public class NIOSocket
     private final long startTime = System.currentTimeMillis();
     private EventListenerManager<BaseEventObject<?>, ?> eventListenerManager = null;
     private final RateCounter callsCounter = new RateCounter("nio-calls-counter");
-
-
-//	public NIOSocket(Executor exec, TaskSchedulerProcessor tsp) throws IOException
-//	{
-//		this(null, 0, null, exec);
-//	}
 
 
     public NIOSocket(Executor exec, TaskSchedulerProcessor tsp) throws IOException {
@@ -97,13 +91,7 @@ public class NIOSocket
         return sk;
     }
 
-    public SelectionKey addDatagramChannel(InetSocketAddress sa, ProtocolFactory<?> psf) throws IOException {
-        SUS.checkIfNulls("Null values", sa, psf);
-        DatagramChannel dc = DatagramChannel.open();
-        dc.socket().bind(sa);
 
-        return addDatagramChannel(dc, psf);
-    }
 
 
     public SelectionKey addClientSocket(InetSocketAddress sa, ProtocolFactory<?> psf) throws IOException {
@@ -145,8 +133,14 @@ public class NIOSocket
         return ret;
     }
 
+    public SelectionKey addDatagramSocket(InetSocketAddress sa, ProtocolFactory<?> psf) throws IOException {
+        SUS.checkIfNulls("Null values", sa, psf);
+        DatagramChannel dc = DatagramChannel.open();
+        dc.socket().bind(sa);
 
-    public SelectionKey addDatagramChannel(DatagramChannel dc, ProtocolFactory<?> psf) throws IOException {
+        return addDatagramSocket(dc, psf);
+    }
+    public SelectionKey addDatagramSocket(DatagramChannel dc, ProtocolFactory<?> psf) throws IOException {
         SUS.checkIfNulls("Null values", dc, psf);
         SelectionKey sk = selectorController.register(dc, SelectionKey.OP_READ, psf.newInstance(), false);
         logger.getLogger().info(dc + " added");
@@ -443,7 +437,7 @@ public class NIOSocket
     @Override
     public boolean isClosed() {
         // TODO Auto-generated method stub
-        return live.get();
+        return !live.get();
     }
 
     @Override
@@ -464,6 +458,15 @@ public class NIOSocket
             IOUtil.close(selectorController);
         }
 
+    }
+
+
+    public Executor getExecutor() {
+        return executor;
+    }
+
+    public ScheduledExecutorService getScheduler() {
+        return tsp;
     }
 
 

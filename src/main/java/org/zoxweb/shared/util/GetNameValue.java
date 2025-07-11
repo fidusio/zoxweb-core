@@ -19,78 +19,80 @@ import java.util.Objects;
 
 /**
  * The name value pair getter definition interface.
- * @author mnael
  *
  * @param <V>
+ * @author mnael
  */
 public interface GetNameValue<V>
-	extends GetName, GetValue<V>
-{
+        extends GetName, GetValue<V> {
 
-	final class GetNameValueImpl<V>
-			implements GetNameValue<V>
-	{
-		private final String name;
-		private final V value;
+    final class GetNameValueImpl<V>
+            implements GetNameValue<V> {
+        private final String name;
+        private final V value;
 
-		private GetNameValueImpl(String name, V value)
-		{
-			this.name = name;
-			this.value = value;
-		}
+        private GetNameValueImpl(String name, V value) {
+            this.name = name;
+            this.value = value;
+        }
 
-		/**
-		 * @return the name of the object
-		 */
-		@Override
-		public String getName() {
-			return name;
-		}
+        /**
+         * @return the name of the object
+         */
+        @Override
+        public String getName() {
+            return name;
+        }
 
-		/**
-		 * Returns the value.
-		 *
-		 * @return typed value
-		 */
-		@Override
-		public V getValue() {
-			return value;
-		}
+        /**
+         * Returns the value.
+         *
+         * @return typed value
+         */
+        @Override
+        public V getValue() {
+            return value;
+        }
 
-		@Override
-		public boolean equals(Object o) {
-			if (!(o instanceof GetNameValue)) return false;
-			GetNameValue<?> that = (GetNameValue<?>) o;
-			return Objects.equals(name, that.getName()) && Objects.equals(value, that.getValue());
-		}
+        @Override
+        public boolean equals(Object o) {
+            if (!(o instanceof GetNameValue)) return false;
+            GetNameValue<?> that = (GetNameValue<?>) o;
+            return Objects.equals(name, that.getName()) && Objects.equals(value, that.getValue());
+        }
 
-		@Override
-		public int hashCode() {
-			return Objects.hash(name, value);
-		}
-	}
+        @Override
+        public int hashCode() {
+            return Objects.hash(name, value);
+        }
 
-	/**
-	 * This should only be used in memory read only Objets
-	 * @param name of the object
-	 * @param value value of object
-	 * @return the GetNameValue encapsulation
-	 * @param <V> for type conversion and ease of use
-	 */
-	static <V> GetNameValue<V> create(String name, V value)
-	{
-		return new GetNameValueImpl<>(name, value);
-	}
+        @Override
+        public String toString() {
+            return "{" + name + ":" + value + "}";
+        }
+    }
 
-	/**
-	 * This should only be used in memory read only Objets
-	 * @param name of the object
-	 * @param value value of object
-	 * @return the GetNameValue encapsulation
-	 * @param <V> for type conversion and ease of use
-	 */
-	static <V> GetNameValue<V> create(GetName name, V value)
-	{
-		return new GetNameValueImpl<>(name.getName(), value);
-	}
+    /**
+     * This should only be used in memory read only Objets
+     *
+     * @param name  of the object
+     * @param value value of object
+     * @param <V>   for type conversion and ease of use
+     * @return the GetNameValue encapsulation
+     */
+    static <V> GetNameValue<V> create(String name, V value) {
+        return new GetNameValueImpl<>(name, value);
+    }
+
+    /**
+     * This should only be used in memory read only Objets
+     *
+     * @param name  of the object
+     * @param value value of object
+     * @param <V>   for type conversion and ease of use
+     * @return the GetNameValue encapsulation
+     */
+    static <V> GetNameValue<V> create(GetName name, V value) {
+        return new GetNameValueImpl<>(name.getName(), value);
+    }
 }

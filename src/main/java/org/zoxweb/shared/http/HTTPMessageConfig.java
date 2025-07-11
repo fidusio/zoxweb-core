@@ -268,7 +268,7 @@ public class HTTPMessageConfig
      */
     public void setContent(byte[] content) {
         setValue(Params.CONTENT, content);
-        setContentLength(content != null ? content.length  : 0);
+        setContentLength(content != null ? content.length : 0);
     }
 
     /**
@@ -297,12 +297,15 @@ public class HTTPMessageConfig
         if (contentAsIS != null)
             return contentAsIS;
 
-        if (getContent() != null) {
-            contentAsIS = new ByteArrayInputStream(getContent());
-            return contentAsIS;
-        }
 
-        return null;
+        contentAsIS = getContent() != null ? new ByteArrayInputStream(getContent()) : new ByteArrayInputStream(Const.EMPTY_BYTE_ARRAY);
+        return contentAsIS;
+//        if (getContent() != null) {
+//            contentAsIS = new ByteArrayInputStream(getContent());
+//            return contentAsIS;
+//        }
+//
+//        return getContent() != null ;
     }
 
     /**
