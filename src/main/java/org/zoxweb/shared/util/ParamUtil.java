@@ -540,5 +540,9 @@ public class ParamUtil {
         return result;
     }
 
+    public static String[] parseWithSep(String sep, String token) {
+        return SharedStringUtil.parseString(token, sep, true);
+    }
+
 
 }
