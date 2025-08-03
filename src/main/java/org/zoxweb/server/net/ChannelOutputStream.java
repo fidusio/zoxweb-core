@@ -11,7 +11,7 @@ import java.nio.channels.ByteChannel;
 public class ChannelOutputStream
         extends BaseChannelOutputStream {
 
-    public ChannelOutputStream(ProtocolHandler ph, ByteChannel byteChannel, int outAppBufferSize) {
+    public ChannelOutputStream(ProtocolHandler ph, ByteChannel byteChannel, int outAppBufferSize) throws IOException{
         super(ph, byteChannel, outAppBufferSize);
     }
 

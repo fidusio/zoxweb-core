@@ -8,8 +8,10 @@ import org.zoxweb.shared.util.SUS;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.ByteChannel;
+import java.nio.channels.SocketChannel;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class BaseChannelOutputStream extends OutputStream
@@ -22,9 +24,11 @@ public abstract class BaseChannelOutputStream extends OutputStream
     protected final byte[] oneByteBuffer = new byte[1];
     protected final AtomicBoolean isClosed = new AtomicBoolean(false);
     protected final ProtocolHandler protocolHandler;
+    protected final InetSocketAddress clientAddress;
 
-    protected BaseChannelOutputStream(ProtocolHandler ph, ByteChannel outByteChannel, int outAppBufferSize) {
+    protected BaseChannelOutputStream(ProtocolHandler ph, ByteChannel outByteChannel, int outAppBufferSize) throws IOException {
         SUS.checkIfNulls("Protocol handler or channel can't be null ", ph, outByteChannel);
+        this.clientAddress = (InetSocketAddress) ((SocketChannel) outByteChannel).getRemoteAddress();
         this.outChannel = outByteChannel;
         if (outAppBufferSize > 0) {
             outAppData = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.DIRECT, outAppBufferSize);
@@ -40,11 +44,11 @@ public abstract class BaseChannelOutputStream extends OutputStream
         write(oneByteBuffer, 0, 1);
     }
 
-    public void write(UByteArrayOutputStream ubaos, boolean reset) throws IOException {
-        synchronized (ubaos) {
-            write(ubaos.getInternalBuffer(), 0, ubaos.size());
+    public void write(UByteArrayOutputStream byteArrayOutputStream, boolean reset) throws IOException {
+        synchronized (byteArrayOutputStream) {
+            write(byteArrayOutputStream.getInternalBuffer(), 0, byteArrayOutputStream.size());
             if (reset)
-                ubaos.reset();
+                byteArrayOutputStream.reset();
         }
     }
 
@@ -63,6 +67,11 @@ public abstract class BaseChannelOutputStream extends OutputStream
             write(outAppData);
             off += tempLen;
         }
+    }
+
+
+    public InetSocketAddress getClientAddress(){
+        return clientAddress;
     }
 
     public abstract int write(ByteBuffer byteBuffer) throws IOException;

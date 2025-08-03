@@ -17,7 +17,7 @@ import static javax.net.ssl.SSLEngineResult.HandshakeStatus.NOT_HANDSHAKING;
 public class SSLChannelOutputStream extends BaseChannelOutputStream {
     private final SSLSessionConfig config;
 
-    protected SSLChannelOutputStream(ProtocolHandler protocolHandler, SSLSessionConfig config, int outAppBufferSize) {
+    protected SSLChannelOutputStream(ProtocolHandler protocolHandler, SSLSessionConfig config, int outAppBufferSize) throws IOException {
         super(protocolHandler, config.sslChannel, outAppBufferSize);
         this.config = config;
     }

@@ -236,6 +236,12 @@ public class NetUtil {
         return null;
     }
 
+    public static InetSocketAddress parse(String addressPort)
+    {
+        IPAddress ipAddress = IPAddress.parse(addressPort);
+        return new InetSocketAddress(ipAddress.getInetAddress(), ipAddress.getPort());
+    }
+
     /**
      * Return all the ip V6 addresses associated with the ni
      *
