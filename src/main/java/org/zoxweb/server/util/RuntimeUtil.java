@@ -16,6 +16,7 @@
 package org.zoxweb.server.util;
 
 import org.zoxweb.server.io.IOUtil;
+import org.zoxweb.server.io.UByteArrayOutputStream;
 import org.zoxweb.shared.data.RuntimeResultDAO;
 import org.zoxweb.shared.data.RuntimeResultDAO.ResultAttribute;
 import org.zoxweb.shared.data.VMInfoDAO;
@@ -27,33 +28,105 @@ import org.zoxweb.shared.util.SharedUtil;
 
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.Callable;
 
 public class RuntimeUtil {
 
     public enum ShellType
-            implements GetValue<String> {
+            implements GetValue<String[]> {
 
-        SH("/bin/sh"),
-        BASH("/bin/bash"),
+        SH("/bin/sh -c"),
+        BASH("/bin/bash -c"),
+        CMD("cmd.exe /c"),
         ;
 
 
-        private final String value;
+        private final String[] values;
+
 
 
         ShellType(String value) {
-            this.value = value;
+            this.values = value.split(" ");
         }
 
         /**
          * @return the name of the object
          */
         @Override
-        public String getValue() {
-            return value;
+        public String [] getValue() {
+            return values;
         }
+
+        public List<String> toCommand(String ...args)
+        {
+            List<String> argsAsList = new ArrayList<>();
+            Collections.addAll(argsAsList, getValue());
+            Collections.addAll(argsAsList, args);
+            return argsAsList;
+        }
+
     }
 
+
+    public static class ProcessExec
+            implements Callable<RuntimeResultDAO> {
+        private final ProcessBuilder pb;
+        private final UByteArrayOutputStream outStream;
+
+        public ProcessExec(String... args) {
+            pb = new ProcessBuilder(args);
+            outStream = new UByteArrayOutputStream();
+            //error stream part of output stream
+            pb.redirectErrorStream(true);
+
+        }
+
+        public ProcessExec(List<String> args) {
+            pb = new ProcessBuilder(args);
+            outStream = new UByteArrayOutputStream();
+            //error stream part of output stream
+            pb.redirectErrorStream(true);
+        }
+
+
+        /**
+         * Create a process based on the shell type and command arguments
+         * @param shellType shell type
+         * @param commandPlusArgs command and its arguments
+         * @return ProcessExec then invoke call() to execute
+         */
+        public static ProcessExec create(ShellType shellType, String ...commandPlusArgs)
+        {
+            return new ProcessExec(shellType.toCommand(commandPlusArgs));
+        }
+
+        /**
+         * Runs this operation.
+         */
+        @Override
+        public RuntimeResultDAO call() {
+
+            Process p = null;
+            int exitCode = -1;
+            long ts = System.currentTimeMillis();
+            try {
+                p = pb.start();
+                IOUtil.relayStreams(p.getInputStream(), outStream, false, false);
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if (p != null) {
+                    try {
+                        exitCode = p.waitFor();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            ts = System.currentTimeMillis() - ts;
+            return new RuntimeResultDAO(exitCode, outStream.toString()).setDurationBuilder(ts);
+        }
+    }
 
     public static class PIOs {
         public final Process process;
@@ -61,12 +134,14 @@ public class RuntimeUtil {
         public final BufferedReader stdIn;
         public final BufferedReader stdErr;
 
+
         public PIOs(Process process) {
             this.process = process;
             this.stdIn = new BufferedReader(new InputStreamReader(process.getInputStream()));
             this.stdErr = new BufferedReader(new InputStreamReader(process.getErrorStream()));
             this.stdOut = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()));
         }
+
     }
 
     private RuntimeUtil() {
@@ -364,7 +439,7 @@ public class RuntimeUtil {
         // cmd.add(scriptPath);
         // Otherwise invoke via the shell:
         if (shell != null)
-            cmd.add(shell.getValue());
+            Collections.addAll(cmd, shell.getValue());
         cmd.add(scriptPath);
         Collections.addAll(cmd, args);
 

@@ -34,6 +34,7 @@ public class RuntimeResultDAO
         EXIT_CODE(NVConfigManager.createNVConfig("exit_code", "Process exit code", "ExitCode", false, true, int.class)),
         OUTPUT(NVConfigManager.createNVConfig("output", "Process input stream", "Output", false, true, String.class)),
         ERROR(NVConfigManager.createNVConfig("error", "Process error stream", "Error", false, true, String.class)),
+        DURATION(NVConfigManager.createNVConfig("duration", "Execution duration in millis", "ExecDuration", false, true, long.class)),
 
         ;
 
@@ -134,6 +135,24 @@ public class RuntimeResultDAO
      */
     public void setErrorData(String errorData) {
         setValue(ResultAttribute.ERROR, errorData);
+    }
+
+    public void setDuration(long durationMillis) {
+        if (durationMillis < 0)
+            throw new IllegalArgumentException("Negative duration: " + durationMillis);
+        setValue(ResultAttribute.DURATION, durationMillis);
+    }
+
+    public RuntimeResultDAO setDurationBuilder(long durationMillis) {
+        setDuration(durationMillis);
+        return this;
+    }
+
+    /**
+     * @return the execution duration in millis
+     */
+    public long getDuration() {
+        return lookupValue(ResultAttribute.DURATION);
     }
 
 }
