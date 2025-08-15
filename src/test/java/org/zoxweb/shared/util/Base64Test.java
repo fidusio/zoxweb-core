@@ -151,7 +151,7 @@ public class Base64Test {
     }
 
     @Test
-    public void testBase64DetaultNP()
+    public void testBase64DefaultNP()
     {
         String encoded = SharedBase64.encodeAsString(Base64Type.DEFAULT_NP, toConvert);
         System.out.println(encoded);

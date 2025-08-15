@@ -589,7 +589,7 @@ public class APIAppManagerProvider
     	
     	UserIDCredentialsDAO credentials = ret.get(0);
     	// validate the old password
-    	HashUtil.validatePassword(credentials.getPassword(), oldPassword);
+    	SecUtil.SINGLETON.validatePassword(credentials.getPassword(), oldPassword);
     	
     	try 
     	{

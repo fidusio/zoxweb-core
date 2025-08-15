@@ -9,7 +9,7 @@
 Project website: https://xlogistx.io <br />
 <br />
  
-Copyright (C) 2017-2023 https://xlogistx.io
+Copyright (C) 2017-2025 https://xlogistx.io
 
 ## LICENSE
  XlogistX.IO 

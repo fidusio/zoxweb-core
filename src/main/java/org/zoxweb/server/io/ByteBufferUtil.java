@@ -21,8 +21,13 @@ import org.zoxweb.shared.util.*;
 import java.io.IOException;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import java.nio.channels.ByteChannel;
-import java.util.*;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.locks.Lock;
 
 public class ByteBufferUtil {
@@ -51,6 +56,16 @@ public class ByteBufferUtil {
     private ByteBufferUtil() {
 
 
+    }
+
+
+    public static byte[] toBytes(char[] chars) {
+        Charset utf8 = StandardCharsets.UTF_8;
+        CharBuffer charBuffer = CharBuffer.wrap(chars);
+        ByteBuffer byteBuffer = utf8.encode(charBuffer);
+        byte[] bytes = new byte[byteBuffer.remaining()];
+        byteBuffer.get(bytes);
+        return bytes;
     }
 
     private void cache0(UByteArrayOutputStream ubaos) {

@@ -22,177 +22,181 @@ import org.zoxweb.shared.util.*;
 
 /**
  * PasswordDAO
+ *
  * @author mnael
  *
  */
 @SuppressWarnings("serial")
 public class CIPassword
-    extends PropertyDAO
-    implements CryptoBase, CredentialInfo
-{
+        extends PropertyDAO
+        implements CryptoBase, CredentialInfo {
 
 
-	private enum Param
-        implements GetNVConfig
-    {
-		//HASH_ITERATION(NVConfigManager.createNVConfig("hash_iteration", "Hash iteration", "HashIteration", false, true, Integer.class)),
-		SALT(NVConfigManager.createNVConfig("salt", "The password salt", "Salt", false, true, byte[].class)),
-		HASH(NVConfigManager.createNVConfig("hash", "The password hash", "Hash", false, true, byte[].class)),
+    public enum CIProp
+            implements GetName {
+        SALT("salt"),
+        HASH("hash"),
+        ROUNDS("rounds"),
+        VERSION("version"),
+        MEMORY("memory"),
+        PARALLELISM("parallelism"),
+        ;
+        private final String name;
+
+        CIProp(String name) {
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
+        }
+    }
+
+    private enum Param
+            implements GetNVConfig {
+        //HASH_ITERATION(NVConfigManager.createNVConfig("hash_iteration", "Hash iteration", "HashIteration", false, true, Integer.class)),
+        SALT(NVConfigManager.createNVConfig("salt", "The password salt", "Salt", false, true, byte[].class)),
+        HASH(NVConfigManager.createNVConfig("hash", "The password hash", "Hash", false, true, byte[].class)),
 
         ;
 
-		private final NVConfig nvc;
+        private final NVConfig nvc;
 
-        Param(NVConfig nvc)
-        {
-			this.nvc = nvc;
-		}
-		
-		@Override
-		public NVConfig getNVConfig()
-        {
-			return nvc;
-		}	
-	}
+        Param(NVConfig nvc) {
+            this.nvc = nvc;
+        }
 
-	public final static NVConfigEntity NVCE_CI_PASSWORD = new NVConfigEntityLocal("ci_password", null, "Password", false, true, false, false, CIPassword.class, SharedUtil.extractNVConfigs(Param.values()), null, false, PropertyDAO.NVC_PROPERTY_DAO);
+        @Override
+        public NVConfig getNVConfig() {
+            return nvc;
+        }
+    }
+
+    public final static NVConfigEntity NVCE_CI_PASSWORD = new NVConfigEntityLocal("ci_password", null, "Password", false, true, false, false, CIPassword.class, SharedUtil.extractNVConfigs(Param.values()), null, false, PropertyDAO.NVC_PROPERTY_DAO);
 
     /**
      * The default constructor.
      */
-    public CIPassword()
-    {
-		super(NVCE_CI_PASSWORD);
-	}
+    public CIPassword() {
+        super(NVCE_CI_PASSWORD);
+    }
 
-	public synchronized void setName(HashType mdt)
-    {
-		SUS.checkIfNulls("Null Message Digest", mdt);
-		
-		setName(mdt.getName());
-	}
+    public synchronized void setName(HashType mdt) {
+        SUS.checkIfNulls("Null Message Digest", mdt);
+        setName(mdt.getName());
+    }
 
-	public synchronized void setName(String name)
-    {
-		SUS.checkIfNulls("Null Message Digest", name);
-
-		HashType mdt = HashType.lookup(name);
-
-		if (mdt == null)
-		{
-			throw new IllegalArgumentException("Unsupported Message Digest:" + name);
-		}
-		
-		super.setName(mdt.getName());
-	}
-
-	public int getHashIterations()
-    {
-		NVInt iterations =  getProperties().getNV(CryptoConst.HashProperty.ITERATIONS);
-		if(iterations != null)
-			return iterations.getValue();
-
-		return -1;
-	}
-
-	public synchronized void setHashIterations(int iterations)
-    {
-		if (iterations < 0)
-		{
-			throw new IllegalArgumentException("Invalid iteration value:" + iterations);
-		}
-
-		getProperties().build(new NVInt(CryptoConst.HashProperty.ITERATIONS, iterations));
-	}
-
-	public synchronized byte[] getSalt()
-    {
-		return lookupValue(Param.SALT);
-	}
-
-	public synchronized void setSalt(byte[] salt)
-    {
-		setValue( Param.SALT, salt);
-	}
-
-	public synchronized byte[] getPasswordHash()
-    {
-		return lookupValue(Param.HASH);
-	}
-
-	public synchronized void setPasswordHash(byte[] password)
-    {
-		setValue(Param.HASH, password);
-	}
-
-	public void setPasswordHash(String password)
-	{
-		setPasswordHash(SharedStringUtil.getBytes(password));
-	}
-
-	@Override
-	public String toCanonicalID()
-    {
-		if(getCanonicalID() != null)
-			return getCanonicalID();
-		return SharedUtil.toCanonicalID(':', getName(), getHashIterations(), SharedStringUtil.bytesToHex(getSalt()), SharedStringUtil.bytesToHex( getPasswordHash()));
-	}
-
-	public static CIPassword fromCanonicalID(String passwordCanonicalID)
-		throws NullPointerException, IllegalArgumentException {
-		if (SUS.isEmpty(passwordCanonicalID)) {
-			throw new NullPointerException("Empty password");
-		}
+    public synchronized void setName(String name) {
+        SUS.checkIfNulls("Null Message Digest", name);
+        super.setName(HashType.validate(name));
+    }
 
 
-		try
-		{
-			// special case to process BCrypt
-			BCryptHash bCryptHash = new BCryptHash(passwordCanonicalID);
-			CIPassword ret = new CIPassword();
-			ret.setSalt(SharedStringUtil.getBytes(bCryptHash.salt));
-			ret.setPasswordHash(bCryptHash.hash);
-			ret.setHashIterations(bCryptHash.logRound);
-			ret.setCanonicalID(bCryptHash.toCanonicalID());
-			ret.setName(HashType.BCRYPT);
-			return ret;
-		}
-		catch (Exception e)
-		{
+    public String getVersion() {
+        return getProperties().getValue(CIProp.VERSION);
+    }
 
-		}
-		
-		String[] tokens = passwordCanonicalID.split(":");
-		CIPassword ret = new CIPassword();
-		
-		switch(tokens.length)
-		{
-		case 3:
-			ret.setHashIterations(Integer.parseInt(tokens[0]));
-			ret.setSalt(SharedStringUtil.hexToBytes(tokens[1]));
-			ret.setPasswordHash(SharedStringUtil.hexToBytes(tokens[2]));
-			ret.setName("sha-256");
-			break;
-		case 4:
-			ret.setName(tokens[0].toLowerCase());
-			ret.setHashIterations(Integer.parseInt(tokens[1]));
-			ret.setSalt(SharedStringUtil.hexToBytes(tokens[2]));
-			ret.setPasswordHash(SharedStringUtil.hexToBytes(tokens[3]));
-			break;
-		default:
-			throw new IllegalArgumentException("Invalid password format");	
-		}
-		
-		return ret;
-	}
+    public void setVersion(String version) {
+        getProperties().build(CIProp.VERSION, version);
+    }
+
+    public int getRounds() {
+        NVInt iterations = getProperties().getNV(CryptoConst.HashProperty.ROUNDS);
+        if (iterations != null)
+            return iterations.getValue();
+
+        return -1;
+    }
+
+    public synchronized void setRounds(int rounds) {
+        if (rounds < 0) {
+            throw new IllegalArgumentException("Invalid iteration value:" + rounds);
+        }
+
+        getProperties().build(new NVInt(CryptoConst.HashProperty.ROUNDS, rounds));
+    }
+
+    public synchronized byte[] getSalt() {
+        return lookupValue(Param.SALT);
+    }
+
+    public synchronized void setSalt(byte[] salt) {
+        setValue(Param.SALT, salt);
+    }
+
+    public synchronized byte[] getHash() {
+        return lookupValue(Param.HASH);
+    }
+
+    public synchronized void setHash(byte[] password) {
+        setValue(Param.HASH, password);
+    }
+
+//    public void setHash(String password) {
+//        setHash(SharedStringUtil.getBytes(password));
+//    }
+
+    @Override
+    public String toCanonicalID() {
+
+        return getCanonicalID();
+
+    }
+
+//    public static CIPassword fromCanonicalID(String passwordCanonicalID)
+//            throws NullPointerException, IllegalArgumentException {
+//        if (SUS.isEmpty(passwordCanonicalID)) {
+//            throw new NullPointerException("Empty password");
+//        }
+//
+//
+//        try {
+//            // special case to process BCrypt
+//            BCryptHash bCryptHash = new BCryptHash(passwordCanonicalID);
+//            CIPassword ret = new CIPassword();
+//            ret.setSalt(SharedStringUtil.getBytes(bCryptHash.salt));
+//            ret.setHash(bCryptHash.hash);
+//            ret.setRounds(bCryptHash.logRound);
+//            ret.setCanonicalID(bCryptHash.toCanonicalID());
+//            ret.setName(HashType.BCRYPT);
+//            return ret;
+//        } catch (Exception e) {
+//        }
+//
+//        String[] tokens = SharedStringUtil.parseString(passwordCanonicalID, "\\$", true);
+//        CIPassword ret = new CIPassword();
+//
+//        switch (tokens.length) {
+//            case 3: {
+//                int index = 0;
+//                ret.setRounds(Integer.parseInt(tokens[index++]));
+//                ret.setSalt(SharedBase64.decode(SharedBase64.Base64Type.DEFAULT_NP, tokens[index++]));
+//                ret.setHash(SharedBase64.decode(SharedBase64.Base64Type.DEFAULT_NP, tokens[index++]));
+//                ret.setName(HashType.SHA_256.getName().toLowerCase());
+//            }
+//                break;
+//            case 4: {
+//                int index = 0;
+//                ret.setName(tokens[index++].toLowerCase());
+//                ret.setRounds(Integer.parseInt(tokens[index++]));
+//                ret.setSalt(SharedBase64.decode(SharedBase64.Base64Type.DEFAULT_NP,tokens[index++]));
+//                ret.setHash(SharedBase64.decode(SharedBase64.Base64Type.DEFAULT_NP,tokens[index++]));
+//                break;
+//            }
+//            default:
+//                throw new IllegalArgumentException("Invalid password format");
+//        }
+//
+//        return ret;
+//    }
 
 
-	/**
-	 * @return
-	 */
-	@Override
-	public CredentialType getCredentialType() {
-		return CredentialType.PASSWORD;
-	}
+    /**
+     * @return
+     */
+    @Override
+    public CredentialType getCredentialType() {
+        return CredentialType.PASSWORD;
+    }
 
 }

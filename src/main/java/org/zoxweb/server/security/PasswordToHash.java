@@ -2,6 +2,7 @@ package org.zoxweb.server.security;
 
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.shared.crypto.CIPassword;
+import org.zoxweb.shared.crypto.CredentialHasher;
 import org.zoxweb.shared.util.SharedStringUtil;
 
 import java.io.Console;
@@ -12,15 +13,15 @@ public class PasswordToHash {
 
     private static void error(String msg, int errorCode) {
         System.err.println("**Error**: " + msg);
-        System.err.println("usage: [aglo] [iteration] [password]");
+        System.err.println("usage: [aglo] [password]");
         System.exit(errorCode);
     }
 
     public static void main(String[] args) {
+
         try {
             int index = 0;
             String algo = args[index++];
-            int iteration = Integer.parseInt(args[index++]);
             String rawPassword = index < args.length ? args[index] : null;
             if (rawPassword == null) {
                 Console console = System.console();
@@ -48,10 +49,11 @@ public class PasswordToHash {
 
             }
 
-            CIPassword passwordDAO = HashUtil.toPassword(algo, 0, iteration, rawPassword);
+            CredentialHasher<CIPassword> credentialHasher = SecUtil.SINGLETON.lookupCredentialHasher(algo);
+            CIPassword passwordDAO = credentialHasher.hash(rawPassword);
             System.out.println(passwordDAO.toCanonicalID());
 
-            HashUtil.validatePassword(passwordDAO, rawPassword);
+            SecUtil.SINGLETON.validatePassword(passwordDAO, rawPassword);
         } catch (Exception e) {
             e.printStackTrace();
             error("error", -1);

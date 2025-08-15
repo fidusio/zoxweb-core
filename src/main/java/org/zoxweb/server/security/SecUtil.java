@@ -4,12 +4,11 @@ import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.server.util.ReflectionUtil;
 import org.zoxweb.shared.annotation.SecurityProp;
+import org.zoxweb.shared.crypto.CIPassword;
+import org.zoxweb.shared.crypto.CredentialHasher;
 import org.zoxweb.shared.crypto.CryptoConst;
 import org.zoxweb.shared.security.*;
-import org.zoxweb.shared.util.NVGenericMap;
-import org.zoxweb.shared.util.SUS;
-import org.zoxweb.shared.util.SharedBase64;
-import org.zoxweb.shared.util.SharedStringUtil;
+import org.zoxweb.shared.util.*;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -26,9 +25,12 @@ public final class SecUtil {
     public static CryptoConst.SecureRandomType SECURE_RANDOM_ALGO = null;
     public static final SecUtil SINGLETON = new SecUtil();
     private final Map<Method, ResourceSecurity> methodResourceSecurityMap = new LinkedHashMap<>();
+    private final Map<String, CredentialHasher<?>> credentialHasherMap = new LinkedHashMap<>();
     private volatile SecureRandom defaultSecureRandom = null;
 
     private SecUtil() {
+        addCredentialHasher(new BCryptPasswordHasher(10));
+        addCredentialHasher(new SHAPasswordHasher(8196));
     }
 
 
@@ -161,6 +163,40 @@ public final class SecUtil {
         return jwt;
     }
 
+
+    public CIPassword fromCanonicalID(String passwordCanID) throws NoSuchAlgorithmException {
+        SUS.checkIfNulls("null passwordCanID", passwordCanID);
+        CredentialHasher<CIPassword> ch = findCredentialHasherByCanID(passwordCanID);
+        if(ch == null)
+            throw new NoSuchAlgorithmException("Not found");
+
+        return ch.fromCanonicalID(passwordCanID);
+    }
+    public synchronized CredentialHasher<CIPassword> findCredentialHasherByCanID(String passwordCanID) {
+        String[] tokens = SharedStringUtil.parseString(passwordCanID, "\\$", true);
+        if (tokens.length > 1)
+            return lookupCredentialHasher(tokens[0]);
+        return null;
+    }
+
+
+    public synchronized SecUtil addCredentialHasher(CredentialHasher<?> credentialHasher) {
+        credentialHasherMap.put(credentialHasher.getName(), credentialHasher);
+        for (String algo : credentialHasher.supportedAlgorithms())
+            credentialHasherMap.put(algo, credentialHasher);
+        return this;
+    }
+
+    public synchronized void removeCredentialHasher(CredentialHasher<?> credentialHasher) {
+        credentialHasherMap.remove(credentialHasher.getName());
+        for (String algo : credentialHasher.supportedAlgorithms())
+            credentialHasherMap.remove(algo);
+    }
+
+    public synchronized <T> CredentialHasher<T> lookupCredentialHasher(String name) {
+        return (CredentialHasher<T>) credentialHasherMap.get(name);
+    }
+
     /**
      * This method read the assigned SecurityProp of method and if it exists it will apply it to the security profile
      *
@@ -177,6 +213,61 @@ public final class SecUtil {
             return ret;
         }
         return null;
+    }
+
+
+    public boolean isPasswordValid(final CIPassword ciPassword, String password)
+            throws NullPointerException, IllegalArgumentException {
+        SUS.checkIfNulls("Null values", ciPassword, password);
+        return isPasswordValid(ciPassword, SharedStringUtil.getBytes(password));
+    }
+
+    public boolean isPasswordValid(final CIPassword ciPassword, byte[] password)
+            throws NullPointerException, IllegalArgumentException {
+        SUS.checkIfNulls("Null values", ciPassword, password);
+        CredentialHasher<CIPassword> passwordHasher = lookupCredentialHasher(ciPassword.getName());
+        if(passwordHasher == null)
+            throw new AccessSecurityException("no credential hasher found for: " + ciPassword.getName());
+        return passwordHasher.isPasswordValid(ciPassword, password);
+    }
+
+    public boolean isPasswordValid(final CIPassword ciPassword, char[] password)
+            throws NullPointerException, IllegalArgumentException {
+        SUS.checkIfNulls("Null values", ciPassword, password);
+        CredentialHasher<CIPassword> passwordHasher = lookupCredentialHasher(ciPassword.getName());
+        if(passwordHasher == null)
+            throw new AccessSecurityException("no credential hasher found for: " + ciPassword.getName());
+        return passwordHasher.isPasswordValid(ciPassword, password);
+    }
+
+    public void validatePassword(final CIPassword passwordDAO, final char[] password)
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException {
+
+        SUS.checkIfNulls("Null values", passwordDAO, password);
+        if (isPasswordValid(passwordDAO, password))
+            return; // we hava a valid password
+        // password validation failed,
+        throw new AccessSecurityException("Invalid Credentials");
+    }
+
+
+    public void validatePassword(final CIPassword passwordDAO, final byte[] password)
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException {
+
+        SUS.checkIfNulls("Null values", passwordDAO, password);
+        if (isPasswordValid(passwordDAO, password))
+            return; // we hava a valid password
+        // password validation failed,
+        throw new AccessSecurityException("Invalid Credentials");
+    }
+
+    public  void validatePassword(final CIPassword passwordDAO, String password)
+            throws NullPointerException, IllegalArgumentException, AccessException {
+        SUS.checkIfNulls("Null values", passwordDAO, password);
+        if (isPasswordValid(passwordDAO, password))
+            return; // we hava a valid password
+        // password validation failed,
+        throw new AccessSecurityException("Invalid Credentials");
     }
 
     /**

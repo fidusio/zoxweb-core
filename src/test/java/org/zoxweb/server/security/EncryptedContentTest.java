@@ -128,10 +128,10 @@ public class EncryptedContentTest {
                 }
 
                 //System.out.println( passwordDAO.toCanonicalID());
-                System.out.println("passwordDAO:" + HashUtil.isPasswordValid(passwordDAO, "password"));
-                CIPassword passwordFromCanonicalID = CIPassword
+                System.out.println("passwordDAO:" + SecUtil.SINGLETON.isPasswordValid(passwordDAO, "password"));
+                CIPassword passwordFromCanonicalID = SecUtil.SINGLETON.findCredentialHasherByCanID(passwordDAO.getCanonicalID())
                         .fromCanonicalID(passwordDAO.toCanonicalID());
-                System.out.println("passwordFromCanonicalID:" + HashUtil
+                System.out.println("passwordFromCanonicalID:" + SecUtil.SINGLETON
                         .isPasswordValid(passwordFromCanonicalID, "password"));
                 System.out.println(passwordFromCanonicalID.toCanonicalID());
                 String json = GSONUtil.toJSON(passwordDAO, true, false, false);
@@ -142,7 +142,7 @@ public class EncryptedContentTest {
                 System.out.println(passwordDAO.toCanonicalID());
                 System.out.println(fromJSON.toCanonicalID());
 
-                System.out.println("password is equal " + HashUtil.isPasswordValid(fromJSON, "password"));
+                System.out.println("password is equal " + SecUtil.SINGLETON.isPasswordValid(fromJSON, "password"));
 
                 EncryptedKey ekd = CryptoUtil.createEncryptedKey("password");
                 String ekdJSON = GSONUtil.toJSON(ekd, true, false, false);
@@ -222,7 +222,7 @@ public class EncryptedContentTest {
                             "==============================================================================");
                     CIPassword pd = null;
                     try {
-                        pd = CIPassword.fromCanonicalID(canId);
+                        pd = SecUtil.SINGLETON.fromCanonicalID(canId);
 
                     } catch (Exception e) {
                         System.out.println(e);
@@ -239,8 +239,8 @@ public class EncryptedContentTest {
             for (HashType mdt : HashType.values()) {
                 try {
                     CIPassword pDAO = HashUtil.toPassword(mdt.getName(), 0, -1, "password");
-                    System.out.println(HashUtil
-                            .isPasswordValid(CIPassword.fromCanonicalID(pDAO.toCanonicalID()), "password")
+                    System.out.println(SecUtil.SINGLETON
+                            .isPasswordValid(SecUtil.SINGLETON.fromCanonicalID(pDAO.toCanonicalID()), "password")
                             + "::::" + pDAO.toCanonicalID());
                 } catch (NullPointerException | IllegalArgumentException
                          | NoSuchAlgorithmException e) {

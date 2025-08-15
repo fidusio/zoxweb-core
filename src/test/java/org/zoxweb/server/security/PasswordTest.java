@@ -1,6 +1,7 @@
 package org.zoxweb.server.security;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.crypto.CryptoConst;
@@ -12,11 +13,23 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
 public class PasswordTest {
+
+    @BeforeAll
+    public static void setup()
+    {
+        //SecUtil.SINGLETON.addCredentialHasher(new SHAPasswordHasher(8196)).addCredentialHasher(new BCryptPasswordHasher(10));
+    }
     @Test
     public void createPassword() throws NoSuchAlgorithmException {
         CIPassword p = HashUtil.toPassword(CryptoConst.HashType.SHA_256, 24, 8192, "P!ssw2rd");
         System.out.println(GSONUtil.toJSONDefault(p, true));
-       // p.setSalt(CryptoUtil.generateRandomHashedBytes());
+
+        System.out.println(p.toCanonicalID());
+        CIPassword regenPassword = SecUtil.SINGLETON.fromCanonicalID(p.toCanonicalID());
+        System.out.println(regenPassword.toCanonicalID());
+        System.out.println(GSONUtil.toJSONDefault(regenPassword, true));
+
+        // p.setSalt(CryptoUtil.generateRandomHashedBytes());
     }
 
 
@@ -35,23 +48,23 @@ public class PasswordTest {
 
         // generated online with clear password = password
         String bcryptHash = "$2y$10$yvHLPVjv6yF1MhI95Tw.TellvsfC7TDxYoNBxK8ksuEga8xkpHk7C";
-        CIPassword parsed = CIPassword.fromCanonicalID(bcryptHash);
+        CIPassword parsed = SecUtil.SINGLETON.fromCanonicalID(bcryptHash);
         System.out.println(bcryptHash + " " + HashUtil.isBCryptPasswordValid("password", bcryptHash));
         System.out.println(bCrypted);
-        Assertions.assertTrue(HashUtil.isPasswordValid(parsed, "password"));
+        Assertions.assertTrue(SecUtil.SINGLETON.isPasswordValid(parsed, "password"));
 
 
         CIPassword bPassword = HashUtil.toPassword(CryptoConst.HashType.BCRYPT, 0, 10, "P!ssw2rd");
         System.out.println(GSONUtil.toJSONDefault(bPassword));
-        Assertions.assertTrue(HashUtil.isPasswordValid(bPassword, "P!ssw2rd"));
+        Assertions.assertTrue(SecUtil.SINGLETON.isPasswordValid(bPassword, "P!ssw2rd"));
 
-        HashUtil.validatePassword(bPassword, "P!ssw2rd");
+        SecUtil.SINGLETON.validatePassword(bPassword, "P!ssw2rd");
 
-        CIPassword passwordFromCanonicalID = CIPassword
+        CIPassword passwordFromCanonicalID = SecUtil.SINGLETON
                 .fromCanonicalID(bPassword.toCanonicalID());
 
         System.out.println(GSONUtil.toJSONDefault(passwordFromCanonicalID));
-        Assertions.assertTrue(HashUtil.isPasswordValid(passwordFromCanonicalID, "P!ssw2rd"));
+        Assertions.assertTrue(SecUtil.SINGLETON.isPasswordValid(passwordFromCanonicalID, "P!ssw2rd"));
 
 
 
@@ -61,6 +74,6 @@ public class PasswordTest {
         assert BCrypt.isAMatch("password",hashedPW);
         bPassword = HashUtil.toPassword(CryptoConst.HashType.BCRYPT, 0, 9, "P!ssw2rd");
         System.out.println(GSONUtil.toJSONDefault(bPassword));
-        Assertions.assertTrue(HashUtil.isPasswordValid(bPassword, "P!ssw2rd"));
+        Assertions.assertTrue(SecUtil.SINGLETON.isPasswordValid(bPassword, "P!ssw2rd"));
     }
 }
