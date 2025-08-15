@@ -187,6 +187,11 @@ public final class SecUtil {
         return this;
     }
 
+    public String[] credentialHasherAlgorithms()
+    {
+        return credentialHasherMap.keySet().toArray(new String[0]);
+    }
+
     public synchronized void removeCredentialHasher(CredentialHasher<?> credentialHasher) {
         credentialHasherMap.remove(credentialHasher.getName());
         for (String algo : credentialHasher.supportedAlgorithms())
