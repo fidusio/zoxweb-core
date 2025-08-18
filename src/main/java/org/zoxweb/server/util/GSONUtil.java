@@ -133,6 +133,39 @@ public final class GSONUtil {
 
     }
 
+    public static class NamedValueSerDeserializer implements JsonSerializer<NamedValue>, JsonDeserializer<NamedValue> {
+
+        @Override
+        public JsonElement serialize(NamedValue src, Type typeOfSrc,
+                                     JsonSerializationContext context) {
+            // TODO Auto-generated method stub
+
+
+            JsonTreeWriter jtw = new JsonTreeWriter();
+            try {
+                toJSONNamedValue(jtw, src);
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+
+            return jtw.get();
+        }
+
+        @Override
+        public NamedValue deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+                throws JsonParseException {
+            // TODO Auto-generated method stub
+            NamedValue nv = new NamedValue();
+            fromJSONNamedValue(nv, json);
+            return nv;
+        }
+
+    }
+
+
+
+
 
     public static class NVStringListSerDeserializer implements JsonSerializer<NVStringList>, JsonDeserializer<NVStringList> {
 
@@ -232,6 +265,8 @@ public final class GSONUtil {
         }
 
     }
+
+
 
 
     public static class DateSerDeserializer
@@ -1868,6 +1903,7 @@ public final class GSONUtil {
 
 
     private static void fromJSONNamedValue(NVBase<?> nvb, JsonElement je) {
+
         if (je.isJsonPrimitive()) {
             JsonPrimitive jp = je.getAsJsonPrimitive();
             NamedValue<Object> nv = (NamedValue<Object>) nvb;
@@ -1889,6 +1925,7 @@ public final class GSONUtil {
             JsonElement jeValue = joNV.get("value");
             JsonElement joProperties = joNV.get("properties");
             NamedValue<Object> nv = (NamedValue<Object>) nvb;
+
             if (jeValue != null) {
                 if (jeValue.isJsonPrimitive()) {
                     JsonPrimitive jp = jeValue.getAsJsonPrimitive();

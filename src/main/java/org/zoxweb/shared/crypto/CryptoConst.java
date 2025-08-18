@@ -141,10 +141,10 @@ public final class CryptoConst {
 
     public enum HashProperty
             implements GetName {
-        ITERATIONS("iterations"),
         LOG("log"),
         MEMORY("memory"),
         PARALLELISM("parallelism"),
+        // is also iterations
         ROUNDS("rounds"),
         VERSION("version"),
         SALT("salt"),
@@ -171,7 +171,7 @@ public final class CryptoConst {
         SHA_512("SHA-512"),
 
         BCRYPT("BCRYPT", "2a", "2b", "2y", "2z"),
-        ARGON2("ARGON2", "argon2id", "argon2i", "argon2d"),
+        ARGON2("ARGON2", "argon2id"),
 
         PBKDF2("PBKDF2"),
         ;

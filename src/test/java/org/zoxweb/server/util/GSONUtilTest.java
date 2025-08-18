@@ -1,10 +1,8 @@
 package org.zoxweb.server.util;
 
 import org.junit.jupiter.api.Test;
-import org.zoxweb.shared.util.NVGenericMap;
-import org.zoxweb.shared.util.NVInt;
-import org.zoxweb.shared.util.NVPair;
-import org.zoxweb.shared.util.NVStringList;
+import org.zoxweb.shared.http.*;
+import org.zoxweb.shared.util.*;
 
 import java.util.Date;
 import java.util.Objects;
@@ -92,7 +90,50 @@ public class GSONUtilTest {
         response = GSONUtil.fromJSONDefault(json, NVGenericMap.class);
 
         System.out.println(DateUtil.DEFAULT_GMT_MILLIS.format((long)response.getValue("current_time")));
+    }
 
+    @Test
+    public void testHTTPMessageConfig()
+    {
+
+        HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit("https://api.xlogistx.io", "login", HTTPMethod.PATCH);
+        hmci.setAccept(HTTPMediaType.APPLICATION_JSON);
+        hmci.setContentType(HTTPMediaType.APPLICATION_JSON);
+
+        hmci.getHeaders().add("revision", "2023-07-15");
+        HTTPAuthorization authorization = new HTTPAuthorization("XlogistX-KEY", "ABB-CC-DDSFS-664554");
+        //dataStore.insert(authorization);
+
+
+        hmci.setAuthorization(authorization);
+        NVGenericMap nvgm = new NVGenericMap();
+        nvgm.add("name", "mario");
+        nvgm.add("email", "mario@mario.com");
+        nvgm.add(new NVInt("age", 31));
+        hmci.setContent(GSONUtil.toJSONDefault(nvgm));
+
+        String json = GSONUtil.toJSONDefault(hmci, true );
+        System.out.println(json);
+
+        HTTPMessageConfig httpMessageConfig = GSONUtil.fromJSONDefault(json, HTTPMessageConfig.class );
+
+
+
+        System.out.println(SharedStringUtil.toString(httpMessageConfig.getContent()));
+
+        String json2 = GSONUtil.toJSONDefault(httpMessageConfig, true );
+        System.out.println(json2);
+        json2.equals(json);
+        String jsonFromDB = GSONUtil.toJSONDefault(httpMessageConfig);
+
+        System.out.println((hmci == httpMessageConfig) + " " + json.equals(jsonFromDB));
+        System.out.println(json);
+        System.out.println(jsonFromDB);
+
+        authorization = hmci.getAuthorization();
+        //dataStore.delete(httpMessageConfig, true);
+
+        System.out.println("Authorization meta: " + ((NVConfigEntity)authorization.getNVConfig()).getAttributes());
     }
 
 }
