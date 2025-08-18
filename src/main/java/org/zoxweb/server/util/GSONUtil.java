@@ -133,35 +133,35 @@ public final class GSONUtil {
 
     }
 
-    public static class NamedValueSerDeserializer implements JsonSerializer<NamedValue>, JsonDeserializer<NamedValue> {
-
-        @Override
-        public JsonElement serialize(NamedValue src, Type typeOfSrc,
-                                     JsonSerializationContext context) {
-            // TODO Auto-generated method stub
-
-
-            JsonTreeWriter jtw = new JsonTreeWriter();
-            try {
-                toJSONNamedValue(jtw, src);
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-
-            return jtw.get();
-        }
-
-        @Override
-        public NamedValue deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
-                throws JsonParseException {
-            // TODO Auto-generated method stub
-            NamedValue nv = new NamedValue();
-            fromJSONNamedValue(nv, json);
-            return nv;
-        }
-
-    }
+//    public static class NamedValueSerDeserializer implements JsonSerializer<NamedValue>, JsonDeserializer<NamedValue> {
+//
+//        @Override
+//        public JsonElement serialize(NamedValue src, Type typeOfSrc,
+//                                     JsonSerializationContext context) {
+//            // TODO Auto-generated method stub
+//
+//
+//            JsonTreeWriter jtw = new JsonTreeWriter();
+//            try {
+//                toJSONNamedValue(jtw, src);
+//            } catch (IOException e) {
+//                // TODO Auto-generated catch block
+//                e.printStackTrace();
+//            }
+//
+//            return jtw.get();
+//        }
+//
+//        @Override
+//        public NamedValue deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+//                throws JsonParseException {
+//            // TODO Auto-generated method stub
+//            NamedValue nv = new NamedValue();
+//            fromJSONNamedValue(nv, json);
+//            return nv;
+//        }
+//
+//    }
 
 
 
