@@ -52,7 +52,7 @@ public class BCryptPasswordHasher
         ret.setSalt(SharedBase64.decode(SharedBase64.Base64Type.DEFAULT_NP, bCryptHash.hash));
         ret.setRounds(bCryptHash.rounds);
         ret.setCanonicalID(bCryptHash.toCanonicalID());
-        ret.setName(CryptoConst.HashType.BCRYPT);
+        ret.setAlgorithm(CryptoConst.HashType.BCRYPT);
         return ret;
     }
 

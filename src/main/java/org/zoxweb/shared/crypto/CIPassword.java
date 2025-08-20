@@ -40,6 +40,7 @@ public class CIPassword
         VERSION("version"),
         MEMORY("memory"),
         PARALLELISM("parallelism"),
+        ALGORITHM("algorithm"),
         ;
         private final String name;
 
@@ -52,11 +53,13 @@ public class CIPassword
         }
     }
 
-    private enum Param
+    public enum Param
             implements GetNVConfig {
-        //HASH_ITERATION(NVConfigManager.createNVConfig("hash_iteration", "Hash iteration", "HashIteration", false, true, Integer.class)),
-        SALT(NVConfigManager.createNVConfig("salt", "The password salt", "Salt", false, true, byte[].class)),
-        HASH(NVConfigManager.createNVConfig("hash", "The password hash", "Hash", false, true, byte[].class)),
+        ALGORITHM(NVConfigManager.createNVConfig(CIProp.ALGORITHM.getName(), "Algorithm name", "AlgorithmName", false, true, String.class)),
+        ROUNDS(NVConfigManager.createNVConfig(CIProp.ROUNDS.getName(), "Hash algorithm rounds or iterations", "HashRounds", false, true, Integer.class)),
+        SALT(NVConfigManager.createNVConfig(CIProp.SALT.getName(), "The password salt", "Salt", false, true, byte[].class)),
+        HASH(NVConfigManager.createNVConfig(CIProp.HASH.getName(), "The password hash", "Hash", false, true, byte[].class)),
+
 
         ;
 
@@ -81,14 +84,20 @@ public class CIPassword
         super(NVCE_CI_PASSWORD);
     }
 
-    public synchronized void setName(HashType mdt) {
-        SUS.checkIfNulls("Null Message Digest", mdt);
-        setName(mdt.getName());
+    public synchronized void setAlgorithm(HashType hashType) {
+        SUS.checkIfNulls("Null Message Digest", hashType);
+        setAlgorithm(hashType.getName());
     }
 
-    public synchronized void setName(String name) {
-        SUS.checkIfNulls("Null Message Digest", name);
-        super.setName(HashType.validate(name));
+    public synchronized void setAlgorithm(String algoName) {
+
+        SUS.checkIfNulls("Null Message Digest", algoName);
+        setValue(Param.ALGORITHM, DataEncoder.StringLower.encode(algoName));
+    }
+
+
+    public String getAlgorithm() {
+        return lookupValue(Param.ALGORITHM);
     }
 
 
@@ -101,19 +110,16 @@ public class CIPassword
     }
 
     public int getRounds() {
-        NVInt iterations = getProperties().getNV(CryptoConst.HashProperty.ROUNDS);
-        if (iterations != null)
-            return iterations.getValue();
 
-        return -1;
+        return lookupValue(Param.ROUNDS);
     }
 
     public synchronized void setRounds(int rounds) {
-        if (rounds < 0) {
+        if (rounds < 1) {
             throw new IllegalArgumentException("Invalid iteration value:" + rounds);
         }
 
-        getProperties().build(new NVInt(CryptoConst.HashProperty.ROUNDS, rounds));
+        setValue(Param.ROUNDS, rounds);
     }
 
     public synchronized byte[] getSalt() {
@@ -121,74 +127,22 @@ public class CIPassword
     }
 
     public synchronized void setSalt(byte[] salt) {
-        setValue(Param.SALT, salt);
+       setValue(Param.SALT, salt);
     }
 
     public synchronized byte[] getHash() {
         return lookupValue(Param.HASH);
     }
 
-    public synchronized void setHash(byte[] password) {
-        setValue(Param.HASH, password);
+    public synchronized void setHash(byte[] hash) {
+        setValue(Param.HASH, hash);
     }
 
-//    public void setHash(String password) {
-//        setHash(SharedStringUtil.getBytes(password));
-//    }
 
     @Override
     public String toCanonicalID() {
-
         return getCanonicalID();
-
     }
-
-//    public static CIPassword fromCanonicalID(String passwordCanonicalID)
-//            throws NullPointerException, IllegalArgumentException {
-//        if (SUS.isEmpty(passwordCanonicalID)) {
-//            throw new NullPointerException("Empty password");
-//        }
-//
-//
-//        try {
-//            // special case to process BCrypt
-//            BCryptHash bCryptHash = new BCryptHash(passwordCanonicalID);
-//            CIPassword ret = new CIPassword();
-//            ret.setSalt(SharedStringUtil.getBytes(bCryptHash.salt));
-//            ret.setHash(bCryptHash.hash);
-//            ret.setRounds(bCryptHash.logRound);
-//            ret.setCanonicalID(bCryptHash.toCanonicalID());
-//            ret.setName(HashType.BCRYPT);
-//            return ret;
-//        } catch (Exception e) {
-//        }
-//
-//        String[] tokens = SharedStringUtil.parseString(passwordCanonicalID, "\\$", true);
-//        CIPassword ret = new CIPassword();
-//
-//        switch (tokens.length) {
-//            case 3: {
-//                int index = 0;
-//                ret.setRounds(Integer.parseInt(tokens[index++]));
-//                ret.setSalt(SharedBase64.decode(SharedBase64.Base64Type.DEFAULT_NP, tokens[index++]));
-//                ret.setHash(SharedBase64.decode(SharedBase64.Base64Type.DEFAULT_NP, tokens[index++]));
-//                ret.setName(HashType.SHA_256.getName().toLowerCase());
-//            }
-//                break;
-//            case 4: {
-//                int index = 0;
-//                ret.setName(tokens[index++].toLowerCase());
-//                ret.setRounds(Integer.parseInt(tokens[index++]));
-//                ret.setSalt(SharedBase64.decode(SharedBase64.Base64Type.DEFAULT_NP,tokens[index++]));
-//                ret.setHash(SharedBase64.decode(SharedBase64.Base64Type.DEFAULT_NP,tokens[index++]));
-//                break;
-//            }
-//            default:
-//                throw new IllegalArgumentException("Invalid password format");
-//        }
-//
-//        return ret;
-//    }
 
 
     /**

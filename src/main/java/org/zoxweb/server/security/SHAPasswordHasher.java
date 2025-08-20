@@ -58,12 +58,12 @@ public class SHAPasswordHasher
                 ret.setRounds(Integer.parseInt(tokens[index++]));
                 ret.setSalt(SharedBase64.decode(SharedBase64.Base64Type.DEFAULT_NP, tokens[index++]));
                 ret.setHash(SharedBase64.decode(SharedBase64.Base64Type.DEFAULT_NP, tokens[index++]));
-                ret.setName(CryptoConst.HashType.SHA_256.getName().toLowerCase());
+                ret.setAlgorithm(CryptoConst.HashType.SHA_256.getName().toLowerCase());
             }
             break;
             case 4: {
                 int index = 0;
-                ret.setName(tokens[index++].toLowerCase());
+                ret.setAlgorithm(tokens[index++].toLowerCase());
                 ret.setRounds(Integer.parseInt(tokens[index++]));
                 ret.setSalt(SharedBase64.decode(SharedBase64.Base64Type.DEFAULT_NP, tokens[index++]));
                 ret.setHash(SharedBase64.decode(SharedBase64.Base64Type.DEFAULT_NP, tokens[index++]));
@@ -73,7 +73,7 @@ public class SHAPasswordHasher
                 throw new IllegalArgumentException("Invalid password format");
         }
         ret.setCanonicalID(SharedUtil.toCanonicalID('$',
-                "$" + ret.getName().toLowerCase(),
+                "$" + ret.getAlgorithm().toLowerCase(),
                 ret.getRounds(),
                 SharedBase64.encodeAsString(SharedBase64.Base64Type.DEFAULT_NP, ret.getSalt()),
                 SharedBase64.encodeAsString(SharedBase64.Base64Type.DEFAULT_NP, ret.getHash())));
@@ -108,7 +108,7 @@ public class SHAPasswordHasher
     @Override
     public boolean isPasswordValid(CIPassword ci, byte[] password) {
         try {
-            byte[] genHash = HashUtil.hashWithIterations(MessageDigest.getInstance(ci.getName()),
+            byte[] genHash = HashUtil.hashWithIterations(MessageDigest.getInstance(ci.getAlgorithm()),
                     ci.getSalt(), password, ci.getRounds(),
                     false);
 

@@ -11,7 +11,6 @@ import org.zoxweb.shared.util.Const.TimeInMillis;
 import org.zoxweb.shared.util.KVMapStore;
 import org.zoxweb.shared.util.KVMapStoreDefault;
 import org.zoxweb.shared.util.SUS;
-import org.zoxweb.shared.util.SharedUtil;
 
 import java.util.*;
 import java.util.concurrent.locks.Lock;
@@ -174,7 +173,17 @@ implements KVMapStore<String, JWT>
 		cache.addExclusion(exclusion);;
 	}
 
-	@Override
+    /**
+     * @param value
+     * @param keys
+     * @return
+     */
+    @Override
+    public KVMapStore<String, JWT> map(JWT value, String... keys) {
+        return cache.map(value, keys);
+    }
+
+    @Override
 	public int size() {
 		// TODO Auto-generated method stub
 		return cache.size();

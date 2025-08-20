@@ -8,10 +8,7 @@ import org.zoxweb.shared.crypto.CIPassword;
 import org.zoxweb.shared.crypto.CredentialHasher;
 import org.zoxweb.shared.crypto.CryptoConst;
 import org.zoxweb.shared.security.*;
-import org.zoxweb.shared.util.NVGenericMap;
-import org.zoxweb.shared.util.SUS;
-import org.zoxweb.shared.util.SharedBase64;
-import org.zoxweb.shared.util.SharedStringUtil;
+import org.zoxweb.shared.util.*;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -184,14 +181,11 @@ public final class SecUtil {
     }
 
 
-    private String toName(String name) {
-        return name.toLowerCase();
-    }
 
     public synchronized SecUtil addCredentialHasher(CredentialHasher<?> credentialHasher) {
-        credentialHasherMap.put(toName(credentialHasher.getName()), credentialHasher);
+        credentialHasherMap.put(DataEncoder.StringLower.encode(credentialHasher.getName()), credentialHasher);
         for (String algo : credentialHasher.supportedAlgorithms())
-            credentialHasherMap.put(toName(algo), credentialHasher);
+            credentialHasherMap.put(DataEncoder.StringLower.encode(algo), credentialHasher);
         return this;
     }
 
@@ -200,13 +194,13 @@ public final class SecUtil {
     }
 
     public synchronized void removeCredentialHasher(CredentialHasher<?> credentialHasher) {
-        credentialHasherMap.remove(toName(credentialHasher.getName()));
+        credentialHasherMap.remove(DataEncoder.StringLower.encode(credentialHasher.getName()));
         for (String algo : credentialHasher.supportedAlgorithms())
-            credentialHasherMap.remove(toName(algo));
+            credentialHasherMap.remove(DataEncoder.StringLower.encode(algo));
     }
 
     public synchronized <T> CredentialHasher<T> lookupCredentialHasher(String name) {
-        return (CredentialHasher<T>) credentialHasherMap.get(toName(name));
+        return (CredentialHasher<T>) credentialHasherMap.get(DataEncoder.StringLower.encode(name));
     }
 
     public synchronized <T> CredentialHasher<T> lookupCredentialHasher(CryptoConst.HashType hashType) {
@@ -241,18 +235,18 @@ public final class SecUtil {
     public boolean isPasswordValid(final CIPassword ciPassword, byte[] password)
             throws NullPointerException, IllegalArgumentException {
         SUS.checkIfNulls("Null values", ciPassword, password);
-        CredentialHasher<CIPassword> passwordHasher = lookupCredentialHasher(ciPassword.getName());
+        CredentialHasher<CIPassword> passwordHasher = lookupCredentialHasher(ciPassword.getAlgorithm());
         if (passwordHasher == null)
-            throw new AccessSecurityException("no credential hasher found for: " + ciPassword.getName());
+            throw new AccessSecurityException("no credential hasher found for: " + ciPassword.getAlgorithm());
         return passwordHasher.isPasswordValid(ciPassword, password);
     }
 
     public boolean isPasswordValid(final CIPassword ciPassword, char[] password)
             throws NullPointerException, IllegalArgumentException {
         SUS.checkIfNulls("Null values", ciPassword, password);
-        CredentialHasher<CIPassword> passwordHasher = lookupCredentialHasher(ciPassword.getName());
+        CredentialHasher<CIPassword> passwordHasher = lookupCredentialHasher(ciPassword.getAlgorithm());
         if (passwordHasher == null)
-            throw new AccessSecurityException("no credential hasher found for: " + ciPassword.getName());
+            throw new AccessSecurityException("no credential hasher found for: " + ciPassword.getAlgorithm());
         return passwordHasher.isPasswordValid(ciPassword, password);
     }
 

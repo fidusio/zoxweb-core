@@ -19,6 +19,7 @@ import com.google.gson.*;
 import com.google.gson.internal.bind.JsonTreeWriter;
 import com.google.gson.stream.JsonWriter;
 import org.zoxweb.server.filters.TimestampFilter;
+import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.shared.api.APIException;
 import org.zoxweb.shared.db.*;
@@ -113,15 +114,15 @@ public final class GSONUtil {
             // TODO Auto-generated method stub
 
 
-            JsonTreeWriter jtw = new JsonTreeWriter();
-            try {
+           // JsonTreeWriter jtw = new JsonTreeWriter();
+            try(JsonTreeWriter jtw = new JsonTreeWriter()) {
                 toJSONGenericMap(jtw, src, false, false);
+                return jtw.get();
             } catch (IOException e) {
                 // TODO Auto-generated catch block
-                e.printStackTrace();
+                throw new IllegalArgumentException(e.getMessage());
             }
 
-            return jtw.get();
         }
 
         @Override
@@ -177,10 +178,13 @@ public final class GSONUtil {
 
             JsonTreeWriter jtw = new JsonTreeWriter();
 
-            toJSONStringList(jtw, src);
-
-
-            return jtw.get();
+            try {
+                toJSONStringList(jtw, src);
+                return jtw.get();
+            }
+            finally {
+                IOUtil.close(jtw);
+            }
         }
 
         @Override
@@ -209,6 +213,9 @@ public final class GSONUtil {
                 e.printStackTrace();
             }
 
+            finally {
+                IOUtil.close(jtw);
+            }
             return jtw.get();
         }
 
@@ -252,6 +259,9 @@ public final class GSONUtil {
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
+            }
+            finally {
+                IOUtil.close(jtw);
             }
 
             return jtw.get();

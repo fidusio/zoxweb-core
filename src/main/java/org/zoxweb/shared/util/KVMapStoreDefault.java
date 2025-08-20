@@ -130,6 +130,14 @@ implements KVMapStore<K,V>
 	}
 
 
+    public synchronized  KVMapStore<K,V> map(V value, K ...keys)
+    {
+        SUS.checkIfNull("value null", value);
+        for(K k : keys)
+            mapCache.put(k, value);
+        return this;
+    }
+
 	public synchronized Set<Map.Entry<K, V>> entrySet()
 	{
 		return mapCache.entrySet();

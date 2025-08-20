@@ -421,7 +421,23 @@ public class Const {
     public enum StringType {
         UPPER,// to upper case
         LOWER,// to lower case
-        AS_IS,// as is
+        AS_IS,
+        ;
+
+        public static String convert(StringType stringType, String toConvert)
+        {
+            SUS.checkIfNulls("null string", toConvert);
+            switch (stringType)
+            {
+                case UPPER:
+                    return DataEncoder.StringUpper.encode(toConvert);
+
+                case LOWER:
+                    return DataEncoder.StringLower.encode(toConvert);
+                default:
+                    return toConvert;
+            }
+        }// as is
     }
 
     /**

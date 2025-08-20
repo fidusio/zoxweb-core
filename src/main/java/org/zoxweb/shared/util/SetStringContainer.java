@@ -12,33 +12,20 @@ public class SetStringContainer
         this.type = type != null ? type : Const.StringType.AS_IS;
     }
 
-    private String convert(String str)
-    {
-        SUS.checkIfNulls("null string", str);
-        switch (type)
-        {
-            case UPPER:
-                return str.toUpperCase();
 
-            case LOWER:
-                return str.toLowerCase();
-            default:
-                return str;
-        }
-    }
     public boolean contains(String str)
     {
-        return set.contains(convert(str));
+        return set.contains(Const.StringType.convert(type, str));
     }
 
     /**
-     * @param s
-     * @return
-     * @throws IllegalArgumentException
+     * @param s to be validated
+     * @return validated value
+     * @throws IllegalArgumentException if there issue will s
      */
     @Override
     public String validate(String s) throws IllegalArgumentException, NullPointerException {
-        s = convert(s);
+        s = Const.StringType.convert(type, s);
         if(!contains(s))
             throw new IllegalArgumentException("Not found " + s);
 
@@ -47,12 +34,12 @@ public class SetStringContainer
 
     public SetStringContainer add(String str)
     {
-        return super.add(convert(str));
+        return super.add(Const.StringType.convert(type, str));
     }
 
     public SetStringContainer remove(String str)
     {
-        return super.remove(convert(str));
+        return super.remove(Const.StringType.convert(type, str));
     }
 
 
