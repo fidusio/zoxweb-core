@@ -44,6 +44,9 @@ public interface KVMapStore<K, V> {
     void addExclusion(K exclusion);
 
     KVMapStore<K,V> map(V value, K ...keys);
+    KVMapStore<K, V> setKeyFilter(DataEncoder<K,K> filter);
+    DataEncoder<K, K> getKeyFilter();
+
 
     /**
      * Return the count og object stored by the key value store

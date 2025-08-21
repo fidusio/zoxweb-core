@@ -60,7 +60,7 @@ public class HTTPMessageConfig
         HTTP_STATUS_CODE(NVConfigManager.createNVConfig("http_status_code", "The http status code", "HTTPStatusCode", false, true, HTTPStatusCode.class)),
         HEADERS(NVConfigManager.createNVConfig("headers", "The header parameters", "HeaderParameters", false, true, NVGenericMap.class)),
         REASON(NVConfigManager.createNVConfig("reason", "The server reason", "Reason", false, true, String.class)),
-        AUTHORIZATION(NVConfigManager.createNVConfigEntity("http_authorization", "The http authorization header", "HTTPAuthorization", false, true, HTTPAuthorization.class, ArrayType.NOT_ARRAY)),
+        AUTHORIZATION(NVConfigManager.createNVConfigEntity("http_authorization", "The http authorization header", "HTTPAuthorization", false, true, true, HTTPAuthorization.class, ArrayType.NOT_ARRAY)),
         //PARAMETERS(NVConfigManager.createNVConfig("parameters", "parameters", "Parameters", false, true, false, String[].class, null)),
         PARAMETERS(NVConfigManager.createNVConfig("parameters", "parameters", "Parameters", false, true, NVGenericMap.class)),
         PROXY_ADDRESS(NVConfigManager.createNVConfigEntity("proxy_address", "The proxy address if not null", "ProxyAddress", true, false, IPAddress.class, ArrayType.NOT_ARRAY)),

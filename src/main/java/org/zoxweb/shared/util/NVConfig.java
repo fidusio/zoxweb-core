@@ -60,4 +60,11 @@ public interface NVConfig
 	
 	void setTypeReferenceID(boolean type);
 
+    /**
+     * This a meta reference used for persistence
+     *
+     * @return true if the NVEntity needs to be embedded
+     */
+    boolean isEmbedded();
+
 }

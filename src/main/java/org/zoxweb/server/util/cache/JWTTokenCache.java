@@ -8,6 +8,7 @@ import org.zoxweb.server.util.DateUtil;
 import org.zoxweb.shared.security.JWT;
 import org.zoxweb.shared.security.JWTToken;
 import org.zoxweb.shared.util.Const.TimeInMillis;
+import org.zoxweb.shared.util.DataEncoder;
 import org.zoxweb.shared.util.KVMapStore;
 import org.zoxweb.shared.util.KVMapStoreDefault;
 import org.zoxweb.shared.util.SUS;
@@ -181,6 +182,23 @@ implements KVMapStore<String, JWT>
     @Override
     public KVMapStore<String, JWT> map(JWT value, String... keys) {
         return cache.map(value, keys);
+    }
+
+    /**
+     * @param filter
+     * @return
+     */
+    @Override
+    public KVMapStore<String, JWT> setKeyFilter(DataEncoder<String, String> filter) {
+        return cache.setKeyFilter(filter);
+    }
+
+    /**
+     * @return
+     */
+    @Override
+    public DataEncoder<String, String> getKeyFilter() {
+        return cache.getKeyFilter();
     }
 
     @Override

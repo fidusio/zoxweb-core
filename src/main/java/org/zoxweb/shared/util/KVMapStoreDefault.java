@@ -138,7 +138,25 @@ implements KVMapStore<K,V>
         return this;
     }
 
-	public synchronized Set<Map.Entry<K, V>> entrySet()
+    /**
+     * @param filter
+     * @return
+     */
+    @Override
+    public KVMapStore<K, V> setKeyFilter(DataEncoder<K, K> filter) {
+        this.keyFilter = filter;
+        return this;
+    }
+
+    /**
+     * @return
+     */
+    @Override
+    public DataEncoder<K, K> getKeyFilter() {
+        return keyFilter;
+    }
+
+    public synchronized Set<Map.Entry<K, V>> entrySet()
 	{
 		return mapCache.entrySet();
 	}

@@ -15,9 +15,9 @@
  */
 package org.zoxweb.shared.util;
 
-import java.io.Serializable;
-
 import org.zoxweb.shared.filters.ValueFilter;
+
+import java.io.Serializable;
 
 /**
  * This class implements the NVConfig interface. This class 
@@ -54,6 +54,7 @@ public class NVConfigPortable
 	private boolean hidden = false;
 	private boolean referenceIDType = false;
 	private boolean isStatic = true;
+    protected transient boolean embedded = false;
 	
 	
 	/**
@@ -345,8 +346,18 @@ public class NVConfigPortable
 	{
 		referenceIDType = type;
 	}
-	
-	public boolean isStatic()
+
+    /**
+     * This a meta reference used for persistence
+     *
+     * @return true if the NVEntity needs to be embedded
+     */
+    @Override
+    public boolean isEmbedded() {
+        return embedded;
+    }
+
+    public boolean isStatic()
 	{
 		return isStatic;
 	}
@@ -355,5 +366,6 @@ public class NVConfigPortable
 	{
 		isStatic = staticVal;
 	}
+
 
 }
