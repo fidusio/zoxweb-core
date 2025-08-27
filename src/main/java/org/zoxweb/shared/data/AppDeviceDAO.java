@@ -57,7 +57,7 @@ public class AppDeviceDAO
         }
     }
 
-    public static final NVConfigEntity NVC_APP_DEVICE_DAO = new NVConfigEntityLocal(
+    public static final NVConfigEntity NVC_APP_DEVICE_DAO = new NVConfigEntityPortable(
             "app_device_dao",
             null,
             AppDeviceDAO.class.getSimpleName(),

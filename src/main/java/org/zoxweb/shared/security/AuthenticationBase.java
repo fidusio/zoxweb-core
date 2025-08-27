@@ -19,7 +19,7 @@ import org.zoxweb.shared.data.SetNameDAO;
 import org.zoxweb.shared.util.GetNVConfig;
 import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
+import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.SharedUtil;
 import org.zoxweb.shared.util.SystemID;
@@ -62,7 +62,7 @@ public class AuthenticationBase
 		}
 	}
 	
-	public static final NVConfigEntity NVC_AUTHENTICATION_BASE = new NVConfigEntityLocal("authentication_base",
+	public static final NVConfigEntity NVC_AUTHENTICATION_BASE = new NVConfigEntityPortable("authentication_base",
 																						   null, 
 																						   "AuthenticationBase", 
 																						   true, 

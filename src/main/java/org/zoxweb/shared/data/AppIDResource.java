@@ -33,7 +33,7 @@ public class AppIDResource
 
 
 
-    public static final NVConfigEntity NVC_APP_ID_RESOURCE = new NVConfigEntityLocal(
+    public static final NVConfigEntity NVC_APP_ID_RESOURCE = new NVConfigEntityPortable(
             "app_id_resource",
             "AppIDResource" ,
             AppIDResource.class.getSimpleName(),

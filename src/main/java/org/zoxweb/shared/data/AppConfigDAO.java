@@ -19,7 +19,7 @@ package org.zoxweb.shared.data;
 import org.zoxweb.shared.util.GetNVConfig;
 import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
+import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.SharedUtil;
 
@@ -51,7 +51,7 @@ public class AppConfigDAO
         }
     }
 
-    public static final NVConfigEntity NVC_APP_CONFIG_DAO = new NVConfigEntityLocal(
+    public static final NVConfigEntity NVC_APP_CONFIG_DAO = new NVConfigEntityPortable(
             "app_config_dao",
             null,
             "AppConfigDAO",

@@ -21,7 +21,7 @@ import org.zoxweb.shared.data.SetNameDescriptionDAO;
 import org.zoxweb.shared.util.GetNVConfig;
 import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
+import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.RenderableValue;
 import org.zoxweb.shared.util.SharedUtil;
@@ -64,7 +64,7 @@ public class AmountDAO
 
 	}
 	
-	public static final NVConfigEntity NVC_AMOUNT_DAO = new NVConfigEntityLocal(
+	public static final NVConfigEntity NVC_AMOUNT_DAO = new NVConfigEntityPortable(
 																						"amount_dao", 
 																						null, 
 																						"AmountDAO", 

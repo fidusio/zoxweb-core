@@ -22,7 +22,7 @@ import org.zoxweb.shared.filters.FilterType;
 import org.zoxweb.shared.util.GetNVConfig;
 import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
+import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.SetCanonicalID;
 import org.zoxweb.shared.util.SharedStringUtil;
@@ -66,7 +66,7 @@ public class AccessCodeDAO
 		}
 	}
 	
-	public static final NVConfigEntity NVC_ACCESS_CODE_DAO = new NVConfigEntityLocal(
+	public static final NVConfigEntity NVC_ACCESS_CODE_DAO = new NVConfigEntityPortable(
 																					"access_code_dao", 
 																					null , 
 																					"AccessCodeDAO", 

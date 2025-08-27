@@ -39,7 +39,7 @@ public class APIDataOP
     /**
      * This NVConfigEntity type constant is set to an instantiation of a NVConfigEntityLocal object based on DataContentDAO.
      */
-    public static final NVConfigEntity NVC_API_DATA_OP = new NVConfigEntityLocal("api_data_op",
+    public static final NVConfigEntity NVC_API_DATA_OP = new NVConfigEntityPortable("api_data_op",
             null,
             "APIDataOP",
             true,

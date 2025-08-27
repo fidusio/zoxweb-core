@@ -24,7 +24,7 @@ import org.zoxweb.shared.util.*;
 public class AppIDDAO
     extends AppIDResource
 {
-    public static final NVConfigEntity NVC_APP_ID_DAO = new NVConfigEntityLocal(
+    public static final NVConfigEntity NVC_APP_ID_DAO = new NVConfigEntityPortable(
             "app_id_dao",
             "AppIDDAO" ,
             AppIDDAO.class.getSimpleName(),

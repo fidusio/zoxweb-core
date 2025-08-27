@@ -47,7 +47,7 @@ public class APIBatchResult<V extends NVEntity>
         }
     }
 
-    public static final NVConfigEntity NVC_API_BATCH_RESULT = new NVConfigEntityLocal("api_batch_result",
+    public static final NVConfigEntity NVC_API_BATCH_RESULT = new NVConfigEntityPortable("api_batch_result",
             null,
             "APIBatchResult",
             true,

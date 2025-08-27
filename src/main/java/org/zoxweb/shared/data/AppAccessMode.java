@@ -8,7 +8,7 @@ import org.zoxweb.shared.security.model.SecurityModel.Role;
 import org.zoxweb.shared.util.GetNVConfig;
 import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
+import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.NVEnumList;
 import org.zoxweb.shared.util.SharedUtil;
@@ -40,7 +40,7 @@ public class AppAccessMode
 	     }
 	 }
 	
-	 public static final NVConfigEntity NVC_APP_ACCESS_MODE = new NVConfigEntityLocal(
+	 public static final NVConfigEntity NVC_APP_ACCESS_MODE = new NVConfigEntityPortable(
 	         "app_access_mode",
 	         null,
 	         AppAccessMode.class.getSimpleName(),

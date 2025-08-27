@@ -22,7 +22,7 @@ import org.zoxweb.shared.util.DoNotExpose;
 import org.zoxweb.shared.util.GetNVConfig;
 import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
+import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.NVPair;
 import org.zoxweb.shared.util.SharedUtil;
@@ -61,7 +61,7 @@ public class APITokenDAO
 	/**
 	 * This NVConfigEntity type constant is set to an instantiation of a NVConfigEntityLocal object based on API ConfigInfoDAO.
 	 */
-	public static final NVConfigEntity NVC_TOKEN_DAO = new NVConfigEntityLocal("api_token_dao",
+	public static final NVConfigEntity NVC_TOKEN_DAO = new NVConfigEntityPortable("api_token_dao",
 																				"APITokenDAO", 
 																				"APITokenDAO", 
 																				true, 

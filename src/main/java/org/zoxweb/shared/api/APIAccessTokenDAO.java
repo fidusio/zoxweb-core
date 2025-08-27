@@ -24,7 +24,7 @@ import org.zoxweb.shared.util.Const.TimeInMillis;
 import org.zoxweb.shared.util.GetNVConfig;
 import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
+import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.SharedUtil;
 
 /**
@@ -65,7 +65,7 @@ public class APIAccessTokenDAO
 	/**
 	 * This NVConfigEntity type constant is set to an instantiation of a NVConfigEntityLocal object based on BoxTokenDAO.
 	 */
-	public static final NVConfigEntity NVC_API_ACCESS_TOKEN_DAO = new NVConfigEntityLocal("api_access_token_dao",
+	public static final NVConfigEntity NVC_API_ACCESS_TOKEN_DAO = new NVConfigEntityPortable("api_access_token_dao",
 																					null, 
 																					"APIAccessTokenDAO",
 																					true,

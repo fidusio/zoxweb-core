@@ -71,7 +71,7 @@ public class APINotificationMessageDAO
 	/**
 	 * This NVConfigEntity type constant is set to an instantiation of a NVConfigEntityLocal object based on APINotificationMessageDAO.
 	 */
-	public static final NVConfigEntity NVC_API_NOTIFICATION_MESSAGE_DAO = new NVConfigEntityLocal
+	public static final NVConfigEntity NVC_API_NOTIFICATION_MESSAGE_DAO = new NVConfigEntityPortable
 																			(
 																				"api_notification_message_dao",
 																				null,

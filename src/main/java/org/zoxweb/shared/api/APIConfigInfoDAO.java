@@ -79,7 +79,7 @@ public class APIConfigInfoDAO
 	/**
 	 * This NVConfigEntity type constant is set to an instantiation of a NVConfigEntityLocal object based on API ConfigInfoDAO.
 	 */
-	public static final NVConfigEntity NVC_API_CONFIG_INFO_DAO = new NVConfigEntityLocal
+	public static final NVConfigEntity NVC_API_CONFIG_INFO_DAO = new NVConfigEntityPortable
 																	(
 																		"api_config_info_dao",
 																		null, 

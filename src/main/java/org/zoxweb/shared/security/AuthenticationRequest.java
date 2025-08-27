@@ -19,7 +19,7 @@ import org.zoxweb.shared.filters.FilterType;
 import org.zoxweb.shared.util.GetNVConfig;
 import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
+import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.SharedUtil;
 
@@ -61,7 +61,7 @@ public class AuthenticationRequest
 		}
 	}
 	
-	public static final NVConfigEntity NVC_AUTHENTICATION_REQUEST = new NVConfigEntityLocal("authentication_request",
+	public static final NVConfigEntity NVC_AUTHENTICATION_REQUEST = new NVConfigEntityPortable("authentication_request",
 																						   null, 
 																						   "AuthenticationRequest", 
 																						   true, 

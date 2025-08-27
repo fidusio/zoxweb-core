@@ -18,7 +18,7 @@ package org.zoxweb.shared.data;
 import org.zoxweb.shared.util.GetNVConfig;
 import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
+import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.SharedUtil;
 
@@ -60,7 +60,7 @@ public class AgreementDAO
 	
 	}
 	
-	public static final NVConfigEntity NVC_AGREEMENT_DAO = new NVConfigEntityLocal(
+	public static final NVConfigEntity NVC_AGREEMENT_DAO = new NVConfigEntityPortable(
         "agreement_dao",
         null,
         "Agreement",

@@ -21,7 +21,7 @@ import org.zoxweb.shared.util.CanonicalID;
 import org.zoxweb.shared.util.GetNVConfig;
 import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
+import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.SharedUtil;
 
@@ -58,7 +58,7 @@ public class AppVersionDAO
         }
 	}
 	
-	public static final NVConfigEntity NVC_APPLICATION_VERSION_DAO = new NVConfigEntityLocal(
+	public static final NVConfigEntity NVC_APPLICATION_VERSION_DAO = new NVConfigEntityPortable(
             "application_version_dao",
             null,
             "ApplicationVersionDAO",

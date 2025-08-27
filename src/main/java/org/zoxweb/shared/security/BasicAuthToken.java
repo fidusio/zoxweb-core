@@ -28,7 +28,7 @@ public class BasicAuthToken
         }
     }
 
-    public static final NVConfigEntity NVC_BASIC_AUTH_TOKEN = new NVConfigEntityLocal(
+    public static final NVConfigEntity NVC_BASIC_AUTH_TOKEN = new NVConfigEntityPortable(
             "basic_auth_token",
             null ,
             BasicAuthToken.class.getSimpleName(),

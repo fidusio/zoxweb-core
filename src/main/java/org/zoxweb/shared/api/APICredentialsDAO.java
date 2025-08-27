@@ -23,7 +23,7 @@ import org.zoxweb.shared.util.ArrayValues;
 import org.zoxweb.shared.util.GetNVConfig;
 import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
+import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.NVPair;
 import org.zoxweb.shared.util.SharedUtil;
@@ -61,7 +61,7 @@ public class APICredentialsDAO
 	/**
 	 * This NVConfigEntity type constant is set to an instantiation of a NVConfigEntityLocal object based on API ConfigInfoDAO.
 	 */
-	public static final NVConfigEntity NVC_CREDENTIALS_DAO = new NVConfigEntityLocal("api_credentials_dao",
+	public static final NVConfigEntity NVC_CREDENTIALS_DAO = new NVConfigEntityPortable("api_credentials_dao",
 																		"API Key and Secret", 
 																		"APICredentialsDAO", 
 																		true, 
