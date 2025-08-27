@@ -44,7 +44,8 @@ public class NVConfigEntityLocal
                 + getReferencedNVConfigEntity() + ", isReferenced()="
                 + isReferenced() + ", getMetaType()=" + getMetaType()
                 + ", isAttributesValidationRequired()="
-                + isAttributesValidationRequired() + ", getDomainID()="
+                + isAttributesValidationRequired() + ", getGUID()="
+                + getGUID() + ", getDomainID()="
                 + getDomainID() + ", toCanonicalID()=" + toCanonicalID()
                 + ", toString()=" + super.toString() + ", isUnique()="
                 + isUnique() + ", getName()=" + getName()
@@ -66,10 +67,10 @@ public class NVConfigEntityLocal
     private transient ArrayType arrayType = null;
     //private transient boolean fullyInitialized = false;
     private transient String domainID = null;
+    //private transient String guid = null;
 
 
-
-    private String referenceID = null;
+    private transient String guid = null;
 
     /**
      * This is the default constructor which instantiates
@@ -529,7 +530,7 @@ public class NVConfigEntityLocal
      */
     @Override
     public String getReferenceID() {
-        return referenceID;
+        return guid;
     }
 
     /**
@@ -537,7 +538,7 @@ public class NVConfigEntityLocal
      */
     @Override
     public void setReferenceID(String id) {
-        referenceID = id;
+        guid = id;
     }
 
     /**
@@ -569,5 +570,19 @@ public class NVConfigEntityLocal
     }
 
 
+    /**
+     * @param gid the global identifier of the object uuid is string format.
+     */
+    @Override
+    public void setGUID(String gid) {
+       setReferenceID(gid);
+    }
 
+    /**
+     * @return the global identifier of the object
+     */
+    @Override
+    public String getGUID() {
+        return getReferenceID();
+    }
 }

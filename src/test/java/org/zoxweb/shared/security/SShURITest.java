@@ -11,6 +11,6 @@ public class SShURITest {
         System.out.println(SShURI.parse("bob@server.example.com:2022"));  // domain
         System.out.println(SShURI.parse("carol@[2001:db8::1]:2222"));    // IPv6
         System.out.println(SShURI.parse("dave@[fe80::ab]"));           // IPv6, default port
-        System.out.println(SShURI.parse("eve@host123"));
+        System.out.println(SShURI.parse("eve:loves@Adam!@host123:443"));
     }
 }

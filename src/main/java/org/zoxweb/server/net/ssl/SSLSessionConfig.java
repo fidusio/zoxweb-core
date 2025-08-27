@@ -9,9 +9,7 @@ import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.util.CloseableType;
 import org.zoxweb.shared.util.SUS;
 
-import javax.net.ssl.SSLEngine;
-import javax.net.ssl.SSLEngineResult;
-import javax.net.ssl.SSLException;
+import javax.net.ssl.*;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
@@ -19,9 +17,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 
 public class SSLSessionConfig
-    implements CloseableType
-
-{
+        implements CloseableType {
     public final static LogWrapper log = new LogWrapper(SSLSessionConfig.class.getName()).setEnabled(false);
 
     // Incoming encrypted data
@@ -40,10 +36,9 @@ public class SSLSessionConfig
     volatile SSLConnectionHelper sslConnectionHelper = null;
     volatile boolean forcedClose = false;
     volatile IPAddress remoteConnection = null;
+    private volatile String sniHostName = null;
 
     // used for remote connection creation only
-
-
 
 
     //final Lock ioLock = null;//new ReentrantLock();
@@ -53,19 +48,16 @@ public class SSLSessionConfig
     private final AtomicBoolean isClosed = new AtomicBoolean(false);
     final AtomicBoolean hasBegan = new AtomicBoolean(false);
 
-    public SSLSessionConfig(SSLContextInfo sslContext)
-    {
+    public SSLSessionConfig(SSLContextInfo sslContext) {
         SUS.checkIfNulls("sslContext null", sslContext);
         this.sslEngine = sslContext.newInstance();
     }
 
     @Override
-    public void close()
-    {
+    public void close() {
 
 
-        if (!isClosed.getAndSet(true))
-        {
+        if (!isClosed.getAndSet(true)) {
 //            log.getLogger().info("SSLSessionConfig-NOT-CLOSED-YET " +Thread.currentThread() + " " + sslChannel);
 //            try
 //            {
@@ -73,32 +65,26 @@ public class SSLSessionConfig
 //            }
 //            catch (Exception e){}
 
-            if(sslEngine != null)
-            {
+            if (sslEngine != null) {
 
-                try
-                {
+                try {
                     sslEngine.closeOutbound();
-                    while (!forcedClose && hasBegan.get() && !sslEngine.isOutboundDone() && sslChannel.isOpen())
-                    {
-                      SSLEngineResult.HandshakeStatus hs = getHandshakeStatus();
-                      switch (hs)
-                      {
-                        case NEED_WRAP:
-                        case NEED_UNWRAP:
-                          //stateMachine.publishSync(new Trigger<SSLSessionCallback>(this, hs,null,null));
-                          sslConnectionHelper.publish(hs, null);
-                          //stateMachine.publishSync(null, hs, null);
-                          //staticSSLStateMachine.dispatch(hs, null);
-                          break;
-                        default:
-                          IOUtil.close(sslChannel);
-                      }
+                    while (!forcedClose && hasBegan.get() && !sslEngine.isOutboundDone() && sslChannel.isOpen()) {
+                        SSLEngineResult.HandshakeStatus hs = getHandshakeStatus();
+                        switch (hs) {
+                            case NEED_WRAP:
+                            case NEED_UNWRAP:
+                                //stateMachine.publishSync(new Trigger<SSLSessionCallback>(this, hs,null,null));
+                                sslConnectionHelper.publish(hs, null);
+                                //stateMachine.publishSync(null, hs, null);
+                                //staticSSLStateMachine.dispatch(hs, null);
+                                break;
+                            default:
+                                IOUtil.close(sslChannel);
+                        }
                     }
 
-                }
-                catch (Exception e)
-                {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
@@ -112,7 +98,7 @@ public class SSLSessionConfig
             ByteBufferUtil.cache(inSSLNetData, inAppData, outSSLNetData, inRemoteData);
             IOUtil.close(sslOutputStream);
 
-            if (log.isEnabled()) log.getLogger().info("SSLSessionConfig-CLOSED " +Thread.currentThread() + " " +
+            if (log.isEnabled()) log.getLogger().info("SSLSessionConfig-CLOSED " + Thread.currentThread() + " " +
                     sslChannel);// + " Address: " + connectionRemoteAddress);
 //            TaskUtil.getDefaultTaskScheduler().queue(Const.TimeInMillis.SECOND.MILLIS, ()->
 //                log.getLogger().info(SSLStateMachine.rates()));
@@ -121,23 +107,41 @@ public class SSLSessionConfig
 
     }
 
-    public boolean isClosed()
-    {
+    public boolean isClosed() {
         return isClosed.get();
     }
 
 
+    public String getSNIHostName() {
+        if (sniHostName == null) {
+            synchronized (this) {
+                if (sniHostName == null) {
+                    SSLSession session = sslEngine.getSession();
+                    if (session instanceof ExtendedSSLSession) {
+                        ExtendedSSLSession extSession = (ExtendedSSLSession) session;
+                        for (SNIServerName serverName : extSession.getRequestedServerNames()) {
+                            if (serverName instanceof SNIHostName) {
+                                sniHostName = ((SNIHostName) serverName).getAsciiName();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return sniHostName;
+    }
+
+
     public synchronized SSLEngineResult smartWrap(ByteBuffer source, ByteBuffer destination) throws SSLException {
-        ((Buffer)source).flip();
+        ((Buffer) source).flip();
         SSLEngineResult ret = sslEngine.wrap(source, destination);
         //if(ret.getStatus() == SSLEngineResult.Status.OK)
         source.compact();
         return ret;
     }
 
-    public synchronized SSLEngineResult smartUnwrap(ByteBuffer source, ByteBuffer destination) throws SSLException
-    {
-        ((Buffer)source).flip();
+    public synchronized SSLEngineResult smartUnwrap(ByteBuffer source, ByteBuffer destination) throws SSLException {
+        ((Buffer) source).flip();
         SSLEngineResult ret = sslEngine.unwrap(source, destination);
         //if(ret.getStatus() == SSLEngineResult.Status.OK)
         source.compact();
@@ -145,12 +149,9 @@ public class SSLSessionConfig
     }
 
 
-
     public void beginHandshake(boolean clientMode) throws SSLException {
-        if (!hasBegan.get())
-        {
-            if(!hasBegan.getAndSet(true))
-            {
+        if (!hasBegan.get()) {
+            if (!hasBegan.getAndSet(true)) {
                 // set the ssl engine mode client or sever
                 sslEngine.setUseClientMode(clientMode);
                 // start the handshake
@@ -163,23 +164,20 @@ public class SSLSessionConfig
         }
     }
 
-    public int getPacketBufferSize()
-    {
+    public int getPacketBufferSize() {
         return sslEngine.getSession().getPacketBufferSize();
     }
 
-    public int getApplicationBufferSize()
-    {
+    public int getApplicationBufferSize() {
         return sslEngine.getSession().getApplicationBufferSize();
     }
-    public SSLEngineResult.HandshakeStatus getHandshakeStatus()
-    {
+
+    public SSLEngineResult.HandshakeStatus getHandshakeStatus() {
         return sslEngine.getHandshakeStatus();
     }
 
 
-    public Runnable getDelegatedTask()
-    {
+    public Runnable getDelegatedTask() {
         return sslEngine.getDelegatedTask();
     }
 
