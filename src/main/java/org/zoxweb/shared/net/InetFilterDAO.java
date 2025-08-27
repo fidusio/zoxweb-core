@@ -20,7 +20,7 @@ import org.zoxweb.shared.data.SetNameDescriptionDAO;
 import org.zoxweb.shared.util.GetNVConfig;
 import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
+import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.SharedUtil;
 
@@ -55,7 +55,7 @@ public class InetFilterDAO
 	
 	}
 	
-	public static final NVConfigEntity NVC_INET_FILTER_DAO = new NVConfigEntityLocal("inet_filter_dao", null , "InetFilterDAO", true, false, false, false, InetFilterDAO.class, SharedUtil.extractNVConfigs( Params.values()), null, false, SetNameDescriptionDAO.NVC_NAME_DAO);
+	public static final NVConfigEntity NVC_INET_FILTER_DAO = new NVConfigEntityPortable("inet_filter_dao", null , "InetFilterDAO", true, false, false, false, InetFilterDAO.class, SharedUtil.extractNVConfigs( Params.values()), null, false, SetNameDescriptionDAO.NVC_NAME_DAO);
 	
 	/**
 	 * Default constructor for the bean consistency

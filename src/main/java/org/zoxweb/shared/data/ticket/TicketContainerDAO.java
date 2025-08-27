@@ -21,7 +21,7 @@ import org.zoxweb.shared.data.ResolutionStatus;
 import org.zoxweb.shared.util.GetNVConfig;
 import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
+import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.SharedUtil;
 import org.zoxweb.shared.util.NVConfigEntity.ArrayType;
@@ -56,7 +56,7 @@ public class TicketContainerDAO
 		}
 	}
 	
-	public static final NVConfigEntity NVC_TICKET_CONTAINER_DAO = new NVConfigEntityLocal
+	public static final NVConfigEntity NVC_TICKET_CONTAINER_DAO = new NVConfigEntityPortable
 																						(
 																							"ticket_container_dao", 
 																							null, 

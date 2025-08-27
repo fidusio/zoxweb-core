@@ -76,7 +76,7 @@ public class UserIDCredentialsDAO
      * This NVConfigEntity type constant is set to an instantiation of a NVConfigEntityLocal object
      * based on UserCredentialsStatusDAO.
      */
-    public static final NVConfigEntity NVC_USER_ID_CREDENTIALS_DAO = new NVConfigEntityLocal(
+    public static final NVConfigEntity NVC_USER_ID_CREDENTIALS_DAO = new NVConfigEntityPortable(
             "user_id_credentials_dao",
             null,
             "UserIDCredentialsDAO",

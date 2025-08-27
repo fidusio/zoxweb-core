@@ -20,7 +20,7 @@ import java.util.List;
 import org.zoxweb.shared.data.SetNameDAO;
 import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
+import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.SharedUtil;
 import org.zoxweb.shared.util.NVConfigEntity.ArrayType;
@@ -36,7 +36,7 @@ public class NetworkInterfaceDAO
 	private static final NVConfig MAC_ADDRESS  = NVConfigManager.createNVConfig("mac_address", "The network interface mac address","MACAddress",true, false, String.class);
 	private static final NVConfig INET_ADDRESSES  = NVConfigManager.createNVConfigEntity("inet_addresses", "The inet address associated with the network interface","InetAddresses",true, false, InetAddressDAO[].class, ArrayType.LIST);
 	
-	public static final NVConfigEntity NVC_NETWORK_INTERFACE_DAO = new NVConfigEntityLocal(
+	public static final NVConfigEntity NVC_NETWORK_INTERFACE_DAO = new NVConfigEntityPortable(
 	        "network_interface_dao",
             null ,
             "NetworkInterfaceDAO",

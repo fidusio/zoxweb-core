@@ -10,7 +10,7 @@ extends PropertyDAO
 
     public static final NVConfig ALIAS = NVConfigManager.createNVConfig("alias", "User defined alias", "Alias", false, true, String.class);
 
-    public static final NVConfigEntity NVC_IOT_BASE = new NVConfigEntityLocal("iot_base",
+    public static final NVConfigEntity NVC_IOT_BASE = new NVConfigEntityPortable("iot_base",
             null,
             "IOTBase",
             true,

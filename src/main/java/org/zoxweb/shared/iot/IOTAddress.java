@@ -27,7 +27,7 @@ public class IOTAddress
         }
     }
 
-    public static final NVConfigEntity NVC_IOT_ADDRESS = new NVConfigEntityLocal("iot_address",
+    public static final NVConfigEntity NVC_IOT_ADDRESS = new NVConfigEntityPortable("iot_address",
             null,
             "IOTAddress",
             true,

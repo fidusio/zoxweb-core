@@ -7,7 +7,7 @@ import org.zoxweb.shared.util.GetNVConfig;
 import org.zoxweb.shared.util.GetName;
 import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
+import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.NVConfigManager;
 
 import org.zoxweb.shared.util.SharedUtil;
@@ -52,7 +52,7 @@ public class NIConfigDAO
   
   }
   
-  public static final NVConfigEntity NVC_NI_CONFIG_DAO = new NVConfigEntityLocal("ni_config_dao", null , "NIConfigDAO", true, false, false, false, NIConfigDAO.class, SharedUtil.extractNVConfigs(Param.NI_NAME, Param.INET_PROTO), null, false, PropertyDAO.NVC_PROPERTY_DAO);
+  public static final NVConfigEntity NVC_NI_CONFIG_DAO = new NVConfigEntityPortable("ni_config_dao", null , "NIConfigDAO", true, false, false, false, NIConfigDAO.class, SharedUtil.extractNVConfigs(Param.NI_NAME, Param.INET_PROTO), null, false, PropertyDAO.NVC_PROPERTY_DAO);
   
   public NIConfigDAO()
   {

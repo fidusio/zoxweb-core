@@ -61,7 +61,7 @@ public class ShiroAssociationRule
 	/**
 	 * This NVConfigEntity type constant is set to an instantiation of a NVConfigEntityLocal object based on UserIDDAO.
 	 */
-	public static final NVConfigEntity NVC_SHIRO_ASSOCIATION_RULE = new NVConfigEntityLocal("shiro_association_rule", null , "ShiroAssociationRule", true, false, false, false, ShiroAssociationRule.class, SharedUtil.extractNVConfigs(Param.values()), null, false, TimeStampDAO.NVC_TIME_STAMP_DAO);
+	public static final NVConfigEntity NVC_SHIRO_ASSOCIATION_RULE = new NVConfigEntityPortable("shiro_association_rule", null , "ShiroAssociationRule", true, false, false, false, ShiroAssociationRule.class, SharedUtil.extractNVConfigs(Param.values()), null, false, TimeStampDAO.NVC_TIME_STAMP_DAO);
 	
 	
 	private String dynamicPattern;

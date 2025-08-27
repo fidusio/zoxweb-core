@@ -17,7 +17,7 @@ package org.zoxweb.shared.security.shiro;
 
 import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
+import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.SharedStringUtil;
 import org.zoxweb.shared.util.SharedUtil;
@@ -30,7 +30,7 @@ public class ShiroPermission
 	//public static final NVConfig NVC_EMBED_APP_ID =  NVConfigManager.createNVConfig("embed_app_id", null,"EmbedAppID",true, false, Boolean.class);
 	public static final NVConfig NVC_PATTERN =  NVConfigManager.createNVConfig("pattern", null,"Pattern",true, false, String.class);
 	
-	public static final NVConfigEntity  NVC_SHIRO_PERMISSION = new NVConfigEntityLocal("shiro_permission", "Shiro permission dao object" ,
+	public static final NVConfigEntity  NVC_SHIRO_PERMISSION = new NVConfigEntityPortable("shiro_permission", "Shiro permission dao object" ,
 			"ShiroPermission", false, true, false, false, ShiroPermission.class, SharedUtil.toNVConfigList(NVC_PATTERN),
 			null, false, ShiroDomain.NVC_SHIRO_DOMAIN);
 	

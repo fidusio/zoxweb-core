@@ -20,7 +20,7 @@ import java.util.Date;
 import org.zoxweb.shared.util.GetNVConfig;
 import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
+import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.SharedUtil;
 
@@ -57,7 +57,7 @@ public class VMInfoDAO
         }
 	}
 	
-	public static final NVConfigEntity NVC_VMINFO_DAO = new NVConfigEntityLocal(
+	public static final NVConfigEntity NVC_VMINFO_DAO = new NVConfigEntityPortable(
             "vm_info_dao",
             null,
             VMInfoDAO.class.getSimpleName(),

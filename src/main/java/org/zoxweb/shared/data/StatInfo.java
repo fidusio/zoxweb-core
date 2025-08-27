@@ -27,7 +27,7 @@ public class StatInfo
     }
 
 
-    public static final NVConfigEntity NVC_STAT_INFO = new NVConfigEntityLocal("stat_info",
+    public static final NVConfigEntity NVC_STAT_INFO = new NVConfigEntityPortable("stat_info",
             null,
             "StatInfo",
             true,

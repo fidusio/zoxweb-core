@@ -18,7 +18,7 @@ package org.zoxweb.shared.net;
 import org.zoxweb.shared.data.SetNameDAO;
 import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
+import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.SharedUtil;
 
@@ -30,7 +30,7 @@ public class IPAddress
     private static final NVConfig PORT = NVConfigManager.createNVConfig("port", "The port number", "Port", true, false, int.class);
     private static final NVConfig BACKLOG = NVConfigManager.createNVConfig("backlog", "How many pending connections", "BackLog", true, false, int.class);
     private static final NVConfig PROXY_TYPE = NVConfigManager.createNVConfig("proxy_type", "proxy type", "ProxyType", false, false, ProxyType.class);
-    public static final NVConfigEntity NVC_IP_ADDRESS = new NVConfigEntityLocal("ip_address", null, "IPAddress", true, false, false, false, IPAddress.class, SharedUtil.toNVConfigList(INET_ADDRESS, PORT, BACKLOG, PROXY_TYPE), null, false, SetNameDAO.NVC_NAME_DAO);
+    public static final NVConfigEntity NVC_IP_ADDRESS = new NVConfigEntityPortable("ip_address", null, "IPAddress", true, false, false, false, IPAddress.class, SharedUtil.toNVConfigList(INET_ADDRESS, PORT, BACKLOG, PROXY_TYPE), null, false, SetNameDAO.NVC_NAME_DAO);
 
     public IPAddress() {
         super(NVC_IP_ADDRESS);

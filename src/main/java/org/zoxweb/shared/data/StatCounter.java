@@ -10,7 +10,7 @@ import org.zoxweb.shared.util.Const.TimeInMillis;
 import org.zoxweb.shared.util.GetNVConfig;
 import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
+import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.SharedUtil;
 
@@ -43,7 +43,7 @@ public class StatCounter
 		}
 	}
 	
-	public static final NVConfigEntity NVC_STAT_COUNTER_DAO = new NVConfigEntityLocal(
+	public static final NVConfigEntity NVC_STAT_COUNTER_DAO = new NVConfigEntityPortable(
 	        "stat_counter",
 	        null,
 	        StatCounter.class.getSimpleName(),

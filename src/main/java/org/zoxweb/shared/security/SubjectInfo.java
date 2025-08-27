@@ -26,7 +26,7 @@ extends PropertyDAO
         }
     }
 
-    public static final NVConfigEntity NVC_SUBJECT_INFO = new NVConfigEntityLocal(
+    public static final NVConfigEntity NVC_SUBJECT_INFO = new NVConfigEntityPortable(
             "subject_info",
             null ,
             SubjectInfo.class.getName(),

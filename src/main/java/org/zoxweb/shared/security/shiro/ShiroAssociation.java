@@ -19,7 +19,7 @@ import org.zoxweb.shared.data.SetNameDAO;
 import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
 import org.zoxweb.shared.util.NVConfigEntity.ArrayType;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
+import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.NVConfigManager;
 
 import org.zoxweb.shared.util.SharedUtil;
@@ -35,7 +35,7 @@ public abstract class ShiroAssociation
 	private static final NVConfig NVC_ASSOCIATED_TO = NVConfigManager.createNVConfigEntity("associated_to", "The Associated to","AssociatedTo", true, false, ShiroDomain.class, ArrayType.NOT_ARRAY);
 	
 	
-	private static final NVConfigEntity NVC_ASSOCIATION = new NVConfigEntityLocal("shiro_association_dao", null , "ShiroAssociationDAO", true, false, false, false, ShiroAssociation.class, SharedUtil.toNVConfigList(NVC_ASSOCIATION_TYPE, NVC_ASSOCIATION_PARAM, NVC_ASSOCIATED_TO), null, false, SetNameDAO.NVC_NAME_DAO);
+	private static final NVConfigEntity NVC_ASSOCIATION = new NVConfigEntityPortable("shiro_association_dao", null , "ShiroAssociationDAO", true, false, false, false, ShiroAssociation.class, SharedUtil.toNVConfigList(NVC_ASSOCIATION_TYPE, NVC_ASSOCIATION_PARAM, NVC_ASSOCIATED_TO), null, false, SetNameDAO.NVC_NAME_DAO);
 	
 	protected ShiroAssociation(ShiroAssociationType type, ShiroDomain associatedTo, ShiroDomain association)
 	{
