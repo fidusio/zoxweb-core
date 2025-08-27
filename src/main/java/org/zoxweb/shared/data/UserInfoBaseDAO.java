@@ -58,7 +58,7 @@ public abstract class UserInfoBaseDAO
         }
 	}
 
-	public static final NVConfigEntity NVC_USER_INFO_BASE_DAO = new NVConfigEntityLocal(
+	public static final NVConfigEntity NVC_USER_INFO_BASE_DAO = new NVConfigEntityPortable(
 																							"user_info_base_dao", 
 																							null, 
 																							"UserInfoBaseDAO",

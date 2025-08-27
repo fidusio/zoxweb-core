@@ -51,7 +51,7 @@ public class KeyStoreInfo
         }
     }
 
-    public static final NVConfigEntity NVC_KEY_STORE_INFO = new NVConfigEntityLocal(
+    public static final NVConfigEntity NVC_KEY_STORE_INFO = new NVConfigEntityPortable(
             "key_store_info",
             null ,
             KeyStoreInfo.class.getSimpleName(),

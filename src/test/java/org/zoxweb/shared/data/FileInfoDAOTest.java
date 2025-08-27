@@ -21,14 +21,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.zoxweb.server.util.GSONUtil;
-import org.zoxweb.shared.data.FileInfoDAO;
-import org.zoxweb.shared.data.ZWDataFactory;
 import org.zoxweb.shared.data.ticket.TicketContainerDAO;
 import org.zoxweb.shared.data.ticket.TicketIssuerDAO;
 import org.zoxweb.shared.util.GetNVConfig;
 import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
+import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.NVPair;
 import org.zoxweb.shared.util.SharedUtil;
@@ -60,7 +58,7 @@ public class FileInfoDAOTest {
 
 		private List<NVPair> tempo = new ArrayList<NVPair>();
 
-		public static final NVConfigEntity  NVC_CHILD_FILE_INFO_DAO = new NVConfigEntityLocal("child_file_info_dao", null , "ChildFileInfoDAO", true, false, false, false,ChildFileInfoDAO.class, SharedUtil.extractNVConfigs(CFFIParams.values()), null, false, FileInfoDAO.NVC_FILE_INFO_DAO);//,SharedUtil.extractNVConfigs( new Params[]{Params.REFERENCE_ID, Params.NAME, Params.LENGTH}));
+		public static final NVConfigEntity  NVC_CHILD_FILE_INFO_DAO = new NVConfigEntityPortable("child_file_info_dao", null , "ChildFileInfoDAO", true, false, false, false,ChildFileInfoDAO.class, SharedUtil.extractNVConfigs(CFFIParams.values()), null, false, FileInfoDAO.NVC_FILE_INFO_DAO);//,SharedUtil.extractNVConfigs( new Params[]{Params.REFERENCE_ID, Params.NAME, Params.LENGTH}));
 
 		public ChildFileInfoDAO() {
 			super(NVC_CHILD_FILE_INFO_DAO);
@@ -88,7 +86,7 @@ public class FileInfoDAOTest {
 		}
 	}
 
-	public static final NVConfigEntity  NVC = new NVConfigEntityLocal(null, null , "ChildFileInfoDAO", true, false, false, false, FileInfoDAO.class, SharedUtil.extractNVConfigs(CFFIParams.values()), null, false, null);//,SharedUtil.extractNVConfigs( new Params[]{Params.REFERENCE_ID, Params.NAME, Params.LENGTH}));
+	public static final NVConfigEntity  NVC = new NVConfigEntityPortable(null, null , "ChildFileInfoDAO", true, false, false, false, FileInfoDAO.class, SharedUtil.extractNVConfigs(CFFIParams.values()), null, false, null);//,SharedUtil.extractNVConfigs( new Params[]{Params.REFERENCE_ID, Params.NAME, Params.LENGTH}));
 	
 	public static void main(String[] args) {
 		try {

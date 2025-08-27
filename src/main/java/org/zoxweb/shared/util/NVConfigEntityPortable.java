@@ -28,7 +28,7 @@ import java.util.Map;
  * @author mnael
  */
 @SuppressWarnings("serial")
-public class NVConfigEntityLocal
+public class NVConfigEntityPortable
         extends NVConfigPortable
         implements NVConfigEntity {
 
@@ -76,7 +76,7 @@ public class NVConfigEntityLocal
      * This is the default constructor which instantiates
      * the parent class, NVConfigLocal.
      */
-    public NVConfigEntityLocal() {
+    public NVConfigEntityPortable() {
         super();
     }
 
@@ -96,18 +96,18 @@ public class NVConfigEntityLocal
      * @param displayList
      * @param attributesValidationRequired
      */
-    public NVConfigEntityLocal(String name,
-                               String description,
-                               String displayName,
-                               boolean man,
-                               boolean edit,
-                               boolean isUnique,
-                               boolean isHidden,
-                               Class<?> type,
-                               List<NVConfig> attrList,
-                               List<NVConfig> displayList,
-                               boolean attributesValidationRequired,
-                               NVConfigEntity superClass) {
+    public NVConfigEntityPortable(String name,
+                                  String description,
+                                  String displayName,
+                                  boolean man,
+                                  boolean edit,
+                                  boolean isUnique,
+                                  boolean isHidden,
+                                  Class<?> type,
+                                  List<NVConfig> attrList,
+                                  List<NVConfig> displayList,
+                                  boolean attributesValidationRequired,
+                                  NVConfigEntity superClass) {
         super(name, description, displayName, man, edit, isUnique, isHidden, false, type, null);
 
         if (name == null && type != null) {
@@ -153,14 +153,14 @@ public class NVConfigEntityLocal
      * @param type
      * @param at
      */
-    public NVConfigEntityLocal(String name,
-                               String description,
-                               String displayName,
-                               boolean man,
-                               boolean edit,
-                               boolean embedded,
-                               Class<?> type,
-                               ArrayType at) {
+    public NVConfigEntityPortable(String name,
+                                  String description,
+                                  String displayName,
+                                  boolean man,
+                                  boolean edit,
+                                  boolean embedded,
+                                  Class<?> type,
+                                  ArrayType at) {
         this(name, description, displayName, man, edit, false, false, type, null, null, false, null);
         if (at != null && at != ArrayType.NOT_ARRAY) {
             setArray(true);
@@ -198,16 +198,16 @@ public class NVConfigEntityLocal
 //		setMandatory(man);
 //		setEditable(edit);
 //	}
-    public NVConfigEntityLocal(String name,
-                               String description,
-                               String displayName,
-                               boolean man,
-                               boolean edit,
-                               boolean unique,
-                               boolean hidden,
-                               NVConfigEntity byRef,
-                               boolean embedded,
-                               ArrayType arrayType) {
+    public NVConfigEntityPortable(String name,
+                                  String description,
+                                  String displayName,
+                                  boolean man,
+                                  boolean edit,
+                                  boolean unique,
+                                  boolean hidden,
+                                  NVConfigEntity byRef,
+                                  boolean embedded,
+                                  ArrayType arrayType) {
         super();
         setReferencedNVConfigEntity(byRef);
         setName(name);

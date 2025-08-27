@@ -19,7 +19,7 @@ import org.zoxweb.shared.data.DataConst.DataParam;
 
 
 import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
+import org.zoxweb.shared.util.NVConfigEntityPortable;
 
 import org.zoxweb.shared.util.SetName;
 import org.zoxweb.shared.util.SharedUtil;
@@ -39,7 +39,7 @@ public abstract class SetNameDAO
 	implements SetName
 {
 
-	public static final NVConfigEntity NVC_NAME_DAO = new NVConfigEntityLocal(
+	public static final NVConfigEntity NVC_NAME_DAO = new NVConfigEntityPortable(
             null,
             null ,
             null,

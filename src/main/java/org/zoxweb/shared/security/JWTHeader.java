@@ -51,7 +51,7 @@ implements GetNVProperties
 		}
 	}
 	
-	public static final NVConfigEntity NVC_JWT_HEADER = new NVConfigEntityLocal(
+	public static final NVConfigEntity NVC_JWT_HEADER = new NVConfigEntityPortable(
 																					"jwt_header", 
 																					null , 
 																					"JWTHeader", 

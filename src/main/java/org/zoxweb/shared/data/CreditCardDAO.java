@@ -62,7 +62,7 @@ public class CreditCardDAO
         }
 	}
 	
-	public static final NVConfigEntity NVC_CREDIT_CARD_DAO = new NVConfigEntityLocal(
+	public static final NVConfigEntity NVC_CREDIT_CARD_DAO = new NVConfigEntityPortable(
         "credit_card_dao",
         null ,
         "CreditCardDAO",

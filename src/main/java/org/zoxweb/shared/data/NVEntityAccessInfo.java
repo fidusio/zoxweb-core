@@ -22,10 +22,9 @@ import org.zoxweb.shared.util.CRUD;
 import org.zoxweb.shared.util.GetNVConfig;
 import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
+import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.SharedUtil;
-import org.zoxweb.shared.data.TimeStampDAO;
 
 /**
  *
@@ -57,7 +56,7 @@ public class NVEntityAccessInfo
 		}
 	}
 	
-	public static final NVConfigEntity NVC_NVENTITY_ACCESS_INFO = new NVConfigEntityLocal(  
+	public static final NVConfigEntity NVC_NVENTITY_ACCESS_INFO = new NVConfigEntityPortable(
             "nventity_access_info",
             null,
             "NVEntityAccessInfo",

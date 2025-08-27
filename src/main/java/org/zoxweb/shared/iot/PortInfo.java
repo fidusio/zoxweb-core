@@ -30,7 +30,7 @@ extends IOTBase
         }
     }
 
-    public static final NVConfigEntity NVC_PORT_INFO = new NVConfigEntityLocal("port_info",
+    public static final NVConfigEntity NVC_PORT_INFO = new NVConfigEntityPortable("port_info",
             null,
             "PortInfo",
             true,

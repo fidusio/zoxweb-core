@@ -29,7 +29,7 @@ extends IOTBase
     }
 
     private static final CanonicalIDSetter CIDS = new CanonicalIDSetter('-', DataConst.DataParam.NAME, Param.VERSION);
-    public static final NVConfigEntity NVC_IOT_PROTOCOL = new NVConfigEntityLocal("iot_protocol",
+    public static final NVConfigEntity NVC_IOT_PROTOCOL = new NVConfigEntityPortable("iot_protocol",
             null,
             "ProtocolInfo",
             true,

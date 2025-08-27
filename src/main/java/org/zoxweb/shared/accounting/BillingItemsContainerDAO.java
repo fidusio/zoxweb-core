@@ -23,7 +23,7 @@ import org.zoxweb.shared.util.ArrayValues;
 import org.zoxweb.shared.util.GetNVConfig;
 import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
+import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.NVEntity;
 import org.zoxweb.shared.util.SharedUtil;
@@ -57,7 +57,7 @@ public class BillingItemsContainerDAO
 		}
 	}
 	
-	public static final NVConfigEntity NVC_BILLING_ITEMS_CONTAINER_DAO = new NVConfigEntityLocal(
+	public static final NVConfigEntity NVC_BILLING_ITEMS_CONTAINER_DAO = new NVConfigEntityPortable(
 																									"billing_items_container_dao", 
 																									null, 
 																									"Billing Items Container", 

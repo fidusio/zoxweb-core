@@ -22,7 +22,7 @@ import org.zoxweb.shared.util.ArrayValues;
 import org.zoxweb.shared.util.GetNVConfig;
 import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
+import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.NVPair;
 import org.zoxweb.shared.util.SharedUtil;
@@ -57,7 +57,7 @@ abstract public class DocumentInfoDAO
         }
 	}
 	
-	public static final NVConfigEntity NVC_DOCUMENT_INFO_DAO = new NVConfigEntityLocal(
+	public static final NVConfigEntity NVC_DOCUMENT_INFO_DAO = new NVConfigEntityPortable(
 																							"document_info_dao", 
 																							null, 
 																							"DocumentInfoDAO", 

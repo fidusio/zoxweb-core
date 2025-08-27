@@ -60,7 +60,7 @@ public class SubjectAPIKey
         }
     }
 
-    public static final NVConfigEntity NVC_SUBJECT_API_KEY = new NVConfigEntityLocal(
+    public static final NVConfigEntity NVC_SUBJECT_API_KEY = new NVConfigEntityPortable(
             "subject_api_key",
             null,
             SubjectAPIKey.class.getSimpleName(),

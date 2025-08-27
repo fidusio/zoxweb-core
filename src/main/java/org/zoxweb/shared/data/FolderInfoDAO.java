@@ -45,7 +45,7 @@ public class FolderInfoDAO
         }
     }
 
-    public static final NVConfigEntity NVC_FOLDER_INFO_DAO = new NVConfigEntityLocal(
+    public static final NVConfigEntity NVC_FOLDER_INFO_DAO = new NVConfigEntityPortable(
             "folder_info_dao",
             null,
             "FolderInfoDAO",

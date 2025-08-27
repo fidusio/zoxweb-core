@@ -19,7 +19,7 @@ import org.zoxweb.shared.filters.FilterType;
 import org.zoxweb.shared.util.GetNVConfig;
 import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
+import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.SharedUtil;
 
@@ -55,7 +55,7 @@ public class SimpleMessage
 		}
 	}
 	
-	public static final NVConfigEntity NVC_SIMPLE_MESSAGE = new NVConfigEntityLocal(
+	public static final NVConfigEntity NVC_SIMPLE_MESSAGE = new NVConfigEntityPortable(
             "simple_message",
             "Simple Message",
             "SimpleMessage",

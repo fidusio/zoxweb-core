@@ -29,7 +29,7 @@ public abstract class ShiroDomain
 	//private static final NVConfig NVC_DOMAIN_ID =  NVConfigManager.createNVConfig("domain_id", null,"DomainID",true, false, String.class);
 	protected static final NVConfig DOMAIN_APP_ID_LOCAL = NVConfigManager.createNVConfig("domain_app_id", "Domain APP ID", "DomainAppID", true, false, false,String.class, null);
 	
-	protected static final NVConfigEntity NVC_SHIRO_DOMAIN = new NVConfigEntityLocal("shiro_domain", null , "ShiroDomain", false, true, false, false, ShiroDomain.class, SharedUtil.toNVConfigList(DOMAIN_APP_ID_LOCAL), null, false, AppIDDAO.NVC_APP_ID_DAO);
+	protected static final NVConfigEntity NVC_SHIRO_DOMAIN = new NVConfigEntityPortable("shiro_domain", null , "ShiroDomain", false, true, false, false, ShiroDomain.class, SharedUtil.toNVConfigList(DOMAIN_APP_ID_LOCAL), null, false, AppIDDAO.NVC_APP_ID_DAO);
 	//,SharedUtil.extractNVConfigs( new Params[]{Params.REFERENCE_ID, Params.NAME, Params.LENGTH}));
 	
 	

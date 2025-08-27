@@ -46,7 +46,7 @@ public class ShiroRole
 		}
 	}
 	
-	public static final NVConfigEntity NVC_SHIRO_ROLE = new NVConfigEntityLocal("shiro_role", "Shiro role dao object" , "ShiroRole",
+	public static final NVConfigEntity NVC_SHIRO_ROLE = new NVConfigEntityPortable("shiro_role", "Shiro role dao object" , "ShiroRole",
 			false, true, false, false, ShiroRole.class, SharedUtil.extractNVConfigs(Param.values()), null, false, ShiroDomain.NVC_SHIRO_DOMAIN);
 	
 	public ShiroRole()

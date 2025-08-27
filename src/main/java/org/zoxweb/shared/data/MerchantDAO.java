@@ -59,7 +59,7 @@ public class MerchantDAO
         }
 	}
 	
-	public static final NVConfigEntity NVC_MERCHANT_DAO = new NVConfigEntityLocal(
+	public static final NVConfigEntity NVC_MERCHANT_DAO = new NVConfigEntityPortable(
             "merchant_dao",
             null,
             "MerchantDAO",

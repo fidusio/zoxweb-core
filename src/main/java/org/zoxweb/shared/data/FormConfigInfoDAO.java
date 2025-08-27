@@ -22,7 +22,7 @@ import org.zoxweb.shared.util.DomainID;
 import org.zoxweb.shared.util.GetNVConfig;
 import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
+import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.NVPair;
 import org.zoxweb.shared.util.SharedUtil;
@@ -58,7 +58,7 @@ public class FormConfigInfoDAO
         }
 	}
 	
-	public static final NVConfigEntity NVC_FORM_CONFIG_INFO_DAO = new NVConfigEntityLocal
+	public static final NVConfigEntity NVC_FORM_CONFIG_INFO_DAO = new NVConfigEntityPortable
 																(
 																	"form_config_info_dao", 
 																	null, 

@@ -4,7 +4,7 @@ import org.zoxweb.shared.util.GetNVConfig;
 import org.zoxweb.shared.util.GetValue;
 import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
+import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.SharedUtil;
 import org.zoxweb.shared.filters.FilterType;
@@ -64,7 +64,7 @@ public class ImageDAO
         }
     }
 
-    public static final NVConfigEntity NVC_IMAGE_DAO = new NVConfigEntityLocal(
+    public static final NVConfigEntity NVC_IMAGE_DAO = new NVConfigEntityPortable(
             "image_dao",
             null ,
             "ImageDAO",

@@ -19,7 +19,7 @@ import org.zoxweb.shared.data.CanonicalIDDAO;
 import org.zoxweb.shared.util.GetNVConfig;
 import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
+import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.SharedUtil;
 import org.zoxweb.shared.util.Const.ScanStatus;
@@ -55,7 +55,7 @@ public class ScanResult
 		}
 	}
 	
-	public static final NVConfigEntity NVC_SCAN_RESULT = new NVConfigEntityLocal(
+	public static final NVConfigEntity NVC_SCAN_RESULT = new NVConfigEntityPortable(
 																					"scan_result",
 																					null , 
 																					"ScanResult",

@@ -38,7 +38,7 @@ extends SecurityProfile
     /**
      * This NVConfigEntity type constant is set to an instantiation of a NVConfigEntityLocal object based on DataContentDAO.
      */
-    public static final NVConfigEntity NVC_HTTP_END_POINT = new NVConfigEntityLocal("http_end_point",
+    public static final NVConfigEntity NVC_HTTP_END_POINT = new NVConfigEntityPortable("http_end_point",
             null,
             "HTTPEndPoint",
             true,

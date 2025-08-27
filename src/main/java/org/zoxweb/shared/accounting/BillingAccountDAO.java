@@ -21,7 +21,7 @@ import org.zoxweb.shared.data.TimeStampDAO;
 import org.zoxweb.shared.util.GetNVConfig;
 import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
+import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.SharedUtil;
 import org.zoxweb.shared.util.NVConfigEntity.ArrayType;
@@ -58,7 +58,7 @@ public class BillingAccountDAO
 		}
 	}
 	
-	public static final NVConfigEntity NVC_BILLING_ACCOUNT_DAO = new NVConfigEntityLocal(
+	public static final NVConfigEntity NVC_BILLING_ACCOUNT_DAO = new NVConfigEntityPortable(
 																							"billing_account_dao", 
 																							null, 
 																							"BillingAccountDAO", 

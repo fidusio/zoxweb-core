@@ -46,7 +46,7 @@ public class NVEntityContainerDAO
         }
     }
 
-    public static final NVConfigEntity NVC_NVENTITY_CONTAINER_DAO = new NVConfigEntityLocal(
+    public static final NVConfigEntity NVC_NVENTITY_CONTAINER_DAO = new NVConfigEntityPortable(
             "nventity_container_dao",
             null,
             "Dossier",

@@ -51,7 +51,7 @@ public abstract class TimeStampDAO
 		}
 	}
 	
-	public static final NVConfigEntity NVC_TIME_STAMP_DAO = new NVConfigEntityLocal(
+	public static final NVConfigEntity NVC_TIME_STAMP_DAO = new NVConfigEntityPortable(
 	        "time_stamp_dao",
             null,
             TimeStampDAO.class.getSimpleName(),

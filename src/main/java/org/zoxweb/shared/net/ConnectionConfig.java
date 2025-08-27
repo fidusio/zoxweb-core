@@ -4,7 +4,7 @@ import org.zoxweb.shared.data.SetNameDescriptionDAO;
 import org.zoxweb.shared.util.GetNVConfig;
 import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
+import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.NVGenericMap;
 import org.zoxweb.shared.util.NVStringList;
@@ -37,7 +37,7 @@ public class ConnectionConfig
 
   }
 
-  public final static NVConfigEntity NVC_CONNECTION_CONFIG_DAO = new NVConfigEntityLocal("connection_config", null, "ConnectionConfig", false, true, false, false, ConnectionConfig.class, SharedUtil
+  public final static NVConfigEntity NVC_CONNECTION_CONFIG_DAO = new NVConfigEntityPortable("connection_config", null, "ConnectionConfig", false, true, false, false, ConnectionConfig.class, SharedUtil
       .extractNVConfigs(Param.values()), null, false, SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO);
 
   public ConnectionConfig()

@@ -20,7 +20,7 @@ import org.zoxweb.shared.util.ArrayValues;
 import org.zoxweb.shared.util.GetNVConfig;
 import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
+import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.NVEntity;
 import org.zoxweb.shared.util.SharedUtil;
@@ -70,7 +70,7 @@ public class ConfigDAO
 	/**
 	 * This NVConfigEntity type constant is set to an instantiation of a NVConfigEntityLocal object based on DataContentDAO.
 	 */
-	public static final NVConfigEntity NVC_CONFIG_DAO = new NVConfigEntityLocal("config_dao",
+	public static final NVConfigEntity NVC_CONFIG_DAO = new NVConfigEntityPortable("config_dao",
 																				null,
 																				"ConfigDAO", 
 																				true,

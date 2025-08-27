@@ -138,7 +138,7 @@ public class NVConfigManager {
                                                 boolean embedded,
                                                 Class<?> type,
                                                 ArrayType at) {
-        return new NVConfigEntityLocal(name, description, displayName, mandatory, edit, embedded, type, at);
+        return new NVConfigEntityPortable(name, description, displayName, mandatory, edit, embedded, type, at);
     }
 
     /**
@@ -160,7 +160,7 @@ public class NVConfigManager {
                                                 boolean edit,
                                                 Class<?> type,
                                                 ArrayType at) {
-        return new NVConfigEntityLocal(name, description, displayName, mandatory, edit, false, type, at);
+        return new NVConfigEntityPortable(name, description, displayName, mandatory, edit, false, type, at);
     }
 
     /**
@@ -175,7 +175,7 @@ public class NVConfigManager {
      * @return the attribute meta info
      */
     public static NVConfig createNVConfigEntity(String name, String description, String displayName, boolean mandatory, boolean edit, NVConfigEntity nvce) {
-        return new NVConfigEntityLocal(name, description, displayName, mandatory, edit, false, false, nvce, false, ArrayType.NOT_ARRAY);
+        return new NVConfigEntityPortable(name, description, displayName, mandatory, edit, false, false, nvce, false, ArrayType.NOT_ARRAY);
     }
 
 
@@ -191,7 +191,7 @@ public class NVConfigManager {
      * @return the attribute meta info
      */
     public static NVConfig createNVConfigEntity(String name, String description, String displayName, boolean mandatory, boolean edit, boolean embedded, NVConfigEntity nvce) {
-        return new NVConfigEntityLocal(name, description, displayName, mandatory, edit, false, false, nvce, embedded, ArrayType.NOT_ARRAY);
+        return new NVConfigEntityPortable(name, description, displayName, mandatory, edit, false, false, nvce, embedded, ArrayType.NOT_ARRAY);
     }
 
     /**
@@ -213,7 +213,7 @@ public class NVConfigManager {
                                                 boolean edit,
                                                 NVConfigEntity nvce,
                                                 ArrayType at) {
-        return new NVConfigEntityLocal(name, description, displayName, mandatory, edit, false, false, nvce, false, at);
+        return new NVConfigEntityPortable(name, description, displayName, mandatory, edit, false, false, nvce, false, at);
     }
 
 
@@ -239,7 +239,7 @@ public class NVConfigManager {
                                                 boolean hidden,
                                                 NVConfigEntity nvce,
                                                 ArrayType at) {
-        return new NVConfigEntityLocal(name, description, displayName, mandatory, edit, unique, hidden, nvce, false, at);
+        return new NVConfigEntityPortable(name, description, displayName, mandatory, edit, unique, hidden, nvce, false, at);
     }
 
 

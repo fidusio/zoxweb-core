@@ -49,7 +49,7 @@ implements ResourceSecurity
     /**
      * This NVConfigEntity type constant is set to an instantiation of a NVConfigEntityLocal object based on DataContentDAO.
      */
-    public static final NVConfigEntity NVC_SECURITY_PROFILE = new NVConfigEntityLocal("security_profile",
+    public static final NVConfigEntity NVC_SECURITY_PROFILE = new NVConfigEntityPortable("security_profile",
             null,
             "SecurityProfile",
             true,

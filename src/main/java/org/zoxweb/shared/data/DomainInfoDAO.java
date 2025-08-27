@@ -19,7 +19,7 @@ import org.zoxweb.shared.filters.FilterType;
 import org.zoxweb.shared.util.DomainID;
 import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
+import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.SharedUtil;
 
@@ -35,7 +35,7 @@ public class DomainInfoDAO
 {
 	
 	public static final NVConfig NVC_DOMAIN_ID =  NVConfigManager.createNVConfig("domain_id", "The domain url identifier", "Domain/AccountID", true, true, true, String.class, FilterType.DOMAIN);
-	public static final NVConfigEntity NVC_DOMAIN_INFO_DAO = new NVConfigEntityLocal("domain_info_dao", "DomainInfoDAO Object" , "DomainInfoDAO", true, false, false, false, DomainInfoDAO.class, SharedUtil.toNVConfigList(NVC_DOMAIN_ID), null, false, SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO);
+	public static final NVConfigEntity NVC_DOMAIN_INFO_DAO = new NVConfigEntityPortable("domain_info_dao", "DomainInfoDAO Object" , "DomainInfoDAO", true, false, false, false, DomainInfoDAO.class, SharedUtil.toNVConfigList(NVC_DOMAIN_ID), null, false, SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO);
 	
 	/**
 	 * The default constructor.

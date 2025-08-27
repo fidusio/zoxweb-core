@@ -19,7 +19,7 @@ import org.zoxweb.shared.filters.FilterType;
 import org.zoxweb.shared.util.GetNVConfig;
 import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
+import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.SharedUtil;
 import org.zoxweb.shared.util.SubjectID;
@@ -62,7 +62,7 @@ public class UserIDDAO
 
 	}
 	
-	public static final NVConfigEntity NVC_USER_ID_DAO = new NVConfigEntityLocal(
+	public static final NVConfigEntity NVC_USER_ID_DAO = new NVConfigEntityPortable(
 	        "user_id_dao",
             null ,
             UserIDDAO.class.getSimpleName(),

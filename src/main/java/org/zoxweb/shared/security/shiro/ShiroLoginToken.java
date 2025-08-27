@@ -30,7 +30,7 @@ public class ShiroLoginToken
 	private static final NVConfig NVC_SUBJECT_ID = NVConfigManager.createNVConfig(MetaToken.SUBJECT_ID.getName(), "The user","SubjectID", true, true, String.class);
 	private static final NVConfig NVC_PASSWORD = NVConfigManager.createNVConfig("password", "The password","Password", true, true, String.class);
 
-	private static final NVConfigEntity NVC_LOGIN_TOKEN = new NVConfigEntityLocal("shiro_login_token", "The login token", "ShiroLoginToken", true, false, false, false, ShiroLoginToken.class, SharedUtil.toNVConfigList( NVC_DOMAIN_ID, NVC_APPLICATION_ID, NVC_REALM, NVC_SUBJECT_ID, NVC_PASSWORD), null, false, SetNameDAO.NVC_NAME_DAO);
+	private static final NVConfigEntity NVC_LOGIN_TOKEN = new NVConfigEntityPortable("shiro_login_token", "The login token", "ShiroLoginToken", true, false, false, false, ShiroLoginToken.class, SharedUtil.toNVConfigList( NVC_DOMAIN_ID, NVC_APPLICATION_ID, NVC_REALM, NVC_SUBJECT_ID, NVC_PASSWORD), null, false, SetNameDAO.NVC_NAME_DAO);
 
 	public ShiroLoginToken()
 	{

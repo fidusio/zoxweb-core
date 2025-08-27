@@ -65,7 +65,7 @@ public class NVCEMap
 		
 	}
 	
-	public static final NVConfigEntity NVCE_MAP = new NVConfigEntityLocal(
+	public static final NVConfigEntity NVCE_MAP = new NVConfigEntityPortable(
 																			"nvce_map", 
 																			null, 
 																			"NVCEMap", 

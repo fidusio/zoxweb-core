@@ -20,7 +20,7 @@ import org.zoxweb.shared.security.JWTEncoder;
 import org.zoxweb.shared.util.GetNameValue;
 import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
+import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.SharedUtil;
 import org.zoxweb.shared.util.NVConfigEntity.ArrayType;
@@ -38,7 +38,7 @@ extends HTTPAuthorization
 	public static final NVConfig NVC_KEY = NVConfigManager.createNVConfig("key", null,"Token", false, true, byte[].class);
 	public static final NVConfig NVC_JWT = NVConfigManager.createNVConfigEntity("jwt", "jwt token", "JWT", false, true, JWT.class, ArrayType.NOT_ARRAY);
 	
-	public static final NVConfigEntity NVC_HTTP_AUTHORIZATION_JWT_BEARER = new NVConfigEntityLocal("http_authorization_jwt_bearer", null , null, true, false, false, false, HTTPAuthorizationJWTBearer.class, SharedUtil.toNVConfigList(NVC_KEY, NVC_JWT), null, false, HTTPAuthorization.NVC_HTTP_AUTHORIZATION);
+	public static final NVConfigEntity NVC_HTTP_AUTHORIZATION_JWT_BEARER = new NVConfigEntityPortable("http_authorization_jwt_bearer", null , null, true, false, false, false, HTTPAuthorizationJWTBearer.class, SharedUtil.toNVConfigList(NVC_KEY, NVC_JWT), null, false, HTTPAuthorization.NVC_HTTP_AUTHORIZATION);
 	
 	private transient JWTEncoder jwtEncoder = null;
 	

@@ -29,7 +29,7 @@ public class FolderContentOp
         }
     }
 
-    public static final NVConfigEntity NVC_FOLDER_CONTENT_OP = new NVConfigEntityLocal(
+    public static final NVConfigEntity NVC_FOLDER_CONTENT_OP = new NVConfigEntityPortable(
             "folder_content_op",
             "FolderContentOp",
             FolderContentOp.class.getSimpleName(),

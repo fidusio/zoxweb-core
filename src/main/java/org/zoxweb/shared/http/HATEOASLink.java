@@ -19,7 +19,7 @@ import org.zoxweb.shared.data.SetNameDAO;
 import org.zoxweb.shared.util.GetNVConfig;
 import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
+import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.SharedUtil;
 
@@ -55,7 +55,7 @@ extends SetNameDAO
 	
 	}
 
-	public static final NVConfigEntity NVC_HATEOAS_LINK = new NVConfigEntityLocal("hateos_link", null , "HATEOASLink", true, false, false, false, HATEOASLink.class, SharedUtil.extractNVConfigs(Params.values()), null, false, SetNameDAO.NVC_NAME_DAO);
+	public static final NVConfigEntity NVC_HATEOAS_LINK = new NVConfigEntityPortable("hateos_link", null , "HATEOASLink", true, false, false, false, HATEOASLink.class, SharedUtil.extractNVConfigs(Params.values()), null, false, SetNameDAO.NVC_NAME_DAO);
 	
 	
 	public HATEOASLink()

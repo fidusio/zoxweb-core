@@ -75,7 +75,7 @@ public class CIPassword
         }
     }
 
-    public final static NVConfigEntity NVCE_CI_PASSWORD = new NVConfigEntityLocal("ci_password", null, "Password", false, true, false, false, CIPassword.class, SharedUtil.extractNVConfigs(Param.values()), null, false, PropertyDAO.NVC_PROPERTY_DAO);
+    public final static NVConfigEntity NVCE_CI_PASSWORD = new NVConfigEntityPortable("ci_password", null, "Password", false, true, false, false, CIPassword.class, SharedUtil.extractNVConfigs(Param.values()), null, false, PropertyDAO.NVC_PROPERTY_DAO);
 
     /**
      * The default constructor.

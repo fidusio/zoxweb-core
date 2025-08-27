@@ -18,7 +18,7 @@ package org.zoxweb.shared.data;
 import org.zoxweb.shared.util.GetNVConfig;
 import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
+import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.SetCanonicalID;
 import org.zoxweb.shared.util.SharedUtil;
@@ -63,7 +63,7 @@ public class DataContentDAO
 	/**
 	 * This NVConfigEntity type constant is set to an instantiation of a NVConfigEntityLocal object based on DataContentDAO.
 	 */
-	public static final NVConfigEntity NVC_DATA_CONTENT_DAO = new NVConfigEntityLocal(
+	public static final NVConfigEntity NVC_DATA_CONTENT_DAO = new NVConfigEntityPortable(
 																						"data_content_dao",
 																						null,
 																						"DataContentDAO", 

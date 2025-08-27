@@ -21,7 +21,7 @@ import org.zoxweb.shared.util.CanonicalID;
 import org.zoxweb.shared.util.GetNVConfig;
 import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
+import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.SharedUtil;
 
@@ -68,7 +68,7 @@ public class PhoneDAO
 
 	}
 	
-	public static final NVConfigEntity NVC_PHONE_DAO = new NVConfigEntityLocal(
+	public static final NVConfigEntity NVC_PHONE_DAO = new NVConfigEntityPortable(
             "phone_dao",
             null,
             "Phone",

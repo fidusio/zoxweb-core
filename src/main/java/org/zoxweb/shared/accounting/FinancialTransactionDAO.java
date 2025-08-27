@@ -22,7 +22,7 @@ import org.zoxweb.shared.data.TimeStampDAO;
 import org.zoxweb.shared.util.GetNVConfig;
 import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
+import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.NVEntity;
 import org.zoxweb.shared.util.SharedUtil;
@@ -70,7 +70,7 @@ public class FinancialTransactionDAO
 
 	}
 	
-	public static final NVConfigEntity NVC_FINANCIAL_TRANSACTION_DAO = new NVConfigEntityLocal(
+	public static final NVConfigEntity NVC_FINANCIAL_TRANSACTION_DAO = new NVConfigEntityPortable(
 																								"financial_transaction_dao", 
 																								null, 
 																								"FinancialTransactionDAO", 

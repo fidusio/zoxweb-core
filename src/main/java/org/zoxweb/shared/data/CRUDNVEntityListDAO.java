@@ -47,7 +47,7 @@ public class CRUDNVEntityListDAO
         }
     }
 
-    public static final NVConfigEntity NVC_CRUD_NVENTITY_LIST_DAO = new NVConfigEntityLocal("crud_nventity_list_dao", null, "CRUDNVEntityListDAO", true, false, false, false, CRUDNVEntityListDAO.class, SharedUtil.extractNVConfigs(Param.values()), null, false, SetNameDAO.NVC_NAME_DAO);
+    public static final NVConfigEntity NVC_CRUD_NVENTITY_LIST_DAO = new NVConfigEntityPortable("crud_nventity_list_dao", null, "CRUDNVEntityListDAO", true, false, false, false, CRUDNVEntityListDAO.class, SharedUtil.extractNVConfigs(Param.values()), null, false, SetNameDAO.NVC_NAME_DAO);
 
     public CRUDNVEntityListDAO() {
         super(NVC_CRUD_NVENTITY_LIST_DAO);

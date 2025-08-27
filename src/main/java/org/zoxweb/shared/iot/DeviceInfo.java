@@ -36,7 +36,7 @@ extends IOTBase
     private static final CanonicalIDSetter CIDS = new CanonicalIDSetter('-',DataConst.DataParam.NAME,
             Param.MODEL, Param.FORM, Param.VERSION);
 
-    public static final NVConfigEntity NVC_DEVICE_INFO = new NVConfigEntityLocal("device_info",
+    public static final NVConfigEntity NVC_DEVICE_INFO = new NVConfigEntityPortable("device_info",
             "IOT device information",
             "DeviceInfo",
             true,

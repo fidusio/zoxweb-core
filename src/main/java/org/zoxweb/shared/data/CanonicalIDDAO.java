@@ -17,7 +17,7 @@ package org.zoxweb.shared.data;
 
 import org.zoxweb.shared.data.DataConst.DataParam;
 import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
+import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.SetCanonicalID;
 import org.zoxweb.shared.util.SharedUtil;
 
@@ -32,7 +32,7 @@ public class CanonicalIDDAO
 	implements SetCanonicalID
 {
 	
-	public static final NVConfigEntity NVC_CANONICAL_ID_DAO = new NVConfigEntityLocal
+	public static final NVConfigEntity NVC_CANONICAL_ID_DAO = new NVConfigEntityPortable
 																	(
 																		"canonical_id_dao", 
 																		null, 

@@ -4,7 +4,7 @@ import org.zoxweb.shared.data.SetNameDescriptionDAO;
 import org.zoxweb.shared.util.GetNVConfig;
 import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
+import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.SharedUtil;
 
@@ -56,7 +56,7 @@ extends SetNameDescriptionDAO
 	/**
 	 * This NVConfigEntity type constant is set to an instantiation of a NVConfigEntityLocal object based on AgreementDAO.
 	 */
-	public static final NVConfigEntity IP_RANGE_DAO = new NVConfigEntityLocal("ip_range_dao", null , "IPRangeDAO", true, false, false, false, IPRangeDAO.class, SharedUtil.extractNVConfigs(Params.values()), null, false, SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO);
+	public static final NVConfigEntity IP_RANGE_DAO = new NVConfigEntityPortable("ip_range_dao", null , "IPRangeDAO", true, false, false, false, IPRangeDAO.class, SharedUtil.extractNVConfigs(Params.values()), null, false, SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO);
 	public IPRangeDAO()
 	{
 		super(IP_RANGE_DAO);

@@ -19,7 +19,7 @@ import org.zoxweb.shared.data.SetNameDAO;
 import org.zoxweb.shared.net.InetProp.IPVersion;
 import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
+import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.SharedUtil;
 
@@ -29,7 +29,7 @@ public class InetAddressDAO
 	
 	private static final NVConfig INET_ADDRESS = NVConfigManager.createNVConfig("inet_address", "The ip address","InetAddress",true, false, String.class);
 	private static final NVConfig IP_VERSION = NVConfigManager.createNVConfig("ip_version", "The ip version V4 or V6","IPVersion", true, false, IPVersion.class);
-	public static final NVConfigEntity NVC_INET_ADDRESS_DAO = new NVConfigEntityLocal("inet_address_dao", null , "InetAddressDAO", true, false, false, false, InetAddressDAO.class, SharedUtil.toNVConfigList(INET_ADDRESS, IP_VERSION), null, false, SetNameDAO.NVC_NAME_DAO);
+	public static final NVConfigEntity NVC_INET_ADDRESS_DAO = new NVConfigEntityPortable("inet_address_dao", null , "InetAddressDAO", true, false, false, false, InetAddressDAO.class, SharedUtil.toNVConfigList(INET_ADDRESS, IP_VERSION), null, false, SetNameDAO.NVC_NAME_DAO);
 
 	public InetAddressDAO() {
 		super(NVC_INET_ADDRESS_DAO);

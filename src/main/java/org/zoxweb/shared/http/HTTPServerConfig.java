@@ -36,7 +36,7 @@ implements AppConfig
     }
   }
 
-  public static final NVConfigEntity NVC_HTTP_SERVER_CONFIG = new NVConfigEntityLocal("HTTP_SERVER_CONFIG",
+  public static final NVConfigEntity NVC_HTTP_SERVER_CONFIG = new NVConfigEntityPortable("HTTP_SERVER_CONFIG",
       null,
       "HTTPServerConfig", 
       true,

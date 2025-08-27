@@ -53,7 +53,7 @@ public class BillingItemDAO
 		}
 	}
 
-	public static final NVConfigEntity NVC_BILLING_ITEM_DAO = new NVConfigEntityLocal(
+	public static final NVConfigEntity NVC_BILLING_ITEM_DAO = new NVConfigEntityPortable(
 																							"billing_item_dao", 
 																							null, 
 																							"Billing Item", 

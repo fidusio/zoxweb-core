@@ -27,7 +27,7 @@ public class PropertyDAO
     /**
      * This NVConfigEntity type constant is set to an instantiation of a NVConfigEntityLocal object based on DataContentDAO.
      */
-    public static final NVConfigEntity NVC_PROPERTY_DAO = new NVConfigEntityLocal("property_dao",
+    public static final NVConfigEntity NVC_PROPERTY_DAO = new NVConfigEntityPortable("property_dao",
             null,
             "PropertyDAO",
             true,

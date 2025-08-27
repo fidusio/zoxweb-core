@@ -19,7 +19,7 @@ package org.zoxweb.shared.data;
 import org.zoxweb.shared.util.MetaToken;
 import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
+import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.NVEntity;
 import org.zoxweb.shared.util.SharedUtil;
@@ -34,7 +34,7 @@ public abstract class ReferenceIDDAO
     public static final NVConfig NVC_REFERENCE_ID = NVConfigManager.createNVConfig(MetaToken.REFERENCE_ID.getName(), "The reference id of the Object", "ReferenceID", true, false, true, true, true, String.class, null);
     public static final NVConfig NVC_SUBJECT_GUID = NVConfigManager.createNVConfig(MetaToken.SUBJECT_GUID.getName(), "The user id or Subject GUID", "SubjectGUID", true, false, false, true, false, String.class, null);
     public static final NVConfig NVC_GUID = NVConfigManager.createNVConfig(MetaToken.GUID.getName(), "The global id of the Object", "GlobalUID", true, false, true, true, false, String.class, null);
-    public static final NVConfigEntity NVC_REFERENCE_ID_DAO = new NVConfigEntityLocal("reference_id_dao", null, "ReferenceIDDAO", true, false, false, false, ReferenceIDDAO.class, SharedUtil.toNVConfigList(NVC_REFERENCE_ID, NVC_SUBJECT_GUID, NVC_GUID), null, false, null);
+    public static final NVConfigEntity NVC_REFERENCE_ID_DAO = new NVConfigEntityPortable("reference_id_dao", null, "ReferenceIDDAO", true, false, false, false, ReferenceIDDAO.class, SharedUtil.toNVConfigList(NVC_REFERENCE_ID, NVC_SUBJECT_GUID, NVC_GUID), null, false, null);
 
     protected ReferenceIDDAO(NVConfigEntity nvConfigEntity) {
         super(nvConfigEntity);

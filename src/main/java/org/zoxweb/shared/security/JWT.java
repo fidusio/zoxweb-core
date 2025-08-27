@@ -24,7 +24,7 @@ import org.zoxweb.shared.util.GetNVConfig;
 import org.zoxweb.shared.util.LongIDGenerator;
 import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
+import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.NVGenericMap;
 import org.zoxweb.shared.util.SharedUtil;
@@ -66,7 +66,7 @@ extends SetNameDescriptionDAO
 		}
 	}
 	
-	public static final NVConfigEntity NVC_JWT = new NVConfigEntityLocal("jwt", 
+	public static final NVConfigEntity NVC_JWT = new NVConfigEntityPortable("jwt",
 																		null , 
 																		"JWT", 
 																		true, 

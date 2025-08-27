@@ -21,7 +21,7 @@ import org.zoxweb.shared.util.GetName;
 import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
 import org.zoxweb.shared.util.NVConfigEntity.ArrayType;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
+import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.SharedUtil;
 import org.zoxweb.shared.api.APIFileInfoMap;
@@ -72,7 +72,7 @@ public class FileInfoDAO
     }
 
 
-    public static final NVConfigEntity NVC_FILE_INFO_DAO = new NVConfigEntityLocal("file_info_dao",
+    public static final NVConfigEntity NVC_FILE_INFO_DAO = new NVConfigEntityPortable("file_info_dao",
             null,
             "FileInfoDAO",
             true,

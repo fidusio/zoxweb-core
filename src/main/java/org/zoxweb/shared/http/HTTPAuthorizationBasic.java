@@ -18,7 +18,7 @@ package org.zoxweb.shared.http;
 import org.zoxweb.shared.util.GetNameValue;
 import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
+import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.SharedUtil;
 
@@ -34,7 +34,7 @@ extends HTTPAuthorization
 	public static final NVConfig NVC_USER = NVConfigManager.createNVConfig("user", null, "User", false, true, String.class);
 	public static final NVConfig NVC_PASSWORD = NVConfigManager.createNVConfig("password", null, "Password", false, true, String.class);
 	
-	public static final NVConfigEntity NVC_HTTP_AUTHORIZATION_BASIC = new NVConfigEntityLocal("http_authorization_basic", null , null, true, false, false, false, HTTPAuthorizationBasic.class, SharedUtil.toNVConfigList(NVC_USER, NVC_PASSWORD), null, false, HTTPAuthorization.NVC_HTTP_AUTHORIZATION);
+	public static final NVConfigEntity NVC_HTTP_AUTHORIZATION_BASIC = new NVConfigEntityPortable("http_authorization_basic", null , null, true, false, false, false, HTTPAuthorizationBasic.class, SharedUtil.toNVConfigList(NVC_USER, NVC_PASSWORD), null, false, HTTPAuthorization.NVC_HTTP_AUTHORIZATION);
 	
 
 	public HTTPAuthorizationBasic()

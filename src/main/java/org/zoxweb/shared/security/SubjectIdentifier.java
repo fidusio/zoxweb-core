@@ -59,7 +59,7 @@ public class SubjectIdentifier
 
 	}
 
-	public static final NVConfigEntity NVC_SUBJECT_IDENTIFIER = new NVConfigEntityLocal(
+	public static final NVConfigEntity NVC_SUBJECT_IDENTIFIER = new NVConfigEntityPortable(
 	        "subject_identifier",
             null ,
             SubjectIdentifier.class.getSimpleName(),

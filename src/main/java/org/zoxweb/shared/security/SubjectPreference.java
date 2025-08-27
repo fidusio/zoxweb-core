@@ -39,7 +39,7 @@ public class SubjectPreference
         }
     }
 
-    public static final NVConfigEntity NVC_SUBJECT_PREFERENCE = new NVConfigEntityLocal(
+    public static final NVConfigEntity NVC_SUBJECT_PREFERENCE = new NVConfigEntityPortable(
             "subject_preference",
             null,
             "SubjectPreference",

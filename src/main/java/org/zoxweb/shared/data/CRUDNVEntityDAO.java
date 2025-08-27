@@ -20,7 +20,7 @@ import org.zoxweb.shared.util.CRUDNVEntity;
 import org.zoxweb.shared.util.GetNVConfig;
 import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
+import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.NVEntity;
 import org.zoxweb.shared.util.SharedUtil;
@@ -59,7 +59,7 @@ public class CRUDNVEntityDAO
         }
 	}
 	
-	public static final NVConfigEntity NVC_CRUD_NVENTITY_DAO = new NVConfigEntityLocal("crud_nventity_dao", null , "CRUDNVEntityDAO", true, false, false, false, CRUDNVEntityDAO.class, SharedUtil.extractNVConfigs(Param.values()), null, false, SetNameDAO.NVC_NAME_DAO);
+	public static final NVConfigEntity NVC_CRUD_NVENTITY_DAO = new NVConfigEntityPortable("crud_nventity_dao", null , "CRUDNVEntityDAO", true, false, false, false, CRUDNVEntityDAO.class, SharedUtil.extractNVConfigs(Param.values()), null, false, SetNameDAO.NVC_NAME_DAO);
 
 	public CRUDNVEntityDAO()
 	{

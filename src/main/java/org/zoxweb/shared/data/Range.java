@@ -82,7 +82,7 @@ public class Range<T extends Comparable<T>>
         }
     }
 
-    public static final NVConfigEntity NVC_RANGE = new NVConfigEntityLocal(
+    public static final NVConfigEntity NVC_RANGE = new NVConfigEntityPortable(
             "range",
             null,
             Range.class.getSimpleName(),

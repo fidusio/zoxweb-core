@@ -27,7 +27,7 @@ public class RateCounter
         }
     }
 
-    public static final NVConfigEntity NVC_RATE_COUNTER = new NVConfigEntityLocal(
+    public static final NVConfigEntity NVC_RATE_COUNTER = new NVConfigEntityPortable(
             "rate_counter",
             null ,
             "RateCounter",

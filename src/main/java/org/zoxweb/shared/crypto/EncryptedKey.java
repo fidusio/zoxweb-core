@@ -49,7 +49,7 @@ public class EncryptedKey
 		}
 	} 
 
-	public final static NVConfigEntity NVCE_ENCRYPTED_KEY = new NVConfigEntityLocal("encrypted_key", null, "EncryptedKey", false, true, false, false, EncryptedKey.class, SharedUtil.extractNVConfigs(Param.values()), null, false, EncryptedData.NVCE_ENCRYPTED_DATA);
+	public final static NVConfigEntity NVCE_ENCRYPTED_KEY = new NVConfigEntityPortable("encrypted_key", null, "EncryptedKey", false, true, false, false, EncryptedKey.class, SharedUtil.extractNVConfigs(Param.values()), null, false, EncryptedData.NVCE_ENCRYPTED_DATA);
 	
 	
 	public EncryptedKey()

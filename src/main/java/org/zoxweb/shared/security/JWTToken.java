@@ -4,7 +4,7 @@ import org.zoxweb.shared.data.SetNameDescriptionDAO;
 import org.zoxweb.shared.util.GetNVConfig;
 import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
+import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.SharedUtil;
 
@@ -34,7 +34,7 @@ public class JWTToken
         }
     }
 
-    public static final NVConfigEntity NVC_JWT_TOKEN = new NVConfigEntityLocal("jwt_token",
+    public static final NVConfigEntity NVC_JWT_TOKEN = new NVConfigEntityPortable("jwt_token",
             null,
             "JWTToken",
             true,

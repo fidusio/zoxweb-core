@@ -70,7 +70,7 @@ public class DynamicNVConfigEntityTest {
 
     public static void main(String[] args) {
         ArrayList<NVConfig> attr = new ArrayList<NVConfig>();
-        NVConfigEntity nvConfigEntity = new NVConfigEntityLocal();
+        NVConfigEntity nvConfigEntity = new NVConfigEntityPortable();
 
         ArrayList<NVConfig> display = new ArrayList<NVConfig>();
         nvConfigEntity.setDisplayAttributes(display);
@@ -82,7 +82,7 @@ public class DynamicNVConfigEntityTest {
         nvConfigEntity.setMandatory(true);
 
         //FileInfoDAO
-        NVConfigEntity nvcFileInfoDAO = new NVConfigEntityLocal("file_info", "File info data access object", "FileInfoDAO", true, false, false, false, FileInfoDAO.NVC_FILE_INFO_DAO, false, ArrayType.NOT_ARRAY);
+        NVConfigEntity nvcFileInfoDAO = new NVConfigEntityPortable("file_info", "File info data access object", "FileInfoDAO", true, false, false, false, FileInfoDAO.NVC_FILE_INFO_DAO, false, ArrayType.NOT_ARRAY);
         nvConfigEntity.getAttributes().add(nvcFileInfoDAO);
 
         //String

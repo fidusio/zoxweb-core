@@ -59,7 +59,7 @@ public class EncryptedData
 		}	
 	}
 
-	public final static NVConfigEntity NVCE_ENCRYPTED_DATA = new NVConfigEntityLocal("encrypted_data", null, "EncryptedData", false, true, false, false, EncryptedData.class, SharedUtil.extractNVConfigs(Param.values()), null, false, TimeStampDAO.NVC_TIME_STAMP_DAO);
+	public final static NVConfigEntity NVCE_ENCRYPTED_DATA = new NVConfigEntityPortable("encrypted_data", null, "EncryptedData", false, true, false, false, EncryptedData.class, SharedUtil.extractNVConfigs(Param.values()), null, false, TimeStampDAO.NVC_TIME_STAMP_DAO);
 
 	public EncryptedData()
     {

@@ -88,7 +88,7 @@ public class HTTPMessageConfig
     /**
      * This NVConfigEntity type constant is set to an instantiation of a NVConfigEntityLocal object based on AddressDAO.
      */
-    public static final NVConfigEntity NVC_HTTP_MESSAGE_CONFIG = new NVConfigEntityLocal("http_message_config",
+    public static final NVConfigEntity NVC_HTTP_MESSAGE_CONFIG = new NVConfigEntityPortable("http_message_config",
             null,
             "HTTPMessageConfig",
             true,

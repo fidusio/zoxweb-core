@@ -20,7 +20,7 @@ import org.zoxweb.shared.util.DisplayUnit;
 import org.zoxweb.shared.util.GetNVConfig;
 import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityLocal;
+import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.SharedUtil;
 
@@ -60,7 +60,7 @@ public class DocumentOperationDAO
         }
 	}
 
-	public static final NVConfigEntity NVC_DOCUMENT_OPERATION_DAO = new NVConfigEntityLocal(
+	public static final NVConfigEntity NVC_DOCUMENT_OPERATION_DAO = new NVConfigEntityPortable(
             "document_operation_dao",
             null ,
             "DocumentOperationDAO",

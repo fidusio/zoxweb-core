@@ -58,7 +58,7 @@ implements SubjectID<String>
   
   }
   
-  public static final NVConfigEntity NVC_SESSION_DATA = new NVConfigEntityLocal("shiro_session_data", null , "ShiroSubjectData", true, false, false, false, ShiroSessionData.class, SharedUtil.extractNVConfigs(Param.SUBJECT_ID, Param.ROLES, Param.PERMISSIONS), null, false, AppIDResource.NVC_APP_ID_RESOURCE);
+  public static final NVConfigEntity NVC_SESSION_DATA = new NVConfigEntityPortable("shiro_session_data", null , "ShiroSubjectData", true, false, false, false, ShiroSessionData.class, SharedUtil.extractNVConfigs(Param.SUBJECT_ID, Param.ROLES, Param.PERMISSIONS), null, false, AppIDResource.NVC_APP_ID_RESOURCE);
   public ShiroSessionData() {
     super(NVC_SESSION_DATA);
     // TODO Auto-generated constructor stubs

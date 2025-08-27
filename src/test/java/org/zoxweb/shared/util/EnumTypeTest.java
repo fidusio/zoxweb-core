@@ -32,7 +32,7 @@ public class EnumTypeTest {
             }
         }
 
-        public static final NVConfigEntity NVC_ENUM_TESTER = new NVConfigEntityLocal(
+        public static final NVConfigEntity NVC_ENUM_TESTER = new NVConfigEntityPortable(
                 "enum_tester",
                 null,
                 SubjectInfo.class.getName(),
