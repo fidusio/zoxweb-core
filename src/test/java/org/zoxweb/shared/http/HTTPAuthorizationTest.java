@@ -104,4 +104,45 @@ public class HTTPAuthorizationTest {
         GetNameValue<String> authorization = HTTPAuthScheme.BASIC.toHTTPHeader(url.getUserInfo());
         System.out.println(authorization);
     }
+
+
+    @Test
+    public void genericNotAuthorizationHeader() {
+        HTTPAuthorization authToken = new HTTPAuthorization("x-xlogistx-key", "key1232ljkwerjew3lr5jk342j5243", true);
+
+        GetNameValue<String> nvs = authToken.toHTTPHeader();
+        System.out.println(nvs);
+        System.out.println(authToken.getNVConfig());
+        System.out.println(((NVConfigEntity) authToken.getNVConfig()).getAttributes());
+
+
+        System.out.println("attributes:" + authToken.getAttributes());
+
+
+
+
+
+        HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit("https://iot.xlogistx.io", "login", HTTPMethod.GET);
+        hmci.setAuthorization(authToken);
+        hmci.setAccept(HTTPMediaType.APPLICATION_JSON);
+        hmci.setContentType(HTTPMediaType.APPLICATION_JSON);
+
+        authToken = hmci.getAuthorization();
+
+        String json = GSONUtil.toJSONDefault(hmci, true);
+        System.out.println(json);
+//        System.out.println(((NVConfigEntity)authToken.getNVConfig()).getAttributes());
+        System.out.println(authToken);
+        hmci = GSONUtil.fromJSONDefault(json, HTTPMessageConfig.class);
+        String json2 = GSONUtil.toJSONDefault(hmci, true);
+        assert json2.equals(json);
+        System.out.println(json2);
+
+        try {
+
+            System.out.println(OkHTTPCall.send(hmci));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

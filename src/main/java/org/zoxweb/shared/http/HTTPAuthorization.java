@@ -28,8 +28,8 @@ public class HTTPAuthorization
 
     public static final NVConfig NVC_AUTH_SCHEME = NVConfigManager.createNVConfig("auth_scheme", null, "HTTPAuthScheme", false, true, HTTPAuthScheme.class);
     public static final NVConfig NVC_TOKEN = NVConfigManager.createNVConfig("token", null, "Token", false, true, NamedValue.class);
-    //public static final NVConfig NVC_AUTH_SCHEME_OVERRIDE = NVConfigManager.createNVConfig("auth_scheme_override", null,"Token type override", false, true, String.class);
-    public static final NVConfigEntity NVC_HTTP_AUTHORIZATION = new NVConfigEntityPortable("http_authorization", null, null, true, false, false, false, HTTPAuthorization.class, SharedUtil.toNVConfigList(NVC_AUTH_SCHEME, NVC_TOKEN), null, false, SetNameDAO.NVC_NAME_DAO);
+    public static final NVConfig NVC_TYPE_IS_HEADER = NVConfigManager.createNVConfig("name_is_header", null, "TypeIsHeader", false, true, boolean.class);
+    public static final NVConfigEntity NVC_HTTP_AUTHORIZATION = new NVConfigEntityPortable("http_authorization", null, null, true, false, false, false, HTTPAuthorization.class, SharedUtil.toNVConfigList(NVC_AUTH_SCHEME, NVC_TOKEN, NVC_TYPE_IS_HEADER), null, false, SetNameDAO.NVC_NAME_DAO);
 
 
     public HTTPAuthorization() {
@@ -43,9 +43,15 @@ public class HTTPAuthorization
 
 
     public HTTPAuthorization(String type, String token) {
+        this(type, token, false);
+    }
+
+    public HTTPAuthorization(String type, String token, boolean typeIsHeader) {
         this(HTTPAuthScheme.GENERIC);
         setName(type);
         setToken(token);
+        setValue(NVC_TYPE_IS_HEADER, typeIsHeader);
+
     }
 
 
@@ -83,19 +89,22 @@ public class HTTPAuthorization
                 token.getProperties().build(key, val);
             }
         }
-
     }
 
+
+    public String getType() {
+        return getName();
+    }
 
     public HTTPAuthorization(HTTPAuthScheme type, String token) {
         this(type);
         setToken(token);
     }
 
-//	protected HTTPAuthorization(NVConfigEntity nvce)
-//	{
-//		super(nvce);
-//	}
+    public boolean isTypeHeader() {
+        return lookupValue(NVC_TYPE_IS_HEADER);
+    }
+
 
     protected HTTPAuthorization(NVConfigEntity nvce, HTTPAuthScheme type) {
         super(nvce);
@@ -108,6 +117,10 @@ public class HTTPAuthorization
      */
     public String getToken() {
         return (String) lookup(NVC_TOKEN).getValue();
+    }
+
+    public NamedValue<String> getGenericToken() {
+        return lookup(NVC_TOKEN);
     }
 
     /**
@@ -124,7 +137,14 @@ public class HTTPAuthorization
     }
 
     public GetNameValue<String> toHTTPHeader() {
-        return getAuthScheme().toHTTPHeader(getName(), getToken());
+        NVPair ret;
+        if (isTypeHeader()) {
+            ret = (NVPair) getAuthScheme().toHTTPHeader(getToken());
+            ret.setName(getName());
+        } else
+            ret = (NVPair) getAuthScheme().toHTTPHeader(getName(), getToken());
+
+        return ret;
     }
 
 
@@ -137,17 +157,6 @@ public class HTTPAuthorization
     public String toString() {
         return toHTTPHeader().getValue();
     }
-
-//	public static HTTPAuthorization createBearer()
-//	{
-//		return new HTTPAuthorization(HTTPAuthScheme.BEARER);
-//	}
-//
-//
-//	public static HTTPAuthorization createBearer(String token)
-//	{
-//		return new HTTPAuthorization(HTTPAuthScheme.BEARER, token);
-//	}
 
 
 }
