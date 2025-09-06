@@ -36,7 +36,7 @@ public class FileInfoDAO
         FILE("File"),
         FOLDER("Folder");
 
-        private String name;
+        private final String name;
 
         FileType(String name) {
             this.name = name;

@@ -24,54 +24,49 @@ import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.SharedUtil;
 
 /**
- * 
+ *
  * @author mzebib
  *
  */
 @SuppressWarnings("serial")
 public class DomainInfoDAO
-	extends SetNameDescriptionDAO
-	implements DomainID<String>
-{
-	
-	public static final NVConfig NVC_DOMAIN_ID =  NVConfigManager.createNVConfig("domain_id", "The domain url identifier", "Domain/AccountID", true, true, true, String.class, FilterType.DOMAIN);
-	public static final NVConfigEntity NVC_DOMAIN_INFO_DAO = new NVConfigEntityPortable("domain_info_dao", "DomainInfoDAO Object" , "DomainInfoDAO", true, false, false, false, DomainInfoDAO.class, SharedUtil.toNVConfigList(NVC_DOMAIN_ID), null, false, SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO);
-	
-	/**
-	 * The default constructor.
-	 */
-	public DomainInfoDAO()
-	{
-		super(NVC_DOMAIN_INFO_DAO);
-	}
-	
-	/**
-	 * 
-	 * @param nvce
-	 */
-	protected DomainInfoDAO(NVConfigEntity nvce)
-	{
-		super(nvce);
-	}
+        extends SetNameDescriptionDAO
+        implements DomainID<String> {
 
-	/**
-	 * Returns the domain ID;
-	 * @return the domain id
-	 */
-	@Override
-	public String getDomainID()
-	{
-		return lookupValue(NVC_DOMAIN_ID);
-	}
+    public static final NVConfig NVC_DOMAIN_ID = NVConfigManager.createNVConfig("domain_id", "The domain url identifier", "Domain/AccountID", true, true, true, String.class, FilterType.DOMAIN);
+    public static final NVConfigEntity NVC_DOMAIN_INFO_DAO = new NVConfigEntityPortable("domain_info_dao", "DomainInfoDAO Object", "DomainInfoDAO", true, false, false, false, DomainInfoDAO.class, SharedUtil.toNVConfigList(NVC_DOMAIN_ID), null, false, SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO);
 
-	/**
-	 * Sets the domain ID.
-	 * @param domainID
-	 */
-	@Override
-	public void setDomainID(String domainID)
-	{
-		setValue(NVC_DOMAIN_ID, domainID);
-	}
+    /**
+     * The default constructor.
+     */
+    public DomainInfoDAO() {
+        super(NVC_DOMAIN_INFO_DAO);
+    }
+
+    /**
+     *
+     * @param nvce
+     */
+    protected DomainInfoDAO(NVConfigEntity nvce) {
+        super(nvce);
+    }
+
+    /**
+     * Returns the domain ID;
+     * @return the domain id
+     */
+    @Override
+    public String getDomainID() {
+        return lookupValue(NVC_DOMAIN_ID);
+    }
+
+    /**
+     * Sets the domain ID.
+     * @param domainID
+     */
+    @Override
+    public void setDomainID(String domainID) {
+        setValue(NVC_DOMAIN_ID, domainID);
+    }
 
 }

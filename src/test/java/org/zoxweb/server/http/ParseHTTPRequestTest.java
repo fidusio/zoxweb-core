@@ -240,9 +240,9 @@ public class ParseHTTPRequestTest {
 
             int dataToProcess = nvs.getValue().available();
 
-            IOUtil.relayStreams(nvs.getValue(), fileContent, true);
+            long copied = IOUtil.relayStreams(nvs.getValue(), fileContent, true);
             if (dataToProcess > 0)
-                System.out.println("DataToProcess: " + dataToProcess + " fileContent size: " + fileContent.size());
+                System.out.println("DataToProcess: " + dataToProcess + " fileContent size: " + fileContent.size() + " data copied: " + copied);
 //            HTTPCodecs.log.setEnabled(false);
             return lastChunk;
         }

@@ -15,6 +15,7 @@
  */
 package org.zoxweb.server.util;
 
+
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.io.UByteArrayOutputStream;
 import org.zoxweb.shared.data.RuntimeResultDAO;
@@ -27,6 +28,9 @@ import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedUtil;
 
 import java.io.*;
+import java.lang.management.ManagementFactory;
+import java.lang.management.RuntimeMXBean;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.Callable;
 
@@ -44,7 +48,6 @@ public class RuntimeUtil {
         private final String[] values;
 
 
-
         ShellType(String value) {
             this.values = value.split(" ");
         }
@@ -53,12 +56,11 @@ public class RuntimeUtil {
          * @return the name of the object
          */
         @Override
-        public String [] getValue() {
+        public String[] getValue() {
             return values;
         }
 
-        public List<String> toCommand(String ...args)
-        {
+        public List<String> toCommand(String... args) {
             List<String> argsAsList = new ArrayList<>();
             Collections.addAll(argsAsList, getValue());
             Collections.addAll(argsAsList, args);
@@ -95,8 +97,7 @@ public class RuntimeUtil {
          * @param commandPlusArgs command and its arguments
          * @return ProcessExec then invoke call() to execute
          */
-        public static ProcessExec create(ShellType shellType, String ...commandPlusArgs)
-        {
+        public static ProcessExec create(ShellType shellType, String... commandPlusArgs) {
             return new ProcessExec(shellType.toCommand(commandPlusArgs));
         }
 
@@ -474,5 +475,13 @@ public class RuntimeUtil {
         return exit;
     }
 
+    public static RuntimeMXBean vmMXBean() {
+        return ManagementFactory.getRuntimeMXBean();
+    }
+
+    public static long linuxUptime() throws IOException {
+        String content = IOUtil.inputStreamToString(Paths.get("/proc/uptime"));
+        return Const.TimeInMillis.SECOND.mult((long) Double.parseDouble(content.split(" ")[0]));
+    }
 
 }

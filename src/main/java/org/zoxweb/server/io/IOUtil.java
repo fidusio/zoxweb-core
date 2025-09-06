@@ -74,14 +74,14 @@ public class IOUtil {
         return inputStreamToString(clazz.getResourceAsStream(resourceID), true);
     }
 
-    public static File findFile(String filename) {
+    public static File validateAsFile(String filename) {
         filename = SharedStringUtil.trimOrNull(filename);
         SUS.checkIfNulls("Filename can't be null.", filename);
 
-        return findFile(new File(filename));
+        return validateAsFile(new File(filename));
     }
 
-    public static File findFile(File file) {
+    public static File validateAsFile(File file) {
         SUS.checkIfNulls("File can't be null.", file);
         return (file.exists() && file.isFile()) ? file : null;
     }
@@ -154,7 +154,7 @@ public class IOUtil {
     }
 
     public static File locateFile(String filename) {
-        File ret = findFile(filename);
+        File ret = validateAsFile(filename);
         if (ret != null)
             return ret;
         return locateFile(ClassLoader.getSystemClassLoader(), filename);
@@ -222,15 +222,15 @@ public class IOUtil {
 
 
     /**
-     * @param is
-     * @param charsetEncoding
-     * @param close
+     * @param is to be read
+     * @param charsetEncoding charset encoding
+     * @param close if true
      * @return
      * @throws IOException
      */
     public static String inputStreamToString(InputStream is, String charsetEncoding, boolean close)
             throws IOException {
-        UByteArrayOutputStream baos = (UByteArrayOutputStream) inputStreamToByteArray(is, close);
+        UByteArrayOutputStream baos = inputStreamToByteArray(is, close);
         return new String(baos.getInternalBuffer(), 0, baos.size(), charsetEncoding);
     }
 
@@ -259,9 +259,11 @@ public class IOUtil {
 
 
     /**
-     * @param filename
-     * @return
-     * @throws IOException
+     * Load path file as a string
+     *
+     * @param filename to read
+     * @return file content as string
+     * @throws IOException in case of error
      */
     public static String inputStreamToString(String filename)
             throws IOException {
@@ -269,22 +271,35 @@ public class IOUtil {
     }
 
     /**
-     * Load file
+     * Load path file as a string
      *
-     * @param file
-     * @return
-     * @throws IOException
+     * @param file to read
+     * @return file content as string
+     * @throws IOException in case of error
      */
     public static String inputStreamToString(File file)
             throws IOException {
         return inputStreamToString(new FileInputStream(file), true);
     }
 
+
     /**
-     * @param is
-     * @param close
-     * @return
-     * @throws IOException
+     * Load path file as a string
+     *
+     * @param path to read
+     * @return file content as string
+     * @throws IOException in case of error
+     */
+    public static String inputStreamToString(Path path)
+            throws IOException {
+        return inputStreamToString(Files.newInputStream(path), true);
+    }
+
+    /**
+     * @param is to be completely read and converted to string
+     * @param close if true will close the stream at the end
+     * @return file content as string
+     * @throws IOException in case of io errors
      */
     public static String inputStreamToString(InputStream is, boolean close)
             throws IOException {
@@ -296,28 +311,37 @@ public class IOUtil {
                 sb.append(new String(buffer, 0, read, Const.UTF_8));
             }
 
+        } finally {
+            ByteBufferUtil.cache(buffer);
             if (close) {
                 close(is);
             }
-        } finally {
-            ByteBufferUtil.cache(buffer);
         }
 
         return sb.toString();
     }
 
-    public static String readerToString(Reader is, boolean close)
+    /**
+     *
+     * @param reader to be completely read and converted to string
+     * @param close if true will close the stream at the end
+     * @return reader content as string
+     * @throws IOException in case of io errors
+     */
+    public static String readerToString(Reader reader, boolean close)
             throws IOException {
         char[] buffer = new char[4096];
         StringBuilder sb = new StringBuilder();
         int read;
 
-        while ((read = is.read(buffer, 0, buffer.length)) > 0) {
-            sb.append(buffer, 0, read);
-        }
-
-        if (close) {
-            close(is);
+        try {
+            while ((read = reader.read(buffer, 0, buffer.length)) > 0) {
+                sb.append(buffer, 0, read);
+            }
+        } finally {
+            if (close) {
+                close(reader);
+            }
         }
 
         return sb.toString();
@@ -368,12 +392,12 @@ public class IOUtil {
     }
 
     /**
-     * Read the all the content of an input stream and return it as a byte array
+     * Read the all the content of an input stream and return it as UByteArrayOutputStream
      *
      * @param file  to be read
-     * @param close if true is will closed after reading
-     * @return byte array
-     * @throws IOException
+     * @param close if true is will be closed after reading
+     * @return UByteArrayOutputStream
+     * @throws IOException in case of IO errors
      */
     public static UByteArrayOutputStream inputStreamToByteArray(File file, boolean close)
             throws IOException {
@@ -390,9 +414,9 @@ public class IOUtil {
     /**
      * Write a string to file
      *
-     * @param file
-     * @param toWrite
-     * @throws IOException
+     * @param file to be created and written to
+     * @param toWrite string content
+     * @throws IOException in case of IO errors
      */
     public static void writeToFile(File file, String toWrite)
             throws IOException {
@@ -400,11 +424,13 @@ public class IOUtil {
     }
 
     /**
-     * @param file
-     * @param buffer
-     * @throws IOException
+     * Write a byte[] to file
+     *
+     * @param file to be created and written to
+     * @param buffer byte[] content
+     * @throws IOException in case of IO errors
      */
-    public static void writeToFile(File file, byte buffer[])
+    public static void writeToFile(File file, byte[] buffer)
             throws IOException {
         FileOutputStream fos = null;
         try {
@@ -419,9 +445,9 @@ public class IOUtil {
     /**
      * Return the file creation in millis
      *
-     * @param file
+     * @param file to check
      * @return file creation time in millis
-     * @throws IOException
+     * @throws IOException in case of IO errors
      */
     public static long fileCreationTime(File file)
             throws IOException {
@@ -433,11 +459,11 @@ public class IOUtil {
     }
 
     /**
-     * Return the file creation in millis
+     * Return the path creation in millis
      *
-     * @param path
+     * @param path to be checked
      * @return file creation time in millis
-     * @throws IOException
+     * @throws IOException in case of IO errors
      */
     public static long fileCreationTime(Path path)
             throws IOException {
@@ -446,8 +472,8 @@ public class IOUtil {
     }
 
     /**
-     * @param dirName
-     * @return
+     * @param dirName to be created
+     * @return file representing the directory if it failed
      */
     public static File createDirectory(String dirName) {
         File dir = new File(dirName);
@@ -456,15 +482,18 @@ public class IOUtil {
             dir.mkdirs();
         }
 
+        if (!dir.isDirectory())
+            return null;
+
         return dir;
     }
 
     /**
-     * @param is
-     * @param os
-     * @param closeBoth
-     * @return
-     * @throws IOException
+     * @param is to be read
+     * @param os to be written to
+     * @param closeBoth if true close both stream
+     * @return how many bytes where successfully copied
+     * @throws IOException in case of IO errors
      */
     public static long relayStreams(InputStream is, OutputStream os, boolean closeBoth)
             throws IOException {
@@ -476,7 +505,14 @@ public class IOUtil {
         return relayStreams(hashType, is, os, both, both);
     }
 
-
+    /**
+     * relays streams and update message digest if not null
+     * @param md to be updated
+     * @param is input stream
+     * @param os output stream
+     * @return total data copied between is and os
+     * @throws IOException in case of IO errors
+     */
     public static long relayStreams(MessageDigest md, InputStream is, OutputStream os)
             throws IOException {
 
@@ -531,10 +567,9 @@ public class IOUtil {
      */
     public static long relayStreams(InputStream is, OutputStream os, boolean closeIS, boolean closeOS)
             throws IOException {
-        long totalCopied = 0;
 
         try {
-            totalCopied = relayStreams(null, is, os);
+            return relayStreams(null, is, os);
         } finally {
             if (closeIS || is instanceof CloseEnabledInputStream) {
                 close(is);
@@ -544,8 +579,6 @@ public class IOUtil {
                 close(os);
             }
         }
-
-        return totalCopied;
     }
 
     /**

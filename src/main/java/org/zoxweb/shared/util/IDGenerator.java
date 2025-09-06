@@ -1,7 +1,7 @@
 package org.zoxweb.shared.util;
 
 public interface IDGenerator<I,N>
-	extends GetName
+	extends GetName, DataEncoder<N,I>, DataDecoder<I, N>, Validator<I>
 {
 	
 	/**
@@ -11,6 +11,16 @@ public interface IDGenerator<I,N>
 	I generateID();
 	
 	N generateNativeID();
+
+    default boolean isValid(I toValidate)
+    {
+        try
+        {
+            return decode(toValidate) != null;
+        }
+        catch (Exception e){}
+        return false;
+    }
 	
 	
 }

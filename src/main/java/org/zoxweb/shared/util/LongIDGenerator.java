@@ -5,7 +5,7 @@ public class LongIDGenerator implements IDGenerator<Long, Long> {
   public static final LongIDGenerator DEFAULT = new LongIDGenerator();
   
   
-  private long currentID = 0;
+  private volatile long currentID = 0;
 
   @Override
   public String getName() {
@@ -35,4 +35,23 @@ public class LongIDGenerator implements IDGenerator<Long, Long> {
     return ++currentID;
   }
 
+    /**
+     *
+     * @param input
+     * @return
+     */
+    @Override
+    public Long decode(Long input) {
+        return input;
+    }
+
+    /**
+     *
+     * @param input
+     * @return
+     */
+    @Override
+    public Long encode(Long input) {
+        return input;
+    }
 }

@@ -16,6 +16,7 @@
 package org.zoxweb.shared.filters;
 
 import org.zoxweb.shared.util.CanonicalID;
+import org.zoxweb.shared.util.Validator;
 
 import java.io.Serializable;
 
@@ -27,27 +28,23 @@ import java.io.Serializable;
  * @param <I> Input value
  * @param <O> Output filtered value
  */
-public interface ValueFilter<I extends Object, O extends Object>
-    extends Serializable, CanonicalID
-{
+public interface ValueFilter<I, O>
+        extends Serializable, CanonicalID, Validator<I> {
 
-	/**
-	 * Validate the object
-	 * @param in value to be validated
-	 * @return validated acceptable value
-	 * @throws NullPointerException if in is null
-	 * @throws IllegalArgumentException if in is invalid
-	 */
-	O validate(I in)
-        throws NullPointerException, IllegalArgumentException;
-	
-	
-	/**
-	 * Check if the value is valid
-	 * @param in value to be checked
-	 * @return true if in value valid
-	 */
-	boolean isValid(I in);
-	
+    /**
+     * Validate the object
+     * @param in value to be validated
+     * @return validated acceptable value
+     * @throws NullPointerException if in is null
+     * @throws IllegalArgumentException if in is invalid
+     */
+    O validate(I in)
+            throws NullPointerException, IllegalArgumentException;
 
+    /**
+     * Check if the value is valid
+     * @param in value to be checked
+     * @return true if in value valid
+     */
+    boolean isValid(I in);
 }

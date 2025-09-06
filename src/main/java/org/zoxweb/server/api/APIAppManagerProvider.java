@@ -2,7 +2,7 @@ package org.zoxweb.server.api;
 
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.security.*;
-import org.zoxweb.server.util.IDGeneratorUtil;
+import org.zoxweb.server.util.IDGs;
 import org.zoxweb.shared.api.APIAppManager;
 import org.zoxweb.shared.api.APIDataStore;
 import org.zoxweb.shared.api.APIException;
@@ -120,7 +120,7 @@ public class APIAppManagerProvider
         SUS.checkIfNulls("Null SubjectAPIKey", subjectAPIKey);
 
         if (subjectAPIKey.getSubjectID() == null) {
-            subjectAPIKey.setSubjectID(IDGeneratorUtil.SHA256Base64.generateID());
+            subjectAPIKey.setSubjectID(IDGs.SHA256Base64.generateID());
         }
 
         if (subjectAPIKey.getAPIKey() == null) {
@@ -279,7 +279,7 @@ public class APIAppManagerProvider
 
 		// special case to avoid chicken and egg situation
 		String userIDRef = getAPIDataStore().getIDGenerator().generateID();
-		String globalID = IDGeneratorUtil.UUIDV4.generateID();
+		String globalID = IDGs.UUIDV4.generateID();
 		getAPISecurityManager().associateNVEntityToSubjectUserID(userID, userIDRef);
 		userID.setReferenceID(userIDRef);
 		userID.setSubjectGUID(userIDRef);

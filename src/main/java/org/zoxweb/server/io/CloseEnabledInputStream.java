@@ -26,7 +26,7 @@ public class CloseEnabledInputStream
     extends FilterInputStream
 {
 
-	protected boolean autoCloseable;
+	protected volatile boolean autoCloseable;
 
 	public CloseEnabledInputStream(InputStream in)
 	{
