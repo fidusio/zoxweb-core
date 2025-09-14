@@ -66,7 +66,7 @@ public final class GSONUtil {
 
 
     public static boolean SIMPLE_FORMAT = false;
-    public static final LogWrapper log = new LogWrapper(GSONUtil.class).setEnabled(true);
+    public static final LogWrapper log = new LogWrapper(GSONUtil.class).setEnabled(false);
 
     private static final AtomicLong counter = new AtomicLong();
 
@@ -114,8 +114,8 @@ public final class GSONUtil {
             // TODO Auto-generated method stub
 
 
-           // JsonTreeWriter jtw = new JsonTreeWriter();
-            try(JsonTreeWriter jtw = new JsonTreeWriter()) {
+            // JsonTreeWriter jtw = new JsonTreeWriter();
+            try (JsonTreeWriter jtw = new JsonTreeWriter()) {
                 toJSONGenericMap(jtw, src, false, false);
                 return jtw.get();
             } catch (IOException e) {
@@ -165,9 +165,6 @@ public final class GSONUtil {
 //    }
 
 
-
-
-
     public static class NVStringListSerDeserializer implements JsonSerializer<NVStringList>, JsonDeserializer<NVStringList> {
 
         @Override
@@ -181,8 +178,7 @@ public final class GSONUtil {
             try {
                 toJSONStringList(jtw, src);
                 return jtw.get();
-            }
-            finally {
+            } finally {
                 IOUtil.close(jtw);
             }
         }
@@ -211,9 +207,7 @@ public final class GSONUtil {
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
-            }
-
-            finally {
+            } finally {
                 IOUtil.close(jtw);
             }
             return jtw.get();
@@ -259,8 +253,7 @@ public final class GSONUtil {
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
-            }
-            finally {
+            } finally {
                 IOUtil.close(jtw);
             }
 
@@ -275,8 +268,6 @@ public final class GSONUtil {
         }
 
     }
-
-
 
 
     public static class DateSerDeserializer
@@ -1031,10 +1022,10 @@ public final class GSONUtil {
         } else if (gnv instanceof NamedValue) {
             toJSONNamedValue(writer, (NamedValue<?>) gnv);
         } else if (gnv instanceof NVBlob) {
-            writer.name(name).value(SharedBase64.encodeWrappedAsString((byte[]) gnv.getValue()));
+            writer.name(GNVType.toName(gnv, ':')).value(SharedBase64.encodeAsString(Base64Type.DEFAULT, (byte[]) gnv.getValue()));
         } else if (gnv instanceof NVEntityReference) {
             writer.name(name);
-            toJSON(writer, ((NVEntity) gnv.getValue()).getClass(), (NVEntity) gnv.getValue(), printNull, printClassType, Base64Type.URL);
+            toJSON(writer, ((NVEntity) gnv.getValue()).getClass(), (NVEntity) gnv.getValue(), printNull, printClassType, Base64Type.DEFAULT);
         } else if (gnv instanceof NVGenericMap) {
             writer.name(name);
             toJSONGenericMap(writer, (NVGenericMap) gnv, printNull, printClassType);
@@ -1370,14 +1361,15 @@ public final class GSONUtil {
             }
         }
 
+        if (log.isEnabled()) log.getLogger().info(name + " " + gnvType);
         if (gnvType != null) {
             switch (gnvType) {
                 case NVBLOB:
                     try {
-                        byte value[] = SharedBase64.decode(Base64Type.URL, jp.getAsString());
+                        byte[] value = SharedBase64.decode(Base64Type.URL, jp.getAsString());
                         return new NVBlob(name, value);
                     } catch (Exception e) {
-
+                        e.printStackTrace();
                     }
                     break;
                 case NVBOOLEAN:
@@ -1417,31 +1409,31 @@ public final class GSONUtil {
             }
 
         } else if (jp.isString()) {
-            try {
-                byte value[] = SharedBase64.decodeWrappedAsString(jp.getAsString());
-                return new NVBlob(name, value);
-            } catch (Exception e) {
-
-            }
+//            try {
+//                byte[] value = SharedBase64.decode(Base64Type.DEFAULT, jp.getAsString());
+//                return new NVBlob(name, value);
+//            } catch (Exception e) {
+//
+//            }
 
             // if true we will not guess the string value
             // like parsing a long or guessing a long value as date
             //
-            if (stringAsValue) {
-                return new NVPair(name, jp.getAsString());
-            }
+//            if (stringAsValue) {
+//                return new NVPair(name, jp.getAsString());
+//            }
 
 
-            try {
-                Long.parseLong(jp.getAsString());
-            } catch (Exception e) {
-                if (TimestampFilter.SINGLETON.isValid(jp.getAsString())) {
-                    try {
-                        return new NVLong(name, TimestampFilter.SINGLETON.validate(jp.getAsString()));
-                    } catch (Exception ex) {
-                    }
-                }
-            }
+//            try {
+//                Long.parseLong(jp.getAsString());
+//            } catch (Exception e) {
+//                if (TimestampFilter.SINGLETON.isValid(jp.getAsString())) {
+//                    try {
+//                        return new NVLong(name, TimestampFilter.SINGLETON.validate(jp.getAsString()));
+//                    } catch (Exception ex) {
+//                    }
+//                }
+//            }
             // this the last step we have a string
             return new NVPair(name, jp.getAsString());
         }

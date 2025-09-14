@@ -9,24 +9,21 @@ import org.zoxweb.shared.util.Const;
 
 public class JWTCacheTest {
 
-    public static void main(String ...args)
-    {
-        try
-        {
+    public static void main(String... args) {
+        try {
             int index = 0;
             String subject = args[index++];
             String password = args[index++];
             int count = Integer.parseInt(args[index++]);
 
-            long ttl = index < args.length ? Const.TimeInMillis.toMillis(args[index++]) : Const.TimeInMillis.SECOND.MILLIS*45;
+            long ttl = index < args.length ? Const.TimeInMillis.toMillis(args[index++]) : Const.TimeInMillis.SECOND.MILLIS * 45;
             TaskUtil.defaultTaskProcessor();
 
             JWTTokenCache cache = new JWTTokenCache(ttl, TaskUtil.defaultTaskScheduler());
             long sizeOfAllTockens = 0;
             long ts = System.currentTimeMillis();
             JWT jwt = null;
-            for(int i=0; i < count; i++)
-            {
+            for (int i = 0; i < count; i++) {
                 jwt = JWT.createJWT(CryptoConst.JWTAlgo.HS256, subject, "xlogistx.io", "test");
                 sizeOfAllTockens += CryptoUtil.encodeJWT(password, jwt, true).length();
                 cache.map(jwt);
@@ -37,14 +34,12 @@ public class JWTCacheTest {
 
             TaskUtil.waitIfBusyThenClose(250);
             System.out.println("It took " + Const.TimeInMillis.toString(creationTS) + " to create " + actualSize + " JWT token");
-            System.out.println("It took " + Const.TimeInMillis.toString(System.currentTimeMillis()-ts) + " to finish " + actualSize + " JWT token cache size " + cache.size() +
-                               " average size " + (sizeOfAllTockens/actualSize) + " total size: " + sizeOfAllTockens + " default expiration: " + Const.TimeInMillis.toString(cache.defaultExpirationPeriod()));
+            System.out.println("It took " + Const.TimeInMillis.toString(System.currentTimeMillis() - ts) + " to finish " + actualSize + " JWT token cache size " + cache.size() +
+                    " average size " + (sizeOfAllTockens / actualSize) + " total size: " + sizeOfAllTockens + " default expiration: " + Const.TimeInMillis.toString(cache.defaultExpirationPeriod()));
             System.out.println(GSONUtil.toJSON(jwt, true, false, false));
 
 
-        }
-        catch(Exception e)
-        {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

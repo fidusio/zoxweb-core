@@ -2,7 +2,7 @@ package org.zoxweb.server.security;
 
 
 import org.zoxweb.shared.api.APIDataStore;
-import org.zoxweb.shared.crypto.EncryptedKey;
+import org.zoxweb.shared.crypto.EncapsulatedKey;
 import org.zoxweb.shared.crypto.KeyLockType;
 import org.zoxweb.shared.db.QueryMatchString;
 import org.zoxweb.shared.security.AccessException;
@@ -27,7 +27,7 @@ public final class KeyMakerProvider
     private static final Logger log = Logger.getLogger(KeyMakerProvider.class.getSimpleName());
 
     private volatile SecretKey masterKey = null;
-    private HashMap<String, EncryptedKey> keyMap = new HashMap<String, EncryptedKey>();
+    private HashMap<String, EncapsulatedKey> keyMap = new HashMap<String, EncapsulatedKey>();
 
 
     private KeyMakerProvider() {
@@ -74,7 +74,7 @@ public final class KeyMakerProvider
     }
 
 
-    public EncryptedKey createSubjectIDKey(SubjectIdentifier subjectID, final byte[] encryptionKey)
+    public EncapsulatedKey createSubjectIDKey(SubjectIdentifier subjectID, final byte[] encryptionKey)
             throws NullPointerException, IllegalArgumentException, AccessException {
         SUS.checkIfNulls("subjectID is null or encryptionKey is null.", subjectID, encryptionKey);
 
@@ -82,7 +82,7 @@ public final class KeyMakerProvider
             throw new IllegalArgumentException("Get user ID is null.");
         }
 
-        EncryptedKey ekd;
+        EncapsulatedKey ekd;
         try {
             ekd = CryptoUtil.createEncryptedKey(encryptionKey);
         } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException |
@@ -97,14 +97,14 @@ public final class KeyMakerProvider
     }
 
 
-    public EncryptedKey createNVEntityKey(APIDataStore<?, ?> dataStore, NVEntity nve, final byte[] key)
+    public EncapsulatedKey createNVEntityKey(APIDataStore<?, ?> dataStore, NVEntity nve, final byte[] key)
             throws NullPointerException, IllegalArgumentException, AccessException {
         SUS.checkIfNulls("User ID is null.", nve, key);
         if (nve.getSubjectGUID() == null || nve.getGUID() == null) {
             throw new IllegalArgumentException("NVE SubjectGUID or GUID is null.");
         }
 
-        EncryptedKey ekd = lookupEncryptedKeyDOA(dataStore, nve);
+        EncapsulatedKey ekd = lookupEncryptedKeyDOA(dataStore, nve);
         try {
             if (ekd == null) {
                 ekd = CryptoUtil.createEncryptedKey(key);
@@ -131,7 +131,7 @@ public final class KeyMakerProvider
         for (int i = 0; i < chainedIDs.length; i++) {
             String id = chainedIDs[i];
             try {
-                EncryptedKey ekd = lookupEncryptedKeyDOA(dataStore, id);
+                EncapsulatedKey ekd = lookupEncryptedKeyDOA(dataStore, id);
                 tempKey = CryptoUtil.decryptEncryptedData(ekd, tempKey);
             } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException |
                      InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException |
@@ -145,22 +145,22 @@ public final class KeyMakerProvider
     }
 
 
-    public EncryptedKey lookupEncryptedKeyDOA(APIDataStore<?, ?> dataStore, NVEntity nve)
+    public EncapsulatedKey lookupEncryptedKeyDOA(APIDataStore<?, ?> dataStore, NVEntity nve)
             throws NullPointerException, IllegalArgumentException, AccessException {
         SUS.checkIfNulls("Null parameters", dataStore, nve);
 
         return lookupEncryptedKeyDOA(dataStore, nve.getGUID(), nve.getSubjectGUID());
     }
 
-    public synchronized EncryptedKey lookupEncryptedKeyDOA(APIDataStore<?, ?> dataStore,
-                                                           String dataRefGUID, String subjectGUID)
+    public synchronized EncapsulatedKey lookupEncryptedKeyDOA(APIDataStore<?, ?> dataStore,
+                                                              String dataRefGUID, String subjectGUID)
             throws NullPointerException, IllegalArgumentException, AccessException {
         SUS.checkIfNulls("Null parameters", dataStore, dataRefGUID);
-        EncryptedKey ekd = keyMap.get(SharedUtil.toCanonicalID(':', dataRefGUID, subjectGUID));
+        EncapsulatedKey ekd = keyMap.get(SharedUtil.toCanonicalID(':', dataRefGUID, subjectGUID));
 
         if (ekd == null) {
-            List<EncryptedKey> keyMatches = dataStore
-                    .search(EncryptedKey.NVCE_ENCRYPTED_KEY, null,
+            List<EncapsulatedKey> keyMatches = dataStore
+                    .search(EncapsulatedKey.NVCE_ENCAPSULATED_KEY, null,
                             new QueryMatchString(MetaToken.SUBJECT_GUID, subjectGUID, Const.RelationalOperator.EQUAL),
                             Const.LogicalOperator.AND,
                             new QueryMatchString(MetaToken.REFERENCE_GUID, dataRefGUID, Const.RelationalOperator.EQUAL));
@@ -174,15 +174,15 @@ public final class KeyMakerProvider
         return ekd;
     }
 
-    public synchronized final EncryptedKey lookupEncryptedKeyDOA(APIDataStore<?, ?> dataStore,
-                                                                 String dataRefGUID)
+    public synchronized final EncapsulatedKey lookupEncryptedKeyDOA(APIDataStore<?, ?> dataStore,
+                                                                    String dataRefGUID)
             throws NullPointerException, IllegalArgumentException, AccessException {
         SUS.checkIfNulls("Null parameters", dataStore, dataRefGUID);
-        EncryptedKey ekd = keyMap.get(dataRefGUID);
+        EncapsulatedKey ekd = keyMap.get(dataRefGUID);
 
         if (ekd == null) {
-            List<EncryptedKey> keyMatches = dataStore
-                    .search(EncryptedKey.NVCE_ENCRYPTED_KEY, null,
+            List<EncapsulatedKey> keyMatches = dataStore
+                    .search(EncapsulatedKey.NVCE_ENCAPSULATED_KEY, null,
                             new QueryMatchString(MetaToken.REFERENCE_GUID, dataRefGUID, Const.RelationalOperator.EQUAL));
             if (keyMatches == null || keyMatches.size() != 1) {
                 return null;

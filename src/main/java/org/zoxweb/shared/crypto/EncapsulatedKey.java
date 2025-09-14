@@ -19,7 +19,7 @@ import org.zoxweb.shared.security.AccessException;
 import org.zoxweb.shared.util.*;
 
 @SuppressWarnings("serial")
-public class EncryptedKey
+public class EncapsulatedKey
     extends EncryptedData
     implements DoNotExpose
 {
@@ -49,15 +49,15 @@ public class EncryptedKey
 		}
 	} 
 
-	public final static NVConfigEntity NVCE_ENCRYPTED_KEY = new NVConfigEntityPortable("encrypted_key", null, "EncryptedKey", false, true, false, false, EncryptedKey.class, SharedUtil.extractNVConfigs(Param.values()), null, false, EncryptedData.NVCE_ENCRYPTED_DATA);
+	public final static NVConfigEntity NVCE_ENCAPSULATED_KEY = new NVConfigEntityPortable("encapsulated_key", null, "EncryptedKey", false, true, false, false, EncapsulatedKey.class, SharedUtil.extractNVConfigs(Param.values()), null, false, EncryptedData.NVCE_ENCRYPTED_DATA);
 	
 	
-	public EncryptedKey()
+	public EncapsulatedKey()
     {
-		super(NVCE_ENCRYPTED_KEY);
+		super(NVCE_ENCAPSULATED_KEY);
 	}
 
-	protected EncryptedKey(NVConfigEntity nvce)
+	protected EncapsulatedKey(NVConfigEntity nvce)
     {
 		super(nvce);
 	}

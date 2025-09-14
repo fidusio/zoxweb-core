@@ -13,8 +13,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 
-
-
 public class SHAPasswordHasher
         extends PasswordHasher {
 
@@ -96,8 +94,8 @@ public class SHAPasswordHasher
      * @return
      */
     @Override
-    public boolean isPasswordValid(CIPassword ci, String password) {
-        return isPasswordValid(ci, SharedStringUtil.getBytes(password));
+    public boolean validate(CIPassword ci, String password) {
+        return validate(ci, SharedStringUtil.getBytes(password));
     }
 
     /**
@@ -106,7 +104,7 @@ public class SHAPasswordHasher
      * @return
      */
     @Override
-    public boolean isPasswordValid(CIPassword ci, byte[] password) {
+    public boolean validate(CIPassword ci, byte[] password) {
         try {
             byte[] genHash = HashUtil.hashWithIterations(MessageDigest.getInstance(ci.getAlgorithm()),
                     ci.getSalt(), password, ci.getRounds(),
@@ -124,8 +122,8 @@ public class SHAPasswordHasher
      * @return
      */
     @Override
-    public boolean isPasswordValid(CIPassword ci, char[] password) {
-        return isPasswordValid(ci, ByteBufferUtil.toBytes(password));
+    public boolean validate(CIPassword ci, char[] password) {
+        return validate(ci, ByteBufferUtil.toBytes(password));
     }
 
 

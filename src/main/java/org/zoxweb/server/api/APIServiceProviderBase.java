@@ -28,102 +28,88 @@ import java.util.concurrent.atomic.AtomicLong;
 
 @SuppressWarnings("serial")
 public abstract class APIServiceProviderBase<P, S>
-	implements APIServiceProvider<P,S>
-{
+        implements APIServiceProvider<P, S> {
 
-	private long lastAccessTS;
-	protected AtomicLong pendingCalls = new AtomicLong();
-	private APIConfigInfo apiConfigInfo;
-	private APIExceptionHandler apiExceptionHandler;
+    private long lastAccessTS;
+    protected AtomicLong pendingCalls = new AtomicLong();
+    private APIConfigInfo apiConfigInfo;
+    private APIExceptionHandler apiExceptionHandler;
 
-	protected APIServiceProviderBase()
-	{
-		touch();
-	}
+    protected APIServiceProviderBase() {
+        touch();
+    }
 
-	/**
-	 * Updates the last time object was used (milliseconds).
-	 * @return last time accessed
-	 */
-	protected synchronized long touch()
-	{
-		lastAccessTS = System.currentTimeMillis();
-		return lastAccessTS;
-	}
-	
-	/**
-	 * Returns the last time it was accessed (milliseconds).
-	 * @return the last it was accessed in millis
-	 */
-	public long lastTimeAccessed()
-	{
-		return lastAccessTS;
-	}
-	
-	/**
-	 * Return the delta between NOW and last time the object was used.
-	 * @return the inactivity duration in millis
-	 */
-	public long inactivityDuration()
-	{	
-		return System.currentTimeMillis() - lastTimeAccessed();
-	}
+    /**
+     * Updates the last time object was used (milliseconds).
+     * @return last time accessed
+     */
+    protected synchronized long touch() {
+        lastAccessTS = System.currentTimeMillis();
+        return lastAccessTS;
+    }
+
+    /**
+     * Returns the last time it was accessed (milliseconds).
+     * @return the last it was accessed in millis
+     */
+    public long lastTimeAccessed() {
+        return lastAccessTS;
+    }
+
+    /**
+     * Return the delta between NOW and last time the object was used.
+     * @return the inactivity duration in millis
+     */
+    public long inactivityDuration() {
+        return System.currentTimeMillis() - lastTimeAccessed();
+    }
 
 
-	public APIConfigInfo getAPIConfigInfo()
-	{
-		return apiConfigInfo;
-	}
+    public APIConfigInfo getAPIConfigInfo() {
+        return apiConfigInfo;
+    }
 
 
-	public void setAPIConfigInfo(APIConfigInfo configInfo)
-	{
-		apiConfigInfo = configInfo;
-	}
-	
-	
-	
-	public APIExceptionHandler getAPIExceptionHandler()
-	{
-		return apiExceptionHandler;
-	}
+    public void setAPIConfigInfo(APIConfigInfo configInfo) {
+        apiConfigInfo = configInfo;
+    }
 
-	
-	public void setAPIExceptionHandler(APIExceptionHandler exceptionHandler)
-	{
-		this.apiExceptionHandler = exceptionHandler;
-	}
 
-	@SuppressWarnings("unchecked")
-	public <T> T lookupProperty(GetName propertyName) 
-	{
-		SUS.checkIfNulls("Null property name", propertyName);
+    public APIExceptionHandler getAPIExceptionHandler() {
+        return apiExceptionHandler;
+    }
 
-		if (propertyName instanceof APIProperty)
-		{
-			APIProperty apiProperty = (APIProperty) propertyName;
 
-			switch(apiProperty)
-			{
-			case ASYNC_CREATE:
-				return (T) Boolean.TRUE;
-			case RETRY_DELAY:
-				return (T)  Long.valueOf(Const.TimeInMillis.SECOND.MILLIS*ServerUtil.RNG.nextInt(4) + Const.TimeInMillis.SECOND.MILLIS*2);
-			case ASYNC_DELETE:
-			case ASYNC_READ:
-			case ASYNC_UPDATE:
-			default:
-				break;
-			
-			}
-		}
-		
-		return null;
-	}
-	
-	public boolean isBusy()
-	{
-		return pendingCalls.get() != 0;
-	}
+    public void setAPIExceptionHandler(APIExceptionHandler exceptionHandler) {
+        this.apiExceptionHandler = exceptionHandler;
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> T lookupProperty(GetName propertyName) {
+        SUS.checkIfNulls("Null property name", propertyName);
+
+        if (propertyName instanceof APIProperty) {
+            APIProperty apiProperty = (APIProperty) propertyName;
+
+            switch (apiProperty) {
+                case ASYNC_CREATE:
+                    return (T) Boolean.TRUE;
+                case RETRY_DELAY:
+                    return (T) Long.valueOf(Const.TimeInMillis.SECOND.MILLIS * ServerUtil.RNG.nextInt(4) + Const.TimeInMillis.SECOND.MILLIS * 2);
+                case ASYNC_DELETE:
+                case ASYNC_READ:
+                case ASYNC_UPDATE:
+                default:
+                    break;
+
+            }
+        }
+
+        return null;
+    }
+
+    public boolean isBusy() {
+        return pendingCalls.get() != 0;
+    }
 
 }

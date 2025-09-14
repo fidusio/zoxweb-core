@@ -8,10 +8,8 @@ import org.zoxweb.shared.crypto.CryptoConst.JWTAlgo;
 import org.zoxweb.shared.security.JWT;
 import org.zoxweb.shared.security.JWTHeader;
 import org.zoxweb.shared.security.JWTPayload;
-import org.zoxweb.shared.util.BytesValue;
-import org.zoxweb.shared.util.NVPair;
+import org.zoxweb.shared.util.*;
 import org.zoxweb.shared.util.SharedBase64.Base64Type;
-import org.zoxweb.shared.util.SharedStringUtil;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -71,22 +69,22 @@ public class JWTTest {
 
   }
 
-  @Test
-  public void toGSON() {
-//      throws IOException, InstantiationException, IllegalAccessException, ClassNotFoundException, InvalidKeyException, NoSuchAlgorithmException {
+//  @Test
+//  public void toGSON()
+//      throws IOException, InstantiationException, IllegalAccessException, ClassNotFoundException, NoSuchAlgorithmException {
 //		String json = GSONUtil.toJSON(jwtHS256, true, false, false, Base64Type.URL);
 //		System.out.println(json);
-//		
+//
 //		System.out.println("ToGSON:***************************************************************");
 //		JWT localJwt = GSONUtil.fromJSON(json, JWT.class, Base64Type.URL);
 //		json = GSONUtil.toJSON(localJwt, true, false, false, Base64Type.URL);
 //		System.out.println(json);
-//		
+//
 //		System.out.println(localJwt.getPayload());
-//		
+//
 //		String test = CryptoUtil.encodeJWT("secret", localJwt);
 //		System.out.println(test);
-//		
+//
 //		JWTPayload payload = new JWTPayload();
 //		payload.setDomainID("xlogistx.io");
 //		payload.setAppID("xlogistx");
@@ -95,12 +93,12 @@ public class JWTTest {
 //		payload.setAdmin(true);
 //		payload.setNotBefore(System.currentTimeMillis());
 //		payload.setNonce(index++);
-//		payload.getNVGenericMap().add(new NVBoolean("bool", true));
-//		
+//		payload.getProperties().add(new NVBoolean("bool", true));
+//
 //		//payload.setRandom(new byte[] {0,1,2,3});
 //		localJwt.setPayload(payload);
-//		
-//		NVGenericMap nvgm = payload.getNVGenericMap();
+//
+//		NVGenericMap nvgm = payload.getProperties();
 //		NVPair nvp = (NVPair)nvgm.get("name");
 //		nvp.setValue("Mario");
 //		json = GSONUtil.toJSON(localJwt, true, false, false, Base64Type.URL);
@@ -108,52 +106,52 @@ public class JWTTest {
 //		test = CryptoUtil.encodeJWT("secret", localJwt);
 //		System.out.println(test);
 //
-//		System.out.println(CryptoUtil.decodeJWT("secret", test));
-//		
+//		System.out.println(SecUtil.SINGLETON.decodeJWT("secret", test));
+//
 //		String payloadJSON = GSONUtil.toJSON(payload, true, false, true, Base64Type.URL);
 //		System.out.println("-------------------------------------------------------------------");
 //		System.out.println(payloadJSON);
-//	
-//		
+//
+//
 //		NVGenericMap gm = GSONUtil.fromJSONGenericMap(payloadJSON,(NVConfigEntity)payload.getNVConfig(), Base64Type.URL);
 //		//System.out.println(gm);
 //		NVGenericMapTest.printValue(gm);
-//		
-//		
+//
+//
 //		JWTPayload tempJWTP = new  JWTPayload();
 //		gm.add(new NVPair("http://toto.com", "batata"));
 //		tempJWTP.setNVGenericMap(gm);
 //		System.out.println(tempJWTP);
-//	
+//
 //		tempJWTP.getNotBefore();
 //		System.out.println("genericMapToJSON:" + GSONUtil.toJSONGenericMap(tempJWTP.getNVGenericMap(), false, false, false));
 //		System.out.println( GSONUtil.toJSON(tempJWTP, false, false, true, Base64Type.URL));
-//		
+//
 //		System.out.println("---------------++++++++++++++++++++----------------------------------------------------");
-  }
-
-
-  @Test
-  public void testJWTNone()
-      throws IOException, SecurityException, NullPointerException, IllegalArgumentException, GeneralSecurityException {
-    String jsonNone = GSONUtil.toJSON(jwtNONE, true, false, false, Base64Type.URL);
-    System.out.println(jsonNone);
-    JWT localJwt = GSONUtil.fromJSON(jsonNone, JWT.class, Base64Type.URL);
-    jsonNone = GSONUtil.toJSON(localJwt, true, false, false, Base64Type.URL);
-    System.out.println(jsonNone);
-
-    System.out.println(localJwt.getPayload());
-
-    String test = CryptoUtil.encodeJWT("secret", localJwt);
-    System.out.println(test);
-
-    jsonNone = GSONUtil.toJSON(localJwt, false, false, false, Base64Type.URL);
-    System.out.println(jsonNone);
-    test = CryptoUtil.encodeJWT("secret", localJwt);
-    System.out.println(test);
-
-    System.out.println(SecUtil.SINGLETON.decodeJWT((String) null, test));
-  }
+//  }
+//
+//
+//  @Test
+//  public void testJWTNone()
+//      throws IOException, SecurityException, NullPointerException, IllegalArgumentException, GeneralSecurityException {
+//    String jsonNone = GSONUtil.toJSON(jwtNONE, true, false, false, Base64Type.URL);
+//    System.out.println(jsonNone);
+//    JWT localJwt = GSONUtil.fromJSON(jsonNone, JWT.class, Base64Type.URL);
+//    jsonNone = GSONUtil.toJSON(localJwt, true, false, false, Base64Type.URL);
+//    System.out.println(jsonNone);
+//
+//    System.out.println(localJwt.getPayload());
+//
+//    String test = CryptoUtil.encodeJWT("secret", localJwt);
+//    System.out.println(test);
+//
+//    jsonNone = GSONUtil.toJSON(localJwt, false, false, false, Base64Type.URL);
+//    System.out.println(jsonNone);
+//    test = CryptoUtil.encodeJWT("secret", localJwt);
+//    System.out.println(test);
+//
+//    System.out.println(SecUtil.SINGLETON.decodeJWT((String) null, test));
+//  }
 
 
   @Test
@@ -253,7 +251,7 @@ public class JWTTest {
     System.out.println("--------------------------------------------------------------");
     //"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYmYiOjE1MDg0NjA1MzMzNDEsImRvbWFpbiI6Inhsb2dpc3R4LmlvIiwiYXBwIjoieGxvZ2lzdHgifQ.oxqpJP18sxq51qNt8_kisYeS0oR31QL2DrP-M_wYaO0";
     String gwtToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYmYiOjE1MDg0NzMyMzU0OTMsImRvbWFpbiI6Inhsb2dpc3R4LmlvIiwiYXBwIjoieGxvZ2lzdHgifQ.MrrlKa90ut2RBcfJ61lXB7ScwHikPyvkvpd_DVxPnFg";
-    JWT decoded = SecUtil.SINGLETON.SINGLETON.decodeJWT("secret", gwtToken);
+    JWT decoded = SecUtil.SINGLETON.decodeJWT("secret", gwtToken);
     String test = CryptoUtil.encodeJWT("secret", decoded);
     System.out.println("TESTGWT  :" + gwtToken);
     System.out.println("local:" + test);

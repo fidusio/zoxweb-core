@@ -17,7 +17,7 @@ package org.zoxweb.server.security;
 
 import org.zoxweb.server.io.UByteArrayOutputStream;
 import org.zoxweb.shared.crypto.EncryptedData;
-import org.zoxweb.shared.crypto.EncryptedKey;
+import org.zoxweb.shared.crypto.EncapsulatedKey;
 import org.zoxweb.shared.util.Const;
 import org.zoxweb.shared.util.Const.SizeInBytes;
 import org.zoxweb.shared.util.SUS;
@@ -67,13 +67,13 @@ public class CryptoUtilTest {
                 .nanosToString(delta));
       }
 
-      EncryptedKey ekd = CryptoUtil.createEncryptedKey("password");
+      EncapsulatedKey ekd = CryptoUtil.createEncryptedKey("password");
       byte[] key = CryptoUtil.decryptEncryptedData(ekd, "password");
       System.out.println(SharedStringUtil.bytesToHex(key));
       System.out.println(ekd.toCanonicalID());
 
       EncryptedData ed = CryptoUtil
-          .encryptData(new EncryptedKey(), SharedStringUtil.getBytes("password"),
+          .encryptData(new EncapsulatedKey(), SharedStringUtil.getBytes("password"),
               SharedStringUtil.getBytes("password"));
       System.out.println(ed.toCanonicalID());
 

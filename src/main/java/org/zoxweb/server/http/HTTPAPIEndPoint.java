@@ -16,19 +16,19 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class HTTPAPIEndPoint<I, O>
         implements CanonicalID, GetNVProperties {
-    private HTTPMessageConfigInterface config;
-    private RateController rateController;
-    private BiDataEncoder<HTTPMessageConfigInterface, I, HTTPMessageConfigInterface> dataEncoder;
-    private DataDecoder<HTTPResponseData, O> dataDecoder;
+    private volatile HTTPMessageConfigInterface config;
+    private volatile RateController rateController;
+    private volatile BiDataEncoder<HTTPMessageConfigInterface, I, HTTPMessageConfigInterface> dataEncoder;
+    private volatile DataDecoder<HTTPResponseData, O> dataDecoder;
     private transient Executor executor;
     private transient ScheduledExecutorService tsp;
     private final NamedDescription namedDescription = new NamedDescription();
-    private String domain;
-    private OkHttpClient okHttpClient = null;
+    private volatile String domain;
+    private volatile OkHttpClient okHttpClient = null;
     private final Map<Integer, HTTPStatusCode> positiveResults;
     private final AtomicLong successCounter = new AtomicLong();
     private final AtomicLong failedCounter = new AtomicLong();
-    private NVGenericMap properties = new NVGenericMap();
+    private volatile NVGenericMap properties = new NVGenericMap();
 
 
     private class ToRun

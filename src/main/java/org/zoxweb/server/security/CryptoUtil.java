@@ -21,7 +21,7 @@ import org.zoxweb.server.io.UByteArrayOutputStream;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.crypto.CryptoConst;
 import org.zoxweb.shared.crypto.EncryptedData;
-import org.zoxweb.shared.crypto.EncryptedKey;
+import org.zoxweb.shared.crypto.EncapsulatedKey;
 import org.zoxweb.shared.filters.BytesValueFilter;
 import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.security.JWT;
@@ -74,24 +74,24 @@ public class CryptoUtil {
     }
 
 
-    public static EncryptedKey rekeyEncryptedKey(final EncryptedKey toBeRekeyed,
-                                                 String originalKey, String newKey)
+    public static EncapsulatedKey rekeyEncryptedKey(final EncapsulatedKey toBeRekeyed,
+                                                    String originalKey, String newKey)
             throws NullPointerException, IllegalArgumentException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
         SUS.checkIfNulls("Null parameter", originalKey, toBeRekeyed, newKey);
         return rekeyEncryptedKey(toBeRekeyed, SharedStringUtil.getBytes(originalKey),
                 SharedStringUtil.getBytes(newKey));
     }
 
-    public static EncryptedKey rekeyEncryptedKey(final EncryptedKey toBeRekeyed,
-                                                 final byte[] originalKey, final byte[] newKey)
+    public static EncapsulatedKey rekeyEncryptedKey(final EncapsulatedKey toBeRekeyed,
+                                                    final byte[] originalKey, final byte[] newKey)
             throws NullPointerException, IllegalArgumentException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
         SUS.checkIfNulls("Null parameter", originalKey, toBeRekeyed, newKey);
         byte[] decyptedKey = decryptEncryptedData(toBeRekeyed, originalKey);
 
-        return (EncryptedKey) encryptData(toBeRekeyed, newKey, decyptedKey);
+        return (EncapsulatedKey) encryptData(toBeRekeyed, newKey, decyptedKey);
     }
 
-    public static EncryptedKey createEncryptedKey(String key)
+    public static EncapsulatedKey createEncryptedKey(String key)
             throws NullPointerException,
             IllegalArgumentException,
             InvalidKeyException,
@@ -103,7 +103,7 @@ public class CryptoUtil {
         return createEncryptedKey(SharedStringUtil.getBytes(key));
     }
 
-    public static EncryptedKey createEncryptedKey(final byte[] key)
+    public static EncapsulatedKey createEncryptedKey(final byte[] key)
             throws NullPointerException,
             IllegalArgumentException,
             NoSuchAlgorithmException,
@@ -113,7 +113,7 @@ public class CryptoUtil {
             IllegalBlockSizeException,
             BadPaddingException {
 
-        return (EncryptedKey) encryptData(new EncryptedKey(), key, null);
+        return (EncapsulatedKey) encryptData(new EncapsulatedKey(), key, null);
     }
 
 

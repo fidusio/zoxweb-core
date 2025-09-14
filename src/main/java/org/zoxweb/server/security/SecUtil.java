@@ -18,8 +18,9 @@ import javax.net.ssl.TrustManagerFactory;
 import java.io.*;
 import java.lang.reflect.Method;
 import java.security.*;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509Certificate;
+import java.util.*;
 
 public final class SecUtil {
     public static CryptoConst.SecureRandomType SECURE_RANDOM_ALGO = null;
@@ -27,6 +28,74 @@ public final class SecUtil {
     private final Map<Method, ResourceSecurity> methodResourceSecurityMap = new LinkedHashMap<>();
     private final Map<String, CredentialHasher<?>> credentialHasherMap = new LinkedHashMap<>();
     private volatile SecureRandom defaultSecureRandom = null;
+    private static final Map<String, String> OID_MAP;
+
+    static {
+        Map<String, String> m = new HashMap<>();
+
+        // --- Subject / Issuer Attribute OIDs (RDNs) ---
+        m.put("2.5.4.3",  "CN (Common Name)");
+        m.put("2.5.4.6",  "C (Country)");
+        m.put("2.5.4.7",  "L (Locality)");
+        m.put("2.5.4.8",  "ST (State/Province)");
+        m.put("2.5.4.10", "O (Organization)");
+        m.put("2.5.4.11", "OU (Organizational Unit)");
+        m.put("1.2.840.113549.1.9.1", "emailAddress");
+
+        // --- Signature / Public Key Algorithms ---
+        m.put("1.2.840.113549.1.1.1", "RSA Encryption");
+        m.put("1.2.840.113549.1.1.5", "sha1WithRSAEncryption");
+        m.put("1.2.840.113549.1.1.11", "sha256WithRSAEncryption");
+        m.put("1.2.840.113549.1.1.12", "sha384WithRSAEncryption");
+        m.put("1.2.840.113549.1.1.13", "sha512WithRSAEncryption");
+        m.put("1.2.840.113549.1.1.10", "RSASSA-PSS");
+        m.put("1.2.840.10045.2.1", "EC Public Key");
+        m.put("1.2.840.10045.4.3.2", "ecdsaWithSHA256");
+        m.put("1.2.840.10045.4.3.3", "ecdsaWithSHA384");
+        m.put("1.2.840.10045.4.3.4", "ecdsaWithSHA512");
+        m.put("1.3.101.112", "Ed25519");
+        m.put("1.3.101.113", "Ed448");
+
+        // --- Extensions ---
+        m.put("2.5.29.19", "Basic Constraints");
+        m.put("2.5.29.14", "Subject Key Identifier");
+        m.put("2.5.29.35", "Authority Key Identifier");
+        m.put("2.5.29.15", "Key Usage");
+        m.put("2.5.29.37", "Extended Key Usage");
+        m.put("2.5.29.17", "Subject Alternative Name");
+        m.put("2.5.29.18", "Issuer Alternative Name");
+        m.put("2.5.29.31", "CRL Distribution Points");
+        m.put("2.5.29.32", "Certificate Policies");
+        m.put("2.5.29.30", "Name Constraints");
+        m.put("2.5.29.36", "Policy Constraints");
+        m.put("2.5.29.46", "Freshest CRL");
+        m.put("1.3.6.1.5.5.7.1.1", "Authority Information Access");
+        m.put("1.3.6.1.5.5.7.48.1", "OCSP");
+        m.put("1.3.6.1.5.5.7.48.2", "CA Issuers");
+
+        // --- Extended Key Usages ---
+        m.put("1.3.6.1.5.5.7.3.1", "Server Authentication");
+        m.put("1.3.6.1.5.5.7.3.2", "Client Authentication");
+        m.put("1.3.6.1.5.5.7.3.3", "Code Signing");
+        m.put("1.3.6.1.5.5.7.3.4", "Email Protection");
+        m.put("1.3.6.1.5.5.7.3.8", "Time Stamping");
+        m.put("1.3.6.1.5.5.7.3.9", "OCSP Signing");
+
+        // --- Hash algorithms (sometimes referenced) ---
+        m.put("1.3.14.3.2.26", "SHA-1");
+        m.put("2.16.840.1.101.3.4.2.1", "SHA-256");
+        m.put("2.16.840.1.101.3.4.2.2", "SHA-384");
+        m.put("2.16.840.1.101.3.4.2.3", "SHA-512");
+        // --- Certificate Transparency (Google OIDs) ---
+        m.put("1.3.6.1.4.1.11129.2.4.2", "CT Precertificate SCTs");
+        m.put("1.3.6.1.4.1.11129.2.4.3", "CT Precertificate Poison");
+        m.put("1.3.6.1.4.1.11129.2.4.4", "CT Embedded SCT Extension");
+        m.put("1.3.6.1.4.1.11129.2.4.5", "CT Embedded OCSP SCTs");
+        m.put("1.3.6.1.4.1.11129.2.4.6", "CT Embedded CRL SCTs");
+
+        OID_MAP = Collections.unmodifiableMap(m);
+    }
+
 
     private SecUtil() {
         addCredentialHasher(new BCryptPasswordHasher(10));
@@ -181,7 +250,6 @@ public final class SecUtil {
     }
 
 
-
     public synchronized SecUtil addCredentialHasher(CredentialHasher<?> credentialHasher) {
         credentialHasherMap.put(DataEncoder.StringLower.encode(credentialHasher.getName()), credentialHasher);
         for (String algo : credentialHasher.supportedAlgorithms())
@@ -238,7 +306,7 @@ public final class SecUtil {
         CredentialHasher<CIPassword> passwordHasher = lookupCredentialHasher(ciPassword.getAlgorithm());
         if (passwordHasher == null)
             throw new AccessSecurityException("no credential hasher found for: " + ciPassword.getAlgorithm());
-        return passwordHasher.isPasswordValid(ciPassword, password);
+        return passwordHasher.validate(ciPassword, password);
     }
 
     public boolean isPasswordValid(final CIPassword ciPassword, char[] password)
@@ -247,7 +315,7 @@ public final class SecUtil {
         CredentialHasher<CIPassword> passwordHasher = lookupCredentialHasher(ciPassword.getAlgorithm());
         if (passwordHasher == null)
             throw new AccessSecurityException("no credential hasher found for: " + ciPassword.getAlgorithm());
-        return passwordHasher.isPasswordValid(ciPassword, password);
+        return passwordHasher.validate(ciPassword, password);
     }
 
     public void validatePassword(final CIPassword ciPassword, final char[] password)
@@ -552,6 +620,68 @@ public final class SecUtil {
 
     public synchronized Provider getProvider(String name) {
         return Security.getProvider(name);
+    }
+
+    public NVGenericMap certificateToNVGM(X509Certificate cert) throws CertificateEncodingException {
+        NVGenericMap nvgm = new NVGenericMap();
+
+        // Basic certificate fields
+        nvgm.build(new NVInt("version", cert.getVersion()));
+        nvgm.build("serialNumber", cert.getSerialNumber().toString(16));
+        nvgm.build("signatureAlgorithm", cert.getSigAlgName());
+        nvgm.build(parseDN("issuer", cert.getIssuerX500Principal().getName()));
+        nvgm.build(parseDN("subject", cert.getSubjectX500Principal().getName()));
+
+        // Validity
+        NVGenericMap validity = new NVGenericMap("validity");
+        validity.build("notBefore", cert.getNotBefore().toString());
+        validity.build("notAfter", cert.getNotAfter().toString());
+        nvgm.build(validity);
+
+        // Public Key
+        NVGenericMap publicKey = new NVGenericMap("publicKey");
+        publicKey.build("algorithm", cert.getPublicKey().getAlgorithm());
+        publicKey.build(new NVBlob("encoded", cert.getPublicKey().getEncoded()));
+        nvgm.build(publicKey);
+
+        // Extensions
+        NVGenericMapList extensions = new NVGenericMapList("extensions");
+        for (String oid : cert.getCriticalExtensionOIDs() != null ? cert.getCriticalExtensionOIDs() : new HashSet<String>()) {
+            NVGenericMap ext = new NVGenericMap();
+            //ext.build("oid", OID_MAP.get(oid));
+            ext.build(new NVBoolean("critical", true));
+            ext.build(new NVBlob(OID_MAP.get(oid) != null ? OID_MAP.get(oid) : oid, cert.getExtensionValue(oid)));
+            extensions.add(ext);
+        }
+        for (String oid : cert.getNonCriticalExtensionOIDs() != null ? cert.getNonCriticalExtensionOIDs() : new HashSet<String>()) {
+            NVGenericMap ext = new NVGenericMap();
+            //ext.build("oid", OID_MAP.get(oid));
+            //ext.build(new NVBoolean("critical", false));
+            ext.build(new NVBlob(OID_MAP.get(oid) != null ? OID_MAP.get(oid) : oid, cert.getExtensionValue(oid)));
+            extensions.add(ext);
+        }
+        nvgm.build(extensions);
+
+        // Signature
+        nvgm.build(new NVBlob("signature", cert.getSignature()));
+
+        // Raw certificate data
+        nvgm.build(new NVBlob("encoded", cert.getEncoded()));
+
+        return nvgm;
+    }
+
+    // Helper method to parse Distinguished Name (DN) into a JSON object
+    private static NVGenericMap parseDN(String name, String dn) {
+        NVGenericMap dnJson = new NVGenericMap(name);
+        String[] parts = dn.split(",\\s*");
+        for (String part : parts) {
+            String[] keyValue = part.split("=");
+            if (keyValue.length == 2) {
+                dnJson.build(keyValue[0].trim(), keyValue[1].trim());
+            }
+        }
+        return dnJson;
     }
 
 }

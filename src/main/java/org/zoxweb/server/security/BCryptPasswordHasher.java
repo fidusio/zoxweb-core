@@ -8,7 +8,7 @@ import org.zoxweb.shared.util.SharedBase64;
 public class BCryptPasswordHasher
         extends PasswordHasher {
     public BCryptPasswordHasher(int rounds) {
-        super("bcrypt", CryptoConst.HashType.BCRYPT,  CryptoConst.HashType.BCRYPT.VARIANCES, rounds);
+        super("bcrypt", CryptoConst.HashType.BCRYPT, CryptoConst.HashType.BCRYPT.VARIANCES, rounds);
     }
 
     /**
@@ -62,7 +62,7 @@ public class BCryptPasswordHasher
      * @return
      */
     @Override
-    public boolean isPasswordValid(CIPassword ci, String password) {
+    public boolean validate(CIPassword ci, String password) {
         return HashUtil.isBCryptPasswordValid(password, ci.getCanonicalID());
     }
 
@@ -72,7 +72,7 @@ public class BCryptPasswordHasher
      * @return
      */
     @Override
-    public boolean isPasswordValid(CIPassword ci, byte[] password) {
+    public boolean validate(CIPassword ci, byte[] password) {
         return HashUtil.isBCryptPasswordValid(password, ci.getCanonicalID());
     }
 
@@ -82,7 +82,7 @@ public class BCryptPasswordHasher
      * @return
      */
     @Override
-    public boolean isPasswordValid(CIPassword ci, char[] password) {
+    public boolean validate(CIPassword ci, char[] password) {
         return HashUtil.isBCryptPasswordValid(new String(password), ci.getCanonicalID());
     }
 }

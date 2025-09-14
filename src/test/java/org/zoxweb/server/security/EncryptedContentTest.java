@@ -20,7 +20,7 @@ import org.zoxweb.shared.crypto.CryptoConst;
 import org.zoxweb.shared.crypto.CryptoConst.HashType;
 import org.zoxweb.shared.crypto.CryptoConst.SecureRandomType;
 import org.zoxweb.shared.crypto.EncryptedData;
-import org.zoxweb.shared.crypto.EncryptedKey;
+import org.zoxweb.shared.crypto.EncapsulatedKey;
 import org.zoxweb.shared.crypto.CIPassword;
 import org.zoxweb.shared.util.SharedStringUtil;
 
@@ -144,14 +144,14 @@ public class EncryptedContentTest {
 
                 System.out.println("password is equal " + SecUtil.SINGLETON.isPasswordValid(fromJSON, "password"));
 
-                EncryptedKey ekd = CryptoUtil.createEncryptedKey("password");
+                EncapsulatedKey ekd = CryptoUtil.createEncryptedKey("password");
                 String ekdJSON = GSONUtil.toJSON(ekd, true, false, false);
                 System.out.println(ekdJSON);
                 byte[] key = CryptoUtil.decryptEncryptedData(ekd, "password");
                 System.out.println(key.length + " " + SharedStringUtil.bytesToHex(key));
                 System.out.println(key.length + " " + SharedStringUtil.bytesToHex(ekd.getEncryptedData()));
 
-                EncryptedKey ekdFromJSON = GSONUtil.fromJSON(ekdJSON, EncryptedKey.class);
+                EncapsulatedKey ekdFromJSON = GSONUtil.fromJSON(ekdJSON, EncapsulatedKey.class);
 
                 key = CryptoUtil.decryptEncryptedData(ekdFromJSON, "password");
                 System.out.println("from json       key:" + SharedStringUtil.bytesToHex(key));
@@ -183,7 +183,7 @@ public class EncryptedContentTest {
                             "generateRandomHashedBytes" + "," + SharedStringUtil.bytesToHex(randomBytes));
 
                     ts = System.nanoTime();
-                    EncryptedKey ekdTest = CryptoUtil.createEncryptedKey("password");
+                    EncapsulatedKey ekdTest = CryptoUtil.createEncryptedKey("password");
                     ts = System.nanoTime() - ts;
                     System.out.print("[" + ts + " ns]");
                     System.out.println(ekdTest.getName() + "\t,Encrypted data " + SharedStringUtil

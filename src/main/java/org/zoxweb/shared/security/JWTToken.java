@@ -1,16 +1,11 @@
 package org.zoxweb.shared.security;
 
-import org.zoxweb.shared.data.SetNameDescriptionDAO;
-import org.zoxweb.shared.util.GetNVConfig;
-import org.zoxweb.shared.util.NVConfig;
-import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityPortable;
-import org.zoxweb.shared.util.NVConfigManager;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.data.PropertyDAO;
+import org.zoxweb.shared.util.*;
 
 @SuppressWarnings("serial")
 public class JWTToken
-        extends SetNameDescriptionDAO
+        extends PropertyDAO
         implements CredentialInfo {
 
 
@@ -45,7 +40,7 @@ public class JWTToken
             SharedUtil.extractNVConfigs(Param.values()),
             null,
             false,
-            SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO);
+            PropertyDAO.NVC_PROPERTY_DAO);
 
 
     public JWTToken() {

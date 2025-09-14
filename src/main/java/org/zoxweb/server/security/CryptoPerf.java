@@ -29,7 +29,7 @@ public class CryptoPerf {
 
     public static Result generateRandomNumber(CryptoConst.SecureRandomType randomType, int byteSize, int count) throws NoSuchAlgorithmException {
         SecureRandom sr = SecUtil.SINGLETON.newSecureRandom(randomType);
-        byte buffer[] = new byte[byteSize];
+        byte[] buffer = new byte[byteSize];
         //HashSet<Object> set = new HashSet<>();
 
         long ts = System.currentTimeMillis();
@@ -97,7 +97,6 @@ public class CryptoPerf {
                     String keyName = args[index++];
                     int keySizeInBits = Integer.parseInt(args[index++]);
                     count = Integer.parseInt(args[index++]);
-                    ;
                     repeat = Integer.parseInt(args[index++]);
                     verify = args.length > index && "-v".equalsIgnoreCase(args[index++]) ? true : false;
                     for (int i = 0; i < repeat; i++) {

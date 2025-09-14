@@ -33,107 +33,94 @@ import java.util.Date;
 
 @SuppressWarnings("serial")
 public class JWT
-extends SetNameDescriptionDAO
-{
+        extends SetNameDescriptionDAO {
 
-	public enum JWTField
-	{
-		HEADER,
-		PAYLOAD,
-		HASH
-	}
-
-
-	public enum Param
-	implements GetNVConfig
-	{
-		JWT_HEADER(NVConfigManager.createNVConfig("header", "Header", "Header", true, true, NVGenericMap.class)),
-		JWT_PAYLOAD(NVConfigManager.createNVConfig("payload", "Payload", "Payload", false, false, NVGenericMap.class)),
-		JWT_HASH(NVConfigManager.createNVConfig("hash", "hash", "Hash", false, false, String.class)),
-		
-		;
-		
-		private final NVConfig nvc;
-		
-		Param(NVConfig nvc)
-		{
-	        this.nvc = nvc;
-		}
-		
-		public NVConfig getNVConfig() 
-		{
-			return nvc;
-		}
-	}
-	
-	public static final NVConfigEntity NVC_JWT = new NVConfigEntityPortable("jwt",
-																		null , 
-																		"JWT", 
-																		true, 
-																		false, 
-																		false, 
-																		false, 
-																		JWT.class, 
-																		SharedUtil.extractNVConfigs(Param.values()), 
-																		null, 
-																		false, 
-																		SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO);
-	
-	
-	
-	
-	
-	
-	private JWTPayload payload;
-	private JWTHeader header;
-	public JWT()
-	{
-		super(NVC_JWT);
-		payload = new JWTPayload((NVGenericMap) lookup(Param.JWT_PAYLOAD));
-		header = new JWTHeader((NVGenericMap) lookup(Param.JWT_HEADER));
-	}
-
-	
-	public JWT(JWTHeader header, JWTPayload payload)
-	{
-		this();
-		this.header.setProperties(header.getProperties());
-	
-		this.payload.setProperties(payload.getProperties());
-		
-
-	}
-	public JWTHeader getHeader() {
-		return header;
-	}
-
-
-
-	public JWTPayload getPayload() {
-		return payload;
-	}
-
-
-	
-	
-	public String getHash()
-	{
-		return lookupValue(Param.JWT_HASH);
-	}
-	
-	
-	public void setHash(String hash)
-	{
-		setValue(Param.JWT_HASH, hash);
-	}
-
-    public static JWT createJWT(CryptoConst.JWTAlgo algorithm, String subjectID, AppID<String> appID) {
-	    return createJWT(algorithm, subjectID, appID.getDomainID(), appID.getAppID());
+    public enum JWTField {
+        HEADER,
+        PAYLOAD,
+        HASH
     }
 
-	public static JWT createJWT(CryptoConst.JWTAlgo algorithm, String subjectID, String domainID, String appID) {
-		
-		JWT jwt = new JWT();
+
+    public enum Param
+            implements GetNVConfig {
+        JWT_HEADER(NVConfigManager.createNVConfig("header", "Header", "Header", true, true, NVGenericMap.class)),
+        JWT_PAYLOAD(NVConfigManager.createNVConfig("payload", "Payload", "Payload", false, false, NVGenericMap.class)),
+        JWT_HASH(NVConfigManager.createNVConfig("hash", "hash", "Hash", false, false, String.class)),
+        ;
+
+        private final NVConfig nvc;
+
+        Param(NVConfig nvc) {
+            this.nvc = nvc;
+        }
+
+        public NVConfig getNVConfig() {
+            return nvc;
+        }
+    }
+
+    public static final NVConfigEntity NVC_JWT = new NVConfigEntityPortable("jwt",
+            null,
+            "JWT",
+            true,
+            false,
+            false,
+            false,
+            JWT.class,
+            SharedUtil.extractNVConfigs(Param.values()),
+            null,
+            false,
+            SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO);
+
+
+    private final JWTPayload payload;
+    private final JWTHeader header;
+
+    public JWT() {
+        super(NVC_JWT);
+        payload = new JWTPayload(lookup(Param.JWT_PAYLOAD));
+        header = new JWTHeader(lookup(Param.JWT_HEADER));
+    }
+
+
+    public JWT(JWTHeader header, JWTPayload payload) {
+        this();
+        this.header.setProperties(header.getProperties());
+        this.payload.setProperties(payload.getProperties());
+
+
+    }
+
+    public JWTHeader getHeader() {
+        return header;
+    }
+
+
+    public JWTPayload getPayload() {
+        return payload;
+    }
+
+    /**
+     *
+     * @return string URL encoded base64
+     */
+    public String getHash() {
+        return lookupValue(Param.JWT_HASH);
+    }
+
+
+    public void setHash(String hash) {
+        setValue(Param.JWT_HASH, hash);
+    }
+
+    public static JWT createJWT(CryptoConst.JWTAlgo algorithm, String subjectID, AppID<String> appID) {
+        return createJWT(algorithm, subjectID, appID.getDomainID(), appID.getAppID());
+    }
+
+    public static JWT createJWT(CryptoConst.JWTAlgo algorithm, String subjectID, String domainID, String appID) {
+
+        JWT jwt = new JWT();
         JWTHeader jwtHeader = jwt.getHeader();
         jwtHeader.setJWTAlgorithm(algorithm);
         jwtHeader.setTokenType("JWT");
@@ -142,21 +129,9 @@ extends SetNameDescriptionDAO
         jwtPayload.setDomainID(domainID);
         jwtPayload.setAppID(appID);
         jwtPayload.setSubjectID(subjectID);
-        // trick for multi-threading safety 
-        //DataEncoder<JWTPayload, JWTPayload> tempEncoder = PAYLOAD_ENCODER;
-//        if (tempEncoder != null)
-//        	jwtPayload = tempEncoder.encode(jwtPayload);
-//        else
+
         jwtPayload.setIssuedAt(new Date());
         jwtPayload.setNonce(LongIDGenerator.DEFAULT.nextID());
-        
-
-        //jwt.setHeader(jwtHeader);
-        //jwt.setPayload(jwtPayload);
-
         return jwt;
     }
-
-	
-	//public static DataEncoder<JWTPayload, JWTPayload>  PAYLOAD_ENCODER = null;
 }

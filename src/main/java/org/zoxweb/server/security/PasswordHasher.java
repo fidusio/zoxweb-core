@@ -3,6 +3,7 @@ package org.zoxweb.server.security;
 import org.zoxweb.shared.crypto.CIPassword;
 import org.zoxweb.shared.crypto.CredentialHasher;
 import org.zoxweb.shared.crypto.CryptoConst;
+import org.zoxweb.shared.security.AccessSecurityException;
 
 public abstract class PasswordHasher
         implements CredentialHasher<CIPassword> {
@@ -53,5 +54,63 @@ public abstract class PasswordHasher
 
     public CryptoConst.HashType getHashType() {
         return hashType;
+    }
+
+
+    /**
+     *
+     * @param oldCI
+     * @param password
+     * @param newPassword
+     * @return
+     * @throws AccessSecurityException
+     */
+    @Override
+    public CIPassword update(CIPassword oldCI, String password, String newPassword) throws AccessSecurityException {
+        if (SecUtil.SINGLETON.lookupCredentialHasher(oldCI.getAlgorithm()).validate(oldCI, password)) {
+            return merge(oldCI, hash(newPassword));
+        }
+        throw new AccessSecurityException("Invalid password update failed");
+    }
+
+    /**
+     *
+     * @param oldCI
+     * @param password
+     * @param newPassword
+     * @return
+     * @throws AccessSecurityException
+     */
+    @Override
+    public CIPassword update(CIPassword oldCI, byte[] password, byte[] newPassword) throws AccessSecurityException {
+        if (SecUtil.SINGLETON.lookupCredentialHasher(oldCI.getAlgorithm()).validate(oldCI, password)) {
+            return merge(oldCI, hash(newPassword));
+        }
+        throw new AccessSecurityException("Invalid password update failed");
+    }
+
+    /**
+     *
+     * @param oldCI
+     * @param password
+     * @param newPassword
+     * @return
+     * @throws AccessSecurityException
+     */
+    @Override
+    public CIPassword update(CIPassword oldCI, char[] password, char[] newPassword) throws AccessSecurityException {
+        if (SecUtil.SINGLETON.lookupCredentialHasher(oldCI.getAlgorithm()).validate(oldCI, password)) {
+            return merge(oldCI, hash(newPassword));
+        }
+        throw new AccessSecurityException("Invalid password update failed");
+    }
+
+    protected static CIPassword merge(CIPassword oldCI, CIPassword newCI) {
+        newCI.setDescription(oldCI.getDescription());
+        newCI.setName(oldCI.getName());
+        newCI.setSubjectGUID(oldCI.getSubjectGUID());
+        newCI.setReferenceID(oldCI.getReferenceID());
+        newCI.setGUID(oldCI.getGUID());
+        return newCI;
     }
 }

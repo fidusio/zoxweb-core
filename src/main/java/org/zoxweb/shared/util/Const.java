@@ -970,7 +970,7 @@ public class Const {
     public enum GNVType
             implements GetName,
             GetMetaType {
-        NVBLOB("byte[]", byte[].class),
+        NVBLOB("binary", byte[].class),
         NVBOOLEAN("boolean", boolean.class),
         NVINT("int", int.class),
         NVLONG("long", long.class),

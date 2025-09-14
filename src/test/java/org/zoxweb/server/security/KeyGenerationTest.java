@@ -5,7 +5,7 @@ import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.crypto.CryptoConst;
 import org.zoxweb.shared.crypto.CryptoConst.SignatureAlgo;
 import org.zoxweb.shared.crypto.EncryptedData;
-import org.zoxweb.shared.crypto.EncryptedKey;
+import org.zoxweb.shared.crypto.EncapsulatedKey;
 import org.zoxweb.shared.security.JWT;
 import org.zoxweb.shared.util.Const.TimeInMillis;
 import org.zoxweb.shared.util.SharedBase64;
@@ -30,7 +30,7 @@ public class KeyGenerationTest {
       for (int i = 0; i < 5; i++) {
 
         EncryptedData ed = CryptoUtil
-            .encryptData(new EncryptedKey(), SharedStringUtil.getBytes("password"), null, 1);
+            .encryptData(new EncapsulatedKey(), SharedStringUtil.getBytes("password"), null, 1);
         String json = GSONUtil.toJSON(ed, false, false, false, Base64Type.URL);
         KeyPair aliceKey = CryptoUtil.generateKeyPair("RSA", 2048);
         long ts = System.nanoTime();
@@ -104,7 +104,7 @@ public class KeyGenerationTest {
       long ts = System.currentTimeMillis();
       for (int i = 0; i < loop; i++) {
         CryptoUtil
-            .encryptData(new EncryptedKey(), SharedStringUtil.getBytes("password"), null, 8196);
+            .encryptData(new EncapsulatedKey(), SharedStringUtil.getBytes("password"), null, 8196);
       }
       ts = System.currentTimeMillis() - ts;
       System.out
@@ -113,16 +113,16 @@ public class KeyGenerationTest {
       ts = System.currentTimeMillis();
       for (int i = 0; i < loop; i++) {
         CryptoUtil
-            .encryptData(new EncryptedKey(), SharedStringUtil.getBytes("password"), null, 1);
+            .encryptData(new EncapsulatedKey(), SharedStringUtil.getBytes("password"), null, 1);
       }
       ts = System.currentTimeMillis() - ts;
       System.out.println("Generated " + loop + " with rehash 1 took " + TimeInMillis.toString(ts));
       EncryptedData ed = CryptoUtil
-          .encryptData(new EncryptedKey(), SharedStringUtil.getBytes("password"), null, 1);
+          .encryptData(new EncapsulatedKey(), SharedStringUtil.getBytes("password"), null, 1);
       String json = GSONUtil.toJSON(ed, false, false, false, Base64Type.URL);
       System.out.println(json);
       System.out.println(json.length() + ":" + SharedStringUtil.getBytes(json).length);
-      ed = GSONUtil.fromJSON(json, EncryptedKey.class, Base64Type.URL);
+      ed = GSONUtil.fromJSON(json, EncapsulatedKey.class, Base64Type.URL);
       byte[] data = CryptoUtil.decryptEncryptedData(ed, SharedStringUtil.getBytes("password"), 1);
       System.out.println(SharedStringUtil.bytesToHex(data));
     } catch (Exception e) {
