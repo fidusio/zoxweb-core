@@ -1,6 +1,9 @@
 package org.zoxweb.shared.security;
 
+import org.zoxweb.shared.util.GetNVProperties;
+
 public interface CredentialInfo
+    extends GetNVProperties
 {
 
     enum CredentialType

@@ -65,7 +65,8 @@
         <angus.version>2.0.3</angus.version>
         <jsoup.version>RELEASE</jsoup.version>
         <junit.version>5.12.0</junit.version>
-        <okhttp.version>4.12.0</okhttp.version>
+        <okhttp.version>5.1.0</okhttp.version>
+<!--        <okhttp.version>4.12.0</okhttp.version>-->
         <oshi-core.version>6.8.3</oshi-core.version>
     </properties>
 
@@ -221,23 +222,6 @@
             <version>${angus.version}</version>
         </dependency>
 
-<!--        <dependency>-->
-<!--            <groupId>com.github.oshi</groupId>-->
-<!--            <artifactId>oshi-core</artifactId>-->
-<!--            <version>${oshi-core.version}</version>-->
-<!--        </dependency>-->
-
-        <!--<dependency>
-          <groupId>com.sun.mail</groupId>
-          <artifactId>jakarta.mail</artifactId>
-          <version>${jakarta-mail.version}</version>
-        </dependency>-->
-
-        <!--    <dependency>-->
-        <!--      <groupId>jakarta.mail</groupId>-->
-        <!--      <artifactId>jakarta.mail-api</artifactId>-->
-        <!--      <version>${jakarta-mail.version}</version>-->
-        <!--    </dependency>-->
 
         <dependency>
             <groupId>javax.cache</groupId>
@@ -247,8 +231,9 @@
 
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
-            <artifactId>okhttp</artifactId>
+            <artifactId>okhttp-jvm</artifactId>
             <version>${okhttp.version}</version>
+            <scope>compile</scope>
         </dependency>
 
         <dependency>

@@ -8,8 +8,7 @@ import java.util.concurrent.TimeUnit;
 
 public class TimeInMillisTest {
     @Test
-    public void testTimeToString()
-    {
+    public void testTimeToString() {
         long ts = System.currentTimeMillis();
         long[] times = {
                 0,
@@ -22,15 +21,15 @@ public class TimeInMillisTest {
                 Const.TimeInMillis.WEEK.MILLIS,
         };
 
-        for(long t : times)
+        for (long t : times)
             System.out.println(Const.TimeInMillis.toString(t));
         System.out.println();
-        for(long t : times)
-            System.out.println(Const.TimeInMillis.toString(t*25));
+        for (long t : times)
+            System.out.println(Const.TimeInMillis.toString(t * 25));
 
 
         System.out.println(Const.TimeInMillis.toString(Const.TimeInMillis.WEEK.MILLIS + Const.TimeInMillis.DAY.MILLIS +
-                Const.TimeInMillis.HOUR.MILLIS*26 + Const.TimeInMillis.MINUTE.MILLIS*70 +50));
+                Const.TimeInMillis.HOUR.MILLIS * 26 + Const.TimeInMillis.MINUTE.MILLIS * 70 + 50));
 
 
         System.out.println(Const.TimeInMillis.toString(System.currentTimeMillis()) + " " + new Date(0));
@@ -41,8 +40,7 @@ public class TimeInMillisTest {
     }
 
     @Test
-    public void json()
-    {
+    public void json() {
         NVEnum nve = new NVEnum("seconds", TimeUnit.SECONDS);
         NVGenericMap nvgm = new NVGenericMap();
         nvgm.add(nve);
@@ -56,16 +54,16 @@ public class TimeInMillisTest {
     }
 
     @Test
-    public void parsingTest()
-    {
-        String[] durations = {
-          "1d",
-          "1w",
-          "1y"
+    public void parsingTest() {
+        Object[] durations = {
+                "1d",
+                "1w",
+                "1y",
+                10000,
+                1_000_000_000_000_000_000L
         };
 
-        for (String duration : durations)
-        {
+        for (Object duration : durations) {
             System.out.println(SharedUtil.toCanonicalID(',', duration, Const.TimeInMillis.toMillis(duration)));
         }
     }

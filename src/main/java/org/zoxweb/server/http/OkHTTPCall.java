@@ -397,7 +397,8 @@ public class OkHTTPCall {
         return send(null, hmci, clazz);
     }
 
-    public static HTTPResponseData send(OkHttpClient okHttpClient, HTTPMessageConfigInterface hmci)
+    public static HTTPResponseData send(
+            OkHttpClient okHttpClient, HTTPMessageConfigInterface hmci)
             throws IOException {
         HTTPResponseData ret;
         try {

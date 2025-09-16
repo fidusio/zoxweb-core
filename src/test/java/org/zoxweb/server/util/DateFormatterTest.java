@@ -70,7 +70,7 @@ public class DateFormatterTest {
 		
 		
 		
-		String tokens[] = 
+		String[] tokens=
 			{
 				"01:00:00",
 				"01:00:00.500.500",

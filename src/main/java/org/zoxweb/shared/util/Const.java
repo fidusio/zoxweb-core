@@ -381,7 +381,10 @@ public class Const {
         public long mult(long sizeMultiplier) {
             return SIZE * sizeMultiplier;
         }
-        public int mult(int sizeMultiplier) {return (int) SIZE * sizeMultiplier;}
+
+        public int mult(int sizeMultiplier) {
+            return (int) SIZE * sizeMultiplier;
+        }
 
         @Override
         public String getName() {
@@ -424,11 +427,9 @@ public class Const {
         AS_IS,
         ;
 
-        public static String convert(StringType stringType, String toConvert)
-        {
+        public static String convert(StringType stringType, String toConvert) {
             SUS.checkIfNulls("null string", toConvert);
-            switch (stringType)
-            {
+            switch (stringType) {
                 case UPPER:
                     return DataEncoder.StringUpper.encode(toConvert);
 
@@ -524,7 +525,6 @@ public class Const {
         }
 
 
-
         public static TimeInMillis toTimeInMillis(String unit) {
             int index = unit.indexOf("/");
             if (index != -1)
@@ -569,90 +569,109 @@ public class Const {
          *
          * @return the time string value in millis
          */
-        public static long toMillis(String time)
+        public static long toMillis(Object toConvert)
                 throws NullPointerException, IllegalArgumentException {
-            time = SharedStringUtil.toLowerCase(time).trim();
-            try {
-                return Long.parseLong(time);
-            } catch (NumberFormatException e) {
 
-            }
-            String[] hhmmss = time.split(":");
-            if (hhmmss.length > 0 && hhmmss.length <= 3) {
-                int millis = 0;
-                int ss = 0;
-                int mm = 0;
-                int hh = 0;
+            if (toConvert instanceof String) {
+                String time = (String) toConvert;
+                time = SharedStringUtil.toLowerCase(time).trim();
                 try {
-                    for (int i = 0; i < hhmmss.length; i++) {
-                        int index = hhmmss.length - (i + 1);
-                        String tok = hhmmss[index];
-                        switch (i) {
-                            case 0:
-                                String[] millisToken = tok.split("\\.");
-                                if (millisToken.length == 2) {
-                                    millis = Integer.parseInt(millisToken[1]);
-                                    if (millis < 0 || millis > 999) {
-                                        throw new IllegalArgumentException("invalid millis value " + millis);
-                                    }
-                                    tok = millisToken[0];
-                                }
+                    return Long.parseLong(time);
+                } catch (NumberFormatException e) {
 
-                                ss = Integer.parseInt(tok);
-                                if (ss < 0 || ss > 59) {
-                                    throw new IllegalArgumentException("invalid second value " + ss);
-                                }
-                                break;
-                            case 1:
-                                mm = Integer.parseInt(tok);
-                                if (mm < 0 || mm > 59) {
-                                    throw new IllegalArgumentException("invalid minute value " + mm);
-                                }
-                                break;
-                            case 2:
-                                hh = Integer.parseInt(tok);
-                                if (hh < 0) {
-                                    throw new IllegalArgumentException("invalid hour value " + hh);
-                                }
-                                break;
+                }
+                String[] hhmmss = time.split(":");
+                if (hhmmss.length > 0 && hhmmss.length <= 3) {
+                    int millis = 0;
+                    int ss = 0;
+                    int mm = 0;
+                    int hh = 0;
+                    try {
+                        for (int i = 0; i < hhmmss.length; i++) {
+                            int index = hhmmss.length - (i + 1);
+                            String tok = hhmmss[index];
+                            switch (i) {
+                                case 0:
+                                    String[] millisToken = tok.split("\\.");
+                                    if (millisToken.length == 2) {
+                                        millis = Integer.parseInt(millisToken[1]);
+                                        if (millis < 0 || millis > 999) {
+                                            throw new IllegalArgumentException("invalid millis value " + millis);
+                                        }
+                                        tok = millisToken[0];
+                                    }
+
+                                    ss = Integer.parseInt(tok);
+                                    if (ss < 0 || ss > 59) {
+                                        throw new IllegalArgumentException("invalid second value " + ss);
+                                    }
+                                    break;
+                                case 1:
+                                    mm = Integer.parseInt(tok);
+                                    if (mm < 0 || mm > 59) {
+                                        throw new IllegalArgumentException("invalid minute value " + mm);
+                                    }
+                                    break;
+                                case 2:
+                                    hh = Integer.parseInt(tok);
+                                    if (hh < 0) {
+                                        throw new IllegalArgumentException("invalid hour value " + hh);
+                                    }
+                                    break;
+                            }
+                        }
+                        return hh * HOUR.MILLIS + mm * MINUTE.MILLIS + ss * SECOND.MILLIS + millis;
+                    } catch (NumberFormatException e) {
+                        //e.printStackTrace();
+                    }
+                }
+
+                TimeInMillis timeMatch = null;
+                String tokenMatch = null;
+
+                for (TimeInMillis tim : TimeInMillis.values()) {
+                    for (String tok : tim.tokens) {
+                        if (time.endsWith(tok)) {
+                            tokenMatch = tok;
+                            timeMatch = tim;
+                            break;
+                        }
+
+                        if (timeMatch != null) {
+                            break;
                         }
                     }
-                    return hh * HOUR.MILLIS + mm * MINUTE.MILLIS + ss * SECOND.MILLIS + millis;
-                } catch (NumberFormatException e) {
-                    //e.printStackTrace();
                 }
-            }
 
-            TimeInMillis timeMatch = null;
-            String tokenMatch = null;
-
-            for (TimeInMillis tim : TimeInMillis.values()) {
-                for (String tok : tim.tokens) {
-                    if (time.endsWith(tok)) {
-                        tokenMatch = tok;
-                        timeMatch = tim;
-                        break;
-                    }
-
-                    if (timeMatch != null) {
-                        break;
-                    }
+                if (timeMatch == null) {
+                    throw new IllegalArgumentException("Invalid time token " + time);
                 }
+
+                String[] valueMatch = time.split(tokenMatch);
+
+                if (valueMatch.length != 1) {
+                    throw new IllegalArgumentException("Invalid time token " + time);
+                }
+
+                long multiplier = Long.parseLong(valueMatch[0].trim());
+
+                return timeMatch.MILLIS * multiplier;
+            } else if (toConvert instanceof Long) {
+
+                long time = (long) toConvert;
+                if (time < 0)
+                    throw new IllegalArgumentException("Invalid millis " + time);
+                return time;
+            }
+            else if (toConvert instanceof Integer) {
+
+                long time = (long)(int)toConvert;
+                if (time < 0)
+                    throw new IllegalArgumentException("Invalid millis " + time);
+                return time;
             }
 
-            if (timeMatch == null) {
-                throw new IllegalArgumentException("Invalid time token " + time);
-            }
-
-            String[] valueMatch = time.split(tokenMatch);
-
-            if (valueMatch.length != 1) {
-                throw new IllegalArgumentException("Invalid time token " + time);
-            }
-
-            long multiplier = Long.parseLong(valueMatch[0].trim());
-
-            return timeMatch.MILLIS * multiplier;
+            throw new IllegalArgumentException("Invalid millis " + toConvert);
         }
 
         /**
