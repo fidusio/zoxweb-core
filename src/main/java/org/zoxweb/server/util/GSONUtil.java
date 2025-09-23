@@ -78,6 +78,7 @@ public final class GSONUtil {
             .registerTypeHierarchyAdapter(NVEntity.class, new NVEntitySerDeserializer())
             .registerTypeAdapter(NVStringList.class, new NVStringListSerDeserializer())
             .registerTypeAdapter(Date.class, new DateSerDeserializer())
+            .disableHtmlEscaping()
             //.registerTypeAdapter(Enum.class, new EnumSerDeserializer()
             .create();
 
@@ -99,6 +100,7 @@ public final class GSONUtil {
             .registerTypeAdapter(Date.class, new DateSerDeserializer())
             .registerTypeAdapter(NVStringList.class, new NVStringListSerDeserializer())
             .setPrettyPrinting()
+            .disableHtmlEscaping()
             //.registerTypeAdapter(Enum.class, new EnumSerDeserializer()
             .create();
 
@@ -116,6 +118,7 @@ public final class GSONUtil {
 
             // JsonTreeWriter jtw = new JsonTreeWriter();
             try (JsonTreeWriter jtw = new JsonTreeWriter()) {
+//                jtw.setHtmlSafe(false);
                 toJSONGenericMap(jtw, src, false, false);
                 return jtw.get();
             } catch (IOException e) {
@@ -372,6 +375,7 @@ public final class GSONUtil {
         public JsonElement serialize(NVEntity src, Type typeOfSrc, JsonSerializationContext context) {
             JsonTreeWriter jtw = new JsonTreeWriter();
             try {
+                //jtw.setHtmlSafe(false);
                 toJSON(jtw, src.getClass(), src, false, true, null);
             } catch (IOException e) {
                 // TODO Auto-generated catch block
@@ -538,7 +542,7 @@ public final class GSONUtil {
         StringWriter sw = new StringWriter();
         JsonWriter writer = new JsonWriter(sw);
         writer.setSerializeNulls(true);
-        writer.setHtmlSafe(true);
+        writer.setHtmlSafe(false);
 
         if (indent)
             writer.setIndent("  ");
@@ -560,7 +564,7 @@ public final class GSONUtil {
         StringWriter sw = new StringWriter();
         JsonWriter writer = new JsonWriter(sw);
         writer.setSerializeNulls(true);
-        writer.setHtmlSafe(true);
+        writer.setHtmlSafe(false);
 
         if (indent)
             writer.setIndent("  ");
@@ -585,7 +589,7 @@ public final class GSONUtil {
         StringWriter sw = new StringWriter();
         JsonWriter writer = new JsonWriter(sw);
         writer.setSerializeNulls(true);
-        writer.setHtmlSafe(true);
+        writer.setHtmlSafe(false);
 
         if (indent)
             writer.setIndent("  ");
@@ -940,7 +944,7 @@ public final class GSONUtil {
         StringWriter sw = new StringWriter();
         JsonWriter writer = new JsonWriter(sw);
         writer.setSerializeNulls(true);
-        writer.setHtmlSafe(true);
+        writer.setHtmlSafe(false);
         if (indent)
             writer.setIndent("  ");
         else
@@ -961,6 +965,7 @@ public final class GSONUtil {
     }
 
     private static JsonWriter toJSONGenericMap(JsonWriter writer, NVGenericMap nvgm, boolean printNull, boolean printClassType) throws IOException {
+//        writer.setHtmlSafe(false);
         writer.beginObject();
         GetNameValue<?>[] values = nvgm.values();
         for (GetNameValue<?> gnv : values) {
@@ -1562,7 +1567,7 @@ public final class GSONUtil {
         StringWriter sw = new StringWriter();
         JsonWriter writer = new JsonWriter(sw);
         writer.setSerializeNulls(true);
-        writer.setHtmlSafe(true);
+        writer.setHtmlSafe(false);
         writer.setIndent("  ");
 
         writer.beginObject();
@@ -2056,7 +2061,7 @@ public final class GSONUtil {
         StringWriter sw = new StringWriter();
         JsonWriter writer = new JsonWriter(sw);
         writer.setSerializeNulls(true);
-        writer.setHtmlSafe(true);
+        writer.setHtmlSafe(false);
 
         if (indent)
             writer.setIndent("  ");
@@ -2188,7 +2193,7 @@ public final class GSONUtil {
         StringWriter sw = new StringWriter();
         JsonWriter writer = new JsonWriter(sw);
         writer.setSerializeNulls(true);
-        writer.setHtmlSafe(true);
+        writer.setHtmlSafe(false);
         writer.setIndent("  ");
 
         toJSONDynamicEnumMap(writer, dem);
@@ -2307,7 +2312,7 @@ public final class GSONUtil {
         StringWriter sw = new StringWriter();
         JsonWriter writer = new JsonWriter(sw);
         writer.setSerializeNulls(true);
-        writer.setHtmlSafe(true);
+        writer.setHtmlSafe(false);
         writer.setIndent("  ");
 
         writer.beginObject();

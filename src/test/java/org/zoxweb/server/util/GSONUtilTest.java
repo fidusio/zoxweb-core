@@ -89,7 +89,16 @@ public class GSONUtilTest {
         System.out.println(json);
         response = GSONUtil.fromJSONDefault(json, NVGenericMap.class);
 
-        System.out.println(DateUtil.DEFAULT_GMT_MILLIS.format((long)response.getValue("current_time")));
+        System.out.println((String)response.getValue("current_time"));
+    }
+
+    @Test
+    public void testSpecialChar()
+    {
+        NVGenericMap nvgm = new NVGenericMap();
+        nvgm.build("var", "<=>");
+        String json = GSONUtil.toJSONDefault(nvgm, true);
+        System.out.println(json);
     }
 
     @Test
