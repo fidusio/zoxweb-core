@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.zoxweb.shared.http.*;
 import org.zoxweb.shared.util.*;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Objects;
 
@@ -97,7 +98,11 @@ public class GSONUtilTest {
     {
         NVGenericMap nvgm = new NVGenericMap();
         nvgm.build("var", "<=>");
+        byte[] array =  new byte[]{0,1,2,3,4,5,6,7};
+        nvgm.build(new NVBlob("bin", array));
         String json = GSONUtil.toJSONDefault(nvgm, true);
+        NVGenericMap decoded = GSONUtil.fromJSONDefault(json, NVGenericMap.class);
+        assert Arrays.equals(array, decoded.getValue("bin"));
         System.out.println(json);
     }
 
@@ -132,7 +137,7 @@ public class GSONUtilTest {
 
         String json2 = GSONUtil.toJSONDefault(httpMessageConfig, true );
         System.out.println(json2);
-        json2.equals(json);
+        assert json2.equals(json);
         String jsonFromDB = GSONUtil.toJSONDefault(httpMessageConfig);
 
         System.out.println((hmci == httpMessageConfig) + " " + json.equals(jsonFromDB));

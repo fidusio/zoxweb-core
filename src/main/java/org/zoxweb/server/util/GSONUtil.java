@@ -1027,7 +1027,10 @@ public final class GSONUtil {
         } else if (gnv instanceof NamedValue) {
             toJSONNamedValue(writer, (NamedValue<?>) gnv);
         } else if (gnv instanceof NVBlob) {
-            writer.name(GNVType.toName(gnv, ':')).value(SharedBase64.encodeAsString(Base64Type.DEFAULT, (byte[]) gnv.getValue()));
+//            writer.name(GNVType.toName(gnv, ':')).value(SharedBase64.encodeAsString(Base64Type.DEFAULT, (byte[]) gnv.getValue()));
+            DataCodec<byte[], String> codec = MetaValueCodec.SINGLETON.lookupCodec(byte[].class);
+
+            writer.name(GNVType.toName(gnv, ':')).value(codec.encode((byte[])gnv.getValue()));
         } else if (gnv instanceof NVEntityReference) {
             writer.name(name);
             toJSON(writer, ((NVEntity) gnv.getValue()).getClass(), (NVEntity) gnv.getValue(), printNull, printClassType, Base64Type.DEFAULT);
@@ -1371,7 +1374,9 @@ public final class GSONUtil {
             switch (gnvType) {
                 case NVBLOB:
                     try {
-                        byte[] value = SharedBase64.decode(Base64Type.URL, jp.getAsString());
+//                        byte[] value = SharedBase64.decode(Base64Type.URL, jp.getAsString());
+                        DataCodec<byte[], String> codec = MetaValueCodec.SINGLETON.lookupCodec(byte[].class);
+                        byte[] value = codec.decode(jp.getAsString());//SharedBase64.decode(Base64Type.URL, jp.getAsString());
                         return new NVBlob(name, value);
                     } catch (Exception e) {
                         e.printStackTrace();
