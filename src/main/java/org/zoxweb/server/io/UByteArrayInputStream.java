@@ -10,8 +10,8 @@ import java.io.IOException;
 import static org.zoxweb.shared.util.Const.EMPTY_BYTE_ARRAY;
 
 public class UByteArrayInputStream
-    extends ByteArrayInputStream
-    implements CloseableType {
+        extends ByteArrayInputStream
+        implements CloseableType {
 
     public static final UByteArrayInputStream EMPTY_INPUT_STREAM = new UByteArrayInputStream(EMPTY_BYTE_ARRAY);
 
@@ -32,7 +32,6 @@ public class UByteArrayInputStream
     public UByteArrayInputStream(byte[] buf) {
         this(buf, 0, buf.length, null);
     }
-
 
 
     /**

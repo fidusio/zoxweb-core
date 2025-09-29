@@ -14,18 +14,18 @@ public class MetaValueCodec {
         DataCodec<byte[], String> dataCodec = new DataCodec<byte[], String>() {
             /**
              *
-             * @param input
-             * @return
+             * @param input as base64
+             * @return byte array
              */
             @Override
             public byte[] decode(String input) {
-                return input != null ?  SharedBase64.decode(SharedBase64.Base64Type.DEFAULT, input) : null;
+                return input != null ? SharedBase64.decode(SharedBase64.Base64Type.DEFAULT, input) : null;
             }
 
             /**
              *
-             * @param input
-             * @return
+             * @param input byte array
+             * @return String as base64
              */
             @Override
             public String encode(byte[] input) {
@@ -36,7 +36,7 @@ public class MetaValueCodec {
         codecMap.register(NVBlob.class, dataCodec);
 
 
-        codecMap.register(String.class,  new DataCodec<String, String>() {
+        codecMap.register(String.class, new DataCodec<String, String>() {
             @Override
             public String decode(String input) {
                 return input;
@@ -50,11 +50,10 @@ public class MetaValueCodec {
 
     }
 
-    public <I,V> DataCodec<I,V> lookupCodec(Object o)
-    {
+    public <I, V> DataCodec<I, V> lookupCodec(Object o) {
         Class<?> c;
-        if(o instanceof Class)
-            c = (Class<?>)o;
+        if (o instanceof Class)
+            c = (Class<?>) o;
         else
             c = o.getClass();
 

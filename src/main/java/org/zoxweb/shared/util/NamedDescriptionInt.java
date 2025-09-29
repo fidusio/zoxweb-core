@@ -1,6 +1,5 @@
 package org.zoxweb.shared.util;
 
 public interface NamedDescriptionInt
-extends SetName, SetDescription
-{
+        extends SetName, SetDescription {
 }

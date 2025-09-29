@@ -1,6 +1,5 @@
 package org.zoxweb.shared.util;
 
-public interface OutputDataDecoder<O> 
-{
-	O decode();
+public interface OutputDataDecoder<O> {
+    O decode();
 }

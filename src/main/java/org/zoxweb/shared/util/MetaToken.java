@@ -22,113 +22,92 @@ import org.zoxweb.shared.security.model.SecurityModel;
  * @author mzebib
  *
  */
-public enum MetaToken 
-	implements GetName
-{
-	// 	Name of the attribute.
-	NAME("name"),
-	//	Description of the attribute.
-	DESCRIPTION("description"),
-	// 	Value of the attribute.
-	VALUE("value"),
-	// 	Reference ID of the attribute.
-	REFERENCE_ID("reference_id"),
-	// Global ID of the attributes
-	GUID(SecurityModel.GUID),
-	SUBJECT_GUID(SecurityModel.SUBJECT_GUID),
-	// 	Value filter of the attribute.
-	VALUE_FILTER("value_filter"),
-	// 	Attributes list or collection.
-	ATTRIBUTES("attributes"),
-	// 	Class type of the attribute.
-	CLASS_TYPE("class_type"),
-	// 	Fixed property of the attribute.
-	IS_FIXED("is_fixed"),
-	// 	The collection name can be table name for SQL databases or collection name for NoSQL databases.
-	COLLECTION_NAME("collection_name"),
-	// Json content to wrap a json object
-	JSON_CONTENT("json_content"),
-	// Canonical ID
-	CANONICAL_ID("canonical_id"),
-	// Domain ID
-	DOMAIN_ID("domain_id"),
-	// Account ID
-	ACCOUNT_ID("account_id"),
-	//	Array property of the attribute.
-	IS_ARRAY("is_array"),
-	// RelationOperator
-	RELATIONAL_OPERATOR("relational_operator"),
-	// LogicalOperator
-	LOGICAL_OPERATOR("logical_operator"),
-	//Values
-	VALUES("values"),
-	// Enums
-	ENUMS("enums"),
-	// Ignore case 
-	IGNORE_CASE("ignore_case"),
-	// is static
-	STATIC("static"),
-	//	Class ID
-	CLASS_ID("class_id"),
-	// SubjectID token
-	SUBJECT_ID(SecurityModel.SUBJECT_ID),
-	//	Recursive
-	RECURSIVE("recursive"),
-	// meta type
-	META_TYPE("meta_type"),
-	// enum type (enum class name)
-	ENUM_TYPE("enum_type"),
-	UNIT("unit"),
-	RESOURCE_TYPE("resource_type"),
-	RESOURCE_GUID(SecurityModel.RESOURCE_GUID),
-	REFERENCE_TYPE("reference_type"),
-	REFERENCE_GUID(SecurityModel.REFERENCE_GUID),
-	
-	;
-	
-	private final  String name;
-	
-	MetaToken(String name)
-    {
-		this.name = name;
-	}
+public enum MetaToken
+        implements GetName {
+    // 	Name of the attribute.
+    NAME("name"),
+    //	Description of the attribute.
+    DESCRIPTION("description"),
+    // 	Value of the attribute.
+    VALUE("value"),
+    // 	Reference ID of the attribute.
+    REFERENCE_ID("reference_id"),
+    // Global ID of the attributes
+    GUID(SecurityModel.GUID),
+    SUBJECT_GUID(SecurityModel.SUBJECT_GUID),
+    // 	Value filter of the attribute.
+    VALUE_FILTER("value_filter"),
+    // 	Attributes list or collection.
+    ATTRIBUTES("attributes"),
+    // 	Class type of the attribute.
+    CLASS_TYPE("class_type"),
+    // 	Fixed property of the attribute.
+    IS_FIXED("is_fixed"),
+    // 	The collection name can be table name for SQL databases or collection name for NoSQL databases.
+    COLLECTION_NAME("collection_name"),
+    // Json content to wrap a json object
+    JSON_CONTENT("json_content"),
+    // Canonical ID
+    CANONICAL_ID("canonical_id"),
+    // Domain ID
+    DOMAIN_ID("domain_id"),
+    // Account ID
+    ACCOUNT_ID("account_id"),
+    //	Array property of the attribute.
+    IS_ARRAY("is_array"),
+    // RelationOperator
+    RELATIONAL_OPERATOR("relational_operator"),
+    // LogicalOperator
+    LOGICAL_OPERATOR("logical_operator"),
+    //Values
+    VALUES("values"),
+    // Enums
+    ENUMS("enums"),
+    // Ignore case
+    IGNORE_CASE("ignore_case"),
+    // is static
+    STATIC("static"),
+    //	Class ID
+    CLASS_ID("class_id"),
+    // SubjectID token
+    SUBJECT_ID(SecurityModel.SUBJECT_ID),
+    //	Recursive
+    RECURSIVE("recursive"),
+    // meta type
+    META_TYPE("meta_type"),
+    // enum type (enum class name)
+    ENUM_TYPE("enum_type"),
+    UNIT("unit"),
+    RESOURCE_TYPE("resource_type"),
+    RESOURCE_GUID(SecurityModel.RESOURCE_GUID),
+    REFERENCE_TYPE("reference_type"),
+    REFERENCE_GUID(SecurityModel.REFERENCE_GUID),
+    ;
 
-	@Override
-	public String getName()
-    {
-		return name;
-	}
+    private final String name;
+
+    MetaToken(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
 
 
-	public static boolean isPrimitiveArray(NVBase<?> nvb)
-	{
-		if (nvb instanceof NVStringList || nvb instanceof NVIntList ||
-			nvb instanceof NVLongList || nvb instanceof NVFloatList ||
-			nvb instanceof NVDoubleList || nvb instanceof NVEnumList)
-		{
-			return true;
-		}
-		return false;
-	}
+    public static boolean isPrimitiveArray(NVBase<?> nvb) {
+        return nvb instanceof NVStringList || nvb instanceof NVIntList ||
+                nvb instanceof NVLongList || nvb instanceof NVFloatList ||
+                nvb instanceof NVDoubleList || nvb instanceof NVEnumList;
+    }
 
-	public static boolean isNVEntityArray(NVBase<?> nvb)
-	{
-		if (nvb instanceof NVEntityReferenceList || nvb instanceof NVEntityGetNameMap || nvb instanceof NVEntityReferenceIDMap )
-		{
-			return true;
-		}
+    public static boolean isNVEntityArray(NVBase<?> nvb) {
+        return nvb instanceof NVEntityReferenceList || nvb instanceof NVEntityGetNameMap || nvb instanceof NVEntityReferenceIDMap;
+    }
 
-		return false;
-	}
-
-	public static boolean isArrayValuesString(NVBase<?> nvb)
-	{
-		if (nvb instanceof NVPairList || nvb instanceof NVPairGetNameMap || nvb instanceof NVGetNameValueList)
-		{
-			return true;
-		}
-
-		return false;
-	}
+    public static boolean isArrayValuesString(NVBase<?> nvb) {
+        return nvb instanceof NVPairList || nvb instanceof NVPairGetNameMap || nvb instanceof NVGetNameValueList;
+    }
 
 }

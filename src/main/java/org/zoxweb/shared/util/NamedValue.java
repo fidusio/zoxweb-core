@@ -4,7 +4,8 @@ import java.io.Closeable;
 
 public class NamedValue<V>
         extends NVBase<V>
-        implements GetNameValue<V>,
+        implements
+//        GetNameValue<V>,
         GetNVProperties,
         AutoCloseable {
 
@@ -13,60 +14,24 @@ public class NamedValue<V>
     public NamedValue() {
     }
 
+    public NamedValue(GetNameValue<V> gnv) {
+        super(gnv);
+    }
+
 
     public NamedValue(String name) {
         this.name = name;
     }
 
     public NamedValue(Enum<?> name, V value) {
-        this.name = name instanceof GetName ? ((GetName) name).getName() : "" + name;
-        this.value = value;
+        super(name instanceof GetName ? ((GetName) name).getName() : "" + name, value);
     }
 
 
     public NamedValue(String name, V value) {
-        this.name = name;
-        this.value = value;
+        super(name, value);
     }
 
-    /**
-     * @return the name of the object
-     */
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * Returns the value.
-     *
-     * @return typed value
-     */
-    @Override
-    public V getValue() {
-        return value;
-    }
-
-//    /**
-//     * Set name property.
-//     *
-//     * @param name of the instance
-//     */
-//
-//    public void setName(String name)
-//    {
-//        this.name = name;
-//
-//    }
-//
-//    /**
-//     * Sets the value.
-//     *
-//     * @param value value of the instance
-//     */
-//    public void setValue(V value) {
-//        this.value = value;
-//    }
 
     /**
      * @return the properties of the instance
