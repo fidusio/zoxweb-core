@@ -217,10 +217,6 @@ public class SharedBase64 {
             bt = detectType(data, index, len);
         }
 
-//	    if(Base64Type.DEFAULT == bt && len % 4 != 0)
-//	    	throw new IllegalArgumentException("Invalid length not divisible by 4");
-
-
         int paddings = 0;
         if (data[len - 1] == '=') {
             paddings++;
@@ -387,15 +383,6 @@ public class SharedBase64 {
                 olen = 4 * (len / 3) + (n == 0 ? 0 : n + 1);
                 break;
         }
-//	    if (bt == Base64Type.URL || bt == Base64Type.DEFAULT_NP)
-//	    {
-//	    	int n = len % 3;
-//	    	olen = 4 * (len / 3) + (n == 0 ? 0 : n + 1);
-//	    }
-//	    else
-//	    {
-//	    	 olen = 4 * ((len + 2) / 3);
-//	    }
 
         byte[] bytes = new byte[olen];
 

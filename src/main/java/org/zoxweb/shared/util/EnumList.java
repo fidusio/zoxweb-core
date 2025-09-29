@@ -23,65 +23,58 @@ import java.io.Serializable;
  */
 @SuppressWarnings("serial")
 public class EnumList
-    implements Serializable
-{
+        implements Serializable {
 
-	private String enumClassName;
-	private Enum<?>[] enumList;
-	
-	/**
-	 * The default constructor.
-	 */
-	public EnumList()
-    {
+    private String enumClassName;
+    private Enum<?>[] enumList;
 
-	}
-	
-	/**
-	 * This constructor initializes EnumList object based on name and list.
-	 * @param name
-	 * @param list
-	 */
-	public EnumList(String name, Enum<?>[] list)
-    {
-		setEnumClassName(name);
-		setEnumList(list);
-	}
-	
-	/**
-	 * Returns the enum class name.
-	 * @return enaum class name
-	 */
-	public final String getEnumClassName()
-    {
-		return enumClassName;
-	}
-	
-	/**
-	 * Sets the enum class name.
-	 * @param enumClassName
-	 */
-	public void setEnumClassName(String enumClassName)
-    {
-		this.enumClassName = enumClassName;
-	}
-	
-	/**
-	 * Returns an enum list.
-	 * @return all enums
-	 */
-	public final Enum<?>[] getEnumList()
-    {
-		return enumList;
-	}
-	
-	/**
-	 * Sets an enum list.
-	 * @param enumList 
-	 */
-	public void setEnumList(Enum<?>[] enumList)
-    {
-		this.enumList = enumList;
-	}
-	
+    /**
+     * The default constructor.
+     */
+    public EnumList() {
+
+    }
+
+    /**
+     * This constructor initializes EnumList object based on name and list.
+     * @param name
+     * @param list
+     */
+    public EnumList(String name, Enum<?>[] list) {
+        setEnumClassName(name);
+        setEnumList(list);
+    }
+
+    /**
+     * Returns the enum class name.
+     * @return enaum class name
+     */
+    public final String getEnumClassName() {
+        return enumClassName;
+    }
+
+    /**
+     * Sets the enum class name.
+     * @param enumClassName
+     */
+    public void setEnumClassName(String enumClassName) {
+        this.enumClassName = enumClassName;
+    }
+
+    /**
+     * Returns an enum list.
+     * @return all enums
+     */
+    public final Enum<?>[] getEnumList() {
+        return enumList;
+    }
+
+    /**
+     * Sets an enum list.
+     * @param enumList
+     */
+    public void setEnumList(Enum<?>[] enumList) {
+        this.enumList = enumList;
+    }
+
 }

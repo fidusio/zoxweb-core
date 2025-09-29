@@ -19,12 +19,10 @@ package org.zoxweb.shared.util;
  * The unique property interface.
  * @author mzebib
  */
-public interface IsUnique
-{
-	/**
-	 * Check if value is unique within its set.
-	 * @return true if unique
-	 */
-	boolean isUnique();
-
+public interface IsUnique {
+    /**
+     * Check if value is unique within its set.
+     * @return true if unique
+     */
+    boolean isUnique();
 }

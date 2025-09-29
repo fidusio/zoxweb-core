@@ -16,15 +16,13 @@
 package org.zoxweb.shared.util;
 
 public interface DomainInfo
-    extends ReferenceID<String>, SetName, SetDescription, DomainID<String>, CanonicalID
-{
+        extends ReferenceID<String>, SetName, SetDescription, DomainID<String>, CanonicalID {
 
-	boolean addNVConfigEntity(NVConfigEntity nvce);
-	
-	boolean deleteNVConfigEntity(NVConfigEntity nvce);
-	
-	NVConfigEntity lookup(String byName);
-	
-	NVConfigEntity[] getAllNVConfigEntity();
+    boolean addNVConfigEntity(NVConfigEntity nvce);
 
+    boolean deleteNVConfigEntity(NVConfigEntity nvce);
+
+    NVConfigEntity lookup(String byName);
+
+    NVConfigEntity[] getAllNVConfigEntity();
 }

@@ -3,14 +3,13 @@ package org.zoxweb.shared.util;
 import java.util.Arrays;
 
 public class ArrayQueue<O>
-implements SimpleQueueInterface<O>{
+        implements SimpleQueueInterface<O> {
     protected volatile Object[] array;
     protected int head = 0, end = 0;
     protected int size = 0;
-    protected long totalDequeued=0, totalQueued=0;
+    protected long totalDequeued = 0, totalQueued = 0;
 
-    public ArrayQueue(int capacity)
-    {
+    public ArrayQueue(int capacity) {
         array = new Object[capacity];
     }
 
@@ -23,53 +22,45 @@ implements SimpleQueueInterface<O>{
         Arrays.fill(array, null);
     }
 
-    public int size()
-    {
+    public int size() {
         return size;
     }
 
-    public synchronized boolean queue(O toQueue)
-    {
-        if(toQueue == null)
+    public synchronized boolean queue(O toQueue) {
+        if (toQueue == null)
             throw new NullPointerException("Can't queue a null object");
         return int_queue(toQueue);
     }
 
 
-    protected  boolean int_queue(O toQueue)
-    {
+    protected boolean int_queue(O toQueue) {
 
         if (size != array.length) {
             if (end == array.length) {
                 end = 0;
             }
-         array[end] = toQueue;
-         end++;
-         size++;
-         totalQueued++;
-         return true;
+            array[end] = toQueue;
+            end++;
+            size++;
+            totalQueued++;
+            return true;
         }
 
         return false;
     }
 
 
-
-
-    public synchronized O dequeue()
-    {
+    public synchronized O dequeue() {
         return int_dequeue();
     }
+
     @SuppressWarnings("unchecked")
-    protected O int_dequeue()
-    {
-        if(size != 0)
-        {
-            O ret = (O)array[head];
+    protected O int_dequeue() {
+        if (size != 0) {
+            O ret = (O) array[head];
             array[head] = null;
             head++;
-            if(head == array.length)
-            {
+            if (head == array.length) {
                 head = 0;
             }
             size--;
@@ -79,7 +70,6 @@ implements SimpleQueueInterface<O>{
 
         return null;
     }
-
 
 
     @Override
@@ -108,10 +98,7 @@ implements SimpleQueueInterface<O>{
     }
 
 
-
-
-    public String toString()
-    {
+    public String toString() {
         return "[" + SharedUtil.toCanonicalID(',', array.length, head, end, size()) + "]";
     }
 

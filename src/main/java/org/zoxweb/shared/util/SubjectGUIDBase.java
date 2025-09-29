@@ -1,6 +1,5 @@
 package org.zoxweb.shared.util;
 
-public interface SubjectGUIDBase<T>
-{
+public interface SubjectGUIDBase<T> {
     T getSubjectGUID();
 }

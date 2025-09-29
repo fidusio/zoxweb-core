@@ -19,20 +19,19 @@ package org.zoxweb.shared.util;
  *
  * @param <T>
  */
-public interface LifeCycleMonitor<T>
-{
+public interface LifeCycleMonitor<T> {
     /**
      *
      * @param t
      * @return
      */
-	boolean created(T t);
+    boolean created(T t);
 
     /**
      *
      * @param t
      * @return
      */
-	boolean terminated(T t);
+    boolean terminated(T t);
 
 }

@@ -18,9 +18,6 @@ package org.zoxweb.shared.util;
 import java.util.List;
 
 public interface CRUDNVEntityList
-    extends CRUDEvent
-{
-
-	public List<NVEntity> getNVEntityList();
-
+        extends CRUDEvent {
+    List<NVEntity> getNVEntityList();
 }

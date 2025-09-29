@@ -5,10 +5,9 @@ package org.zoxweb.shared.util;
  * @author mnael
  *
  */
-public interface UpdateOnSelect 
-{
-  /**
-   * Invoked to notify the implementing class of a selection update
-   */
-  void updateOnSelect();
+public interface UpdateOnSelect {
+    /**
+     * Invoked to notify the implementing class of a selection update
+     */
+    void updateOnSelect();
 }

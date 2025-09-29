@@ -16,41 +16,35 @@
 package org.zoxweb.shared.util;
 
 public enum DisplayUnit
-    implements GetName
-{
+        implements GetName {
 
-	EM("EM"),
-	PERCENT("%"),
-	PIXEL("px")
-	
-	;
+    EM("EM"),
+    PERCENT("%"),
+    PIXEL("px");
 
-	private String name;
-	
-	DisplayUnit(String name)
-    {
-		this.name = name;
-	}
-	
-	@Override
-	public String getName()
-    {
-		return name;
-	}
+    private final String name;
+
+    DisplayUnit(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
 
 
-	public static DisplayUnit parseUnit(String str) {
-		if (!SUS.isEmpty(str)) {
-			str = str.toLowerCase();
+    public static DisplayUnit parseUnit(String str) {
+        if (!SUS.isEmpty(str)) {
+            str = str.toLowerCase();
 
-			for (DisplayUnit unit : values()) {
-				if (str.endsWith(unit.getName())) {
-					return unit;
-				}
-			}
-		}
-
-		return null;
-	}
+            for (DisplayUnit unit : values()) {
+                if (str.endsWith(unit.getName())) {
+                    return unit;
+                }
+            }
+        }
+        return null;
+    }
 
 }

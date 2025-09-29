@@ -19,24 +19,24 @@ package org.zoxweb.shared.util;
  *
  * @param <V>
  */
-public interface BytesValue<V>
-{
+public interface BytesValue<V> {
     /**
      *
      * @param v to be converted
      * @return byte array
      */
-	byte[] toBytes(V v);
-	
-	//byte[] toBytes(V v, byte[] retBuffer, int retStartIndex);
+    byte[] toBytes(V v);
 
-	byte[] toBytes(byte[] retBuffer, int retStartIndex, @SuppressWarnings("unchecked") V ...v);
+    //byte[] toBytes(V v, byte[] retBuffer, int retStartIndex);
+
+    byte[] toBytes(byte[] retBuffer, int retStartIndex, @SuppressWarnings("unchecked") V... v);
+
     /**
      *
      * @param bytes
      * @return
      */
-	V toValue(byte[] bytes);
+    V toValue(byte[] bytes);
 
     /**
      *
@@ -45,388 +45,298 @@ public interface BytesValue<V>
      * @param length
      * @return
      */
-	V toValue(byte[] bytes, int offset, int length);
-	V toValue(byte[] bytes, int offset);
+    V toValue(byte[] bytes, int offset, int length);
+
+    V toValue(byte[] bytes, int offset);
 
 
+    BytesValue<Short> SHORT = new BytesValue<Short>() {
+        public byte[] toBytes(Short in) {
+
+            return toBytes(null, 0, in);
+        }
+
+        public byte[] toBytes(byte[] retBuffer, int retStartIndex, Short... ins) {
+            int size = Short.SIZE / Byte.SIZE;
+            if (retBuffer == null) {
+                retBuffer = new byte[size * ins.length];
+                retStartIndex = 0;
+            }
 
 
-	public static final BytesValue<Short> SHORT = new  BytesValue<Short>()
-	{
-		public byte[] toBytes(Short in)
-		{
-			
-			return toBytes(null, 0, in);
-		}
-		
-		public byte[] toBytes(byte[] retBuffer, int retStartIndex, Short ...ins)
-		{			
-			int size = Short.SIZE/Byte.SIZE;
-			if (retBuffer == null)
-			{
-				retBuffer = new byte[size*ins.length];
-				retStartIndex = 0;
-			}
+            for (int j = 0; j < ins.length; j++) {
+                int val = ins[j].intValue();
+                int index = retStartIndex + j * size;
+                for (int i = (index + size); i > index; i--) {
+                    retBuffer[i - 1] = (byte) val;
+                    val = val >> 8;
+                }
+            }
 
-			
-			for (int j=0; j < ins.length; j++)
-			{
-				int val = ins[j].intValue();
-				int index = retStartIndex + j*size;
-				for (int i = (index + size) ; i > index; i--)
-				{
-					retBuffer[i-1] = (byte)val;
-					val = val >> 8;
-				}
-			}
+            return retBuffer;
+        }
 
-			return retBuffer;
-		}
+        public Short toValue(byte[] bytes, int offset, int length) {
 
-		public Short toValue(byte[] bytes, int offset, int length)
-		{
-//			int value = 0;
-//			length += offset;
-//			for (int i = offset; i < length; i++)
-//			{
-//				value = (value << 8) | (buffer[i] & 0xff);
-//			}
-//
-//			return (short)value;
-			return LONG.toValue(bytes, offset, length).shortValue();
-		}
-		public Short toValue(byte[] bytes, int offset)
-		{
-			return LONG.toValue(bytes, offset, Short.BYTES).shortValue();
-		}
+            return LONG.toValue(bytes, offset, length).shortValue();
+        }
 
-		@Override
-		public Short toValue(byte[] bytes)
-		{
-			return LONG.toValue(bytes, 0, Short.BYTES).shortValue();
-//			int i = (bytes[0] & 0xFF) << 8 | (short) (bytes[1] & 0xFF);
-//			return (short)i;
-		}
-	};
+        public Short toValue(byte[] bytes, int offset) {
+            return LONG.toValue(bytes, offset, Short.BYTES).shortValue();
+        }
 
-	
-	public static final BytesValue<Integer> INT = new  BytesValue<Integer>()
-	{
-		public byte[] toBytes(Integer in)
-		{
-			return toBytes(null, 0, in);
-		}
-		
-		public Integer toValue(byte bytes[], int offset, int length)
-		{
-//			int value = 0;
-//			length += offset;
-//			for (int i = offset; i < length; i++)
-//			{
-//				value = (value << 8) | (buffer[i] & 0xff);
-//			}
-			return LONG.toValue(bytes, offset, length).intValue();
-		}
+        @Override
+        public Short toValue(byte[] bytes) {
+            return LONG.toValue(bytes, 0, Short.BYTES).shortValue();
 
-		public Integer toValue(byte[] bytes, int offset)
-		{
-			return LONG.toValue(bytes, offset, Integer.BYTES).intValue();
-		}
-
-		@Override
-		public Integer toValue(byte[] bytes) 
-		{
-			return LONG.toValue(bytes, 0, Integer.BYTES).intValue();
-		}
-
-		@Override
-		public byte[] toBytes(byte[] retBuffer, int retStartIndex, Integer ...ins) {
-			
-			int size = Integer.SIZE/Byte.SIZE;
-			if (retBuffer == null)
-			{
-				retBuffer = new byte[size*ins.length];
-				retStartIndex = 0;
-			}
-
-			
-			for (int j=0; j < ins.length; j++)
-			{
-				int val = ins[j];
-				int index = retStartIndex + j*size;
-				for (int i = (index + size) ; i > index; i--)
-				{
-					retBuffer[i-1] = (byte)val;
-					val = val >> 8;
-				}
-			}
-
-			return retBuffer;
-		}
-	};
-	
-	public static final BytesValue<Long> LONG = new BytesValue<Long>()
-	{
-		public byte[] toBytes(Long in)
-		{			
-			return toBytes(null, 0, in);
-		}
-		
-		
-
-		
-		public byte[] toBytes(byte[] retBuffer, int retStartIndex, Long ...ins) {
-			
-			int size = Long.SIZE/Byte.SIZE;
-			if (retBuffer == null)
-			{
-				retBuffer = new byte[size*ins.length];
-				retStartIndex = 0;
-			}
-			
-			for (int j=0; j < ins.length; j++)
-			{
-				long val = ins[j];
-				int index = retStartIndex + j*size;
-				for (int i = (index + size) ; i > index; i--)
-				{
-					retBuffer[i-1] = (byte)val;
-					val = val >> 8;
-				}
-			}
-
-			return retBuffer;
-		}
-
-		public Long toValue(byte[] buffer, int offset)
-		{
-			return toValue(buffer, offset, Long.BYTES);
-		}
-		
-
-		/**
-		 * @param bytes array
-		 * @param offset
-		 * @param length
-		 * @return Long converted value
-		 */
-		public Long toValue(byte[] bytes, int offset, int length)
-		{
-			long value = 0;
-			length += offset;
-			for (int i = offset; i < length; i++)
-			{
-				value = (value << 8) | (bytes[i] & 0xff);
-			}
-
-			return value;
-		}
-
-		@Override
-		public Long toValue(byte[] bytes)
-		{
-
-			//return toValue(bytes, 0, bytes.length);
-//			long ret = (bytes[0] & 0xFF) | (bytes[1] & 0xFF)  << 8 | (bytes[2] & 0xFF)  << 8 | (bytes[3] & 0xFF) << 8|
-//					   (bytes[4] & 0xFF) << 8 | (bytes[5] & 0xFF) << 8 | (bytes[6] & 0xFF)  << 8 | (bytes[7] & 0xFF) << 8;
-			long ret = bytes[0] & 0xFF;
-			ret  = ret << 8 | (bytes[1] & 0xFF);
-			ret  = ret << 8 | (bytes[2] & 0xFF);
-			ret  = ret << 8 | (bytes[3] & 0xFF);
-			ret  = ret << 8 | (bytes[4] & 0xFF);
-			ret  = ret << 8 | (bytes[5] & 0xFF);
-			ret  = ret << 8 | (bytes[6] & 0xFF);
-			ret  = ret << 8 | (bytes[7] & 0xFF);
-
-			return ret;
-		}
-
-	};
-	
-	
-	public static final BytesValue<Float> FLOAT = new BytesValue<Float>()
-	{
-		public byte[] toBytes(Float in) {
-			return toBytes(null, 0, in);
-		}
-
-		/**
-		 * @param bytes
-		 * @param offset
-		 * @param length
-		 * @return float value
-		 */
-		public Float toValue(byte bytes[], int offset, int length) {
-			int value = 0;
-			length += offset;
-			for (int i = offset; i < length; i++)
-			{
-				 value = (value << 8) + (bytes[i] & 0xff);
-			}
-
-			return Float.intBitsToFloat(value);
-		}
-
-		public Float toValue(byte[] buffer, int offset)
-		{
-			return toValue(buffer, offset, Float.BYTES);
-		}
-		
-		public Float toValue(byte[] bytes)
-		{
-			return toValue(bytes, 0, bytes.length);
-		}
-
-		@Override
-		public byte[] toBytes(byte[] retBuffer, int retStartIndex, Float ...ins) {
-
-			int size = Float.SIZE/Byte.SIZE;
-			if (retBuffer == null)
-			{
-				retBuffer = new byte[size*ins.length];
-				retStartIndex = 0;
-			}
-
-			
-			for (int j=0; j < ins.length; j++)
-			{
-				int val = Float.floatToIntBits(ins[j]);
-				int index = retStartIndex + j*size;
-				for (int i = (index + size) ; i > index; i--)
-				{
-					retBuffer[i-1] = (byte)val;
-					val = val >> 8;
-				}
-			}
-
-			return retBuffer;
-			
-			
-			
-		}
-
-	};
-
-	public static final BytesValue<Double> DOUBLE = new BytesValue<Double>()
-	{
-		public byte[] toBytes(Double in)
-		{
-//			long val = Double.doubleToLongBits(in);
-//			byte buffer[] = new byte[Double.SIZE/Byte.SIZE];
-//
-//			for (int i = buffer.length; i > 0; i--)
-//			{
-//				buffer[i-1] = (byte)val;
-//				val = val >> 8;
-//			}
-//
-//			return buffer;
-			return toBytes(null, 0, in);
-		}
-		
-		@Override
-		public byte[] toBytes(byte[] retBuffer, int retStartIndex, Double ...ins) {
-//			// TODO Auto-generated method stub
-//			long val = Double.doubleToLongBits(in);
-//			int size = Double.SIZE/Byte.SIZE;
-//			if (retBuffer == null)
-//			{
-//				retBuffer = new byte[size];
-//			}
-//
-//			for (int i = retStartIndex + size; i > retStartIndex; i--)
-//			{
-//				retBuffer[i-1] = (byte)val;
-//				val = val >> 8;
-//			}
-//
-//			return retBuffer;
-			
-			
-			int size = Double.SIZE/Byte.SIZE;
-			if (retBuffer == null)
-			{
-				retBuffer = new byte[size*ins.length];
-				retStartIndex = 0;
-			}
-
-			
-			for (int j=0; j < ins.length; j++)
-			{
-				long val = Double.doubleToLongBits(ins[j]);
-				int index = retStartIndex + j*size;
-				for (int i = (index + size) ; i > index; i--)
-				{
-					retBuffer[i-1] = (byte)val;
-					val = val >> 8;
-				}
-			}
-
-			return retBuffer;
-		}
+        }
+    };
 
 
-		public Double toValue(byte[] buffer, int offset)
-		{
-			return toValue(buffer, offset, Double.BYTES);
-		}
-	
-		public Double toValue(byte bytes[], int offset, int length)
-		{
-			long value = 0;
+    BytesValue<Integer> INT = new BytesValue<Integer>() {
+        public byte[] toBytes(Integer in) {
+            return toBytes(null, 0, in);
+        }
 
-			length += offset;
-			for (int i = offset; i < length; i++)
-			{
-				 value = (value << 8) + (bytes[i] & 0xff);
-			}
+        public Integer toValue(byte[] bytes, int offset, int length) {
 
-			return Double.longBitsToDouble(value);
-		}
-		
-		public Double toValue(byte[] bytes)
-		{
-			return toValue(bytes, 0, bytes.length);
-		}
+            return LONG.toValue(bytes, offset, length).intValue();
+        }
 
-	};
+        public Integer toValue(byte[] bytes, int offset) {
+            return LONG.toValue(bytes, offset, Integer.BYTES).intValue();
+        }
 
-	public static final BytesValue<String> STRING = new BytesValue<String>()
-	{
+        @Override
+        public Integer toValue(byte[] bytes) {
+            return LONG.toValue(bytes, 0, Integer.BYTES).intValue();
+        }
+
+        @Override
+        public byte[] toBytes(byte[] retBuffer, int retStartIndex, Integer... ins) {
+
+            int size = Integer.SIZE / Byte.SIZE;
+            if (retBuffer == null) {
+                retBuffer = new byte[size * ins.length];
+                retStartIndex = 0;
+            }
 
 
-		@Override
-		public byte[] toBytes(String s) {
-			return SharedStringUtil.getBytes(s);
-		}
+            for (int j = 0; j < ins.length; j++) {
+                int val = ins[j];
+                int index = retStartIndex + j * size;
+                for (int i = (index + size); i > index; i--) {
+                    retBuffer[i - 1] = (byte) val;
+                    val = val >> 8;
+                }
+            }
 
-		@Override
-		public byte[] toBytes(byte[] retBuffer, int retStartIndex, String... v) {
-			for (String str : v)
-			{
-				byte toAdd[] = toBytes(str);
-				for(int i = 0; i < toAdd.length; i++)
-				{
-					retBuffer[i+retStartIndex] = toAdd[i];
-				}
-				retStartIndex += toAdd.length;
-			}
-			return retBuffer;
-		}
+            return retBuffer;
+        }
+    };
 
-		@Override
-		public String toValue(byte[] bytes) {
-			return SharedStringUtil.toString(bytes);
-		}
-		public String toValue(byte[] buffer, int offset)
-		{
-			throw new IllegalArgumentException("Not supported");
+    BytesValue<Long> LONG = new BytesValue<Long>() {
+        public byte[] toBytes(Long in) {
+            return toBytes(null, 0, in);
+        }
 
-		}
 
-		@Override
-		public String toValue(byte[] bytes, int offset, int length) {
-			return SharedStringUtil.toString(bytes, offset, length);
-		}
-	};
+        public byte[] toBytes(byte[] retBuffer, int retStartIndex, Long... ins) {
+
+            int size = Long.SIZE / Byte.SIZE;
+            if (retBuffer == null) {
+                retBuffer = new byte[size * ins.length];
+                retStartIndex = 0;
+            }
+
+            for (int j = 0; j < ins.length; j++) {
+                long val = ins[j];
+                int index = retStartIndex + j * size;
+                for (int i = (index + size); i > index; i--) {
+                    retBuffer[i - 1] = (byte) val;
+                    val = val >> 8;
+                }
+            }
+
+            return retBuffer;
+        }
+
+        public Long toValue(byte[] buffer, int offset) {
+            return toValue(buffer, offset, Long.BYTES);
+        }
+
+
+        /**
+         * @param bytes array
+         * @param offset
+         * @param length
+         * @return Long converted value
+         */
+        public Long toValue(byte[] bytes, int offset, int length) {
+            long value = 0;
+            length += offset;
+            for (int i = offset; i < length; i++) {
+                value = (value << 8) | (bytes[i] & 0xff);
+            }
+
+            return value;
+        }
+
+        @Override
+        public Long toValue(byte[] bytes) {
+            long ret = bytes[0] & 0xFF;
+            ret = ret << 8 | (bytes[1] & 0xFF);
+            ret = ret << 8 | (bytes[2] & 0xFF);
+            ret = ret << 8 | (bytes[3] & 0xFF);
+            ret = ret << 8 | (bytes[4] & 0xFF);
+            ret = ret << 8 | (bytes[5] & 0xFF);
+            ret = ret << 8 | (bytes[6] & 0xFF);
+            ret = ret << 8 | (bytes[7] & 0xFF);
+
+            return ret;
+        }
+
+    };
+
+
+    BytesValue<Float> FLOAT = new BytesValue<Float>() {
+        public byte[] toBytes(Float in) {
+            return toBytes(null, 0, in);
+        }
+
+        /**
+         * @param bytes
+         * @param offset
+         * @param length
+         * @return float value
+         */
+        public Float toValue(byte[] bytes, int offset, int length) {
+            int value = 0;
+            length += offset;
+            for (int i = offset; i < length; i++) {
+                value = (value << 8) + (bytes[i] & 0xff);
+            }
+
+            return Float.intBitsToFloat(value);
+        }
+
+        public Float toValue(byte[] buffer, int offset) {
+            return toValue(buffer, offset, Float.BYTES);
+        }
+
+        public Float toValue(byte[] bytes) {
+            return toValue(bytes, 0, bytes.length);
+        }
+
+        @Override
+        public byte[] toBytes(byte[] retBuffer, int retStartIndex, Float... ins) {
+
+            int size = Float.SIZE / Byte.SIZE;
+            if (retBuffer == null) {
+                retBuffer = new byte[size * ins.length];
+                retStartIndex = 0;
+            }
+
+
+            for (int j = 0; j < ins.length; j++) {
+                int val = Float.floatToIntBits(ins[j]);
+                int index = retStartIndex + j * size;
+                for (int i = (index + size); i > index; i--) {
+                    retBuffer[i - 1] = (byte) val;
+                    val = val >> 8;
+                }
+            }
+
+            return retBuffer;
+
+
+        }
+
+    };
+
+    BytesValue<Double> DOUBLE = new BytesValue<Double>() {
+        public byte[] toBytes(Double in) {
+            return toBytes(null, 0, in);
+        }
+
+        @Override
+        public byte[] toBytes(byte[] retBuffer, int retStartIndex, Double... ins) {
+
+
+            int size = Double.SIZE / Byte.SIZE;
+            if (retBuffer == null) {
+                retBuffer = new byte[size * ins.length];
+                retStartIndex = 0;
+            }
+
+
+            for (int j = 0; j < ins.length; j++) {
+                long val = Double.doubleToLongBits(ins[j]);
+                int index = retStartIndex + j * size;
+                for (int i = (index + size); i > index; i--) {
+                    retBuffer[i - 1] = (byte) val;
+                    val = val >> 8;
+                }
+            }
+
+            return retBuffer;
+        }
+
+
+        public Double toValue(byte[] buffer, int offset) {
+            return toValue(buffer, offset, Double.BYTES);
+        }
+
+        public Double toValue(byte[] bytes, int offset, int length) {
+            long value = 0;
+
+            length += offset;
+            for (int i = offset; i < length; i++) {
+                value = (value << 8) + (bytes[i] & 0xff);
+            }
+
+            return Double.longBitsToDouble(value);
+        }
+
+        public Double toValue(byte[] bytes) {
+            return toValue(bytes, 0, bytes.length);
+        }
+
+    };
+
+    BytesValue<String> STRING = new BytesValue<String>() {
+
+
+        @Override
+        public byte[] toBytes(String s) {
+            return SharedStringUtil.getBytes(s);
+        }
+
+        @Override
+        public byte[] toBytes(byte[] retBuffer, int retStartIndex, String... v) {
+            for (String str : v) {
+                byte[] toAdd = toBytes(str);
+                for (int i = 0; i < toAdd.length; i++) {
+                    retBuffer[i + retStartIndex] = toAdd[i];
+                }
+                retStartIndex += toAdd.length;
+            }
+            return retBuffer;
+        }
+
+        @Override
+        public String toValue(byte[] bytes) {
+            return SharedStringUtil.toString(bytes);
+        }
+
+        public String toValue(byte[] buffer, int offset) {
+            throw new IllegalArgumentException("Not supported");
+
+        }
+
+        @Override
+        public String toValue(byte[] bytes, int offset, int length) {
+            return SharedStringUtil.toString(bytes, offset, length);
+        }
+    };
 }

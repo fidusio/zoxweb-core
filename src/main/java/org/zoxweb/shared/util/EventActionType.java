@@ -20,11 +20,10 @@ package org.zoxweb.shared.util;
  * used in event notification, database action, or any context where it
  * is applicable.
  */
-public enum EventActionType
-{
-	ADD,
-	UPDATE,
-	DELETE,
-	READ
+public enum EventActionType {
+    ADD,
+    UPDATE,
+    DELETE,
+    READ
 
 }

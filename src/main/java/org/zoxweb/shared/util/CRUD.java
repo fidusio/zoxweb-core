@@ -20,13 +20,12 @@ package org.zoxweb.shared.util;
  * database action, or in any context where it is applicable.
  * @author mzebib
  */
-public enum CRUD
-{
-	CREATE,
-	READ,
-	UPDATE,
-	DELETE,
-	MOVE,
-	SHARE,
-	EXEC
+public enum CRUD {
+    CREATE,
+    READ,
+    UPDATE,
+    DELETE,
+    MOVE,
+    SHARE,
+    EXEC
 }

@@ -12,7 +12,7 @@ public class TypedCache {
 
     /**
      * Register a new cache type
-     * 
+     *
      * @param cacheType to be resgistered
      * @return this
      */
@@ -27,7 +27,7 @@ public class TypedCache {
 
     /**
      * Register a new cache type
-     * 
+     *
      * @param cacheType to be resgistered
      * @return this
      */
@@ -37,7 +37,7 @@ public class TypedCache {
 
     /**
      * Lookup and an object
-     * 
+     *
      * @param <C>              casting type
      * @param cacheType        type in the cache
      * @param cachedObjectName name of the cached object

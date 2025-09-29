@@ -5,31 +5,27 @@ import org.zoxweb.shared.data.AddressDAO;
 import org.zoxweb.shared.data.SetNameDescriptionDAO;
 
 public class RateCounter
-    extends SetNameDescriptionDAO
-{
+        extends SetNameDescriptionDAO {
     public enum Param
-            implements GetNVConfig
-    {
+            implements GetNVConfig {
         COUNTS(NVConfigManager.createNVConfig("counts", "Counted values", "Counts", true, false, long.class)),
         DELTAS(NVConfigManager.createNVConfig("deltas", "Accumulated deltas", "Deltas", true, false, long.class)),
         ;
 
         private final NVConfig nvc;
 
-        Param(NVConfig nvc)
-        {
+        Param(NVConfig nvc) {
             this.nvc = nvc;
         }
 
-        public NVConfig getNVConfig()
-        {
+        public NVConfig getNVConfig() {
             return nvc;
         }
     }
 
     public static final NVConfigEntity NVC_RATE_COUNTER = new NVConfigEntityPortable(
             "rate_counter",
-            null ,
+            null,
             "RateCounter",
             true,
             false,
@@ -46,21 +42,19 @@ public class RateCounter
     private transient long timestamp = 0;
     private transient long lastDelta = 0;
 
-    public RateCounter()
-    {
+    public RateCounter() {
         super(NVC_RATE_COUNTER);
     }
-    public RateCounter(String name)
-    {
+
+    public RateCounter(String name) {
         this(name, null);
     }
 
-    public RateCounter(Enum<?> name)
-    {
+    public RateCounter(Enum<?> name) {
         this(SUS.enumName(name), null);
     }
-    public RateCounter(String name, String description)
-    {
+
+    public RateCounter(String name, String description) {
         this();
         setName(name);
         setDescription(description);
@@ -73,8 +67,7 @@ public class RateCounter
      * @param timeStamp sometime in past timeStamp = System.currentTimeMillis()
      * @return current time stamp in millis
      */
-    public long registerTimeStamp(long timeStamp)
-    {
+    public long registerTimeStamp(long timeStamp) {
         return registerTimeStamp(true, timeStamp, 1);
     }
 
@@ -85,50 +78,42 @@ public class RateCounter
      * @param inc count
      * @return current time stamp in millis or nanos depend on the millis value
      */
-    public long registerTimeStamp(boolean millis, long timeStamp, long inc)
-    {
+    public long registerTimeStamp(boolean millis, long timeStamp, long inc) {
         long ts = millis ? System.currentTimeMillis() : System.nanoTime();
         register(ts - timeStamp, inc);
         return ts;
     }
 
-    public RateCounter register(long delta)
-    {
+    public RateCounter register(long delta) {
         return register(delta, 1);
     }
 
-    public RateCounter inc()
-    {
+    public RateCounter inc() {
         return register(0, 1);
 
     }
 
-    public RateCounter inc(long inc)
-    {
+    public RateCounter inc(long inc) {
         return register(0, inc);
     }
 
-    public synchronized RateCounter register(long delta, long inc)
-    {
-       setValue(Param.DELTAS, (getDeltas() + delta));
-       setValue(Param.COUNTS,  (getCounts() + inc));
-       lastDelta = delta;
-       return this;
+    public synchronized RateCounter register(long delta, long inc) {
+        setValue(Param.DELTAS, (getDeltas() + delta));
+        setValue(Param.COUNTS, (getCounts() + inc));
+        lastDelta = delta;
+        return this;
     }
 
-    public synchronized long start()
-    {
+    public synchronized long start() {
         timestamp = System.currentTimeMillis();
         return timestamp;
     }
 
-    public long stop()
-    {
+    public long stop() {
         return stop(1);
     }
 
-    public synchronized long stop(long inc)
-    {
+    public synchronized long stop(long inc) {
         if (timestamp == 0)
             throw new IllegalStateException("Never started must calls start() first");
         long currentTS = System.currentTimeMillis();
@@ -138,72 +123,62 @@ public class RateCounter
         return timestamp;
     }
 
-    public synchronized long lastTimeStampInMillis()
-    {
+    public synchronized long lastTimeStampInMillis() {
         return timestamp;
     }
 
 
-    public synchronized long lastDeltaInMillis()
-    {
+    public synchronized long lastDeltaInMillis() {
         return lastDelta;
     }
 
 
-    public synchronized RateCounter reset()
-    {
-        setValue(Param.DELTAS, (long)0);
-        setValue(Param.COUNTS, (long)0);
+    public synchronized RateCounter reset() {
+        setValue(Param.DELTAS, (long) 0);
+        setValue(Param.COUNTS, (long) 0);
         lastDelta = 0;
         return this;
     }
 
-    public long getDeltas()
-    {
+    public long getDeltas() {
         return lookupValue(Param.DELTAS);
     }
-    public long getCounts()
-    {
+
+    public long getCounts() {
         return lookupValue(Param.COUNTS);
     }
 
-    public float average()
-    {
+    public float average() {
         return average(1);
     }
 
-    public float average(float rateMultiplier)
-    {
+    public float average(float rateMultiplier) {
         float ret = 0;
-        if(getCounts() != 0) {
+        if (getCounts() != 0) {
             ret = rateMultiplier * ((float) getDeltas() / (float) getCounts());
         }
         return ret;
     }
 
-    public float average(long rateMultiplier)
-    {
-      return average((float)rateMultiplier);
+    public float average(long rateMultiplier) {
+        return average((float) rateMultiplier);
     }
 
-    public float rate()
-    {
+    public float rate() {
         return rate(1);
     }
 
-    public float rate(int multiplier)
-    {
-        return rate((float)multiplier);
+    public float rate(int multiplier) {
+        return rate((float) multiplier);
     }
 
-    public float rate(long multiplier)
-    {
-        return rate((float)multiplier);
+    public float rate(long multiplier) {
+        return rate((float) multiplier);
     }
-    public float rate(float multiplier)
-    {
+
+    public float rate(float multiplier) {
         float ret = 0;
-        if(getDeltas() != 0) {
+        if (getDeltas() != 0) {
             ret = multiplier * ((float) getCounts() / (float) getDeltas());
         }
 
@@ -211,18 +186,16 @@ public class RateCounter
     }
 
 
-    public float average(int rateMultiplier)
-    {
-        return average((float)rateMultiplier);
+    public float average(int rateMultiplier) {
+        return average((float) rateMultiplier);
     }
-
 
 
     @Override
     public String toString() {
         return "{" +
-                "name=\"" + getName()+"\"" +
-                (getDescription() != null ? ", description=\"" + getDescription() +"\"" : "") +
+                "name=\"" + getName() + "\"" +
+                (getDescription() != null ? ", description=\"" + getDescription() + "\"" : "") +
                 ", counts=" + getCounts() +
                 ", deltas=" + getDeltas() +
                 ", average=" + average() +

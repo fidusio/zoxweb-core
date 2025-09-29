@@ -662,10 +662,9 @@ public class Const {
                 if (time < 0)
                     throw new IllegalArgumentException("Invalid millis " + time);
                 return time;
-            }
-            else if (toConvert instanceof Integer) {
+            } else if (toConvert instanceof Integer) {
 
-                long time = (long)(int)toConvert;
+                long time = (long) (int) toConvert;
                 if (time < 0)
                     throw new IllegalArgumentException("Invalid millis " + time);
                 return time;

@@ -25,75 +25,67 @@ import java.util.List;
  *
  */
 @SuppressWarnings("serial")
-public class ExceptionCollection 
-	extends RuntimeException
-{
+public class ExceptionCollection
+        extends RuntimeException {
 
-	private List<Exception> list = new ArrayList<Exception>();
-	private String message;
-	
-	/**
-	 * The default constructor.
-	 */
-	public ExceptionCollection()
-    {
+    private List<Exception> list = new ArrayList<Exception>();
+    private String message;
 
-	}
-	
-	/**
-	 * This constructor instantiates ExceptionCollection with
-	 * message set based on reason input.
-	 * @param reason
-	 */
-	public ExceptionCollection(String reason)
-    {
-		super();
-		setMessage(reason);
-	}
-	
-	/**
-	 * Returns the exception list.
-	 * @return list of exceptions
-	 */
-	public List<Exception> getExceptionList()
-    {
-		return list;
-	}
-	
-	/**
-	 * Sets the exception list.
-	 * @param list
-	 */
-	public void setExceptionList(List<Exception> list)
-    {
-		this.list = list;
-	}
-	
-	/**
-	 * Returns the message;
-	 * @return the message
-	 */
-	public String getMessage()
-    {
-		return message;
-	}
-	
-	/**
-	 * Sets the message.
-	 * @param message
-	 */
-	public void setMessage(String message)
-    {
-		this.message = message;
-	}
+    /**
+     * The default constructor.
+     */
+    public ExceptionCollection() {
 
-	/**
-	 * Adds an existing exception collection to the current exception collection.
-	 * @param ec
-	 */
-	public void add(ExceptionCollection ec)
-    {
-		list.addAll(ec.getExceptionList());
-	}
+    }
+
+    /**
+     * This constructor instantiates ExceptionCollection with
+     * message set based on reason input.
+     * @param reason
+     */
+    public ExceptionCollection(String reason) {
+        super();
+        setMessage(reason);
+    }
+
+    /**
+     * Returns the exception list.
+     * @return list of exceptions
+     */
+    public List<Exception> getExceptionList() {
+        return list;
+    }
+
+    /**
+     * Sets the exception list.
+     * @param list
+     */
+    public void setExceptionList(List<Exception> list) {
+        this.list = list;
+    }
+
+    /**
+     * Returns the message;
+     * @return the message
+     */
+    public String getMessage() {
+        return message;
+    }
+
+    /**
+     * Sets the message.
+     * @param message
+     */
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    /**
+     * Adds an existing exception collection to the current exception collection.
+     * @param ec
+     */
+    public void add(ExceptionCollection ec) {
+        list.addAll(ec.getExceptionList());
+    }
 
 }

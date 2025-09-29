@@ -32,7 +32,6 @@ public class SharedUtil {
      * The constructor is declared private to prevent instantiation.
      */
     private SharedUtil() {
-
     }
 
 
@@ -1895,7 +1894,6 @@ public class SharedUtil {
     public static int indexOf(byte[] buffer, int fromIndex, int toIndex, byte[] match, int matchOffset, int matchLen) {
         return indexOf(buffer.length, buffer, fromIndex, toIndex, match, matchOffset, matchLen);
     }
-
 
 
     public static int indexOf(int bufferLimit, byte[] buffer, int fromIndex, int toIndex, byte[] match, int matchOffset, int matchLen) {

@@ -58,7 +58,7 @@ public class UniqueSimpleQueue<E>
         if (!it.hasNext()) return null;
         E first = it.next();
         it.remove();
-        if(first != null)
+        if (first != null)
             totalDeQueued.decrementAndGet();
         return first;
     }

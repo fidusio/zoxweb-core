@@ -8,7 +8,7 @@ import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class BytesArray
-    implements IsValid {
+        implements IsValid {
 
 
     public static final BytesArray EMPTY = new BytesArray(null, Const.EMPTY_BYTE_ARRAY);
@@ -37,6 +37,7 @@ public final class BytesArray
     public BytesArray(AtomicBoolean valid, byte[] array) {
         this(valid, array, 0, array.length, true);
     }
+
     public BytesArray(byte[] array) {
         this(null, array, 0, array.length, true);
     }
@@ -112,11 +113,11 @@ public final class BytesArray
     /**
      * @return the internal byte array use with extreme caution
      */
-    public byte[] getArray()
-    {
+    public byte[] getArray() {
         checkValidity();
         return array;
     }
+
     @Override
     public boolean equals(Object o) {
         if (o == null) return false;

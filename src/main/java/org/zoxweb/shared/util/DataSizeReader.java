@@ -1,6 +1,5 @@
 package org.zoxweb.shared.util;
 
-public interface DataSizeReader<V>
-{
+public interface DataSizeReader<V> {
     long size(V v);
 }

@@ -22,20 +22,17 @@ package org.zoxweb.shared.util;
  *
  * @param <T>
  */
-public interface DomainID<T>
-//    extends SetName, SetDescription
-{
+public interface DomainID<T> {
+    /**
+     * Gets the domain ID.
+     * @return typed domain id
+     */
+    T getDomainID();
 
-	/**
-	 * Gets the domain ID.
-	 * @return typed domain id
-	 */
-	T getDomainID();
-	
-	/**
-	 * Sets the domain ID.
-	 * @param domainID
-	 */
-	void setDomainID(T domainID);
-	
+    /**
+     * Sets the domain ID.
+     * @param domainID
+     */
+    void setDomainID(T domainID);
+
 }

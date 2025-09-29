@@ -1,6 +1,5 @@
 package org.zoxweb.shared.util;
 
-public interface GetMetaType
-{
+public interface GetMetaType {
     Class<?> getMetaType();
 }

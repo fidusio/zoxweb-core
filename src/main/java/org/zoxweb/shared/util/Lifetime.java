@@ -1,16 +1,13 @@
 package org.zoxweb.shared.util;
 
 
-
-
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class Lifetime
-    implements WaitTime<Lifetime>,
-        CloseableType, Identifier<Long>, IsExpired
-{
+        implements WaitTime<Lifetime>,
+        CloseableType, Identifier<Long>, IsExpired {
 
     private static final AtomicLong INSTANCE_COUNTER = new AtomicLong();
     private final long id = INSTANCE_COUNTER.incrementAndGet();
@@ -29,13 +26,12 @@ public class Lifetime
      * @param tu user time to convert to millis if null delay is in millis
      * @param delayBetweenUsage delay between usage in millis 0 not used
      */
-    public Lifetime(long creationTimestamp, long maxUse, TimeUnit tu, long delayBetweenUsage)
-    {
+    public Lifetime(long creationTimestamp, long maxUse, TimeUnit tu, long delayBetweenUsage) {
         this.creationTimestamp = creationTimestamp;
-        if(maxUse < 0)
+        if (maxUse < 0)
             throw new IllegalArgumentException("negative maxUse: " + maxUse);
         this.maxUse = maxUse;
-        if(delayBetweenUsage < 0)
+        if (delayBetweenUsage < 0)
             throw new IllegalArgumentException("negative delay: " + delayBetweenUsage);
         this.delayBetweenUsage = tu != null ? tu.toMillis(delayBetweenUsage) : delayBetweenUsage;
     }
@@ -43,16 +39,14 @@ public class Lifetime
     /**
      * Default to current time in millis
      */
-    public Lifetime()
-    {
+    public Lifetime() {
         this(System.currentTimeMillis(), 0, null, 0);
     }
 
     /**
      * @return when it was created
      */
-    public long getCreationTimestamp()
-    {
+    public long getCreationTimestamp() {
         return creationTimestamp;
     }
 
@@ -60,8 +54,7 @@ public class Lifetime
     /**
      * @return time since creation in millis
      */
-    public long timeSinceCreation()
-    {
+    public long timeSinceCreation() {
         return System.currentTimeMillis() - creationTimestamp;
     }
 
@@ -70,8 +63,7 @@ public class Lifetime
      * @param tu time unit conversion
      * @return duration converted to tu
      */
-    public long timeSinceCreation(TimeUnit tu)
-    {
+    public long timeSinceCreation(TimeUnit tu) {
         SUS.checkIfNulls("TimeUnit can't be null", tu);
         return tu.convert(System.currentTimeMillis() - creationTimestamp, TimeUnit.MILLISECONDS);
 
@@ -80,8 +72,7 @@ public class Lifetime
     /**
      * @return how many times incUsage ins called
      */
-    public long getUsageCounter()
-    {
+    public long getUsageCounter() {
         return usageCounter;
     }
 
@@ -89,8 +80,7 @@ public class Lifetime
      * Increment the usage by one
      * @return this
      */
-    public Lifetime incUsage()
-    {
+    public Lifetime incUsage() {
         return incUsage(1);
     }
 
@@ -99,14 +89,12 @@ public class Lifetime
      * @param inc usage increment
      * @return this
      */
-    public Lifetime incUsage(long inc)
-    {
+    public Lifetime incUsage(long inc) {
         if (isClosed())
             throw new IllegalStateException("lifetime expired");
-        synchronized (this)
-        {
+        synchronized (this) {
             long temp = usageCounter + inc;
-            if(maxUse != 0 && temp > maxUse)
+            if (maxUse != 0 && temp > maxUse)
                 throw new IllegalStateException(temp + " > maxUsage: " + maxUse);
             usageCounter = temp;
             lastUseTimestamp = System.currentTimeMillis();
@@ -117,23 +105,19 @@ public class Lifetime
     /**
      * @return How many millis sec wait for the
      */
-    public long nextWait()
-    {
+    public long nextWait() {
         if (closed.get() || isExpired())
             throw new IllegalStateException("lifetime expired");
 
-        if (lastUseTimestamp == 0)
-        {
-            synchronized (this)
-            {
-                if(lastUseTimestamp == 0)
-                {
+        if (lastUseTimestamp == 0) {
+            synchronized (this) {
+                if (lastUseTimestamp == 0) {
                     lastUseTimestamp = System.currentTimeMillis();
                 }
             }
         }
 
-        if (delayBetweenUsage == 0 )
+        if (delayBetweenUsage == 0)
             return 0;
 
         return delayBetweenUsage - (System.currentTimeMillis() - lastUseTimestamp);
@@ -142,8 +126,7 @@ public class Lifetime
     /**
      * @return this;
      */
-    public Lifetime getType()
-    {
+    public Lifetime getType() {
         return this;
     }
 
@@ -152,24 +135,21 @@ public class Lifetime
      * @return true If the implementation is expired
      */
     @Override
-    public boolean isExpired()
-    {
-        return maxUse != 0 &&  usageCounter >= maxUse;
+    public boolean isExpired() {
+        return maxUse != 0 && usageCounter >= maxUse;
     }
 
     /**
      * @return maximum number of usage, 0 forever
      */
-    public long getMaxUse()
-    {
+    public long getMaxUse() {
         return maxUse;
     }
 
     /**
      * @return last time incUsage called, 0 never
      */
-    public long getLastTimeUsed()
-    {
+    public long getLastTimeUsed() {
         return lastUseTimestamp;
     }
 
@@ -177,15 +157,13 @@ public class Lifetime
     /**
      * @return the allowed delays in millis between inc()s
      */
-    public long getDelayInMillis()
-    {
+    public long getDelayInMillis() {
         return delayBetweenUsage;
     }
 
 
     @Override
-    public void close()
-    {
+    public void close() {
         closed.set(true);
     }
 
@@ -207,7 +185,7 @@ public class Lifetime
     public String toString() {
         return "Lifetime{" +
                 "id= " + id +
-                ", creationTimestamp= " +creationTimestamp +
+                ", creationTimestamp= " + creationTimestamp +
                 ", lastUseTimestamp= " + lastUseTimestamp +
                 ", delayBetweenUsage= " + Const.TimeInMillis.toString(delayBetweenUsage) +
                 ", maxUse= " + maxUse +
@@ -215,7 +193,6 @@ public class Lifetime
                 ", closed= " + closed +
                 '}';
     }
-
 
 
     /**
@@ -228,6 +205,6 @@ public class Lifetime
      */
     @Override
     public long getDelay(TimeUnit unit) {
-        return unit.convert(System.currentTimeMillis() - getLastTimeUsed(),TimeUnit.MILLISECONDS);
+        return unit.convert(System.currentTimeMillis() - getLastTimeUsed(), TimeUnit.MILLISECONDS);
     }
 }

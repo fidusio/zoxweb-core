@@ -21,43 +21,42 @@ import java.io.Serializable;
  * The timestamp interface.
  */
 public interface TimeStampInterface
-    extends Serializable
-{
+        extends Serializable {
 
-	/**
-	 * Returns the time when the file was created or uploaded into a system or domain (milliseconds).
-	 * @return creation time in milliseconds
-	 */
-	long getCreationTime();
-	
-	/**
-	 * Sets the time when the file was created or uploaded into a system or domain (milliseconds).
-	 * @param ts creation time in milliseconds
-	 */
-	void setCreationTime(long ts);
-	
-	/**
-	 * Returns the last time the file was updated (milliseconds).
-	 * @return last time updated in milliseconds
-	 */
-	long getLastTimeUpdated();
-	
-	/**
-	 * Sets the last time the file was updated (milliseconds).
-	 * @param ts last time updated in milliseconds
-	 */
-	void setLastTimeUpdated(long ts);
-	
-	/**
-	 * Returns the last time the file was read (milliseconds).
-	 * @return last time read in milliseconds
-	 */
-	long getLastTimeRead();
-	
-	/**
-	 * Sets the last time the file was read (milliseconds).
-	 * @param ts last time read in milliseconds
-	 */
-	void setLastTimeRead(long ts);
+    /**
+     * Returns the time when the file was created or uploaded into a system or domain (milliseconds).
+     * @return creation time in milliseconds
+     */
+    long getCreationTime();
+
+    /**
+     * Sets the time when the file was created or uploaded into a system or domain (milliseconds).
+     * @param ts creation time in milliseconds
+     */
+    void setCreationTime(long ts);
+
+    /**
+     * Returns the last time the file was updated (milliseconds).
+     * @return last time updated in milliseconds
+     */
+    long getLastTimeUpdated();
+
+    /**
+     * Sets the last time the file was updated (milliseconds).
+     * @param ts last time updated in milliseconds
+     */
+    void setLastTimeUpdated(long ts);
+
+    /**
+     * Returns the last time the file was read (milliseconds).
+     * @return last time read in milliseconds
+     */
+    long getLastTimeRead();
+
+    /**
+     * Sets the last time the file was read (milliseconds).
+     * @param ts last time read in milliseconds
+     */
+    void setLastTimeRead(long ts);
 
 }

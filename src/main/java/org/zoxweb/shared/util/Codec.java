@@ -1,6 +1,4 @@
 package org.zoxweb.shared.util;
 
-public interface Codec
-{
-
+public interface Codec {
 }

@@ -23,59 +23,59 @@ import java.util.concurrent.Delayed;
  * The appointment interface.
  */
 public interface Appointment
-	extends CloseableType, Delayed, WaitTime<Appointment>
-{
-	
-	Comparator<Appointment> EQUAL_COMPARATOR = new AppointmentComparator();
-	
-	/**
-	 * @return the delay time in millis
-	 */
-	long getDelayInMillis();
+        extends CloseableType, Delayed, WaitTime<Appointment> {
 
-	/**
-	 * Set the delay time in millis
-	 * @param delayInMillis to wait
-	 */
-	void setDelayInMillis(long delayInMillis);
-	/**
-	 * Set the delay in millis with nanos offset
-	 * @param delayInMillis to wait
-	 * @param nanoOffset nanos to add
-	 */
-	void setDelayInNanos(long delayInMillis, long nanoOffset);
-	
-	/**
-	 * Returns the expiration in real time.
-	 * @return the expiration in real time.
-	 */ 
-	long getExpirationInMillis();
+    Comparator<Appointment> EQUAL_COMPARATOR = new AppointmentComparator();
 
-	/**
-	 * Cancel operation.
-	 * @return true if canceled
-	 */
-	boolean cancel();
-	
-	/**
-	 * Adjusted expiration to granular precision beyond millis
-	 * @return nano wait
-	 */
-	long getPreciseExpiration();
+    /**
+     * @return the delay time in millis
+     */
+    long getDelayInMillis();
 
+    /**
+     * Set the delay time in millis
+     * @param delayInMillis to wait
+     */
+    void setDelayInMillis(long delayInMillis);
 
-	void close();
+    /**
+     * Set the delay in millis with nanos offset
+     * @param delayInMillis to wait
+     * @param nanoOffset nanos to add
+     */
+    void setDelayInNanos(long delayInMillis, long nanoOffset);
 
-	/**
-	 * reset the appointment
-	 * @param runOnce if true appointment is executed once if false it will repeat
-	 */
-	boolean reset(boolean runOnce);
+    /**
+     * Returns the expiration in real time.
+     * @return the expiration in real time.
+     */
+    long getExpirationInMillis();
+
+    /**
+     * Cancel operation.
+     * @return true if canceled
+     */
+    boolean cancel();
+
+    /**
+     * Adjusted expiration to granular precision beyond millis
+     * @return nano wait
+     */
+    long getPreciseExpiration();
 
 
-	/**
-	 * @return the execution count
-	 */
-	long execCount();
-	
+    void close();
+
+    /**
+     * reset the appointment
+     * @param runOnce if true appointment is executed once if false it will repeat
+     */
+    boolean reset(boolean runOnce);
+
+
+    /**
+     * @return the execution count
+     */
+    long execCount();
+
 }

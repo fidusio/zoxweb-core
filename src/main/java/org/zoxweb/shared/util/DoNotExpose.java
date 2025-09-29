@@ -5,7 +5,5 @@ package org.zoxweb.shared.util;
  * @author javaconsigliere
  *
  */
-public interface DoNotExpose 
-{
-
+public interface DoNotExpose {
 }
