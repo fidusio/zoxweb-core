@@ -10,24 +10,20 @@ import org.zoxweb.shared.util.InstanceFactory;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-public class EchoProtocol
-{
-    private final static InstanceFactory.InstanceCreator<PlainSessionCallback> echoPIC = EchoSession::new;
+public class EchoProtocol {
+    private final static InstanceFactory.Creator<PlainSessionCallback> echoPIC = EchoSession::new;
 
-    private final static InstanceFactory.InstanceCreator<SSLSessionCallback> echoSIC = SSLEchoSession::new;
+    private final static InstanceFactory.Creator<SSLSessionCallback> echoSIC = SSLEchoSession::new;
 
     public static class EchoSession
-        extends PlainSessionCallback
-    {
-        private final  UByteArrayOutputStream ubaos = new UByteArrayOutputStream();
+            extends PlainSessionCallback {
+        private final UByteArrayOutputStream ubaos = new UByteArrayOutputStream();
+
         @Override
-        public void accept(ByteBuffer byteBuffer)
-        {
-            try
-            {
+        public void accept(ByteBuffer byteBuffer) {
+            try {
                 ByteBufferUtil.write(byteBuffer, ubaos, true);
-                if (ubaos.byteAt(ubaos.size() - 1) == (byte)'\n')
-                {
+                if (ubaos.byteAt(ubaos.size() - 1) == (byte) '\n') {
                     get().write(ubaos, true);
                 }
             } catch (IOException e) {
@@ -56,23 +52,20 @@ public class EchoProtocol
 
         @Override
         public boolean isClosed() {
-            return get()!= null && get().isClosed();
+            return get() != null && get().isClosed();
         }
     }
 
     public static class SSLEchoSession
-            extends SSLSessionCallback
-    {
+            extends SSLSessionCallback {
 
         private final UByteArrayOutputStream ubaos = new UByteArrayOutputStream();
+
         @Override
-        public void accept(ByteBuffer byteBuffer)
-        {
-            try
-            {
+        public void accept(ByteBuffer byteBuffer) {
+            try {
                 ByteBufferUtil.write(byteBuffer, ubaos, true);
-                if (ubaos.byteAt(ubaos.size() - 1) == (byte)'\n')
-                {
+                if (ubaos.byteAt(ubaos.size() - 1) == (byte) '\n') {
                     get().write(ubaos, true);
                 }
             } catch (IOException e) {
@@ -104,7 +97,7 @@ public class EchoProtocol
          */
         @Override
         public boolean isClosed() {
-            return get()!= null && get().isClosed();
+            return get() != null && get().isClosed();
         }
     }
 

@@ -8,61 +8,51 @@ import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.util.InstanceFactory;
 
 public class SSLNIOSocketHandlerFactory
-        extends ProtocolFactoryBase<SSLNIOSocketHandler>
-{
+        extends ProtocolFactoryBase<SSLNIOSocketHandler> {
 
     private IPAddress remoteConnection;
     private SSLContextInfo sslContext;
     private Class<? extends BaseSessionCallback> scClass;
-    private InstanceFactory.InstanceCreator<SSLSessionCallback> instanceCreator;
+    private InstanceFactory.Creator<SSLSessionCallback> creator;
 
-    public SSLNIOSocketHandlerFactory()
-    {
+    public SSLNIOSocketHandlerFactory() {
         complexSetup = false;
     }
-    public SSLNIOSocketHandlerFactory(SSLContextInfo sslContext, InstanceFactory.InstanceCreator<SSLSessionCallback> instanceCreator)
-    {
+
+    public SSLNIOSocketHandlerFactory(SSLContextInfo sslContext, InstanceFactory.Creator<SSLSessionCallback> creator) {
         this();
         this.sslContext = sslContext;
-        this.instanceCreator = instanceCreator;
+        this.creator = creator;
     }
 
-    public SSLNIOSocketHandlerFactory(SSLContextInfo sslContext, Class<? extends BaseSessionCallback> scClass)
-    {
+    public SSLNIOSocketHandlerFactory(SSLContextInfo sslContext, Class<? extends BaseSessionCallback> scClass) {
         this();
         this.sslContext = sslContext;
         this.scClass = scClass;
     }
 
 
-    public SSLNIOSocketHandlerFactory(SSLContextInfo sslContext, IPAddress rc)
-    {
+    public SSLNIOSocketHandlerFactory(SSLContextInfo sslContext, IPAddress rc) {
         this();
         this.sslContext = sslContext;
         remoteConnection = rc;
     }
 
-    public SSLContextInfo getSSLContext()
-    {
+    public SSLContextInfo getSSLContext() {
         return sslContext;
     }
 
 
     @Override
-    public SSLNIOSocketHandler newInstance()
-    {
+    public SSLNIOSocketHandler newInstance() {
         SSLSessionCallback sc = null;
-        try
-        {
-            if(instanceCreator != null)
-            {
-                sc = instanceCreator.newInstance();;
-            }
-            else if(scClass != null)
+        try {
+            if (creator != null) {
+                sc = creator.newInstance();
+                ;
+            } else if (scClass != null)
                 sc = (SSLSessionCallback) scClass.getDeclaredConstructor().newInstance();
-        }
-        catch(Exception e)
-        {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return new SSLNIOSocketHandler(sslContext, sc, getProperties().getValue("simple_state_machine", true), remoteConnection);
@@ -74,31 +64,27 @@ public class SSLNIOSocketHandlerFactory
         return "SSLNIOSocketFactory";
     }
 
-    public void init()
-    {
-        if(getProperties().getValue("remote_host") != null)
+    public void init() {
+        if (getProperties().getValue("remote_host") != null)
             setRemoteConnection(new IPAddress(getProperties().getValue("remote_host")));
-        sslContext = (SSLContextInfo) ((ConfigDAO)getProperties().getValue("ssl_engine")).attachment();
-        try
-        {
-            if(getProperties().getValue("session_callback") != null)
-            {
+        sslContext = (SSLContextInfo) ((ConfigDAO) getProperties().getValue("ssl_engine")).attachment();
+        try {
+            if (getProperties().getValue("session_callback") != null) {
                 scClass = (Class<SSLSessionCallback>) Class.forName(getProperties().getValue("session_callback"));
             }
-        }
-        catch(Exception e)
-        {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
     }
 
-    public void setRemoteConnection(IPAddress rConnection)
-    {
+    public void setRemoteConnection(IPAddress rConnection) {
         remoteConnection = rConnection;
     }
 
-    public IPAddress getRemoteConnection(){ return remoteConnection; }
+    public IPAddress getRemoteConnection() {
+        return remoteConnection;
+    }
 
 
 //    @Override

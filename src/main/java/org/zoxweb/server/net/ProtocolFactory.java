@@ -20,7 +20,7 @@ import org.zoxweb.shared.util.GetName;
 import org.zoxweb.shared.util.InstanceFactory;
 
 public interface ProtocolFactory<P extends ProtocolHandler>
-        extends GetName, GetNVProperties, InstanceFactory.InstanceCreator<P> {
+        extends GetName, GetNVProperties, InstanceFactory.Creator<P> {
 
 
     /**

@@ -10,7 +10,7 @@ import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 
 public class SSLContextInfo
-        implements InstanceFactory.InstanceCreator<SSLEngine> {
+        implements InstanceFactory.Creator<SSLEngine> {
 
     public enum Param
             implements GetName {

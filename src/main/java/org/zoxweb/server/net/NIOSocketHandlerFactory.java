@@ -7,7 +7,7 @@ public class NIOSocketHandlerFactory
         extends ProtocolFactoryBase<NIOSocketHandler> {
 
     private Class<? extends BaseSessionCallback> cbClass;
-    private InstanceFactory.InstanceCreator<PlainSessionCallback> instanceCreator;
+    private InstanceFactory.Creator<PlainSessionCallback> creator;
 
     public NIOSocketHandlerFactory() {
     }
@@ -18,8 +18,8 @@ public class NIOSocketHandlerFactory
 
     }
 
-    public NIOSocketHandlerFactory(InstanceFactory.InstanceCreator<PlainSessionCallback> instanceCreator) {
-        this.instanceCreator = instanceCreator;
+    public NIOSocketHandlerFactory(InstanceFactory.Creator<PlainSessionCallback> creator) {
+        this.creator = creator;
     }
 
 
@@ -27,8 +27,8 @@ public class NIOSocketHandlerFactory
     public NIOSocketHandler newInstance() {
         PlainSessionCallback sc = null;
         try {
-            if (instanceCreator != null)
-                sc = instanceCreator.newInstance();
+            if (creator != null)
+                sc = creator.newInstance();
             else if (cbClass != null)
                 sc = (PlainSessionCallback) cbClass.getDeclaredConstructor().newInstance();
         } catch (Exception e) {

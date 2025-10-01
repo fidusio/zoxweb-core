@@ -3,7 +3,7 @@ package org.zoxweb.shared.util;
 public interface InstanceFactory {
 
 
-    interface ParamsInstanceCreator<T> {
+    interface ParamsCreator<T> {
 
         /**
          * Create a new instance based on the type T
@@ -13,7 +13,7 @@ public interface InstanceFactory {
         T newInstance(Object... params);
     }
 
-    interface InstanceCreator<T> {
+    interface Creator<T> {
         /**
          * Create a new instance based on the type T
          * @return  new instance of T
