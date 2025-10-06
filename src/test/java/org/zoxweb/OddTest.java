@@ -60,6 +60,20 @@ public class OddTest {
             assert lA == lB;
             assert lA == a;
             assert aI.equals(bI);
+            assert 1000 == 1000;
         }
+    }
+
+    @Test
+    public void stringTest()
+    {
+        String a = "12345";
+        String b = a;
+        assert a==b;
+        b = a+"";
+        assert a!=b;
+        assert a.equals(b);
+
+
     }
 }

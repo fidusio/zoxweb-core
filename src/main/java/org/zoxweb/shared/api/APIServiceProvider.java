@@ -15,19 +15,19 @@
  */
 package org.zoxweb.shared.api;
 
-import org.zoxweb.shared.util.CanonicalID;
-import org.zoxweb.shared.util.GetName;
-import org.zoxweb.shared.util.SetDescription;
-import org.zoxweb.shared.util.SetName;
+import org.zoxweb.shared.util.*;
 
 /**
  * The API service provider interface.
  * @author mzebib
+ *
+ * @param <P> Protocol specific connection
+ * @param <S> System specific connection
  */
 public interface APIServiceProvider<P, S>
 	extends SetDescription, 
 			SetName, 
-			CanonicalID {
+			CanonicalID, AutoCloseable{
 
 	/**
 	 * Returns the data store configuration info.
@@ -58,11 +58,11 @@ public interface APIServiceProvider<P, S>
 			throws APIException;
 	
 	/**
-	 * Shuts down the data store.
+	 * Shuts down the service provider store.
 	 * @throws APIException in case of closure issue
 	 */
-	void close()
-			throws APIException;
+    @Override
+	void close() throws APIException;
 	
 	/**
 	 * Checks if the store is active.
@@ -72,7 +72,7 @@ public interface APIServiceProvider<P, S>
 
 	/**
 	 * Returns the exception handler.
-	 * @returnAPIExceptionHandler
+	 * @return APIExceptionHandler
 	 */
 	APIExceptionHandler getAPIExceptionHandler();
 	
@@ -105,5 +105,17 @@ public interface APIServiceProvider<P, S>
 	 * @return true if the current api instance is busy
 	 */
 	boolean isBusy();
+
+
+    /**
+     *
+     * @param detailed if true and the ping is successful return detailed information
+     * @return status info
+     * @throws APIException if the API is not accessible remotely
+     *
+     */
+    default NVGenericMap ping(boolean detailed) throws APIException{
+        throw new APIException("Not supported");
+    };
 
 }

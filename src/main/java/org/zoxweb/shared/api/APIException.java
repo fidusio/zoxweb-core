@@ -127,9 +127,9 @@ public class APIException
 	 * This constructor instantiates APIStoreException based given reason.
 	 * @param reason
 	 */
-	public APIException(String message)
+	public APIException(String reason)
 	{
-		super(message);
+		super(reason);
 	}
 	
 	

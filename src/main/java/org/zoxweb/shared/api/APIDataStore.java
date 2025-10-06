@@ -27,10 +27,9 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * The API data storage interface.
- * @author mzebib
- * @param <ST> 
- *
+ * The Data store api
+ * @param <P>
+ * @param <S>
  */
 public interface APIDataStore<P,S>
 	extends APIServiceProvider<P, S>
@@ -48,7 +47,7 @@ public interface APIDataStore<P,S>
 	Set<String> getStoreTables();
 
 
-	default <V extends NVEntity> V findOne(NVConfigEntity nvce, List<String> fieldNames, QueryMarker ... queryCriteria)
+	default <V extends NVEntity> V findOne(NVConfigEntity nvce, List<String> fieldNames, QueryMarker... queryCriteria)
 		throws NullPointerException, IllegalArgumentException, AccessException, APIException
 	{
 		List<V> ret = search(nvce, fieldNames, queryCriteria);
