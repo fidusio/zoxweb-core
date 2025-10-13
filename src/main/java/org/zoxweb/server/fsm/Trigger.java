@@ -7,9 +7,8 @@ import java.util.EventObject;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class Trigger<D>
-extends EventObject
-implements TriggerInt<D>
-{
+        extends EventObject
+        implements TriggerInt<D> {
     private final static AtomicLong counter = new AtomicLong();
 
     private final String canonicalID;
@@ -35,14 +34,13 @@ implements TriggerInt<D>
     public Trigger(Object source, Enum<?> canonicalID, StateInt lastState, D data) {
         this(source, SUS.enumName(canonicalID), lastState, data);
     }
-    public Trigger(StateInt state, String canonicalID, D data)
-    {
+
+    public Trigger(StateInt state, String canonicalID, D data) {
         this(state, canonicalID, state, data);
     }
 
 
-    public Trigger(StateInt state, Enum<?> name, D data)
-    {
+    public Trigger(StateInt state, Enum<?> name, D data) {
         this(state, SUS.enumName(name), state, data);
     }
 
@@ -57,20 +55,17 @@ implements TriggerInt<D>
     }
 
 
-
     @Override
     public String getCanonicalID() {
         return canonicalID;
     }
 
 
-    public long getID()
-    {
+    public long getID() {
         return id;
     }
 
-    public long getTimestamp()
-    {
+    public long getTimestamp() {
         return timestamp;
     }
 

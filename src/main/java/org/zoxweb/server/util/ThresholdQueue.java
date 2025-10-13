@@ -31,109 +31,96 @@ import org.zoxweb.shared.util.SharedUtil;
  * again.
  */
 public class ThresholdQueue<O>
-    extends ArrayQueue<O>
-{
+        extends ArrayQueue<O> {
 
-	private int threshold;
-	private boolean thresholdEnabled = false;
-
-
-	public ThresholdQueue(int highMark)
-	{
-		this(highMark/2, highMark);
-	}
-	
-	/**
-	 * Create a bounded queue based on a lowMark and highMark parameters.
-	 * 
-	 * @param threshold
-	 *            of the queue size.
-	 * @param capacity
-	 *            of the queue size.
-	 * @exception IllegalArgumentException
-	 *                if the lowMark >= highMark or lowMark < 0 or highMark < 0.
-	 */
-	public ThresholdQueue(int threshold, int capacity)
-        throws IllegalArgumentException
-    {
-    	super(capacity);
-		if (capacity <= threshold || capacity < 0 || threshold < 0) {
-			throw new IllegalArgumentException("Invalid queue parameters "
-					+ " capacity " + capacity + " lowThreshold " + threshold);
-		}
+    private int threshold;
+    private boolean thresholdEnabled = false;
 
 
-		this.threshold = threshold;
-	}
+    public ThresholdQueue(int highMark) {
+        this(highMark / 2, highMark);
+    }
 
-	/**
-	 * This method will dequeue and Object, if the queue is empty it will return
-	 * null.
-	 */
-	public synchronized O dequeue()
-    {
-		O ret = int_dequeue();
-		if (thresholdEnabled && size <= threshold)
-		{
-			thresholdEnabled = false;
-			notifyAll();
-		}
-		return ret;
-	}
-
-	/**
-	 * This method will add an object to the queue if the high mark is
-	 * reached the calling thread will block till the size of the queue = to the
-	 * lowMark.
-	 * 
-	 * @param toQueue the object.
-	 */
-	public synchronized boolean queue(O toQueue)
-    {
-		if(toQueue == null)
-			throw new NullPointerException("Can't queue a null object");
-		if (thresholdEnabled && toQueue != null)
-		{
-			try
-            {
-				while (thresholdEnabled)
-					wait(300);
-			} 
-			catch (InterruptedException e) 
-			{
-				e.printStackTrace();
-			}
-		}
-
-		int_queue(toQueue);
-
-		if (size == array.length)
-		{
-			thresholdEnabled = true;
-		}
-		return true;
-
-	}
-
-	/**
-	 * This method will return a string containing the size, highMark, 
-	 * lowMark, and boundMode results.
-	 */
-	@Override
-	public String toString()
-    {
-	  
-	  return SharedUtil.toCanonicalID(',', array.length, threshold, size(), thresholdEnabled);
-	
-	}
+    /**
+     * Create a bounded queue based on a lowMark and highMark parameters.
+     *
+     * @param threshold
+     *            of the queue size.
+     * @param capacity
+     *            of the queue size.
+     * @exception IllegalArgumentException
+     *                if the lowMark >= highMark or lowMark < 0 or highMark < 0.
+     */
+    public ThresholdQueue(int threshold, int capacity)
+            throws IllegalArgumentException {
+        super(capacity);
+        if (capacity <= threshold || capacity < 0 || threshold < 0) {
+            throw new IllegalArgumentException("Invalid queue parameters "
+                    + " capacity " + capacity + " lowThreshold " + threshold);
+        }
 
 
-	/**
-	 * @return the low mark of the queue.
-	 */
-	public int getThreshold()
-    {
-		return threshold;
-	}
-	
+        this.threshold = threshold;
+    }
+
+    /**
+     * This method will dequeue and Object, if the queue is empty it will return
+     * null.
+     */
+    public synchronized O dequeue() {
+        O ret = int_dequeue();
+        if (thresholdEnabled && size <= threshold) {
+            thresholdEnabled = false;
+            notifyAll();
+        }
+        return ret;
+    }
+
+    /**
+     * This method will add an object to the queue if the high mark is
+     * reached the calling thread will block till the size of the queue = to the
+     * lowMark.
+     *
+     * @param toQueue the object.
+     */
+    public synchronized boolean queue(O toQueue) {
+        if (toQueue == null)
+            throw new NullPointerException("Can't queue a null object");
+        if (thresholdEnabled && toQueue != null) {
+            try {
+                while (thresholdEnabled)
+                    wait(300);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        int_queue(toQueue);
+
+        if (size == array.length) {
+            thresholdEnabled = true;
+        }
+        return true;
+
+    }
+
+    /**
+     * This method will return a string containing the size, highMark,
+     * lowMark, and boundMode results.
+     */
+    @Override
+    public String toString() {
+
+        return SharedUtil.toCanonicalID(',', array.length, threshold, size(), thresholdEnabled);
+
+    }
+
+
+    /**
+     * @return the low mark of the queue.
+     */
+    public int getThreshold() {
+        return threshold;
+    }
+
 }

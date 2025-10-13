@@ -402,14 +402,14 @@ public class HTTPUtil {
 //////		ArrayList<String> strList = new ArrayList<String>();
 ////
 ////		for ( int i = 0; i < methods.length; i++)
-////		{
+////        {
 ////			//strList.add(methods[i]);
 ////			if ( methods[i].equals("TRACE"))
-////			{
+////            {
 //////				strList.add(methods[i]);
 ////				methods[i] = HTTPMethod.PATCH.name();
-////			}
-////		}
+////            }
+////        }
 //////		strList.add( HTTPMethod.PATCH.name());
 //////
 //////		methods = strList.toArray( new String[0]);

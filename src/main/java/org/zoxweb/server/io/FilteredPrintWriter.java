@@ -15,45 +15,42 @@
  */
 package org.zoxweb.server.io;
 
+import org.zoxweb.server.logging.LogWrapper;
+
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.security.MessageDigest;
-import java.util.logging.Logger;
 
 /**
  *
  */
 public class FilteredPrintWriter
-	extends PrintWriter
-{
-	private static final transient Logger log = Logger.getLogger(FilteredPrintWriter.class.getName());
-	
-	private MultiDigest mdw = new MultiDigest();
-	
-	/**
-	 * [Optional - Please state the purpose of this constructor; especially if multiple constructors exist.].
-	 * 
-	 * @param out
-	 * @param digests 
-	 */
-	public FilteredPrintWriter(Writer out, MessageDigest... digests)
-	{
-		super(out);
-		mdw.setMessageDigests(digests);
-	}
+        extends PrintWriter {
+    public static final LogWrapper log = new LogWrapper(FilteredPrintWriter.class);
 
-	
-	public void write(char buf[], int off, int len)
-	{
-		super.write(buf, off, len);
-		mdw.update(buf, off, len);
-	}
-	
-	public void close()
-	{
-		super.close();
-		log.info("stat:"+mdw);
-	}
-	
-	
+    private MultiDigest mdw = new MultiDigest();
+
+    /**
+     * [Optional - Please state the purpose of this constructor; especially if multiple constructors exist.].
+     *
+     * @param out
+     * @param digests
+     */
+    public FilteredPrintWriter(Writer out, MessageDigest... digests) {
+        super(out);
+        mdw.setMessageDigests(digests);
+    }
+
+
+    public void write(char buf[], int off, int len) {
+        super.write(buf, off, len);
+        mdw.update(buf, off, len);
+    }
+
+    public void close() {
+        super.close();
+        log.info("stat:" + mdw);
+    }
+
+
 }

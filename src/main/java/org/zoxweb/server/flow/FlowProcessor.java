@@ -6,7 +6,6 @@ import java.io.Closeable;
 import java.util.function.Consumer;
 
 public interface FlowProcessor<F>
- extends Consumer<FlowEvent<F>>, Publisher<FlowEvent<F>>, Closeable
-{
+        extends Consumer<FlowEvent<F>>, Publisher<FlowEvent<F>>, Closeable {
     void init();
 }

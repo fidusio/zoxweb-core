@@ -15,8 +15,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import static javax.net.ssl.SSLEngineResult.HandshakeStatus.*;
 
 class CustomSSLStateMachine extends MonoStateMachine<SSLEngineResult.HandshakeStatus, SSLSessionCallback>
-    implements SSLConnectionHelper, Closeable, Identifier<Long>
-{
+        implements SSLConnectionHelper, Closeable, Identifier<Long> {
     public static final LogWrapper log = new LogWrapper(CustomSSLStateMachine.class).setEnabled(false);
 
     static RateCounter rcNotHandshaking = new RateCounter("NotHandshaking");
@@ -29,13 +28,11 @@ class CustomSSLStateMachine extends MonoStateMachine<SSLEngineResult.HandshakeSt
     private final SSLNIOSocketHandler sslns;
     private final long id;
 
-    public static long getIDCount()
-    {
+    public static long getIDCount() {
         return counter.get();
     }
 
-    CustomSSLStateMachine(SSLNIOSocketHandler sslns)
-    {
+    CustomSSLStateMachine(SSLNIOSocketHandler sslns) {
         super(false);
         this.sslns = sslns;
         sslns.getConfig().sslConnectionHelper = this;
@@ -49,62 +46,50 @@ class CustomSSLStateMachine extends MonoStateMachine<SSLEngineResult.HandshakeSt
     }
 
     @Override
-    public void close() throws IOException
-    {
+    public void close() throws IOException {
         getConfig().close();
     }
 
-    public Long getID()
-    {
+    public Long getID() {
         return id;
     }
 
-    public void needWrap(SSLSessionCallback callback)
-    {
+    public void needWrap(SSLSessionCallback callback) {
         rcNeedWrap.register(SSLUtil._needWrap(getConfig(), callback));
     }
 
-    public void needUnwrap(SSLSessionCallback callback)
-    {
+    public void needUnwrap(SSLSessionCallback callback) {
         rcNeedUnwrap.register(SSLUtil._needUnwrap(getConfig(), callback));
     }
 
-    public void needTask(SSLSessionCallback callback)
-    {
+    public void needTask(SSLSessionCallback callback) {
         rcNeedTask.register(SSLUtil._needTask(getConfig(), callback));
     }
 
-    public void finished(SSLSessionCallback callback)
-    {
+    public void finished(SSLSessionCallback callback) {
         rcFinished.register(SSLUtil._finished(getConfig(), callback));
     }
 
-    public void notHandshaking(SSLSessionCallback callback)
-    {
+    public void notHandshaking(SSLSessionCallback callback) {
         rcNotHandshaking.register(SSLUtil._notHandshaking(getConfig(), callback));
     }
 
     @Override
-    public void createRemoteConnection()
-    {
+    public void createRemoteConnection() {
         sslns.createRemoteConnection();
     }
 
-    public SSLSessionConfig getConfig()
-    {
+    public SSLSessionConfig getConfig() {
         return sslns.getConfig();
     }
 
-    public static String rates()
-    {
+    public static String rates() {
         return SharedUtil.toCanonicalID(',', rcNeedWrap, rcNeedUnwrap, rcNeedTask, rcFinished, rcNotHandshaking);
     }
 
-    public static <T> T lookupType(String type)
-    {
+    public static <T> T lookupType(String type) {
         type = SharedStringUtil.toUpperCase(type);
-        switch(type)
-        {
+        switch (type) {
             case "NEED_WRAP":
                 return (T) rcNeedWrap;
             case "NEED_UNWRAP":
@@ -114,9 +99,9 @@ class CustomSSLStateMachine extends MonoStateMachine<SSLEngineResult.HandshakeSt
             case "FINISHED":
                 return (T) rcFinished;
             case "NOT_HANDSHAKING":
-                return (T)rcNotHandshaking;
+                return (T) rcNotHandshaking;
             default:
-                System.out.println("***************************************** SHIT: "  + type);
+                System.out.println("***************************************** SHIT: " + type);
         }
         return null;
     }

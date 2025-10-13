@@ -31,7 +31,7 @@ import java.util.List;
 public class InetFilterRulesManager {
 
     public static final LogWrapper log = new LogWrapper(InetFilterRulesManager.class).setEnabled(false);
-    private List<InetFilterRule> set = new ArrayList<InetFilterRule>();
+    private final List<InetFilterRule> set = new ArrayList<>();
 
     @SuppressWarnings("serial")
     public static class InetFilterRule

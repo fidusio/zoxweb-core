@@ -10,8 +10,7 @@ import java.util.logging.Logger;
  * Enum for java Logger level
  */
 public enum LoggerLevel
-    implements GetValue<Level>
-{
+        implements GetValue<Level> {
     ALL(Level.ALL),
     CONFIG(Level.CONFIG),
     FINE(Level.FINE),
@@ -24,8 +23,8 @@ public enum LoggerLevel
     ;
 
     private final Level level;
-    LoggerLevel(Level level)
-    {
+
+    LoggerLevel(Level level) {
         this.level = level;
     }
 
@@ -42,15 +41,12 @@ public enum LoggerLevel
         }
     }
 
-    public static LoggerLevel currentLevel()
-    {
+    public static LoggerLevel currentLevel() {
         return toLoggerLevel(Logger.getLogger("").getLevel());
     }
 
-    public static LoggerLevel toLoggerLevel(Level level)
-    {
-        for(LoggerLevel ll : LoggerLevel.values())
-        {
+    public static LoggerLevel toLoggerLevel(Level level) {
+        for (LoggerLevel ll : LoggerLevel.values()) {
             if (ll.getValue() == level)
                 return ll;
         }

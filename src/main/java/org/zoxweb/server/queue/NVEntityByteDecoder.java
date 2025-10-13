@@ -7,7 +7,7 @@ import org.zoxweb.shared.util.DataDecoder;
 import org.zoxweb.shared.util.NVEntity;
 import org.zoxweb.shared.util.SharedBase64.Base64Type;
 
-public class NVEnvityByteDecoder implements DataDecoder<byte[], NVEntityQueueEvent> {
+public class NVEntityByteDecoder implements DataDecoder<byte[], NVEntityQueueEvent> {
 
 	@Override
 	public NVEntityQueueEvent decode(byte[] input) 

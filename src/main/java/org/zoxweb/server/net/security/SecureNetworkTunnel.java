@@ -37,155 +37,129 @@ import java.net.Socket;
 import java.nio.channels.ServerSocketChannel;
 
 public class SecureNetworkTunnel
-    implements Runnable, Closeable
-{
+        implements Runnable, Closeable {
 
-	public static final LogWrapper log = new LogWrapper(SecureNetworkTunnel.class);
-	/*
-	 * json file format
-	   {
-			keystore_file: "file location",
-			keystore_type: "jks",
-			keystore_password: "passwd",
-			alias_password: "passwd"
-	   }
-	 */
-	public static class KeyStoreConfig
-	{
-		public String keystore_file;
-		public String keystore_type;
-		public String keystore_password;
-		public String truststore_file;
-		public String truststore_password;
-		public String alias_password;
-	}
-	
-	
-	
-	private ServerSocket ss;
-	private IPAddress remoteSocketAddress;
-	public SecureNetworkTunnel(SSLServerSocketFactory sslssf, int localPort, int backlog, IPAddress remoteAddress) throws IOException
-	{
-		ss = sslssf.createServerSocket(localPort, backlog);
-		remoteSocketAddress = remoteAddress;
-		new Thread(this).start();
-	}
-	
-	
-	//@SuppressWarnings("resource")
-	@Override
-	public void run() 
-	{
-		try
-		{
-			if (log.isEnabled()) log.getLogger().info("secure socket started " + ss.getLocalPort() + " " + remoteSocketAddress);
-			while (!ss.isClosed())
-			{
-				Socket sIn = ss.accept();
-				Socket sRemote = new Socket(remoteSocketAddress.getInetAddress(), remoteSocketAddress.getPort());
-				//sIn.setSoTimeout(1000);
-				//log.info(ss.getClass().getName() + " " +sIn.getClass().getName());
-				new NetworkTunnel(sIn, sRemote);
-			}
-		}
-		catch(Exception e)
-		{
-			IOUtil.close(ss);
-		}
-	}
-	
-	
-	@Override
-	public void close() throws IOException {
-		// TODO Auto-generated method stub
-		ss.close();
-	}
-	
-	@SuppressWarnings("resource")
-	public static void main(String ...args)
-	{
-		try
-		{
-			int index = 0;
-			boolean nio = false;
-			String ksConfig = args[index++];
-			if (!new File(ksConfig).isFile())
-			{
-				ksConfig = args[index++];
-				nio = true;
-			}
+    public static final LogWrapper log = new LogWrapper(SecureNetworkTunnel.class);
+
+    /*
+     * json file format
+       {
+            keystore_file: "file location",
+            keystore_type: "jks",
+            keystore_password: "passwd",
+            alias_password: "passwd"
+       }
+     */
+    public static class KeyStoreConfig {
+        public String keystore_file;
+        public String keystore_type;
+        public String keystore_password;
+        public String truststore_file;
+        public String truststore_password;
+        public String alias_password;
+    }
 
 
-			KeyStoreConfig ksc = GSONUtil.create(false).fromJson(IOUtil.inputStreamToString(new FileInputStream(ksConfig), true), KeyStoreConfig.class);
-			
-			
-			//System.setProperty("javax.net.debug","all");
-			SSLContext sslc = SecUtil.SINGLETON.initSSLContext(ksc.keystore_file, ksc.keystore_type, ksc.keystore_password.toCharArray(),
-					ksc.alias_password != null ?  ksc.alias_password.toCharArray() : null, null, null);
-			
-	
-			
-			if (nio)
-			{
-				if (log.isEnabled()) log.info("Creating NIO Secure tunnel");
-				
-				NIOSocket nios = new NIOSocket(TaskUtil.defaultTaskProcessor(), TaskUtil.defaultTaskScheduler());
-				for(; index < args.length; index++)
-				{
-					try
-					{
-						String[] parsed = args[index].split(",");
-						int port = Integer.parseInt(parsed[0]);
-						IPAddress remoteAddress = new IPAddress(parsed[1]);
-						ServerSocketChannel ssc = ServerSocketChannel.open();
-					
-						ssc.bind(new InetSocketAddress(port));
-						System.out.println("Adding:" + ssc + " " + remoteAddress);
-						nios.addServerSocket(ssc, new NIOTunnelFactory(remoteAddress));
-						//					
-					}
-					catch(Exception e)
-					{
-					
-						e.printStackTrace();
-					}
-				}
-			
-			}
-			else
-			{
-				if (log.isEnabled()) log.info("Creating classic Secure tunnel");
-				SSLServerSocketFactory sslssf = sslc.getServerSocketFactory();
-				for(; index < args.length; index++)
-				{
-					try
-					{
-						String[] parsed = args[index].split(",");
-						int port = Integer.parseInt(parsed[0]);
-						IPAddress remoteAddress = new IPAddress(parsed[1]);
-						new SecureNetworkTunnel(sslssf, port, 128, remoteAddress);
-						
-					}
-					catch(Exception e)
-					{
-						if (log.isEnabled()) log.info("Failed to start " + args[index]);
-						e.printStackTrace();
-					}
-				}
-			}
-				
-			
+    private ServerSocket ss;
+    private IPAddress remoteSocketAddress;
 
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			System.err.println("SecureNetworkTunnel keystoreJSONConfigFile localport,remoteHost:remotePort...");
-			System.exit(0);
-		}
-	}
+    public SecureNetworkTunnel(SSLServerSocketFactory sslssf, int localPort, int backlog, IPAddress remoteAddress) throws IOException {
+        ss = sslssf.createServerSocket(localPort, backlog);
+        remoteSocketAddress = remoteAddress;
+        new Thread(this).start();
+    }
 
 
-	
-	
+    //@SuppressWarnings("resource")
+    @Override
+    public void run() {
+        try {
+            if (log.isEnabled())
+                log.getLogger().info("secure socket started " + ss.getLocalPort() + " " + remoteSocketAddress);
+            while (!ss.isClosed()) {
+                Socket sIn = ss.accept();
+                Socket sRemote = new Socket(remoteSocketAddress.getInetAddress(), remoteSocketAddress.getPort());
+                //sIn.setSoTimeout(1000);
+                //log.info(ss.getClass().getName() + " " +sIn.getClass().getName());
+                new NetworkTunnel(sIn, sRemote);
+            }
+        } catch (Exception e) {
+            IOUtil.close(ss);
+        }
+    }
+
+
+    @Override
+    public void close() throws IOException {
+        // TODO Auto-generated method stub
+        ss.close();
+    }
+
+    @SuppressWarnings("resource")
+    public static void main(String... args) {
+        try {
+            int index = 0;
+            boolean nio = false;
+            String ksConfig = args[index++];
+            if (!new File(ksConfig).isFile()) {
+                ksConfig = args[index++];
+                nio = true;
+            }
+
+
+            KeyStoreConfig ksc = GSONUtil.create(false).fromJson(IOUtil.inputStreamToString(new FileInputStream(ksConfig), true), KeyStoreConfig.class);
+
+
+            //System.setProperty("javax.net.debug","all");
+            SSLContext sslc = SecUtil.SINGLETON.initSSLContext(ksc.keystore_file, ksc.keystore_type, ksc.keystore_password.toCharArray(),
+                    ksc.alias_password != null ? ksc.alias_password.toCharArray() : null, null, null);
+
+
+            if (nio) {
+                if (log.isEnabled()) log.info("Creating NIO Secure tunnel");
+
+                NIOSocket nios = new NIOSocket(TaskUtil.defaultTaskProcessor(), TaskUtil.defaultTaskScheduler());
+                for (; index < args.length; index++) {
+                    try {
+                        String[] parsed = args[index].split(",");
+                        int port = Integer.parseInt(parsed[0]);
+                        IPAddress remoteAddress = new IPAddress(parsed[1]);
+                        ServerSocketChannel ssc = ServerSocketChannel.open();
+
+                        ssc.bind(new InetSocketAddress(port));
+                        System.out.println("Adding:" + ssc + " " + remoteAddress);
+                        nios.addServerSocket(ssc, new NIOTunnelFactory(remoteAddress));
+                        //
+                    } catch (Exception e) {
+
+                        e.printStackTrace();
+                    }
+                }
+
+            } else {
+                if (log.isEnabled()) log.info("Creating classic Secure tunnel");
+                SSLServerSocketFactory sslssf = sslc.getServerSocketFactory();
+                for (; index < args.length; index++) {
+                    try {
+                        String[] parsed = args[index].split(",");
+                        int port = Integer.parseInt(parsed[0]);
+                        IPAddress remoteAddress = new IPAddress(parsed[1]);
+                        new SecureNetworkTunnel(sslssf, port, 128, remoteAddress);
+
+                    } catch (Exception e) {
+                        if (log.isEnabled()) log.info("Failed to start " + args[index]);
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println("SecureNetworkTunnel keystoreJSONConfigFile localport,remoteHost:remotePort...");
+            System.exit(0);
+        }
+    }
+
+
 }

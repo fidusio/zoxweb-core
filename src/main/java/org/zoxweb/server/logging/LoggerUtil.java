@@ -25,93 +25,82 @@ import java.util.logging.*;
 /**
  * Logger utility class.
  */
-public final class LoggerUtil 
-{
-	//Date d;
-	public static final SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSZ");
-	public static final String PRODUCTION_FORMAT = "%1$tY-%1$tm-%1$td %1$tH:%1$tM:%1$tS %4$-6s : %2$s %5$s%6$s%n";
-	public static final String DEFAULT_FORMAT = "%1$s %4$-6s : %2$s-%5$s%6$s%n";
-	public static final String DEFAULT_FORMAT_INTERNAL = "[%1$s][%2$s::%3$s][%4$s]:%5$s: %6$s %n";
-	public static final ConsoleHandler PRODUCTION_HANDLER = new ConsoleHandler();
-	static
-	{
-		PRODUCTION_HANDLER.setFormatter(new SimpleFormatter() {
+public final class LoggerUtil {
 
-			@Override
-			public synchronized String format(LogRecord lr) {
-				return String.format(DEFAULT_FORMAT_INTERNAL,
-						DateUtil.DEFAULT_DATE_FORMAT_TZ.format(new Date(lr.getMillis())),
-						lr.getSourceClassName(),
-						lr.getSourceMethodName(),
-						lr.getLevel().getLocalizedName(),
-						Thread.currentThread(),
-						lr.getMessage()
-				);
-			}
-		});
-	}
+    public static final SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSZ");
+    public static final String PRODUCTION_FORMAT = "%1$tY-%1$tm-%1$td %1$tH:%1$tM:%1$tS %4$-6s : %2$s %5$s%6$s%n";
+    public static final String DEFAULT_FORMAT = "%1$s %4$-6s : %2$s-%5$s%6$s%n";
+    public static final String DEFAULT_FORMAT_INTERNAL = "[%1$s][%2$s::%3$s][%4$s]:%5$s: %6$s %n";
+    public static final ConsoleHandler PRODUCTION_HANDLER = new ConsoleHandler();
 
-	private LoggerUtil()
-	{
-	}
-	
-	public static Logger loggerToFile(String loggerName, String filename)
-        throws SecurityException, IOException
-	{
-		if (loggerName != null && filename != null)
-		{
-			return loggerToFile(Logger.getLogger(loggerName), filename);
-		}
+    static {
+        PRODUCTION_HANDLER.setFormatter(new SimpleFormatter() {
 
-		return null;
-	}
-	
-	
-	public static Logger loggerToFile(Logger logger, String filename)
-        throws SecurityException, IOException
-	{
-		if (logger != null && filename != null)
-		{
-			FileHandler fh = new FileHandler(filename, true);
-			//Logger rootLogger = Logger.getLogger("");
-	        //Handler[] handlers = rootLogger.getHandlers();
-	        //if (handlers[0] instanceof ConsoleHandler) {
-	        //       rootLogger.removeHandler(handlers[0]);
-	        //}
-	        logger.addHandler(fh);
-	        CustomFormatter formatter = new CustomFormatter(DEFAULT_FORMAT);  
-	        fh.setFormatter(formatter);  
-	        logger.info("file logging started");
-		}
+            @Override
+            public synchronized String format(LogRecord lr) {
+                return String.format(DEFAULT_FORMAT_INTERNAL,
+                        DateUtil.DEFAULT_DATE_FORMAT_TZ.format(new Date(lr.getMillis())),
+                        lr.getSourceClassName(),
+                        lr.getSourceMethodName(),
+                        lr.getLevel().getLocalizedName(),
+                        Thread.currentThread(),
+                        lr.getMessage()
+                );
+            }
+        });
+    }
+
+    private LoggerUtil() {
+    }
+
+    public static Logger loggerToFile(String loggerName, String filename)
+            throws SecurityException, IOException {
+        if (loggerName != null && filename != null) {
+            return loggerToFile(Logger.getLogger(loggerName), filename);
+        }
+
+        return null;
+    }
+
+
+    public static Logger loggerToFile(Logger logger, String filename)
+            throws SecurityException, IOException {
+        if (logger != null && filename != null) {
+            FileHandler fh = new FileHandler(filename, true);
+            //Logger rootLogger = Logger.getLogger("");
+            //Handler[] handlers = rootLogger.getHandlers();
+            //if (handlers[0] instanceof ConsoleHandler) {
+            //       rootLogger.removeHandler(handlers[0]);
+            //}
+            logger.addHandler(fh);
+            CustomFormatter formatter = new CustomFormatter(DEFAULT_FORMAT);
+            fh.setFormatter(formatter);
+            logger.info("file logging started");
+        }
 
         return logger;
-	}
+    }
 
-	public static PrintWriter createPrintWriter(String filename)
-        throws IOException
-	{
-		return createPrintWriter(new File(filename));
-	}
-	
-	public static PrintWriter createPrintWriter(File f)
-        throws IOException
-	{
-		FileWriter fw = new FileWriter(f, true);
-		return new PrintWriter(new BufferedWriter(fw), true);
-	}
-	
-	public static void logToFile(PrintWriter pw, String msg)
-	{
-		if (pw != null)
-		{
-			pw.println(SDF.format(new Date()) + msg);
-		}
-	}
+    public static PrintWriter createPrintWriter(String filename)
+            throws IOException {
+        return createPrintWriter(new File(filename));
+    }
 
-	public static void updateLoggingFormat(String format)
-	{
-		System.setProperty("java.util.logging.SimpleFormatter.format", format);
-	}
+    public static PrintWriter createPrintWriter(File f)
+            throws IOException {
+        FileWriter fw = new FileWriter(f, true);
+        return new PrintWriter(new BufferedWriter(fw), true);
+    }
+
+    public static void logToFile(PrintWriter pw, String msg) {
+        if (pw != null) {
+            pw.println(SDF.format(new Date()) + msg);
+        }
+    }
+
+    public static void updateLoggingFormat(String format) {
+        System.setProperty("java.util.logging.SimpleFormatter.format", format);
+    }
 
 //	public static void enableDefaultLogger(String loggerHeader)
 //	{
@@ -135,21 +124,21 @@ public final class LoggerUtil
 //		mainLogger.addHandler(handler);
 //	}
 
-	public static void configureLogger(Logger logger) {
-		// Remove existing handlers (if any)
-		for (Handler handler : logger.getHandlers()) {
-			logger.removeHandler(handler);
-		}
+    public static void configureLogger(Logger logger) {
+        // Remove existing handlers (if any)
+        for (Handler handler : logger.getHandlers()) {
+            logger.removeHandler(handler);
+        }
 
-		// Attach the handler to the logger
-		logger.addHandler(PRODUCTION_HANDLER);
+        // Attach the handler to the logger
+        logger.addHandler(PRODUCTION_HANDLER);
 
-		// Set the logger level (optional)
-		logger.setLevel(Level.ALL);
+        // Set the logger level (optional)
+        logger.setLevel(Level.ALL);
 
-		// Disable use of parent handlers
-		logger.setUseParentHandlers(false);
-	}
+        // Disable use of parent handlers
+        logger.setUseParentHandlers(false);
+    }
 
 
 }

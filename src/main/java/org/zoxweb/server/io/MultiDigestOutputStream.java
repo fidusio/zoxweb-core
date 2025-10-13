@@ -23,12 +23,11 @@ import java.security.MessageDigest;
 
 /**
  * [Please state the purpose for this class or method because it will help the team for future maintenance ...].
- * 
+ *
  */
 public class MultiDigestOutputStream
-    extends FilterOutputStream
-    implements MultiDigestInterface
-{
+        extends FilterOutputStream
+        implements MultiDigestInterface {
 
 //    private boolean on = true;
 //    private AtomicLong totalBytes = new AtomicLong();
@@ -37,8 +36,8 @@ public class MultiDigestOutputStream
 //     * The message digest associated with this stream.
 //     */
 //    protected MessageDigest[] digests;
-    
-    
+
+
     private MultiDigest md = new MultiDigest();
 
     /**
@@ -49,8 +48,7 @@ public class MultiDigestOutputStream
      *
      * @param digests the message digest to associate with this stream.
      */
-    public MultiDigestOutputStream(OutputStream stream, MessageDigest ...digests)
-    {
+    public MultiDigestOutputStream(OutputStream stream, MessageDigest... digests) {
         super(stream);
         //setMessageDigests(digest);
         md.setMessageDigests(digests);
@@ -60,10 +58,9 @@ public class MultiDigestOutputStream
      * Returns the message digest associated with this stream.
      *
      * @return the message digest associated with this stream.
-     
+
      */
-    public MessageDigest[] getMessageDigests()
-    {
+    public MessageDigest[] getMessageDigests() {
         return md.getMessageDigests();
     }
 
@@ -73,8 +70,7 @@ public class MultiDigestOutputStream
      * @param digests the message digest to be associated with this stream.
 
      */
-    public void setMessageDigests(MessageDigest[] digests)
-    {
+    public void setMessageDigests(MessageDigest[] digests) {
         md.setMessageDigests(digests);
     }
 
@@ -95,11 +91,10 @@ public class MultiDigestOutputStream
      *
      * @see MessageDigest#update(byte)
      */
-    public void write(int b) throws IOException 
-    {
+    public void write(int b) throws IOException {
         out.write(b);
-        md.update((byte)b);
-       
+        md.update((byte) b);
+
     }
 
     /**
@@ -125,8 +120,7 @@ public class MultiDigestOutputStream
      *
      * @see MessageDigest#update(byte[], int, int)
      */
-    public void write(byte[] b, int off, int len) throws IOException
-    {
+    public void write(byte[] b, int off, int len) throws IOException {
         out.write(b, off, len);
         md.update(b, off, len);
     }
@@ -140,22 +134,19 @@ public class MultiDigestOutputStream
      * @param on true to turn the digest function on, false to turn it
      * off.
      */
-    public void on(boolean on) 
-    {
-    	md.on(on);
+    public void on(boolean on) {
+        md.on(on);
     }
-    
-    public long totalBytes()
-    {
-    	return md.totalBytes();
+
+    public long totalBytes() {
+        return md.totalBytes();
     }
 
     /**
      * Prints a string representation of this digest output stream and
      * its associated message digest object.
      */
-     public String toString()
-     {
-         return md.toString();
-     }
+    public String toString() {
+        return md.toString();
+    }
 }

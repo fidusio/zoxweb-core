@@ -8,22 +8,23 @@ import java.util.concurrent.Executor;
 
 
 public interface StateMachineInt<C>
-extends GetName, AutoCloseable, GetConfig<C>
-{
+        extends GetName, AutoCloseable, GetConfig<C> {
 
     StateMachineInt<C> register(StateInt<?> state);
 
     StateMachineInt<C> publish(TriggerInt<?> trigger);
-    <D>StateMachineInt<C> publish(StateInt<?> state, String canID, D data);
 
-    <D>StateMachineInt<C> publish(StateInt<?> state, Enum<?> canID, D data);
+    <D> StateMachineInt<C> publish(StateInt<?> state, String canID, D data);
+
+    <D> StateMachineInt<C> publish(StateInt<?> state, Enum<?> canID, D data);
+
     StateMachineInt<C> publishSync(TriggerInt<?> trigger);
 
-    <D>StateMachineInt<C> publishSync(StateInt<?> state, String canID, D data);
+    <D> StateMachineInt<C> publishSync(StateInt<?> state, String canID, D data);
 
-    <D>StateMachineInt<C> publishSync(StateInt<?> state, Enum<?> canID, D data);
+    <D> StateMachineInt<C> publishSync(StateInt<?> state, Enum<?> canID, D data);
+
     StateMachineInt<C> publishToCurrentState(TriggerInt<?> trigger);
-
 
 
     StateMachineInt<C> setConfig(C config);
@@ -33,9 +34,13 @@ extends GetName, AutoCloseable, GetConfig<C>
     void close();
 
     TaskSchedulerProcessor getScheduler();
+
     Executor getExecutor();
+
     boolean isScheduledTaskEnabled();
+
     StateInt<?> lookupState(String name);
+
     StateInt<?> lookupState(Enum<?> name);
 
 

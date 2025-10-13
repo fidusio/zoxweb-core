@@ -16,8 +16,7 @@ import java.util.Base64;
 public class OkHTTPChunkedMultipartUploader {
 
     public static NVGenericMap uploadFile(String url, String username, String password, String filepath, String remoteLocation)
-            throws IOException
-    {
+            throws IOException {
         OkHttpClient client = OkHTTPCall.createOkHttpBuilder(null, null, HTTPMessageConfigInterface.DEFAULT_TIMEOUT_20_SECOND, false, 20, HTTPMessageConfigInterface.DEFAULT_TIMEOUT_40_SECOND).build();
 
         File file = new File(filepath);
@@ -78,7 +77,7 @@ public class OkHTTPChunkedMultipartUploader {
 
             resp.build(new NVInt("status", response.code()))
                     .build("round-trip-duration", Const.TimeInMillis.toString(System.currentTimeMillis() - ts))
-                            .build(remoteResp);
+                    .build(remoteResp);
             return resp;
 
         }
@@ -98,16 +97,14 @@ public class OkHTTPChunkedMultipartUploader {
         String[] files = ParamUtil.parseWithSep(",", args[index++]);
         String remoteLocation = index < args.length ? args[index++] : null;
 
-        for(String filepath: files) {
+        for (String filepath : files) {
             System.out.println("Trying to upload: " + filepath + " to: " + url);
             try {
                 NVGenericMap resp = uploadFile(url, username, password, filepath, remoteLocation);
                 System.out.println(GSONUtil.toJSONDefault(resp, true));
 //                System.out.println("" + resp.getValue("content"));
 //                System.out.println("It took " + Const.TimeInMillis.toString(resp.getValue("duration")));
-            }
-            catch (Exception e)
-            {
+            } catch (Exception e) {
                 System.err.println(filepath + " failed to upload");
                 e.printStackTrace();
             }

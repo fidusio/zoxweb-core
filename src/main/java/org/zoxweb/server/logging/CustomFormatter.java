@@ -23,15 +23,13 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
 public class CustomFormatter
-    extends Formatter
-{
-	  // format string for printing the log record
+        extends Formatter {
+    // format string for printing the log record
     private final String format;
     private final Date dat = new Date();
-    
-    public CustomFormatter(String format)
-    {
-    	this.format = format;
+
+    public CustomFormatter(String format) {
+        this.format = format;
     }
 
     /**
@@ -109,29 +107,23 @@ public class CustomFormatter
      * @param record the log record to be formatted.
      * @return a formatted log record
      */
-    public synchronized String format(LogRecord record)
-    {
+    public synchronized String format(LogRecord record) {
         dat.setTime(record.getMillis());
         String source;
 
-        if (record.getSourceClassName() != null)
-        {
+        if (record.getSourceClassName() != null) {
             source = record.getSourceClassName();
-            if (record.getSourceMethodName() != null)
-            {
-               source += " " + record.getSourceMethodName();
+            if (record.getSourceMethodName() != null) {
+                source += " " + record.getSourceMethodName();
             }
-        }
-        else
-        {
+        } else {
             source = record.getLoggerName();
         }
 
         String message = formatMessage(record);
         String throwable = "";
 
-        if (record.getThrown() != null)
-        {
+        if (record.getThrown() != null) {
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);
             pw.println();
@@ -141,13 +133,13 @@ public class CustomFormatter
         }
 
         return String.format(format,
-                             LoggerUtil.SDF.format(dat),
-                             source,
-                             record.getLoggerName(),
-                             record.getLevel().getName(),
-                             //record.getLevel().getLocalizedLevelName(),
-                             message,
-                             throwable);
+                LoggerUtil.SDF.format(dat),
+                source,
+                record.getLoggerName(),
+                record.getLevel().getName(),
+                //record.getLevel().getLocalizedLevelName(),
+                message,
+                throwable);
     }
 
 }

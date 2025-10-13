@@ -8,20 +8,19 @@ import java.util.function.Consumer;
 
 
 public interface StateInt<P>
-    extends GetName, GetNVProperties
-{
+        extends GetName, GetNVProperties {
     enum States
-        implements GetName
-    {
+            implements GetName {
         INIT("init"),
         FINAL("final"),
         ;
 
         private final String name;
-        States(String name)
-        {
+
+        States(String name) {
             this.name = name;
         }
+
         @Override
         public String getName() {
             return name;
@@ -32,7 +31,9 @@ public interface StateInt<P>
     TriggerConsumerInt<?>[] triggers();
 
     TriggerConsumerInt<?> lookupTriggerConsumer(String canonicalID);
+
     TriggerConsumerInt<?> lookupTriggerConsumer(GetName canonicalID);
+
     TriggerConsumerInt<?> lookupTriggerConsumer(Enum<?> canonicalID);
 
     Consumer<?> lookupConsumer(String canonicalID);
@@ -40,8 +41,9 @@ public interface StateInt<P>
     StateInt<?> register(TriggerConsumerInt<?> tc);
 
 
-    StateInt<?> register(Consumer<?> consumer, String ...canIDs);
-    StateInt<?> register(Consumer<?> consumer, Enum<?> ...canIDs);
+    StateInt<?> register(Consumer<?> consumer, String... canIDs);
+
+    StateInt<?> register(Consumer<?> consumer, Enum<?>... canIDs);
 
     StateMachineInt<?> getStateMachine();
 

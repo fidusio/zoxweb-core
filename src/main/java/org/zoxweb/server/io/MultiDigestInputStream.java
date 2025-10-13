@@ -21,13 +21,12 @@ import java.io.InputStream;
 import java.security.MessageDigest;
 
 /**
- * 
- * 
+ *
+ *
  */
-public class MultiDigestInputStream 
-    extends FilterInputStream
-    implements MultiDigestInterface
-{
+public class MultiDigestInputStream
+        extends FilterInputStream
+        implements MultiDigestInterface {
 
     /* NOTE: This should be made a generic UpdaterInputStream */
 
@@ -40,7 +39,7 @@ public class MultiDigestInputStream
 //    protected MessageDigest[] digests;
 //    
 //    private AtomicLong totalBytes = new AtomicLong();
-    
+
     private MultiDigest md = new MultiDigest();
 
     /**
@@ -51,8 +50,7 @@ public class MultiDigestInputStream
      *
      * @param digests the message digest to associate with this stream.
      */
-    public MultiDigestInputStream(InputStream stream, MessageDigest ...digests) 
-    {
+    public MultiDigestInputStream(InputStream stream, MessageDigest... digests) {
         super(stream);
         setMessageDigests(digests);
     }
@@ -62,8 +60,7 @@ public class MultiDigestInputStream
      *
      * @return the message digests associated with this stream.
      */
-    public MessageDigest[] getMessageDigests()
-    {
+    public MessageDigest[] getMessageDigests() {
         return md.getMessageDigests();
     }
 
@@ -72,9 +69,8 @@ public class MultiDigestInputStream
      *
      * @param digests the message digest to be associated with this stream.
      */
-    public void setMessageDigests(MessageDigest[] digests)
-    {
-    	md.setMessageDigests(digests);
+    public void setMessageDigests(MessageDigest[] digests) {
+        md.setMessageDigests(digests);
     }
 
     /**
@@ -90,13 +86,11 @@ public class MultiDigestInputStream
      * @exception IOException if an I/O error occurs.
      *
      */
-    public int read() throws IOException 
-    {
+    public int read() throws IOException {
         int ch = in.read();
 
-        if (ch != -1) 
-        {
-        	md.update((byte)ch);
+        if (ch != -1) {
+            md.update((byte) ch);
         }
 
         return ch;
@@ -130,13 +124,11 @@ public class MultiDigestInputStream
      * @exception IOException if an I/O error occurs.
      *
      */
-    public int read(byte[] b, int off, int len) 
-        throws IOException
-    {
+    public int read(byte[] b, int off, int len)
+            throws IOException {
         int result = in.read(b, off, len);
-        if (result != -1) 
-        {	
-        	md.update(b, off, result);
+        if (result != -1) {
+            md.update(b, off, result);
         }
         return result;
     }
@@ -150,22 +142,19 @@ public class MultiDigestInputStream
      * @param on true to turn the digest function on, false to turn
      * it off.
      */
-    public void on(boolean on)
-    {
-    	md.on(on);
+    public void on(boolean on) {
+        md.on(on);
     }
-    
-    public long totalBytes()
-    {
-    	return md.totalBytes();
+
+    public long totalBytes() {
+        return md.totalBytes();
     }
 
     /**
      * return Prints a string representation of this digest input stream and its associated message digest object.
      */
-     public String toString()
-     {
-         return md.toString();
-     }
+    public String toString() {
+        return md.toString();
+    }
 
 }

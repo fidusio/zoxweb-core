@@ -297,7 +297,7 @@ public class JarTool {
     public static ZipInputStream convertToZipIS(InputStream is)
             throws IOException {
         try {
-            if(is instanceof ByteArrayInputStream)
+            if (is instanceof ByteArrayInputStream)
                 return new ZipInputStream(is);
             UByteArrayOutputStream baos = new UByteArrayOutputStream();
             byte[] buffer = new byte[4096];
@@ -307,7 +307,7 @@ public class JarTool {
             }
             return new ZipInputStream(baos.toByteArrayInputStream());
         } finally {
-            if(!(is instanceof ByteArrayInputStream))
+            if (!(is instanceof ByteArrayInputStream))
                 IOUtil.close(is);
         }
     }
@@ -315,7 +315,7 @@ public class JarTool {
     public static JarInputStream convertToJarIS(InputStream is)
             throws IOException {
         try {
-            if(is instanceof ByteArrayInputStream)
+            if (is instanceof ByteArrayInputStream)
                 return new JarInputStream(is);
 
             UByteArrayOutputStream baos = new UByteArrayOutputStream();
@@ -326,7 +326,7 @@ public class JarTool {
             }
             return new JarInputStream(baos.toByteArrayInputStream());
         } finally {
-            if(!(is instanceof ByteArrayInputStream))
+            if (!(is instanceof ByteArrayInputStream))
                 IOUtil.close(is);
         }
     }

@@ -19,26 +19,25 @@ import java.security.MessageDigest;
 
 /**
  * [Please state the purpose for this class or method because it will help the team for future maintenance ...].
- * 
+ *
  */
 public interface MultiDigestInterface
-	extends StreamStats
-{
+        extends StreamStats {
 
-	/**
+    /**
      * Associates the specified message digest with this stream.
      *
      * @param digests the message digest to be associated with this stream.)
      */
     public void setMessageDigests(MessageDigest[] digests);
-    
+
     /**
      * Returns the message digest associated with this stream.
      *
      * @return the message digest associated with this stream.
      */
     public MessageDigest[] getMessageDigests();
-    
+
     /**
      * Turns the digest function on or off. The default is on.  When
      * it is on, a call to one of the <code>write</code> methods results in an
@@ -48,6 +47,6 @@ public interface MultiDigestInterface
      * @param on true to turn the digest function on, false to turn it off.
      */
     public void on(boolean on);
-    
-   
+
+
 }

@@ -15,11 +15,6 @@
  */
 package org.zoxweb.server.util;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.HashMap;
-import java.util.List;
-
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.shared.app.AppVersionDAO;
 import org.zoxweb.shared.util.NVPair;
@@ -27,103 +22,96 @@ import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedStringUtil;
 import org.zoxweb.shared.util.SharedUtil;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.List;
+
 /**
  * The release manager load and parse json release string and streams that represent application release objects
  */
-public class ReleaseManager
-{
+public class ReleaseManager {
 
-	public static final ReleaseManager SINGLETON = new ReleaseManager();
+    public static final ReleaseManager SINGLETON = new ReleaseManager();
 
-	private HashMap<String, AppVersionDAO> map = new HashMap<String, AppVersionDAO>();
+    private HashMap<String, AppVersionDAO> map = new HashMap<String, AppVersionDAO>();
 
-	private ReleaseManager()
-    {
-		
-	}
-	
-	public AppVersionDAO load(String dir, String appName)
-        throws IOException
-    {
-		return load(ReleaseManager.class.getResourceAsStream(dir +appName + ".json"));
-	}
-	
-	public AppVersionDAO load(InputStream is)
-        throws IOException
-    {
-		return load(IOUtil.inputStreamToString(is, true));
-	}
-	
-	public synchronized AppVersionDAO load(String json)
-    {
-		String name = null;
-		String description = null;
-		int major = 0;
-		int minor = 0;
-		int nano  = 0;
-		
-		List<CharSequence> tokens = SharedStringUtil.parseGroup(json, "{", "}", false);
-	
-		String[] attributes = tokens.get(0).toString().split(",");
+    private ReleaseManager() {
 
-		for (String attribute :attributes)
-		{
-			NVPair nvp = SharedUtil.toNVPair(attribute, ":", false);
-			nvp.setName(SharedStringUtil.filterString(nvp.getName(), "\""));
-			switch( nvp.getName())
-            {
-			case "name":
-				name = SharedStringUtil.filterString(nvp.getValue(), "\"");
-				break;
-			case "description":
-				description = SharedStringUtil.filterString(nvp.getValue(), "\"");
-				break;
-			case "major":
-				major = Integer.parseInt(nvp.getValue());
-				break;
-			case "minor":
-				minor = Integer.parseInt(nvp.getValue());
-				break;
-			case "nano":
-				nano = Integer.parseInt(nvp.getValue());
-			break;
-			}
-		}
+    }
 
-		if (!SUS.isEmpty(name))
-		{
-			AppVersionDAO ret = new AppVersionDAO();
-		
-			ret.setName(name);
-			ret.setDescription(description);
-			ret.setMajor(major);
-			ret.setMinor(minor);
-			ret.setNano(nano);
-			map.put(name.toLowerCase(), ret);
-		
-			return ret;
-		}
+    public AppVersionDAO load(String dir, String appName)
+            throws IOException {
+        return load(ReleaseManager.class.getResourceAsStream(dir + appName + ".json"));
+    }
 
-		return null;
-	}
-	
-	public AppVersionDAO lookup( String name)
-    {
-		name = SharedStringUtil.toLowerCase(SharedStringUtil.trimOrNull(name));
-		return map.get(name);
-	}
+    public AppVersionDAO load(InputStream is)
+            throws IOException {
+        return load(IOUtil.inputStreamToString(is, true));
+    }
 
-	public static void main(String... args)
-    {
-		String DEFAULT_DIR ="/org/zoxweb/conf/";
-		
-		try
-        {
-			System.out.println(ReleaseManager.SINGLETON.load( DEFAULT_DIR, "jwput").toCanonicalID());
-		}
-		catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+    public synchronized AppVersionDAO load(String json) {
+        String name = null;
+        String description = null;
+        int major = 0;
+        int minor = 0;
+        int nano = 0;
+
+        List<CharSequence> tokens = SharedStringUtil.parseGroup(json, "{", "}", false);
+
+        String[] attributes = tokens.get(0).toString().split(",");
+
+        for (String attribute : attributes) {
+            NVPair nvp = SharedUtil.toNVPair(attribute, ":", false);
+            nvp.setName(SharedStringUtil.filterString(nvp.getName(), "\""));
+            switch (nvp.getName()) {
+                case "name":
+                    name = SharedStringUtil.filterString(nvp.getValue(), "\"");
+                    break;
+                case "description":
+                    description = SharedStringUtil.filterString(nvp.getValue(), "\"");
+                    break;
+                case "major":
+                    major = Integer.parseInt(nvp.getValue());
+                    break;
+                case "minor":
+                    minor = Integer.parseInt(nvp.getValue());
+                    break;
+                case "nano":
+                    nano = Integer.parseInt(nvp.getValue());
+                    break;
+            }
+        }
+
+        if (!SUS.isEmpty(name)) {
+            AppVersionDAO ret = new AppVersionDAO();
+
+            ret.setName(name);
+            ret.setDescription(description);
+            ret.setMajor(major);
+            ret.setMinor(minor);
+            ret.setNano(nano);
+            map.put(name.toLowerCase(), ret);
+
+            return ret;
+        }
+
+        return null;
+    }
+
+    public AppVersionDAO lookup(String name) {
+        name = SharedStringUtil.toLowerCase(SharedStringUtil.trimOrNull(name));
+        return map.get(name);
+    }
+
+    public static void main(String... args) {
+        String DEFAULT_DIR = "/org/zoxweb/conf/";
+
+        try {
+            System.out.println(ReleaseManager.SINGLETON.load(DEFAULT_DIR, "jwput").toCanonicalID());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
 }

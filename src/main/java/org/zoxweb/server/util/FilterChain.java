@@ -9,26 +9,20 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class FilterChain<T>
-implements Function<T, FunctionStatus>
-{
-
-
+        implements Function<T, FunctionStatus> {
 
     private final ListIterator<Function<T, FunctionStatus>> filtersIterator;
     private final Consumer<T> handler;
 
-    public FilterChain(List<Function<T, FunctionStatus >> filters, Consumer<T> handler)
-    {
+    public FilterChain(List<Function<T, FunctionStatus>> filters, Consumer<T> handler) {
         filtersIterator = filters != null ? filters.listIterator() : null;
         this.handler = handler;
     }
 
-    public FunctionStatus apply(T data)
-    {
+    public FunctionStatus apply(T data) {
         if (filtersIterator != null && filtersIterator.hasNext()) {
             FunctionStatus fs = filtersIterator.next().apply(data);
-            switch (fs)
-            {
+            switch (fs) {
 
                 case PARTIAL:
                     return FunctionStatus.PARTIAL;
@@ -41,14 +35,11 @@ implements Function<T, FunctionStatus>
 
             }
 
-        }
-        else if (handler != null)
+        } else if (handler != null)
             handler.accept(data);
 
         return FunctionStatus.COMPLETED;
     }
-
-
 
 
 }

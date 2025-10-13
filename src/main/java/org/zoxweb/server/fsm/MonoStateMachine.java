@@ -11,24 +11,23 @@ import java.util.function.Consumer;
  * @param <V>
  */
 public class MonoStateMachine<K, V>
-    extends RegistrarMap<K, Consumer<V>, MonoStateMachine<K,V>>
-{
+        extends RegistrarMap<K, Consumer<V>, MonoStateMachine<K, V>> {
 
     private final boolean synchronous;
 
-    public MonoStateMachine(boolean synchronous)
-    {
+    public MonoStateMachine(boolean synchronous) {
         super(new LinkedHashMap<>());
         this.synchronous = synchronous;
     }
-    public void publish(K key, V param)
-    {
+
+    public void publish(K key, V param) {
 
         Consumer<V> c = lookup(key);
-        if (c != null)
-        {
-            if(synchronous)
-                synchronized (this){c.accept(param);}
+        if (c != null) {
+            if (synchronous)
+                synchronized (this) {
+                    c.accept(param);
+                }
             else
                 c.accept(param);
 

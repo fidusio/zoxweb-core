@@ -9,33 +9,31 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 
 public abstract class TriggerConsumer<T>
-implements TriggerConsumerInt<T>
-{
+        implements TriggerConsumerInt<T> {
     public final static LogWrapper log = new LogWrapper(TriggerConsumer.class).setEnabled(false);
 
     private final String[] canonicalIDs;
     private StateInt<?> state;
     protected AtomicLong execCounter = new AtomicLong();
-    private  Function<T, ?> function;
-    private  NVGenericMap nvgmConfig = null;
+    private Function<T, ?> function;
+    private NVGenericMap nvgmConfig = null;
 
 
-    public TriggerConsumer(Function f, String ...canonicalIDs)
-    {
+    public TriggerConsumer(Function f, String... canonicalIDs) {
         this(canonicalIDs);
         function = f;
     }
-    public TriggerConsumer(Function f, Enum<?> ...canonicalIDs)
-    {
+
+    public TriggerConsumer(Function f, Enum<?>... canonicalIDs) {
         this(canonicalIDs);
         function = f;
     }
-    public TriggerConsumer(String ...canonicalIDs)
-    {
+
+    public TriggerConsumer(String... canonicalIDs) {
         this.canonicalIDs = canonicalIDs;
     }
-    public TriggerConsumer(Enum<?>...gnCanonicalIDs)
-    {
+
+    public TriggerConsumer(Enum<?>... gnCanonicalIDs) {
         canonicalIDs = SUS.enumNames(gnCanonicalIDs);
     }
 
@@ -43,30 +41,27 @@ implements TriggerConsumerInt<T>
     public String[] canonicalIDs() {
         return canonicalIDs;
     }
+
     @Override
-    public StateInt<?> getState()
-    {
+    public StateInt<?> getState() {
         return state;
     }
 
     @Override
-    public void setSate(StateInt<?> state)
-    {
+    public void setSate(StateInt<?> state) {
         this.state = state;
     }
 
     @Override
-    public<R> TriggerConsumerInt<T> setFunction(Function<?, R> function)
-    {
+    public <R> TriggerConsumerInt<T> setFunction(Function<?, R> function) {
         this.function = (Function<T, ?>) function;
         return this;
     }
 
     @Override
-   public<R> Function getFunction()
-   {
-       return function;
-   }
+    public <R> Function getFunction() {
+        return function;
+    }
 
 
     @Override
@@ -79,49 +74,47 @@ implements TriggerConsumerInt<T>
 
     @Override
     public void publish(TriggerInt<?> triggerInt) {
-        if(triggerInt != null)
+        if (triggerInt != null)
             getState().getStateMachine().publish(triggerInt);
     }
+
     @Override
-    public <D>void publish(String canID, D data) {
-        if(canID != null)
+    public <D> void publish(String canID, D data) {
+        if (canID != null)
             getState().getStateMachine().publish(new Trigger(getState(), canID, data));
     }
 
     public <D> void publish(Enum<?> canID, D data) {
-        if(canID != null)
+        if (canID != null)
             getState().getStateMachine().publish(new Trigger(getState(), SUS.enumName(canID), data));
     }
 
     @Override
     public void publishSync(TriggerInt<?> triggerInt) {
-        if(triggerInt != null)
+        if (triggerInt != null)
             getState().getStateMachine().publishSync(triggerInt);
     }
 
-    public <D>void publishSync(String canID, D data) {
-        if(canID != null)
+    public <D> void publishSync(String canID, D data) {
+        if (canID != null)
             getState().getStateMachine().publishSync(new Trigger(getState(), canID, data));
     }
 
     public <D> void publishSync(Enum<?> canID, D data) {
-        if(canID != null)
+        if (canID != null)
             getState().getStateMachine().publishSync(new Trigger(getState(), SUS.enumName(canID), data));
     }
 
     @Override
-    public StateMachineInt<?> getStateMachine()
-    {
+    public StateMachineInt<?> getStateMachine() {
         return state.getStateMachine();
     }
-    
-    public void setProperties(NVGenericMap nvgm)
-    {
+
+    public void setProperties(NVGenericMap nvgm) {
         this.nvgmConfig = nvgm;
     }
-    
-    public NVGenericMap getProperties()
-    {
+
+    public NVGenericMap getProperties() {
         return nvgmConfig;
     }
 }

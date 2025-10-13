@@ -49,8 +49,7 @@ public class HTTPHeaderParser {
 
         if (headerName.equalsIgnoreCase(HTTPHeader.CONTENT_LENGTH.getName())) {
             ret = new NamedValue<>(headerName, Long.parseLong(headerValue));
-        }
-        else if (headerName.equalsIgnoreCase("Cookie")) {
+        } else if (headerName.equalsIgnoreCase("Cookie")) {
 
             ret = new NamedValue<>(headerName, headerValue);
             // Cookie: name1=value1; name2=value2

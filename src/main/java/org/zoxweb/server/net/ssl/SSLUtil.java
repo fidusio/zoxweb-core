@@ -8,35 +8,29 @@ import javax.net.ssl.SSLEngineResult;
 
 import static javax.net.ssl.SSLEngineResult.HandshakeStatus.*;
 
-public class SSLUtil
-{
+public class SSLUtil {
     public static final LogWrapper log = new LogWrapper(SSLUtil.class).setEnabled(false);
-    private SSLUtil(){}
 
-    public static long _notHandshaking(SSLSessionConfig config, SSLSessionCallback callback)
-    {
+    private SSLUtil() {
+    }
+
+    public static long _notHandshaking(SSLSessionConfig config, SSLSessionCallback callback) {
         long ts = System.currentTimeMillis();
-        if(log.isEnabled()) log.getLogger().info("" + config.getHandshakeStatus());
+        if (log.isEnabled()) log.getLogger().info("" + config.getHandshakeStatus());
 
-        if(config.sslChannel.isOpen())
-        {
-            if(config.getHandshakeStatus() == NOT_HANDSHAKING)
-            {
-                try
-                {
+        if (config.sslChannel.isOpen()) {
+            if (config.getHandshakeStatus() == NOT_HANDSHAKING) {
+                try {
                     int bytesRead = config.sslChannel.read(config.inSSLNetData);
-                    if (bytesRead == -1)
-                    {
-                        if (log.isEnabled()) log.getLogger().info("SSLCHANNEL-CLOSED-NOT_HANDSHAKING: " + config.getHandshakeStatus() + " bytesRead: " + bytesRead);
+                    if (bytesRead == -1) {
+                        if (log.isEnabled())
+                            log.getLogger().info("SSLCHANNEL-CLOSED-NOT_HANDSHAKING: " + config.getHandshakeStatus() + " bytesRead: " + bytesRead);
                         config.close();
-                    }
-                    else
-                    {
+                    } else {
                         SSLEngineResult result;
                         // even if we have read zero it will trigger BUFFER_UNDERFLOW then we wait for incoming
                         // data
-                        do
-                        {
+                        do {
                             result = config.smartUnwrap(config.inSSLNetData, config.inAppData);
                             if (log.isEnabled())
                                 log.getLogger().info("AFTER-NOT_HANDSHAKING-PROCESSING: " + result + " bytesRead: " + bytesRead + " callback: " + callback);
@@ -44,7 +38,8 @@ public class SSLUtil
                                 case BUFFER_UNDERFLOW:
                                     // no incoming data available we need to wait for more socket data
                                     // return and let the NIOSocket or the data handler call back
-                                    if (log.isEnabled()) log.getLogger().info("AFTER-NOT_HANDSHAKING-PROCESSING: " + result + " bytesRead: " + bytesRead + " callback: " + callback);
+                                    if (log.isEnabled())
+                                        log.getLogger().info("AFTER-NOT_HANDSHAKING-PROCESSING: " + result + " bytesRead: " + bytesRead + " callback: " + callback);
 
                                     return System.currentTimeMillis() - ts;
 
@@ -53,8 +48,7 @@ public class SSLUtil
                                     // this should never happen
                                 case OK:
                                     // check if we have data to process
-                                    if (callback != null && bytesRead >= 0 && result.bytesProduced() > 0)
-                                    {
+                                    if (callback != null && bytesRead >= 0 && result.bytesProduced() > 0) {
                                         // we have decrypted data to process
                                         callback.accept(config.inAppData);
                                     }
@@ -67,21 +61,20 @@ public class SSLUtil
                                     break;
                             }
                         }// check if we still have encrypted data to process
-                        while(config.inSSLNetData.hasRemaining() && !config.isClosed());
+                        while (config.inSSLNetData.hasRemaining() && !config.isClosed());
 
 
                     }
                 } catch (Exception e) {
-                    if(log.isEnabled())
+                    if (log.isEnabled())
                         e.printStackTrace();
 
-                    if(callback != null)
+                    if (callback != null)
                         callback.exception(e);
 
                     config.close();
                 }
-            }
-            else
+            } else
                 config.sslConnectionHelper.publish(config.getHandshakeStatus(), callback);
 
         }
@@ -89,21 +82,18 @@ public class SSLUtil
     }
 
 
-    public static long _finished(SSLSessionConfig config, SSLSessionCallback callback)
-    {
+    public static long _finished(SSLSessionConfig config, SSLSessionCallback callback) {
         long ts = System.currentTimeMillis();
 
         // ********************************************
         // Very crucial steps
         // ********************************************
-        if(config.remoteConnection != null)
-        {
+        if (config.remoteConnection != null) {
             // we have a SSL tunnel
             config.sslConnectionHelper.createRemoteConnection();
         }
 
-        if (config.inSSLNetData.position() > 0)
-        {
+        if (config.inSSLNetData.position() > 0) {
             //**************************************************
             // ||-----DATA BUFFER------ ||
             // ||Handshake data|App data||
@@ -116,12 +106,11 @@ public class SSLUtil
         return System.currentTimeMillis() - ts;
     }
 
-    public static long _needTask(SSLSessionConfig config, SSLSessionCallback callback)
-    {
+    public static long _needTask(SSLSessionConfig config, SSLSessionCallback callback) {
         long ts = System.currentTimeMillis();
 
         Runnable toRun;
-        while((toRun = config.getDelegatedTask()) != null)
+        while ((toRun = config.getDelegatedTask()) != null)
             toRun.run();
 
         SSLEngineResult.HandshakeStatus status = config.getHandshakeStatus();
@@ -145,13 +134,11 @@ public class SSLUtil
             try {
 
                 int bytesRead = config.sslChannel.read(config.inSSLNetData);
-                if (bytesRead == -1)
-                {
+                if (bytesRead == -1) {
                     if (log.isEnabled())
                         log.getLogger().info("SSLCHANNEL-CLOSED-NEED_UNWRAP: " + config.getHandshakeStatus() + " bytes read: " + bytesRead);
                     config.close();
-                }
-                else //if (bytesRead > 0)
+                } else //if (bytesRead > 0)
                 {
                     // even if we have read zero it will trigger BUFFER_UNDERFLOW then we wait for incoming
                     // data
@@ -160,8 +147,7 @@ public class SSLUtil
                     SSLEngineResult result = config.smartUnwrap(config.inSSLNetData, ByteBufferUtil.EMPTY);
 
 
-                    if (log.isEnabled())
-                    {
+                    if (log.isEnabled()) {
                         log.getLogger().info("AFTER-NEED_UNWRAP-HANDSHAKING: " + result + " bytes read: " + bytesRead);
                         log.getLogger().info("AFTER-NEED_UNWRAP-HANDSHAKING inNetData: " + config.inSSLNetData + " inAppData: " + config.inAppData);
                     }

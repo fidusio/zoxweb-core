@@ -9,28 +9,25 @@ import java.util.function.Consumer;
 
 
 public class State<P>
-    implements StateInt<P>
-{
-
+        implements StateInt<P> {
 
     public final static LogWrapper log = new LogWrapper(State.class).setEnabled(false);
     private final String name;
     private final NVGenericMap data = new NVGenericMap();
     private volatile StateMachineInt<?> stateMachine;
 
-    private final  Map<String, Consumer<?>> triggerConsumers = new LinkedHashMap<String, Consumer<?>> ();
-    public State(String name, NVBase<?> ...props)
-    {
+    private final Map<String, Consumer<?>> triggerConsumers = new LinkedHashMap<String, Consumer<?>>();
+
+    public State(String name, NVBase<?>... props) {
         this.name = name;
-        if(props != null)
-        {
+        if (props != null) {
             for (NVBase<?> nvb : props) {
                 data.add(nvb);
             }
         }
     }
-    public State(Enum<?> name, NVBase<?> ...props)
-    {
+
+    public State(Enum<?> name, NVBase<?>... props) {
         this(SUS.enumName(name), props);
     }
 
@@ -48,8 +45,7 @@ public class State<P>
         return null;
     }
 
-    public Consumer<?> lookupConsumer(String canonicalID)
-    {
+    public Consumer<?> lookupConsumer(String canonicalID) {
         return triggerConsumers.get(canonicalID);
     }
 
@@ -70,18 +66,16 @@ public class State<P>
         return name;
     }
 
-    public synchronized StateInt<?> register(TriggerConsumerInt<?> tc)
-    {
-        for(String canID : tc.canonicalIDs())
+    public synchronized StateInt<?> register(TriggerConsumerInt<?> tc) {
+        for (String canID : tc.canonicalIDs())
             triggerConsumers.put(canID, tc);
         tc.setSate(this);
         return this;
     }
 
-    public synchronized StateInt<?> register(Consumer<?> consumer, String ...canIDs)
-    {
+    public synchronized StateInt<?> register(Consumer<?> consumer, String... canIDs) {
         Consumer<?> tch = consumer instanceof TriggerConsumerHolder ? consumer : new TriggerConsumerHolder<>(consumer);
-        for(String canID : canIDs)
+        for (String canID : canIDs)
             triggerConsumers.put(canID, tch);
         return this;
     }
@@ -108,13 +102,11 @@ public class State<P>
         stateMachine = smi;
     }
 
-    public NVGenericMap getProperties()
-    {
+    public NVGenericMap getProperties() {
         return data;
     }
 
-    public String toString()
-    {
+    public String toString() {
         return getName();
     }
 }

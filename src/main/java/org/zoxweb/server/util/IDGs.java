@@ -99,6 +99,7 @@ public class IDGs {
         public String encode(byte[] input) {
             return SharedBase64.encodeAsString(Base64Type.URL, input);
         }
+
         @Override
         public String generateID() {
             String ret = null;
@@ -190,7 +191,7 @@ public class IDGs {
         }
     };
 
-    public static final IDGenerator<String, UUID> UUIDV4 = new IDGenerator<String, UUID>(){
+    public static final IDGenerator<String, UUID> UUIDV4 = new IDGenerator<String, UUID>() {
 
         /**
          *
@@ -228,7 +229,6 @@ public class IDGs {
             // TODO Auto-generated method stub
             return UUID.randomUUID();
         }
-
 
 
     };

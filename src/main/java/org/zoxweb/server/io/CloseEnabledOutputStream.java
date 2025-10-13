@@ -22,39 +22,34 @@ import java.io.OutputStream;
 /**
  *
  */
-public class CloseEnabledOutputStream 
-    extends FilterOutputStream
-{
+public class CloseEnabledOutputStream
+        extends FilterOutputStream {
 
-	protected volatile boolean autoCloseable;
-	
-	
-	public CloseEnabledOutputStream(OutputStream in)
-	{
-		this(in, true);
-	}
-	
-	
-	/**
-	 *
-	 * @param in
-	 */
-	public CloseEnabledOutputStream(OutputStream in, boolean autoClose)
-	{
-		super(in);
-		this.autoCloseable = autoClose;
-	}
+    protected volatile boolean autoCloseable;
 
-	public boolean isCloseEnabled()
-	{
-		return autoCloseable;
-	}
-	
-	
-	public void close()
-		throws IOException
-	{
-		if (isCloseEnabled())
-			super.close();
-	}
+
+    public CloseEnabledOutputStream(OutputStream in) {
+        this(in, true);
+    }
+
+
+    /**
+     *
+     * @param in
+     */
+    public CloseEnabledOutputStream(OutputStream in, boolean autoClose) {
+        super(in);
+        this.autoCloseable = autoClose;
+    }
+
+    public boolean isCloseEnabled() {
+        return autoCloseable;
+    }
+
+
+    public void close()
+            throws IOException {
+        if (isCloseEnabled())
+            super.close();
+    }
 }

@@ -1030,7 +1030,7 @@ public final class GSONUtil {
 //            writer.name(GNVType.toName(gnv, ':')).value(SharedBase64.encodeAsString(Base64Type.DEFAULT, (byte[]) gnv.getValue()));
             DataCodec<byte[], String> codec = MetaValueCodec.SINGLETON.lookupCodec(byte[].class);
 
-            writer.name(GNVType.toName(gnv, ':')).value(codec.encode((byte[])gnv.getValue()));
+            writer.name(GNVType.toName(gnv, ':')).value(codec.encode((byte[]) gnv.getValue()));
         } else if (gnv instanceof NVEntityReference) {
             writer.name(name);
             toJSON(writer, ((NVEntity) gnv.getValue()).getClass(), (NVEntity) gnv.getValue(), printNull, printClassType, Base64Type.DEFAULT);

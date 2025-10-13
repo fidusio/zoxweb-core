@@ -9,44 +9,39 @@ import org.zoxweb.shared.data.events.EventListenerManager;
 
 
 public class DefaultEvenManager
-extends EventListenerManager<BaseEventObject<?>, EventHandlerListener<BaseEventObject<?>>>
-{
+        extends EventListenerManager<BaseEventObject<?>, EventHandlerListener<BaseEventObject<?>>> {
 
     protected final TaskSchedulerProcessor tsp;
 
-    public DefaultEvenManager()
-    {
+    public DefaultEvenManager() {
         this(TaskUtil.defaultTaskScheduler());
     }
-    public DefaultEvenManager(TaskSchedulerProcessor tsp)
-    {
+
+    public DefaultEvenManager(TaskSchedulerProcessor tsp) {
         this.tsp = tsp;
     }
+
     @SuppressWarnings("unchecked")
     @Override
-    public void dispatch(BaseEventObject<?> event, boolean async)
-    {
-      EventHandlerListener<BaseEventObject<?>>[] all = getAllListeners();
+    public void dispatch(BaseEventObject<?> event, boolean async) {
+        EventHandlerListener<BaseEventObject<?>>[] all = getAllListeners();
 
-		for ( EventHandlerListener<?> el : all)
-		{
-		    if (async)
-            {
+        for (EventHandlerListener<?> el : all) {
+            if (async) {
                 tsp.queue(0, new Runnable() {
                     @Override
                     public void run() {
-                      ((EventHandlerListener<BaseEventObject<?>>) el).handleEvent(event);
+                        ((EventHandlerListener<BaseEventObject<?>>) el).handleEvent(event);
                     }
                 });
-            }
-		    else
-            {
+            } else {
                 ((EventHandlerListener<BaseEventObject<?>>) el).handleEvent(event);
             }
-		}
-	}
+        }
+    }
+
     @Override
     public void close() {
-      IOUtil.close(tsp);
+        IOUtil.close(tsp);
     }
 }

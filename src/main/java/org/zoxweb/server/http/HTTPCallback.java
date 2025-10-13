@@ -18,43 +18,37 @@ package org.zoxweb.server.http;
 import org.zoxweb.shared.http.HTTPAPIResult;
 import org.zoxweb.shared.task.ConsumerSupplierCallback;
 
-public abstract class HTTPCallback<I,O>
-    implements ConsumerSupplierCallback<HTTPAPIResult<O>,I>
-{
+public abstract class HTTPCallback<I, O>
+        implements ConsumerSupplierCallback<HTTPAPIResult<O>, I> {
 
-    private transient HTTPAPIEndPoint<I,O> endpoint;
+    private transient HTTPAPIEndPoint<I, O> endpoint;
 
     protected I input;
-    public HTTPCallback(I input)
-    {
+
+    public HTTPCallback(I input) {
         set(input);
     }
 
-    public HTTPCallback()
-    {
+    public HTTPCallback() {
     }
 
 
     @Override
-    public I get() 
-    {
+    public I get() {
         return input;
     }
 
-    public HTTPCallback<I,O> set(I input)
-    {
+    public HTTPCallback<I, O> set(I input) {
         this.input = input;
         return this;
     }
 
-    public HTTPCallback<I,O> setEndpoint(HTTPAPIEndPoint<I,O> endpoint)
-    {
+    public HTTPCallback<I, O> setEndpoint(HTTPAPIEndPoint<I, O> endpoint) {
         this.endpoint = endpoint;
         return this;
     }
 
-    public HTTPAPIEndPoint<I,O> getEndpoint()
-    {
+    public HTTPAPIEndPoint<I, O> getEndpoint() {
         return endpoint;
     }
 }

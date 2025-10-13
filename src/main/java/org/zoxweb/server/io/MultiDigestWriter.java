@@ -24,64 +24,57 @@ import java.security.MessageDigest;
  *
  */
 public class MultiDigestWriter
-	extends FilterWriter
-	implements MultiDigestInterface
-{
-	
-	private MultiDigest md = new MultiDigest();
+        extends FilterWriter
+        implements MultiDigestInterface {
 
-	/**
+    private MultiDigest md = new MultiDigest();
+
+    /**
      * *
-	 * @param out
-	 * @param digests 
-	 */
-	public MultiDigestWriter(Writer out, MessageDigest... digests)
-	{
-		super(out);
-		md.setMessageDigests(digests);
-	}
-	
-	public void write(char cbuf[], int off, int len)
-        throws IOException
-	{
-		out.write(cbuf, off, len);
-		md.update(cbuf, off, len);
-	}
+     * @param out
+     * @param digests
+     */
+    public MultiDigestWriter(Writer out, MessageDigest... digests) {
+        super(out);
+        md.setMessageDigests(digests);
+    }
 
-	/**
-	 * @see org.zoxweb.server.io.MultiDigestInterface#setMessageDigests(java.security.MessageDigest[])
-	 */
-	@Override
-	public void setMessageDigests(MessageDigest[] digests)
-    {
-		md.setMessageDigests(digests);
-	}
+    public void write(char cbuf[], int off, int len)
+            throws IOException {
+        out.write(cbuf, off, len);
+        md.update(cbuf, off, len);
+    }
 
-	/**
-	 * @see org.zoxweb.server.io.MultiDigestInterface#getMessageDigests()
-	 */
-	@Override
-	public MessageDigest[] getMessageDigests()
-    {
-		return md.getMessageDigests();
-	}
+    /**
+     * @see org.zoxweb.server.io.MultiDigestInterface#setMessageDigests(java.security.MessageDigest[])
+     */
+    @Override
+    public void setMessageDigests(MessageDigest[] digests) {
+        md.setMessageDigests(digests);
+    }
 
-	/**
-	 * @see org.zoxweb.server.io.MultiDigestInterface#on(boolean)
-	 */
-	@Override
-	public void on(boolean on)
-    {
-		md.on(on);
-	}
+    /**
+     * @see org.zoxweb.server.io.MultiDigestInterface#getMessageDigests()
+     */
+    @Override
+    public MessageDigest[] getMessageDigests() {
+        return md.getMessageDigests();
+    }
 
-	/**
-	 * @see org.zoxweb.server.io.MultiDigestInterface#totalBytes()
-	 */
-	@Override
-	public long totalBytes()
-    {
-		return md.totalBytes();
-	}
+    /**
+     * @see org.zoxweb.server.io.MultiDigestInterface#on(boolean)
+     */
+    @Override
+    public void on(boolean on) {
+        md.on(on);
+    }
+
+    /**
+     * @see org.zoxweb.server.io.MultiDigestInterface#totalBytes()
+     */
+    @Override
+    public long totalBytes() {
+        return md.totalBytes();
+    }
 
 }

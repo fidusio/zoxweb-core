@@ -6,8 +6,7 @@ import org.zoxweb.shared.util.SharedUtil;
 import java.lang.reflect.Modifier;
 
 public enum JMod
-        implements GetName
-{
+        implements GetName {
     PUBLIC(Modifier.PUBLIC, "public"),
     PROTECTED(Modifier.PROTECTED, "protected"),
     PRIVATE(Modifier.PRIVATE, "private"),
@@ -25,8 +24,8 @@ public enum JMod
 
     public final int MOD;
     private final String name;
-    JMod(int mod, String name)
-    {
+
+    JMod(int mod, String name) {
         this.MOD = mod;
         this.name = name;
     }
@@ -37,36 +36,29 @@ public enum JMod
     }
 
 
-    public static int toModifier(String ...tokens)
-    {
+    public static int toModifier(String... tokens) {
 
         int m = 0x0;
-        for (String s : tokens)
-        {
+        for (String s : tokens) {
             JMod jm = SharedUtil.lookupEnum(s, JMod.values());
-            if (jm != null)
-            {
+            if (jm != null) {
                 m |= jm.MOD;
             }
         }
         return m;
     }
 
-    public static int toModifier(JMod...modifiers)
-    {
+    public static int toModifier(JMod... modifiers) {
         int m = 0x0;
-        for (JMod jm : modifiers)
-        {
-            if (jm != null)
-            {
+        for (JMod jm : modifiers) {
+            if (jm != null) {
                 m |= jm.MOD;
             }
         }
         return m;
     }
 
-    public static String toString(int mod)
-    {
+    public static String toString(int mod) {
         // this is just a helper method
         return Modifier.toString(mod);
     }

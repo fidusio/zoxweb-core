@@ -16,12 +16,10 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 public class StateMachine<C>
-    implements StateMachineInt<C>
-{
+        implements StateMachineInt<C> {
 
     public final static LogWrapper log = new LogWrapper(StateMachine.class).setEnabled(false);
-    //protected final static Logger log = Logger.getLogger(StateMachine.class.getName());
-    //public static boolean debug = false;
+
     private final String name;
     private final TaskSchedulerProcessor tsp;
     private final Map<String, Set<TriggerConsumerInt<?>>> tcMap = new LinkedHashMap<String, Set<TriggerConsumerInt<?>>>();
@@ -33,14 +31,12 @@ public class StateMachine<C>
     private final AtomicReference<StateInt> currentState = new AtomicReference<>();
 
 
-    public StateMachine(String name)
-    {
+    public StateMachine(String name) {
         this(name, TaskUtil.defaultTaskScheduler());
     }
 
     public StateMachine(String name, TaskSchedulerProcessor taskSchedulerProcessor)
-            throws NullPointerException
-    {
+            throws NullPointerException {
         SUS.checkIfNulls("Name or TaskScheduler can't be null.", name, taskSchedulerProcessor);
         this.name = name;
         this.tsp = taskSchedulerProcessor;
@@ -49,9 +45,8 @@ public class StateMachine<C>
     }
 
     public StateMachine(String name, Executor executor)
-            throws NullPointerException
-    {
-        if(log.isEnabled()) log.getLogger().info(name + ":" + executor);
+            throws NullPointerException {
+        if (log.isEnabled()) log.getLogger().info(name + ":" + executor);
         SUS.checkIfNulls("Name or Executor can't be null.", name);
         this.name = name;
         this.tsp = null;
@@ -59,15 +54,11 @@ public class StateMachine<C>
     }
 
     @Override
-    public synchronized StateMachineInt<C> register(StateInt<?> state)
-    {
-        if(state != null)
-        {
+    public synchronized StateMachineInt<C> register(StateInt<?> state) {
+        if (state != null) {
             TriggerConsumerInt<?>[] triggers = state.triggers();
-            if(triggers != null)
-            {
-                for(TriggerConsumerInt<?> tc: triggers)
-                {
+            if (triggers != null) {
+                for (TriggerConsumerInt<?> tc : triggers) {
                     mapTriggerConsumer(tc);
                 }
             }
@@ -77,15 +68,12 @@ public class StateMachine<C>
         return this;
     }
 
-    private synchronized void mapTriggerConsumer(TriggerConsumerInt<?> tc)
-    {
+    private synchronized void mapTriggerConsumer(TriggerConsumerInt<?> tc) {
         String canonicalIDs[] = tc.canonicalIDs();
-        for (String canID : canonicalIDs)
-        {
+        for (String canID : canonicalIDs) {
 
             Set<TriggerConsumerInt<?>> tcSet = tcMap.get(canID);
-            if (tcSet == null)
-            {
+            if (tcSet == null) {
                 tcSet = new LinkedHashSet<TriggerConsumerInt<?>>();
                 tcMap.put(canID, tcSet);
             }
@@ -94,23 +82,20 @@ public class StateMachine<C>
     }
 
 
-
     @Override
-    public StateMachineInt<C> publish(TriggerInt<?> trigger)
-    {
-        if(isClosed())
+    public StateMachineInt<C> publish(TriggerInt<?> trigger) {
+        if (isClosed())
             throw new IllegalStateException("State machine closed");
 
         Set<TriggerConsumerInt<?>> set = tcMap.get(trigger.getCanonicalID());
-        if(set != null)
-        {
-            if(log.isEnabled()) log.getLogger().info("" + trigger);
-            if(isScheduledTaskEnabled())
+        if (set != null) {
+            if (log.isEnabled()) log.getLogger().info("" + trigger);
+            if (isScheduledTaskEnabled())
                 set.forEach(c -> tsp.queue(0, new SupplierConsumerTask(trigger, new TriggerConsumerHolder<>(c))));
             else
                 set.forEach(c -> {
                     SupplierConsumerTask sct = new SupplierConsumerTask(trigger, new TriggerConsumerHolder<>(c));
-                    if(executor != null)
+                    if (executor != null)
                         executor.execute(sct);
                     else
                         sct.run();
@@ -121,30 +106,27 @@ public class StateMachine<C>
 
     @Override
     public <D> StateMachineInt<C> publish(StateInt<?> state, String canID, D data) {
-        if(canID != null)
+        if (canID != null)
             publish(new Trigger(this, canID, state, data));
         return this;
     }
 
     @Override
-    public <D> StateMachineInt<C> publish(StateInt<?> state, Enum<?> canID, D data)
-    {
-        if(canID != null)
+    public <D> StateMachineInt<C> publish(StateInt<?> state, Enum<?> canID, D data) {
+        if (canID != null)
             publish(new Trigger(this, canID, state, data));
         return this;
     }
 
 
     @Override
-    public StateMachineInt<C> publishSync(TriggerInt<?> trigger)
-    {
-        if(isClosed())
+    public StateMachineInt<C> publishSync(TriggerInt<?> trigger) {
+        if (isClosed())
             throw new IllegalStateException("State machine closed");
 
         Set<TriggerConsumerInt<?>> set = tcMap.get(trigger.getCanonicalID());
-        if(set != null)
-        {
-            if(log.isEnabled()) log.getLogger().info("" + trigger);
+        if (set != null) {
+            if (log.isEnabled()) log.getLogger().info("" + trigger);
 
             set.forEach(c -> {
                 SupplierConsumerTask sct = new SupplierConsumerTask(trigger, new TriggerConsumerHolder<>(c));
@@ -156,36 +138,33 @@ public class StateMachine<C>
 
     @Override
     public <D> StateMachineInt<C> publishSync(StateInt<?> state, String canID, D data) {
-        if(canID != null)
+        if (canID != null)
             publishSync(new Trigger(this, canID, state, data));
         return this;
     }
 
     @Override
     public <D> StateMachineInt<C> publishSync(StateInt<?> state, Enum<?> canID, D data) {
-        if(canID != null)
+        if (canID != null)
             publishSync(new Trigger(this, canID, state, data));
         return this;
     }
 
     @Override
     public StateMachineInt<C> publishToCurrentState(TriggerInt<?> trigger) {
-        if(isClosed())
+        if (isClosed())
             throw new IllegalStateException("State machine closed");
 
         StateInt current = getCurrentState();
-        if(current == null)
-        {
+        if (current == null) {
             return publish(trigger);
-        }
-        else
-        {
+        } else {
             Consumer<?> tci = current.lookupTriggerConsumer(trigger.getCanonicalID());
             if (tci != null) {
-                SupplierConsumerTask<?> sct =  new SupplierConsumerTask(trigger, new TriggerConsumerHolder<>(tci));
+                SupplierConsumerTask<?> sct = new SupplierConsumerTask(trigger, new TriggerConsumerHolder<>(tci));
                 if (isScheduledTaskEnabled())
                     tsp.queue(0, sct);
-                else if(executor != null)
+                else if (executor != null)
                     executor.execute(sct);
                 else
                     sct.run();
@@ -196,73 +175,62 @@ public class StateMachine<C>
     }
 
     @Override
-    public C getConfig()
-    {
+    public C getConfig() {
         return config;
     }
 
     @Override
-    public StateMachineInt<C> setConfig(C config)
-    {
+    public StateMachineInt<C> setConfig(C config) {
         this.config = config;
         return this;
     }
 
     @Override
-    public String getName()
-    {
+    public String getName() {
         return name;
     }
 
-    public void start(boolean sync)
-    {
+    public void start(boolean sync) {
         if (tcMap.get(StateInt.States.INIT.getName()) != null) {
             if (sync)
                 publishSync(new Trigger<Void>(this, StateInt.States.INIT, null, null));
             else
                 publish(new Trigger<Void>(this, StateInt.States.INIT, null, null));
-        }
-        else
+        } else
             throw new IllegalArgumentException("Not Init state");
     }
 
 
-    public String toString()
-    {
+    public String toString() {
         return getName();
     }
 
-    public TaskSchedulerProcessor getScheduler()
-    {
+    public TaskSchedulerProcessor getScheduler() {
         return tsp;
     }
 
     @Override
-    public Executor getExecutor()
-    {
+    public Executor getExecutor() {
         return executor;
     }
 
     @Override
-    public boolean isScheduledTaskEnabled()
-    {
+    public boolean isScheduledTaskEnabled() {
         return tsp != null;
     }
 
     @Override
-    public StateInt<?> lookupState(String name)
-    {
+    public StateInt<?> lookupState(String name) {
         return states.get(name);
     }
 
     @Override
-    public StateInt<?>  lookupState(Enum<?> name)
-    {
+    public StateInt<?> lookupState(Enum<?> name) {
         return lookupState(SUS.enumName(name));
     }
 
     @Override
-    public StateInt<?>  getCurrentState() {
+    public StateInt<?> getCurrentState() {
         return currentState.get();
     }
 
@@ -272,16 +240,13 @@ public class StateMachine<C>
     }
 
 
-
     @Override
-    public void close()
-    {
+    public void close() {
         isClosed.getAndSet(true);
 
     }
 
-    public boolean isClosed()
-    {
+    public boolean isClosed() {
         return isClosed.get();
     }
 

@@ -22,65 +22,55 @@ import org.zoxweb.shared.util.GetNameValue;
 
 import java.util.List;
 
-public class HTTPRawFormatter 
-{
-	private final String firstLine;
-	private final List<GetNameValue<String>> headers;
-	private final byte[] content;
-	private UByteArrayOutputStream ubaos;
+public class HTTPRawFormatter {
+    private final String firstLine;
+    private final List<GetNameValue<String>> headers;
+    private final byte[] content;
+    private UByteArrayOutputStream ubaos;
 
-	public HTTPRawFormatter (HTTPRequestLine rrl, List<GetNameValue<String>> headers, byte[] content)
-	{
-		this.firstLine = rrl.toString();
-		this.headers = headers;
-		this.content = content;
-	}
+    public HTTPRawFormatter(HTTPRequestLine rrl, List<GetNameValue<String>> headers, byte[] content) {
+        this.firstLine = rrl.toString();
+        this.headers = headers;
+        this.content = content;
+    }
 
-	public HTTPRawFormatter (String firstLine, List<GetNameValue<String>> headers, byte[] content)
-	{
-		this.firstLine = firstLine;
-		this.headers = headers;
-		this.content = content;
-	}
-	
-	public synchronized UByteArrayOutputStream  format()
-	{
-		if (ubaos == null)
-		{
-			ubaos = new UByteArrayOutputStream();
-			ubaos.write(firstLine);
-			ubaos.write(Delimiter.CRLF.getBytes());
-			if (headers != null)
-			{
-				for (GetNameValue<String> gnv : headers)
-				{
-					ubaos.write(gnv.getName());
-					ubaos.write(Delimiter.COLON.getBytes());
-					String value = gnv.getValue();
+    public HTTPRawFormatter(String firstLine, List<GetNameValue<String>> headers, byte[] content) {
+        this.firstLine = firstLine;
+        this.headers = headers;
+        this.content = content;
+    }
 
-					if (value != null && !value.isEmpty())
-					{
-						if (value.charAt(0) != ' ')
-						{
-							ubaos.write(' ');
-						}
+    public synchronized UByteArrayOutputStream format() {
+        if (ubaos == null) {
+            ubaos = new UByteArrayOutputStream();
+            ubaos.write(firstLine);
+            ubaos.write(Delimiter.CRLF.getBytes());
+            if (headers != null) {
+                for (GetNameValue<String> gnv : headers) {
+                    ubaos.write(gnv.getName());
+                    ubaos.write(Delimiter.COLON.getBytes());
+                    String value = gnv.getValue();
 
-						ubaos.write(value);
-					}
-					ubaos.write(Delimiter.CRLF.getBytes());
-				}
-			}
+                    if (value != null && !value.isEmpty()) {
+                        if (value.charAt(0) != ' ') {
+                            ubaos.write(' ');
+                        }
 
-			ubaos.write(Delimiter.CRLF.getBytes());
-			
-			if (content != null)
-			{
-				ubaos.write(content);
-			}
-		}
-		
-		return ubaos;
-	}
-	
-	
+                        ubaos.write(value);
+                    }
+                    ubaos.write(Delimiter.CRLF.getBytes());
+                }
+            }
+
+            ubaos.write(Delimiter.CRLF.getBytes());
+
+            if (content != null) {
+                ubaos.write(content);
+            }
+        }
+
+        return ubaos;
+    }
+
+
 }

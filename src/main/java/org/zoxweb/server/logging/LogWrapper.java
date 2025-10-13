@@ -6,60 +6,53 @@ import java.util.logging.Logger;
 public class LogWrapper {
     private final Logger logger;
     private volatile boolean enabled = true;
-    public LogWrapper(Logger logger)
-    {
+
+    public LogWrapper(Logger logger) {
         this.logger = logger;
     }
 
-    public LogWrapper(Class<?> clazz)
-    {
+    public LogWrapper(Class<?> clazz) {
         this(clazz.getName());
     }
 
-    public LogWrapper(String loggerName)
-    {
+    public LogWrapper(String loggerName) {
         this(Logger.getLogger(loggerName));
         LoggerUtil.configureLogger(logger);
     }
 
-    public Logger getLogger()
-    {
+    public Logger getLogger() {
         return logger;
     }
 
-    public boolean isEnabled()
-    {
+    public boolean isEnabled() {
         return enabled;
     }
-    public LogWrapper setEnabled(boolean stat)
-    {
+
+    public LogWrapper setEnabled(boolean stat) {
         this.enabled = stat;
         return this;
     }
-    public LogWrapper info(Object o)
-    {
-        if(isEnabled())
-        {
+
+    public LogWrapper info(Object o) {
+        if (isEnabled()) {
             if (o == null)
                 logger.info("null");
-            else if(o instanceof String)
+            else if (o instanceof String)
                 logger.info((String) o);
             else
-            logger.info(o.toString());
+                logger.info(o.toString());
         }
         return this;
     }
 
-    public LogWrapper info(String message, Object ...o)
-    {
-        if(isEnabled())
-        {
+    public LogWrapper info(String message, Object... o) {
+        if (isEnabled()) {
             if (o == null || o.length == 0)
                 logger.info(message + ": " + "null");
-            else if(o.length == 1)
-                logger.info(message +": " + o[0]);
+            else if (o.length == 1)
+                logger.info(message + ": " + o[0]);
             else
-                logger.info(message +": " + Arrays.toString(o));
+                logger.info(message + ": " + Arrays.toString(o));
         }
         return this;
     }

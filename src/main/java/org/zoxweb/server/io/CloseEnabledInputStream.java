@@ -23,47 +23,41 @@ import java.io.InputStream;
  *
  */
 public class CloseEnabledInputStream
-    extends FilterInputStream
-{
+        extends FilterInputStream {
 
-	protected volatile boolean autoCloseable;
+    protected volatile boolean autoCloseable;
 
-	public CloseEnabledInputStream(InputStream in)
-	{
-		this(in, true);
-	}
+    public CloseEnabledInputStream(InputStream in) {
+        this(in, true);
+    }
 
-	/**
-	 *
-	 * @param in
-	 * @param autoClose
-	 */
-	public CloseEnabledInputStream(InputStream in, boolean autoClose)
-	{
-		super(in);
-		this.autoCloseable = autoClose;
-	}
+    /**
+     *
+     * @param in
+     * @param autoClose
+     */
+    public CloseEnabledInputStream(InputStream in, boolean autoClose) {
+        super(in);
+        this.autoCloseable = autoClose;
+    }
 
-	/**
-	 *
-	 * @return
-	 */
-	public boolean isCloseEnabled()
-	{
-		return autoCloseable;
-	}
+    /**
+     *
+     * @return
+     */
+    public boolean isCloseEnabled() {
+        return autoCloseable;
+    }
 
-	/**
-	 *
-	 * @throws IOException
-	 */
-	public void close()
-		throws IOException
-	{
-		if (isCloseEnabled())
-		{
-			super.close();
-		}
-	}
+    /**
+     *
+     * @throws IOException
+     */
+    public void close()
+            throws IOException {
+        if (isCloseEnabled()) {
+            super.close();
+        }
+    }
 
 }

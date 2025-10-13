@@ -15,32 +15,31 @@
  */
 package org.zoxweb.server.net.ssl;
 
-import java.net.URLConnection;
-
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSocketFactory;
+import java.net.URLConnection;
 
 public interface SSLSocketProp {
 
-  /**
-   * Returns the SSLFactory
-   *
-   * @return SSLSocketFactory
-   */
-  public SSLSocketFactory getSSLFactory();
+    /**
+     * Returns the SSLFactory
+     *
+     * @return SSLSocketFactory
+     */
+    SSLSocketFactory getSSLFactory();
 
 
-  /**
-   * Returns the HostnameVerifier
-   *
-   * @return HostnameVerifier
-   */
-  public HostnameVerifier getHostnameVerifier();
+    /**
+     * Returns the HostnameVerifier
+     *
+     * @return HostnameVerifier
+     */
+    HostnameVerifier getHostnameVerifier();
 
 
-  /**
-   * Updates the URLConnection if it is a secure connection with getSSLFactory
-   */
-  public void updateURLConnection(URLConnection con);
+    /**
+     * Updates the URLConnection if it is a secure connection with getSSLFactory
+     */
+    void updateURLConnection(URLConnection con);
 
 }

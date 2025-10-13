@@ -15,47 +15,43 @@
  */
 package org.zoxweb.server.io;
 
-import java.io.InputStream;
-
 import org.zoxweb.shared.data.FileInfoDAO;
+
+import java.io.InputStream;
 
 /**
  *
  */
-public class FileInfoStreamSource
-{
+public class FileInfoStreamSource {
 
-	private FileInfoDAO fileInfoDAO;
-	private InputStream srcInputStream;
-	
-	/**
-	 * 
-	 * @param fileInfoDAO
-	 * @param is
-	 */
-	public FileInfoStreamSource(FileInfoDAO fileInfoDAO, InputStream is)
-	{
-		this.fileInfoDAO = fileInfoDAO;
-		srcInputStream = is;
-	}
-	
-	/**
-	 * Returns the input stream.
-	 * @return input stream
-	 */
-	public InputStream getSourceInputStream()
-	{
-		return srcInputStream;
-	}
-	
-	/**
-	 * Returns FileInfoDAO object.
-	 * @return FileInfoDAO
-	 */
-	public FileInfoDAO getFileInfoDAO()
-	{
-		return fileInfoDAO;
-	}
+    private FileInfoDAO fileInfoDAO;
+    private InputStream srcInputStream;
 
-	
+    /**
+     *
+     * @param fileInfoDAO
+     * @param is
+     */
+    public FileInfoStreamSource(FileInfoDAO fileInfoDAO, InputStream is) {
+        this.fileInfoDAO = fileInfoDAO;
+        srcInputStream = is;
+    }
+
+    /**
+     * Returns the input stream.
+     * @return input stream
+     */
+    public InputStream getSourceInputStream() {
+        return srcInputStream;
+    }
+
+    /**
+     * Returns FileInfoDAO object.
+     * @return FileInfoDAO
+     */
+    public FileInfoDAO getFileInfoDAO() {
+        return fileInfoDAO;
+    }
+
+
 }

@@ -236,8 +236,7 @@ public class NetUtil {
         return null;
     }
 
-    public static InetSocketAddress parse(String addressPort)
-    {
+    public static InetSocketAddress parse(String addressPort) {
         IPAddress ipAddress = IPAddress.parse(addressPort);
         return new InetSocketAddress(ipAddress.getInetAddress(), ipAddress.getPort());
     }

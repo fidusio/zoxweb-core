@@ -243,7 +243,7 @@ public final class HTTPCodecs {
 
                                         if (filename != null) {
                                             toAdd.getProperties().build("filename", filename);
-                                            if(location != null)
+                                            if (location != null)
                                                 toAdd.getProperties().build(location.getName(), location.getValue());
                                         }
 
@@ -405,8 +405,8 @@ public final class HTTPCodecs {
                                                 paramFileToAdd.getProperties().build(new NVLong(contentLength.getName(), (long) contentLength.getValue()));
                                             }
                                             paramFileToAdd.getProperties().build(new NVBoolean(ProtoMarker.LAST_CHUNK, false));
-                                            if(location != null && location.getValue() !=null)
-                                                paramFileToAdd.getProperties().build(location.getName(), ""+location.getValue());
+                                            if (location != null && location.getValue() != null)
+                                                paramFileToAdd.getProperties().build(location.getName(), "" + location.getValue());
 
                                             hmci.getParameters().add(paramFileToAdd);
                                             int lastDataMark = hrm.getDataMark();
@@ -438,8 +438,8 @@ public final class HTTPCodecs {
                                             paramFileToAdd.getProperties().build(new NVLong(contentLength.getName(), (long) contentLength.getValue()));
                                         }
                                         paramFileToAdd.getProperties().build(new NVBoolean(ProtoMarker.LAST_CHUNK, true));
-                                        if(location != null && location.getValue() !=null)
-                                            paramFileToAdd.getProperties().build(location.getName(), ""+location.getValue());
+                                        if (location != null && location.getValue() != null)
+                                            paramFileToAdd.getProperties().build(location.getName(), "" + location.getValue());
 
                                         hmci.getParameters().add(paramFileToAdd);
                                         UByteArrayInputStream is = new UByteArrayInputStream(ubaos.getInternalBuffer(), dataContentStartIndex, dataContentEndIndex - dataContentStartIndex);
