@@ -104,7 +104,7 @@ public class NIOTunnel
         IOUtil.close(destinationChannel);
         IOUtil.close(phSChannel);
         ByteBufferUtil.cache(sourceBB, destinationBB);
-        log.info("closed: " + sourceAddress + " - " + remoteAddress);
+        log.getLogger().info("closed: " + sourceAddress + " - " + remoteAddress);
 
     }
 

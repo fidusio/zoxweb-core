@@ -18,7 +18,7 @@ public class LoggingTest {
 
     LogWrapper log = new LogWrapper(LoggingTest.class);
 
-    log.info("hello");
-    log.getLogger().info("helloz");
+//    log.info("hello");
+    log.logger.info("helloz");
   }
 }

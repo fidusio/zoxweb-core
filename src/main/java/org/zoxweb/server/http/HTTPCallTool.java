@@ -75,7 +75,7 @@ public final class HTTPCallTool {
 
     public static void main(String... args) {
         try {
-            TaskUtil.setThreadMultiplier(8);
+            TaskUtil.setThreadMultiplier(96);
             TaskUtil.setMaxTasksQueue(2048);
             //System.setProperty("http.maxConnections", "100");
 

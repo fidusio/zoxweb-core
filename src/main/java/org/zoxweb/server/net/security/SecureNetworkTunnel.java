@@ -116,7 +116,7 @@ public class SecureNetworkTunnel
 
 
             if (nio) {
-                if (log.isEnabled()) log.info("Creating NIO Secure tunnel");
+                if (log.isEnabled()) log.getLogger().info("Creating NIO Secure tunnel");
 
                 NIOSocket nios = new NIOSocket(TaskUtil.defaultTaskProcessor(), TaskUtil.defaultTaskScheduler());
                 for (; index < args.length; index++) {
@@ -137,7 +137,7 @@ public class SecureNetworkTunnel
                 }
 
             } else {
-                if (log.isEnabled()) log.info("Creating classic Secure tunnel");
+                if (log.isEnabled()) log.getLogger().info("Creating classic Secure tunnel");
                 SSLServerSocketFactory sslssf = sslc.getServerSocketFactory();
                 for (; index < args.length; index++) {
                     try {
@@ -147,7 +147,7 @@ public class SecureNetworkTunnel
                         new SecureNetworkTunnel(sslssf, port, 128, remoteAddress);
 
                     } catch (Exception e) {
-                        if (log.isEnabled()) log.info("Failed to start " + args[index]);
+                        if (log.isEnabled()) log.getLogger().info("Failed to start " + args[index]);
                         e.printStackTrace();
                     }
                 }

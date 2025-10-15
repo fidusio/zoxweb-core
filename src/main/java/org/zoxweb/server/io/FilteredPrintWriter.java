@@ -49,7 +49,7 @@ public class FilteredPrintWriter
 
     public void close() {
         super.close();
-        log.info("stat:" + mdw);
+        log.getLogger().info("stat:" + mdw);
     }
 
 
