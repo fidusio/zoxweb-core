@@ -351,8 +351,6 @@ public class HashUtil {
     }
 
 
-
-
     public static String hashAsBase64(String algo, byte[] data) throws NoSuchAlgorithmException {
         return SharedBase64.encodeAsString(SharedBase64.Base64Type.DEFAULT, hash(algo, data));
     }
