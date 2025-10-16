@@ -1,13 +1,13 @@
 package org.zoxweb.shared.filters;
 
 import org.zoxweb.shared.util.Const;
+import org.zoxweb.shared.util.DataEncoder;
 import org.zoxweb.shared.util.SharedStringUtil;
 
 
 public class TokenFilter
-    implements ValueFilter<String, String>
-
-{
+        implements ValueFilter<String, String>,
+        DataEncoder<String, String> {
     public static final TokenFilter UPPER_COLON = new TokenFilter("UpperColon", Const.StringType.UPPER, ":");
     public static final TokenFilter LOWER_COLON = new TokenFilter("LowerColon", Const.StringType.LOWER, ":");
     public static final TokenFilter COLON = new TokenFilter("Colon", Const.StringType.AS_IS, ":");
@@ -16,8 +16,8 @@ public class TokenFilter
     private final String canID;
     private final String sep;
     private final Const.StringType st;
-    
-    public TokenFilter(String canID, Const.StringType st, String sep){
+
+    public TokenFilter(String canID, Const.StringType st, String sep) {
         this.canID = canID;
         this.sep = SharedStringUtil.trimOrNull(sep);
         this.st = st;
@@ -27,25 +27,23 @@ public class TokenFilter
     @Override
     public String validate(String value) throws NullPointerException, IllegalArgumentException {
         value = SharedStringUtil.trimOrNull(value);
-        if(value == null)
+        if (value == null)
             throw new NullPointerException("value can be null or empty");
 
-        if(sep != null)
-        {
+        if (sep != null) {
             int index = value.indexOf(sep);
-            if(index > 0)
+            if (index > 0)
                 value = value.substring(0, index);
-            if(index == 0)
+            if (index == 0)
                 throw new IllegalArgumentException("value can't start with separator " + sep);
         }
 
-        switch(st)
-        {
+        switch (st) {
 
             case UPPER:
-                return value.toUpperCase();
+                return DataEncoder.StringUpper.encode(value);
             case LOWER:
-                return value.toLowerCase();
+                return DataEncoder.StringLower.encode(value);
         }
 
 
@@ -53,11 +51,9 @@ public class TokenFilter
     }
 
     @Override
-    public boolean isValid(String value)
-    {
+    public boolean isValid(String value) {
         value = SharedStringUtil.trimOrNull(value);
-        if(value != null && sep != null)
-        {
+        if (value != null && sep != null) {
 
             return (value.indexOf(sep) != 0);
         }
@@ -67,5 +63,10 @@ public class TokenFilter
     @Override
     public String toCanonicalID() {
         return canID;
+    }
+
+    @Override
+    public String encode(String value) {
+        return validate(value);
     }
 }

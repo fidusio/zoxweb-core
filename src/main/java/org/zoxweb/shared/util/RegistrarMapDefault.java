@@ -9,6 +9,12 @@ public class RegistrarMapDefault<K, V>
     public RegistrarMapDefault(Map<K, V> map) {
         super(map);
     }
+    public RegistrarMapDefault(DataEncoder<K, K> keyFilter, DataDecoder<V, K> valueToKey)
+    {
+        this();
+        setValueToKeyDecoder(valueToKey);
+        setKeyFilter(keyFilter);
+    }
 
     public RegistrarMapDefault() {
         this(new LinkedHashMap<>());

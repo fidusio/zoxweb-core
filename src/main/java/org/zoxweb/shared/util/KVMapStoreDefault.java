@@ -14,7 +14,11 @@ public class KVMapStoreDefault<K, V>
     protected final Set<K> exclusionFilter;
     protected final DataSizeReader<V> sizeReader;
     protected final AtomicLong dataSize = new AtomicLong();
+
+
     protected DataEncoder<K, K> keyFilter = null;
+    protected DataDecoder<V, K> valueToKey = null;
+    protected NamedDescription namedDescription;
 
 
     public KVMapStoreDefault(Map<K, V> map) {
@@ -32,8 +36,24 @@ public class KVMapStoreDefault<K, V>
         this.sizeReader = sizeReader;
     }
 
+
+
+    /**
+     * Convert the key with using keyfiter if not null
+     * @param key to be converted
+     * @return converted key
+     */
+    private K toKey(K key) {
+        return keyFilter != null ? keyFilter.encode(key) : key;
+    }
+
+
+    protected Map<K, V> getMapCache() {
+        return mapCache;
+    }
+
     @Override
-    public synchronized boolean put(K key, V value) {
+    public final synchronized boolean put(K key, V value) {
         if (key != null && value != null) {
             key = toKey(key);
 
@@ -51,18 +71,9 @@ public class KVMapStoreDefault<K, V>
         return false;
     }
 
-    private K toKey(K key) {
-        return keyFilter != null ? keyFilter.encode(key) : key;
-    }
-
-//	@Override
-//	public  boolean map(K key, V value)
-//	{
-//		return put(key, value);
-//	}
 
     @Override
-    public synchronized V get(K key) {
+    public final synchronized V get(K key) {
         // TODO Auto-generated method stub
         return mapCache.get(toKey(key));
     }
@@ -73,19 +84,12 @@ public class KVMapStoreDefault<K, V>
         V oldValue = mapCache.remove(toKey(key));
         if (sizeReader != null) {
             long toSubtract = sizeReader.size(oldValue);
-
             dataSize.getAndAdd(-toSubtract);
         }
         return (oldValue != null);
     }
 
-
-    protected Map<K, V> getMapCache() {
-        return mapCache;
-    }
-
-
-    public synchronized V removeGet(K key) {
+    public final synchronized V removeGet(K key) {
         // TODO Auto-generated method stub
         V oldValue = mapCache.remove(toKey(key));
         if (sizeReader != null) {
@@ -119,12 +123,12 @@ public class KVMapStoreDefault<K, V>
     }
 
 
-    public synchronized KVMapStore<K, V> map(V value, K... keys) {
-        SUS.checkIfNull("value null", value);
-        for (K k : keys)
-            mapCache.put(k, value);
-        return this;
-    }
+//    public synchronized KVMapStore<K, V> map(V value, K... keys) {
+//        SUS.checkIfNull("value null", value);
+//        for (K k : keys)
+//            put(k, value);
+//        return this;
+//    }
 
     /**
      * @param filter
@@ -135,6 +139,8 @@ public class KVMapStoreDefault<K, V>
         this.keyFilter = filter;
         return this;
     }
+
+
 
     /**
      * @return
@@ -186,4 +192,21 @@ public class KVMapStoreDefault<K, V>
     }
 
 
+    /**
+     * Returns the property description.
+     *
+     * @return description
+     */
+    @Override
+    public String getDescription() {
+        return namedDescription != null ? namedDescription.getDescription() : null;
+    }
+
+    /**
+     * @return the name of the object
+     */
+    @Override
+    public String getName() {
+        return namedDescription != null ? namedDescription.getName() : null;
+    }
 }

@@ -16,45 +16,38 @@
 package org.zoxweb.shared.filters;
 
 import org.zoxweb.shared.util.SUS;
-import org.zoxweb.shared.util.SharedUtil;
 
 @SuppressWarnings("serial")
 public class ReplacementFilter
-    implements ValueFilter<String, String>
-{
+        implements ValueFilter<String, String> {
 
-	private String replace, replacement;
+    private final String replace, replacement;
 
-	public ReplacementFilter(String toReplace, String replacement)
-    {
-		SUS.checkIfNulls("params can't be null", toReplace, replacement);
-		this.replace = toReplace;
-		this.replacement = replacement;
-	}
+    public ReplacementFilter(String toReplace, String replacement) {
+        SUS.checkIfNulls("params can't be null", toReplace, replacement);
+        this.replace = toReplace;
+        this.replacement = replacement;
+    }
 
-	@Override
-	public String validate(String v)
-        throws NullPointerException, IllegalArgumentException
-    {
-		if (v != null)
-		{
-			v = v.replace(replace, replacement);
-		}
+    @Override
+    public String validate(String v)
+            throws NullPointerException, IllegalArgumentException {
+        if (v != null) {
+            v = v.replace(replace, replacement);
+        }
 
-		return v;
-	}
+        return v;
+    }
 
-	@Override
-	public boolean isValid(String v)
-    {
-		return true;
-	}
+    @Override
+    public boolean isValid(String v) {
+        return true;
+    }
 
 
-	@Override
-	public String toCanonicalID()
-    {
-		return "static:ValueFilter:ReplacementFilter";
-	}
+    @Override
+    public String toCanonicalID() {
+        return "static:ValueFilter:ReplacementFilter";
+    }
 
 }

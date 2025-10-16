@@ -19,43 +19,33 @@ package org.zoxweb.shared.net;
 import org.zoxweb.shared.util.KVMapStoreDefault;
 import org.zoxweb.shared.util.SharedStringUtil;
 
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 
 
-public class IPMapCache 
-extends KVMapStoreDefault<String, String>
-{
+public class IPMapCache
+        extends KVMapStoreDefault<String, String> {
 
-	public IPMapCache()
-    {
-		super(new HashMap<String, String>(), new HashSet<String>());
-	}
-	
-	public synchronized boolean map(String ipAddress, String macAddress)
-    {
-		ipAddress = SharedStringUtil.toTrimmedLowerCase(ipAddress);
-		macAddress = SharedStringUtil.toTrimmedLowerCase(macAddress);
-		if (ipAddress != null && macAddress != null)
-		{
-			if (!exclusionFilter.contains(ipAddress) && !exclusionFilter.contains(macAddress))
-			{
-				
-				{
-					put(ipAddress, macAddress);
-					return true;
-				}
-			}
-		}
-		
-		return false;
-	}
-	
-	public void addExclusion(String exclusion)
-	{
-		super.addExclusion(SharedStringUtil.toTrimmedLowerCase(exclusion));
-	}
+    public IPMapCache() {
+        super(new LinkedHashMap<>(), new HashSet<>());
+    }
 
-	
+    public synchronized boolean map(String ipAddress, String macAddress) {
+        ipAddress = SharedStringUtil.toTrimmedLowerCase(ipAddress);
+        macAddress = SharedStringUtil.toTrimmedLowerCase(macAddress);
+        if (ipAddress != null && macAddress != null) {
+            if (!exclusionFilter.contains(ipAddress) && !exclusionFilter.contains(macAddress)) {
+                put(ipAddress, macAddress);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public void addExclusion(String exclusion) {
+        super.addExclusion(SharedStringUtil.toTrimmedLowerCase(exclusion));
+    }
+
 
 }

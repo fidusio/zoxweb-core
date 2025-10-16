@@ -26,50 +26,48 @@ import org.zoxweb.shared.util.SharedUtil;
 
 /**
  * The ip filter object is used to mask and filter ip sets
- * 
+ *
  * @author mnael
  */
 @SuppressWarnings("serial")
 public class InetFilterDAO
-    extends SetNameDescriptionDAO
-{
-	
-	public enum Params
-        implements GetNVConfig
-    {
-		IP(NVConfigManager.createNVConfig("ip_address", "IP Address", "IP", false, true, String.class)),
-		//FILTER(NVConfigManager.createNVConfig("filter", "Filter", "Filter", false, true, String.class)),
-		NET_MASK(NVConfigManager.createNVConfig("network_mask", "Network Mask", "NetMask", false, true, String.class)),
-		NETWORK(NVConfigManager.createNVConfig("network_address", "Network", "Network", false, true, String.class)),		
-		;	
-	
-		private final NVConfig cType;
-		
-		Params(NVConfig c) {
-			cType = c;
-		}
-		
-		public NVConfig getNVConfig() {
-			return cType;
-		}
-	
-	}
-	
-	public static final NVConfigEntity NVC_INET_FILTER_DAO = new NVConfigEntityPortable("inet_filter_dao", null , "InetFilterDAO", true, false, false, false, InetFilterDAO.class, SharedUtil.extractNVConfigs( Params.values()), null, false, SetNameDescriptionDAO.NVC_NAME_DAO);
-	
-	/**
-	 * Default constructor for the bean consistency
-	 * 
-	 */
-	public InetFilterDAO() {
-		super(NVC_INET_FILTER_DAO);
-	}
+        extends SetNameDescriptionDAO {
 
-	/**
-	 * Create a filter based on the filter object
-	 * 
-	 * @param filter
-	 */
+    public enum Params
+            implements GetNVConfig {
+        IP(NVConfigManager.createNVConfig("ip_address", "IP Address", "IP", false, true, String.class)),
+        //FILTER(NVConfigManager.createNVConfig("filter", "Filter", "Filter", false, true, String.class)),
+        NET_MASK(NVConfigManager.createNVConfig("network_mask", "Network Mask", "NetMask", false, true, String.class)),
+        NETWORK(NVConfigManager.createNVConfig("network_address", "Network", "Network", false, true, String.class)),
+        ;
+
+        private final NVConfig cType;
+
+        Params(NVConfig c) {
+            cType = c;
+        }
+
+        public NVConfig getNVConfig() {
+            return cType;
+        }
+
+    }
+
+    public static final NVConfigEntity NVC_INET_FILTER_DAO = new NVConfigEntityPortable("inet_filter_dao", null, "InetFilterDAO", true, false, false, false, InetFilterDAO.class, SharedUtil.extractNVConfigs(Params.values()), null, false, SetNameDescriptionDAO.NVC_NAME_DAO);
+
+    /**
+     * Default constructor for the bean consistency
+     *
+     */
+    public InetFilterDAO() {
+        super(NVC_INET_FILTER_DAO);
+    }
+
+    /**
+     * Create a filter based on the filter object
+     *
+     * @param filter
+     */
 //	public InetFilterDAO(String filter)
 //	{
 //		this();
@@ -77,76 +75,76 @@ public class InetFilterDAO
 //	}
 
 
-	/**
-	 * Create a filter based on the ip address and the nework mask
-	 * @param ip
-	 * @param mask
-	 */
-	public InetFilterDAO(String ip, String mask) {
-		this();
-		setIP(ip);
-		setNetworkMask(mask);
-	}
+    /**
+     * Create a filter based on the ip address and the nework mask
+     * @param ip
+     * @param mask
+     */
+    public InetFilterDAO(String ip, String mask) {
+        this();
+        setIP(ip);
+        setNetworkMask(mask);
+    }
 
-	/**
-	 * Get the current up filter
-	 * 
-	 * @return
-	 */
+    /**
+     * Get the current up filter
+     *
+     * @return
+     */
 //	public String getFilter() 
 //	{
 //		return lookupValue(Params.FILTER);
 //	}
 
-	/**
-	 * Set the filter
-	 * 
-	 * @param filter
-	 */
+    /**
+     * Set the filter
+     *
+     * @param filter
+     */
 //	public void setFilter(String filter)
 //	{
 //		setValue(Params.FILTER, filter);
 //	}
 
-	/**
-	 * Get the ip, null if no set
-	 * @return the ip 
-	 */
-	public String getIP() {
-		return lookupValue(Params.IP);
-	}
+    /**
+     * Get the ip, null if no set
+     * @return the ip
+     */
+    public String getIP() {
+        return lookupValue(Params.IP);
+    }
 
-	/**
-	 * Set the ip
-	 * @param ip
-	 */
-	public void setIP(String ip) {
-		setValue(Params.IP, ip);
-	}
+    /**
+     * Set the ip
+     * @param ip
+     */
+    public void setIP(String ip) {
+        setValue(Params.IP, ip);
+    }
 
-	/**
-	 * Get the network mask, null if not set
-	 * @return network mask
-	 */
-	public String getNetworkMask() {
-		return lookupValue(Params.NET_MASK);
-	}
+    /**
+     * Get the network mask, null if not set
+     * @return network mask
+     */
+    public String getNetworkMask() {
+        return lookupValue(Params.NET_MASK);
+    }
 
-	/**
-	 * Set the network mask.
-	 * @param mask
-	 */
-	public void setNetworkMask(String mask) {
-		setValue(Params.NET_MASK , mask);
-	}
-	
-	public String getNetwork() {
-		return lookupValue(Params.NETWORK);
-	}
+    /**
+     * Set the network mask.
+     * @param mask
+     */
+    public void setNetworkMask(String mask) {
+        setValue(Params.NET_MASK, mask);
+    }
 
-	public void setNetwork(String network) {
-		setValue(Params.NETWORK , network);
+    public String getNetwork() {
+        return lookupValue(Params.NETWORK);
+    }
 
-	}
+    public void setNetwork(String network) {
+        setValue(Params.NETWORK, network);
+
+    }
 
 }

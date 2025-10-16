@@ -25,34 +25,34 @@ import org.zoxweb.shared.util.SharedUtil;
 
 @SuppressWarnings("serial")
 public class InetAddressDAO
-    extends SetNameDAO {
-	
-	private static final NVConfig INET_ADDRESS = NVConfigManager.createNVConfig("inet_address", "The ip address","InetAddress",true, false, String.class);
-	private static final NVConfig IP_VERSION = NVConfigManager.createNVConfig("ip_version", "The ip version V4 or V6","IPVersion", true, false, IPVersion.class);
-	public static final NVConfigEntity NVC_INET_ADDRESS_DAO = new NVConfigEntityPortable("inet_address_dao", null , "InetAddressDAO", true, false, false, false, InetAddressDAO.class, SharedUtil.toNVConfigList(INET_ADDRESS, IP_VERSION), null, false, SetNameDAO.NVC_NAME_DAO);
+        extends SetNameDAO {
 
-	public InetAddressDAO() {
-		super(NVC_INET_ADDRESS_DAO);
-	}
-	
-	public String getInetAddress() {
-		return lookupValue(INET_ADDRESS);
-	}
-	
-	public void setInetAddress(String address) {
-		setValue(INET_ADDRESS, address);
-	}
-	
-	public IPVersion getIPVersion() {
-		return lookupValue(IP_VERSION);
-	}
-	
-	public void setIPVersion(IPVersion ipType) {
-		setValue( IP_VERSION, ipType);
-	}
+    private static final NVConfig INET_ADDRESS = NVConfigManager.createNVConfig("inet_address", "The ip address", "InetAddress", true, false, String.class);
+    private static final NVConfig IP_VERSION = NVConfigManager.createNVConfig("ip_version", "The ip version V4 or V6", "IPVersion", true, false, IPVersion.class);
+    public static final NVConfigEntity NVC_INET_ADDRESS_DAO = new NVConfigEntityPortable("inet_address_dao", null, "InetAddressDAO", true, false, false, false, InetAddressDAO.class, SharedUtil.toNVConfigList(INET_ADDRESS, IP_VERSION), null, false, SetNameDAO.NVC_NAME_DAO);
 
-	public String toString() {
-		return SharedUtil.toCanonicalID(':', getIPVersion(), getInetAddress());
-	}
-	
+    public InetAddressDAO() {
+        super(NVC_INET_ADDRESS_DAO);
+    }
+
+    public String getInetAddress() {
+        return lookupValue(INET_ADDRESS);
+    }
+
+    public void setInetAddress(String address) {
+        setValue(INET_ADDRESS, address);
+    }
+
+    public IPVersion getIPVersion() {
+        return lookupValue(IP_VERSION);
+    }
+
+    public void setIPVersion(IPVersion ipType) {
+        setValue(IP_VERSION, ipType);
+    }
+
+    public String toString() {
+        return SharedUtil.toCanonicalID(':', getIPVersion(), getInetAddress());
+    }
+
 }

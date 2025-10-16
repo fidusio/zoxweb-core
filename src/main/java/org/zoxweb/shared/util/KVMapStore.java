@@ -19,7 +19,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-public interface KVMapStore<K, V> {
+public interface KVMapStore<K, V>
+extends GetName,GetDescription{
 
 
     boolean put(K key, V value);
@@ -43,9 +44,11 @@ public interface KVMapStore<K, V> {
 
     void addExclusion(K exclusion);
 
-    KVMapStore<K,V> map(V value, K ...keys);
+//    KVMapStore<K,V> map(V value, K ...keys);
     KVMapStore<K, V> setKeyFilter(DataEncoder<K,K> filter);
     DataEncoder<K, K> getKeyFilter();
+
+
 
 
     /**

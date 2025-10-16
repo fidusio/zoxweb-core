@@ -1,7 +1,6 @@
 package org.zoxweb.shared.net;
 
-public enum ProxyType 
-{
+public enum ProxyType {
     /**
      * Represents a direct connection, or the absence of a proxy.
      */

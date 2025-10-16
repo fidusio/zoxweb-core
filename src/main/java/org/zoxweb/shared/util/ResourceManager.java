@@ -1,8 +1,5 @@
 package org.zoxweb.shared.util;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 public class ResourceManager
         implements Registrar<Object, Object, ResourceManager> {
 
@@ -37,39 +34,72 @@ public class ResourceManager
     }
 
 
+    private final RegistrarMapDefault<Object, Object> resources = new RegistrarMapDefault<>(ResourceManager::keyMap, null);
     public static final ResourceManager SINGLETON = new ResourceManager();
 
-    private final Map<Object, Object> resources = new LinkedHashMap<>();
+    //private final Map<Object, Object> resources = new LinkedHashMap<>();
 
     private ResourceManager() {
         register(Resource.SYSTEM_INFO, new NVGenericMap(Resource.SYSTEM_INFO.getName()));
     }
 
     public synchronized Object[] resources() {
-        return resources.values().toArray();
+        return resources.entrySet().toArray();
     }
 
 
-    private Object keyMap(Object key) {
+    private static Object keyMap(Object key) {
         if (key instanceof GetName)
             return ((GetName) key).getName();
         return key;
     }
 
+    /**
+     *
+     * @return
+     */
+    @Override
+    public DataDecoder<Object, Object> getValueToKeyDecoder() {
+        return resources.getValueToKeyDecoder();
+    }
+
+    /**
+     *
+     * @param nd
+     * @return
+     */
+    @Override
+    public ResourceManager setNamedDescription(NamedDescription nd) {
+        resources.setNamedDescription(nd);
+        return this;
+    }
+
     @Override
     public synchronized ResourceManager register(Object key, Object value) {
-        resources.put(keyMap(key), value);
+        resources.register(key, value);
         return this;
     }
 
     @Override
     public synchronized Object unregister(Object key) {
-        return resources.remove(keyMap(key));
+        return resources.remove(key);
     }
 
     @Override
     public <V> V lookup(Object key) {
-        return (V) resources.get(keyMap(key));
+        return resources.lookup(key);
+    }
+
+    /**
+     *
+     * @param value
+     * @param keys
+     * @return
+     */
+    @Override
+    public ResourceManager map(Object value, Object... keys) {
+        resources.map(value, keys);
+        return this;
     }
 
 
