@@ -3,7 +3,7 @@ package org.zoxweb.shared.util;
 
 import java.util.Map;
 
-public class RegistrarMap<K, V, T>
+public abstract  class RegistrarMap<K, V, T>
         extends KVMapStoreDefault<K, V>
         implements Registrar<K, V, T> {
 

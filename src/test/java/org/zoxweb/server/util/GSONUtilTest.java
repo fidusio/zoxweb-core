@@ -98,11 +98,16 @@ public class GSONUtilTest {
     {
         NVGenericMap nvgm = new NVGenericMap();
         nvgm.build("var", "<=>");
+
         byte[] array =  new byte[]{0,1,2,3,4,5,6,7};
-        nvgm.build(new NVBlob("bin", array));
+        NVBlob nvb = new NVBlob("bin", array);
+        nvgm.build(nvb);
+        System.out.println(""+ DataCodecRegistrar.SINGLETON.lookup(nvb).getClass());
         String json = GSONUtil.toJSONDefault(nvgm, true);
         NVGenericMap decoded = GSONUtil.fromJSONDefault(json, NVGenericMap.class);
         assert Arrays.equals(array, decoded.getValue("bin"));
+        assert DataCodecRegistrar.SINGLETON.lookup(nvb) == DataCodecRegistrar.SINGLETON.lookup(byte[].class);
+        assert DataCodecRegistrar.SINGLETON.lookup(NVBlob.class) == DataCodecRegistrar.SINGLETON.lookup(byte[].class);
         System.out.println(json);
     }
 
