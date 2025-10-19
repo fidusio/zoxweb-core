@@ -37,8 +37,6 @@ public class ResourceManager
     private final RegistrarMapDefault<Object, Object> resources = new RegistrarMapDefault<>(ResourceManager::keyMap, null);
     public static final ResourceManager SINGLETON = new ResourceManager();
 
-    //private final Map<Object, Object> resources = new LinkedHashMap<>();
-
     private ResourceManager() {
         register(Resource.SYSTEM_INFO, new NVGenericMap(Resource.SYSTEM_INFO.getName()));
     }
@@ -59,8 +57,8 @@ public class ResourceManager
      * @return
      */
     @Override
-    public DataDecoder<Object, Object> getValueToKeyDecoder() {
-        return resources.getValueToKeyDecoder();
+    public DataDecoder<Object, Object> getValueKeyDecoder() {
+        return resources.getValueKeyDecoder();
     }
 
     /**

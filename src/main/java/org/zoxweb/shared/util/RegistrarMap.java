@@ -24,7 +24,7 @@ public abstract  class RegistrarMap<K, V, T>
      * @return
      */
     @Override
-    public T setValueToKeyDecoder(DataDecoder<V, K> dd) {
+    public T setValueKeyDecoder(DataDecoder<V, K> dd) {
         valueToKey = dd;
         return (T) this;
     }
@@ -40,7 +40,7 @@ public abstract  class RegistrarMap<K, V, T>
      * @return
      */
     @Override
-    public DataDecoder<V, K> getValueToKeyDecoder() {
+    public DataDecoder<V, K> getValueKeyDecoder() {
         return valueToKey;
     }
 

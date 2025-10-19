@@ -12,7 +12,7 @@ public class RegistrarMapDefault<K, V>
     public RegistrarMapDefault(DataEncoder<K, K> keyFilter, DataDecoder<V, K> valueToKey)
     {
         this();
-        setValueToKeyDecoder(valueToKey);
+        setValueKeyDecoder(valueToKey);
         setKeyFilter(keyFilter);
     }
 
