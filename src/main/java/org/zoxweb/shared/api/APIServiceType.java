@@ -17,22 +17,21 @@ package org.zoxweb.shared.api;
 
 /**
  * API service types
+ *
  * @author mzebib
  */
 public enum APIServiceType {
 
-	//	Data storage
-	DATA_STORAGE,
-	//	Document storage
-	DOCUMENT_STORAGE,
-	//	Email notification
-	EMAIL_NOTIFICATION,
-	//	SMS notification
-	SMS_NOTIFICATION,
-	//	Voice notification
-	VOICE_NOTIFICATION,
+    //	Data storage
+    DATA_STORAGE,
+    //	Document storage
+    DOCUMENT_STORAGE,
+    //	Email notification
+    EMAIL_NOTIFICATION,
+    //	SMS notification
+    SMS_NOTIFICATION,
+    //	Voice notification
+    VOICE_NOTIFICATION,
 
-    PAYMENT_PROCESSOR
-
-	;
+    PAYMENT_PROCESSOR,
 }

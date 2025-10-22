@@ -11,11 +11,9 @@ import java.util.List;
 
 @SuppressWarnings("serial")
 public class APIDataOP
-    extends SetNameDescriptionDAO
-{
+        extends SetNameDescriptionDAO {
     public enum Param
-            implements GetNVConfig
-    {
+            implements GetNVConfig {
         DATA_OP(NVConfigManager.createNVConfig("data_op", "Data Operation", "DataOP", true, true, DataConst.DataOP.class)),
         PROP_NAMES(NVConfigManager.createNVConfig("prop_names", "name of parameters", "PropNames", true, true, NVStringList.class)),
         NVE(NVConfigManager.createNVConfigEntity("nve", "name of parameters", "PropNames", true, true, NVEntity.class, NVConfigEntity.ArrayType.NOT_ARRAY)),
@@ -23,17 +21,14 @@ public class APIDataOP
         ;
         private final NVConfig nvc;
 
-        Param(NVConfig nvc)
-        {
+        Param(NVConfig nvc) {
             this.nvc = nvc;
         }
 
-        public NVConfig getNVConfig()
-        {
+        public NVConfig getNVConfig() {
             return nvc;
         }
     }
-
 
 
     /**
@@ -52,43 +47,35 @@ public class APIDataOP
             false,
             SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO);
 
-    public APIDataOP()
-    {
+    public APIDataOP() {
         super(NVC_API_DATA_OP);
     }
 
-    public void setDataOP(DataConst.DataOP dataOP)
-    {
+    public void setDataOP(DataConst.DataOP dataOP) {
         setValue(Param.DATA_OP, dataOP);
     }
 
-    public DataConst.DataOP getDataOP()
-    {
+    public DataConst.DataOP getDataOP() {
         return lookupValue(Param.DATA_OP);
     }
 
-    public NVStringList getPropertiesNames()
-    {
+    public NVStringList getPropertiesNames() {
         return (NVStringList) lookup(Param.PROP_NAMES);
     }
 
-    public synchronized void add(String ...names)
-    {
+    public synchronized void add(String... names) {
         List<String> list = getPropertiesNames().getValue();
-        for (String name: names)
-        {
-            if(!SUS.isEmpty(name))
+        for (String name : names) {
+            if (!SUS.isEmpty(name))
                 list.add(name);
         }
     }
 
-    public void setNVEntity(NVEntity nve)
-    {
+    public void setNVEntity(NVEntity nve) {
         setValue(Param.NVE, nve);
     }
 
-    public NVEntity getNVEntity()
-    {
+    public NVEntity getNVEntity() {
         return lookupValue(Param.NVE);
     }
 }

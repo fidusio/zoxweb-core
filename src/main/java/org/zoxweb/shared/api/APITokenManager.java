@@ -26,22 +26,21 @@ import java.io.IOException;
  * This interface must be implemented by APIProvider that requires and OAUTH2 token access
  */
 public interface APITokenManager {
-	
-	APITokenDAO activateToken(APIDataStore<?,?> dataStore, String userID, APIConfigInfo apiToken, NVPair... params)
-			throws NullPointerException, IllegalArgumentException, IOException, AccessException, APIException;
-	
-	
-	APITokenDAO activateToken(APIDataStore<?, ?> dataStore, ArrayValues<GetNameValue<String>> params)
-			throws NullPointerException, IllegalArgumentException, IOException, AccessException, APIException;
-	
-	
-	APITokenDAO refreshToken(APIDataStore<?, ?> dataStore, String userID, APITokenDAO apiToken)
-			throws NullPointerException, IllegalArgumentException, IOException, AccessException, APIException;
-	
-	
-	String generateOAuthURL(APIDataStore<?, ?> dataStore, String code)
-			throws NullPointerException, IllegalArgumentException, AccessException;
-	
-	
-	 
+
+    APITokenDAO activateToken(APIDataStore<?, ?> dataStore, String userID, APIConfigInfo apiToken, NVPair... params)
+            throws NullPointerException, IllegalArgumentException, IOException, AccessException, APIException;
+
+
+    APITokenDAO activateToken(APIDataStore<?, ?> dataStore, ArrayValues<GetNameValue<String>> params)
+            throws NullPointerException, IllegalArgumentException, IOException, AccessException, APIException;
+
+
+    APITokenDAO refreshToken(APIDataStore<?, ?> dataStore, String userID, APITokenDAO apiToken)
+            throws NullPointerException, IllegalArgumentException, IOException, AccessException, APIException;
+
+
+    String generateOAuthURL(APIDataStore<?, ?> dataStore, String code)
+            throws NullPointerException, IllegalArgumentException, AccessException;
+
+
 }

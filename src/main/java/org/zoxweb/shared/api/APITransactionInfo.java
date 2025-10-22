@@ -19,62 +19,71 @@ import org.zoxweb.shared.util.RemoteID;
 
 /**
  * The API transaction information interface.
+ *
  * @author mzebib
  */
 public interface APITransactionInfo
-    extends RemoteID<String> {
+        extends RemoteID<String> {
 
-	/**
-	 * Returns the message.
-	 * @return APINotificationMessage
-	 */
-	APINotificationMessage getMessage();
-	
-	/**
-	 * Sets the message.
-	 * @param message
-	 */
-	void setMessage(APINotificationMessage message);
-	
-	
-	/**
-	 * Returns the delivery status.
-	 * @return APINotificationStatus
-	 */
-	APINotificationStatus getDeliverStatus();
-	
-	/**
-	 * Sets the delivery status.
-	 * @param status
-	 */
-	void setDeliverStatus(APINotificationStatus status);
+    /**
+     * Returns the message.
+     *
+     * @return APINotificationMessage
+     */
+    APINotificationMessage getMessage();
 
-	/**
-	 * Returns the updated time stamp.
-	 * @return the last itme updated in miilis
-	 */
-	long getUpdateTimeStamp();
-	
-	/**
-	 * Sets the updated time stamp.
-	 * @param ts
-	 * @throws IllegalArgumentException
-	 */
-	void setUpdateTimeStamp(long ts)
-			throws IllegalArgumentException;
+    /**
+     * Sets the message.
+     *
+     * @param message
+     */
+    void setMessage(APINotificationMessage message);
 
-	/**
-	 * Returns the created time stamp.
-	 * @return creation time stamp in millis.
-	 */
-	long getCreateTimeStamp();
-	
-	/**
-	 * Sets the created time stamp.
-	 * @param ts
-	 * @throws IllegalArgumentException
-	 */
-	void setCreateTimeStamp(long ts)
+
+    /**
+     * Returns the delivery status.
+     *
+     * @return APINotificationStatus
+     */
+    APINotificationStatus getDeliverStatus();
+
+    /**
+     * Sets the delivery status.
+     *
+     * @param status
+     */
+    void setDeliverStatus(APINotificationStatus status);
+
+    /**
+     * Returns the updated time stamp.
+     *
+     * @return the last itme updated in miilis
+     */
+    long getUpdateTimeStamp();
+
+    /**
+     * Sets the updated time stamp.
+     *
+     * @param ts
+     * @throws IllegalArgumentException
+     */
+    void setUpdateTimeStamp(long ts)
+            throws IllegalArgumentException;
+
+    /**
+     * Returns the created time stamp.
+     *
+     * @return creation time stamp in millis.
+     */
+    long getCreateTimeStamp();
+
+    /**
+     * Sets the created time stamp.
+     *
+     * @param ts
+     * @throws IllegalArgumentException
+     */
+    void setCreateTimeStamp(long ts)
             throws IllegalArgumentException;
 
 }

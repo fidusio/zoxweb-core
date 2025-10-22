@@ -18,10 +18,9 @@ package org.zoxweb.shared.api;
 /**
  * API config statuses
  */
-public enum APIConfigStatus 
-{
-	ACTIVE,
-	INACTIVE,
-	SUSPENDED,
-	INVALID
+public enum APIConfigStatus {
+    ACTIVE,
+    INACTIVE,
+    SUSPENDED,
+    INVALID
 }

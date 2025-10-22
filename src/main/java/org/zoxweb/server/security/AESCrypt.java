@@ -69,20 +69,14 @@ public class AESCrypt {
 
     public static boolean debug = false;
     private byte[] password;
-    private Cipher cipher;
-    private Mac hmac;
-    private SecureRandom random;
-    private MessageDigest digest;
+    private final Cipher cipher;
+    private final Mac hmac;
+    private final SecureRandom random;
+    private final MessageDigest digest;
     private IvParameterSpec ivSpec1;
     private SecretKeySpec aesKey1;
     private IvParameterSpec ivSpec2;
     private SecretKeySpec aesKey2;
-
-
-    /*******************
-     * PRIVATE METHODS *
-     *******************/
-
 
     /**
      * Prints a debug message on standard output if DEBUG mode is turned on.
@@ -110,16 +104,6 @@ public class AESCrypt {
             //System.out.println(buffer.toString());
         }
     }
-
-    /**
-     * Generates a pseudo-random byte array.
-     * @return pseudo-random byte array of <tt>len</tt> bytes.
-     */
-//	protected byte[] generateRandomBytes(int len) {
-//		byte[] bytes = new byte[len];
-//		random.nextBytes(bytes);
-//		return bytes;
-//	}
 
 
     /**

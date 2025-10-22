@@ -19,48 +19,53 @@ import org.zoxweb.shared.util.GetName;
 
 /**
  * The API service provider creator interface.
+ *
  * @author mzebib
  */
 public interface APIServiceProviderCreator
-		extends GetName {
+        extends GetName {
 
-	/**
-	 * Creates empty configuration information parameters.
-	 * @return APIConfigInfo
-	 */
-	APIConfigInfo createEmptyConfigInfo();
-	
-	/**
-	 * Returns the exception handler.
-	 * @return APIExceptionHandler
-	 */
-	APIExceptionHandler getExceptionHandler();
-	
-	/**
-	 * Creates the API based on the configuration parameters.
-	 * @param dataStore 
-	 * @param apiConfig
-	 * @return APIServiceProvider
-	 * @throws APIException
-	 */
-	APIServiceProvider<?, ?> createAPI(APIDataStore<?, ?> dataStore, APIConfigInfo apiConfig )
-			throws APIException;
-	
-	/**
+    /**
+     * Creates empty configuration information parameters.
+     *
+     * @return APIConfigInfo
+     */
+    APIConfigInfo createEmptyConfigInfo();
+
+    /**
+     * Returns the exception handler.
+     *
+     * @return APIExceptionHandler
+     */
+    APIExceptionHandler getExceptionHandler();
+
+    /**
+     * Creates the API based on the configuration parameters.
+     *
+     * @param dataStore
+     * @param apiConfig
+     * @return APIServiceProvider
+     * @throws APIException
+     */
+    APIServiceProvider<?, ?> createAPI(APIDataStore<?, ?> dataStore, APIConfigInfo apiConfig)
+            throws APIException;
+
+    /**
      * Returns the API token manager.
-	 * @return the api token manager
-	 */
-	APITokenManager getAPITokenManager();
-	
-	/**
-	 * Get the APISecurityManager
-	 * @return
-	 */
-	//APISecurityManager<?> getAPISecurityManager();
-	
-	/**
-	 * 
-	 * @param apiSecurityManager
-	 */
-	//void setAPISecurityManager(APISecurityManager<?> apiSecurityManager);
- }
+     *
+     * @return the api token manager
+     */
+    APITokenManager getAPITokenManager();
+
+    /**
+     * Get the APISecurityManager
+     * @return
+     */
+    //APISecurityManager<?> getAPISecurityManager();
+
+    /**
+     *
+     * @param apiSecurityManager
+     */
+    //void setAPISecurityManager(APISecurityManager<?> apiSecurityManager);
+}

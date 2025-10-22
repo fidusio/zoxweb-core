@@ -34,10 +34,10 @@ public final class SecUtil {
         Map<String, String> m = new HashMap<>();
 
         // --- Subject / Issuer Attribute OIDs (RDNs) ---
-        m.put("2.5.4.3",  "CN (Common Name)");
-        m.put("2.5.4.6",  "C (Country)");
-        m.put("2.5.4.7",  "L (Locality)");
-        m.put("2.5.4.8",  "ST (State/Province)");
+        m.put("2.5.4.3", "CN (Common Name)");
+        m.put("2.5.4.6", "C (Country)");
+        m.put("2.5.4.7", "L (Locality)");
+        m.put("2.5.4.8", "ST (State/Province)");
         m.put("2.5.4.10", "O (Organization)");
         m.put("2.5.4.11", "OU (Organizational Unit)");
         m.put("1.2.840.113549.1.9.1", "emailAddress");

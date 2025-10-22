@@ -42,6 +42,7 @@ public @interface EndPointProp {
      * </ol>
      * Note: There a limitation here which is the exclusion of comma from the uri definition which is actually
      * a good practice
+     *
      * @return comma separated uris
      */
     String uris();
@@ -49,6 +50,7 @@ public @interface EndPointProp {
 
     /**
      * List of HTTPMethod to be called GET=HTTPMethod.GET, POST=HTTPMethod.POST ...
+     *
      * @return array of HTTPMethod
      */
     HTTPMethod[] methods() default {};
@@ -59,12 +61,14 @@ public @interface EndPointProp {
 
     /**
      * Name of the handler or servlet depending on the server used
+     *
      * @return name of the handle
      */
     String name();
 
     /**
      * Describe the handler
+     *
      * @return description of the handle
      */
     String description() default "";

@@ -15,31 +15,31 @@
  */
 package org.zoxweb.shared.api;
 
+import org.zoxweb.shared.security.AccessException;
+
 import java.io.IOException;
 import java.util.List;
 
-import org.zoxweb.shared.security.AccessException;
-
 /**
  * The API search interface.
- * @author mzebib
  *
  * @param <I>
  * @param <O>
+ * @author mzebib
  */
-public interface APISearch<I, O>
-{
-	/**
-	 * This method is used to search and return list of outputs based on input arguments.
-	 * @param args
-	 * @return list of matching the search criteria
-	 * @throws IllegalArgumentException
-	 * @throws IOException
-	 * @throws NullPointerException
-	 * @throws AccessException 
-	 * @throws APIException 
-	 */
-	@SuppressWarnings("unchecked")
-	List<O> search(I... args) 
-			throws IllegalArgumentException, IOException, NullPointerException, AccessException, APIException;
+public interface APISearch<I, O> {
+    /**
+     * This method is used to search and return list of outputs based on input arguments.
+     *
+     * @param args
+     * @return list of matching the search criteria
+     * @throws IllegalArgumentException
+     * @throws IOException
+     * @throws NullPointerException
+     * @throws AccessException
+     * @throws APIException
+     */
+    @SuppressWarnings("unchecked")
+    List<O> search(I... args)
+            throws IllegalArgumentException, IOException, NullPointerException, AccessException, APIException;
 }

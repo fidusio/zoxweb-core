@@ -15,8 +15,7 @@
  */
 package org.zoxweb.shared.api;
 
-public enum APINotificationDelivery 
-{
-	NOW,
-	QUEUED
+public enum APINotificationDelivery {
+    NOW,
+    QUEUED
 }

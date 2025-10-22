@@ -17,23 +17,25 @@ package org.zoxweb.shared.api;
 
 /**
  * The API exception handler interface.
+ *
  * @author mzebib
  */
-public interface APIExceptionHandler 
-{
-	/**
-	 * This method throws an exception.
-	 * @param e
-	 * @throws APIException
-	 */
-	public void throwException(Exception e) 
-			throws APIException;
-	
-	/**
-	 * This method maps the exception to an API exception.
-	 * @param e
-	 * @return the mapped exception of type APIException
-	 */
-	public APIException mapException(Exception e);
-	
+public interface APIExceptionHandler {
+    /**
+     * This method throws an exception.
+     *
+     * @param e
+     * @throws APIException
+     */
+    public void throwException(Exception e)
+            throws APIException;
+
+    /**
+     * This method maps the exception to an API exception.
+     *
+     * @param e
+     * @return the mapped exception of type APIException
+     */
+    public APIException mapException(Exception e);
+
 }

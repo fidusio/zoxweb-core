@@ -19,36 +19,34 @@ import org.zoxweb.shared.util.GetValue;
 
 /**
  * This enum contains currencies.
+ *
  * @author mzebib
  */
 public enum Currency
-	implements GetValue<String>
-{
-	//	United States dollar
-	USD("$"),
-	//	Euro
-	EUR("€"),
-	//	Canadian dollar
-	CAD("$"),
-	//	Japanese yen
-	JPY("¥"),
-	//	Pound sterling
-	GBP("£"),
-	//	Swiss franc 
-	CHF("Fr"),
-	;
+        implements GetValue<String> {
+    //	United States dollar
+    USD("$"),
+    //	Euro
+    EUR("€"),
+    //	Canadian dollar
+    CAD("$"),
+    //	Japanese yen
+    JPY("¥"),
+    //	Pound sterling
+    GBP("£"),
+    //	Swiss franc
+    CHF("Fr"),
+    ;
 
-	private String value;
-	
-	Currency(String value)
-	{
-		this.value = value;
-	}
-	
-	@Override
-	public String getValue() 
-	{
-		return value;
-	}
+    private String value;
+
+    Currency(String value) {
+        this.value = value;
+    }
+
+    @Override
+    public String getValue() {
+        return value;
+    }
 
 }

@@ -3,10 +3,8 @@ package org.zoxweb.shared.app;
 import org.zoxweb.shared.util.AppConfig;
 
 
-
 public abstract class AppCreatorDefault<A, C extends AppConfig>
-    implements AppCreator<A, C>
-{
+        implements AppCreator<A, C> {
     private String name;
     private C appConfig;
 

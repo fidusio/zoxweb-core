@@ -7,9 +7,10 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface MappedProp
-{
+public @interface MappedProp {
     String name();
+
     String description() default "";
+
     String id();
 }

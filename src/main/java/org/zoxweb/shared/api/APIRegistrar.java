@@ -29,14 +29,13 @@ public class APIRegistrar
     }
 
 
-    public NVGenericMap stats(boolean detailed)
-    {
+    public NVGenericMap stats(boolean detailed) {
 
         NVGenericMap ret = null;
         if (asDefault != null)
-            ret =  asDefault.ping(detailed);
+            ret = asDefault.ping(detailed);
 
-        if(ret == null)
+        if (ret == null)
             ret = new NVGenericMap();
 
         ret.setName("api-registrar");

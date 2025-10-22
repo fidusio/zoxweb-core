@@ -17,34 +17,35 @@ package org.zoxweb.shared.api;
 
 /**
  * The API notification interface which extends API service provider interface.
- * @author mzebib
  *
  * @param <V>
+ * @author mzebib
  */
 public interface APINotification<V>
-	extends APIServiceProvider<V, V>
-{	
-	/**
-	 * This method sends a message and returns transaction information.
-	 * @param message
-	 * @param apind NOW the message will be send at the message return, QUEUED the message will be queued and sent later
-	 * @return APITransactionInfo
-	 * @throws NullPointerException
-	 * @throws IllegalArgumentException
-	 * @throws APIException
-	 */
-	APITransactionInfo sendAPIMessage(APIMessage message, APINotificationDelivery apind)
-			throws NullPointerException, IllegalArgumentException, APIException;
-	
-	/**
-	 * This method updates transaction information.
-	 * @param transaction
-	 * @return APITransactionInfo
-	 * @throws NullPointerException
-	 * @throws IllegalArgumentException
-	 * @throws APIException
-	 */
-	APITransactionInfo updateTransactionInfo(APITransactionInfo transaction)
-			throws NullPointerException, IllegalArgumentException, APIException;
-	
+        extends APIServiceProvider<V, V> {
+    /**
+     * This method sends a message and returns transaction information.
+     *
+     * @param message
+     * @param apind   NOW the message will be send at the message return, QUEUED the message will be queued and sent later
+     * @return APITransactionInfo
+     * @throws NullPointerException
+     * @throws IllegalArgumentException
+     * @throws APIException
+     */
+    APITransactionInfo sendAPIMessage(APIMessage message, APINotificationDelivery apind)
+            throws NullPointerException, IllegalArgumentException, APIException;
+
+    /**
+     * This method updates transaction information.
+     *
+     * @param transaction
+     * @return APITransactionInfo
+     * @throws NullPointerException
+     * @throws IllegalArgumentException
+     * @throws APIException
+     */
+    APITransactionInfo updateTransactionInfo(APITransactionInfo transaction)
+            throws NullPointerException, IllegalArgumentException, APIException;
+
 }

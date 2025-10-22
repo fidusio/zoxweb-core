@@ -17,22 +17,22 @@ package org.zoxweb.shared.api;
 
 /**
  * This enum contains notification status types.
+ *
  * @author mzebib
  *
  */
-public enum APINotificationStatus 
-{
-	// Provider confirmed delivery
-	DELIVERY_CONFIRMED,
-	// Sent to provider, provider can't confirm delivery
-	DELIVERED,
-	// Provider received message but failed to deliver it 
-	FAILED,
-	// Provider received the message and it is queued waiting for delivery confirmation
-	PENDING,
-	// Exception occurred at the provider level 
-	PROVIDER_EXCEPTION,
-	// Expired message delivery
-	EXPIRED
-	
+public enum APINotificationStatus {
+    // Provider confirmed delivery
+    DELIVERY_CONFIRMED,
+    // Sent to provider, provider can't confirm delivery
+    DELIVERED,
+    // Provider received message but failed to deliver it
+    FAILED,
+    // Provider received the message and it is queued waiting for delivery confirmation
+    PENDING,
+    // Exception occurred at the provider level
+    PROVIDER_EXCEPTION,
+    // Expired message delivery
+    EXPIRED
+
 }

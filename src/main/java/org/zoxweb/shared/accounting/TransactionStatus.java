@@ -11,5 +11,4 @@ public enum TransactionStatus {
     PROCESSING,
     REFUNDED,
     SUCCESSFUL,
-
 }

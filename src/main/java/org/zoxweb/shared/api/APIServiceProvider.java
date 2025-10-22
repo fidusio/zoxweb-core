@@ -19,92 +19,102 @@ import org.zoxweb.shared.util.*;
 
 /**
  * The API service provider interface.
- * @author mzebib
  *
  * @param <P> Protocol specific connection
  * @param <S> System specific connection
+ * @author mzebib
  */
 public interface APIServiceProvider<P, S>
-	extends SetDescription, 
-			SetName, 
-			CanonicalID, AutoCloseable{
+        extends SetDescription,
+        SetName,
+        CanonicalID, AutoCloseable {
 
-	/**
-	 * Returns the data store configuration info.
-	 * @return APIConfigInfo
-	 */
-	APIConfigInfo getAPIConfigInfo();
-	
-	/**
-	 * Sets the data store configuration info.
-	 * @param configInfo object
-	 */
-	void setAPIConfigInfo(APIConfigInfo configInfo);
+    /**
+     * Returns the data store configuration info.
+     *
+     * @return APIConfigInfo
+     */
+    APIConfigInfo getAPIConfigInfo();
 
-	/*
-	 * Connects to the data store
-	 * @return native connection 
-	 * @throws APIException in case of connection issues
-	 */
-	S connect()
-			throws APIException;
-	
-	/**
-	 * Create a new connection
-	 * @return native connection 
-	 * @throws APIException in case of connection issues
-	 */
-	P newConnection()
-			throws APIException;
-	
-	/**
-	 * Shuts down the service provider store.
-	 * @throws APIException in case of closure issue
-	 */
+    /**
+     * Sets the data store configuration info.
+     *
+     * @param configInfo object
+     */
+    void setAPIConfigInfo(APIConfigInfo configInfo);
+
+    /*
+     * Connects to the data store
+     * @return native connection
+     * @throws APIException in case of connection issues
+     */
+    S connect()
+            throws APIException;
+
+    /**
+     * Create a new connection
+     *
+     * @return native connection
+     * @throws APIException in case of connection issues
+     */
+    P newConnection()
+            throws APIException;
+
+    /**
+     * Shuts down the service provider store.
+     *
+     * @throws APIException in case of closure issue
+     */
     @Override
-	void close() throws APIException;
-	
-	/**
-	 * Checks if the store is active.
-	 * @return true if active
-	 */
-	boolean isProviderActive();
+    void close() throws APIException;
 
-	/**
-	 * Returns the exception handler.
-	 * @return APIExceptionHandler
-	 */
-	APIExceptionHandler getAPIExceptionHandler();
-	
-	/**
-	 * Sets the exception handler.
-	 * @param exceptionHandler object to map native exceptions to APIException
-	 */
-	void setAPIExceptionHandler(APIExceptionHandler exceptionHandler);
-	
-	/**
-	 * Lookup the property type based on the GetName property.
-	 * @param propertyName looking for 
-	 * @return typed value
-	 */
-	<T> T lookupProperty(GetName propertyName);
+    /**
+     * Checks if the store is active.
+     *
+     * @return true if active
+     */
+    boolean isProviderActive();
 
-	/**
-	 * Returns last time it was used or accessed
-	 * @return time in millis last time accessed
-	 */
-	long lastTimeAccessed();
+    /**
+     * Returns the exception handler.
+     *
+     * @return APIExceptionHandler
+     */
+    APIExceptionHandler getAPIExceptionHandler();
 
-	/**
-	 * Returns the delta between NOW and last time the object was used
-	 * @return time in millis for inactivity
-	 */
-	long inactivityDuration();
-	
-	/**
-	 * @return true if the current api instance is busy
-	 */
-	boolean isBusy();
+    /**
+     * Sets the exception handler.
+     *
+     * @param exceptionHandler object to map native exceptions to APIException
+     */
+    void setAPIExceptionHandler(APIExceptionHandler exceptionHandler);
+
+    /**
+     * Lookup the property type based on the GetName property.
+     *
+     * @param propertyName looking for
+     * @return typed value
+     */
+    <T> T lookupProperty(GetName propertyName);
+
+    /**
+     * Returns last time it was used or accessed
+     *
+     * @return time in millis last time accessed
+     */
+    long lastTimeAccessed();
+
+    /**
+     * Returns the delta between NOW and last time the object was used
+     *
+     * @return time in millis for inactivity
+     */
+    long inactivityDuration();
+
+    /**
+     * @return true if the current api instance is busy
+     */
+    boolean isBusy();
 
 
     /**
@@ -114,8 +124,10 @@ public interface APIServiceProvider<P, S>
      * @throws APIException if the API is not accessible remotely
      *
      */
-    default NVGenericMap ping(boolean detailed) throws APIException{
+    default NVGenericMap ping(boolean detailed) throws APIException {
         throw new APIException("Not supported");
-    };
+    }
+
+    ;
 
 }

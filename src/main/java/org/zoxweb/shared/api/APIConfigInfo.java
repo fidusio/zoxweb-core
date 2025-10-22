@@ -21,64 +21,65 @@ import org.zoxweb.shared.util.*;
 
 /**
  * The API configuration information interface.
+ *
  * @author mzebib
  *
  */
 public interface APIConfigInfo
-    extends ReferenceID<String>,
-            AccountID<String>,
-            SubjectGUID<String>,
-            SetName,
-            SetDescription,
-            TimeStampInterface,
-			GetNVProperties,
-            CanonicalID,
-		    SecurityControllerHolder
-{
-	
-	public enum OAuthVersion
-	{
-		NONE,
-		OAUTH_1,
-		OAUTH_2
-	}
-	
-	
-	
-	/**
-	 * @return returns the API type name.
-	 */
-	String getAPITypeName();
+        extends ReferenceID<String>,
+        AccountID<String>,
+        SubjectGUID<String>,
+        SetName,
+        SetDescription,
+        TimeStampInterface,
+        GetNVProperties,
+        CanonicalID,
+        SecurityControllerHolder {
 
-	
-	/**
-	 * This method sets the API type name.
-	 * @param name
-	 */
-	void setAPITypeName(String name);
-	
-	/**
-	 * @return service types.
-	 */
-	APIServiceType[] getServiceTypes();
-	
-	/**
-	 * This method sets service types.
-	 * @param serviceType
-	 */
-	void setServiceTypes(APIServiceType[] serviceType);
+    public enum OAuthVersion {
+        NONE,
+        OAUTH_1,
+        OAUTH_2
+    }
 
-	/**
-	 * @return the version.
-	 */
-	String getVersion();
-	
-	/**
-	 * This method sets the version.
-	 * @param version
-	 */
-	void setVersion(String version);
-	
+
+    /**
+     * @return returns the API type name.
+     */
+    String getAPITypeName();
+
+
+    /**
+     * This method sets the API type name.
+     *
+     * @param name
+     */
+    void setAPITypeName(String name);
+
+    /**
+     * @return service types.
+     */
+    APIServiceType[] getServiceTypes();
+
+    /**
+     * This method sets service types.
+     *
+     * @param serviceType
+     */
+    void setServiceTypes(APIServiceType[] serviceType);
+
+    /**
+     * @return the version.
+     */
+    String getVersion();
+
+    /**
+     * This method sets the version.
+     *
+     * @param version
+     */
+    void setVersion(String version);
+
 //	/**
 //	 * @return the configuration parameters.
 //	 * @deprecated
@@ -91,71 +92,76 @@ public interface APIConfigInfo
 //	 * @deprecated
 //	 */
 //	void setConfigParameters(List<NVPair> configParams);
-	
-	/**
-	 * This method sets the configuration parameters.
-	 * @param configParams
-	 * @deprecated
-	 */
-	void setConfigParameters(ArrayValues<NVPair> configParams);
-	
-	/**
-	 * The default location where to store or get information, this parameter is optional and depend on the  
-	 * the API 
-	 * @return the default location
-	 */
-	String getDefaultLocation();
-	/**
-	 * Set the default location
-	 * 
-	 * @param location
-	 */
-	void setDefaultLocation(String location);
-	
-	/**
-	 * This method checks if the specified service type is supported.
-	 * @param type
-	 * @return true is the type is supported.
-	 */
-	boolean isServiceTypeSupported(APIServiceType type);
-	
-	/**
-	 * @return status
-	 */
-	APIConfigStatus getStatus();
-	
-	/**
-	 * Set the current status.
-	 * @param status
-	 */
-	void setStatus(APIConfigStatus status);
-	
-	/**
-	 * @return the oauth version
-	 */
-	OAuthVersion getOAuthVersion();
-	
-	/**
-	 * Set the oauth version
-	 * @param version
-	 */
-	void setOAuthVersion(OAuthVersion version);
-	
-	void setKeyMaker(KeyMaker keyMaker);
-	KeyMaker getKeyMaker();
+
+    /**
+     * This method sets the configuration parameters.
+     *
+     * @param configParams
+     * @deprecated
+     */
+    void setConfigParameters(ArrayValues<NVPair> configParams);
+
+    /**
+     * The default location where to store or get information, this parameter is optional and depend on the
+     * the API
+     *
+     * @return the default location
+     */
+    String getDefaultLocation();
+
+    /**
+     * Set the default location
+     *
+     * @param location
+     */
+    void setDefaultLocation(String location);
+
+    /**
+     * This method checks if the specified service type is supported.
+     *
+     * @param type
+     * @return true is the type is supported.
+     */
+    boolean isServiceTypeSupported(APIServiceType type);
+
+    /**
+     * @return status
+     */
+    APIConfigStatus getStatus();
+
+    /**
+     * Set the current status.
+     *
+     * @param status
+     */
+    void setStatus(APIConfigStatus status);
+
+    /**
+     * @return the oauth version
+     */
+    OAuthVersion getOAuthVersion();
+
+    /**
+     * Set the oauth version
+     *
+     * @param version
+     */
+    void setOAuthVersion(OAuthVersion version);
+
+    void setKeyMaker(KeyMaker keyMaker);
+
+    KeyMaker getKeyMaker();
 
 //	void setAPISecurityManager(APISecurityManager<?, ?, ?> apiSM);
 //	APISecurityManager<?, ?, ?> getAPISecurityManager();
 
 
-	/**
-	 * Get the native configuration parameters
-	 * @return
-	 */
-	NVGenericMap getProperties();
-	
-	
-	
-	
+    /**
+     * Get the native configuration parameters
+     *
+     * @return
+     */
+    NVGenericMap getProperties();
+
 
 }

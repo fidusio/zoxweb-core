@@ -17,41 +17,44 @@ package org.zoxweb.shared.api;
 
 import org.zoxweb.shared.data.FileInfoDAO;
 
-public interface APIFileInfoMap
-{
-	
-	/**
-	 * This method returns the original file information.
-	 * @return FileInfoDAO
-	 */
-	public FileInfoDAO getOriginalFileInfo();
+public interface APIFileInfoMap {
+
+    /**
+     * This method returns the original file information.
+     *
+     * @return FileInfoDAO
+     */
+    FileInfoDAO getOriginalFileInfo();
 
 
-	/**
-	 * This method sets the original file information.
-	 * @param info
-	 * @throws NullPointerException 
-	 * @throws IllegalArgumentException 
-	 */
-	public void setOriginalFileInfo(FileInfoDAO info)
-        throws NullPointerException, IllegalArgumentException;
-	
+    /**
+     * This method sets the original file information.
+     *
+     * @param info
+     * @throws NullPointerException
+     * @throws IllegalArgumentException
+     */
+    void setOriginalFileInfo(FileInfoDAO info)
+            throws NullPointerException, IllegalArgumentException;
 
-	/**
-	 * This method returns the remote file information.
-	 * @return FileInfoDAO
-	 */
-	public FileInfoDAO getRemoteFileInfo();
-	
 
-	/**
-	 * This method sets the remote file information.
-	 * @param info
-	 * @throws NullPointerException 
-	 * @throws IllegalArgumentException 
-	 */
-	public void setRemoteFileInfo(FileInfoDAO info)
-        throws NullPointerException, IllegalArgumentException;
-	
+    /**
+     * This method returns the remote file information.
+     *
+     * @return FileInfoDAO
+     */
+    FileInfoDAO getRemoteFileInfo();
+
+
+    /**
+     * This method sets the remote file information.
+     *
+     * @param info
+     * @throws NullPointerException
+     * @throws IllegalArgumentException
+     */
+    void setRemoteFileInfo(FileInfoDAO info)
+            throws NullPointerException, IllegalArgumentException;
+
 
 }

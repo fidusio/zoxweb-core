@@ -17,15 +17,13 @@ package org.zoxweb.shared.accounting;
 
 /**
  * Contains transaction descriptors.
+ *
  * @author mzebib
  */
-public enum TransactionDescriptor 
-{
-	MONTHLY_PAYMENT,
-	SUBSCRIPTION,
-	CREDIT,
-	REFUNDS,
+public enum TransactionDescriptor {
+    MONTHLY_PAYMENT,
+    SUBSCRIPTION,
+    CREDIT,
+    REFUNDS,
     ORDER_PAYMENT,
-	
-	;
 }

@@ -6,11 +6,12 @@ import org.zoxweb.shared.util.GetName;
 import java.io.IOException;
 
 public interface AppCreator<A, C extends AppConfig>
-extends GetName, AutoCloseable
-{
-	AppCreator<A, C> setAppConfig(C appConfig);
+        extends GetName, AutoCloseable {
+    AppCreator<A, C> setAppConfig(C appConfig);
 
-	AppCreator<A, C> setName(String name);
-	C getAppConfig();
-	A createApp() throws NullPointerException, IllegalArgumentException, IOException;
+    AppCreator<A, C> setName(String name);
+
+    C getAppConfig();
+
+    A createApp() throws NullPointerException, IllegalArgumentException, IOException;
 }

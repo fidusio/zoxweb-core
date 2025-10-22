@@ -29,94 +29,90 @@ import org.zoxweb.shared.util.NVConfigEntity.ArrayType;
 /**
  * This class is used to define payment information used for
  * payment during transactions.
+ *
  * @author mzebib
  *
  */
 @SuppressWarnings("serial")
-public class PaymentInfoDAO 
-	extends SetNameDescriptionDAO
-{
-	
-	public enum Params
-		implements GetNVConfig
-	{
-		
-		CREDIT_CARD(NVConfigManager.createNVConfigEntity("credit_card", "Credit card information includes: card type, card holder name, card number, expiration date, and security code", "CreditCard", true, true, CreditCardDAO.NVC_CREDIT_CARD_DAO, ArrayType.NOT_ARRAY)),
-		BILLING_ADDRESS(NVConfigManager.createNVConfigEntity("billing_address", "Billing address includes: street, city, state/province, zip/postal code, and country", "BillingAddress", true, true, AddressDAO.NVC_ADDRESS_DAO, ArrayType.NOT_ARRAY)),
-		
-		;
-		
-		private final NVConfig cType;
-		
-		Params(NVConfig c)
-		{
-			cType = c;
-		}
-		
-		public NVConfig getNVConfig() 
-		{
-			return cType;
-		}
-	}
-	
-	public static final NVConfigEntity NVC_PAYMENT_INFO_DAO = new NVConfigEntityPortable(
-																						"payment_info_dao", 
-																						null, 
-																						"PaymentInfoDAO", 
-																						true, 
-																						false, 
-																						false, 
-																						false, 
-																						PaymentInfoDAO.class, 
-																						SharedUtil.extractNVConfigs(Params.values()), 
-																						null, 
-																					 	false, 
-																					 	SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO
-																					 );
-	
-	
-	/**
-	 * The default constructor.
-	 */
-	public PaymentInfoDAO()
-	{
-		super(NVC_PAYMENT_INFO_DAO);
-	}
-	
-	/**
-	 * Returns the credit card information.
-	 * @return Credit card
-	 */
-	public CreditCardDAO getCreditCard() 
-	{
-		return lookupValue(Params.CREDIT_CARD);
-	}
-	
-	/**
-	 * Sets the credit card information.
-	 * @param card
-	 */
-	public void setCreditCard(CreditCardDAO card)
-	{
-		setValue(Params.CREDIT_CARD, card);
-	}
+public class PaymentInfoDAO
+        extends SetNameDescriptionDAO {
 
-	/**
-	 * Returns the billing address.
-	 * @return billing address
-	 */
-	public AddressDAO getBillingAddress() 
-	{
-		return lookupValue(Params.BILLING_ADDRESS);
-	}
-	
-	/**
-	 * Sets the billing address.
-	 * @param address
-	 */
-	public void setBillingAddress(AddressDAO address)
-	{
-		setValue(Params.BILLING_ADDRESS, address);
-	}
-	
+    public enum Params
+            implements GetNVConfig {
+
+        CREDIT_CARD(NVConfigManager.createNVConfigEntity("credit_card", "Credit card information includes: card type, card holder name, card number, expiration date, and security code", "CreditCard", true, true, CreditCardDAO.NVC_CREDIT_CARD_DAO, ArrayType.NOT_ARRAY)),
+        BILLING_ADDRESS(NVConfigManager.createNVConfigEntity("billing_address", "Billing address includes: street, city, state/province, zip/postal code, and country", "BillingAddress", true, true, AddressDAO.NVC_ADDRESS_DAO, ArrayType.NOT_ARRAY)),
+
+        ;
+
+        private final NVConfig cType;
+
+        Params(NVConfig c) {
+            cType = c;
+        }
+
+        public NVConfig getNVConfig() {
+            return cType;
+        }
+    }
+
+    public static final NVConfigEntity NVC_PAYMENT_INFO_DAO = new NVConfigEntityPortable(
+            "payment_info_dao",
+            null,
+            "PaymentInfoDAO",
+            true,
+            false,
+            false,
+            false,
+            PaymentInfoDAO.class,
+            SharedUtil.extractNVConfigs(Params.values()),
+            null,
+            false,
+            SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO
+    );
+
+
+    /**
+     * The default constructor.
+     */
+    public PaymentInfoDAO() {
+        super(NVC_PAYMENT_INFO_DAO);
+    }
+
+    /**
+     * Returns the credit card information.
+     *
+     * @return Credit card
+     */
+    public CreditCardDAO getCreditCard() {
+        return lookupValue(Params.CREDIT_CARD);
+    }
+
+    /**
+     * Sets the credit card information.
+     *
+     * @param card
+     */
+    public void setCreditCard(CreditCardDAO card) {
+        setValue(Params.CREDIT_CARD, card);
+    }
+
+    /**
+     * Returns the billing address.
+     *
+     * @return billing address
+     */
+    public AddressDAO getBillingAddress() {
+        return lookupValue(Params.BILLING_ADDRESS);
+    }
+
+    /**
+     * Sets the billing address.
+     *
+     * @param address
+     */
+    public void setBillingAddress(AddressDAO address) {
+        setValue(Params.BILLING_ADDRESS, address);
+    }
+
 }

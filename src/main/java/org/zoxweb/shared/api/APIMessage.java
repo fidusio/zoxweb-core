@@ -21,25 +21,27 @@ import org.zoxweb.shared.util.SubjectGUID;
 
 /**
  * The API message interface.
+ *
  * @author mzebib
  *
  */
 public interface APIMessage
-	extends ReferenceID<String>, AccountID<String>, SubjectGUID<String>
-{
-	/**
-	 * This method returns the message type.
-	 * @return APIServiceType
-	 */
-	public APIServiceType getMessageType();
-	
-	/**
-	 * This method sets the message type.
-	 * @param type
-	 * @throws NullPointerException
-	 * @throws IllegalArgumentException
-	 */
-	public void setMessageType(APIServiceType type)
-			throws NullPointerException, IllegalArgumentException;
-	
+        extends ReferenceID<String>, AccountID<String>, SubjectGUID<String> {
+    /**
+     * This method returns the message type.
+     *
+     * @return APIServiceType
+     */
+    public APIServiceType getMessageType();
+
+    /**
+     * This method sets the message type.
+     *
+     * @param type
+     * @throws NullPointerException
+     * @throws IllegalArgumentException
+     */
+    public void setMessageType(APIServiceType type)
+            throws NullPointerException, IllegalArgumentException;
+
 }

@@ -15,132 +15,122 @@
  */
 package org.zoxweb.shared.api;
 
-import java.util.List;
-
 import org.zoxweb.shared.util.NVConfigEntity;
 import org.zoxweb.shared.util.TimeStampInterface;
 
+import java.util.List;
+
 @SuppressWarnings("serial")
 public class APISearchResult<T>
-	implements TimeStampInterface
-{
-	private NVConfigEntity nvce;
-	private String reportID;
-	private long creationTS;
-	private long lastUpdatedTS;
-	private long lastReadTS;
-	private List<T> matchIDs;
-	
-	/**
-	 * The default constructor.
-	 */
-	public APISearchResult()
-	{
-		
-	}
-	
-	/**
-	 * Returns the NVConfigEntity.
-	 * @return NVConfigEntity
-	 */
-	public NVConfigEntity getNVConfigEntity()
-	{
-		return nvce;
-	}
-	
-	/**
-	 * Sets the NVConfigEntity.
-	 * @param nvce
-	 */
-	public void setNVConfigEntity(NVConfigEntity nvce)
-	{
-		this.nvce = nvce;
-	}
-	
-	/**
-	 * @return the report ID.
-	 */
-	public String getReportID()
-	{
-		return reportID;
-	}
-	
-	/**
-	 * Sets the report ID.
-	 * @param reportID
-	 */
-	public void setReportID(String reportID)
-	{
-		this.reportID = reportID;
-	}
-	
-	/**
-	 * Returns list of match ID's.
-	 * @return the matching ids.
-	 */
-	public List<T> getMatchIDs()
-	{
-		return matchIDs;
-	}
-	
-	/**
-	 * Sets list of match ID's.
-	 * @param ids
-	 */
-	public void setMatchIDs(List<T> ids)
-	{
-		this.matchIDs = ids;
-	}
-	
-	/**
-	 * Returns the size of the match ID's list.
-	 * @return size
-	 */
-	public int size()
-	{
-		if (matchIDs != null)
-		{
-			return matchIDs.size();
-		}
-		
-		return 0;
-	}
-	
-	@Override
-	public long getCreationTime() 
-	{
-		return creationTS;
-	}
+        implements TimeStampInterface {
+    private NVConfigEntity nvce;
+    private String reportID;
+    private long creationTS;
+    private long lastUpdatedTS;
+    private long lastReadTS;
+    private List<T> matchIDs;
 
-	@Override
-	public void setCreationTime(long ts) 
-	{
-		creationTS = ts;
-	}
+    /**
+     * The default constructor.
+     */
+    public APISearchResult() {
 
-	@Override
-	public long getLastTimeUpdated() 
-	{
-		return lastUpdatedTS;
-	}
+    }
+
+    /**
+     * Returns the NVConfigEntity.
+     *
+     * @return NVConfigEntity
+     */
+    public NVConfigEntity getNVConfigEntity() {
+        return nvce;
+    }
+
+    /**
+     * Sets the NVConfigEntity.
+     *
+     * @param nvce
+     */
+    public void setNVConfigEntity(NVConfigEntity nvce) {
+        this.nvce = nvce;
+    }
+
+    /**
+     * @return the report ID.
+     */
+    public String getReportID() {
+        return reportID;
+    }
+
+    /**
+     * Sets the report ID.
+     *
+     * @param reportID
+     */
+    public void setReportID(String reportID) {
+        this.reportID = reportID;
+    }
+
+    /**
+     * Returns list of match ID's.
+     *
+     * @return the matching ids.
+     */
+    public List<T> getMatchIDs() {
+        return matchIDs;
+    }
+
+    /**
+     * Sets list of match ID's.
+     *
+     * @param ids
+     */
+    public void setMatchIDs(List<T> ids) {
+        this.matchIDs = ids;
+    }
+
+    /**
+     * Returns the size of the match ID's list.
+     *
+     * @return size
+     */
+    public int size() {
+        if (matchIDs != null) {
+            return matchIDs.size();
+        }
+
+        return 0;
+    }
+
+    @Override
+    public long getCreationTime() {
+        return creationTS;
+    }
+
+    @Override
+    public void setCreationTime(long ts) {
+        creationTS = ts;
+    }
+
+    @Override
+    public long getLastTimeUpdated() {
+        return lastUpdatedTS;
+    }
 
 
-	@Override
-	public void setLastTimeUpdated(long ts) 
-	{
-		lastUpdatedTS = ts;
-	}
+    @Override
+    public void setLastTimeUpdated(long ts) {
+        lastUpdatedTS = ts;
+    }
 
-	@Override
-	public long getLastTimeRead() 
-	{
-		return lastReadTS;
-	}
+    @Override
+    public long getLastTimeRead() {
+        return lastReadTS;
+    }
 
 
-	@Override
-	public void setLastTimeRead(long ts) 
-	{
-		lastReadTS = ts;
-	}
+    @Override
+    public void setLastTimeRead(long ts) {
+        lastReadTS = ts;
+    }
 }
