@@ -11,7 +11,7 @@ import org.zoxweb.shared.task.ConsumerSupplierCallback;
  * @param <S>  Session supplier
  */
 public abstract class SessionCallback<CF, C, S> implements ConsumerSupplierCallback<C, S> {
-    public static final LogWrapper log = new LogWrapper(SessionCallback.class);
+    public static final LogWrapper log = new LogWrapper(SessionCallback.class).setEnabled(false);
     protected volatile CF config;
     protected volatile ProtocolHandler protocolHandler;
 

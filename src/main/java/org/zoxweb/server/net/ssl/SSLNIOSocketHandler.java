@@ -52,8 +52,12 @@ public class SSLNIOSocketHandler
 
         @Override
         public void accept(ByteBuffer buffer) {
-            // data handling
+            // data handling for the remote tunnel
+            // we have a byte buffer with data
+            // we forward it to ssl connection
+
             if (buffer != null) {
+                if (log.isEnabled()) log.getLogger().info("We have data to send: " + buffer);
                 try {
                     ByteBufferUtil.smartWrite(null, getConfig().remoteChannel, buffer);
                 } catch (Exception e) {
@@ -119,7 +123,6 @@ public class SSLNIOSocketHandler
         remoteConnection = rc;
         this.simpleStateMachine = simpleStateMachine;
         if (remoteConnection != null && sessionCallback == null) {
-            //this.sessionCallback = new TunnelCallback();
             this.sessionCallback = new TunnelCallback();
         } else {
             SUS.checkIfNulls("SSL session call can't be null", sessionCallback);
@@ -170,6 +173,7 @@ public class SSLNIOSocketHandler
 
             // channel selection data coming from ssl channel or tunnel response
             if (key.channel() == config.sslChannel && config.sslChannel.isConnected()) {
+                // here we have an application code that will process decrypted data
                 sslDispatcher.publish(config.getHandshakeStatus(), sessionCallback);
             } else if (key.channel() == config.remoteChannel && config.remoteChannel.isConnected()) {
                 // this is the tunnel section connection
