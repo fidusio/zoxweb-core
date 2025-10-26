@@ -27,29 +27,26 @@ import org.zoxweb.shared.util.SharedUtil;
  * Note: this class must be used by 2 threads simultaneously a
  * <code>queuing</code> thread and a <code>dequeuing</code>thread. The
  * <code>dequeuing</code> thread must be running continuously otherwise the
- * <code>queuing</code> will be pending till the dequeuing process starts
+ * <code>dequeuing</code> will be pending till the dequeuing process starts
  * again.
  */
 public class ThresholdQueue<O>
         extends ArrayQueue<O> {
 
-    private int threshold;
+    private final int threshold;
     private boolean thresholdEnabled = false;
 
 
-    public ThresholdQueue(int highMark) {
-        this(highMark / 2, highMark);
+    public ThresholdQueue(int capacity) {
+        this(capacity / 2, capacity);
     }
 
     /**
      * Create a bounded queue based on a lowMark and highMark parameters.
      *
-     * @param threshold
-     *            of the queue size.
-     * @param capacity
-     *            of the queue size.
-     * @exception IllegalArgumentException
-     *                if the lowMark >= highMark or lowMark < 0 or highMark < 0.
+     * @param threshold of the queue size.
+     * @param capacity  of the queue size.
+     * @throws IllegalArgumentException if the lowMark >= highMark or lowMark < 0 or highMark < 0.
      */
     public ThresholdQueue(int threshold, int capacity)
             throws IllegalArgumentException {
@@ -86,10 +83,10 @@ public class ThresholdQueue<O>
     public synchronized boolean queue(O toQueue) {
         if (toQueue == null)
             throw new NullPointerException("Can't queue a null object");
-        if (thresholdEnabled && toQueue != null) {
+        if (thresholdEnabled) {
             try {
                 while (thresholdEnabled)
-                    wait(300);
+                    wait(250);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -110,9 +107,7 @@ public class ThresholdQueue<O>
      */
     @Override
     public String toString() {
-
         return SharedUtil.toCanonicalID(',', array.length, threshold, size(), thresholdEnabled);
-
     }
 
 
