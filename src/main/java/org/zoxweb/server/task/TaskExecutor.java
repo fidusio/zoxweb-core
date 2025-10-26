@@ -19,26 +19,28 @@ import java.util.EventListener;
 
 /**
  * This interface must be implemented by any class that uses the TaskProcessor
- * Object 
+ * Object
+ *
  * @author mnael
  *
  */
 public interface TaskExecutor
-		extends EventListener
-{
+        extends EventListener {
 
-	/**
-	 * This method is called by the TaskProcessor ExecutorThread to execute a task
-	 * This method must not throw any exception and in case it want to share a response
-	 * the TaskEvent.setExecutionResult() can be used 
-	 * @param event task event to be executed
-	 */
-	void executeTask(TaskEvent event) throws Exception;
-	
-	/**
-	 * Called after returning from TaskExecutor.executeTask();
-	 * @param event
-	 */
-	void finishTask(TaskEvent event);
+    /**
+     * This method is called by the TaskProcessor ExecutorThread to execute a task
+     * This method must not throw any exception and in case it want to share a response
+     * the TaskEvent.setExecutionResult() can be used
+     *
+     * @param event task event to be executed
+     */
+    void executeTask(TaskEvent event) throws Exception;
+
+    /**
+     * Called after returning from TaskExecutor.executeTask();
+     *
+     * @param event
+     */
+    void finishTask(TaskEvent event);
 
 }

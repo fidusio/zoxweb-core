@@ -11,8 +11,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 public class FutureCallableRunnableTask<V>
-    implements TaskExecutor, Future<V>
-{
+        implements TaskExecutor, Future<V> {
 
     public final LogWrapper log = new LogWrapper(FunctionalInterface.class).setEnabled(false);
     private final Callable<V> callable;
@@ -22,8 +21,7 @@ public class FutureCallableRunnableTask<V>
     private final boolean isFuture;
     final AtomicBoolean pendingExecution = new AtomicBoolean(true);
 
-    FutureCallableRunnableTask(TaskEvent te)
-    {
+    FutureCallableRunnableTask(TaskEvent te) {
         SUS.checkIfNulls("TaskEvent can't be null", te);
         callable = null;
         runnable = null;
@@ -31,19 +29,17 @@ public class FutureCallableRunnableTask<V>
         this.taskEvent = te;
     }
 
-    FutureCallableRunnableTask(Callable<V> callable, Object source)
-    {
+    FutureCallableRunnableTask(Callable<V> callable, Object source) {
         SUS.checkIfNulls("Callable can't be null", callable);
         this.callable = callable;
         this.runnable = null;
         this.isFuture = true;
         taskEvent = new TaskEvent(source,
-                (callable instanceof CallableConsumer) ? ((CallableConsumer<V>) callable).isStackTraceEnabled(): true,
+                (callable instanceof CallableConsumer) ? ((CallableConsumer<V>) callable).isStackTraceEnabled() : true,
                 this);
     }
 
-    FutureCallableRunnableTask(Runnable runnable, V result, boolean isFuture, Object source)
-    {
+    FutureCallableRunnableTask(Runnable runnable, V result, boolean isFuture, Object source) {
         SUS.checkIfNulls("Runnable can't be null", runnable);
         this.callable = null;
         this.runnable = runnable;
@@ -51,15 +47,15 @@ public class FutureCallableRunnableTask<V>
         this.isFuture = isFuture;
         taskEvent = new TaskEvent(source, true, this);
     }
+
     /**
      * @param event task event to be executed
      */
     @Override
     public void executeTask(TaskEvent event)
-            throws Exception
-    {
+            throws Exception {
 
-        if(isFuture) {
+        if (isFuture) {
             synchronized (this) {
                 try {
                     if (runnable != null)
@@ -70,8 +66,7 @@ public class FutureCallableRunnableTask<V>
                     notifyAll();
                 }
             }
-        }
-        else if(runnable != null)
+        } else if (runnable != null)
             runnable.run();
         else
             taskEvent.getTaskExecutor().executeTask(taskEvent);
@@ -82,25 +77,19 @@ public class FutureCallableRunnableTask<V>
      * @param event
      */
     @Override
-    public void finishTask(TaskEvent event)
-    {
-        if (callable != null)
-        {
-            if (event.getExecutionException() != null)
-            {
+    public void finishTask(TaskEvent event) {
+        if (callable != null) {
+            if (event.getExecutionException() != null) {
                 // if there was an exception while call
-                if (callable instanceof ExceptionCallback)
-                {
+                if (callable instanceof ExceptionCallback) {
                     ((ConsumerCallback<V>) callable).exception(event.getExecutionException());
                 }
-            }
-            else if (callable instanceof Consumer) {
+            } else if (callable instanceof Consumer) {
                 ((Consumer<V>) callable).accept(result);
             }
         }
         pendingExecution.set(false);
     }
-
 
 
     /**
@@ -126,8 +115,7 @@ public class FutureCallableRunnableTask<V>
      * @return
      */
     @Override
-    public boolean isDone()
-    {
+    public boolean isDone() {
         // this will cause error
         return taskEvent.execCount() != 0 && !pendingExecution.get();
     }
@@ -137,18 +125,14 @@ public class FutureCallableRunnableTask<V>
      * @throws InterruptedException
      * @throws ExecutionException
      */
-    public V get() throws InterruptedException, ExecutionException
-    {
-        synchronized(this)
-        {
-            if (!isDone())
-            {
+    public V get() throws InterruptedException, ExecutionException {
+        synchronized (this) {
+            if (!isDone()) {
                 wait();
             }
         }
 
-        if(taskEvent.getExecutionException() != null)
-        {
+        if (taskEvent.getExecutionException() != null) {
             throw new ExecutionException(taskEvent.getExecutionException());
         }
 
@@ -165,21 +149,18 @@ public class FutureCallableRunnableTask<V>
      */
     @Override
     public V get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-        if(log.isEnabled()) log.getLogger().info("get(timeout, timeunit)");
+        if (log.isEnabled()) log.getLogger().info("get(timeout, timeunit)");
 
-        synchronized (this)
-        {
-            if(!isDone())
-            {
+        synchronized (this) {
+            if (!isDone()) {
                 wait(unit.toMillis(timeout));
             }
-            if(!isDone())
+            if (!isDone())
                 throw new TimeoutException("Result not available yet");
         }
 
 
-        if(taskEvent.getExecutionException() != null)
-        {
+        if (taskEvent.getExecutionException() != null) {
             throw new ExecutionException(taskEvent.getExecutionException());
         }
 

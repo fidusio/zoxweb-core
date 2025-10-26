@@ -19,39 +19,40 @@ import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * This class provides a default implementation of the TaskExecutor and TaskTerminationListener interface, it is
- * recommended to extend this class and customize the implementation to reflect the requirement of the new implementation 
+ * recommended to extend this class and customize the implementation to reflect the requirement of the new implementation
+ *
  * @author mnael
  *
  */
 public abstract class TaskDefault
-		implements TaskExecutor {
+        implements TaskExecutor {
 
-	protected AtomicLong executeCount =  new AtomicLong();
-	protected AtomicLong finishCount =  new AtomicLong();
+    protected AtomicLong executeCount = new AtomicLong();
+    protected AtomicLong finishCount = new AtomicLong();
 
-	protected abstract void childExecuteTask(TaskEvent event);
+    protected abstract void childExecuteTask(TaskEvent event);
 
-	@Override
-	public void finishTask(TaskEvent event) {
-		finishCount.incrementAndGet();	
-	}
+    @Override
+    public void finishTask(TaskEvent event) {
+        finishCount.incrementAndGet();
+    }
 
-	@Override
-	public void executeTask(TaskEvent event) {
-		try {
-			childExecuteTask(event);
-		} catch( Exception e) {
-			e.printStackTrace();
-		}		
-		executeCount.incrementAndGet();
-	}
-	
-	public long getExecutionCallbackCount() {
-		return executeCount.get();
-	}
-	
-	public long getTerminationCallbackCount() {
-		return finishCount.get();
-	}
-	
+    @Override
+    public void executeTask(TaskEvent event) {
+        try {
+            childExecuteTask(event);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        executeCount.incrementAndGet();
+    }
+
+    public long getExecutionCallbackCount() {
+        return executeCount.get();
+    }
+
+    public long getTerminationCallbackCount() {
+        return finishCount.get();
+    }
+
 }
