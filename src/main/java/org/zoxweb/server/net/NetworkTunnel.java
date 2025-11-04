@@ -34,8 +34,8 @@ public class NetworkTunnel
 
     static class StreamRelay
             implements Runnable, CloseableType {
-        private InputStream is;
-        private OutputStream os;
+        private final InputStream is;
+        private final OutputStream os;
         CloseableType[] counterParts;
         private boolean closedStat = false;
 
@@ -98,10 +98,10 @@ public class NetworkTunnel
     }
 
 
-    private StreamRelay sr1;
-    private StreamRelay sr2;
-    private Socket s1;
-    private Socket s2;
+    private final StreamRelay sr1;
+    private final StreamRelay sr2;
+    private final Socket s1;
+    private final Socket s2;
 
     private boolean closedStat = false;
 

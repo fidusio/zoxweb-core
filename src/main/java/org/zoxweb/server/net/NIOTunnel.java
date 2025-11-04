@@ -49,8 +49,8 @@ public class NIOTunnel
             this.remoteAddress = remoteAddress;
         }
 
-        public void setRemoteAddress(IPAddress rAddress) {
-            remoteAddress = rAddress;
+        public void setRemoteAddress(IPAddress remoteAddress) {
+            this.remoteAddress = remoteAddress;
         }
 
         public IPAddress getRemoteAddress() {

@@ -75,7 +75,7 @@ public abstract class ProtocolHandler
 
     protected ProtocolHandler(boolean enableTimeout) {
         updateUsage();
-        if(enableTimeout)
+        if (enableTimeout)
             phTimeout = new PHTimeout(this, SESSION_TIMEOUT);
         else
             phTimeout = null;
@@ -160,14 +160,10 @@ public abstract class ProtocolHandler
     }
 
 
-//	public void setSessionCallback(BaseSessionCallback<?> sessionCallback) {
-//		throw new UnsupportedOperationException("Can't set session callback");
-//	}
-
     public final void close() throws IOException {
         if (!isClosed.getAndSet(true)) {
             close_internal();
-            if(phTimeout != null)
+            if (phTimeout != null)
                 phTimeout.timeout.cancel();
         }
     }

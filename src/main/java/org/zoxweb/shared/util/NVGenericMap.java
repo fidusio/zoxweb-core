@@ -92,7 +92,11 @@ public class NVGenericMap
      */
     public long getValueAsLong(String name)
             throws RuntimeException {
-        return Long.parseLong(getValue(name));
+        Object value = getValue(name);
+        if (value instanceof Long)
+            return (long) value;
+
+        return Long.parseLong((String) value);
     }
 
     @SuppressWarnings("unchecked")
