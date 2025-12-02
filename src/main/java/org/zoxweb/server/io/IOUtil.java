@@ -20,6 +20,7 @@ import org.zoxweb.shared.crypto.HashResult;
 import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.net.ProxyType;
 import org.zoxweb.shared.util.Const;
+import org.zoxweb.shared.util.RegistrarMapDefault;
 import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedStringUtil;
 
@@ -36,6 +37,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -678,5 +680,65 @@ public class IOUtil {
             file.renameTo(new File(newPath));
         }
         return file;
+    }
+
+    /**
+     * True if file exists and regular file and readable
+     * @param pFile to check
+     * @return status
+     */
+    public static boolean isRegularFile(Path pFile) {
+        return Files.exists(pFile) && Files.isRegularFile(pFile) && Files.isReadable(pFile);
+    }
+
+    public static Path regularFileOrNull(Path pFile) {
+        return isRegularFile(pFile) ? pFile : null;
+    }
+
+    /**
+     * Find the first match in the parentPath the match is case-insensitive
+     * @param parentPath entry path
+     * @param toFind file name looking for
+     * @param cache if not null the match in cached
+     * @return matching path or null
+     * @throws IOException in case of io error
+     */
+    public static Path findFirstMatchingInPath(Path parentPath, String toFind, RegistrarMapDefault<String, Path> cache) throws IOException {
+        Path searchPathObj = Paths.get(toFind);
+
+        Path match = cache != null ? cache.lookup(toFind) : null;
+
+        if (match == null) {
+            try (Stream<Path> stream = Files.walk(parentPath)) {
+                Optional<Path> search = stream
+                        .filter(IOUtil::isRegularFile)
+                        .filter(p -> endsWithIgnoreCase(p, searchPathObj))
+                        .findFirst();
+
+                if (search.isPresent()) {
+                    match = search.get();
+                    if (cache != null)
+                        cache.map(match, toFind);
+                }
+            }
+        }
+
+        return match;
+    }
+
+    public static boolean endsWithIgnoreCase(Path fullPath, Path suffix) {
+        int suffixCount = suffix.getNameCount();
+        int fullCount = fullPath.getNameCount();
+
+        if (suffixCount > fullCount) return false;
+
+        for (int i = 0; i < suffixCount; i++) {
+            String suffixPart = suffix.getName(suffixCount - 1 - i).toString();
+            String fullPart = fullPath.getName(fullCount - 1 - i).toString();
+            if (!suffixPart.equalsIgnoreCase(fullPart)) {
+                return false;
+            }
+        }
+        return true;
     }
 }
