@@ -290,9 +290,9 @@ public class TaskSchedulerProcessor
     }
 
     /**
-     * Schedule a task based on the current delay in millis from now
+     * Schedule a task based on the current delay in millis from now.
      *
-     * @param delayInMillis if delay is < 0 the task will execute now
+     * @param delayInMillis if delay is less than 0 the task will execute now
      * @param task          to be executed
      * @return Appointment object associated with the task
      */

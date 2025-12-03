@@ -81,7 +81,7 @@ public class NVEntityAccessInfo
 	
 	/**
 	 * This constructor instantiates NVEntityAccessInfo based on given NVConfigEntity parameter.
-	 * @param nvce
+	 * @param nvc the NVConfigEntity
 	 */
 	protected NVEntityAccessInfo(NVConfigEntity nvc)
 	{

@@ -238,12 +238,14 @@ public class Range<T extends Comparable<T>>
 
     /**
      * Modifies range, if needed, so
-     * range.getStart() >= intoOtherRange.getStart() and <br/>
-     * range.getEnd() <= intoOtherRange.getEnd()
-     * It does not guarantee into.contains(range)==true which depends also on
+     * range.getStart() is greater or equal to intoOtherRange.getStart() and
+     * range.getEnd() is less or equal to intoOtherRange.getEnd().
+     * It does not guarantee into.contains(range)==true which depends also on inclusivity.
      *
-     * @param range
-     * @param into  <br>Both not null safe
+     * @param range the range to fit
+     * @param into the target range. Both are not null safe
+     * @param <T> the comparable type
+     * @return the fitted range
      */
     public static <T extends Comparable<T>> Range<T> fit(Range<T> range,
                                                          Range<T> into) {
@@ -262,12 +264,14 @@ public class Range<T extends Comparable<T>>
 
     /**
      * Modifies range, if needed, so
-     * range.getStart() <= intoOtherRange.getStart() and <br/>
-     * range.getEnd() >= intoOtherRange.getEnd() <br/>
-     * It does not guarantee range.contains(toContain)==true which depends also on
+     * range.getStart() is less or equal to intoOtherRange.getStart() and
+     * range.getEnd() is greater or equal to intoOtherRange.getEnd().
+     * It does not guarantee range.contains(toContain)==true which depends also on inclusivity.
      *
-     * @param range
-     * @param toContain <br>Both not null safe
+     * @param range the range to expand
+     * @param toContain the range to contain. Both are not null safe
+     * @param <T> the comparable type
+     * @return the expanded range
      */
     public static <T extends Comparable<T>> Range<T> expand(Range<T> range,
                                                             Range<T> toContain) {

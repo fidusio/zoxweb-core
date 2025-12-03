@@ -79,9 +79,9 @@ public class DynamicEnumMap
     }
 
     /**
-     * This constructor instantiates DynamicEnumMap based on given name and enums of Enum<?> type.
-     * @param name
-     * @param enums
+     * This constructor instantiates DynamicEnumMap based on given name and enums of Enum type.
+     * @param name the name of the enum map
+     * @param enums the enum values
      */
     public DynamicEnumMap(String name, Enum<?>... enums) {
         super(name, new ArrayList<NVPair>());

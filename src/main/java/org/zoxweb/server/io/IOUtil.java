@@ -58,10 +58,12 @@ public class IOUtil {
     public static void close(AutoCloseable... acs) {
         if (acs != null) {
             for (AutoCloseable c : acs) {
-                try {
-                    c.close();
-                } catch (Exception e) {
-
+                if (c != null) {
+                    try {
+                        c.close();
+                    } catch (Exception e) {
+                        // Intentionally suppressed - close() should not throw during cleanup
+                    }
                 }
             }
         }
@@ -152,7 +154,13 @@ public class IOUtil {
 
         con.setUseCaches(false);
         con.connect();
-        return inputStreamToByteArray(con.getInputStream(), true);
+        try (InputStream is = con.getInputStream()) {
+            return inputStreamToByteArray(is, false);
+        } finally {
+            if (con instanceof HttpURLConnection) {
+                ((HttpURLConnection) con).disconnect();
+            }
+        }
     }
 
     public static File locateFile(String filename) {
@@ -166,8 +174,11 @@ public class IOUtil {
     public static File locateFile(ClassLoader cl, String filename) {
         File ret = new File(filename);
         if (!ret.exists() || !ret.isFile()) {
-            ret = new File(cl.getResource(filename)
-                    .getFile());
+            java.net.URL resource = cl.getResource(filename);
+            if (resource == null) {
+                return null;
+            }
+            ret = new File(resource.getFile());
         }
 
         return ret;
@@ -199,7 +210,7 @@ public class IOUtil {
 
         Predicate<Path> composition = null;
         Predicate<Path> pattern = p -> p.toString().matches(filterPattern);
-        if (SUS.isEmpty(filterExclusion)) {
+        if (!SUS.isEmpty(filterExclusion)) {
             Predicate<Path> exclusion = p -> p.toString().matches(filterExclusion);
             composition = pattern.and(exclusion.negate());
         } else {

@@ -625,9 +625,10 @@ public class SharedUtil {
     /**
      * Looks NV list based on name.
      *
-     * @param list
-     * @param name
-     * @return GateNameValue<?> matches name
+     * @param list the list to search
+     * @param name the name to look for
+     * @param <V> the value type
+     * @return GetNameValue matching name
      */
     public static <V> GetNameValue<V> lookupNV(List<? extends GetNameValue<V>> list, String name) {
         return lookupNV(list, name, null);
@@ -636,10 +637,11 @@ public class SharedUtil {
     /**
      * Looks up NV based on name and canonical separator.
      *
-     * @param list
-     * @param name
-     * @param canonicalSep
-     * @return GateNameValue<?> matches name
+     * @param list the list to search
+     * @param name the name to look for
+     * @param canonicalSep the canonical separator
+     * @param <V> the value type
+     * @return GetNameValue matching name
      */
     public static <V> GetNameValue<V> lookupNV(List<? extends GetNameValue<V>> list, String name, String canonicalSep) {
         if (name != null) {
@@ -882,9 +884,10 @@ public class SharedUtil {
     /**
      * Looks up NV list that extends GetNameValue based on enum.
      *
-     * @param arrayList
-     * @param e
-     * @return matching GetNameValue<V>
+     * @param arrayList the list to search
+     * @param e the enum to match
+     * @param <V> the value type
+     * @return matching GetNameValue
      */
     public static <V> GetNameValue<V> lookupNV(List<? extends GetNameValue<V>> arrayList, Enum<?> e) {
         if (e != null) {
@@ -1341,25 +1344,25 @@ public class SharedUtil {
     /**
      * Converts NVConfig to NVBase based on
      * the variable name shared between both objects.
-     * <br>Primitive object conversion list:</br>
+     * <br>Primitive object conversion list:
      * <ul>
-     * <li>Enum type class to NVEnum
-     * <li>String type class to NVPair
-     * <li>Long type class to NVLong
-     * <li>Integer type class to NVInt
-     * <li>Boolean type class to NVBoolean
-     * <li>Float type class to NVFloat
-     * <li>Double type class to NVDouble
+     * <li>Enum type class to NVEnum</li>
+     * <li>String type class to NVPair</li>
+     * <li>Long type class to NVLong</li>
+     * <li>Integer type class to NVInt</li>
+     * <li>Boolean type class to NVBoolean</li>
+     * <li>Float type class to NVFloat</li>
+     * <li>Double type class to NVDouble</li>
      * </ul>
-     * <br>Array object conversion list:</br>
+     * Array object conversion list:
      * <ul>
-     * <li>Enum type class to NVEnumList
-     * <li>String array type class to NVPairList
-     * <li>Long array type class to NVLongList
-     * <li>Byte array type class to NVBlob
-     * <li>Integer array type class to NVIntList
-     * <li>Float array type class to NVFloatList
-     * <li>Double array type class to NVDoubleList
+     * <li>Enum type class to NVEnumList</li>
+     * <li>String array type class to NVPairList</li>
+     * <li>Long array type class to NVLongList</li>
+     * <li>Byte array type class to NVBlob</li>
+     * <li>Integer array type class to NVIntList</li>
+     * <li>Float array type class to NVFloatList</li>
+     * <li>Double array type class to NVDoubleList</li>
      * </ul>
      *
      * @param config
@@ -1777,8 +1780,9 @@ public class SharedUtil {
 
 
     /**
-     * @param list
-     * @return convert nvpair list to GetNameValue<String> list
+     * Converts NVPair list to GetNameValue list.
+     * @param list the list to convert
+     * @return converted list of GetNameValue
      */
     public static List<GetNameValue<String>> toNVList(List<NVPair> list) {
         List<GetNameValue<String>> ret = null;
@@ -1795,9 +1799,9 @@ public class SharedUtil {
     }
 
     /**
-     * Parse a line that contains a list of name=value separated by & \r or \n
+     * Parse a line that contains a list of name=value separated by ampersand, carriage return or newline.
      *
-     * @param str
+     * @param str the string to parse
      * @param nvpSep the name nvpSep value
      * @param regExp the separator nvp1 rexExp nvp2
      * @return list nvpair (name sep value regExp)+
@@ -2016,13 +2020,14 @@ public class SharedUtil {
     }
 
     /**
-     * This method will check value == null then return defaultValue otherwise it will return value.
+     * This method will check if value is null then return defaultValue otherwise it will return value.
      * The value and defaultValue can not be null simultaneously.
      *
-     * @param value
-     * @param defaultValue
+     * @param value the value to check
+     * @param defaultValue the default value if value is null
+     * @param <V> the value type
      * @return override null with default value
-     * @throws NullPointerException if defaultValue == null && value == null
+     * @throws NullPointerException if both defaultValue and value are null
      */
     public static <V extends Object> V nullToDefault(V value, V defaultValue)
             throws NullPointerException {

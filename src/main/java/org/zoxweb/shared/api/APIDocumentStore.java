@@ -124,13 +124,13 @@ public interface APIDocumentStore<P, S>
     /**
      * This method is used to search for list of files given arguments.
      *
-     * @param args
-     * @return List<APIFileInfoMap>
-     * @throws NullPointerException
-     * @throws IllegalArgumentException
-     * @throws IOException
-     * @throws AccessException
-     * @throws APIException
+     * @param args search arguments
+     * @return List of APIFileInfoMap
+     * @throws NullPointerException if args is null
+     * @throws IllegalArgumentException if args are invalid
+     * @throws IOException if an I/O error occurs
+     * @throws AccessException if access is denied
+     * @throws APIException if an API error occurs
      */
     public List<APIFileInfoMap> search(String... args)
             throws NullPointerException, IllegalArgumentException, IOException, AccessException, APIException;

@@ -204,7 +204,7 @@ public class TaskProcessor
      * @param executorThreadCount number of worker threads
      * @param threadPriority      the thread priority
      * @param executorNotify      notify the task executor
-     * @throws IllegalArgumentException <code>if taskQueueMaxSize < 2 or executorThreadCount < 2, or executorThreadCount > taskQueueMaxSize</code>
+     * @throws IllegalArgumentException if taskQueueMaxSize is less than 2 or executorThreadCount is less than 2, or executorThreadCount is greater than taskQueueMaxSize
      */
     public TaskProcessor(String defaultPrefix,
                          int taskQueueMaxSize,

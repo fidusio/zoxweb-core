@@ -46,7 +46,7 @@ public class ThresholdQueue<O>
      *
      * @param threshold of the queue size.
      * @param capacity  of the queue size.
-     * @throws IllegalArgumentException if the lowMark >= highMark or lowMark < 0 or highMark < 0.
+     * @throws IllegalArgumentException if the lowMark is greater or equal to highMark or lowMark is less than 0 or highMark is less than 0.
      */
     public ThresholdQueue(int threshold, int capacity)
             throws IllegalArgumentException {

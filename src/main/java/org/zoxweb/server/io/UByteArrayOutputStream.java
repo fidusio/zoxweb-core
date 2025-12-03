@@ -409,10 +409,10 @@ public class UByteArrayOutputStream
     }
 
     /**
-     * Shift the data left, basically shrinking the buffer this method is useful and efficient for protocol parsing and processing
+     * Shift the data left, basically shrinking the buffer this method is useful and efficient for protocol parsing and processing.
      *
      * @param from start index
-     * @param to   end index with constraint to < from
+     * @param to   end index with constraint to is less than from
      * @return the buffer size after the shift
      * @throws IndexOutOfBoundsException in case the from and to are out of bound
      */

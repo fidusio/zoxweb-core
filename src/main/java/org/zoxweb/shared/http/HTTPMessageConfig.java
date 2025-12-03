@@ -27,14 +27,12 @@ import java.util.List;
 
 /**
  * This class is configuration object that contains all the required parameters to perform
- * <p>
  * HTTP Task such as:
  * <ul>
- * <li> do http submit
- * <li> do http query
- * <li> do http rest invocation
- * </ul
- * </p>
+ * <li>do http submit</li>
+ * <li>do http query</li>
+ * <li>do http rest invocation</li>
+ * </ul>
  *
  * @author javaconsigliere
  */

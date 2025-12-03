@@ -45,7 +45,7 @@ import java.util.Arrays;
  * Extension (JCE) Unlimited Strength Jurisdiction Policy Files</a>.
  * <p>
  * Thread-safety and sharing: this class is not thread-safe.<br>
- * <tt>AESCrypt</tt> objects can be used as Commands (create, use once and dispose),
+ * {@code AESCrypt} objects can be used as Commands (create, use once and dispose),
  * or reused to perform multiple operations (not concurrently though).
  *
  * @author Vócali Sistemas Inteligentes
@@ -108,7 +108,7 @@ public class AESCrypt {
 
     /**
      * SHA256 digest over given byte array and random bytes.<br>
-     * <tt>bytes.length</tt> * <tt>num</tt> random bytes are added to the digest.
+     * {@code bytes.length} * {@code num} random bytes are added to the digest.
      * <p>
      * The generated hash is saved back to the original byte array.<br> Maximum array size is {@link
      * #SHA_SIZE} bytes.
@@ -244,8 +244,6 @@ public class AESCrypt {
 
     /**
      * Generates the random AES key used to crypt file contents.
-     *
-     * @return AES key of {@link #KEY_SIZE} bytes.
      */
 //	protected byte[] generateAESKey2() {
 //		byte[] aesKey = generateRandomBytes(KEY_SIZE);
@@ -327,9 +325,9 @@ public class AESCrypt {
 
 
     /**
-     * The file at <tt>fromPath</tt> is encrypted and saved at <tt>toPath</tt> location.
+     * The file at {@code fromPath} is encrypted and saved at {@code toPath} location.
      * <p>
-     * <tt>version</tt> can be either 1 or 2.
+     * {@code version} can be either 1 or 2.
      *
      * @throws IOException              when there are I/O errors.
      * @throws GeneralSecurityException if the platform does not support the required cryptographic
@@ -342,9 +340,9 @@ public class AESCrypt {
 
 
     /**
-     * The file at <tt>fromPath</tt> is encrypted and saved at <tt>toPath</tt> location.
+     * The file at {@code fromPath} is encrypted and saved at {@code toPath} location.
      * <p>
-     * <tt>version</tt> can be either 1 or 2.
+     * {@code version} can be either 1 or 2.
      *
      * @throws IOException              when there are I/O errors.
      * @throws GeneralSecurityException if the platform does not support the required cryptographic
@@ -368,7 +366,7 @@ public class AESCrypt {
     }
 
     /**
-     * The file at <tt>fromPath</tt> is decrypted and saved at <tt>toPath</tt> location.
+     * The file at {@code fromPath} is decrypted and saved at {@code toPath} location.
      * <p>
      * Source file can be encrypted using version 1 or 2 of aescrypt.
      *
@@ -385,7 +383,7 @@ public class AESCrypt {
 
 
     /**
-     * The file at <tt>fromPath</tt> is decrypted and saved at <tt>toPath</tt> location.
+     * The file at {@code fromPath} is decrypted and saved at {@code toPath} location.
      * <p>
      * Source file can be encrypted using version 1 or 2 of aescrypt.
      *
@@ -415,9 +413,9 @@ public class AESCrypt {
     }
 
     /**
-     * The file at <tt>fromPath</tt> is encrypted and saved at <tt>toPath</tt> location.
+     * The file at {@code fromPath} is encrypted and saved at {@code toPath} location.
      * <p>
-     * <tt>version</tt> can be either 1 or 2.
+     * {@code version} can be either 1 or 2.
      *
      * @throws IOException              when there are I/O errors.
      * @throws GeneralSecurityException if the platform does not support the required cryptographic
@@ -522,7 +520,7 @@ public class AESCrypt {
     }
 
     /**
-     * The file at <tt>fromPath</tt> is decrypted and saved at <tt>toPath</tt> location.
+     * The file at {@code fromPath} is decrypted and saved at {@code toPath} location.
      * <p>
      * Source file can be encrypted using version 1 or 2 of aescrypt.
      *

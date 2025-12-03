@@ -651,18 +651,17 @@ public class HTTPUtil {
     }
 
     /**
-     * Return path parameters base on the meta path and the value path
+     * Return path parameters base on the meta path and the value path.
      * <ul>
      * <li>pathWithMetas: /start/abc/{id}/{info}</li>
      * <li>pathWithValues:/start/abc/12345/postPath</li>
-     * <ul></ul>
-     * <br>
-     *     NVGenericMap will return NVLong("id", 12345), NVPair("info","batata")
+     * </ul>
+     * NVGenericMap will return NVLong("id", 12345), NVPair("info","batata")
      *
-     * @param pathWithMetas
-     * @param pathWithValues
-     * @param addMissing
-     * @return
+     * @param pathWithMetas the path with meta placeholders
+     * @param pathWithValues the path with actual values
+     * @param addMissing whether to add missing parameters
+     * @return map of parsed parameters
      */
     public static Map<String, Object> parsePathParameters(String pathWithMetas, String pathWithValues, boolean addMissing) {
         Map<String, Object> ret = new LinkedHashMap<String, Object>();

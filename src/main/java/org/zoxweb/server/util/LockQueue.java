@@ -33,9 +33,9 @@ public class LockQueue {
     }
 
     /**
-     * Create a lock queue specific  size
-     * @param size of the initial queue.
-     * @exception IllegalArgumentException if the queue size < 0
+     * Create a lock queue specific size.
+     * @param size of the initial queue
+     * @throws IllegalArgumentException if the queue size is less than 0
      */
     public LockQueue(int size) {
         if (size < 0)

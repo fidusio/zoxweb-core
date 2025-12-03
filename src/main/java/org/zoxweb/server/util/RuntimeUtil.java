@@ -390,7 +390,10 @@ public class RuntimeUtil {
 
 
     /**
-     * Helper: run `ipset <args...>` and throw on non-zero exit.
+     * Helper: run ipset with args and throw on non-zero exit.
+     * @param args the command arguments
+     * @return true if execution was successful
+     * @throws IOException if an I/O error occurs
      */
     public static boolean exec(String... args)
             throws IOException {

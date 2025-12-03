@@ -311,6 +311,7 @@ public class HTTPCall {
                 try {
                     con.disconnect();
                 } catch (Exception e) {
+                    // Intentionally suppressed - disconnect failure during cleanup
                 }
             }
 

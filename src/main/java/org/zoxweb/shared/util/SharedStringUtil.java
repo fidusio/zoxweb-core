@@ -801,10 +801,11 @@ public final class SharedStringUtil {
     }
 
     /**
-     * Format a list of NPairs
+     * Format a list of NPairs.
      *
-     * @param list
-     * @return n1=v1&n2=v2...
+     * @param list the list of name-value pairs
+     * @param <V> the value type
+     * @return formatted string like n1=v1&amp;n2=v2...
      */
     public static <V> String format(ArrayValues<GetNameValue<V>> list) {
         return format(list, "=", false, "&");

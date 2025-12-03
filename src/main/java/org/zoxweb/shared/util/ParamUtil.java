@@ -510,7 +510,7 @@ public class ParamUtil {
 
 
     /**
-     * Parse (n1,v1),(n2,v2)... as a List<GetNameValue>
+     * Parse (n1,v1),(n2,v2)... as a List of GetNameValue.
      *
      * @param input string to be parsed
      * @return list of GetNameValue
