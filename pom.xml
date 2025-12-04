@@ -1,17 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-    <description>XlogistX(prev ZoxWeb.com) public utilities jar</description>
+    <description>zoxweb-core is an enterprise Java utility library by XlogistX with 670+ classes across 45+ packages.
+        Core capabilities: NIO/TLS socket framework with WebSocket support, JWT/OAuth authentication and cryptography,
+        RESTful API builder, async task scheduling, finite state machine implementation, GSON serialization,
+        DAO abstractions, IoT device management, and billing/accounting utilities. GWT-compatible.</description>
     <url>https://www.xlogistx.io</url>
     <name>zoxweb-core</name>
     <groupId>org.zoxweb</groupId>
     <artifactId>zoxweb-core</artifactId>
-    <version>2.3.8</version>
+    <version>2.3.9</version>
     <packaging>jar</packaging>
+
 
     <licenses>
         <license>
