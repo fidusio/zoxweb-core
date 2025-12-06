@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
     <description>zoxweb-core is an enterprise Java utility library by XlogistX with 670+ classes across 45+ packages.
         Core capabilities: NIO/TLS socket framework with WebSocket support, JWT/OAuth authentication and cryptography,
         RESTful API builder, async task scheduling, finite state machine implementation, GSON serialization,
-        DAO abstractions, IoT device management, and billing/accounting utilities. GWT-compatible.</description>
+        DAO abstractions, IoT device management, and billing/accounting utilities. GWT-compatible.
+    </description>
     <url>https://www.xlogistx.io</url>
     <name>zoxweb-core</name>
     <groupId>org.zoxweb</groupId>
@@ -23,9 +25,9 @@
 
 
     <scm>
-        <url>https://github.com/fidusio/zoxweb-core.git</url>
-        <connection>scm:git:git://github.com/fidusio/zoxweb-core.git</connection>
-        <developerConnection>scm:git:git://github.com/fidusio/zoxweb-core.git</developerConnection>
+        <url>https://github.com/fidusio/zoxweb-core</url>
+        <connection>scm:git:https://github.com/fidusio/zoxweb-core.git</connection>
+        <developerConnection>scm:git:git@github.com:fidusio/zoxweb-core.git</developerConnection>
     </scm>
 
 
@@ -51,32 +53,23 @@
         <skipTests>true</skipTests>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jdk.version>1.8</jdk.version>
-        <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
-        <maven-plugin-source.version>3.2.1</maven-plugin-source.version>
-        <maven-resources-plugin.version>3.3.0</maven-resources-plugin.version>
-        <maven-surefire-plugin.version>3.0.0-M7</maven-surefire-plugin.version>
-        <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
-        <maven-jar-plugin.version>3.3.0</maven-jar-plugin.version>
-        <maven-javadoc.version>3.4.1</maven-javadoc.version>
-        <exec-maven.version>3.1.0</exec-maven.version>
+        <maven-compiler-plugin.version>3.14.1</maven-compiler-plugin.version>
+        <maven-plugin-source.version>3.4.0</maven-plugin-source.version>
+        <maven-resources-plugin.version>3.4.0</maven-resources-plugin.version>
+        <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
+        <maven-publishing-plugin.version>0.9.0</maven-publishing-plugin.version>
+        <maven-jar-plugin.version>3.5.0</maven-jar-plugin.version>
+        <maven-javadoc.version>3.12.0</maven-javadoc.version>
+        <maven-surefire-plugin.version>3.5.4</maven-surefire-plugin.version>
         <sonatype-staging.version>1.6.13</sonatype-staging.version>
-
-        <gson.version>RELEASE</gson.version>
-        <javax-cache.version>RELEASE</javax-cache.version>
+        <!-- dependency jars -->
+        <gson.version>2.13.2</gson.version>
+        <javax-cache.version>1.1.1</javax-cache.version>
         <angus.mail.version>2.0.5</angus.mail.version>
-        <jsoup.version>RELEASE</jsoup.version>
+        <jsoup.version>1.21.2</jsoup.version>
         <junit.version>6.0.1</junit.version>
         <okhttp.version>5.3.2</okhttp.version>
-        <!--<oshi-core.version>6.8.3</oshi-core.version>-->
     </properties>
-
-
-    <!--    <distributionManagement>-->
-    <!--        <repository>-->
-    <!--            <id>ossrh</id>-->
-    <!--            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>-->
-    <!--        </repository>-->
-    <!--    </distributionManagement>-->
 
     <build>
         <directory>target</directory>
@@ -86,12 +79,6 @@
             </resource>
         </resources>
 
-
-        <!--        <resources>-->
-        <!--            <resource>-->
-        <!--                <directory>src/main/java/</directory>-->
-        <!--            </resource>-->
-        <!--        </resources>-->
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -103,22 +90,15 @@
                 </configuration>
             </plugin>
 
-            <!--            <plugin>-->
-            <!--                <groupId>org.codehaus.mojo</groupId>-->
-            <!--                <artifactId>exec-maven-plugin</artifactId>-->
-            <!--                <version>${exec-maven.version}</version>-->
-            <!--                <configuration>-->
-            <!--                </configuration>-->
-            <!--            </plugin>-->
-
-
             <plugin>
                 <groupId>org.sonatype.central</groupId>
                 <artifactId>central-publishing-maven-plugin</artifactId>
-                <version>0.9.0</version>
+                <version>${maven-publishing-plugin.version}</version>
                 <extensions>true</extensions>
                 <configuration>
                     <publishingServerId>central</publishingServerId>
+<!--                    <autoPublish>true</autoPublish>-->
+<!--                    <waitUntil>published</waitUntil>-->
                 </configuration>
             </plugin>
 
@@ -170,7 +150,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-gpg-plugin</artifactId>
-                <version>3.2.8</version>
+                <version>${maven-gpg-plugin.version}</version>
                 <executions>
                     <execution>
                         <id>sign-artifacts</id>
@@ -209,9 +189,6 @@
     </build>
 
     <dependencies>
-        <!-- JUnit 5 API for writing tests -->
-
-
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
