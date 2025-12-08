@@ -41,7 +41,7 @@ import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.text.ParseException;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicLong;
@@ -295,8 +295,8 @@ public final class GSONUtil {
 
             try {
                 if (jp.isString() && !SUS.isEmpty(jp.getAsString()))
-                    return DateUtil.DEFAULT_GMT_MILLIS.parse(jp.getAsString());
-            } catch (ParseException e) {
+                    return DateUtil.DEFAULT_GMT_MILLIS.toDate(jp.getAsString());
+            } catch (DateTimeParseException e) {
                 // TODO Auto-generated catch block
                 //e.printStackTrace();
                 log.getLogger().info(jp + " Exception: " + e);
@@ -381,6 +381,9 @@ public final class GSONUtil {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
+//            finally {
+//                IOUtil.close(jtw);
+//            }
 
             return jtw.get();
         }
@@ -526,7 +529,6 @@ public final class GSONUtil {
             jw.endArray();
         } catch (IOException e) {
             e.printStackTrace();
-            ;
         }
         return jw;
     }
@@ -880,10 +882,10 @@ public final class GSONUtil {
                 } else if (nvc.getMetaTypeBase() == Date.class) {
 
                     if (nve.lookupValue(nvc) instanceof Date) {
-                        writer.name(nvc.getName()).value(DateUtil.DEFAULT_GMT_MILLIS.format(nve.lookupValue(nvc)));
+                        writer.name(nvc.getName()).value(DateUtil.DEFAULT_GMT_MILLIS.format((Date)nve.lookupValue(nvc)));
                     } else if ((long) nve.lookupValue(nvc) != 0) {
                         //writer.name( nvc.getName()).value((long)nve.lookupValue(nvc));
-                        writer.name(nvc.getName()).value(DateUtil.DEFAULT_GMT_MILLIS.format(new Date((long) nve.lookupValue(nvc))));
+                        writer.name(nvc.getName()).value(DateUtil.DEFAULT_GMT_MILLIS.format((long) nve.lookupValue(nvc)));
                     }
                 } else if (nvc.getMetaTypeBase() == BigDecimal.class) {
                     if (nve.lookupValue(nvc) != null) {

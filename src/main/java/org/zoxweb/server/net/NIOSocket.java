@@ -484,7 +484,7 @@ public class NIOSocket
 
     public NVGenericMap getStats() {
         NVGenericMap ret = new NVGenericMap("nio_socket");
-        ret.add("time_stamp", DateUtil.DEFAULT_JAVA_FORMAT.format(new Date()));
+        ret.add("time_stamp", DateUtil.DEFAULT_DATE_FORMAT_TZ.format(new Date()));
         ret.build(new NVLong("connection_counts", totalConnections())).
                 build(new NVLong("select_calls_counts", selectedCountTotal)).
                 build(new NVLong("attack_counts", attackTotalCount)).

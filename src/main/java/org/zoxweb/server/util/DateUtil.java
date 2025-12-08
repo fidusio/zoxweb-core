@@ -4,6 +4,11 @@ import org.zoxweb.shared.util.Const.DayOfWeek;
 import org.zoxweb.shared.util.Const.TimeInMillis;
 
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -11,18 +16,69 @@ import java.util.TimeZone;
 
 public class DateUtil {
 
-    public static final SimpleDateFormat DEFAULT_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-    public static final SimpleDateFormat DEFAULT_DATE_FORMAT_TZ = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS zzz");
-    public static final SimpleDateFormat DEFAULT_JAVA_FORMAT = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy");
-    public static final SimpleDateFormat DEFAULT_GMT_MILLIS = createSDF("yyyy-MM-dd'T'HH:mm:ss.SSSX", "UTC");
-    public static final SimpleDateFormat DEFAULT_ZULU_MILLIS = createSDF("yyyy-MM-dd'T'HH:mm:ss.SSSZ", "UTC");
-    public static final SimpleDateFormat ISO_8601 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
-    public static final SimpleDateFormat DEFAULT_GMT = createSDF("yyyy-MM-dd'T'HH:mm:ssX", "UTC");
+    public static class ExtendedDTF {
+
+        private final DateTimeFormatter formatter;
+        private final ZoneId zone;
+
+        private ExtendedDTF(DateTimeFormatter formatter) {
+            this(formatter, ZoneId.systemDefault());
+        }
+
+        private ExtendedDTF(DateTimeFormatter formatter, ZoneId zone) {
+            this.formatter = formatter;
+            this.zone = zone != null ? zone : ZoneId.systemDefault();
+        }
+
+        /** Format java.time types normally */
+        public String format(TemporalAccessor temporal) {
+            return formatter.format(temporal);
+        }
+
+        /** Format java.util.Date */
+        public String format(Date date) {
+            Instant instant = date.toInstant();
+            ZonedDateTime zdt = instant.atZone(zone);
+            return formatter.format(zdt);
+        }
+
+        /** Format milliseconds since epoch */
+        public String format(long millis) {
+            Instant instant = Instant.ofEpochMilli(millis);
+            ZonedDateTime zdt = instant.atZone(zone);
+            return formatter.format(zdt);
+        }
+
+        public TemporalAccessor parse(String text) {
+            return formatter.parse(text);
+        }
+
+        public long toTimeInMillis(String text)
+        {
+            return Instant.from(formatter.parse(text)).toEpochMilli();
+        }
+
+        public Date toDate(String text)
+        {
+            return new Date(toTimeInMillis(text));
+        }
+
+        public DateTimeFormatter unwrap() {
+            return formatter;
+        }
+    }
+    public static final ExtendedDTF DEFAULT_DATE_FORMAT = createDTF("yyyy-MM-dd HH:mm:ss.SSS");
+    public static final ExtendedDTF DEFAULT_DATE_FORMAT_TZ = createDTF("yyyy-MM-dd HH:mm:ss.SSS zzz");
+    public static final ExtendedDTF DEFAULT_JAVA_FORMAT = createDTF("EEE MMM dd HH:mm:ss zzz yyyy");
+    public static final ExtendedDTF DEFAULT_GMT_MILLIS = createDTF("yyyy-MM-dd'T'HH:mm:ss.SSSX", "UTC");
+    public static final ExtendedDTF DEFAULT_ZULU_MILLIS = createDTF("yyyy-MM-dd'T'HH:mm:ss.SSSZ", "UTC");
+    public static final ExtendedDTF ISO_8601 = createDTF("yyyy-MM-dd'T'HH:mm:ssXXX");
+    public static final ExtendedDTF DEFAULT_GMT = createDTF("yyyy-MM-dd'T'HH:mm:ssX", "UTC");
     /**
      * Today Local TimeZone format 'yyyy-MM-dd'
      */
-    public static final SimpleDateFormat TODAY_LTZ = new SimpleDateFormat("yyyy-MM-dd");
-    public static final SimpleDateFormat FILE_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss-SSS");
+    public static final ExtendedDTF TODAY_LTZ = createDTF("yyyy-MM-dd");
+    public static final ExtendedDTF FILE_DATE_FORMAT = createDTF("yyyy-MM-dd_HH-mm-ss-SSS");
 
     private DateUtil() {
     }
@@ -32,6 +88,13 @@ public class DateUtil {
         SimpleDateFormat sdf = new SimpleDateFormat(pattern);
         sdf.setTimeZone(TimeZone.getTimeZone(timezone));
         return sdf;
+    }
+
+    public static ExtendedDTF createDTF(String pattern ) {
+        return new ExtendedDTF(DateTimeFormatter.ofPattern(pattern),null);
+    }
+    public static ExtendedDTF createDTF(String pattern, String zoneId) {
+        return new ExtendedDTF(DateTimeFormatter.ofPattern(pattern), zoneId != null ? ZoneId.of(zoneId) : null);
     }
 
     /**
@@ -121,6 +184,12 @@ public class DateUtil {
 
     public static DayOfWeek dayOfWeek(long millis) {
         return dayOfWeek(new Date(millis));
+    }
+
+    public static String format(Date date, DateTimeFormatter formatter) {
+        return date.toInstant()
+                .atZone(ZoneId.systemDefault())
+                .format(formatter);
     }
 
 

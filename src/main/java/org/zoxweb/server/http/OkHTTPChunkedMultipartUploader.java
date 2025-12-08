@@ -3,6 +3,7 @@ package org.zoxweb.server.http;
 import okhttp3.*;
 import okio.BufferedSink;
 import org.zoxweb.server.util.GSONUtil;
+import org.zoxweb.server.util.ServerUtil;
 import org.zoxweb.shared.http.HTTPMessageConfigInterface;
 import org.zoxweb.shared.util.*;
 
@@ -84,11 +85,12 @@ public class OkHTTPChunkedMultipartUploader {
     }
 
 
+
     public static void main(String[] args) throws IOException {
-        if (args.length < 4) {
-            System.err.println("Usage: java ChunkedMultipartUploader <url> <username> <password> <file1,file2,...>");
-            System.exit(1);
-        }
+
+        if (args.length < 4)
+            ServerUtil.exitWithError(-1, "Usage: java ChunkedMultipartUploader <url> <username> <password> <file1,file2,...>");
+
 
         int index = 0;
         String url = args[index++];

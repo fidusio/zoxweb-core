@@ -4,8 +4,7 @@ import org.zoxweb.server.util.DateUtil;
 import org.zoxweb.shared.filters.ValueFilter;
 import org.zoxweb.shared.util.Const;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.format.DateTimeParseException;
 
 /**
  * The date filter validates date formats.
@@ -20,18 +19,18 @@ public class TimestampFilter
     /**
      * Defines an array of support date formats.
      */
-    private static SimpleDateFormat[] sdf =
+    private static DateUtil.ExtendedDTF[] sdf =
             {
                     DateUtil.DEFAULT_GMT_MILLIS,
                     DateUtil.DEFAULT_GMT,
                     DateUtil.DEFAULT_JAVA_FORMAT,
-                    DateUtil.createSDF("yyyy-MM-dd'T'HH:mm:ss.SSSZ", "UTC"),
-                    DateUtil.createSDF("yyyy-MM-dd'T'HH:mm:ssZ", "UTC"),
-                    DateUtil.createSDF("yyyy-MM-dd hh:mm:ss", "UTC"),
-                    DateUtil.createSDF("yyyy-MM-dd", "UTC"),
+                    DateUtil.createDTF("yyyy-MM-dd'T'HH:mm:ss.SSSZ", "UTC"),
+                    DateUtil.createDTF("yyyy-MM-dd'T'HH:mm:ssZ", "UTC"),
+                    DateUtil.createDTF("yyyy-MM-dd hh:mm:ss", "UTC"),
+                    DateUtil.createDTF("yyyy-MM-dd", "UTC"),
 
-                    DateUtil.createSDF("MM-yy", "UTC"),
-                    DateUtil.createSDF("MM-yyyy", "UTC"),
+                    DateUtil.createDTF("MM-yy", "UTC"),
+                    DateUtil.createDTF("MM-yyyy", "UTC"),
 
             };
 
@@ -62,10 +61,11 @@ public class TimestampFilter
     public Long validate(String in)
             throws NullPointerException, IllegalArgumentException {
 
-        for (SimpleDateFormat format : sdf) {
+        for (DateUtil.ExtendedDTF format : sdf) {
             try {
-                return format.parse(in).getTime();
-            } catch (ParseException e) {
+                return format.toTimeInMillis(in);//Instant.from(format.parse(in)).toEpochMilli();
+//                return format.parse(in).getTime();
+            } catch (DateTimeParseException e) {
 
             }
         }

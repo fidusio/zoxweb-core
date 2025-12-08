@@ -95,11 +95,7 @@ public final class ServerUtil {
             return array2;
         }
 
-        if (array1 != null && array2 == null) {
-            return array1;
-        }
-
-        return null;
+        return array1;
     }
 
     /**
@@ -244,20 +240,18 @@ public final class ServerUtil {
         return loadSystemInfoDAO(true);
     }
 
-//	public static void configureLogger(Logger logger, String filename) throws SecurityException, IOException
-//	{
-//		 // This block configure the logger with handler and formatter  
-//		FileHandler  fh = new FileHandler(filename);  
-//		
-//		
-//		
-//		
-//		
-//        logger.addHandler(fh);
-//        SimpleFormatter formatter = new SimpleFormatter();  
-//        fh.setFormatter(formatter); 
-//        logger.info("Logger activated");
-//	}
+
+    /**
+     * This method will print statements to the error stream and invoke system exit with existCode.
+     * WARNING: after the invocation of this method the JVM will cease to exist
+     * @param exitCode the application exist code
+     * @param statements to be printed
+     */
+    public static void exitWithError(int exitCode, String... statements) {
+        for (String msg : statements)
+            System.err.println(msg);
+        System.exit(exitCode);
+    }
 
     /**
      * Create delay in nanos
