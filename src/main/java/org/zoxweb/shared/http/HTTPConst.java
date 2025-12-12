@@ -15,6 +15,8 @@ public final class HTTPConst {
     public final static String TEXT_PLAIN = "text/plain";
     public final static String TEXT_YAML = "text/yaml";
 
+    public final static String SESSION_ID = "JSESSIONID";
+
     public static final GetNameValue<String> CHARSET_UTF_8 = new NVPair("charset", Const.UTF_8);
 
 

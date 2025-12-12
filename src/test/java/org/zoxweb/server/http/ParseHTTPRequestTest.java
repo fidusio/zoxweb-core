@@ -293,6 +293,25 @@ public class ParseHTTPRequestTest {
 
 
     @Test
+    public void parseCookies()
+    {
+        String[] cookies = {
+                "Set-Cookie: rememberMe=encrypted_data; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=2592000",
+                "Set-Cookie: token=xyz; Domain=example.com",
+        };
+        for (String cookie : cookies) {
+            System.out.println("=============================================================");
+            System.out.println(cookie);
+            NamedValue<?> header = HTTPHeaderParser.parseFullHeaderLine(cookie);
+            System.out.println(header
+
+            );
+        }
+    }
+
+
+
+    @Test
     public void parseHeaderValue() {
         String[] headerValues = {"form-data; name=\"file\"; filename=\"example.pdf\"", "text/html, application/xhtml+xml;q=0.9, image/webp;q=0.8, */*;q=0.7", "timeout=5, max=10", "attachment; filename=\"file,: name.pdf\"; creation-date=\"Wed, 12 Feb 2020 16:00:00 GMT\", inline", "text/html; q=0.8, application/xhtml+xml; q=0.9, image/webp; q=0.7, */*; q=0.5", "Bearer 439iu5krjtjritu34iu5ij43l5kjewlrjlkejtewtre", "no-cache, no-store, must-revalidate", "text/html; charset=UTF-8", "keep-alive, Upgrade"
 
