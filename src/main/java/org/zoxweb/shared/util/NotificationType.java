@@ -24,6 +24,5 @@ public enum NotificationType
 	ERROR,
 	INFORMATION,
 	WARNING
-	
 	;
 }

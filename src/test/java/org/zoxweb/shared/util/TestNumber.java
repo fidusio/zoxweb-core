@@ -72,8 +72,8 @@ public class TestNumber {
 
 		for(long val : longSet)
 		{
-			String str = NumSet.BASE_27.toString(val);
-			String str1 = "" + NumSet.BASE_27.getLong(str);
+			String str = NumSet.Base27.SINGLETON.toString(val);
+			String str1 = "" + NumSet.Base27.SINGLETON.getLong(str);
 			System.out.println(val +", "  +  str + ", " + str1 + ", " + str1.equals(""+val) + ", converted length: " + str.length());
 		}
 	}
@@ -85,13 +85,13 @@ public class TestNumber {
 
 		String[] stringSet = {
 				"Aaaab",
-				NumSet.BASE_27.toString(Long.MAX_VALUE),
+				NumSet.Base27.SINGLETON.toString(Long.MAX_VALUE),
 		};
 
 		for(String val : stringSet)
 		{
 
-			System.out.println(val +", "  +  NumSet.BASE_27.getLong(val));
+			System.out.println(val +", "  +  NumSet.Base27.SINGLETON.getLong(val));
 
 		}
 	}
@@ -103,7 +103,7 @@ public class TestNumber {
 		for (int i = 0; i < 100; i++) {
 			UUID uuid = UUID.randomUUID();
 			String uuidStr = uuid.toString();
-			String str = NumSet.BASE_27.toString(uuid.getMostSignificantBits(), uuid.getLeastSignificantBits());
+			String str = NumSet.Base27.SINGLETON.toString(uuid.getMostSignificantBits(), uuid.getLeastSignificantBits());
 			System.out.println(uuid + ", " + uuidStr.length() + ", " + str + ", " + str.length());
 		}
 	}

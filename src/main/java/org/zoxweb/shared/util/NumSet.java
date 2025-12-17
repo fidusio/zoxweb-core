@@ -3,8 +3,6 @@ package org.zoxweb.shared.util;
 
 public abstract class NumSet {
 
-    public static final Base27 BASE_27 = new Base27();
-
 
     private NumSet() {
     }
@@ -15,8 +13,10 @@ public abstract class NumSet {
      * The included set is: ABCDEFGHJKMNPQRTUVWXY3456789 with numeric values starting with A=0 and ending with 9=26
      * The excluded set is: 0O1IL2Z5S
      */
-    static class Base27
+    final static class Base27
             extends NumSet {
+
+        public static final Base27 SINGLETON = new Base27();
 
         private Base27() {
         }
@@ -95,4 +95,5 @@ public abstract class NumSet {
 
         return ret.toString();
     }
+
 }

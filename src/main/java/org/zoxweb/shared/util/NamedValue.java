@@ -5,7 +5,6 @@ import java.io.Closeable;
 public class NamedValue<V>
         extends NVBase<V>
         implements
-//        GetNameValue<V>,
         GetNVProperties,
         AutoCloseable {
 
