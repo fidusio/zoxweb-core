@@ -303,7 +303,7 @@ public class IOUtil {
      * @return file content as string
      * @throws IOException in case of error
      */
-    public static String inputStreamToString(Path path)
+    public static String pathToString(Path path)
             throws IOException {
         return inputStreamToString(Files.newInputStream(path), true);
     }

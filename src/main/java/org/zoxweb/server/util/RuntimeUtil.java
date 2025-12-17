@@ -483,7 +483,7 @@ public class RuntimeUtil {
     }
 
     public static long linuxUptime() throws IOException {
-        String content = IOUtil.inputStreamToString(Paths.get("/proc/uptime"));
+        String content = IOUtil.pathToString(Paths.get("/proc/uptime"));
         return Const.TimeInMillis.SECOND.mult((long) Double.parseDouble(content.split(" ")[0]));
     }
 
