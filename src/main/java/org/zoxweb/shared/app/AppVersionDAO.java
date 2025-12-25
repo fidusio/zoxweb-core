@@ -65,6 +65,40 @@ public class AppVersionDAO
     );
 
 
+    public AppVersionDAO(String nameDescriptionVersion) {
+        this();
+        String[] parsed = nameDescriptionVersion.split("::");
+        int index = 0;
+        switch (parsed.length) {
+
+            case 1:
+                // major.minor.nano
+                parseVersion(parsed[index]);
+                break;
+            case 2:
+                // we have name::major.minor.nano
+                setName(parsed[index++]);
+                parseVersion(parsed[index]);
+                break;
+
+            case 3:
+                // we have name::description::major.minor.nano
+                setName(parsed[index++]);
+                setDescription(parsed[index++]);
+                parseVersion(parsed[index]);
+                break;
+        }
+    }
+
+
+    private void parseVersion(String version) {
+        String[] versions = version.split("\\.");
+        if (versions.length != 3) throw new IllegalArgumentException("Invalid version format " + version);
+        setMajor(Integer.parseInt(versions[0]));
+        setMinor(Integer.parseInt(versions[1]));
+        setNano(Integer.parseInt(versions[2]));
+    }
+
     /**
      * The default constructor.
      */
@@ -72,14 +106,6 @@ public class AppVersionDAO
         super(NVC_APPLICATION_VERSION_DAO);
     }
 
-    /**
-     * This constructor instantiates UserInfoDAO based on list of NVConfigEntity type.
-     * @param list
-     */
-//	protected ApplicationInfoDAO(List<NVConfigEntity> list)
-//	{
-//		super(SharedUtil.merge(list, NVC_USER_INFO_DAO));
-//	}
 
     /**
      * Returns the major number of the version.
@@ -139,7 +165,6 @@ public class AppVersionDAO
         if (nano < 0 || nano > 99) {
             throw new IllegalArgumentException(nano + " invalid nano value valid [0-9]");
         }
-
         setValue(Param.NANO, nano);
     }
 
@@ -148,15 +173,28 @@ public class AppVersionDAO
      */
     @Override
     public String toCanonicalID() {
-        String min = "" + getMinor();
-        String nan = "" + getNano();
-        return getName() + "-" + getMajor() + "." + min + "." + nan;
+        return getName() + "-" + getMajor() + "." + getMinor() + "." + getNano();
     }
 
+
+    public String toString() {
+        return toCanonicalID();
+    }
 
     public Date getReleaseDate() {
         long ts = lookupValue(Param.RELEASE_DATE);
         return new Date(ts);
+    }
+
+
+    public String version()
+    {
+        return  getMajor() + "." + getMinor() + "." + getNano();
+    }
+
+
+    public GetNameValue<String> toNVVersion() {
+        return GetNameValue.create("VERSION", toCanonicalID());
     }
 
     public void setReleaseDate(Date date) {

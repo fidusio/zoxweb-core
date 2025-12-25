@@ -222,6 +222,14 @@ public class ByteBufferUtil {
         return SINGLETON.toByteArray0(length);
     }
 
+    public static byte[] allocateByteArray(ByteBuffer bb, boolean flip) {
+        if(flip) bb.flip();
+
+        byte[] ret = SINGLETON.toByteArray0(bb.limit());
+        bb.get(ret);
+        return ret;
+    }
+
     public static ByteBuffer allocateByteBuffer(int capacity) {
         return SINGLETON.toByteBuffer0(BufferType.HEAP, null, 0, capacity, false);
     }

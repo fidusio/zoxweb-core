@@ -91,8 +91,6 @@ public final class BytesArray
             os.write(array, offset, length);
             if (flush)
                 os.flush();
-
-
         } else
             throw new IOException("Byte buffer invalid");
     }
