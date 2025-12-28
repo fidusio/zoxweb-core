@@ -4,11 +4,11 @@ import java.util.function.Consumer;
 
 public class TriggerConsumerHolder<T>
         implements Consumer<T> {
-    private Consumer inner;
+    private volatile Consumer<T> inner;
 
 
     TriggerConsumerHolder(Consumer<?> inner) {
-        this.inner = inner;
+        this.inner = (Consumer<T>) inner;
     }
 
     public void accept(T t) {

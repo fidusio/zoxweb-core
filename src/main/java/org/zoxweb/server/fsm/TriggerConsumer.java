@@ -19,12 +19,12 @@ public abstract class TriggerConsumer<T>
     private NVGenericMap nvgmConfig = null;
 
 
-    public TriggerConsumer(Function f, String... canonicalIDs) {
+    public TriggerConsumer(Function<T, ?> f, String... canonicalIDs) {
         this(canonicalIDs);
         function = f;
     }
 
-    public TriggerConsumer(Function f, Enum<?>... canonicalIDs) {
+    public TriggerConsumer(Function<T, ?> f, Enum<?>... canonicalIDs) {
         this(canonicalIDs);
         function = f;
     }
