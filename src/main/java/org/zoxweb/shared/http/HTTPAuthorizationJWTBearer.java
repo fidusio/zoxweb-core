@@ -26,8 +26,17 @@ import org.zoxweb.shared.util.SharedUtil;
 import org.zoxweb.shared.util.NVConfigEntity.ArrayType;
 
 /**
- * @author mnael
+ * HTTP Bearer Authentication credentials container for JWT (JSON Web Token) authentication.
+ * Stores the JWT token, signing key, and JWT encoder used to generate Bearer authorization headers.
+ * <p>
+ * The token is encoded using the provided JWTEncoder and key when converted to an HTTP
+ * Authorization header in the format: "Bearer encoded_jwt_token".
+ * </p>
  *
+ * @author mnael
+ * @see HTTPAuthorization
+ * @see HTTPAuthScheme#BEARER
+ * @see org.zoxweb.shared.security.JWT
  */
 @SuppressWarnings("serial")
 public class HTTPAuthorizationJWTBearer
@@ -43,55 +52,94 @@ extends HTTPAuthorization
 	private transient JWTEncoder jwtEncoder = null;
 	
 	
+	/**
+	 * Default constructor creating an empty JWT Bearer authorization.
+	 */
 	public HTTPAuthorizationJWTBearer()
 	{
 		super(NVC_HTTP_AUTHORIZATION_JWT_BEARER, HTTPAuthScheme.BEARER);
 	}
-	
+
+	/**
+	 * Constructs an HTTPAuthorizationJWTBearer with the specified encoder, key, and JWT.
+	 *
+	 * @param encoder the JWT encoder used to sign and encode the token
+	 * @param key     the signing key for the JWT
+	 * @param jwt     the JWT token to be encoded
+	 */
 	public HTTPAuthorizationJWTBearer(JWTEncoder encoder, byte[] key, JWT jwt)
 	{
 		this();
 		setJWTEncoder(encoder);
 		setKey(key);
 		setJWT(jwt);
-		
+
 	}
-	
-	public byte[] getKey() 
+
+	/**
+	 * Returns the signing key for the JWT.
+	 *
+	 * @return the signing key as a byte array
+	 */
+	public byte[] getKey()
 	{
 		return lookupValue(NVC_KEY);
 	}
-	
-	public void setKey(byte[] key) 
+
+	/**
+	 * Sets the signing key for the JWT.
+	 *
+	 * @param key the signing key as a byte array
+	 */
+	public void setKey(byte[] key)
 	{
 		setValue(NVC_KEY, key);
 	}
 	
-//	public String toString()
-//	{
-//		return SharedUtil.toCanonicalID(' ', getType(), getToken());
-//	}
-	
+	/**
+	 * Returns the JWT encoder used to sign and encode the token.
+	 *
+	 * @return the JWT encoder
+	 */
 	public JWTEncoder getJWTEncoder() {
 		return jwtEncoder;
 	}
 
+	/**
+	 * Sets the JWT encoder used to sign and encode the token.
+	 *
+	 * @param jwtEncoder the JWT encoder to set
+	 */
 	public void setJWTEncoder(JWTEncoder jwtEncoder) {
 		this.jwtEncoder = jwtEncoder;
 	}
-	
+
+	/**
+	 * Returns the JWT token.
+	 *
+	 * @return the JWT token
+	 */
 	public JWT getJWT()
 	{
 		return lookupValue(NVC_JWT);
 	}
-	
-	public void setJWT(JWT jwt) 
+
+	/**
+	 * Sets the JWT token.
+	 *
+	 * @param jwt the JWT token to set
+	 */
+	public void setJWT(JWT jwt)
 	{
 		setValue(NVC_JWT, jwt);
 	}
-	
-	
 
+	/**
+	 * Converts this JWT Bearer authorization to an HTTP Authorization header.
+	 * The result is in the format: "Bearer encoded_jwt_token".
+	 *
+	 * @return the Authorization header as a name-value pair
+	 */
 	public GetNameValue<String> toHTTPHeader()
 	{
 		return getAuthScheme().toHTTPHeader(jwtEncoder.encode(getKey(), getJWT()));

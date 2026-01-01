@@ -23,6 +23,13 @@ import java.util.List;
 import java.util.Map;
 
 
+/**
+ * HTTP response data container that holds the response body as a byte array.
+ * Extends {@link HTTPAPIResult} to include status, headers, and raw response data.
+ *
+ * @author mnael
+ * @see HTTPAPIResult
+ */
 @SuppressWarnings("serial")
 public class HTTPResponseData
 extends HTTPAPIResult<byte[]>
@@ -54,6 +61,11 @@ extends HTTPAPIResult<byte[]>
 				"duration: " + Const.TimeInMillis.toString(getDuration()) + "]";
 	}
 
+	/**
+	 * Returns the response data as a UTF-8 string.
+	 *
+	 * @return the response data as string, or null if no data
+	 */
 	public String getDataAsString()
 	{
 		if (getData() != null)

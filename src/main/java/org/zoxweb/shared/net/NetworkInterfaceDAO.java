@@ -21,6 +21,14 @@ import org.zoxweb.shared.util.NVConfigEntity.ArrayType;
 
 import java.util.List;
 
+/**
+ * Data access object for network interface information.
+ * Stores network interface details including display name, MAC address,
+ * and associated IP addresses.
+ *
+ * @author mnael
+ * @see InetAddressDAO
+ */
 @SuppressWarnings("serial")
 public class NetworkInterfaceDAO
         extends SetNameDAO {
@@ -29,6 +37,7 @@ public class NetworkInterfaceDAO
     private static final NVConfig MAC_ADDRESS = NVConfigManager.createNVConfig("mac_address", "The network interface mac address", "MACAddress", true, false, String.class);
     private static final NVConfig INET_ADDRESSES = NVConfigManager.createNVConfigEntity("inet_addresses", "The inet address associated with the network interface", "InetAddresses", true, false, InetAddressDAO[].class, ArrayType.LIST);
 
+    /** NVConfigEntity definition for NetworkInterfaceDAO */
     public static final NVConfigEntity NVC_NETWORK_INTERFACE_DAO = new NVConfigEntityPortable(
             "network_interface_dao",
             null,
@@ -44,30 +53,63 @@ public class NetworkInterfaceDAO
             SetNameDAO.NVC_NAME_DAO
     );
 
+    /**
+     * Default constructor.
+     */
     public NetworkInterfaceDAO() {
         super(NVC_NETWORK_INTERFACE_DAO);
     }
 
+    /**
+     * Returns the list of IP addresses associated with this interface.
+     *
+     * @return list of InetAddressDAO objects
+     */
     public List<InetAddressDAO> getInetAddresses() {
         return lookupValue(INET_ADDRESSES);
     }
 
+    /**
+     * Sets the list of IP addresses associated with this interface.
+     *
+     * @param inetAddresses the list of IP addresses to set
+     */
     public void setInetAddresses(List<InetAddressDAO> inetAddresses) {
         setValue(INET_ADDRESSES, inetAddresses);
     }
 
+    /**
+     * Returns the MAC address of this interface.
+     *
+     * @return the MAC address string
+     */
     public String getMACAddress() {
         return lookupValue(MAC_ADDRESS);
     }
 
+    /**
+     * Sets the MAC address of this interface.
+     *
+     * @param macAddress the MAC address to set
+     */
     public synchronized void setMACAddress(String macAddress) {
         setValue(MAC_ADDRESS, macAddress);
     }
 
+    /**
+     * Returns the display name of this interface.
+     *
+     * @return the display name
+     */
     public String getDisplayName() {
         return lookupValue(DISPLAY_NAME);
     }
 
+    /**
+     * Sets the display name of this interface.
+     *
+     * @param displayName the display name to set
+     */
     public void setDisplayName(String displayName) {
         setValue(DISPLAY_NAME, displayName);
     }

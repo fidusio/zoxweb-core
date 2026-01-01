@@ -20,6 +20,14 @@ import org.zoxweb.shared.net.InetProp.NIStatus;
 import org.zoxweb.shared.net.InetProp.NIType;
 import org.zoxweb.shared.util.SUS;
 
+/**
+ * Data access object for network connection properties.
+ * Stores connection-specific settings including network interface details,
+ * bandwidth capacity, routing information, and connection status.
+ *
+ * @author mnael
+ * @see InetProp
+ */
 public class ConnectionPropDAO {
 
     private int bandwidthCapacity = 1;
@@ -30,10 +38,22 @@ public class ConnectionPropDAO {
     private int routeID = 0;
     private NIStatus status = NIStatus.OK;
 
+    /**
+     * Default constructor.
+     */
     public ConnectionPropDAO() {
 
     }
 
+    /**
+     * Constructor with all connection properties.
+     *
+     * @param niName the network interface name
+     * @param name the connection name
+     * @param niType the network interface type
+     * @param niCategory the network interface category
+     * @param band the bandwidth capacity
+     */
     public ConnectionPropDAO(String niName,
                              String name,
                              NIType niType,

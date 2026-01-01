@@ -19,9 +19,16 @@ import org.zoxweb.shared.crypto.CryptoConst;
 import org.zoxweb.shared.util.*;
 
 /**
- * The authorization the enum currently support Basic and Bearer
+ * Enumeration of HTTP authentication schemes as defined in RFC 7235.
+ * Supports Basic, Bearer, and Generic authentication types.
+ * <p>
+ * Each scheme provides methods to convert credentials to HTTP Authorization headers
+ * and to parse Authorization header values back into HTTPAuthorization objects.
+ * </p>
  *
  * @author mnael
+ * @see HTTPAuthorization
+ * @see HTTPAuthorizationBasic
  */
 public enum HTTPAuthScheme
         implements GetName {
@@ -165,18 +172,43 @@ public enum HTTPAuthScheme
         return getName();
     }
 
+    /**
+     * Converts the provided credentials to an HTTP Authorization header.
+     *
+     * @param args the credentials (format depends on the authentication scheme)
+     * @return a name-value pair representing the Authorization header, or null if invalid
+     */
     abstract public GetNameValue<String> toHTTPHeader(String... args);
 
+    /**
+     * Parses an Authorization header value into an HTTPAuthorization object.
+     *
+     * @param value the Authorization header value to parse
+     * @return the parsed HTTPAuthorization object
+     */
     abstract public HTTPAuthorization toHTTPAuthentication(String value);
 
 
+    /**
+     * Parses an Authorization header name-value pair into an HTTPAuthorization object.
+     *
+     * @param gnv the name-value pair containing the Authorization header
+     * @return the parsed HTTPAuthorization, or null if gnv is null
+     */
     public static HTTPAuthorization parse(GetNameValue<String> gnv) {
         if (gnv == null)
             return null;
         return parse(gnv.getValue());
     }
 
-
+    /**
+     * Parses an Authorization header string value into an HTTPAuthorization object.
+     * The value should be in the format: "scheme token" (e.g., "Basic dXNlcjpwYXNz" or "Bearer token123").
+     *
+     * @param value the Authorization header value to parse
+     * @return the parsed HTTPAuthorization
+     * @throws IllegalArgumentException if the value format is invalid
+     */
     public static HTTPAuthorization parse(String value) {
         if (value == null) {
             return null;

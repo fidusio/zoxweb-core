@@ -1,3 +1,18 @@
+/*
+ * Copyright (c) 2012-2026 XlogistX.IO Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package org.zoxweb.shared.http;
 
 import org.zoxweb.shared.protocol.MessageStatus;
@@ -5,11 +20,23 @@ import org.zoxweb.shared.util.BytesArray;
 import org.zoxweb.shared.util.DataBufferController;
 import org.zoxweb.shared.util.SharedStringUtil;
 
+/**
+ * WebSocket protocol utilities and constants as defined in RFC 6455.
+ * Provides frame formatting and parsing capabilities for WebSocket communication.
+ *
+ * @author mnael
+ * @see HTTPWSFrame
+ */
 public class HTTPWSProto
 {
     private HTTPWSProto(){}
+
+    /** WebSocket handshake GUID used for Sec-WebSocket-Accept calculation (RFC 6455) */
     public static final String WEB_SOCKET_UUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
 
+    /**
+     * WebSocket frame opcodes as defined in RFC 6455.
+     */
     public enum OpCode
     {
         TEXT((byte) 0x1),
@@ -43,6 +70,9 @@ public class HTTPWSProto
         }
     }
 
+    /**
+     * WebSocket frame field definitions with byte index, bit index, and length information.
+     */
     public enum WSFrameField
     {
         FIN("FIN", "Final frame bit true if last frame false more to come", 0, 0, 1),
@@ -73,11 +103,32 @@ public class HTTPWSProto
     }
 
 
+    /**
+     * Formats a WebSocket frame with string data.
+     *
+     * @param dataBuffer the buffer to write the frame to
+     * @param fin        true if this is the final frame of a message
+     * @param opcode     the frame opcode (TEXT, BINARY, CLOSE, PING, PONG)
+     * @param maskingKey 4-byte masking key, or null for unmasked frames
+     * @param data       the string payload data
+     * @return BytesArray representing the formatted frame
+     */
     public static BytesArray formatFrame(DataBufferController dataBuffer, boolean fin, OpCode opcode, byte[] maskingKey, String data)
     {
         return formatFrame(dataBuffer, fin, opcode, maskingKey, data != null ? SharedStringUtil.toBytes(data) : null);
     }
 
+    /**
+     * Formats a WebSocket frame with byte array data.
+     *
+     * @param dataBuffer the buffer to write the frame to
+     * @param fin        true if this is the final frame of a message
+     * @param opcode     the frame opcode
+     * @param maskingKey 4-byte masking key, or null for unmasked frames
+     * @param data       the byte array payload data
+     * @return BytesArray representing the formatted frame
+     * @throws IllegalArgumentException if maskingKey is not null and not 4 bytes
+     */
     public static BytesArray formatFrame(DataBufferController dataBuffer, boolean fin, OpCode opcode, byte[] maskingKey, byte[] data)
     {
         synchronized (dataBuffer)
@@ -131,6 +182,17 @@ public class HTTPWSProto
         }
     }
 
+    /**
+     * Formats a WebSocket frame with BytesArray data.
+     *
+     * @param dataBuffer the buffer to write the frame to
+     * @param fin        true if this is the final frame of a message
+     * @param opcode     the frame opcode
+     * @param maskingKey 4-byte masking key, or null for unmasked frames
+     * @param data       the BytesArray payload data
+     * @return BytesArray representing the formatted frame
+     * @throws IllegalArgumentException if maskingKey is not null and not 4 bytes
+     */
     public static BytesArray formatFrame(DataBufferController dataBuffer, boolean fin, OpCode opcode, byte[] maskingKey, BytesArray data)
     {
         synchronized (dataBuffer)
@@ -187,6 +249,10 @@ public class HTTPWSProto
     }
 
 
+    /**
+     * Interface defining WebSocket frame information and access methods.
+     * Provides read-only access to all frame components.
+     */
     public interface WSFrameInfo
     {
 

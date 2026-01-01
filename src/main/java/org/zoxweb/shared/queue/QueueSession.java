@@ -19,44 +19,66 @@ import java.io.IOException;
 import org.zoxweb.shared.util.NVGenericMap;
 
 /**
- * The queue session interface.
+ * Interface for queue session management.
+ * Provides methods for connecting to a queue, managing listeners,
+ * and dispatching queue events.
+ *
+ * @author mnael
+ * @see QueueEvent
+ * @see QueueListener
  */
 public interface QueueSession
     extends AutoCloseable
 {
-	
-	
+
+	/**
+	 * Connects to the queue using the provided configuration.
+	 *
+	 * @param config the connection configuration
+	 * @throws NullPointerException if config is null
+	 * @throws IllegalArgumentException if config is invalid
+	 * @throws IOException if connection fails
+	 */
 	void connect(NVGenericMap config)
 			throws NullPointerException, IllegalArgumentException, IOException;
-	
-	
-	
-	
+
 	/**
-	 * Adds consumer listener.
-	 * @param ql
+	 * Adds a consumer listener with a tag.
+	 *
+	 * @param tag the listener tag/identifier
+	 * @param ql the queue listener to add
 	 */
 	void addListener(String tag, QueueListener<QueueEvent<?>> ql);
 
 	/**
-	 * Removes consumer listener.
-	 * @param ql
+	 * Removes a consumer listener.
+	 *
+	 * @param ql the queue listener to remove
 	 */
 	void removeListener(QueueListener<QueueEvent<?>> ql);
-	//void removeListener(String tag);
 
 	/**
-	 * Dispatches producer event.
-	 * @param qe
+	 * Dispatches a producer event to the queue.
+	 *
+	 * @param qe the queue event to dispatch
+	 * @throws NullPointerException if the event is null
+	 * @throws IllegalArgumentException if the event is invalid
+	 * @throws IOException if dispatching fails
 	 */
 	void queueEvent(QueueEvent<?> qe)
 			throws NullPointerException, IllegalArgumentException, IOException;
-	
-	QueueListener<QueueEvent<?>> [] getAllListeners();
-	
+
 	/**
-	 * Get the connection configuration
-	 * @return
+	 * Returns all registered listeners.
+	 *
+	 * @return array of all queue listeners
+	 */
+	QueueListener<QueueEvent<?>> [] getAllListeners();
+
+	/**
+	 * Returns the connection configuration.
+	 *
+	 * @return the configuration map
 	 */
 	NVGenericMap getConfig();
 

@@ -20,17 +20,24 @@ import java.util.EventListener;
 import org.zoxweb.shared.util.GetName;
 
 /**
+ * Interface for queue event listeners.
+ * Implementations receive and process incoming queue events.
  *
- * @param <E>
+ * @param <E> the type of queue event this listener handles
+ * @author mnael
+ * @see QueueEvent
+ * @see QueueSession
+ * @see EventListener
  */
 public interface QueueListener<E extends QueueEvent<?>>
     extends EventListener,
     		GetName
 {
     /**
-     * Process given event
-     * @param event
+     * Processes an incoming queue event.
+     *
+     * @param event the event to process
      */
-	public void incomingEvent(E event);		
+	public void incomingEvent(E event);
 
 }

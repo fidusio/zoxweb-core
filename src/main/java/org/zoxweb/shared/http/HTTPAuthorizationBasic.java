@@ -23,8 +23,16 @@ import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.SharedUtil;
 
 /**
- * @author mnael
+ * HTTP Basic Authentication credentials container as defined in RFC 7617.
+ * Stores username and password for HTTP Basic authentication scheme.
+ * <p>
+ * The credentials are Base64-encoded when converted to an HTTP Authorization header
+ * in the format: "Basic base64(username:password)".
+ * </p>
  *
+ * @author mnael
+ * @see HTTPAuthorization
+ * @see HTTPAuthScheme#BASIC
  */
 @SuppressWarnings("serial")
 public class HTTPAuthorizationBasic
@@ -37,6 +45,9 @@ extends HTTPAuthorization
 	public static final NVConfigEntity NVC_HTTP_AUTHORIZATION_BASIC = new NVConfigEntityPortable("http_authorization_basic", null , null, true, false, false, false, HTTPAuthorizationBasic.class, SharedUtil.toNVConfigList(NVC_USER, NVC_PASSWORD), null, false, HTTPAuthorization.NVC_HTTP_AUTHORIZATION);
 	
 
+	/**
+	 * Default constructor creating an empty Basic authorization.
+	 */
 	public HTTPAuthorizationBasic()
 	{
 		super(NVC_HTTP_AUTHORIZATION_BASIC, HTTPAuthScheme.BASIC);
@@ -47,6 +58,12 @@ extends HTTPAuthorization
 	
 	
 	
+	/**
+	 * Constructs an HTTPAuthorizationBasic with the specified username and password.
+	 *
+	 * @param user     the username for authentication
+	 * @param password the password for authentication
+	 */
 	public HTTPAuthorizationBasic(String user, String password)
 	{
 		this();
@@ -92,11 +109,22 @@ extends HTTPAuthorization
 	
 	
 	
+	/**
+	 * Returns a string representation of this Basic authorization.
+	 *
+	 * @return string containing the scheme, username, and password
+	 */
 	public String toString()
 	{
 		return SharedUtil.toCanonicalID(' ', getAuthScheme(), getUser(), getPassword());
 	}
 
+	/**
+	 * Converts this Basic authorization to an HTTP Authorization header.
+	 * The result is in the format: "Basic base64(username:password)".
+	 *
+	 * @return the Authorization header as a name-value pair
+	 */
 	public GetNameValue<String> toHTTPHeader()
 	{
 		return getAuthScheme().toHTTPHeader(getUser(), getPassword());

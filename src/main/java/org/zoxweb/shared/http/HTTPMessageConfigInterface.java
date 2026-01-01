@@ -23,7 +23,12 @@ import java.io.InputStream;
 import java.util.List;
 
 /**
+ * Interface defining the configuration for an HTTP message.
+ * Provides methods for setting and getting HTTP request/response properties
+ * including method, URL, headers, parameters, content, and authentication.
  *
+ * @author mnael
+ * @see HTTPMessageConfig
  */
 public interface HTTPMessageConfigInterface
         extends ReferenceID<String>, SetName, SetDescription {

@@ -18,27 +18,46 @@ package org.zoxweb.shared.net;
 import org.zoxweb.shared.util.GetName;
 import org.zoxweb.shared.util.SharedUtil;
 
+/**
+ * Container class for network-related property enumerations.
+ * Provides definitions for IP versions, internet protocols,
+ * network interface categories, types, statuses, and bonding modes.
+ *
+ * @author mnael
+ */
 public class InetProp {
 
+    /**
+     * IP version enumeration.
+     */
     public enum IPVersion {
+        /** IPv4 protocol */
         V4,
+        /** IPv6 protocol */
         V6
     }
 
-
+    /**
+     * Internet protocol configuration types.
+     */
     public enum InetProto
             implements GetName {
+        /** No protocol configured */
         NONE,
+        /** Manual configuration */
         MANUAL,
+        /** Loopback interface */
         LOOPBACK,
+        /** Static IP configuration */
         STATIC,
+        /** Dynamic Host Configuration Protocol */
         DHCP,
+        /** Point-to-Point Protocol over Ethernet */
         PPPOE;
 
         public String toString() {
             return getName();
         }
-
 
         public String getName() {
             return name().toLowerCase();
@@ -46,48 +65,76 @@ public class InetProp {
     }
 
     /**
-     * The network interface category
-     * MAIN this is the main interface for WAN OR LAN
-     * AUXILIARY this is an AUXILIARY interface for the WAN OR LAN
-     * NONE not applicable
+     * Network interface category enumeration.
+     * <ul>
+     *   <li>MAIN - primary interface for WAN or LAN</li>
+     *   <li>AUXILIARY - secondary interface for WAN or LAN</li>
+     *   <li>NONE - not applicable</li>
+     * </ul>
      */
     public enum NICategory {
+        /** Primary network interface */
         MAIN,
+        /** Secondary/auxiliary network interface */
         AUXILIARY,
+        /** Not applicable */
         NONE
     }
 
     /**
-     * The network interface type
-     * LAN internal interface
-     * WAN external interface
-     * BRIDGE interface
+     * Network interface type enumeration.
+     * <ul>
+     *   <li>LAN - internal/local network interface</li>
+     *   <li>WAN - external/wide area network interface</li>
+     *   <li>BRIDGE - bridged network interface</li>
+     * </ul>
      */
     public enum NIType {
+        /** Local Area Network interface */
         LAN,
+        /** Wide Area Network interface */
         WAN,
+        /** Bridge interface */
         BRIDGE
     }
 
     /**
-     * This enum represent the network connection status,
-     * @author mnael
+     * Network interface status enumeration.
+     * Represents the current operational state of a network connection.
      *
+     * @author mnael
      */
     public enum NIStatus {
-        OK, // the connection is ok
-        REMOTE_PING_FAILED, // remote internet ping failed
-        ROUTER_PING_FAILED,// router ping failed
-        CONNECTION_DOWN, // the connection is down
-        DONT_USE // the connection is ok but don't use
+        /** Connection is operational */
+        OK,
+        /** Remote internet ping failed */
+        REMOTE_PING_FAILED,
+        /** Router ping failed */
+        ROUTER_PING_FAILED,
+        /** Connection is down */
+        CONNECTION_DOWN,
+        /** Connection is OK but should not be used */
+        DONT_USE
     }
 
-
+    /**
+     * Network interface bonding mode enumeration.
+     * Defines how multiple network interfaces are combined.
+     */
     public enum BondingMode {
+        /** No bonding */
         NONE,
+        /** Aggregate bandwidth across interfaces */
         AGGREGATE,
+        /** Failover to backup interface on failure */
         FAILOVER;
 
+        /**
+         * Looks up a bonding mode by string value.
+         *
+         * @param val the string value to look up
+         * @return the matching BondingMode, or NONE if not found
+         */
         public static BondingMode lookup(String val) {
             BondingMode ret = (BondingMode) SharedUtil.lookupEnum(val, values());
 

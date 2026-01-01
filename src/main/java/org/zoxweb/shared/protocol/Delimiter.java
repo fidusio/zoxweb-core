@@ -19,19 +19,33 @@ import org.zoxweb.shared.util.GetNameValue;
 import org.zoxweb.shared.util.SharedStringUtil;
 
 /**
- * Punctuation marks.
+ * Enumeration of common protocol delimiters and punctuation marks.
+ * Provides both string and byte array representations for efficient
+ * protocol parsing and formatting.
+ *
+ * @author mnael
+ * @see GetNameValue
  */
 public enum Delimiter
     implements GetNameValue<String>
 {
+	/** Colon separator (:) */
 	COLON(":"),
+	/** URL scheme separator (://) */
 	COLON_PATH("://"),
+	/** Carriage return and line feed */
 	CRLF("\r\n"),
+	/** Double CRLF - end of HTTP headers */
 	CRLFCRLF("\r\n\r\n"),
+	/** Double quote character */
 	DOUBLE_QUOTE("\""),
+	/** Equals sign for key-value pairs */
 	EQUAL("="),
+	/** Question mark for query string start */
 	QUESTION_MARK("?"),
+	/** Semicolon separator */
 	SEMICOLON(";"),
+	/** Space character */
 	SPACE(" "),
 
 	;
@@ -46,8 +60,9 @@ public enum Delimiter
 	}
 
     /**
-     * Returns the name.
-     * @return
+     * Returns the delimiter name.
+     *
+     * @return the enum constant name
      */
 	public String getName()
 	{
@@ -55,8 +70,9 @@ public enum Delimiter
 	}
 
     /**
-     * Returns the value.
-     * @return
+     * Returns the delimiter string value.
+     *
+     * @return the delimiter string
      */
 	public String getValue()
     {
@@ -64,23 +80,34 @@ public enum Delimiter
 	}
 
     /**
-     * Returns the bytes.
-     * @return
+     * Returns the delimiter as a byte array.
+     *
+     * @return the delimiter bytes
      */
 	public final byte[] getBytes()
     {
 		return bytes;
 	}
 
+	/**
+	 * Returns the length of the delimiter in bytes.
+	 *
+	 * @return the byte length
+	 */
 	public int length()
 	{
 		return bytes.length;
 	}
 
+	/**
+	 * Returns the delimiter string value.
+	 *
+	 * @return the delimiter string
+	 */
 	@Override
     public String toString()
     {
         return value;
     }
-		
+
 }

@@ -17,6 +17,12 @@ package org.zoxweb.shared.http;
 
 import org.zoxweb.shared.util.*;
 
+/**
+ * Enumeration of standard HTTP header names as defined in RFC 7230-7235 and related specifications.
+ * Provides type-safe access to HTTP header names and utility methods for creating header name-value pairs.
+ *
+ * @author mnael
+ */
 public enum HTTPHeader
         implements GetName {
     ACCEPT("Accept"),
@@ -79,18 +85,40 @@ public enum HTTPHeader
         return name;
     }
 
+    /**
+     * Returns the header name in lowercase.
+     *
+     * @return the lowercase header name
+     */
     public String lowerCase() {
         return name.toLowerCase();
     }
 
+    /**
+     * Creates an HTTP header with this name and the specified string values.
+     *
+     * @param values the header values
+     * @return the constructed header as a name-value pair
+     */
     public GetNameValue<String> toHTTPHeader(String... values) {
         return HTTPConst.toHTTPHeader(name, values);
     }
 
+    /**
+     * Creates an HTTP header with this name and the specified GetValue objects.
+     *
+     * @param values the header values
+     * @return the constructed header as a name-value pair
+     */
     public GetNameValue<String> toHTTPHeader(GetValue<?>... values) {
         return HTTPConst.toHTTPHeader(name, values);
     }
 
+    /**
+     * Returns the header name as a string.
+     *
+     * @return the header name
+     */
     public String toString() {
         return name;
     }

@@ -20,7 +20,13 @@ import org.zoxweb.shared.util.SharedStringUtil;
 import org.zoxweb.shared.util.SharedUtil;
 
 /**
+ * Enumeration of common MIME types (media types) used in HTTP Content-Type headers.
+ * Each media type can have associated file extensions for lookup purposes.
+ * <p>
+ * Provides utilities for looking up media types by content string or file extension.
+ * </p>
  *
+ * @author mnael
  */
 public enum HTTPMediaType
         implements GetValue<String> {
@@ -64,10 +70,22 @@ public enum HTTPMediaType
         return value;
     }
 
+    /**
+     * Looks up a media type by its MIME type string.
+     *
+     * @param str the MIME type string to look up
+     * @return the matching HTTPMediaType, or null if not found
+     */
     public static HTTPMediaType lookup(String str) {
         return (HTTPMediaType) SharedUtil.matchingEnumContent(HTTPMediaType.values(), str);
     }
 
+    /**
+     * Looks up a media type by file extension.
+     *
+     * @param str the filename or extension to look up
+     * @return the matching HTTPMediaType, or null if not found
+     */
     public static HTTPMediaType lookupByExtension(String str) {
         str = SharedStringUtil.trimOrNull(str);
 

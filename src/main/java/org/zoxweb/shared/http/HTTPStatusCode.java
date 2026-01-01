@@ -15,7 +15,14 @@
  */
 package org.zoxweb.shared.http;
 
-public enum HTTPStatusCode 
+/**
+ * Enumeration of HTTP status codes as defined in RFC 7231 and related specifications.
+ * Each status code has a numeric code, a reason phrase, and belongs to a family
+ * (Informational, Successful, Redirection, Client Error, or Server Error).
+ *
+ * @author mnael
+ */
+public enum HTTPStatusCode
 {
     /**
      * 100 Continue
@@ -278,20 +285,39 @@ public enum HTTPStatusCode
 	
 	;
 	
+	/**
+	 * Status code family categories based on the first digit of the status code.
+	 */
 	public enum Family {INFORMATIONAL, SUCCESSFUL, REDIRECTION, CLIENT_ERROR, SERVER_ERROR, OTHER}
-	
+
+	/** The numeric HTTP status code */
 	public final int CODE;
+	/** The reason phrase describing the status */
 	public final String REASON;
+	/** The family category of this status code */
 	public final Family FAMILY;
+
+	/**
+	 * Constructs an HTTPStatusCode with the specified code and reason.
+	 *
+	 * @param value  the numeric status code
+	 * @param reason the reason phrase
+	 */
 	HTTPStatusCode(int value, String reason)
 	{
 		CODE = value;
 		REASON = reason;
 		FAMILY = familyByCode(value);
 	}
-	
+
+	/**
+	 * Looks up an HTTPStatusCode by its numeric code.
+	 *
+	 * @param val the status code to look up
+	 * @return the matching HTTPStatusCode, or null if not found
+	 */
 	public static HTTPStatusCode statusByCode(int val)
-	{	
+	{
 		for(HTTPStatusCode temp :  HTTPStatusCode.values())
 		{
 			if (val == temp.CODE)
@@ -301,7 +327,14 @@ public enum HTTPStatusCode
 		}
 		return null;
 	}
-	
+
+	/**
+	 * Determines the family category for a status code.
+	 *
+	 * @param httpStatusCode the status code
+	 * @return the Family of the status code
+	 * @throws IllegalArgumentException if the status code is invalid
+	 */
 	public static Family familyByCode(int httpStatusCode)
 	{
 		switch(httpStatusCode/100) 

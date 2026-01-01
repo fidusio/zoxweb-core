@@ -17,9 +17,18 @@ package org.zoxweb.shared.http;
 
 import java.io.IOException;
 
+/**
+ * Exception thrown when an HTTP call fails with an error status code or encounters
+ * a processing error. This exception extends IOException and includes additional
+ * HTTP-specific information such as the status code, response data, and message configuration.
+ *
+ * @author mnael
+ * @see HTTPStatusCode
+ * @see HTTPResponseData
+ */
 @SuppressWarnings("serial")
-public class HTTPCallException 
-extends IOException 
+public class HTTPCallException
+extends IOException
 {
 	
 	private final HTTPStatusCode statusCode;
@@ -27,28 +36,53 @@ extends IOException
 
 	private final HTTPMessageConfigInterface hmci;
 	
+	/**
+	 * Default constructor creating an empty HTTPCallException.
+	 */
 	public HTTPCallException()
 	{
 		this(null, null, (HTTPResponseData)null);
 	}
-	
 
-
+	/**
+	 * Constructs an HTTPCallException with the specified reason message.
+	 *
+	 * @param reason the error message describing the failure
+	 */
 	public HTTPCallException(String reason)
 	{
 		this(reason, null, (HTTPResponseData)null);
 	}
 
+	/**
+	 * Constructs an HTTPCallException with the specified reason and response data.
+	 *
+	 * @param reason the error message describing the failure
+	 * @param rd     the HTTP response data associated with the error
+	 */
 	public HTTPCallException(String reason, HTTPResponseData rd)
 	{
 		this(reason, null, rd);
 	}
 
+	/**
+	 * Constructs an HTTPCallException with the specified reason and status code.
+	 *
+	 * @param reason     the error message describing the failure
+	 * @param statusCode the HTTP status code of the error response
+	 */
 	public HTTPCallException(String reason, HTTPStatusCode statusCode)
 	{
 		this(reason, statusCode, (HTTPResponseData)null);
 	}
 
+	/**
+	 * Constructs an HTTPCallException with the specified reason, status code, and response data.
+	 *
+	 * @param reason     the error message describing the failure
+	 * @param statusCode the HTTP status code of the error response
+	 * @param rd         the HTTP response data associated with the error
+	 */
 	public HTTPCallException(String reason, HTTPStatusCode statusCode, HTTPResponseData rd)
 	{
 		super(reason);
@@ -60,11 +94,24 @@ extends IOException
 			this.statusCode = statusCode;
 	}
 
+	/**
+	 * Constructs an HTTPCallException with the specified reason and message configuration.
+	 *
+	 * @param reason the error message describing the failure
+	 * @param hmci   the HTTP message configuration associated with the error
+	 */
 	public HTTPCallException(String reason, HTTPMessageConfigInterface hmci)
 	{
 		this(reason, null, hmci);
 	}
 
+	/**
+	 * Constructs an HTTPCallException with the specified reason, status code, and message configuration.
+	 *
+	 * @param reason     the error message describing the failure
+	 * @param statusCode the HTTP status code of the error response
+	 * @param hmci       the HTTP message configuration associated with the error
+	 */
 	public HTTPCallException(String reason, HTTPStatusCode statusCode, HTTPMessageConfigInterface hmci)
 	{
 		super(reason);
@@ -80,15 +127,31 @@ extends IOException
 	}
 
 
-	public HTTPResponseData getResponseData() 
+	/**
+	 * Returns the HTTP response data associated with this exception.
+	 *
+	 * @return the response data, or null if not available
+	 */
+	public HTTPResponseData getResponseData()
 	{
 		return responseData;
 	}
+
+	/**
+	 * Returns the HTTP message configuration associated with this exception.
+	 *
+	 * @return the message configuration, or null if not available
+	 */
 	public HTTPMessageConfigInterface getMessageConfig()
 	{
 		return hmci;
 	}
 
+	/**
+	 * Returns the HTTP status code associated with this exception.
+	 *
+	 * @return the HTTP status code
+	 */
 	public HTTPStatusCode getStatusCode()
 	{
 		return statusCode;

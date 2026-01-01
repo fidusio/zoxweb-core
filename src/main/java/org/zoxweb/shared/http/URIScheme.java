@@ -17,20 +17,37 @@ package org.zoxweb.shared.http;
 
 import org.zoxweb.shared.util.GetNameValue;
 
+/**
+ * Enumeration of URI schemes (protocols) commonly used in web applications.
+ * Each scheme has a name (protocol identifier) and a default port.
+ * <p>
+ * Supports HTTP, HTTPS, FTP, FILE, MAILTO, DATA, WebSocket (WS), and secure WebSocket (WSS).
+ * </p>
+ *
+ * @author mnael
+ */
 public enum URIScheme
     implements GetNameValue<Integer>
 {
 	
 	// WARNING: it is crucial to define https before http otherwise the match will never detect https
+	/** Secure HTTP (port 443) */
 	HTTPS("https", 443),
+	/** HTTP (port 80) */
 	HTTP("http", 80),
+	/** FTP (port 23) */
 	FTP("ftp", 23),
+	/** File system access (no port) */
 	FILE("file", -1),
+	/** Email mailto links (no port) */
 	MAIL_TO("mailto", -1),
+	/** Data URLs (no port) */
 	DATA("data", -1),
+	/** Secure WebSocket (port 443) */
 	WSS("wss", 443),
+	/** WebSocket (port 80) */
 	WS("ws", 80),
-	
+
 	;
 
 	private final String name;
@@ -42,6 +59,12 @@ public enum URIScheme
 		this.defaultPort = port;
 	}
 
+	/**
+	 * Matches a URI string to its corresponding URIScheme.
+	 *
+	 * @param uri the URI string to match
+	 * @return the matching URIScheme, or null if not found
+	 */
 	public static URIScheme match(String uri)
 	{
 		if (uri != null)
@@ -56,7 +79,7 @@ public enum URIScheme
                 }
 			}
 		}
-		
+
 		return null;
 	}
 

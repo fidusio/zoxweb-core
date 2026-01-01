@@ -16,12 +16,19 @@
 package org.zoxweb.shared.protocol;
 
 /**
- * Message statuses
+ * Enumeration of message processing statuses.
+ * Indicates the current state of a protocol message during parsing or processing.
+ *
+ * @author mnael
  */
 public enum MessageStatus
 {
+	/** Message is complete and fully parsed */
 	COMPLETE,
+	/** Message is partially received/parsed */
 	PARTIAL,
+	/** Message is invalid or malformed */
 	INVALID,
+	/** Message has not been processed yet */
 	UNPROCESSED,
 }

@@ -1,7 +1,29 @@
+/*
+ * Copyright (c) 2012-2026 XlogistX.IO Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package org.zoxweb.shared.http;
 
 import org.zoxweb.shared.util.*;
 
+/**
+ * HTTP constants and utility methods for working with HTTP headers and content types.
+ * This final class contains commonly used MIME types, header values, and helper methods
+ * for constructing HTTP headers.
+ *
+ * @author mnael
+ */
 public final class HTTPConst {
     private HTTPConst() {
     }
@@ -21,7 +43,8 @@ public final class HTTPConst {
 
 
     /**
-     * HTTP Common-Name parameters
+     * Enumeration of HTTP common-name parameters used in multipart messages
+     * and content headers.
      */
     public enum CNP
             implements GetName {
@@ -46,6 +69,9 @@ public final class HTTPConst {
         }
     }
 
+    /**
+     * Enumeration of common HTTP header values for connection and cache control.
+     */
     public enum HTTPValue
             implements GetValue<String> {
         CLOSE("close"),
@@ -64,6 +90,10 @@ public final class HTTPConst {
         }
     }
 
+    /**
+     * Enumeration of commonly used HTTP headers with predefined name-value pairs.
+     * These can be used directly as HTTP header entries.
+     */
     public enum CommonHeader
             implements GetNameValue<String> {
         CONNECTION_CLOSE(HTTPHeader.CONNECTION, "close"),
@@ -111,16 +141,36 @@ public final class HTTPConst {
     }
 
 
+    /**
+     * Creates an HTTP header from a name and array of GetValue objects.
+     *
+     * @param gn     the header name
+     * @param values the header values
+     * @return the constructed HTTP header as a name-value pair
+     */
     public static GetNameValue<String> toHTTPHeader(GetName gn, GetValue<?>... values) {
         return toHTTPHeader(gn.getName(), values);
     }
 
-
+    /**
+     * Creates an HTTP header from a name and array of string values.
+     *
+     * @param gn     the header name
+     * @param values the header values
+     * @return the constructed HTTP header as a name-value pair
+     */
     public static GetNameValue<String> toHTTPHeader(GetName gn, String... values) {
         return toHTTPHeader(gn.getName(), values);
     }
 
-
+    /**
+     * Creates an HTTP header from a string name and array of GetValue objects.
+     * Values are joined with "; " separator.
+     *
+     * @param name   the header name
+     * @param values the header values
+     * @return the constructed HTTP header as a name-value pair
+     */
     public static GetNameValue<String> toHTTPHeader(String name, GetValue<?>... values) {
         StringBuilder headerValue = new StringBuilder();
 
@@ -146,6 +196,14 @@ public final class HTTPConst {
     }
 
 
+    /**
+     * Creates an HTTP header from a string name and array of string values.
+     * Values are joined with "; " separator.
+     *
+     * @param name   the header name
+     * @param values the header values
+     * @return the constructed HTTP header as a name-value pair
+     */
     public static GetNameValue<String> toHTTPHeader(String name, String... values) {
         StringBuilder headerValue = new StringBuilder();
 
@@ -163,11 +221,26 @@ public final class HTTPConst {
         return new NVPair(name, headerValue.toString());
     }
 
+    /**
+     * Creates an HTTP header from a name and array of GetNameValue objects.
+     * Produces format: "name1=value1; name2=value2".
+     *
+     * @param name the header name
+     * @param gnvs the name-value pairs for the header value
+     * @return the constructed HTTP header
+     */
     public static GetNameValue<String> toHTTPHeader(GetName name, GetNameValue<?>... gnvs) {
         return toHTTPHeader(name.getName(), gnvs);
     }
 
-
+    /**
+     * Creates an HTTP header from a string name and array of GetNameValue objects.
+     * Produces format: "name1=value1; name2=value2".
+     *
+     * @param name the header name
+     * @param gnvs the name-value pairs for the header value
+     * @return the constructed HTTP header
+     */
     public static GetNameValue<String> toHTTPHeader(String name, GetNameValue<?>... gnvs) {
 
         StringBuilder headerValue = new StringBuilder();
@@ -191,10 +264,22 @@ public final class HTTPConst {
     }
 
 
+    /**
+     * Converts a name-value pair to HTTP header string format: "name: value".
+     *
+     * @param gnv the name-value pair
+     * @return the formatted header string
+     */
     public static String toString(GetNameValue<?> gnv) {
         return gnv.getName() + ": " + gnv.getValue();
     }
 
+    /**
+     * Converts a name-value pair to HTTP header bytes in format: "name: value".
+     *
+     * @param gnv the name-value pair
+     * @return the formatted header as bytes
+     */
     public static byte[] toBytes(GetNameValue<?> gnv) {
         return SharedStringUtil.getBytes(gnv.getName() + ": " + gnv.getValue());
     }

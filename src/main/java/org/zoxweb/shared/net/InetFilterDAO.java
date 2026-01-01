@@ -25,7 +25,9 @@ import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.SharedUtil;
 
 /**
- * The ip filter object is used to mask and filter ip sets
+ * Data access object for IP address filtering.
+ * Used to mask and filter IP address sets based on
+ * IP address, network mask, and network address.
  *
  * @author mnael
  */
@@ -33,11 +35,16 @@ import org.zoxweb.shared.util.SharedUtil;
 public class InetFilterDAO
         extends SetNameDescriptionDAO {
 
+    /**
+     * Configuration parameters for InetFilterDAO.
+     */
     public enum Params
             implements GetNVConfig {
+        /** The IP address to filter */
         IP(NVConfigManager.createNVConfig("ip_address", "IP Address", "IP", false, true, String.class)),
-        //FILTER(NVConfigManager.createNVConfig("filter", "Filter", "Filter", false, true, String.class)),
+        /** The network mask for filtering */
         NET_MASK(NVConfigManager.createNVConfig("network_mask", "Network Mask", "NetMask", false, true, String.class)),
+        /** The network address */
         NETWORK(NVConfigManager.createNVConfig("network_address", "Network", "Network", false, true, String.class)),
         ;
 
@@ -53,32 +60,21 @@ public class InetFilterDAO
 
     }
 
+    /** NVConfigEntity definition for InetFilterDAO */
     public static final NVConfigEntity NVC_INET_FILTER_DAO = new NVConfigEntityPortable("inet_filter_dao", null, "InetFilterDAO", true, false, false, false, InetFilterDAO.class, SharedUtil.extractNVConfigs(Params.values()), null, false, SetNameDescriptionDAO.NVC_NAME_DAO);
 
     /**
-     * Default constructor for the bean consistency
-     *
+     * Default constructor.
      */
     public InetFilterDAO() {
         super(NVC_INET_FILTER_DAO);
     }
 
     /**
-     * Create a filter based on the filter object
+     * Constructor with IP address and network mask.
      *
-     * @param filter
-     */
-//	public InetFilterDAO(String filter)
-//	{
-//		this();
-//		setFilter(filter);
-//	}
-
-
-    /**
-     * Create a filter based on the ip address and the nework mask
-     * @param ip
-     * @param mask
+     * @param ip the IP address
+     * @param mask the network mask
      */
     public InetFilterDAO(String ip, String mask) {
         this();
@@ -87,61 +83,55 @@ public class InetFilterDAO
     }
 
     /**
-     * Get the current up filter
+     * Returns the IP address.
      *
-     * @return
-     */
-//	public String getFilter() 
-//	{
-//		return lookupValue(Params.FILTER);
-//	}
-
-    /**
-     * Set the filter
-     *
-     * @param filter
-     */
-//	public void setFilter(String filter)
-//	{
-//		setValue(Params.FILTER, filter);
-//	}
-
-    /**
-     * Get the ip, null if no set
-     * @return the ip
+     * @return the IP address, or null if not set
      */
     public String getIP() {
         return lookupValue(Params.IP);
     }
 
     /**
-     * Set the ip
-     * @param ip
+     * Sets the IP address.
+     *
+     * @param ip the IP address to set
      */
     public void setIP(String ip) {
         setValue(Params.IP, ip);
     }
 
     /**
-     * Get the network mask, null if not set
-     * @return network mask
+     * Returns the network mask.
+     *
+     * @return the network mask, or null if not set
      */
     public String getNetworkMask() {
         return lookupValue(Params.NET_MASK);
     }
 
     /**
-     * Set the network mask.
-     * @param mask
+     * Sets the network mask.
+     *
+     * @param mask the network mask to set
      */
     public void setNetworkMask(String mask) {
         setValue(Params.NET_MASK, mask);
     }
 
+    /**
+     * Returns the network address.
+     *
+     * @return the network address
+     */
     public String getNetwork() {
         return lookupValue(Params.NETWORK);
     }
 
+    /**
+     * Sets the network address.
+     *
+     * @param network the network address to set
+     */
     public void setNetwork(String network) {
         setValue(Params.NETWORK, network);
 

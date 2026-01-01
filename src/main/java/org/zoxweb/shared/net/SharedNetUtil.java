@@ -1,3 +1,18 @@
+/*
+ * Copyright (c) 2012-2026 XlogistX.IO Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package org.zoxweb.shared.net;
 
 import org.zoxweb.shared.util.SUS;
@@ -7,12 +22,32 @@ import org.zoxweb.shared.util.SharedUtil;
 import java.io.IOException;
 import java.util.Arrays;
 
+/**
+ * Utility class for shared network operations.
+ * Provides methods for IPv4 address manipulation, netmask validation,
+ * network calculations, and network interface configuration validation.
+ *
+ * @author mnael
+ */
 public class SharedNetUtil {
+
+    /** Valid netmask byte values for IPv4 */
     public static final byte MASK_VALS[] = {0, (byte) 128, (byte) 192, (byte) 224, (byte) 240, (byte) 248, (byte) 252, (byte) 254, (byte) 255};
 
+    /**
+     * Private constructor to prevent instantiation.
+     */
     private SharedNetUtil() {
     }
 
+    /**
+     * Parses an IPv4 address string to a byte array.
+     *
+     * @param ipV4 the IPv4 address string (e.g., "192.168.1.1")
+     * @return the address as a 4-byte array
+     * @throws IOException if the address is invalid
+     * @throws IllegalArgumentException if the format is incorrect
+     */
     public static byte[] getV4Address(String ipV4)
             throws IOException {
         String bytes[] = ipV4.split("\\.");
@@ -30,6 +65,13 @@ public class SharedNetUtil {
         return ret;
     }
 
+    /**
+     * Validates an IPv4 netmask.
+     *
+     * @param netmask the netmask as a byte array
+     * @return true if valid, false otherwise
+     * @throws IllegalArgumentException if netmask length is not 4
+     */
     public static boolean validateV4Netmask(byte netmask[]) {
         if (netmask.length != 4) {
             throw new IllegalArgumentException("Invalid netmask length:" + netmask.length);
@@ -62,7 +104,14 @@ public class SharedNetUtil {
         return true;
     }
 
-
+    /**
+     * Calculates the network address from an IP address and netmask.
+     *
+     * @param address the IP address bytes
+     * @param netmask the netmask bytes
+     * @return the network address bytes
+     * @throws IOException if calculation fails
+     */
     public static byte[] getNetwork(byte[] address, byte[] netmask)
             throws IOException {
         byte[] networkBytes = new byte[address.length];
@@ -73,6 +122,14 @@ public class SharedNetUtil {
         return networkBytes;
     }
 
+    /**
+     * Converts a byte array to an IPv4 address string.
+     *
+     * @param address the address bytes
+     * @return the formatted IPv4 string
+     * @throws IOException if the address is invalid
+     * @throws NullPointerException if address is null
+     */
     public static String toV4Address(byte[] address)
             throws IOException {
         SUS.checkIfNulls("Null address", address);
@@ -93,6 +150,16 @@ public class SharedNetUtil {
         return sb.toString();
     }
 
+    /**
+     * Checks if an IP address belongs to a specific network.
+     *
+     * @param address the IP address to check
+     * @param netmask the network mask (can be null)
+     * @param network the network address
+     * @return true if the address belongs to the network
+     * @throws IOException if calculation fails
+     * @throws NullPointerException if network or address is null
+     */
     public static boolean belongsToNetwork(byte[] address, byte[] netmask, byte[] network)
             throws IOException {
         SUS.checkIfNulls("Network or IP adress can't be null", network, address);
@@ -100,13 +167,18 @@ public class SharedNetUtil {
         if (netmask != null) {
             tempNetwork = getNetwork(address, netmask);
         } else {
-            //log.info("networkmask: null");
             tempNetwork = address;
         }
         return Arrays.equals(network, tempNetwork);
     }
 
-
+    /**
+     * Converts a CIDR prefix to an IPv4 netmask byte array.
+     *
+     * @param netPrefix the CIDR prefix (0-32)
+     * @return the netmask as a byte array
+     * @throws IllegalArgumentException if prefix is greater than 32
+     */
     public static byte[] toNetmaskIPV4(short netPrefix) {
 
         if (netPrefix > 32) {
@@ -118,14 +190,20 @@ public class SharedNetUtil {
         byte[] maskAddress = new byte[4];
 
         for (int i = 0; i < maskAddress.length; i++) {
-            maskAddress[maskAddress.length - (1 + i)] = (byte) maskLong;//maskAddress[ maskAddress.length - (1+i)] ;
+            maskAddress[maskAddress.length - (1 + i)] = (byte) maskLong;
 
             maskLong = maskLong >> 8;
         }
         return maskAddress;
     }
 
-
+    /**
+     * Converts an IPv4 netmask byte array to a CIDR prefix.
+     *
+     * @param netmask the netmask bytes
+     * @return the CIDR prefix (0-32)
+     * @throws IOException if the netmask is invalid
+     */
     public static short toNetmaskIPV4(byte[] netmask) throws IOException {
         if (!validateV4Netmask(netmask))
             throw new IOException("Invalid netmaks");
@@ -150,7 +228,15 @@ public class SharedNetUtil {
 
     }
 
-
+    /**
+     * Validates a network interface configuration.
+     *
+     * @param nicd the network interface configuration to validate
+     * @return true if the configuration is valid
+     * @throws IOException if validation fails
+     * @throws NullPointerException if nicd or protocol is null
+     * @throws IllegalArgumentException if interface name is invalid
+     */
     public static boolean validateNIConfig(NIConfigDAO nicd) throws IOException {
         SUS.checkIfNulls("NIConfigDAO null", nicd, nicd.getInetProtocol());
         if (SUS.isEmpty(nicd.getNIName())) {

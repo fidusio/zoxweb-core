@@ -22,9 +22,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * HTTP Protocol methods or actions RFC2616
- * @author javaconsigliere
+ * Enumeration of HTTP request methods as defined in RFC 7231 (HTTP/1.1 Semantics).
+ * Includes standard methods (GET, POST, PUT, DELETE, etc.) and WebDAV extensions.
+ * <p>
+ * Each method has a name (the HTTP method string) and a value (the corresponding
+ * servlet method name like "doGet", "doPost").
+ * </p>
  *
+ * @author javaconsigliere
  */
 public enum HTTPMethod
 implements GetNameValue<String>
@@ -75,10 +80,23 @@ implements GetNameValue<String>
 		return value;
 	}
 	
+	/**
+	 * Looks up an HTTP method by name or servlet method name.
+	 *
+	 * @param lookFor the method name to look up
+	 * @return the matching HTTPMethod, or null if not found
+	 */
 	public static HTTPMethod lookup(String lookFor)
 	{
 		return SharedUtil.lookupEnum(lookFor, values());
 	}
+
+	/**
+	 * Fast lookup of HTTP method by name using a cached map.
+	 *
+	 * @param lookFor the method name to look up
+	 * @return the matching HTTPMethod, or null if not found
+	 */
 	public static HTTPMethod lookupHTTPMethod(String lookFor)
 	{
 		if (fastLookup.isEmpty())
@@ -96,16 +114,21 @@ implements GetNameValue<String>
 		return fastLookup.get(lookFor.toLowerCase());
 	}
 	
+	/**
+	 * Returns an array of all HTTP method names.
+	 *
+	 * @return array of method name strings
+	 */
 	public static String[] toMethodNames()
 	{
-		
+
 		HTTPMethod[] all = values();
 		String[] ret= new String[all.length];
 		for (int i=0; i< all.length; i++)
 		{
 			ret[i] = all[i].getName();
 		}
-		
+
 		return ret;
 	}
 }

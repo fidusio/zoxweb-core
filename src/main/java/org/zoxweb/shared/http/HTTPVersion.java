@@ -18,30 +18,60 @@ package org.zoxweb.shared.http;
 import org.zoxweb.shared.util.GetValue;
 import org.zoxweb.shared.util.SharedStringUtil;
 
+/**
+ * Enumeration of HTTP protocol versions.
+ * Currently supports HTTP/1.0 and HTTP/1.1.
+ *
+ * @author mnael
+ */
 public enum HTTPVersion
 	implements GetValue<String>
 {
+	/** HTTP version 1.0 */
 	HTTP_1_0("HTTP/1.0"),
+	/** HTTP version 1.1 */
 	HTTP_1_1("HTTP/1.1")
 	;
-	
+
 	private final String value;
+
+	/**
+	 * Constructs an HTTPVersion with the specified version string.
+	 *
+	 * @param value the version string
+	 */
 	HTTPVersion(String value)
 	{
 		this.value = value;
 	}
-	
+
+	/**
+	 * Returns the HTTP version string.
+	 *
+	 * @return the version string (e.g., "HTTP/1.1")
+	 */
 	@Override
-	public String getValue() 
+	public String getValue()
 	{
 		return value;
 	}
-	
+
+	/**
+	 * Returns the version string.
+	 *
+	 * @return the version string
+	 */
 	public String toString()
 	{
 		return getValue();
 	}
-	
+
+	/**
+	 * Looks up an HTTPVersion by its string representation.
+	 *
+	 * @param val the version string to look up
+	 * @return the matching HTTPVersion, or null if not found
+	 */
 	public static HTTPVersion lookup(String val)
 	{
 		val = SharedStringUtil.trimOrNull(val);

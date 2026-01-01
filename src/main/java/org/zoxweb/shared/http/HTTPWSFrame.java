@@ -1,3 +1,18 @@
+/*
+ * Copyright (c) 2012-2026 XlogistX.IO Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package org.zoxweb.shared.http;
 
 import org.zoxweb.shared.protocol.MessageStatus;
@@ -7,6 +22,18 @@ import org.zoxweb.shared.util.ProtocolException;
 
 import java.util.concurrent.atomic.AtomicLong;
 
+/**
+ * Represents a WebSocket frame as defined in RFC 6455.
+ * Parses and provides access to frame components including FIN bit, opcode,
+ * masking key, and payload data.
+ * <p>
+ * Supports frame sizes up to 16-bit length (65535 bytes). 32-bit lengths are not supported.
+ * </p>
+ *
+ * @author mnael
+ * @see HTTPWSProto
+ * @see HTTPWSProto.WSFrameInfo
+ */
 public class HTTPWSFrame
     implements HTTPWSProto.WSFrameInfo
 {
@@ -31,6 +58,14 @@ public class HTTPWSFrame
     }
 
 
+    /**
+     * Parses a WebSocket frame from the provided data buffer.
+     *
+     * @param dataBuffer  the buffer containing the frame data
+     * @param startOffset the offset within the buffer where the frame starts
+     * @return the parsed HTTPWSFrame, or null if the frame is incomplete
+     * @throws ProtocolException if the opcode is invalid
+     */
     public static HTTPWSFrame parse(DataBufferController dataBuffer, int startOffset)
     {
         HTTPWSFrame ret = new HTTPWSFrame(dataBuffer, startOffset);
