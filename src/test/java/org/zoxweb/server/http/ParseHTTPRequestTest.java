@@ -15,6 +15,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class ParseHTTPRequestTest {
@@ -280,12 +281,33 @@ public class ParseHTTPRequestTest {
                 "Content-Length: " + Long.MAX_VALUE,
                 "Attachment: attachment; filename=\"file,: name.pdf\"; creation-date=\"Wed, 12 Feb 2020 16:00:00 GMT\", inline",
                 "Authorization: Bearer jdlksjfgdksljgikjrtjtkrejtiohyu4o35hjhj5rk",
-                "Connection: keep-alive, Upgrade"
+                "Connection: keep-alive, Upgrade",
+                "Sec-WebSocket-Protocol: mqtt, json"
         };
 
         for (String header : headers) {
             System.out.println(header);
             System.out.println("NEW ONE: " + HTTPHeaderParser.parseFullHeaderLine(header));
+            System.out.println("-----------------------------------------------------------");
+        }
+
+    }
+
+
+    @Test
+    public void parseHeaderTest2() {
+        String[][] headers = {
+                {"Content-Type" ,"text/html;charset=UTF-8; boundary=\"--exampleBoundary\""},
+                {"Connection", "keep-alive, Upgrade"},
+                {"Sec-WebSocket-Protocol","mqtt, json"}
+        };
+
+        for (String[] header : headers) {
+            System.out.println(Arrays.toString(header));
+            NamedValue<?> nv =  HTTPHeaderParser.parseHeader(GetNameValue.create(header[0], header[1]));
+            System.out.println("NEW ONE: " + nv);
+            System.out.println("NEW ONE: " + nv.getValue().getClass().getName());
+            System.out.println("NEW ONE: " + nv.getName() + ": " + nv.getValue());
             System.out.println("-----------------------------------------------------------");
         }
 

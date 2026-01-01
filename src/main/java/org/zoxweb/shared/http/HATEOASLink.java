@@ -24,8 +24,8 @@ import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.SharedUtil;
 
 /**
- * [Please state the purpose for this class or method because it will help the team for future maintenance ...].
- * 
+ * Represents a HATEOAS (Hypermedia as the Engine of Application State) link
+ * used in RESTful APIs to provide navigation and discoverability.
  */
 @SuppressWarnings("serial")
 public class HATEOASLink
@@ -35,7 +35,7 @@ extends SetNameDAO
 	implements GetNVConfig
 	{
 		HREF(NVConfigManager.createNVConfig("href", "URL of the related HATEOAS link you can use for subsequent calls.", "Href", true, true, String.class)),
-		REL(NVConfigManager.createNVConfig("rel", "TLink relation that describes how this link relates to the previous call.", "Rel", true, true, String.class)),
+		REL(NVConfigManager.createNVConfig("rel", "Link relation that describes how this link relates to the previous call.", "Rel", true, true, String.class)),
 		METHOD(NVConfigManager.createNVConfig("method", "The HTTP method required for the related call.", "Method", true, true, String.class)),
 		
 	

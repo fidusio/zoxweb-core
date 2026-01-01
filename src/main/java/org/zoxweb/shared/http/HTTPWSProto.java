@@ -48,7 +48,7 @@ public class HTTPWSProto
         FIN("FIN", "Final frame bit true if last frame false more to come", 0, 0, 1),
         RSV1("RSV1", "RSV1 bit", 0, 1, 1),
         RSV2("RSV2", "RSV2 bit", 0, 2, 1),
-        RSV3("RSV1", "RSV1 bit", 0, 3, 1),
+        RSV3("RSV3", "RSV3 bit", 0, 3, 1),
         OP_CODE("OPCODE", "The message type code, text, binary, close, ping and pong", 0, 4, 4),
         MASK_BIT("MaskBit", "The masking bit if true the masking key must be used to xor the payload", 1, 0, 1),
         DATA_LENGTH("DataLength", "The of the data length up to 125 bytes with the byte, if 126 the next 16 bits are the length, 127 NOT SUPPORTED", 1, 1, 7),
@@ -218,7 +218,7 @@ public class HTTPWSProto
 
 
         /**
-         * @return the raw value id the opcode
+         * @return the raw value of the opcode
          */
         int rawOpCode();
 

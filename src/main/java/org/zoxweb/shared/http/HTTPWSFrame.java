@@ -98,7 +98,7 @@ public class HTTPWSFrame
     }
 
     /**
-     * @return the raw value id the opcode
+     * @return the raw value of the opcode
      */
     @Override
     public int rawOpCode() {

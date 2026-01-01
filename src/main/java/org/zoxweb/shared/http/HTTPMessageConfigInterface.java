@@ -101,17 +101,13 @@ public interface HTTPMessageConfigInterface
      */
     void setURL(String url);
 
-    /**
-     * Set the HTTP request parameters
-     * @return headers
-     */
-    //ArrayValues<GetNameValue<String>> getHeaders();
+
 
     /**
      * @return the header collection
      */
     NVGenericMap getHeaders();
-    //NVGenericMap getHeadersNVGM();
+
 
     /**
      * Get the HTTP request parameters
@@ -121,14 +117,14 @@ public interface HTTPMessageConfigInterface
     void setHeaders(List<GetNameValue<String>> headerParams);
 
     /**
-     * @return yhe formatting encoder if available
+     * @return the formatting encoder if available
      */
     HTTPEncoder getHTTPParameterFormatter();
 
     /**
-     * enable url encoding
+     * Enable url encoding
      *
-     * @param value of hte HTTPEncoder
+     * @param value of the HTTPEncoder
      */
     void setHTTPParameterFormatter(HTTPEncoder value);
 
@@ -144,15 +140,11 @@ public interface HTTPMessageConfigInterface
     boolean isContentMultipartFormData();
 
     /**
-     * return true if Transfer-Encoding is of type chunked
+     * @return true if Transfer-Encoding is of type chunked
      */
     boolean isTransferChunked();
 
-    /**
-     * enable url encoding
-     * @param value true enable URL Encoding
-     */
-    //void setURLEncodingEnabled(boolean value);
+
 
 
     /**
@@ -242,24 +234,15 @@ public interface HTTPMessageConfigInterface
     long getTimeout();
 
     /**
-     * Set the connection timeout is sedonds
+     * Set the connection timeout in seconds
      *
-     * @param connectTimeout in  seconds
+     * @param connectTimeout in seconds
      */
     void setTimeout(long connectTimeout);
 
-    /**
-     * The read timeout in millis seconds before throwing an exception, 0 to disable
-     *
-     * @return the read timeout in millis
-     */
-//	int getReadTimeout();
 
-    /**
-     * Set the read timeout is millis
-     * @param readTimeout
-     */
-//	void setReadTimeout(int readTimeout);
+
+
 
     /**
      * Get the encoding to be used for the parameter, if null default will be used
@@ -272,7 +255,7 @@ public interface HTTPMessageConfigInterface
     /**
      * Set the charset
      *
-     * @param charset
+     * @param charset the character encoding to use
      */
     void setCharset(String charset);
 
@@ -294,7 +277,7 @@ public interface HTTPMessageConfigInterface
     /**
      * Set the proxy address
      *
-     * @param proxyAddress
+     * @param proxyAddress the proxy IP address to use
      */
     void setProxyAddress(IPAddress proxyAddress);
 
@@ -315,7 +298,7 @@ public interface HTTPMessageConfigInterface
     /**
      * Set the header content type
      *
-     * @param contentType
+     * @param contentType the MIME content type
      */
     void setContentType(String contentType);
 
@@ -329,7 +312,7 @@ public interface HTTPMessageConfigInterface
     /**
      * Set the header content type
      *
-     * @param contentType
+     * @param contentType the MIME content type values
      */
     void setContentType(GetValue<String>... contentType);
 
@@ -343,14 +326,14 @@ public interface HTTPMessageConfigInterface
     /**
      * Set cookie
      *
-     * @param cookieValue
+     * @param cookieValue the cookie header value
      */
     void setCookie(String cookieValue);
 
     /**
      * Set cookie
      *
-     * @param cookieValue
+     * @param cookieValue the cookie header value
      */
     void setCookie(GetValue<String> cookieValue);
 

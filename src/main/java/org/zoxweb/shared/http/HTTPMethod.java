@@ -23,7 +23,7 @@ import java.util.Map;
 
 /**
  * HTTP Protocol methods or actions RFC2616
- * @author javconsigliere
+ * @author javaconsigliere
  *
  */
 public enum HTTPMethod

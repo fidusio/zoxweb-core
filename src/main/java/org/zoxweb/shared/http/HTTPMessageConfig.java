@@ -252,7 +252,7 @@ public class HTTPMessageConfig
     /**
      * Set the URL
      *
-     * @param url
+     * @param url the URL to set
      */
     public void setURL(String url) {
         setValue(Params.URL, url);
@@ -262,7 +262,7 @@ public class HTTPMessageConfig
     /**
      * Set the request content
      *
-     * @param content
+     * @param content the content as bytes
      */
     public void setContent(byte[] content) {
         setValue(Params.CONTENT, content);
@@ -272,7 +272,7 @@ public class HTTPMessageConfig
     /**
      * Set the request content
      *
-     * @param content
+     * @param content the content as string
      */
     public void setContent(String content) {
         setContent(content != null ? SharedStringUtil.getBytes(content) : null);
@@ -288,7 +288,7 @@ public class HTTPMessageConfig
     }
 
     /**
-     * @return
+     * @return the content as an InputStream
      */
     @Override
     public synchronized InputStream getContentAsIS() {
@@ -307,7 +307,7 @@ public class HTTPMessageConfig
     }
 
     /**
-     * @param is
+     * @param is the input stream to set as content
      */
     @Override
     public synchronized void setContentAsIS(InputStream is) throws IOException {
@@ -328,7 +328,7 @@ public class HTTPMessageConfig
      * This is an optional parameter that is set by the http call
      * in case of multipart post
      *
-     * @param boundary
+     * @param boundary the multipart boundary separator
      */
     public void setBoundary(String boundary) {
         setValue(Params.BOUNDARY, boundary);
@@ -409,7 +409,7 @@ public class HTTPMessageConfig
     }
 
     /**
-     * The connection timeout in millis seconds before throwing an exception, 0 to disable
+     * The connection timeout in seconds before throwing an exception, 0 to disable
      *
      * @return connection timeout
      */
