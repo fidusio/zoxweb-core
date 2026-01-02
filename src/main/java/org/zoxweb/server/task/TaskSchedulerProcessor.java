@@ -15,6 +15,7 @@
  */
 package org.zoxweb.server.task;
 
+import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.shared.util.*;
 
 import java.security.PrivilegedAction;
@@ -23,6 +24,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class TaskSchedulerProcessor
@@ -216,8 +218,10 @@ public class TaskSchedulerProcessor
         }
     }
 
+    public final static LogWrapper log = new LogWrapper(TaskSchedulerProcessor.class).setEnabled(false);
+
     private final TaskProcessor taskProcessor;
-    private boolean live = true;
+    private final AtomicBoolean live = new AtomicBoolean(true);
     private static final long DEFAULT_TIMEOUT = Const.TimeInMillis.MILLI.MILLIS * 500;
     private static final AtomicLong TSP_COUNTER = new AtomicLong(0);
     private final long counterID = TSP_COUNTER.incrementAndGet();
@@ -243,15 +247,10 @@ public class TaskSchedulerProcessor
     }
 
     public void close() {
-        if (live) {
+        if (live.getAndSet(false)) {
             synchronized (this) {
-                // check to avoid double penetration
-                if (live) {
-                    live = false;
                     notify();
-                }
             }
-
             synchronized (queue) {
                 queue.notify();
             }
@@ -260,7 +259,7 @@ public class TaskSchedulerProcessor
 
     @Override
     public boolean isClosed() {
-        return !live;
+        return !live.get();
     }
 
 
@@ -315,7 +314,7 @@ public class TaskSchedulerProcessor
 
 
     private TaskSchedulerAppointment<?> queue(TaskSchedulerAppointment<?> te) {
-        if (!live) {
+        if (!live.get()) {
             throw new IllegalArgumentException("TaskSchedulerProcessor is dead");
         }
 
@@ -352,7 +351,7 @@ public class TaskSchedulerProcessor
      */
     @Override
     public void run() {
-        while (live) {
+        while (live.get()) {
             long timeToWait = 0;
 
             do {
@@ -392,7 +391,7 @@ public class TaskSchedulerProcessor
             // wait time for the wakeup
             synchronized (queue) {
                 timeToWait = internalWaitTime();
-                if (live && timeToWait > 0) {
+                if (live.get() && timeToWait > 0) {
 
                     try {
                         queue.wait(timeToWait);
@@ -402,6 +401,8 @@ public class TaskSchedulerProcessor
                 }
             }
         }
+
+        log.getLogger().info("TaskSchedulerProcessor is terminated");
     }
 
     public int pendingTasks() {

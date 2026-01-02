@@ -358,7 +358,7 @@ public class TaskProcessor
      * @return Return true if there is pending tasks or any worker thread is executing a task
      */
     public boolean isBusy() {
-        return (tasksQueue.size() > 0 || workersQueue.size() < executorsCounter);
+        return (!tasksQueue.isEmpty() || workersQueue.size() < executorsCounter);
     }
 
 

@@ -27,6 +27,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class TaskUtil {
+
     private static TaskProcessor TASK_PROCESSOR = null;
     private static TaskSchedulerProcessor TASK_SCHEDULER = null;
     private static TaskSchedulerProcessor TASK_SIMPLE_SCHEDULER = null;
@@ -188,7 +189,7 @@ public class TaskUtil {
     public static boolean isBusy(TaskProcessor tp, TaskSchedulerProcessor tsp) {
         if (tp == null && tsp == null)
             throw new NullPointerException("TaskProcessor and TaskSchedulerProcessor null");
-        return (tp == null ? false : tp.isBusy()) || (tsp == null ? false : tsp.isBusy());
+        return (tp != null && tp.isBusy()) || (tsp != null && tsp.isBusy());
     }
 
     public static long waitIfBusy() {
