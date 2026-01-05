@@ -26,8 +26,10 @@ import org.zoxweb.shared.data.events.IPAddressEvent;
 import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.net.SharedNetUtil;
 import org.zoxweb.shared.security.SecurityStatus;
-import org.zoxweb.shared.util.Const.TimeInMillis;
+import org.zoxweb.shared.task.CallableConsumer;
+import org.zoxweb.shared.task.ConsumerCallback;
 import org.zoxweb.shared.util.*;
+import org.zoxweb.shared.util.Const.TimeInMillis;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -42,11 +44,59 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * NIO Socket
+ * High-performance Non-blocking I/O (NIO) socket multiplexer that manages multiple server and client
+ * connections using Java NIO's Selector pattern.
  *
- * @author mnael
+ * <p>This class provides a unified interface for managing TCP server sockets, TCP client sockets,
+ * and UDP datagram sockets. It uses a single-threaded selector loop combined with an executor
+ * for concurrent request processing, enabling efficient handling of thousands of simultaneous
+ * connections.</p>
+ *
+ * <h2>Key Features:</h2>
+ * <ul>
+ *   <li><b>Protocol Factory Pattern:</b> Uses {@link ProtocolFactory} to create protocol-specific
+ *       handlers for each connection, enabling support for multiple protocols on different ports.</li>
+ *   <li><b>Security Filtering:</b> Integrates with {@link org.zoxweb.server.net.InetFilterRulesManager}
+ *       for IP-based access control on incoming connections.</li>
+ *   <li><b>Attack Monitoring:</b> Tracks and logs rejected connections with rate statistics for
+ *       security analysis and intrusion detection.</li>
+ *   <li><b>Event System:</b> Dispatches {@link IPAddressEvent} events for blocked connections,
+ *       enabling integration with external security systems.</li>
+ *   <li><b>Connection Monitoring:</b> Uses {@link NIOChannelMonitor} for timeout detection on
+ *       pending client connections.</li>
+ *   <li><b>Statistics:</b> Collects metrics including total connections, select calls, attack
+ *       counts, and average processing times.</li>
+ * </ul>
+ *
+ * <h2>Threading Model:</h2>
+ * <p>The selector loop runs on a dedicated thread named "NIO-SOCKET". When an executor is provided,
+ * I/O processing is offloaded to the executor's thread pool. Selection key interest ops are
+ * temporarily disabled during processing to prevent concurrent access issues.</p>
+ *
+ * <h2>Usage Example:</h2>
+ * <pre>{@code
+ * Executor executor = TaskUtil.defaultTaskProcessor();
+ * TaskSchedulerProcessor scheduler = TaskUtil.defaultTaskScheduler();
+ * NIOSocket nioSocket = new NIOSocket(executor, scheduler);
+ *
+ * // Add a TCP server
+ * nioSocket.addServerSocket(8080, 50, new MyProtocolFactory());
+ *
+ * // Add a UDP server
+ * nioSocket.addDatagramSocket(new InetSocketAddress(9090), new MyUdpProtocolFactory());
+ *
+ * // Cleanup
+ * nioSocket.close();
+ * }</pre>
+ *
+ * @author javaconsigliere@gmail.com
+ * @see ProtocolFactory
+ * @see ProtocolHandler
+ * @see SelectorController
+ * @see NIOChannelMonitor
  */
 public class NIOSocket
         implements Runnable, DaemonController, Closeable {
@@ -54,8 +104,8 @@ public class NIOSocket
     private final AtomicBoolean live = new AtomicBoolean(true);
     private final SelectorController selectorController;
     private final Executor executor;
-    private final TaskSchedulerProcessor tsp;
-    private long connectionCount = 0;
+    private final TaskSchedulerProcessor taskSchedulerProcessor;
+    private final AtomicLong connectionCount = new AtomicLong(0);
 
 
     private long selectedCountTotal = 0;
@@ -66,15 +116,44 @@ public class NIOSocket
     private final RateCounter callsCounter = new RateCounter("nio-calls-counter");
 
 
+    /**
+     * Creates a new NIOSocket and starts the selector loop thread.
+     *
+     * <p>The constructor initializes the NIO Selector and immediately starts the selector
+     * loop on a dedicated thread named "NIO-SOCKET". The socket is ready to accept
+     * server and client socket registrations after construction.</p>
+     *
+     * @param exec the executor for offloading I/O processing; if null, processing occurs
+     *             on the selector thread (not recommended for production use)
+     * @param tsp  the task scheduler for connection timeout monitoring and delayed operations;
+     *             used by {@link NIOChannelMonitor} to detect stale pending connections
+     * @throws IOException if the Selector cannot be opened
+     */
     public NIOSocket(Executor exec, TaskSchedulerProcessor tsp) throws IOException {
         logger.getLogger().info("Executor: " + exec);
         selectorController = new SelectorController(Selector.open());
         this.executor = exec;
-        this.tsp = tsp;
+        this.taskSchedulerProcessor = tsp;
 
         TaskUtil.startRunnable(this, "NIO-SOCKET");
     }
 
+    /**
+     * Creates and registers a TCP server socket on the specified address.
+     *
+     * <p>This method opens a new {@link ServerSocketChannel}, binds it to the specified
+     * address and port, and registers it with the selector for accepting incoming connections.
+     * When a connection is accepted, a new {@link ProtocolHandler} instance is created using
+     * the provided factory.</p>
+     *
+     * @param sa      the socket address to bind to (IP address and port)
+     * @param backlog the maximum number of pending connections in the listen queue;
+     *                see {@link ServerSocketChannel#bind(java.net.SocketAddress, int)}
+     * @param psf     the protocol factory for creating handlers for accepted connections
+     * @return the SelectionKey associated with the server socket channel
+     * @throws IOException          if the server socket cannot be opened or bound
+     * @throws NullPointerException if sa or psf is null
+     */
     public SelectionKey addServerSocket(InetSocketAddress sa, int backlog, ProtocolFactory<?> psf) throws IOException {
         SUS.checkIfNulls("Null values", sa, psf);
         ServerSocketChannel ssc = ServerSocketChannel.open();
@@ -82,6 +161,19 @@ public class NIOSocket
         return addServerSocket(ssc, psf);
     }
 
+    /**
+     * Registers an existing ServerSocketChannel with the selector.
+     *
+     * <p>Use this method when you need to configure the ServerSocketChannel before
+     * registration, such as setting custom socket options. The channel must already
+     * be bound to an address before calling this method.</p>
+     *
+     * @param ssc the pre-configured and bound server socket channel
+     * @param psf the protocol factory for creating handlers for accepted connections
+     * @return the SelectionKey associated with the server socket channel
+     * @throws IOException          if registration fails
+     * @throws NullPointerException if ssc or psf is null
+     */
     public SelectionKey addServerSocket(ServerSocketChannel ssc, ProtocolFactory<?> psf) throws IOException {
         SUS.checkIfNulls("Null values", ssc, psf);
 
@@ -92,18 +184,51 @@ public class NIOSocket
     }
 
 
-
-
+    /**
+     * Initiates a non-blocking TCP client connection to the specified address.
+     *
+     * <p>Convenience method that uses a default 10-second connection timeout with no rate limiting.
+     * See {@link #addClientSocket(InetSocketAddress, ProtocolFactory, int, RateController)} for
+     * detailed behavior.</p>
+     *
+     * @param sa  the remote server address to connect to
+     * @param psf the protocol factory for creating the connection handler
+     * @return the SelectionKey associated with the client socket channel
+     * @throws IOException if the socket channel cannot be opened or connection initiation fails
+     * @see #addClientSocket(InetSocketAddress, ProtocolFactory, int, RateController)
+     */
     public SelectionKey addClientSocket(InetSocketAddress sa, ProtocolFactory<?> psf) throws IOException {
         return addClientSocket(sa, psf, 10, null);
     }
 
+    /**
+     * Initiates a non-blocking TCP client connection with configurable timeout and rate control.
+     *
+     * <p>This method opens a new SocketChannel and initiates a non-blocking connection to the
+     * remote server. A {@link NIOChannelMonitor} is scheduled to detect and close stale
+     * connections that fail to complete within the specified timeout.</p>
+     *
+     * <p>When a rate controller is provided, the connection attempt is delayed according to
+     * the controller's rate limiting policy, which is useful for connection pooling or
+     * preventing connection storms.</p>
+     *
+     * <p>Once the connection is established, the selector notifies via OP_CONNECT and a
+     * new ProtocolHandler is created from the factory to handle the connection.</p>
+     *
+     * @param sa             the remote server address to connect to
+     * @param psf            the protocol factory for creating the connection handler
+     * @param timeoutInSec   connection timeout in seconds; the connection is closed if not
+     *                       established within this time
+     * @param rateController optional rate controller for connection throttling; may be null
+     * @return the SelectionKey associated with the client socket channel
+     * @throws IOException if the socket channel cannot be opened or connection initiation fails
+     */
     public SelectionKey addClientSocket(InetSocketAddress sa, ProtocolFactory<?> psf, int timeoutInSec, RateController rateController) throws IOException {
         SocketChannel sc = SocketChannel.open();
 
         SelectionKey ret = selectorController.register(sc, SelectionKey.OP_CONNECT, psf, false);
         if (rateController != null) {
-            tsp.queue(rateController.nextWait(), new Runnable() {
+            taskSchedulerProcessor.queue(rateController.nextWait(), new Runnable() {
                         private InetSocketAddress isa;
                         private long timeout;
 
@@ -117,7 +242,7 @@ public class NIOSocket
                         public void run() {
                             try {
                                 sc.connect(isa);
-                                tsp.queue(timeout, new NIOChannelMonitor(ret, selectorController));
+                                taskSchedulerProcessor.queue(timeout, new NIOChannelMonitor(ret, selectorController));
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
@@ -127,12 +252,75 @@ public class NIOSocket
             );
         } else {
             sc.connect(sa);
-            tsp.queue(TimeInMillis.SECOND.mult(timeoutInSec), new NIOChannelMonitor(ret, selectorController));
+            taskSchedulerProcessor.queue(TimeInMillis.SECOND.mult(timeoutInSec), new NIOChannelMonitor(ret, selectorController));
         }
 
         return ret;
     }
 
+
+    /**
+     * Initiates a non-blocking TCP client connection with callback-based notification.
+     *
+     * <p>This method provides a callback-style API for client connections, where the
+     * provided {@link ConsumerCallback} is invoked when the connection completes
+     * successfully or fails with an exception.</p>
+     *
+     * <p>Unlike the factory-based methods, this approach gives the caller direct access
+     * to the connected SocketChannel, allowing custom handling of the connection lifecycle
+     * outside the NIOSocket's protocol handler framework.</p>
+     *
+     * <p>If the connection completes immediately (ultra-fast local connection), the callback
+     * is invoked synchronously before this method returns. Otherwise, the callback is
+     * invoked asynchronously when the connection completes or times out.</p>
+     *
+     * @param sa           the remote server address to connect to
+     * @param timeoutInSec connection timeout in seconds; the connection is closed and
+     *                     an exception is passed to the callback if not established within this time
+     * @param cc           the callback to invoke with the connected SocketChannel on success,
+     *                     or with an exception on failure
+     * @return the SocketChannel being connected (may not yet be connected when returned)
+     * @throws IOException if the socket channel cannot be opened or connection initiation fails
+     */
+    public SocketChannel addClientSocket(InetSocketAddress sa, int timeoutInSec, ConsumerCallback<SocketChannel> cc) throws IOException {
+
+        CallableConsumer.WithSchedule<SocketChannel> ccWithSchedule = new CallableConsumer.WithSchedule<SocketChannel>();
+        ccWithSchedule.setCallback(cc);
+        SocketChannel sc = SocketChannel.open();
+        SelectionKey ret = selectorController.register(sc, SelectionKey.OP_CONNECT, ccWithSchedule, false);
+        try {
+            if (sc.connect(sa)) {
+                // we connected UTRA fast connection
+                finishConnecting(ret);
+                selectorController.cancelSelectionKey(ret);
+                ccWithSchedule.getCallback().accept(sc);
+            } else
+                ccWithSchedule.setAppointment(taskSchedulerProcessor.queue(TimeInMillis.SECOND.mult(timeoutInSec), new NIOChannelMonitor(ret, selectorController)));
+        } catch (IOException e) {
+            selectorController.cancelSelectionKey(ret);
+            ccWithSchedule.getCallback().exception(e);
+            throw e;
+        }
+        return sc;
+    }
+
+    /**
+     * Creates and registers a UDP datagram socket on the specified address.
+     *
+     * <p>This method opens a new {@link DatagramChannel}, binds it to the specified
+     * address and port, and registers it with the selector for reading incoming datagrams.
+     * A single {@link ProtocolHandler} instance is created from the factory to handle
+     * all incoming datagrams on this socket.</p>
+     *
+     * <p>Unlike TCP sockets, UDP sockets handle all communication through a single channel
+     * rather than creating new channels for each remote endpoint.</p>
+     *
+     * @param sa  the socket address to bind to (IP address and port)
+     * @param psf the protocol factory for creating the datagram handler
+     * @return the SelectionKey associated with the datagram channel
+     * @throws IOException          if the datagram socket cannot be opened or bound
+     * @throws NullPointerException if sa or psf is null
+     */
     public SelectionKey addDatagramSocket(InetSocketAddress sa, ProtocolFactory<?> psf) throws IOException {
         SUS.checkIfNulls("Null values", sa, psf);
         DatagramChannel dc = DatagramChannel.open();
@@ -140,6 +328,25 @@ public class NIOSocket
 
         return addDatagramSocket(dc, psf);
     }
+
+    /**
+     * Registers an existing DatagramChannel with the selector.
+     *
+     * <p>Use this method when you need to configure the DatagramChannel before
+     * registration, such as setting custom socket options or connecting to a
+     * specific remote address. The channel must already be bound to an address
+     * before calling this method.</p>
+     *
+     * <p>Note: Unlike TCP, a new ProtocolHandler is created immediately from the
+     * factory and attached to the SelectionKey, since UDP uses a single channel
+     * for all communication.</p>
+     *
+     * @param dc  the pre-configured and bound datagram channel
+     * @param psf the protocol factory for creating the datagram handler
+     * @return the SelectionKey associated with the datagram channel
+     * @throws IOException          if registration fails
+     * @throws NullPointerException if dc or psf is null
+     */
     public SelectionKey addDatagramSocket(DatagramChannel dc, ProtocolFactory<?> psf) throws IOException {
         SUS.checkIfNulls("Null values", dc, psf);
         SelectionKey sk = selectorController.register(dc, SelectionKey.OP_READ, psf.newInstance(), false);
@@ -148,20 +355,68 @@ public class NIOSocket
         return sk;
     }
 
+    /**
+     * Creates and registers a TCP server socket using an {@link IPAddress} specification.
+     *
+     * <p>Convenience method that converts the IPAddress to an InetSocketAddress.
+     * If the IPAddress has no associated InetAddress, the server will bind to all
+     * available interfaces (wildcard address) on the specified port.</p>
+     *
+     * @param sa      the IP address specification containing the bind address and port
+     * @param backlog the maximum number of pending connections in the listen queue
+     * @param psf     the protocol factory for creating handlers for accepted connections
+     * @return the SelectionKey associated with the server socket channel
+     * @throws IOException if the server socket cannot be opened or bound
+     * @see #addServerSocket(InetSocketAddress, int, ProtocolFactory)
+     */
     public SelectionKey addServerSocket(IPAddress sa, int backlog, ProtocolFactory<?> psf) throws IOException {
         return addServerSocket(sa.getInetAddress() != null ? new InetSocketAddress(sa.getInetAddress(), sa.getPort()) : new InetSocketAddress(sa.getPort()),
                 backlog,
                 psf);
     }
 
+    /**
+     * Creates and registers a TCP server socket on the specified port.
+     *
+     * <p>Convenience method that binds the server to all available network interfaces
+     * (wildcard address 0.0.0.0) on the specified port.</p>
+     *
+     * @param port    the port number to listen on
+     * @param backlog the maximum number of pending connections in the listen queue
+     * @param psf     the protocol factory for creating handlers for accepted connections
+     * @return the SelectionKey associated with the server socket channel
+     * @throws IOException if the server socket cannot be opened or bound
+     * @see #addServerSocket(InetSocketAddress, int, ProtocolFactory)
+     */
     public SelectionKey addServerSocket(int port, int backlog, ProtocolFactory<?> psf) throws IOException {
         return addServerSocket(new InetSocketAddress(port), backlog, psf);
     }
 
+    /**
+     * Sets the event listener manager for security events.
+     *
+     * <p>When set, the NIOSocket dispatches {@link IPAddressEvent} notifications whenever
+     * an incoming connection is rejected by the security filter rules. This enables
+     * integration with external intrusion detection systems, logging frameworks, or
+     * automated blacklisting mechanisms.</p>
+     *
+     * <p>Events are dispatched asynchronously (async=true) to avoid blocking the
+     * selector thread.</p>
+     *
+     * @param eventListenerManager the event manager to receive security events; may be null
+     *                             to disable event dispatching
+     * @see IPAddressEvent
+     */
     public void setEventManager(EventListenerManager<BaseEventObject<?>, ?> eventListenerManager) {
         this.eventListenerManager = eventListenerManager;
     }
 
+    /**
+     * Returns the current event listener manager.
+     *
+     * @return the event manager for security events, or null if not set
+     * @see #setEventManager(EventListenerManager)
+     */
     public EventListenerManager<BaseEventObject<?>, ?> getEventManager() {
         return eventListenerManager;
     }
@@ -319,6 +574,7 @@ public class NIOSocket
                                             {
                                                 try {
                                                     protocolHandler.setupConnection(sc, protocolFactory.isBlocking());
+                                                    connectionCount.incrementAndGet();
                                                 } catch (IOException e) {
                                                     e.printStackTrace();
                                                     IOUtil.close(protocolHandler);
@@ -326,26 +582,61 @@ public class NIOSocket
                                             });
                                         } else {
                                             protocolHandler.setupConnection(sc, protocolFactory.isBlocking());
+                                            connectionCount.incrementAndGet();
                                         }
-                                        connectionCount++;
+
 
                                     }
 
                                 } else if (key.isValid()
                                         && key.channel().isOpen()
                                         && key.isConnectable()) {
+                                    // this is used by client connection
 
-                                    connectionCount++;
+                                    // stop key interest first
+                                    key.interestOps(0);
+                                    // finish connection
+                                    // this a bit dicey
+
+                                    if (key.attachment() instanceof CallableConsumer.WithSchedule) {
+                                        CallableConsumer.WithSchedule<SocketChannel> connectData = (CallableConsumer.WithSchedule<SocketChannel>) key.attachment();
+                                        // the code read and write processing is done by outsiders
+                                        // the read/write or waiting for connection is done my outsiders
+                                        // selection key is to be canceled
+                                        SocketChannel sc = ((SocketChannel) key.channel());
+
+                                        try {
+                                            //*no need to create new thread  since it takes micro-seconds at this stage*
+                                            finishConnecting(key);
+                                            selectorController.cancelSelectionKey(key);
+                                            //**************************************************************************
+
+                                            if (executor == null)
+                                                executor.execute(() -> connectData.getCallback().accept(sc));
+                                            else
+                                                connectData.getCallback().accept(sc);
+
+                                        } catch (Exception e) {
+                                            if (executor == null)
+                                                executor.execute(() -> connectData.getCallback().exception(e));
+                                            else
+                                                connectData.getCallback().exception(e);
+                                        }
+                                        continue; // is crucial here
+                                    }
+
+
+                                    // finish connection first;
+                                    finishConnecting(key);
                                     ProtocolFactory<?> protocolFactory = (ProtocolFactory<?>) key.attachment();
                                     ProtocolHandler ph = protocolFactory.newInstance();
+
                                     ph.setSelectorController(selectorController);
                                     ph.setupConnection((AbstractSelectableChannel) key.channel(), false);
 
 
-                                    int keyOPs = key.interestOps();
-                                    key.interestOps(0);
-
                                     // a channel is ready for reading
+                                    int keyOPs = key.interestOps();
                                     if (executor != null) {
                                         executor.execute(() ->
                                         {
@@ -373,24 +664,8 @@ public class NIOSocket
                                             selectorController.wakeup();
                                         }
                                     }
-
-
-//									key.attachment()
-//									if (((SocketChannel) key.channel()).isConnectionPending()) {
-//										((SocketChannel) key.channel()).finishConnect();
-//									}
-//									logger.getLogger().info("connectable:" + key);
-//									selectorController.cancelSelectionKey(key);
-//									IOUtil.close(key.channel());
-
-
                                 }
-//							    else if (key.isValid()
-//										&& key.channel().isOpen()
-//										&& key.isWritable())
-//							    {
-//							         a channel is ready for writing
-//							    }
+
 
                             } catch (Exception e) {
                                 if (!(e instanceof CancelledKeyException))
@@ -430,20 +705,94 @@ public class NIOSocket
     }
 
 
+    /**
+     * Finish the connect stage
+     * @param key isConnectable() true
+     * @throws IOException case of error
+     */
+    private void finishConnecting(SelectionKey key) throws IOException {
+        synchronized (key) {
+            if (key.isValid()) {
+
+                finishConnecting((SocketChannel) key.channel(),
+                        key.attachment() instanceof CallableConsumer.WithSchedule ? ((CallableConsumer.WithSchedule<?>) key.attachment()).getAppointment() : null);
+                return;
+            }
+
+            throw new IOException("failed to finish connection " + key.channel());
+        }
+    }
+
+    /**
+     * Finish the connect stage
+     * @param channel in connection pending stage
+     * @param connectTimeout could be null, if not will be closed
+     * @throws IOException case of error
+     */
+    private void finishConnecting(SocketChannel channel, Appointment connectTimeout) throws IOException {
+        try {
+            if (channel.isOpen()) {
+                if (channel.isConnectionPending())
+                    channel.finishConnect();
+
+                if (channel.isConnected()) {
+                    connectionCount.incrementAndGet();
+                    return;
+                }
+            }
+        } finally {
+            IOUtil.close(connectTimeout);
+        }
+
+        throw new IOException("failed to finish connection " + channel);
+    }
+
+
+    /**
+     * Returns the average I/O processing time per dispatch in nanoseconds.
+     *
+     * <p>This metric measures the average time spent processing each selector dispatch
+     * cycle, from receiving selected keys to completing handler invocations. Useful
+     * for monitoring system performance and detecting processing bottlenecks.</p>
+     *
+     * @return the average processing time in nanoseconds
+     */
     public long averageProcessingTime() {
         return (long) callsCounter.average();
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Returns true if the NIOSocket has been closed via {@link #close()},
+     * indicating that the selector loop has stopped and no further connections
+     * will be processed.</p>
+     *
+     * @return true if the socket is closed, false if still running
+     */
     @Override
     public boolean isClosed() {
-        // TODO Auto-generated method stub
         return !live.get();
     }
 
+    /**
+     * Closes the NIOSocket and releases all associated resources.
+     *
+     * <p>This method performs the following cleanup in order:</p>
+     * <ol>
+     *   <li>Sets the live flag to false, causing the selector loop to exit</li>
+     *   <li>Closes all registered channels (servers, clients, datagrams)</li>
+     *   <li>Cancels all selection keys</li>
+     *   <li>Closes the underlying selector</li>
+     * </ol>
+     *
+     * <p>This method is idempotent; subsequent calls after the first close have no effect.</p>
+     *
+     * @throws IOException if an I/O error occurs during cleanup (channels and selector
+     *                     are still closed on a best-effort basis)
+     */
     @Override
     public void close() throws IOException {
-        // TODO Auto-generated method stub
-
         if (live.getAndSet(false)) {
             Set<SelectionKey> keys = selectorController.keys();
             for (SelectionKey sk : keys) {
@@ -460,28 +809,85 @@ public class NIOSocket
 
     }
 
-
+    /**
+     * Returns the executor used for I/O processing.
+     *
+     * @return the executor for offloading I/O handlers, or null if processing
+     *         occurs on the selector thread
+     */
     public Executor getExecutor() {
         return executor;
     }
 
+    /**
+     * Returns the scheduler used for timed operations.
+     *
+     * <p>The scheduler is used for connection timeout monitoring via
+     * {@link NIOChannelMonitor} and rate-controlled connection attempts.</p>
+     *
+     * @return the scheduled executor service for timed operations
+     */
     public ScheduledExecutorService getScheduler() {
-        return tsp;
+        return taskSchedulerProcessor;
     }
 
-
+    /**
+     * Returns the total number of connections established since startup.
+     *
+     * <p>This count includes both accepted incoming connections and successfully
+     * connected outgoing client connections. It does not include rejected connections
+     * blocked by security filters.</p>
+     *
+     * @return the total connection count
+     */
     public long totalConnections() {
-        return connectionCount;
+        return connectionCount.get();
     }
 
+    /**
+     * Returns the statistics logging interval.
+     *
+     * @return the interval for logging statistics, in milliseconds or dispatch counts
+     *         (depending on which threshold is reached first); 0 disables stat logging
+     * @see #setStatLogCounter(long)
+     */
     public long getStatLogCounter() {
         return statLogCounter;
     }
 
+    /**
+     * Sets the statistics logging interval.
+     *
+     * <p>When set to a value greater than 0, the NIOSocket periodically logs performance
+     * statistics including average processing time, total dispatches, select calls, and
+     * available worker threads. Statistics are logged when either:</p>
+     * <ul>
+     *   <li>The number of dispatches reaches a multiple of this value, or</li>
+     *   <li>The elapsed time since the last log exceeds this value in milliseconds</li>
+     * </ul>
+     *
+     * @param statLogCounter the logging interval; 0 to disable stat logging
+     */
     public void setStatLogCounter(long statLogCounter) {
         this.statLogCounter = statLogCounter;
     }
 
+    /**
+     * Returns a snapshot of current NIOSocket statistics.
+     *
+     * <p>The returned map contains the following metrics:</p>
+     * <ul>
+     *   <li><b>time_stamp:</b> Current timestamp when stats were collected</li>
+     *   <li><b>connection_counts:</b> Total connections established since startup</li>
+     *   <li><b>select_calls_counts:</b> Total selector.select() calls that returned &gt; 0 keys</li>
+     *   <li><b>attack_counts:</b> Total connections rejected by security filters</li>
+     *   <li><b>selection_key_registration_count:</b> Total SelectionKey registrations</li>
+     *   <li><b>total_selection_keys:</b> Current number of registered SelectionKeys</li>
+     *   <li><b>nio-calls-counter:</b> Rate counter with timing statistics</li>
+     * </ul>
+     *
+     * @return an NVGenericMap containing the current statistics
+     */
     public NVGenericMap getStats() {
         NVGenericMap ret = new NVGenericMap("nio_socket");
         ret.add("time_stamp", DateUtil.DEFAULT_DATE_FORMAT_TZ.format(new Date()));

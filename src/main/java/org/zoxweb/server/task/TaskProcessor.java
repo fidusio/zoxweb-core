@@ -409,6 +409,7 @@ public class TaskProcessor
 
     @Override
     public void execute(Runnable command) {
+        if(log.isEnabled()) log.getLogger().info("new command: " + command);
         if (command != null)
             queueTask(new FutureCallableRunnableTask<>(command, null, false, this).taskEvent);
     }
@@ -535,6 +536,7 @@ public class TaskProcessor
      */
     @Override
     public <T> Future<T> submit(Callable<T> task) {
+        if(log.isEnabled()) log.getLogger().info("new command: " + task);
         FutureCallableRunnableTask<T> cct = new FutureCallableRunnableTask<T>(task, this);
         queueTask(cct.taskEvent);
         return cct;
@@ -554,6 +556,7 @@ public class TaskProcessor
      */
     @Override
     public <T> Future<T> submit(Runnable task, T result) {
+        if(log.isEnabled()) log.getLogger().info("new command: " + task);
         FutureCallableRunnableTask<T> cct = new FutureCallableRunnableTask<>(task, result, true, this);
         queueTask(cct.taskEvent);
         return cct;

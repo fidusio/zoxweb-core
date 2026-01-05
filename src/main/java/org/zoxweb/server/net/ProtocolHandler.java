@@ -74,9 +74,13 @@ public abstract class ProtocolHandler
 
 
     protected ProtocolHandler(boolean enableTimeout) {
+        this(enableTimeout ? SESSION_TIMEOUT: 0);
+    }
+
+    protected ProtocolHandler(long timeout) {
         updateUsage();
-        if (enableTimeout)
-            phTimeout = new PHTimeout(this, SESSION_TIMEOUT);
+        if (timeout > 0)
+            phTimeout = new PHTimeout(this, timeout);
         else
             phTimeout = null;
 

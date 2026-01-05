@@ -373,4 +373,24 @@ public class SUS {
         }
         return true;
     }
+
+
+    /**
+     * Convert [o.toString()]
+     * @param o to be square bracketed
+     * @return [o.toString()]
+     */
+    public static String toSB(Object o) {
+        return toSB(o, false);
+    }
+
+    /**
+     * Convert [o.toString()] or  '[o.toString()] '
+     * @param o to be square bracketed
+     * @param addSpace if true add space at the end
+     * @return [o.toString()] or  '[o.toString()] '
+     */
+    public static String toSB(Object o, boolean addSpace) {
+        return "[" + o + "]" + (addSpace ? " " : "");
+    }
 }

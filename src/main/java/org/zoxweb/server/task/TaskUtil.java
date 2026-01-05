@@ -25,6 +25,7 @@ import org.zoxweb.shared.util.SUS;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BooleanSupplier;
 
 public class TaskUtil {
 
@@ -193,19 +194,31 @@ public class TaskUtil {
     }
 
     public static long waitIfBusy() {
-        return waitIfBusy(100, defaultTaskProcessor(), defaultTaskScheduler());
+        return waitIfBusy(100, defaultTaskProcessor(), defaultTaskScheduler(), null);
     }
 
     public static long waitIfBusy(long durationInMillis) {
-        return waitIfBusy(durationInMillis, defaultTaskProcessor(), defaultTaskScheduler());
+        return waitIfBusy(durationInMillis, defaultTaskProcessor(), defaultTaskScheduler(), null);
     }
 
+    public static long waitIfBusy(long durationInMillis, BooleanSupplier exitCondition) {
+        return waitIfBusy(durationInMillis, defaultTaskProcessor(), defaultTaskScheduler(), exitCondition);
+    }
+
+
     public static long waitIfBusy(long durationInMillis, TaskProcessor tp, TaskSchedulerProcessor tsp) {
+        return waitIfBusy(durationInMillis, tp, tsp, null);
+    }
+
+
+    public static long waitIfBusy(long durationInMillis, TaskProcessor tp, TaskSchedulerProcessor tsp, BooleanSupplier exitCondition) {
         if (tp == null && tsp == null)
             throw new NullPointerException("TaskProcessor and TaskSchedulerProcessor null");
         if (durationInMillis < 1)
             throw new IllegalArgumentException("wait time must be greater than 0 millis second.");
         do {
+            if(exitCondition != null && exitCondition.getAsBoolean())
+                break;
             sleep(durationInMillis);
             // check after wait for reason
             // sometimes the tp and tsp needs some time to start working
@@ -217,6 +230,10 @@ public class TaskUtil {
 
 
     public static long waitIfBusyThenClose(long durationInMillis) {
+        return waitIfBusyThenClose(durationInMillis, null);
+    }
+
+    public static long waitIfBusyThenClose(long durationInMillis, BooleanSupplier exitCondition) {
         if (durationInMillis < 1)
             throw new IllegalArgumentException("wait time must be greater than 0 millis second.");
         if (TASK_SIMPLE_SCHEDULER != null) {
@@ -229,24 +246,15 @@ public class TaskUtil {
             } while (TASK_SIMPLE_SCHEDULER.isBusy());//pendingTasks() != 0 );
             TASK_SIMPLE_SCHEDULER.close();
         }
-        return waitIfBusyThenClose(durationInMillis, defaultTaskProcessor(), defaultTaskScheduler());
+        return waitIfBusyThenClose(durationInMillis, defaultTaskProcessor(), defaultTaskScheduler(), exitCondition);
     }
 
-
     public static long waitIfBusyThenClose(long millisToSleepAndCheck, TaskProcessor tp, TaskSchedulerProcessor tsp) {
-//		if(millisToSleepAndCheck < 1)
-//			throw new IllegalArgumentException("wait time must be greater than 0 second.");
-//		do
-//		{
-//			try
-//			{
-//				Thread.sleep(millisToSleepAndCheck);
-//			} catch (InterruptedException e) {
-//				e.printStackTrace();
-//			}
-//		}while(tsp.pendingTasks() != 0 || tp.isBusy());
+        return waitIfBusyThenClose(millisToSleepAndCheck, tp, tsp, null);
+    }
 
-        long timestamp = waitIfBusy(millisToSleepAndCheck, tp, tsp);
+    public static long waitIfBusyThenClose(long millisToSleepAndCheck, TaskProcessor tp, TaskSchedulerProcessor tsp, BooleanSupplier exitCondition) {
+        long timestamp = waitIfBusy(millisToSleepAndCheck, tp, tsp, exitCondition);
         tsp.close();
         tp.close();
         return timestamp;

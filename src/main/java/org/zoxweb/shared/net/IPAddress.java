@@ -15,12 +15,12 @@
  */
 package org.zoxweb.shared.net;
 
+import org.zoxweb.shared.data.Range;
 import org.zoxweb.shared.data.SetNameDAO;
-import org.zoxweb.shared.util.NVConfig;
-import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityPortable;
-import org.zoxweb.shared.util.NVConfigManager;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Data access object representing an IP address with port and connection settings.
@@ -254,6 +254,36 @@ public class IPAddress
             addressPortProxyType = addressPortProxyType + ":" + pt;
         }
         return new IPAddress(addressPortProxyType);
+    }
+
+
+    /**
+     * Parse ipaddress of format ipaddress:[0,1025]
+     * @param ipAddress to be parsed
+     * @return IPAddress[] of the specified range
+     */
+    public static IPAddress[] parseRange(String ipAddress) {
+        String[] parsed = ipAddress.split(":");
+        String address = parsed[0];
+
+        List<IPAddress> ipAddresses = new ArrayList<IPAddress>();
+        try {
+            int singlePort = Integer.parseInt(parsed[1]);
+            ipAddresses.add(new IPAddress(address, singlePort));
+
+        } catch (Exception e) {
+
+            Range<Integer> ports = Range.toRange(parsed[1]);
+            for (int i = ports.getStart(); i <= ports.getEnd(); i++) {
+
+                if (ports.within(i))
+                    ipAddresses.add(new IPAddress(address, i));
+            }
+        }
+
+
+        return ipAddresses.toArray(new IPAddress[0]);
+
     }
 
     /**
