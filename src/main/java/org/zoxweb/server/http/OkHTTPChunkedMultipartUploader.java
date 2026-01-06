@@ -18,7 +18,7 @@ public class OkHTTPChunkedMultipartUploader {
 
     public static NVGenericMap uploadFile(String url, String username, String password, String filepath, String remoteLocation)
             throws IOException {
-        OkHttpClient client = OkHTTPCall.createOkHttpBuilder(null, null, HTTPMessageConfigInterface.DEFAULT_TIMEOUT_20_SECOND, false, 20, HTTPMessageConfigInterface.DEFAULT_TIMEOUT_40_SECOND).build();
+        OkHttpClient client = OkHTTPCall.createOkHttpBuilder(null, true, null, HTTPMessageConfigInterface.DEFAULT_TIMEOUT_20_SECOND, false, 20, HTTPMessageConfigInterface.DEFAULT_TIMEOUT_40_SECOND).build();
 
         File file = new File(filepath);
         if (!file.exists() || !file.isFile()) {

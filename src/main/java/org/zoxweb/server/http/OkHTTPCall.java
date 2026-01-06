@@ -167,12 +167,13 @@ public class OkHTTPCall {
     private final HTTPMessageConfigInterface hmci;
 
 
-    private static final OkHttpClient sslEnabledClient = createOkHttpBuilder(null, null, HTTPMessageConfigInterface.DEFAULT_TIMEOUT_40_SECOND, true, 20, HTTPMessageConfigInterface.DEFAULT_TIMEOUT_20_SECOND).build();
-    private static final OkHttpClient sslDisabledClient = createOkHttpBuilder(null, null, HTTPMessageConfigInterface.DEFAULT_TIMEOUT_20_SECOND, false, 20, HTTPMessageConfigInterface.DEFAULT_TIMEOUT_20_SECOND).build();
+    private static final OkHttpClient sslEnabledClient = createOkHttpBuilder(null, true, null, HTTPMessageConfigInterface.DEFAULT_TIMEOUT_40_SECOND, true, 20, HTTPMessageConfigInterface.DEFAULT_TIMEOUT_20_SECOND).build();
+    private static final OkHttpClient sslDisabledClient = createOkHttpBuilder(null, true, null, HTTPMessageConfigInterface.DEFAULT_TIMEOUT_20_SECOND, false, 20, HTTPMessageConfigInterface.DEFAULT_TIMEOUT_20_SECOND).build();
 
     private final OkHttpClient okHttpClient;
 
     public static OkHttpClient.Builder createOkHttpBuilder(ExecutorService executorService,
+                                                           boolean enableRedirect,
                                                            IPAddress proxy,
                                                            long timeoutInSecond,
                                                            boolean enableSSLCheck,
@@ -191,7 +192,7 @@ public class OkHTTPCall {
         //builder.protocols(Arrays.asList(Protocol.HTTP_1_1));
 
         // allow redirect
-        builder.followRedirects(true).followSslRedirects(true);
+        builder.followRedirects(enableRedirect).followSslRedirects(enableRedirect);
         if (proxy != null) {
             builder.setProxy$okhttp(IOUtil.toProxy(proxy));
         }
@@ -213,13 +214,13 @@ public class OkHTTPCall {
         SUS.checkIfNulls("HTTPMessageConfigInterface can't be null", hmci);
         this.hmci = hmci;
         if (client == null) {
-            if (hmci.getProxyAddress() != null) {
+            if (hmci.getProxyAddress() != null || !hmci.isRedirectEnabled()) {
                 long timeout = hmci.getTimeout();
                 if (timeout == 0)
                     timeout = HTTPMessageConfigInterface.DEFAULT_TIMEOUT_20_SECOND;
                 else
                     timeout = TimeUnit.SECONDS.convert(timeout, TimeUnit.MILLISECONDS);
-                okHttpClient = createOkHttpBuilder(null, hmci.getProxyAddress(), timeout, !hmci.isSecureCheckEnabled(), 0, 0).build();
+                okHttpClient = createOkHttpBuilder(null, hmci.isRedirectEnabled(), hmci.getProxyAddress(), timeout, !hmci.isSecureCheckEnabled(), 0, 0).build();
             } else
                 okHttpClient = hmci.isSecureCheckEnabled() ? sslEnabledClient : sslDisabledClient;
         } else

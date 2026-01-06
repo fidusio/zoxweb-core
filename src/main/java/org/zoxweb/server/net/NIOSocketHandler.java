@@ -32,7 +32,7 @@ import java.nio.channels.spi.AbstractSelectableChannel;
 public class NIOSocketHandler
         extends ProtocolHandler {
 
-    private volatile ByteBuffer phBB = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, (int) Const.SizeInBytes.K.SIZE);
+    private volatile ByteBuffer phBB = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, Const.SizeInBytes.K.mult(1));
 
     private final PlainSessionCallback sessionCallback;
 
@@ -43,12 +43,12 @@ public class NIOSocketHandler
 
     @Override
     public String getName() {
-        return "NIOTunnel";
+        return "NIOSocketHandler";
     }
 
     @Override
     public String getDescription() {
-        return "NIO Tunnel";
+        return "NIO Socket Handler";
     }
 
     @Override
@@ -61,8 +61,7 @@ public class NIOSocketHandler
     @Override
     public void accept(SelectionKey key) {
         try {
-            if (sessionCallback.getConfig() == null)
-                sessionCallback.setConfig(new ChannelOutputStream(this, phSChannel, (int) Const.SizeInBytes.K.SIZE));
+
 
             int read;
             do {
@@ -94,23 +93,9 @@ public class NIOSocketHandler
         getSelectorController().register(phSChannel, SelectionKey.OP_READ, this, isBlocking);
         sessionCallback.setProtocolHandler(this);
         sessionCallback.setRemoteAddress(((InetSocketAddress) phSChannel.getRemoteAddress()).getAddress());
-
+        if (sessionCallback.getConfig() == null)
+            sessionCallback.setConfig(new ChannelOutputStream(this, phSChannel, Const.SizeInBytes.K.mult(1)));
     }
-
-//	@Override
-//	public void setSessionCallback(BaseSessionCallback<?> sessionCallback) {
-//		if(!(sessionCallback instanceof PlainSessionCallback))
-//		{
-//			throw new IllegalArgumentException("sessionCallback is not instance of PlainSessionCallback");
-//		}
-//
-//		this.sessionCallback = (PlainSessionCallback) sessionCallback;
-//		if(this.sessionCallback.getConfig() == null)
-//		{
-//			this.sessionCallback.setConfig(new ChannelOutputStream(this, phSChannel, 512));
-//			sessionCallback.setProtocolHandler(this);
-//		}
-//	}
 
 
     @SuppressWarnings("resource")
