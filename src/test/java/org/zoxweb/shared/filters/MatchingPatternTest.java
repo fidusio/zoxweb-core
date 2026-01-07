@@ -15,11 +15,12 @@
  */
 package org.zoxweb.shared.filters;
 
-import org.zoxweb.shared.filters.PatternFilterLiterals;
+import org.junit.jupiter.api.Test;
 
 public class MatchingPatternTest {
 
-	public static void main(String[] args) {
+	@Test
+	public void test(){
 		String REGEX = ".*";
 		//String REGEX = "[*]*[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*";
 		String[] list = {"*temp", "temp", "*", "/temp/"};

@@ -16,14 +16,13 @@
 package org.zoxweb.shared.filters;
 
 import org.zoxweb.shared.util.SUS;
-import org.zoxweb.shared.util.SharedUtil;
 
 @SuppressWarnings("serial")
 public class PartialFilter
     implements ValueFilter<String, String>
 {
 	
-	private ValueFilter<String, String> vf;
+	private final ValueFilter<String, String> vf;
 	
 	public PartialFilter(ValueFilter<String, String> vf)
     {
