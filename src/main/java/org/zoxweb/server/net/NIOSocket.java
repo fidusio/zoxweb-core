@@ -26,8 +26,8 @@ import org.zoxweb.shared.data.events.IPAddressEvent;
 import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.net.SharedNetUtil;
 import org.zoxweb.shared.security.SecurityStatus;
-import org.zoxweb.shared.task.CallableConsumer;
 import org.zoxweb.shared.task.ConsumerCallback;
+import org.zoxweb.shared.task.ScheduledAttachment;
 import org.zoxweb.shared.util.*;
 import org.zoxweb.shared.util.Const.TimeInMillis;
 
@@ -284,21 +284,21 @@ public class NIOSocket
      */
     public SocketChannel addClientSocket(InetSocketAddress sa, int timeoutInSec, ConsumerCallback<SocketChannel> cc) throws IOException {
 
-        CallableConsumer.WithSchedule<SocketChannel> ccWithSchedule = new CallableConsumer.WithSchedule<SocketChannel>();
-        ccWithSchedule.setCallback(cc);
+        ScheduledAttachment<ConsumerCallback<SocketChannel>> scheduledAttachment = new ScheduledAttachment<ConsumerCallback<SocketChannel>>();
+        scheduledAttachment.attach(cc);
         SocketChannel sc = SocketChannel.open();
-        SelectionKey ret = selectorController.register(sc, SelectionKey.OP_CONNECT, ccWithSchedule, false);
+        SelectionKey selectionKey = selectorController.register(sc, SelectionKey.OP_CONNECT, scheduledAttachment, false);
         try {
             if (sc.connect(sa)) {
                 // we connected UTRA fast connection
-                finishConnecting(ret);
-                selectorController.cancelSelectionKey(ret);
-                ccWithSchedule.getCallback().accept(sc);
+                finishConnecting(selectionKey);
+                selectorController.cancelSelectionKey(selectionKey);
+                scheduledAttachment.attachment().accept(sc);
             } else
-                ccWithSchedule.setAppointment(taskSchedulerProcessor.queue(TimeInMillis.SECOND.mult(timeoutInSec), new NIOChannelMonitor(ret, selectorController)));
+                scheduledAttachment.setAppointment(taskSchedulerProcessor.queue(TimeInMillis.SECOND.mult(timeoutInSec), new NIOChannelMonitor(selectionKey, selectorController)));
         } catch (IOException e) {
-            selectorController.cancelSelectionKey(ret);
-            ccWithSchedule.getCallback().exception(e);
+            selectorController.cancelSelectionKey(selectionKey);
+            scheduledAttachment.attachment().exception(e);
             throw e;
         }
         return sc;
@@ -597,37 +597,41 @@ public class NIOSocket
                                     key.interestOps(0);
                                     // finish connection
                                     // this a bit dicey
+                                    //*no need to create new thread  since it takes micro-seconds at this stage*
 
-                                    if (key.attachment() instanceof CallableConsumer.WithSchedule) {
-                                        CallableConsumer.WithSchedule<SocketChannel> connectData = (CallableConsumer.WithSchedule<SocketChannel>) key.attachment();
+
+                                    if (key.attachment() instanceof ScheduledAttachment &&
+                                            ((ScheduledAttachment)key.attachment()).attachment() instanceof ConsumerCallback) {
+
+                                        ConsumerCallback<SocketChannel> connectData = (ConsumerCallback<SocketChannel>) ((ScheduledAttachment)key.attachment()).attachment();
                                         // the code read and write processing is done by outsiders
                                         // the read/write or waiting for connection is done my outsiders
                                         // selection key is to be canceled
                                         SocketChannel sc = ((SocketChannel) key.channel());
 
                                         try {
-                                            //*no need to create new thread  since it takes micro-seconds at this stage*
                                             finishConnecting(key);
                                             selectorController.cancelSelectionKey(key);
                                             //**************************************************************************
 
                                             if (executor == null)
-                                                executor.execute(() -> connectData.getCallback().accept(sc));
+                                                executor.execute(() -> connectData.accept(sc));
                                             else
-                                                connectData.getCallback().accept(sc);
+                                                connectData.accept(sc);
 
                                         } catch (Exception e) {
+                                            IOUtil.close(key.channel());
                                             if (executor == null)
-                                                executor.execute(() -> connectData.getCallback().exception(e));
+                                                executor.execute(() -> connectData.exception(e));
                                             else
-                                                connectData.getCallback().exception(e);
+                                                connectData.exception(e);
                                         }
                                         continue; // is crucial here
                                     }
 
-
-                                    // finish connection first;
                                     finishConnecting(key);
+
+                                    // be revisited
                                     ProtocolFactory<?> protocolFactory = (ProtocolFactory<?>) key.attachment();
                                     ProtocolHandler ph = protocolFactory.newInstance();
 
@@ -637,6 +641,7 @@ public class NIOSocket
 
                                     // a channel is ready for reading
                                     int keyOPs = key.interestOps();
+                                    key.interestOps(0);
                                     if (executor != null) {
                                         executor.execute(() ->
                                         {
@@ -715,7 +720,7 @@ public class NIOSocket
             if (key.isValid()) {
 
                 finishConnecting((SocketChannel) key.channel(),
-                        key.attachment() instanceof CallableConsumer.WithSchedule ? ((CallableConsumer.WithSchedule<?>) key.attachment()).getAppointment() : null);
+                        key.attachment() instanceof ScheduledAttachment ? ((ScheduledAttachment) key.attachment()).getAppointment() : null);
                 return;
             }
 

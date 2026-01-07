@@ -61,7 +61,14 @@ public class NIOSocketHandler
     @Override
     public void accept(SelectionKey key) {
         try {
-
+            if (sessionCallback.getConfig() == null) {
+                sessionCallback.setConfig(new ChannelOutputStream(this, phSChannel, Const.SizeInBytes.K.mult(1)));
+                // need to notify session callback in case waiting for connection
+                synchronized (sessionCallback)
+                {
+                    sessionCallback.notify();
+                }
+            }
 
             int read;
             do {
@@ -93,8 +100,7 @@ public class NIOSocketHandler
         getSelectorController().register(phSChannel, SelectionKey.OP_READ, this, isBlocking);
         sessionCallback.setProtocolHandler(this);
         sessionCallback.setRemoteAddress(((InetSocketAddress) phSChannel.getRemoteAddress()).getAddress());
-        if (sessionCallback.getConfig() == null)
-            sessionCallback.setConfig(new ChannelOutputStream(this, phSChannel, Const.SizeInBytes.K.mult(1)));
+
     }
 
 

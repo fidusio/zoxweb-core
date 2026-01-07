@@ -2,13 +2,14 @@ package org.zoxweb.server.net;
 
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.logging.LogWrapper;
-import org.zoxweb.shared.task.CallableConsumer;
 import org.zoxweb.shared.task.ConsumerCallback;
+import org.zoxweb.shared.task.ScheduledAttachment;
 import org.zoxweb.shared.util.Const;
 
 import java.io.IOException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
+
 
 public class NIOChannelMonitor
         implements Runnable {
@@ -26,7 +27,7 @@ public class NIOChannelMonitor
     @Override
     public void run() {
         SocketChannel sc = (SocketChannel) sk.channel();
-        Object attachement = sk.attachment();
+//        Object attachement = sk.attachment();
         try {
             if (!sc.isConnected() || sk.isConnectable()) {
                 IOUtil.close(sc);
@@ -36,11 +37,9 @@ public class NIOChannelMonitor
                 if (logger.isEnabled())
                     logger.getLogger().info("Connection timed out: " + sk + " it took " + Const.TimeInMillis.toString(System.currentTimeMillis() - timestamp));
 
-                if(attachement instanceof CallableConsumer.WithSchedule)
-                {
-                    ConsumerCallback<SocketChannel> callback = ((CallableConsumer.WithSchedule<SocketChannel>) attachement).getCallback();
-                    if (callback != null)
-                    {
+                if (sk.attachment() instanceof ScheduledAttachment && ((ScheduledAttachment<?>) sk.attachment()).attachment() instanceof ConsumerCallback) {
+                    ConsumerCallback<SocketChannel> callback = (ConsumerCallback<SocketChannel>) ((ScheduledAttachment<?>) sk.attachment()).attachment();
+                    if (callback != null) {
                         callback.exception(new IOException("Connection timed out"));
                     }
                 }
@@ -48,7 +47,6 @@ public class NIOChannelMonitor
         } catch (Exception e) {
             IOUtil.close(sc);
         }
-
 
 
     }
