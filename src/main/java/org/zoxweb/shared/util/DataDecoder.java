@@ -17,10 +17,15 @@ package org.zoxweb.shared.util;
 
 /**
  * Define a value getter interface based on input and output type
- * @param <DI>
- * @param <DO>
+ * @param <DI> input data type
+ * @param <DO> output data type
  */
 public interface DataDecoder<DI, DO>
         extends Codec {
+    /**
+     * Decode the input and covert it to an output object
+     * @param input object
+     * @return object of DO class type
+     */
     DO decode(DI input);
 }

@@ -1,3 +1,18 @@
+/*
+ * Copyright (c) 2012-2026 XlogistX.IO Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package org.zoxweb.server.http;
 
 import org.zoxweb.server.io.UByteArrayInputStream;
@@ -8,34 +23,116 @@ import org.zoxweb.shared.http.*;
 import org.zoxweb.shared.protocol.Delimiter;
 import org.zoxweb.shared.protocol.ProtoMarker;
 import org.zoxweb.shared.util.*;
-import org.zoxweb.shared.util.SharedBase64.Base64Type;
 
 import java.io.InputStream;
 
-
+/**
+ * A collection of {@link DataDecoder} implementations for parsing various HTTP content formats.
+ * <p>
+ * This utility class provides decoders for:
+ * </p>
+ * <ul>
+ *     <li><b>JSON decoding:</b> Convert bytes or HTTP responses to {@link NVGenericMap} or {@link NVEntity}</li>
+ *     <li><b>URL-encoded forms:</b> Parse {@code application/x-www-form-urlencoded} content</li>
+ *     <li><b>Chunked transfer:</b> Process HTTP chunked transfer encoding</li>
+ *     <li><b>Multipart forms:</b> Parse {@code multipart/form-data} for file uploads</li>
+ *     <li><b>Streaming multipart:</b> Handle chunked multipart data for large file uploads</li>
+ * </ul>
+ *
+ * <h3>Decoder Types</h3>
+ * <table border="1">
+ *     <tr><th>Decoder</th><th>Input</th><th>Output</th><th>Description</th></tr>
+ *     <tr><td>{@link #BytesToNVGM}</td><td>byte[]</td><td>NVGenericMap</td><td>JSON bytes to map</td></tr>
+ *     <tr><td>{@link #HRDToNVGM}</td><td>HTTPResponseData</td><td>NVGenericMap</td><td>HTTP response to map</td></tr>
+ *     <tr><td>{@link #HRDToNVE}</td><td>HTTPResponseData</td><td>NVEntity</td><td>HTTP response to entity</td></tr>
+ *     <tr><td>{@link #WWW_URL_ENC}</td><td>HTTPRawMessage</td><td>HTTPMessageConfigInterface</td><td>URL-encoded form</td></tr>
+ *     <tr><td>{@link #TRANSFER_CHUNKED}</td><td>HTTPRawMessage</td><td>HTTPRawMessage</td><td>Chunked transfer</td></tr>
+ *     <tr><td>{@link #MULTIPART_FORM_DATA}</td><td>HTTPRawMessage</td><td>HTTPMessageConfigInterface</td><td>Multipart form</td></tr>
+ *     <tr><td>{@link #MULTIPART_FORM_DATA_CHUNKED}</td><td>HTTPRawMessage</td><td>HTTPMessageConfigInterface</td><td>Streaming multipart</td></tr>
+ * </table>
+ *
+ * <h3>Usage Example</h3>
+ * <pre>{@code
+ * // Decode JSON response to NVGenericMap
+ * HTTPResponseData response = httpCall.execute();
+ * NVGenericMap result = HTTPCodecs.HRDToNVGM.decode(response);
+ *
+ * // Process chunked transfer encoding
+ * HTTPRawMessage rawMessage = ...;
+ * HTTPCodecs.TRANSFER_CHUNKED.decode(rawMessage);
+ * }</pre>
+ *
+ * @see DataDecoder
+ * @see HTTPRawMessage
+ * @see HTTPResponseData
+ * @see NVGenericMap
+ */
 public final class HTTPCodecs {
+
+    /** Logger for debugging codec operations */
     public final static LogWrapper log = new LogWrapper(HTTPCodecs.class).setEnabled(false);
 
-
+    /**
+     * Private constructor to prevent instantiation of this utility class.
+     */
     private HTTPCodecs() {
     }
 
-    public static final DataDecoder<byte[], NVGenericMap> BytesToNVGM = (input) -> GSONUtil.fromJSONGenericMap(SharedStringUtil.toString(input), null, Base64Type.DEFAULT);
+    /**
+     * Decoder that converts a byte array containing JSON to an {@link NVGenericMap}.
+     * <p>
+     * Uses Base64 DEFAULT type for any embedded binary data.
+     * </p>
+     */
+    public static final DataDecoder<byte[], NVGenericMap> BytesToNVGM = (input) -> GSONUtil.fromJSONDefault(input, NVGenericMap.class);
 
+    /**
+     * Decoder that converts {@link HTTPResponseData} JSON content to an {@link NVGenericMap}.
+     */
     public static final DataDecoder<HTTPResponseData, NVGenericMap> HRDToNVGM = (input) -> GSONUtil.fromJSONDefault(input.getDataAsString(), NVGenericMap.class);
 
-
+    /**
+     * Decoder that converts {@link HTTPResponseData} JSON content to an {@link NVGenericMap}
+     * with pretty-print and array support enabled.
+     */
     public static final DataDecoder<HTTPResponseData, NVGenericMap> NVGMDecoderPAS = (input) -> GSONUtil.fromJSONDefault(input.getDataAsString(), NVGenericMap.class, true);
 
+    /**
+     * Decoder that converts {@link HTTPResponseData} JSON array content to an {@link NVGenericMapList}.
+     */
     public static final DataDecoder<HTTPResponseData, NVGenericMapList> HRDToNVGMList = (input) -> GSONUtil.fromJSONDefault(input.getDataAsString(), NVGenericMapList.class);
 
-
+    /**
+     * Decoder that converts a byte array containing JSON to an {@link NVEntity}.
+     * <p>
+     * Uses {@link GSONUtil#fromJSON(byte[])} for deserialization.
+     * </p>
+     */
     public static final DataDecoder<byte[], NVEntity> BytesToNVE = GSONUtil::fromJSON;
 
-
+    /**
+     * Decoder that converts {@link HTTPResponseData} JSON content to an {@link NVEntity}.
+     */
     public static final DataDecoder<HTTPResponseData, NVEntity> HRDToNVE = (input) -> GSONUtil.fromJSON(input.getData());
 
-
+    /**
+     * Decoder for {@code application/x-www-form-urlencoded} content.
+     * <p>
+     * Parses URL-encoded form data from HTTP requests:
+     * </p>
+     * <ul>
+     *     <li><b>GET requests:</b> Extracts parameters from the query string in the URI</li>
+     *     <li><b>POST/PUT requests:</b> Extracts parameters from the request body when
+     *         Content-Type is {@code application/x-www-form-urlencoded}</li>
+     * </ul>
+     *
+     * <h4>URL-Encoded Format</h4>
+     * <pre>
+     * name1=value1&amp;name2=value2&amp;name3=encoded%20value
+     * </pre>
+     *
+     * @return the {@link HTTPMessageConfigInterface} with parsed parameters, or null if not applicable
+     */
     public static final DataDecoder<HTTPRawMessage, HTTPMessageConfigInterface> WWW_URL_ENC = (hrm) ->
     {
         HTTPMessageConfigInterface hmci = hrm.getHTTPMessageConfig();
@@ -55,7 +152,39 @@ public final class HTTPCodecs {
         return null;
     };
 
-
+    /**
+     * Decoder for HTTP chunked transfer encoding (Transfer-Encoding: chunked).
+     * <p>
+     * Processes the chunked transfer encoding format where the message body is sent in
+     * a series of chunks, each preceded by its size in hexadecimal. This decoder
+     * reassembles the chunks into a contiguous data stream.
+     * </p>
+     *
+     * <h4>Chunked Format</h4>
+     * <pre>
+     * [hex-size]\r\n
+     * [binary-data]\r\n
+     * [hex-size]\r\n
+     * [binary-data]\r\n
+     * 0\r\n
+     * \r\n
+     * </pre>
+     *
+     * <h4>Processing Steps</h4>
+     * <ol>
+     *     <li>Read chunk size in hexadecimal followed by CRLF</li>
+     *     <li>Read chunk data of the specified size followed by CRLF</li>
+     *     <li>Remove chunk metadata, keeping only the data</li>
+     *     <li>Repeat until a zero-size chunk (0\r\n) is encountered</li>
+     * </ol>
+     *
+     * <p>
+     * The decoder modifies the {@link HTTPRawMessage} data stream in-place,
+     * removing chunk size markers and preserving only the actual content.
+     * </p>
+     *
+     * @return the same {@link HTTPRawMessage} with reassembled content
+     */
     public static final DataDecoder<HTTPRawMessage, HTTPRawMessage> TRANSFER_CHUNKED = (hrm) ->
     {
         // the headers are already parsed
@@ -127,7 +256,44 @@ public final class HTTPCodecs {
         return hrm;
     };
 
-
+    /**
+     * Decoder for {@code multipart/form-data} content (file uploads).
+     * <p>
+     * Parses multipart form data as defined in RFC 2046, commonly used for HTML form
+     * file uploads. Each part is separated by a boundary string and can contain
+     * either form fields or file content.
+     * </p>
+     *
+     * <h4>Multipart Format</h4>
+     * <pre>
+     * --boundary\r\n
+     * Content-Disposition: form-data; name="field1"\r\n
+     * \r\n
+     * field1value\r\n
+     * --boundary\r\n
+     * Content-Disposition: form-data; name="file"; filename="example.txt"\r\n
+     * Content-Type: text/plain\r\n
+     * \r\n
+     * [file content]\r\n
+     * --boundary--\r\n
+     * </pre>
+     *
+     * <h4>Extracted Data</h4>
+     * <ul>
+     *     <li><b>Form fields:</b> Added as {@link NVPair} to parameters</li>
+     *     <li><b>JSON fields:</b> Parsed and added as {@link NVGenericMap}</li>
+     *     <li><b>Files:</b> Added as {@link NamedValue}&lt;InputStream&gt; with metadata
+     *         (filename, content-type, length) in properties</li>
+     * </ul>
+     *
+     * <p>
+     * <b>Note:</b> This decoder requires the complete message. For streaming/chunked
+     * multipart processing, use {@link #MULTIPART_FORM_DATA_CHUNKED}.
+     * </p>
+     *
+     * @return the {@link HTTPMessageConfigInterface} with parsed parameters and files, or null if not applicable
+     * @see #MULTIPART_FORM_DATA_CHUNKED
+     */
     public static final DataDecoder<HTTPRawMessage, HTTPMessageConfigInterface> MULTIPART_FORM_DATA = (hrm) ->
     {
         HTTPMessageConfigInterface hmci = hrm.getHTTPMessageConfig();
@@ -286,7 +452,42 @@ public final class HTTPCodecs {
         return null;
     };
 
-
+    /**
+     * Decoder for streaming/chunked {@code multipart/form-data} content.
+     * <p>
+     * Handles large file uploads by processing multipart data incrementally as it arrives,
+     * rather than waiting for the complete message. This is essential for handling large
+     * files that shouldn't be fully buffered in memory.
+     * </p>
+     *
+     * <h4>Key Features</h4>
+     * <ul>
+     *     <li><b>Streaming processing:</b> Processes data as it arrives without full buffering</li>
+     *     <li><b>Partial file chunks:</b> Returns file data in chunks via {@link InputStream}</li>
+     *     <li><b>Memory efficient:</b> Uses a safety buffer to prevent boundary misalignment</li>
+     *     <li><b>Chunk tracking:</b> Marks chunks with {@code LAST_CHUNK} property when complete</li>
+     * </ul>
+     *
+     * <h4>Processing Flow</h4>
+     * <ol>
+     *     <li>Extract boundary from Content-Type header</li>
+     *     <li>Build boundary markers (start, content-end, final)</li>
+     *     <li>Process each multipart section as data arrives</li>
+     *     <li>For files: return partial {@link InputStream}s with close callbacks for buffer management</li>
+     *     <li>For fields: parse complete value and add to parameters</li>
+     * </ol>
+     *
+     * <h4>File Chunk Properties</h4>
+     * <ul>
+     *     <li>{@code filename} - Original filename</li>
+     *     <li>{@code Content-Type} - MIME type of the file</li>
+     *     <li>{@code Content-Length} - Total file size (if provided)</li>
+     *     <li>{@code LAST_CHUNK} - Boolean indicating if this is the final chunk</li>
+     * </ul>
+     *
+     * @return the {@link HTTPMessageConfigInterface} with incrementally parsed data
+     * @see #MULTIPART_FORM_DATA
+     */
     public static final DataDecoder<HTTPRawMessage, HTTPMessageConfigInterface> MULTIPART_FORM_DATA_CHUNKED = (hrm) ->
     {
 
@@ -508,10 +709,27 @@ public final class HTTPCodecs {
     };
 
 
+    /**
+     * Creates a debug string representation of the HTTPRawMessage state.
+     *
+     * @param hrm the raw message to describe
+     * @return a string with DataMark, LastProcessedDataIndex, and buffer size
+     */
     private static String toString(HTTPRawMessage hrm) {
         return "++DataMark: " + hrm.getDataMark() + " LastProcessedDataIndex: " + hrm.getLastProcessedDataIndex() + " UBAOS Size: " + hrm.getDataStream().size() + " --";
     }
 
+    /**
+     * Finds the index where the current multipart content section ends.
+     * <p>
+     * Searches for either the content boundary marker (between parts) or the
+     * final boundary marker (end of multipart message).
+     * </p>
+     *
+     * @param hrm the raw message being processed
+     * @param startIndex the index to start searching from
+     * @return the index of the content end marker, or -1 if not found
+     */
     private static int indexEndOfContent(HTTPRawMessage hrm, int startIndex) {
         if (startIndex > hrm.getDataMark())
             return -1;
@@ -533,6 +751,28 @@ public final class HTTPCodecs {
 
     }
 
+    /**
+     * Parses the headers of a complete multipart section.
+     * <p>
+     * Locates the boundary start marker and parses all headers up to the
+     * header/content separator (CRLFCRLF). Returns structured header data
+     * including content disposition, content type, and content indices.
+     * </p>
+     *
+     * <h4>Returned Properties</h4>
+     * <ul>
+     *     <li>{@code Content-Disposition} - Form field name and optional filename</li>
+     *     <li>{@code Content-Type} - MIME type of the part content</li>
+     *     <li>{@code Content-Length} - Size of content (if provided)</li>
+     *     <li>{@code SUB_CONTENT_START_INDEX} - Index where content data begins</li>
+     *     <li>{@code SUB_CONTENT_END_INDEX} - Index where content data ends (-1 if incomplete)</li>
+     *     <li>{@code IS_FILE} - Boolean indicating if this part is a file upload</li>
+     * </ul>
+     *
+     * @param hrm the raw message being processed
+     * @param startIndex the index to start searching from
+     * @return an {@link NVGenericMap} with parsed headers and metadata, or null if incomplete
+     */
     private static NVGenericMap parseCompleteMultiPartHeaders(HTTPRawMessage hrm, int startIndex) {
 
         // 1 we need to find the BOUNDARY_START
