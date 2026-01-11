@@ -32,6 +32,7 @@ import java.nio.channels.ByteChannel;
  * </p>
  * <p>
  * Usage example:
+ * </p>
  * <pre>{@code
  * SocketChannel channel = SocketChannel.open(new InetSocketAddress("localhost", 8080));
  * try (ChannelOutputStream out = new ChannelOutputStream(channel)) {
@@ -39,7 +40,6 @@ import java.nio.channels.ByteChannel;
  *     out.flush();
  * }
  * }</pre>
- * </p>
  *
  * @see BaseChannelOutputStream
  * @see org.zoxweb.server.net.ssl.SSLChannelOutputStream

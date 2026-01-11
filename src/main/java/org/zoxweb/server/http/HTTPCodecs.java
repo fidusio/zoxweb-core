@@ -39,8 +39,9 @@ import java.io.InputStream;
  *     <li><b>Streaming multipart:</b> Handle chunked multipart data for large file uploads</li>
  * </ul>
  *
- * <h3>Decoder Types</h3>
+ * <h2>Decoder Types</h2>
  * <table border="1">
+ *     <caption>Available HTTP Decoders</caption>
  *     <tr><th>Decoder</th><th>Input</th><th>Output</th><th>Description</th></tr>
  *     <tr><td>{@link #BytesToNVGM}</td><td>byte[]</td><td>NVGenericMap</td><td>JSON bytes to map</td></tr>
  *     <tr><td>{@link #HRDToNVGM}</td><td>HTTPResponseData</td><td>NVGenericMap</td><td>HTTP response to map</td></tr>
@@ -51,7 +52,7 @@ import java.io.InputStream;
  *     <tr><td>{@link #MULTIPART_FORM_DATA_CHUNKED}</td><td>HTTPRawMessage</td><td>HTTPMessageConfigInterface</td><td>Streaming multipart</td></tr>
  * </table>
  *
- * <h3>Usage Example</h3>
+ * <h2>Usage Example</h2>
  * <pre>{@code
  * // Decode JSON response to NVGenericMap
  * HTTPResponseData response = httpCall.execute();
@@ -131,7 +132,7 @@ public final class HTTPCodecs {
      * name1=value1&amp;name2=value2&amp;name3=encoded%20value
      * </pre>
      *
-     * @return the {@link HTTPMessageConfigInterface} with parsed parameters, or null if not applicable
+     * <p>Returns the {@link HTTPMessageConfigInterface} with parsed parameters, or null if not applicable.</p>
      */
     public static final DataDecoder<HTTPRawMessage, HTTPMessageConfigInterface> WWW_URL_ENC = (hrm) ->
     {
@@ -183,7 +184,7 @@ public final class HTTPCodecs {
      * removing chunk size markers and preserving only the actual content.
      * </p>
      *
-     * @return the same {@link HTTPRawMessage} with reassembled content
+     * <p>Returns the same {@link HTTPRawMessage} with reassembled content.</p>
      */
     public static final DataDecoder<HTTPRawMessage, HTTPRawMessage> TRANSFER_CHUNKED = (hrm) ->
     {
@@ -291,7 +292,7 @@ public final class HTTPCodecs {
      * multipart processing, use {@link #MULTIPART_FORM_DATA_CHUNKED}.
      * </p>
      *
-     * @return the {@link HTTPMessageConfigInterface} with parsed parameters and files, or null if not applicable
+     * <p>Returns the {@link HTTPMessageConfigInterface} with parsed parameters and files, or null if not applicable.</p>
      * @see #MULTIPART_FORM_DATA_CHUNKED
      */
     public static final DataDecoder<HTTPRawMessage, HTTPMessageConfigInterface> MULTIPART_FORM_DATA = (hrm) ->
@@ -485,7 +486,7 @@ public final class HTTPCodecs {
      *     <li>{@code LAST_CHUNK} - Boolean indicating if this is the final chunk</li>
      * </ul>
      *
-     * @return the {@link HTTPMessageConfigInterface} with incrementally parsed data
+     * <p>Returns the {@link HTTPMessageConfigInterface} with incrementally parsed data.</p>
      * @see #MULTIPART_FORM_DATA
      */
     public static final DataDecoder<HTTPRawMessage, HTTPMessageConfigInterface> MULTIPART_FORM_DATA_CHUNKED = (hrm) ->

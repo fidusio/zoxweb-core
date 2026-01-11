@@ -39,6 +39,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * </p>
  * <p>
  * Key features:
+ * </p>
  * <ul>
  *     <li>Extends {@link OutputStream} for compatibility with stream-based APIs</li>
  *     <li>Uses direct {@link ByteBuffer} for efficient I/O operations</li>
@@ -46,7 +47,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *     <li>Integrates with {@link ProtocolHandler} for connection management</li>
  *     <li>Implements {@link CloseableType} for proper resource management</li>
  * </ul>
- * </p>
  *
  * @see ChannelOutputStream
  * @see org.zoxweb.server.net.ssl.SSLChannelOutputStream

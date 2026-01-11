@@ -29,7 +29,7 @@ import java.io.InputStream;
  * Extends {@link AutoCloseable} to support try-with-resources statements.
  * </p>
  *
- * <h3>Usage Example</h3>
+ * <h2>Usage Example</h2>
  * <pre>{@code
  * try (InputStreamInt input = getInputStream()) {
  *     byte[] buffer = new byte[1024];

@@ -33,7 +33,7 @@ import org.zoxweb.shared.util.SUS;
 public enum HTTPEncoder
         implements GetNameValue<String>, ValueFilter<GetNameValue<String>, String> {
 
-    /** URL query string encoding format: name=value&name2=value2 */
+    /** URL query string encoding format: name=value&amp;name2=value2 */
     URL_ENCODED("=", "&") {
         @Override
         public String validate(GetNameValue<String> nvp) throws NullPointerException, IllegalArgumentException {

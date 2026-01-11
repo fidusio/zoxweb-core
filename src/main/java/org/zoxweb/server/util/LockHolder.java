@@ -28,14 +28,14 @@ import java.util.concurrent.locks.ReentrantLock;
  * based on runtime conditions.
  * </p>
  *
- * <h3>Use Cases</h3>
+ * <h2>Use Cases</h2>
  * <ul>
  *     <li>Optional thread-safety: Enable/disable locking based on configuration</li>
  *     <li>Performance optimization: Skip locking in single-threaded contexts</li>
  *     <li>Conditional synchronization: Lock only when certain conditions are met</li>
  * </ul>
  *
- * <h3>Usage Example</h3>
+ * <h2>Usage Example</h2>
  * <pre>{@code
  * LockHolder lockHolder = new LockHolder();
  * boolean needsLocking = isMultiThreaded();
@@ -49,7 +49,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * }
  * }</pre>
  *
- * <h3>Thread Safety</h3>
+ * <h2>Thread Safety</h2>
  * <p>
  * This class is thread-safe when the underlying {@link Lock} is thread-safe
  * (which is the case for the default {@link ReentrantLock}).

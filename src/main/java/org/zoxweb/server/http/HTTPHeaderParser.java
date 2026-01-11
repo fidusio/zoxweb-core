@@ -31,7 +31,7 @@ import java.util.regex.Pattern;
  * generic header parsing with comma-separated values and semicolon-separated parameters.
  * </p>
  *
- * <h3>Header Format Notation</h3>
+ * <h2>Header Format Notation</h2>
  * <pre>
  * Header-Name: value1; param1=p1value, value2; param2="quoted value", value3
  * |-- name --|  |-V0-|  |-- PNV0-1 --|  |-V1-|  |---- PNV1-1 -----|  |-V2-|
@@ -41,7 +41,7 @@ import java.util.regex.Pattern;
  *   PNV = Parameter name-value pair for a value segment
  * </pre>
  *
- * <h3>Supported Header Types</h3>
+ * <h2>Supported Header Types</h2>
  * <ul>
  *     <li><b>Content-Length:</b> Parsed as a {@code Long} value</li>
  *     <li><b>Cookie:</b> Parsed into individual cookie name-value pairs (semicolon-separated)</li>
@@ -50,7 +50,7 @@ import java.util.regex.Pattern;
  *     <li><b>Generic:</b> Comma-separated values with optional semicolon-separated parameters</li>
  * </ul>
  *
- * <h3>Usage Examples</h3>
+ * <h2>Usage Examples</h2>
  * <pre>{@code
  * // Parse a Content-Type header
  * NamedValue<?> result = HTTPHeaderParser.parseHeader("Content-Type", "text/html; charset=utf-8");
@@ -72,7 +72,7 @@ import java.util.regex.Pattern;
  */
 public class HTTPHeaderParser {
 
-    /**
+    /**+
      * Private constructor to prevent instantiation of this utility class.
      */
     private HTTPHeaderParser() {
@@ -176,11 +176,13 @@ public class HTTPHeaderParser {
      * <h4>Return Structure</h4>
      * <p>
      * For single-value headers, returns a {@link NamedValue} where:
+     * </p>
      * <ul>
      *     <li>{@code getName()} returns the primary value or header name</li>
      *     <li>{@code getValue()} returns the raw value</li>
      *     <li>{@code getProperties()} contains any parsed parameters</li>
      * </ul>
+     * <p>
      * For multi-value headers (comma-separated), returns a {@link NamedValue} containing
      * an {@link NVGenericMap} with all parsed value segments.
      * </p>

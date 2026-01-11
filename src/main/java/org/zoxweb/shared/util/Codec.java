@@ -22,7 +22,7 @@ package org.zoxweb.shared.util;
  * enabling type-safe handling of encoders and decoders through a common hierarchy.
  * </p>
  *
- * <h3>Related Interfaces</h3>
+ * <h2>Related Interfaces</h2>
  * <ul>
  *     <li>{@link DataEncoder} - For encoding/transforming data from one type to another</li>
  *     <li>{@link DataDecoder} - For decoding/parsing data from one type to another</li>

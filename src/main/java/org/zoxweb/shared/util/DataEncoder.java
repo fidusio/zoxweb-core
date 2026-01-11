@@ -23,7 +23,7 @@ package org.zoxweb.shared.util;
  * a target format.
  * </p>
  *
- * <h3>Usage Examples</h3>
+ * <h2>Usage Examples</h2>
  * <pre>{@code
  * // Using built-in string encoders
  * String lower = DataEncoder.StringLower.encode("HELLO");  // "hello"
@@ -38,7 +38,7 @@ package org.zoxweb.shared.util;
  * String json = jsonEncoder.encode(map);
  * }</pre>
  *
- * <h3>Built-in Encoders</h3>
+ * <h2>Built-in Encoders</h2>
  * <ul>
  *     <li>{@link #StringLower} - Converts strings to lowercase</li>
  *     <li>{@link #StringUpper} - Converts strings to uppercase</li>

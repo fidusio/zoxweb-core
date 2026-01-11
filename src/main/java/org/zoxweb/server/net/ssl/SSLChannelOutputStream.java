@@ -38,13 +38,13 @@ import static javax.net.ssl.SSLEngineResult.HandshakeStatus.NOT_HANDSHAKING;
  * </p>
  * <p>
  * Key features:
+ * </p>
  * <ul>
  *     <li>Automatic encryption of all outgoing data via SSLEngine</li>
  *     <li>Handles SSL handshake state verification before writing</li>
  *     <li>Supports all SSL/TLS protocols configured in the SSLEngine</li>
  *     <li>Thread-safe write operations</li>
  * </ul>
- * </p>
  * <p>
  * <b>Note:</b> Data can only be written after the SSL handshake is complete.
  * Attempting to write during handshaking will result in an {@link SSLException}.
