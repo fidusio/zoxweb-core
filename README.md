@@ -1,6 +1,6 @@
 # zoxweb-core :: Enterprise Java Utility Library
 
-[![Maven Central](https://img.shields.io/badge/Maven%20Central-2.3.8-blue)](https://mvnrepository.com/artifact/org.zoxweb/zoxweb-core)
+[![Maven Central](https://img.shields.io/badge/Maven%20Central-2.3.9-blue)](https://mvnrepository.com/artifact/org.zoxweb/zoxweb-core)
 
 ## Overview
 
