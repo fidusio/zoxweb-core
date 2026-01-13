@@ -174,7 +174,6 @@ public final class HTTPCallTool {
 
 
             RateCounter rc = new RateCounter("OverAll");
-            ;
             rc.start();
             for (int i = 0; i < repeat; i++) {
 
@@ -192,17 +191,12 @@ public final class HTTPCallTool {
 
 
             log.getLogger().info("ENDPOINT OkHTTPCall stat: " + Const.TimeInMillis.toString(rc.lastDeltaInMillis()) + " to send: " + rc.getCounts() + " failed: " + failCounter +
-                    " rate: " + +rc.rate(Const.TimeInMillis.SECOND.MILLIS) + " per/second" + " average call duration: " + rc.average() + " millis");
+                    " rate: " + rc.rate(Const.TimeInMillis.SECOND.MILLIS) + " per/second" + " average call duration: " + rc.average() + " millis");
 
             rc.reset().start();
             successCounter.set(0);
             failCounter.set(0);
-//            for(int i = 0; i < repeat; i++)
-//            {
-//
-//                for(HTTPAPIEndPoint<Void, byte[]>   endPoint : endpoints)
-//                    endPoint.asyncCall(callback);
-//            }
+
             for (int i = 0; i < repeat; i++) {
                 for (HTTPMessageConfigInterface request : hmcis) {
                     if (singleThread) {
@@ -235,7 +229,7 @@ public final class HTTPCallTool {
 
 
             log.getLogger().info("RAW OkHTTPCall stat: " + Const.TimeInMillis.toString(rc.lastDeltaInMillis()) + " to send: " + rc.getCounts() + " failed: " + failCounter +
-                    " rate: " + +rc.rate(Const.TimeInMillis.SECOND.MILLIS) + " per/second" + " average call duration: " + rc.average() + " millis");
+                    " rate: " + rc.rate(Const.TimeInMillis.SECOND.MILLIS) + " per/second" + " average call duration: " + rc.average() + " millis");
 
 
 //            log.getLogger().info(GSONUtil.toJSONDefault(TaskUtil.info(), true));

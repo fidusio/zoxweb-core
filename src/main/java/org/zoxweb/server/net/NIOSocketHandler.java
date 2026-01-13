@@ -106,11 +106,12 @@ public class NIOSocketHandler
         }
     }
 
+    @Override
     public void setupConnection(AbstractSelectableChannel asc, boolean isBlocking) throws IOException {
         phSChannel = (SocketChannel) asc;
         getSelectorController().register(phSChannel, SelectionKey.OP_READ, this, isBlocking);
         sessionCallback.setProtocolHandler(this);
-        sessionCallback.setRemoteAddress(((InetSocketAddress) phSChannel.getRemoteAddress()));
+        sessionCallback.setRemoteAddress(phSChannel.getRemoteAddress());
 
     }
 

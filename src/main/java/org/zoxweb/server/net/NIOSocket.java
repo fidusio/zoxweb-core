@@ -265,17 +265,14 @@ public class NIOSocket
      */
     public SelectionKey addClientSocket(InetSocketAddress sa, ConsumerCallback<SocketChannel> cc, int timeoutInSec) throws IOException {
 
-        ScheduledAttachment<ConsumerCallback<SocketChannel>> scheduledAttachment = new ScheduledAttachment<ConsumerCallback<SocketChannel>>();
+        ScheduledAttachment<ConsumerCallback<SocketChannel>> scheduledAttachment = new ScheduledAttachment<>();
         scheduledAttachment.attach(cc);
         SocketChannel sc = SocketChannel.open();
         SelectionKey selectionKey = selectorController.register(sc, SelectionKey.OP_CONNECT, scheduledAttachment, false);
         try {
             if (sc.connect(sa)) {
                 // we connected UTRA fast connection
-//                finishConnecting(selectionKey);
-//                selectorController.cancelSelectionKey(selectionKey);
                 clientConnect(selectionKey);
-//                scheduledAttachment.attachment().accept(sc);
             } else
                 scheduledAttachment.setAppointment(taskSchedulerProcessor.queue(TimeInMillis.SECOND.mult(timeoutInSec), new NIOChannelMonitor(selectionKey, selectorController)));
         } catch (IOException e) {
@@ -435,31 +432,17 @@ public class NIOSocket
                                     ProtocolHandler currentPP = (ProtocolHandler) key.attachment();
                                     currentPP.updateUsage();
 
-                                    if (currentPP != null) {
-                                        // very,very,very crucial setup prior to processing
-                                        // we are disabling the key operations by the selector
-                                        // for the current selection key
-                                        int keyOPs = key.interestOps();
-                                        key.interestOps(0);
 
-                                        // a channel is ready for reading
-                                        if (executor != null) {
-                                            executor.execute(() ->
-                                            {
-                                                try {
-                                                    currentPP.accept(key);
-                                                } catch (Exception e) {
-                                                    e.printStackTrace();
-                                                }
-                                                // very crucial step
-                                                if (key.isValid()) {
-                                                    // restoring selection ops for the selection key
-                                                    key.interestOps(keyOPs);
-                                                    selectorController.wakeup();
-                                                }
-                                            });
-                                        } else {
-                                            // no executor set so the current thread must process the incoming data
+                                    // very,very,very crucial setup prior to processing
+                                    // we are disabling the key operations by the selector
+                                    // for the current selection key
+                                    int keyOPs = key.interestOps();
+                                    key.interestOps(0);
+
+                                    // a channel is ready for reading
+                                    if (executor != null) {
+                                        executor.execute(() ->
+                                        {
                                             try {
                                                 currentPP.accept(key);
                                             } catch (Exception e) {
@@ -467,12 +450,24 @@ public class NIOSocket
                                             }
                                             // very crucial step
                                             if (key.isValid()) {
+                                                // restoring selection ops for the selection key
                                                 key.interestOps(keyOPs);
                                                 selectorController.wakeup();
                                             }
+                                        });
+                                    } else {
+                                        // no executor set so the current thread must process the incoming data
+                                        try {
+                                            currentPP.accept(key);
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
+                                        }
+                                        // very crucial step
+                                        if (key.isValid()) {
+                                            key.interestOps(keyOPs);
+                                            selectorController.wakeup();
                                         }
                                     }
-
                                 } // server socket waiting for incoming connection
                                 else if (key.isAcceptable()
                                         && key.isValid()
@@ -658,7 +653,6 @@ public class NIOSocket
         } else {
             ProtocolFactory<?> protocolFactory = (ProtocolFactory<?>) ((ScheduledAttachment) key.attachment()).attachment();
             ProtocolHandler ph = protocolFactory.newInstance();
-            //SocketAddress socketAddress = null;
 
             try {
                 finishConnecting(key);
@@ -668,7 +662,6 @@ public class NIOSocket
 
                 // a channel is ready for reading
                 int keyOPs = key.interestOps();
-                if(logger.isEnabled())logger.getLogger().info("key ops " + keyOPs);
                 key.interestOps(0);
                 if (executor != null) {
                     executor.execute(() ->
@@ -738,7 +731,7 @@ public class NIOSocket
             if (channel.isOpen()) {
                 if (channel.isConnectionPending()) {
                     channel.finishConnect();
-                    if(logger.isEnabled()) logger.getLogger().info("connection finished for " + channel);
+                    if (logger.isEnabled()) logger.getLogger().info("connection finished for " + channel);
                 }
 
                 if (channel.isConnected()) {
