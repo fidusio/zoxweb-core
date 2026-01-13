@@ -33,9 +33,7 @@ import org.zoxweb.shared.util.Const.TimeInMillis;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.net.Inet4Address;
-import java.net.InetSocketAddress;
-import java.net.StandardSocketOptions;
+import java.net.*;
 import java.nio.channels.*;
 import java.nio.channels.spi.AbstractSelectableChannel;
 import java.util.Date;
@@ -188,17 +186,17 @@ public class NIOSocket
      * Initiates a non-blocking TCP client connection to the specified address.
      *
      * <p>Convenience method that uses a default 10-second connection timeout with no rate limiting.
-     * See {@link #addClientSocket(InetSocketAddress, ProtocolFactory, int, RateController)} for
+     * See {@link #addClientSocket(InetSocketAddress, ProtocolFactory, int)} for
      * detailed behavior.</p>
      *
      * @param sa  the remote server address to connect to
      * @param psf the protocol factory for creating the connection handler
      * @return the SelectionKey associated with the client socket channel
      * @throws IOException if the socket channel cannot be opened or connection initiation fails
-     * @see #addClientSocket(InetSocketAddress, ProtocolFactory, int, RateController)
+     * @see #addClientSocket(InetSocketAddress, ProtocolFactory, int)
      */
     public SelectionKey addClientSocket(InetSocketAddress sa, ProtocolFactory<?> psf) throws IOException {
-        return addClientSocket(sa, psf, 10, null);
+        return addClientSocket(sa, psf, 10);
     }
 
     /**
@@ -219,43 +217,26 @@ public class NIOSocket
      * @param psf            the protocol factory for creating the connection handler
      * @param timeoutInSec   connection timeout in seconds; the connection is closed if not
      *                       established within this time
-     * @param rateController optional rate controller for connection throttling; may be null
+
      * @return the SelectionKey associated with the client socket channel
      * @throws IOException if the socket channel cannot be opened or connection initiation fails
      */
-    public SelectionKey addClientSocket(InetSocketAddress sa, ProtocolFactory<?> psf, int timeoutInSec, RateController rateController) throws IOException {
+    public SelectionKey addClientSocket(InetSocketAddress sa, ProtocolFactory<?> psf, int timeoutInSec) throws IOException {
+        ScheduledAttachment<ProtocolFactory<?>> scheduledAttachment = new ScheduledAttachment<>();
+        scheduledAttachment.attach(psf);
         SocketChannel sc = SocketChannel.open();
 
-        SelectionKey ret = selectorController.register(sc, SelectionKey.OP_CONNECT, psf, false);
-        if (rateController != null) {
-            taskSchedulerProcessor.queue(rateController.nextWait(), new Runnable() {
-                        private InetSocketAddress isa;
-                        private long timeout;
+        SelectionKey selectionKey = selectorController.register(sc, SelectionKey.OP_CONNECT, scheduledAttachment, false);
 
-                        Runnable setInetSocketAddress(InetSocketAddress isa, long timeout) {
-                            this.isa = isa;
-                            this.timeout = timeout;
-                            return this;
-                        }
-
-                        @Override
-                        public void run() {
-                            try {
-                                sc.connect(isa);
-                                taskSchedulerProcessor.queue(timeout, new NIOChannelMonitor(ret, selectorController));
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    }.setInetSocketAddress(sa, TimeInMillis.SECOND.mult(timeoutInSec))
-
-            );
-        } else {
-            sc.connect(sa);
-            taskSchedulerProcessor.queue(TimeInMillis.SECOND.mult(timeoutInSec), new NIOChannelMonitor(ret, selectorController));
+        if (sc.connect(sa))
+            clientConnect(selectionKey);
+        else {
+            scheduledAttachment.setAppointment(taskSchedulerProcessor.queue(TimeInMillis.SECOND.mult(timeoutInSec), new NIOChannelMonitor(selectionKey, selectorController)));
+            //taskSchedulerProcessor.queue(TimeInMillis.SECOND.mult(timeoutInSec), new NIOChannelMonitor(selectionKey, selectorController));
         }
 
-        return ret;
+
+        return selectionKey;
     }
 
 
@@ -282,7 +263,7 @@ public class NIOSocket
      * @return the SocketChannel being connected (may not yet be connected when returned)
      * @throws IOException if the socket channel cannot be opened or connection initiation fails
      */
-    public SocketChannel addClientSocket(InetSocketAddress sa, int timeoutInSec, ConsumerCallback<SocketChannel> cc) throws IOException {
+    public SelectionKey addClientSocket(InetSocketAddress sa, ConsumerCallback<SocketChannel> cc, int timeoutInSec) throws IOException {
 
         ScheduledAttachment<ConsumerCallback<SocketChannel>> scheduledAttachment = new ScheduledAttachment<ConsumerCallback<SocketChannel>>();
         scheduledAttachment.attach(cc);
@@ -291,9 +272,10 @@ public class NIOSocket
         try {
             if (sc.connect(sa)) {
                 // we connected UTRA fast connection
-                finishConnecting(selectionKey);
-                selectorController.cancelSelectionKey(selectionKey);
-                scheduledAttachment.attachment().accept(sc);
+//                finishConnecting(selectionKey);
+//                selectorController.cancelSelectionKey(selectionKey);
+                clientConnect(selectionKey);
+//                scheduledAttachment.attachment().accept(sc);
             } else
                 scheduledAttachment.setAppointment(taskSchedulerProcessor.queue(TimeInMillis.SECOND.mult(timeoutInSec), new NIOChannelMonitor(selectionKey, selectorController)));
         } catch (IOException e) {
@@ -301,7 +283,7 @@ public class NIOSocket
             scheduledAttachment.attachment().exception(e);
             throw e;
         }
-        return sc;
+        return selectionKey;
     }
 
     /**
@@ -592,88 +574,13 @@ public class NIOSocket
                                         && key.channel().isOpen()
                                         && key.isConnectable()) {
                                     // this is used by client connection
+                                    clientConnect(key);
 
-                                    // stop key interest first
-                                    key.interestOps(0);
-                                    // finish connection
-                                    // this a bit dicey
-                                    //*no need to create new thread  since it takes micro-seconds at this stage*
-
-
-                                    if (key.attachment() instanceof ScheduledAttachment &&
-                                            ((ScheduledAttachment)key.attachment()).attachment() instanceof ConsumerCallback) {
-
-                                        ConsumerCallback<SocketChannel> connectData = (ConsumerCallback<SocketChannel>) ((ScheduledAttachment)key.attachment()).attachment();
-                                        // the code read and write processing is done by outsiders
-                                        // the read/write or waiting for connection is done my outsiders
-                                        // selection key is to be canceled
-                                        SocketChannel sc = ((SocketChannel) key.channel());
-
-                                        try {
-                                            finishConnecting(key);
-                                            selectorController.cancelSelectionKey(key);
-                                            //**************************************************************************
-
-                                            if (executor == null)
-                                                executor.execute(() -> connectData.accept(sc));
-                                            else
-                                                connectData.accept(sc);
-
-                                        } catch (Exception e) {
-                                            IOUtil.close(key.channel());
-                                            if (executor == null)
-                                                executor.execute(() -> connectData.exception(e));
-                                            else
-                                                connectData.exception(e);
-                                        }
-                                        continue; // is crucial here
-                                    }
-
-                                    finishConnecting(key);
-
-                                    // be revisited
-                                    ProtocolFactory<?> protocolFactory = (ProtocolFactory<?>) key.attachment();
-                                    ProtocolHandler ph = protocolFactory.newInstance();
-
-                                    ph.setSelectorController(selectorController);
-                                    ph.setupConnection((AbstractSelectableChannel) key.channel(), false);
-
-
-                                    // a channel is ready for reading
-                                    int keyOPs = key.interestOps();
-                                    key.interestOps(0);
-                                    if (executor != null) {
-                                        executor.execute(() ->
-                                        {
-                                            try {
-                                                ph.accept(key);
-                                            } catch (Exception e) {
-                                                e.printStackTrace();
-                                            }
-                                            // very crucial step
-                                            if (key.isValid()) {
-                                                key.interestOps(keyOPs);
-                                                selectorController.wakeup();
-                                            }
-                                        });
-                                    } else {
-                                        // no executor set so the current thread must process the incoming data
-                                        try {
-                                            ph.accept(key);
-                                        } catch (Exception e) {
-                                            e.printStackTrace();
-                                        }
-                                        // very crucial step
-                                        if (key.isValid()) {
-                                            key.interestOps(keyOPs);
-                                            selectorController.wakeup();
-                                        }
-                                    }
                                 }
 
 
                             } catch (Exception e) {
-                                if (!(e instanceof CancelledKeyException))
+                                if (!(e instanceof CancelledKeyException || e instanceof ConnectException))
                                     e.printStackTrace();
                             }
 
@@ -710,6 +617,98 @@ public class NIOSocket
     }
 
 
+    private void clientConnect(SelectionKey key) throws IOException {
+
+        // this is used by client connection
+        // stop key interest first
+        key.interestOps(0);
+
+        // finish connection
+        // this a bit dicey
+        //*no need to create new thread  since it takes micro-seconds at this stage*
+
+
+        if (key.attachment() instanceof ScheduledAttachment &&
+                ((ScheduledAttachment) key.attachment()).attachment() instanceof ConsumerCallback) {
+
+            ConsumerCallback<SocketChannel> connectData = (ConsumerCallback<SocketChannel>) ((ScheduledAttachment) key.attachment()).attachment();
+            // the code read and write processing is done by outsiders
+            // the read/write or waiting for connection is done my outsiders
+            // selection key is to be canceled
+            SocketChannel sc = ((SocketChannel) key.channel());
+
+            try {
+                finishConnecting(key);
+                selectorController.cancelSelectionKey(key);
+                //**************************************************************************
+
+                if (executor == null)
+                    executor.execute(() -> connectData.accept(sc));
+                else
+                    connectData.accept(sc);
+
+            } catch (Exception e) {
+                IOUtil.close(key.channel());
+                if (executor == null)
+                    executor.execute(() -> connectData.exception(e));
+                else
+                    connectData.exception(e);
+            }
+
+        } else {
+            ProtocolFactory<?> protocolFactory = (ProtocolFactory<?>) ((ScheduledAttachment) key.attachment()).attachment();
+            ProtocolHandler ph = protocolFactory.newInstance();
+            //SocketAddress socketAddress = null;
+
+            try {
+                finishConnecting(key);
+                // attach the protocol handler
+                ph.setSelectorController(selectorController);
+                ph.setupConnection((AbstractSelectableChannel) key.channel(), false);
+
+                // a channel is ready for reading
+                int keyOPs = key.interestOps();
+                if(logger.isEnabled())logger.getLogger().info("key ops " + keyOPs);
+                key.interestOps(0);
+                if (executor != null) {
+                    executor.execute(() ->
+                    {
+                        try {
+                            ph.accept(key);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        // very crucial step
+                        if (key.isValid()) {
+                            key.interestOps(keyOPs);
+                            selectorController.wakeup();
+                        }
+                    });
+                } else {
+                    // no executor set so the current thread must process the incoming data
+                    try {
+                        ph.accept(key);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    // very crucial step
+                    if (key.isValid()) {
+                        key.interestOps(keyOPs);
+                        selectorController.wakeup();
+                    }
+                }
+            } catch (IOException e) {
+
+                if (ph.getSessionCallback() != null)
+                    ph.getSessionCallback().exception(e);
+
+                IOUtil.close(ph);
+                throw e;
+
+            }
+        }
+    }
+
     /**
      * Finish the connect stage
      * @param key isConnectable() true
@@ -737,8 +736,10 @@ public class NIOSocket
     private void finishConnecting(SocketChannel channel, Appointment connectTimeout) throws IOException {
         try {
             if (channel.isOpen()) {
-                if (channel.isConnectionPending())
+                if (channel.isConnectionPending()) {
                     channel.finishConnect();
+                    if(logger.isEnabled()) logger.getLogger().info("connection finished for " + channel);
+                }
 
                 if (channel.isConnected()) {
                     connectionCount.incrementAndGet();

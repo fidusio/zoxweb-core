@@ -70,6 +70,8 @@ public abstract class ProtocolHandler
     private volatile NVGenericMap properties = null;
     protected volatile Executor executor;
     protected final AtomicBoolean isClosed = new AtomicBoolean(false);
+
+    protected BaseSessionCallback<?> sessionCallback;
     private final PHTimeout phTimeout;
 
 
@@ -161,6 +163,11 @@ public abstract class ProtocolHandler
 
     public Executor getExecutor() {
         return executor;
+    }
+
+    public BaseSessionCallback<?> getSessionCallback()
+    {
+        return sessionCallback;
     }
 
 

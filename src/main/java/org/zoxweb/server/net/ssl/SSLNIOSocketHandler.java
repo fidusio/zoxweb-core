@@ -101,7 +101,7 @@ public class SSLNIOSocketHandler
     private volatile SSLSessionConfig config = null;
     public final IPAddress remoteConnection;
     private final SSLContextInfo sslContext;
-    private final SSLSessionCallback sessionCallback;
+    //private final SSLSessionCallback sessionCallback;
     private final boolean simpleStateMachine;
 
     ///private StaticSSLStateMachine staticSSLStateMachine = null;
@@ -174,7 +174,7 @@ public class SSLNIOSocketHandler
             // channel selection data coming from ssl channel or tunnel response
             if (key.channel() == config.sslChannel && config.sslChannel.isConnected()) {
                 // here we have an application code that will process decrypted data
-                sslDispatcher.publish(config.getHandshakeStatus(), sessionCallback);
+                sslDispatcher.publish(config.getHandshakeStatus(), (SSLSessionCallback) sessionCallback);
             } else if (key.channel() == config.remoteChannel && config.remoteChannel.isConnected()) {
                 // this is the tunnel section connection
                 int bytesRead;
@@ -210,7 +210,7 @@ public class SSLNIOSocketHandler
             config.sslChannel = (SocketChannel) asc;
             config.remoteConnection = remoteConnection;
             config.sslOutputStream = new SSLChannelOutputStream(this, config, 512);
-            sessionCallback.setConfig(config);
+            ((SSLSessionCallback)sessionCallback).setConfig(config);
             sslDispatcher = new CustomSSLStateMachine(this);
             sessionCallback.setProtocolHandler(this);
 
@@ -226,12 +226,12 @@ public class SSLNIOSocketHandler
             config.sslChannel = (SocketChannel) asc;
             config.remoteConnection = remoteConnection;
             config.sslOutputStream = new SSLChannelOutputStream(this, config, 512);
-            sessionCallback.setConfig(config);
+            ((SSLSessionCallback)sessionCallback).setConfig(config);
             sessionCallback.setProtocolHandler(this);
             sslStateMachine.start(true);
             if (log.isEnabled()) log.getLogger().info("SSLStateMachine");
         }
-        sessionCallback.setRemoteAddress(((InetSocketAddress) ((SocketChannel) asc).getRemoteAddress()).getAddress());
+        sessionCallback.setRemoteAddress((((SocketChannel) asc).getRemoteAddress()));
         // not sure about
         //config.beginHandshake(false);
         getSelectorController().register(asc, SelectionKey.OP_READ, this, isBlocking);

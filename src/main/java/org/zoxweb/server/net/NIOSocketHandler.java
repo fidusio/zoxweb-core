@@ -17,6 +17,7 @@ package org.zoxweb.server.net;
 
 import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.server.io.IOUtil;
+import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.shared.util.Const;
 
@@ -32,12 +33,18 @@ import java.nio.channels.spi.AbstractSelectableChannel;
 public class NIOSocketHandler
         extends ProtocolHandler {
 
+    public static final LogWrapper log = new LogWrapper(ProtocolHandler.class).setEnabled(false);
+
     private volatile ByteBuffer phBB = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, Const.SizeInBytes.K.mult(1));
 
-    private final PlainSessionCallback sessionCallback;
+    //private final PlainSessionCallback sessionCallback;
 
     public NIOSocketHandler(PlainSessionCallback psc) {
-        super(true);
+       this(psc, true);
+    }
+
+    public NIOSocketHandler(PlainSessionCallback psc, boolean timeout) {
+        super(timeout);
         this.sessionCallback = psc;
     }
 
@@ -61,12 +68,15 @@ public class NIOSocketHandler
     @Override
     public void accept(SelectionKey key) {
         try {
+
+            if (log.isEnabled()) log.getLogger().info("Accepting connection " + key);
             if (sessionCallback.getConfig() == null) {
-                sessionCallback.setConfig(new ChannelOutputStream(this, phSChannel, Const.SizeInBytes.K.mult(1)));
-                // need to notify session callback in case waiting for connection
-                synchronized (sessionCallback)
-                {
-                    sessionCallback.notify();
+                synchronized (this) {
+                    if (sessionCallback.getConfig() == null) {
+                        ((PlainSessionCallback) sessionCallback).setConfig(new ChannelOutputStream(this, phSChannel, Const.SizeInBytes.K.mult(1)));
+                        // need to notify session callback in case waiting for connection
+                        sessionCallback.connected(key);
+                    }
                 }
             }
 
@@ -74,6 +84,7 @@ public class NIOSocketHandler
             do {
                 ((Buffer) phBB).clear();
                 read = phSChannel.isConnected() ? phSChannel.read(phBB) : -1;
+
                 if (read > 0)
                     sessionCallback.accept(phBB);
             }
@@ -99,7 +110,7 @@ public class NIOSocketHandler
         phSChannel = (SocketChannel) asc;
         getSelectorController().register(phSChannel, SelectionKey.OP_READ, this, isBlocking);
         sessionCallback.setProtocolHandler(this);
-        sessionCallback.setRemoteAddress(((InetSocketAddress) phSChannel.getRemoteAddress()).getAddress());
+        sessionCallback.setRemoteAddress(((InetSocketAddress) phSChannel.getRemoteAddress()));
 
     }
 

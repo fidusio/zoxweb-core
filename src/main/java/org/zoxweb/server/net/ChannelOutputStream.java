@@ -85,7 +85,7 @@ public class ChannelOutputStream
      */
     public synchronized int write(ByteBuffer bb) throws IOException {
         try {
-            int ret = ByteBufferUtil.smartWrite(null, outChannel, bb);
+            int ret = ByteBufferUtil.smartWrite(null, dataChannel, bb);
             if (protocolHandler != null) protocolHandler.updateUsage();
             return ret;
         } catch (IOException e) {
@@ -108,7 +108,7 @@ public class ChannelOutputStream
 
         if (!isClosed.getAndSet(true)) {
             if (log.isEnabled()) log.getLogger().info("Calling close");
-            IOUtil.close(outChannel, protocolHandler);
+            IOUtil.close(dataChannel, protocolHandler);
             ByteBufferUtil.cache(outAppData);
         }
     }

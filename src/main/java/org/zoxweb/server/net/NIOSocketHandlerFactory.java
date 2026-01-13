@@ -8,13 +8,19 @@ public class NIOSocketHandlerFactory
 
     private Class<? extends BaseSessionCallback> cbClass;
     private InstanceFactory.Creator<PlainSessionCallback> creator;
+    private boolean timeout = true;
 
     public NIOSocketHandlerFactory() {
     }
 
-
     public NIOSocketHandlerFactory(Class<? extends BaseSessionCallback> cbClass) {
+        this(cbClass, true);
+
+    }
+
+    public NIOSocketHandlerFactory(Class<? extends BaseSessionCallback> cbClass, boolean timeout) {
         this.cbClass = cbClass;
+        this.timeout = timeout;
 
     }
 
@@ -34,7 +40,7 @@ public class NIOSocketHandlerFactory
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return new NIOSocketHandler(sc);
+        return new NIOSocketHandler(sc, timeout);
     }
 
     @Override

@@ -60,7 +60,7 @@ public abstract class BaseChannelOutputStream extends OutputStream
     public static final LogWrapper log = new LogWrapper(BaseChannelOutputStream.class).setEnabled(false);
 
     /** The underlying NIO channel for writing data */
-    protected final ByteChannel outChannel;
+    protected final ByteChannel dataChannel;
     /** Buffer for application data before writing to the channel */
     protected final ByteBuffer outAppData;
     /** Reusable single-byte buffer for write(int) operations */
@@ -85,7 +85,7 @@ public abstract class BaseChannelOutputStream extends OutputStream
     protected BaseChannelOutputStream(ProtocolHandler ph, ByteChannel outByteChannel, int outAppBufferSize) throws IOException {
         SUS.checkIfNulls("channel can't be null ", outByteChannel);
         this.clientAddress = (InetSocketAddress) ((SocketChannel) outByteChannel).getRemoteAddress();
-        this.outChannel = outByteChannel;
+        this.dataChannel = outByteChannel;
         if (outAppBufferSize > 0) {
             outAppData = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.DIRECT, outAppBufferSize);
             this.protocolHandler = ph;
@@ -188,6 +188,7 @@ public abstract class BaseChannelOutputStream extends OutputStream
      * @return true if this stream is closed or the underlying channel is not open
      */
     public boolean isClosed() {
-        return isClosed.get() || !outChannel.isOpen();
+        return isClosed.get() || !dataChannel.isOpen();
     }
+
 }
