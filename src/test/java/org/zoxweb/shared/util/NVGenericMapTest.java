@@ -227,4 +227,144 @@ public class NVGenericMapTest
 		System.out.println(GSONUtil.toJSONDefault(nvgm, true));
 
 	}
+
+	@Test
+	public void testAreEquals_NullCases() {
+		assert NVGenericMap.areEquals(null, null) : "Both null should be equal";
+		assert !NVGenericMap.areEquals(new NVGenericMap(), null) : "Non-null vs null should not be equal";
+		assert !NVGenericMap.areEquals(null, new NVGenericMap()) : "Null vs non-null should not be equal";
+	}
+
+	@Test
+	public void testAreEquals_EmptyMaps() {
+		NVGenericMap one = new NVGenericMap();
+		NVGenericMap two = new NVGenericMap();
+		assert NVGenericMap.areEquals(one, two) : "Two empty maps should be equal";
+	}
+
+	@Test
+	public void testAreEquals_SameInstance() {
+		NVGenericMap nvgm = new NVGenericMap().build("key", "value");
+		assert NVGenericMap.areEquals(nvgm, nvgm) : "Same instance should be equal";
+	}
+
+	@Test
+	public void testAreEquals_PrimitiveValues() {
+		NVGenericMap one = new NVGenericMap("test");
+		one.add(new NVPair("string", "value"));
+		one.add(new NVLong("long", 123L));
+		one.add(new NVInt("int", 456));
+		one.add(new NVDouble("double", 1.23));
+		one.add(new NVFloat("float", 4.56f));
+		one.add(new NVBoolean("bool", true));
+
+		NVGenericMap two = new NVGenericMap("test");
+		two.add(new NVPair("string", "value"));
+		two.add(new NVLong("long", 123L));
+		two.add(new NVInt("int", 456));
+		two.add(new NVDouble("double", 1.23));
+		two.add(new NVFloat("float", 4.56f));
+		two.add(new NVBoolean("bool", true));
+
+		assert NVGenericMap.areEquals(one, two) : "Maps with same primitive values should be equal";
+	}
+
+	@Test
+	public void testAreEquals_DifferentValues() {
+		NVGenericMap one = new NVGenericMap().build("name", "mario");
+		NVGenericMap two = new NVGenericMap().build("name", "luigi");
+		assert !NVGenericMap.areEquals(one, two) : "Maps with different values should not be equal";
+	}
+
+	@Test
+	public void testAreEquals_DifferentSizes() {
+		NVGenericMap one = new NVGenericMap().build("a", "1").build("b", "2");
+		NVGenericMap two = new NVGenericMap().build("a", "1");
+		assert !NVGenericMap.areEquals(one, two) : "Maps with different sizes should not be equal";
+	}
+
+	@Test
+	public void testAreEquals_NestedNVGenericMap() {
+		NVGenericMap innerOne = new NVGenericMap("inner");
+		innerOne.add(new NVPair("nested", "value"));
+
+		NVGenericMap one = new NVGenericMap("outer");
+		one.add(innerOne);
+
+		NVGenericMap innerTwo = new NVGenericMap("inner");
+		innerTwo.add(new NVPair("nested", "value"));
+
+		NVGenericMap two = new NVGenericMap("outer");
+		two.add(innerTwo);
+
+		assert NVGenericMap.areEquals(one, two) : "Maps with nested NVGenericMap should be equal";
+	}
+
+	@Test
+	public void testAreEquals_NestedNVGenericMapDifferent() {
+		NVGenericMap innerOne = new NVGenericMap("inner");
+		innerOne.add(new NVPair("nested", "value1"));
+
+		NVGenericMap one = new NVGenericMap("outer");
+		one.add(innerOne);
+
+		NVGenericMap innerTwo = new NVGenericMap("inner");
+		innerTwo.add(new NVPair("nested", "value2"));
+
+		NVGenericMap two = new NVGenericMap("outer");
+		two.add(innerTwo);
+
+		assert !NVGenericMap.areEquals(one, two) : "Maps with different nested values should not be equal";
+	}
+
+	@Test
+	public void testAreEquals_ByteArrays() {
+		NVGenericMap one = new NVGenericMap();
+		one.add(new NVBlob("bytes", new byte[]{1, 2, 3, 4, 5}));
+
+		NVGenericMap two = new NVGenericMap();
+		two.add(new NVBlob("bytes", new byte[]{1, 2, 3, 4, 5}));
+
+		assert NVGenericMap.areEquals(one, two) : "Maps with same byte arrays should be equal";
+
+		NVGenericMap three = new NVGenericMap();
+		three.add(new NVBlob("bytes", new byte[]{1, 2, 3, 4, 6}));
+
+		assert !NVGenericMap.areEquals(one, three) : "Maps with different byte arrays should not be equal";
+	}
+
+	@Test
+	public void testAreEquals_WithNVEntity() {
+		AddressDAO address1 = new AddressDAO();
+		address1.setStreet("123 Main St");
+		address1.setCity("Los Angeles");
+
+		NVGenericMap one = new NVGenericMap();
+		one.add(address1);
+
+		AddressDAO address2 = new AddressDAO();
+		address2.setStreet("123 Main St");
+		address2.setCity("Los Angeles");
+
+		NVGenericMap two = new NVGenericMap();
+		two.add(address2);
+
+		assert NVGenericMap.areEquals(one, two) : "Maps with equivalent NVEntity should be equal";
+	}
+
+	@Test
+	public void testAreEquals_DeepCopyEquality() {
+		NVGenericMap original = new NVGenericMap("original");
+		original.add(new NVPair("string", "test"));
+		original.add(new NVLong("long", 100L));
+		original.add(new NVBoolean("flag", true));
+
+		NVGenericMap innerMap = new NVGenericMap("nested");
+		innerMap.add(new NVPair("inner", "value"));
+		original.add(innerMap);
+
+		NVGenericMap copy = NVGenericMap.copy(original, true);
+
+		assert NVGenericMap.areEquals(original, copy) : "Deep copy should be equal to original";
+	}
 }

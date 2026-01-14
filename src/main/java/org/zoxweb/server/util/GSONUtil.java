@@ -1190,7 +1190,8 @@ public final class GSONUtil {
                         }
                     }
                 } else {
-                    log.getLogger().info("Array guess failed " + jne);
+                    log.getLogger().info("Array guess failed " + jne + " for  " + element.getKey());
+                    ret.add(new NVStringList(element.getKey()));
                 }
 
 
