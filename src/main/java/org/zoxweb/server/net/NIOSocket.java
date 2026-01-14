@@ -182,48 +182,67 @@ public class NIOSocket
     }
 
 
-    /**
-     * Initiates a non-blocking TCP client connection to the specified address.
-     *
-     * <p>Convenience method that uses a default 10-second connection timeout with no rate limiting.
-     * See {@link #addClientSocket(InetSocketAddress, ProtocolFactory, int)} for
-     * detailed behavior.</p>
-     *
-     * @param sa  the remote server address to connect to
-     * @param psf the protocol factory for creating the connection handler
-     * @return the SelectionKey associated with the client socket channel
-     * @throws IOException if the socket channel cannot be opened or connection initiation fails
-     * @see #addClientSocket(InetSocketAddress, ProtocolFactory, int)
-     */
-    public SelectionKey addClientSocket(InetSocketAddress sa, ProtocolFactory<?> psf) throws IOException {
-        return addClientSocket(sa, psf, 10);
-    }
+//    /**
+//     * Initiates a non-blocking TCP client connection to the specified address.
+//     *
+//     * <p>Convenience method that uses a default 10-second connection timeout with no rate limiting.
+//     * See {@link #addClientSocket(InetSocketAddress, ProtocolFactory, int)} for
+//     * detailed behavior.</p>
+//     *
+//     * @param sa  the remote server address to connect to
+//     * @param psf the protocol factory for creating the connection handler
+//     * @return the SelectionKey associated with the client socket channel
+//     * @throws IOException if the socket channel cannot be opened or connection initiation fails
+//     * @see #addClientSocket(InetSocketAddress, ProtocolFactory, int)
+//     */
+//    public SelectionKey addClientSocket(InetSocketAddress sa, ProtocolFactory<?> psf) throws IOException {
+//        return addClientSocket(sa, psf, 10);
+//    }
 
-    /**
-     * Initiates a non-blocking TCP client connection with configurable timeout and rate control.
-     *
-     * <p>This method opens a new SocketChannel and initiates a non-blocking connection to the
-     * remote server. A {@link NIOChannelMonitor} is scheduled to detect and close stale
-     * connections that fail to complete within the specified timeout.</p>
-     *
-     * <p>When a rate controller is provided, the connection attempt is delayed according to
-     * the controller's rate limiting policy, which is useful for connection pooling or
-     * preventing connection storms.</p>
-     *
-     * <p>Once the connection is established, the selector notifies via OP_CONNECT and a
-     * new ProtocolHandler is created from the factory to handle the connection.</p>
-     *
-     * @param sa             the remote server address to connect to
-     * @param psf            the protocol factory for creating the connection handler
-     * @param timeoutInSec   connection timeout in seconds; the connection is closed if not
-     *                       established within this time
+//    /**
+//     * Initiates a non-blocking TCP client connection with configurable timeout and rate control.
+//     *
+//     * <p>This method opens a new SocketChannel and initiates a non-blocking connection to the
+//     * remote server. A {@link NIOChannelMonitor} is scheduled to detect and close stale
+//     * connections that fail to complete within the specified timeout.</p>
+//     *
+//     * <p>When a rate controller is provided, the connection attempt is delayed according to
+//     * the controller's rate limiting policy, which is useful for connection pooling or
+//     * preventing connection storms.</p>
+//     *
+//     * <p>Once the connection is established, the selector notifies via OP_CONNECT and a
+//     * new ProtocolHandler is created from the factory to handle the connection.</p>
+//     *
+//     * @param sa             the remote server address to connect to
+//     * @param psf            the protocol factory for creating the connection handler
+//     * @param timeoutInSec   connection timeout in seconds; the connection is closed if not
+//     *                       established within this time
+//
+//     * @return the SelectionKey associated with the client socket channel
+//     * @throws IOException if the socket channel cannot be opened or connection initiation fails
+//     */
+//    public SelectionKey addClientSocket(InetSocketAddress sa, ProtocolFactory<?> psf, int timeoutInSec) throws IOException {
+//        ScheduledAttachment<ProtocolFactory<?>> scheduledAttachment = new ScheduledAttachment<>();
+//        scheduledAttachment.attach(psf);
+//        SocketChannel sc = SocketChannel.open();
+//
+//        SelectionKey selectionKey = selectorController.register(sc, SelectionKey.OP_CONNECT, scheduledAttachment, false);
+//
+//        if (sc.connect(sa))
+//            clientConnect(selectionKey);
+//        else {
+//            scheduledAttachment.setAppointment(taskSchedulerProcessor.queue(TimeInMillis.SECOND.mult(timeoutInSec), new NIOChannelMonitor(selectionKey, selectorController)));
+//            //taskSchedulerProcessor.queue(TimeInMillis.SECOND.mult(timeoutInSec), new NIOChannelMonitor(selectionKey, selectorController));
+//        }
+//
+//
+//        return selectionKey;
+//    }
 
-     * @return the SelectionKey associated with the client socket channel
-     * @throws IOException if the socket channel cannot be opened or connection initiation fails
-     */
-    public SelectionKey addClientSocket(InetSocketAddress sa, ProtocolFactory<?> psf, int timeoutInSec) throws IOException {
-        ScheduledAttachment<ProtocolFactory<?>> scheduledAttachment = new ScheduledAttachment<>();
-        scheduledAttachment.attach(psf);
+
+    public SelectionKey addClientSocket(InetSocketAddress sa, ProtocolHandler ph, int timeoutInSec) throws IOException {
+        ScheduledAttachment<ProtocolHandler> scheduledAttachment = new ScheduledAttachment<>();
+        scheduledAttachment.attach(ph);
         SocketChannel sc = SocketChannel.open();
 
         SelectionKey selectionKey = selectorController.register(sc, SelectionKey.OP_CONNECT, scheduledAttachment, false);
@@ -651,8 +670,20 @@ public class NIOSocket
             }
 
         } else {
-            ProtocolFactory<?> protocolFactory = (ProtocolFactory<?>) ((ScheduledAttachment) key.attachment()).attachment();
-            ProtocolHandler ph = protocolFactory.newInstance();
+
+
+            ProtocolHandler phTemp  = null;
+            Object attachment = ((ScheduledAttachment<?>) key.attachment()).attachment();
+
+            if (attachment instanceof ProtocolHandler) {
+                phTemp = (ProtocolHandler) attachment;
+            } else if (attachment instanceof ProtocolFactory) {
+                ProtocolFactory<?> protocolFactory = (ProtocolFactory<?>) attachment;
+                phTemp = protocolFactory.newInstance();
+            }
+
+            // phTemp for lambda requirement
+            ProtocolHandler ph = phTemp;
 
             try {
                 finishConnecting(key);
@@ -664,6 +695,8 @@ public class NIOSocket
                 int keyOPs = key.interestOps();
                 key.interestOps(0);
                 if (executor != null) {
+                    // lambda requirement
+
                     executor.execute(() ->
                     {
                         try {

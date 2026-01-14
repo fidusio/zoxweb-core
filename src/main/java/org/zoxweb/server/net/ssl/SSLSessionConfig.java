@@ -37,6 +37,7 @@ public class SSLSessionConfig
     volatile boolean forcedClose = false;
     volatile IPAddress remoteConnection = null;
     private volatile String sniHostName = null;
+    final boolean clientMode;
 
     // used for remote connection creation only
 
@@ -50,6 +51,7 @@ public class SSLSessionConfig
 
     public SSLSessionConfig(SSLContextInfo sslContext) {
         SUS.checkIfNulls("sslContext null", sslContext);
+        this.clientMode = sslContext.isClient();
         this.sslEngine = sslContext.newInstance();
     }
 
@@ -154,12 +156,15 @@ public class SSLSessionConfig
             if (!hasBegan.getAndSet(true)) {
                 // set the ssl engine mode client or sever
                 sslEngine.setUseClientMode(clientMode);
-                // start the handshake
-                sslEngine.beginHandshake();
-                // create the necessary byte buffer with the proper length
                 inSSLNetData = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, getPacketBufferSize());
                 outSSLNetData = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, getPacketBufferSize());
                 inAppData = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, getApplicationBufferSize());
+                // start the handshake
+                sslEngine.beginHandshake();
+                // create the necessary byte buffer with the proper length
+//                inSSLNetData = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, getPacketBufferSize());
+//                outSSLNetData = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, getPacketBufferSize());
+//                inAppData = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, getApplicationBufferSize());
             }
         }
     }

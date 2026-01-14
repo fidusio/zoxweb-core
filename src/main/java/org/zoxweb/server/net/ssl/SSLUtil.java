@@ -89,8 +89,16 @@ public class SSLUtil {
         // Very crucial steps
         // ********************************************
         if (config.remoteConnection != null) {
-            // we have a SSL tunnel
+            // we have SSL tunnel
             config.sslConnectionHelper.createRemoteConnection();
+        }
+
+
+        if (config.clientMode) {
+            /*
+             * special case if the connection is a client connection
+             */
+            callback.connected(null);
         }
 
         if (config.inSSLNetData.position() > 0) {
@@ -102,6 +110,9 @@ public class SSLUtil {
             //**************************************************
             config.sslConnectionHelper.publish(config.getHandshakeStatus(), callback);
         }
+
+
+
 
         return System.currentTimeMillis() - ts;
     }
@@ -156,7 +167,6 @@ public class SSLUtil {
                         case BUFFER_UNDERFLOW:
                             // no incoming data available we need to wait for more socket data
                             // return and let the NIOSocket or the data handler call back
-                            // config.sslChannelSelectableStatus.set(true);
                             // config.sslChannelSelectableStatus.set(true);
                             // config.sslRead.set(true);
                             return System.currentTimeMillis() - ts;

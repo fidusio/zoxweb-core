@@ -49,7 +49,6 @@ public class SSLNIOSocketHandlerFactory
         try {
             if (creator != null) {
                 sc = creator.newInstance();
-                ;
             } else if (scClass != null)
                 sc = (SSLSessionCallback) scClass.getDeclaredConstructor().newInstance();
         } catch (Exception e) {

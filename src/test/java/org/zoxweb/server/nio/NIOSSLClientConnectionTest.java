@@ -3,13 +3,11 @@ package org.zoxweb.server.nio;
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.net.NIOSocket;
-import org.zoxweb.server.net.NIOSocketHandler;
-import org.zoxweb.server.net.NIOSocketHandlerFactory;
-import org.zoxweb.server.net.PlainSessionCallback;
+import org.zoxweb.server.net.ssl.SSLNIOSocketHandler;
+import org.zoxweb.server.net.ssl.SSLSessionCallback;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.net.IPAddress;
-import org.zoxweb.shared.task.ConsumerCallback;
 import org.zoxweb.shared.util.Const;
 
 import java.io.IOException;
@@ -21,16 +19,16 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 
-public class NIOClientConnectionTest {
+public class NIOSSLClientConnectionTest {
 
 
-    public static final LogWrapper log = new LogWrapper(NIOClientConnectionTest.class).setEnabled(true);
+    public static final LogWrapper log = new LogWrapper(NIOSSLClientConnectionTest.class).setEnabled(true);
 
     static AtomicLong successCount = new AtomicLong(0);
     static AtomicLong failCount = new AtomicLong(0);
 
-    public static class ConnectionSession
-            extends PlainSessionCallback {
+    public static class SSLConnectionSession
+            extends SSLSessionCallback {
         AtomicBoolean closed = new AtomicBoolean(false);
 
 
@@ -50,9 +48,11 @@ public class NIOClientConnectionTest {
          */
         @Override
         public void close() throws IOException {
-            //log.getLogger().info("Closing connection");
-            if (!closed.getAndSet(true))
+
+            if (!closed.getAndSet(true)) {
+                log.getLogger().info("Closing connection: " + getRemoteAddress());
                 IOUtil.close(getChannel());
+            }
         }
 
         /**
@@ -71,8 +71,10 @@ public class NIOClientConnectionTest {
 
         public void exception(Exception e) {
             failCount.incrementAndGet();
-            //log.getLogger().info(total() + " " + e);
+            log.getLogger().info(getRemoteAddress()  + " " + e);
             IOUtil.close(this);
+
+
         }
 
         /**
@@ -89,62 +91,15 @@ public class NIOClientConnectionTest {
         {
             successCount.incrementAndGet();
             SocketChannel channel = (SocketChannel) getChannel();
-            System.out.println(getRemoteAddress() + " " + channel.isConnected() + " total: " + total());
+            //System.out.println(getRemoteAddress() + " " + channel.isConnected() + " total: " + total());
+            log.getLogger().info(getRemoteAddress() + " " + channel.isConnected() + " total: " + total());
             IOUtil.close(this);
         }
     }
 
-    static class ConnectionTracker
-            implements ConsumerCallback<SocketChannel> {
 
 
-        /**
-         * Performs this operation on the given argument.
-         *
-         * @param channel the input argument
-         */
-        @Override
-        public void accept(SocketChannel channel) {
-            successCount.incrementAndGet();
-            try {
-                System.out.println(channel.getRemoteAddress() + " " + channel.isConnected() + " total: " + total());
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                IOUtil.close(channel);
 
-//                try {
-//
-//
-//                    long ts = Const.TimeInMillis.SECOND.MILLIS * (total() % 100);
-//                    //System.out.println(Const.TimeInMillis.toString(ts) + " " + channel.isConnected() + " tot: " + total());
-//                    TaskUtil.defaultTaskScheduler().queue(ts, () ->
-//                    {
-//                        //System.out.println("Closing " + channel);
-//                        IOUtil.close(channel);
-//                    });
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                }
-            }
-        }
-
-        /**
-         *
-         * @param e
-         */
-        @Override
-        public void exception(Exception e) {
-            //e.printStackTrace();
-            failCount.incrementAndGet();
-            System.err.println(e +" " + total());
-        }
-
-        public String toString() {
-            return successCount.toString() + ", " + failCount.toString();
-        }
-
-    }
 
 
     public static long total() {
@@ -155,19 +110,13 @@ public class NIOClientConnectionTest {
 
         try {
             long ts = System.currentTimeMillis();
-            IPAddress[] ipAddresses = IPAddress.parseRange(args[0]);
-            boolean tracker = args.length > 1 && args[1].equals("tracker");
-            TaskUtil.setMaxTasksQueue(2000);
+            IPAddress[] ipAddresses = IPAddress.parse(args);
             NIOSocket nioSocket = new NIOSocket(TaskUtil.defaultTaskProcessor(), TaskUtil.defaultTaskScheduler());
-            ConnectionTracker connectionTracker = new ConnectionTracker();
 
-            NIOSocketHandlerFactory nshf = new NIOSocketHandlerFactory(ConnectionSession.class, false);
             for (IPAddress ipAddress : ipAddresses) {
-                //log.getLogger().info("" + ipAddress);
-                if (tracker)
-                    nioSocket.addClientSocket(new InetSocketAddress(ipAddress.getInetAddress(), ipAddress.getPort()), connectionTracker, 5);
-                else
-                    nioSocket.addClientSocket(new InetSocketAddress(ipAddress.getInetAddress(), ipAddress.getPort()), new NIOSocketHandler(new ConnectionSession(), false), 5);
+                log.getLogger().info("" + ipAddress);
+
+                    nioSocket.addClientSocket(new InetSocketAddress(ipAddress.getInetAddress(), ipAddress.getPort()), new SSLNIOSocketHandler(new SSLConnectionSession(), true), 5);
             }
 
             TaskUtil.waitIfBusy(500, () -> total() == ipAddresses.length);

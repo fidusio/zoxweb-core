@@ -287,6 +287,29 @@ public class IPAddress
     }
 
     /**
+     * Parse ipaddress of format ipaddress:[0,1025]
+     * @param ips to be parsed
+     * @return IPAddress[] of the specified range
+     */
+    public static IPAddress[] parse(String ...ips) {
+
+        List<IPAddress> ipAddresses = new ArrayList<IPAddress>();
+        for (String ip : ips) {
+            String[] parsed = ip.split(":");
+            try {
+                int singlePort = Integer.parseInt(parsed[1]);
+                ipAddresses.add(new IPAddress(parsed[0], singlePort));
+
+            } catch (Exception e) {
+            }
+        }
+
+
+        return ipAddresses.toArray(new IPAddress[0]);
+
+    }
+
+    /**
      * Parses an address string.
      *
      * @param addressPort the address string to parse

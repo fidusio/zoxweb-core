@@ -34,6 +34,8 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.nio.channels.spi.AbstractSelectableChannel;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 
 
 public class SSLNIOSocketHandler
@@ -100,9 +102,10 @@ public class SSLNIOSocketHandler
     private volatile SSLConnectionHelper sslDispatcher = null;
     private volatile SSLSessionConfig config = null;
     public final IPAddress remoteConnection;
-    private final SSLContextInfo sslContext;
+    private transient SSLContextInfo sslContextInfo;
     //private final SSLSessionCallback sessionCallback;
     private final boolean simpleStateMachine;
+    private transient boolean trustAll = false;
 
     ///private StaticSSLStateMachine staticSSLStateMachine = null;
 
@@ -111,15 +114,15 @@ public class SSLNIOSocketHandler
 //
 //		this(sslContext, ra, new TunnelCallback());
 //	}
-    public SSLNIOSocketHandler(SSLContextInfo sslContext, SSLSessionCallback sessionCallback) {
-        this(sslContext, sessionCallback, true, null);
+    public SSLNIOSocketHandler(SSLContextInfo sslContextInfo, SSLSessionCallback sessionCallback) {
+        this(sslContextInfo, sessionCallback, true, null);
     }
 
-    public SSLNIOSocketHandler(SSLContextInfo sslContext, SSLSessionCallback sessionCallback, boolean simpleStateMachine,
+    public SSLNIOSocketHandler(SSLContextInfo sslContextInfo, SSLSessionCallback sessionCallback, boolean simpleStateMachine,
                                IPAddress rc) {
         super(true);
-        SUS.checkIfNulls("context  can't be null", sslContext);
-        this.sslContext = sslContext;
+        SUS.checkIfNulls("context  can't be null", sslContextInfo);
+        this.sslContextInfo = sslContextInfo;
         remoteConnection = rc;
         this.simpleStateMachine = simpleStateMachine;
         if (remoteConnection != null && sessionCallback == null) {
@@ -131,6 +134,18 @@ public class SSLNIOSocketHandler
 
         //SUS.checkIfNulls("Session callback can't be null", this.sessionCallback);
     }
+
+    public SSLNIOSocketHandler(SSLSessionCallback sessionCallback, boolean trustAll) {
+        super(false);
+        remoteConnection = null;
+        this.simpleStateMachine = true;
+        SUS.checkIfNulls("SSL session call can't be null", sessionCallback);
+        this.sessionCallback = sessionCallback;
+        this.trustAll = trustAll;
+
+        //SUS.checkIfNulls("Session callback can't be null", this.sessionCallback);
+    }
+
 
     @Override
     public String getName() {
@@ -159,7 +174,7 @@ public class SSLNIOSocketHandler
      * @return SSLContextInfo
      */
     SSLContextInfo getSSLContextInfo() {
-        return sslContext;
+        return sslContextInfo;
     }
 
     @Override
@@ -167,7 +182,10 @@ public class SSLNIOSocketHandler
         if (log.isEnabled()) log.getLogger().info("Start of Accept SSLNIOSocket");
         try {
             // begin handshake will be called once subsequent calls are ignored
-            config.beginHandshake(false);
+            config.beginHandshake(sslContextInfo.isClient());
+//            if(sslContextInfo.isClient()) {
+//                sessionCallback.connected(key);
+//            }
 
             if (log.isEnabled()) log.getLogger().info("AcceptNewData: " + key);
 
@@ -203,9 +221,16 @@ public class SSLNIOSocketHandler
 
     @Override
     public void setupConnection(AbstractSelectableChannel asc, boolean isBlocking) throws IOException {
+        if(sslContextInfo == null) {
+            try {
+                sslContextInfo = new SSLContextInfo((InetSocketAddress) ((SocketChannel)asc).getRemoteAddress(), trustAll);
+            } catch (NoSuchAlgorithmException | KeyManagementException e) {
+                throw new IOException(e);
+            }
+        }
         if (simpleStateMachine) {
             // CustomSSLStateMachine mode
-            config = new SSLSessionConfig(sslContext);
+            config = new SSLSessionConfig(sslContextInfo);
             config.selectorController = getSelectorController();
             config.sslChannel = (SocketChannel) asc;
             config.remoteConnection = remoteConnection;
