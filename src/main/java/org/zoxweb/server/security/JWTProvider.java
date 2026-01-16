@@ -34,7 +34,7 @@ public final class JWTProvider
     public JWT decode(byte[] key, String b64urlToken) throws AccessSecurityException {
         // TODO Auto-generated method stub
         try {
-            return SecUtil.SINGLETON.decodeJWT(key, b64urlToken);
+            return SecUtil.decodeJWT(key, b64urlToken);
         } catch (SecurityException | IOException | GeneralSecurityException e) {
 
             e.printStackTrace();
@@ -61,7 +61,7 @@ public final class JWTProvider
         try {
 
             for (int i = 0; i < args.length; i++) {
-                JWT jwt = SecUtil.SINGLETON.parseJWT(args[i]);
+                JWT jwt = SecUtil.parseJWT(args[i]);
                 System.out.println(GSONUtil.toJSON(jwt, true, false, false));
                 System.out.println(new Date(jwt.getPayload().getIssuedAt() * 1000));
                 System.out.println((jwt.getPayload().getIssuedAt()));

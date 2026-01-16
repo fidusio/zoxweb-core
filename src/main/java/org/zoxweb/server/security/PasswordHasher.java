@@ -67,7 +67,7 @@ public abstract class PasswordHasher
      */
     @Override
     public CIPassword update(CIPassword oldCI, String password, String newPassword) throws AccessSecurityException {
-        if (SecUtil.SINGLETON.lookupCredentialHasher(oldCI.getAlgorithm()).validate(oldCI, password)) {
+        if (SecUtil.lookupCredentialHasher(oldCI.getAlgorithm()).validate(oldCI, password)) {
             return merge(oldCI, hash(newPassword));
         }
         throw new AccessSecurityException("Invalid password update failed");
@@ -83,7 +83,7 @@ public abstract class PasswordHasher
      */
     @Override
     public CIPassword update(CIPassword oldCI, byte[] password, byte[] newPassword) throws AccessSecurityException {
-        if (SecUtil.SINGLETON.lookupCredentialHasher(oldCI.getAlgorithm()).validate(oldCI, password)) {
+        if (SecUtil.lookupCredentialHasher(oldCI.getAlgorithm()).validate(oldCI, password)) {
             return merge(oldCI, hash(newPassword));
         }
         throw new AccessSecurityException("Invalid password update failed");
@@ -99,7 +99,7 @@ public abstract class PasswordHasher
      */
     @Override
     public CIPassword update(CIPassword oldCI, char[] password, char[] newPassword) throws AccessSecurityException {
-        if (SecUtil.SINGLETON.lookupCredentialHasher(oldCI.getAlgorithm()).validate(oldCI, password)) {
+        if (SecUtil.lookupCredentialHasher(oldCI.getAlgorithm()).validate(oldCI, password)) {
             return merge(oldCI, hash(newPassword));
         }
         throw new AccessSecurityException("Invalid password update failed");

@@ -106,7 +106,7 @@ public class JWTTest {
 //		test = CryptoUtil.encodeJWT("secret", localJwt);
 //		System.out.println(test);
 //
-//		System.out.println(SecUtil.SINGLETON.decodeJWT("secret", test));
+//		System.out.println(SecUtil.decodeJWT("secret", test));
 //
 //		String payloadJSON = GSONUtil.toJSON(payload, true, false, true, Base64Type.URL);
 //		System.out.println("-------------------------------------------------------------------");
@@ -150,7 +150,7 @@ public class JWTTest {
 //    test = CryptoUtil.encodeJWT("secret", localJwt);
 //    System.out.println(test);
 //
-//    System.out.println(SecUtil.SINGLETON.decodeJWT((String) null, test));
+//    System.out.println(SecUtil.decodeJWT((String) null, test));
 //  }
 
 
@@ -175,7 +175,7 @@ public class JWTTest {
     test = CryptoUtil.encodeJWT("secret", localJwt);
     System.out.println(test);
 
-    System.out.println(SecUtil.SINGLETON.decodeJWT("secret", test));
+    System.out.println(SecUtil.decodeJWT("secret", test));
     System.out.println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
   }
 
@@ -211,7 +211,7 @@ public class JWTTest {
     test = CryptoUtil.encodeJWT(kp.getPrivate().getEncoded(), localJwt);
     System.out.println(test);
 
-    System.out.println("Decoded: " + SecUtil.SINGLETON.decodeJWT(kp.getPublic().getEncoded(), test));
+    System.out.println("Decoded: " + SecUtil.decodeJWT(kp.getPublic().getEncoded(), test));
 
     System.out.println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
   }
@@ -239,7 +239,7 @@ public class JWTTest {
     test = CryptoUtil.encodeJWT("secret", localJwt);
     System.out.println(test);
 
-    System.out.println(SecUtil.SINGLETON.decodeJWT("secret", test));
+    System.out.println(SecUtil.decodeJWT("secret", test));
     System.out.println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
   }
 
@@ -251,7 +251,7 @@ public class JWTTest {
     System.out.println("--------------------------------------------------------------");
     //"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYmYiOjE1MDg0NjA1MzMzNDEsImRvbWFpbiI6Inhsb2dpc3R4LmlvIiwiYXBwIjoieGxvZ2lzdHgifQ.oxqpJP18sxq51qNt8_kisYeS0oR31QL2DrP-M_wYaO0";
     String gwtToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYmYiOjE1MDg0NzMyMzU0OTMsImRvbWFpbiI6Inhsb2dpc3R4LmlvIiwiYXBwIjoieGxvZ2lzdHgifQ.MrrlKa90ut2RBcfJ61lXB7ScwHikPyvkvpd_DVxPnFg";
-    JWT decoded = SecUtil.SINGLETON.decodeJWT("secret", gwtToken);
+    JWT decoded = SecUtil.decodeJWT("secret", gwtToken);
     String test = CryptoUtil.encodeJWT("secret", decoded);
     System.out.println("TESTGWT  :" + gwtToken);
     System.out.println("local:" + test);
@@ -277,8 +277,8 @@ public class JWTTest {
         .println("testJWTJohnDoe--------------------------------------------------------------");
     //"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYmYiOjE1MDg0NjA1MzMzNDEsImRvbWFpbiI6Inhsb2dpc3R4LmlvIiwiYXBwIjoieGxvZ2lzdHgifQ.oxqpJP18sxq51qNt8_kisYeS0oR31QL2DrP-M_wYaO0";
     String gwtToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.XbPfbIHMI6arZ3Y922BhjWgQzWXcXNrz0ogtVhfEd2o";
-    System.out.println(SecUtil.SINGLETON.parseJWT(gwtToken));
-    JWT decoded = SecUtil.SINGLETON.decodeJWT("secret", gwtToken);
+    System.out.println(SecUtil.parseJWT(gwtToken));
+    JWT decoded = SecUtil.decodeJWT("secret", gwtToken);
     System.out.println(
         "Subject class id:" + decoded.getPayload().getProperties().get("sub").getClass().getName());
 
@@ -344,7 +344,7 @@ public class JWTTest {
 
       String test = CryptoUtil.encodeJWT(kp.getPrivate().getEncoded(), jwt);
 
-      SecUtil.SINGLETON.decodeJWT(kp.getPublic().getEncoded(), test);
+      SecUtil.decodeJWT(kp.getPublic().getEncoded(), test);
       System.out.println(algo);
     }
 

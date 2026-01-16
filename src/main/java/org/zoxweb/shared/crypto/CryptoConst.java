@@ -547,6 +547,149 @@ public final class CryptoConst {
         return pemToken;
     }
 
+    /**
+     * Certificate validity status values.
+     */
+    public enum CertStatus implements GetName {
+
+
+        VALID("VALID"),
+        EXPIRED("EXPIRED"),
+        NOT_YET_VALID("NOT_YET_VALID"),
+        ;
+
+        private final String name;
+
+        CertStatus(String name) {
+            this.name = name;
+        }
+
+        /**
+         * @return the name of the object
+         */
+        @Override
+        public String getName() {
+            return name;
+        }
+    }
+
+    /**
+     * Parameter names used in the NVGenericMap output.
+     *
+     * <p>These tags define the keys used when building NVGenericMap structures
+     * from SSL session and certificate information.</p>
+     */
+    public enum SSLTags implements GetName {
+        /** SSL/TLS protocol version (e.g., "TLSv1.3") */
+        PROTOCOL("protocol"),
+        /** Cipher suite name (e.g., "TLS_AES_256_GCM_SHA384") */
+        CIPHER_SUITE("cipher_suite"),
+        /** Remote peer hostname */
+        PEER_HOST("peer_host"),
+        /** Remote peer port number */
+        PEER_PORT("peer_port"),
+        /** Whether the SSL session is valid */
+        IS_VALID("is_valid"),
+        /** Whether the connection is considered secure */
+        IS_SECURE("is_secure"),
+        /** SSL session ID in hexadecimal */
+        SESSION_ID("session_id"),
+        /** Session creation timestamp */
+        CREATION_TIME("creation_time"),
+        /** Session last accessed timestamp */
+        LAST_ACCESSED_TIME("last_accessed_time"),
+        /** Container for cipher suite breakdown */
+        CIPHER_INFO("cipher_info"),
+        /** Key exchange algorithm */
+        KEY_EXCHANGE("key_exchange"),
+        /** Bulk encryption algorithm */
+        ENCRYPTION("encryption"),
+        /** Message authentication code algorithm */
+        MAC("mac"),
+        /** List of peer (server) certificates */
+        PEER_CERTIFICATES("peer_certificates"),
+        /** List of local (client) certificates for mutual TLS */
+        LOCAL_CERTIFICATES("local_certificates"),
+        /** Certificate subject distinguished name */
+        SUBJECT("subject"),
+        /** Certificate issuer distinguished name */
+        ISSUER("issuer"),
+        /** Certificate serial number */
+        SERIAL_NUMBER("serial_number"),
+        /** Certificate validity start date */
+        NOT_BEFORE("not_before"),
+        /** Certificate validity end date */
+        NOT_AFTER("not_after"),
+        /** Certificate signature algorithm */
+        SIGNATURE_ALGORITHM("signature_algorithm"),
+        /** Public key algorithm (e.g., "RSA", "EC") */
+        PUBLIC_KEY_ALGORITHM("public_key_algorithm"),
+        /** Public key size in bits */
+        PUBLIC_KEY_SIZE("public_key_size"),
+        /** Certificate validity status */
+        CERTIFICATE_STATUS("certificate_status"),
+        /** Certificate version (1, 2, or 3) */
+        VERSION("version"),
+        /** Container for validity period */
+        VALIDITY("validity"),
+        /** Container for public key information */
+        PUBLIC_KEY("public_key"),
+        /** Encoded public key bytes (Base64) */
+        PUBLIC_KEY_ENCODED("public_key_encoded"),
+        /** List of certificate extensions */
+        EXTENSIONS("extensions"),
+        /** Whether an extension is critical */
+        CRITICAL("critical"),
+        /** Extension OID */
+        OID("oid"),
+        /** Extension value (bytes) */
+        VALUE("value"),
+        /** Certificate signature bytes (Base64) */
+        SIGNATURE("signature"),
+        /** DER encoded certificate (Base64) */
+        ENCODED("encoded"),
+        /** Basic constraints extension */
+        BASIC_CONSTRAINTS("basic_constraints"),
+        /** Whether certificate is a CA */
+        IS_CA("is_ca"),
+        /** CA path length constraint */
+        PATH_LENGTH("path_length"),
+        /** Key usage flags */
+        KEY_USAGE("key_usage"),
+        /** Extended key usage OIDs */
+        EXTENDED_KEY_USAGE("extended_key_usage"),
+        /** Subject alternative names */
+        SUBJECT_ALT_NAMES("subject_alt_names"),
+        /** Issuer alternative names */
+        ISSUER_ALT_NAMES("issuer_alt_names"),
+        /** Signature algorithm OID */
+        SIG_ALG_OID("sig_alg_oid"),
+        /** TBS (To Be Signed) certificate bytes */
+        TBS_CERTIFICATE("tbs_certificate"),
+        ;
+
+        private final String name;
+
+        /**
+         * Constructs a Tags enum constant with the specified name.
+         *
+         * @param name the string name used as key in NVGenericMap
+         */
+        SSLTags(String name) {
+            this.name = name;
+        }
+
+        /**
+         * Returns the string name of this tag.
+         *
+         * @return the tag name used as key in NVGenericMap
+         */
+        @Override
+        public String getName() {
+            return name;
+        }
+    }
+
     public static class SubjectIDFilter
             implements ValueFilter<String, String> {
         public static final SubjectIDFilter SINGLETON = new SubjectIDFilter();

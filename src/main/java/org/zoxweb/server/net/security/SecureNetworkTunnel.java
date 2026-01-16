@@ -111,7 +111,7 @@ public class SecureNetworkTunnel
 
 
             //System.setProperty("javax.net.debug","all");
-            SSLContext sslc = SecUtil.SINGLETON.initSSLContext(ksc.keystore_file, ksc.keystore_type, ksc.keystore_password.toCharArray(),
+            SSLContext sslc = SecUtil.initSSLContext(ksc.keystore_file, ksc.keystore_type, ksc.keystore_password.toCharArray(),
                     ksc.alias_password != null ? ksc.alias_password.toCharArray() : null, null, null);
 
 

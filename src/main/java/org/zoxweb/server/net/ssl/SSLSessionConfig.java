@@ -37,12 +37,10 @@ public class SSLSessionConfig
     volatile boolean forcedClose = false;
     volatile IPAddress remoteConnection = null;
     private volatile String sniHostName = null;
-    final boolean clientMode;
+
 
     // used for remote connection creation only
-
-
-    //final Lock ioLock = null;//new ReentrantLock();
+    final boolean clientMode;
     final SSLEngine sslEngine; // the crypto engine
 
 
@@ -137,7 +135,6 @@ public class SSLSessionConfig
     public synchronized SSLEngineResult smartWrap(ByteBuffer source, ByteBuffer destination) throws SSLException {
         ((Buffer) source).flip();
         SSLEngineResult ret = sslEngine.wrap(source, destination);
-        //if(ret.getStatus() == SSLEngineResult.Status.OK)
         source.compact();
         return ret;
     }
@@ -145,7 +142,6 @@ public class SSLSessionConfig
     public synchronized SSLEngineResult smartUnwrap(ByteBuffer source, ByteBuffer destination) throws SSLException {
         ((Buffer) source).flip();
         SSLEngineResult ret = sslEngine.unwrap(source, destination);
-        //if(ret.getStatus() == SSLEngineResult.Status.OK)
         source.compact();
         return ret;
     }

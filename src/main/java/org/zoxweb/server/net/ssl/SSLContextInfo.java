@@ -189,7 +189,7 @@ public class SSLContextInfo
      */
     public SSLContextInfo(KeyStore ks, char[] keyStorePassword, String[] protocols, String[] ciphers)
             throws GeneralSecurityException {
-        this(SecUtil.SINGLETON.initSSLContext("TLS", null, ks, keyStorePassword, keyStorePassword, null),
+        this(SecUtil.initSSLContext("TLS", null, ks, keyStorePassword, keyStorePassword, null),
                 protocols,
                 ciphers);
     }

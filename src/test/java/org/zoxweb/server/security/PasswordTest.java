@@ -17,7 +17,7 @@ public class PasswordTest {
     @BeforeAll
     public static void setup()
     {
-        //SecUtil.SINGLETON.addCredentialHasher(new SHAPasswordHasher(8196)).addCredentialHasher(new BCryptPasswordHasher(10));
+        //SecUtil.addCredentialHasher(new SHAPasswordHasher(8196)).addCredentialHasher(new BCryptPasswordHasher(10));
     }
     @Test
     public void createPassword() throws NoSuchAlgorithmException {
@@ -25,7 +25,7 @@ public class PasswordTest {
         System.out.println(GSONUtil.toJSONDefault(p, true));
 
         System.out.println(p.toCanonicalID());
-        CIPassword regenPassword = SecUtil.SINGLETON.fromCanonicalID(p.toCanonicalID());
+        CIPassword regenPassword = SecUtil.fromCanonicalID(p.toCanonicalID());
         System.out.println(regenPassword.toCanonicalID());
         System.out.println(GSONUtil.toJSONDefault(regenPassword, true));
 
@@ -48,23 +48,23 @@ public class PasswordTest {
 
         // generated online with clear password = password
         String bcryptHash = "$2y$10$yvHLPVjv6yF1MhI95Tw.TellvsfC7TDxYoNBxK8ksuEga8xkpHk7C";
-        CIPassword parsed = SecUtil.SINGLETON.fromCanonicalID(bcryptHash);
+        CIPassword parsed = SecUtil.fromCanonicalID(bcryptHash);
         System.out.println(bcryptHash + " " + HashUtil.isBCryptPasswordValid("password", bcryptHash));
         System.out.println(bCrypted);
-        Assertions.assertTrue(SecUtil.SINGLETON.isPasswordValid(parsed, "password"));
+        Assertions.assertTrue(SecUtil.isPasswordValid(parsed, "password"));
 
 
         CIPassword bPassword = HashUtil.toPassword(CryptoConst.HashType.BCRYPT, 0, 10, "P!ssw2rd");
         System.out.println(GSONUtil.toJSONDefault(bPassword));
-        Assertions.assertTrue(SecUtil.SINGLETON.isPasswordValid(bPassword, "P!ssw2rd"));
+        Assertions.assertTrue(SecUtil.isPasswordValid(bPassword, "P!ssw2rd"));
 
-        SecUtil.SINGLETON.validatePassword(bPassword, "P!ssw2rd");
+        SecUtil.validatePassword(bPassword, "P!ssw2rd");
 
-        CIPassword passwordFromCanonicalID = SecUtil.SINGLETON
+        CIPassword passwordFromCanonicalID = SecUtil
                 .fromCanonicalID(bPassword.toCanonicalID());
 
         System.out.println(GSONUtil.toJSONDefault(passwordFromCanonicalID));
-        Assertions.assertTrue(SecUtil.SINGLETON.isPasswordValid(passwordFromCanonicalID, "P!ssw2rd"));
+        Assertions.assertTrue(SecUtil.isPasswordValid(passwordFromCanonicalID, "P!ssw2rd"));
 
 
 
@@ -74,6 +74,6 @@ public class PasswordTest {
         assert BCrypt.isAMatch("password",hashedPW);
         bPassword = HashUtil.toPassword(CryptoConst.HashType.BCRYPT, 0, 9, "P!ssw2rd");
         System.out.println(GSONUtil.toJSONDefault(bPassword));
-        Assertions.assertTrue(SecUtil.SINGLETON.isPasswordValid(bPassword, "P!ssw2rd"));
+        Assertions.assertTrue(SecUtil.isPasswordValid(bPassword, "P!ssw2rd"));
     }
 }

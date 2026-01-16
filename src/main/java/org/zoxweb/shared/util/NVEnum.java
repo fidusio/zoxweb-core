@@ -41,4 +41,11 @@ public class NVEnum
         super(name, value);
     }
 
+    public static NVEnum create(String name, Enum<?> value) {
+        return new NVEnum(name, value);
+    }
+    public static NVEnum create(GetName name, Enum<?> value) {
+        return new NVEnum(name, value);
+    }
+
 }

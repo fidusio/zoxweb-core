@@ -30,10 +30,15 @@ public class CertificatesTest {
                         System.out.println(xCert.getSubjectX500Principal().getName());
                         //X500Name xname = new X500Name(xCert.getSubjectX500Principal().getName());
 //            NVGenericMap nvg = SharedUtil.toNVGenericMap(xCert.getSubjectX500Principal().getName(), "=",",", true);
-                        NVGenericMap nvg = SecUtil.SINGLETON.certificateToNVGM(xCert);
+                        NVGenericMap nvg = SecUtil.certificateToNVGM(xCert);
+                        NVGenericMap nvg2 = SSLInfoUtil.extractCertInfo(xCert);
                         //System.out.println("CN: " + nvg.get("cn").getValue());
                         String json = GSONUtil.toJSONDefault(nvg, true);
+                        System.out.println("*************************************************************************");
                         System.out.println(json);
+                        System.out.println("-------------------------------------------------------------------------");
+                        System.out.println(GSONUtil.toJSONDefault(nvg2, true));
+                        System.out.println("*************************************************************************");
                         NVGenericMap nvGenericMap = GSONUtil.fromJSONDefault(json, NVGenericMap.class);
 //                        assert json.equals(GSONUtil.toJSONDefault(nvGenericMap, true));
                         String json2 = GSONUtil.toJSONDefault(nvGenericMap, true);
@@ -71,7 +76,7 @@ public class CertificatesTest {
             PrivateKey priK = CryptoUtil.generatePrivateKey("RSA", aliceKey.getPrivate().getEncoded());
             System.out.println("RSA:" + alicePubK.equals(pubK) + ", " + alicePriK.equals(priK));
             String jwtToken = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6Im1hcndhbiBuYWVsZSIsImFkbWluIjp0cnVlLCJpYXQiOjE1MTYyMzkwMjJ9.TUtOxVMqxsmhsCPMNc9BgV0BjpHqXWHLzoCDN8gRqNWvdQMP-3AwQXZP5966SDSYoPIWaCWCQuxLbgB3IRdpiMKaFP0qhrjRhI3DbAxWCg3c3qLYA7UoM70NhjvUYa4PUVGO8ngRs4hBOEuSpD1wg5-Hu3MmpSY012xwjGrdnG6gM9xx3rp_hWqaBSENXKRHPhUhV513MvQ6fafMn9aQa22PxQzAqz-Z-HDG6HjnxN9o4q9HAsfweluV1QRx5oO-KdzgrDn3Mn6N_HrsbWAgtosjFVpOYI3Q5rXTye_ueCCe5MkELSPkltuQ7R3qQCbvDbAp9bqzjLSCnJQfthYrPA";
-            JWT jwt = SecUtil.SINGLETON.parseJWT(jwtToken);
+            JWT jwt = SecUtil.parseJWT(jwtToken);
             System.out.println(GSONUtil.toJSON(jwt, true, false, false));
 
             PublicKey jwtPubKey = CryptoUtil.generatePublicKey("RSA", SharedBase64

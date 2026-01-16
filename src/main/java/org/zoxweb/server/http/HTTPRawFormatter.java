@@ -16,25 +16,35 @@
 package org.zoxweb.server.http;
 
 import org.zoxweb.server.io.UByteArrayOutputStream;
+import org.zoxweb.shared.http.HTTPMessageConfigInterface;
 import org.zoxweb.shared.http.HTTPRequestLine;
 import org.zoxweb.shared.protocol.Delimiter;
 import org.zoxweb.shared.util.GetNameValue;
-
-import java.util.List;
+import org.zoxweb.shared.util.NVGenericMap;
 
 public class HTTPRawFormatter {
     private final String firstLine;
-    private final List<GetNameValue<String>> headers;
+    private final NVGenericMap headers;
     private final byte[] content;
     private UByteArrayOutputStream ubaos;
 
-    public HTTPRawFormatter(HTTPRequestLine rrl, List<GetNameValue<String>> headers, byte[] content) {
+    public HTTPRawFormatter(HTTPMessageConfigInterface hmci) {
+        String uri = hmci.getURI() ==  null ? "/" : hmci.getURI().startsWith("/") ? hmci.getURI() : "/" + hmci.getURI();
+
+
+        this.firstLine = hmci.getMethod().getName() + " " + uri+ " " + hmci.getHTTPVersion();
+        this.headers = hmci.getHeaders();
+        this.content = hmci.getContent();
+    }
+
+
+    public HTTPRawFormatter(HTTPRequestLine rrl, NVGenericMap headers, byte[] content) {
         this.firstLine = rrl.toString();
         this.headers = headers;
         this.content = content;
     }
 
-    public HTTPRawFormatter(String firstLine, List<GetNameValue<String>> headers, byte[] content) {
+    public HTTPRawFormatter(String firstLine, NVGenericMap headers, byte[] content) {
         this.firstLine = firstLine;
         this.headers = headers;
         this.content = content;
@@ -46,16 +56,15 @@ public class HTTPRawFormatter {
             ubaos.write(firstLine);
             ubaos.write(Delimiter.CRLF.getBytes());
             if (headers != null) {
-                for (GetNameValue<String> gnv : headers) {
+                for (GetNameValue<?> gnv : headers.valuesAs(new GetNameValue[0])) {
                     ubaos.write(gnv.getName());
                     ubaos.write(Delimiter.COLON.getBytes());
-                    String value = gnv.getValue();
+                    String value = gnv.getValue() != null ? gnv.getValue().toString() : null;
 
                     if (value != null && !value.isEmpty()) {
                         if (value.charAt(0) != ' ') {
                             ubaos.write(' ');
                         }
-
                         ubaos.write(value);
                     }
                     ubaos.write(Delimiter.CRLF.getBytes());
@@ -68,7 +77,6 @@ public class HTTPRawFormatter {
                 ubaos.write(content);
             }
         }
-
         return ubaos;
     }
 

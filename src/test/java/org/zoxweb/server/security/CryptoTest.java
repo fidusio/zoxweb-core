@@ -22,13 +22,13 @@ import org.zoxweb.shared.util.SharedStringUtil;
 public class CryptoTest {
     @Test
     public void secureRandom() {
-        System.out.println(SecUtil.SINGLETON.defaultSecureRandom().getAlgorithm());
+        System.out.println(SecUtil.defaultSecureRandom().getAlgorithm());
         byte[] randomBytes = new byte[768 / 8];
-        SecUtil.SINGLETON.defaultSecureRandom().nextBytes(randomBytes);
+        SecUtil.defaultSecureRandom().nextBytes(randomBytes);
 
         for (int i = 0; i < 20; i++) {
             long ts = System.nanoTime();
-            SecUtil.SINGLETON.defaultSecureRandom().nextBytes(randomBytes);
+            SecUtil.defaultSecureRandom().nextBytes(randomBytes);
             ts = System.nanoTime() - ts;
             System.out.println(
                     ts + "\tnanos\t" + new String(SharedBase64.encode(randomBytes)) + ":" + SharedStringUtil

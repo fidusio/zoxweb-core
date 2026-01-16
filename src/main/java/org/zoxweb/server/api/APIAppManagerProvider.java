@@ -547,7 +547,7 @@ public class APIAppManagerProvider
 
         UserIDCredentialsDAO credentials = ret.get(0);
         // validate the old password
-        SecUtil.SINGLETON.validatePassword(credentials.getPassword(), oldPassword);
+        SecUtil.validatePassword(credentials.getPassword(), oldPassword);
 
         try {
             CIPassword newPasswordDAO = HashUtil.toPassword(HashType.SHA_512, 0, 8196, newPassword);

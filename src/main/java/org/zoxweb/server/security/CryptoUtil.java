@@ -554,9 +554,9 @@ public class CryptoUtil {
                                                    int arraySize,
                                                    int hashIteration)
             throws NoSuchAlgorithmException {
-        SecureRandom random = SecUtil.SINGLETON.defaultSecureRandom();
+        SecureRandom random = SecUtil.defaultSecureRandom();
 
-        byte[] bytes = SecUtil.SINGLETON.generateRandomBytes(random, arraySize);
+        byte[] bytes = SecUtil.generateRandomBytes(random, arraySize);
 
         digest.reset();
         digest.update(bytes);
@@ -767,7 +767,7 @@ public class CryptoUtil {
 
     public static KeyPair generateKeyPair(String keyCanonicalID)
             throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, NoSuchProviderException {
-        return generateKeyPair(keyCanonicalID, null, SecUtil.SINGLETON.defaultSecureRandom());
+        return generateKeyPair(keyCanonicalID, null, SecUtil.defaultSecureRandom());
     }
 
     public static KeyPair generateKeyPair(CanonicalID keyCanonicalID, String provider, SecureRandom sr)
@@ -781,7 +781,7 @@ public class CryptoUtil {
         CryptoConst.PKInfo pkInfo = CryptoConst.PKInfo.parse(keyCanonicalID);
 
         if (sr == null)
-            sr = SecUtil.SINGLETON.defaultSecureRandom(); // get the default secure random
+            sr = SecUtil.defaultSecureRandom(); // get the default secure random
         KeyPairGenerator keyPairGenerator = provider != null ? KeyPairGenerator.getInstance(pkInfo.getType(), provider) : KeyPairGenerator.getInstance(pkInfo.getType());
         RSAKeyGenParameterSpec h;
 
@@ -798,7 +798,7 @@ public class CryptoUtil {
 
     public static KeyPair generateKeyPair(String type, String provider, AlgorithmParameterSpec keySpec, SecureRandom random) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException {
         KeyPairGenerator kpg = KeyPairGenerator.getInstance(type, provider);
-        kpg.initialize(keySpec, random != null ? random : SecUtil.SINGLETON.defaultSecureRandom());
+        kpg.initialize(keySpec, random != null ? random : SecUtil.defaultSecureRandom());
         return kpg.generateKeyPair();
     }
 

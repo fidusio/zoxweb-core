@@ -15,10 +15,9 @@
  */
 package org.zoxweb.shared.protocol;
 
-import java.io.Serializable;
-
 import org.zoxweb.shared.util.SUS;
-import org.zoxweb.shared.util.SharedUtil;
+
+import java.io.Serializable;
 
 /**
  * Represents the first line of a protocol message.
@@ -32,7 +31,7 @@ public class MessageFirstLine
     implements Serializable
 {
 
-	private String tokens[] = null;
+	private final String[] tokens;
 
 	/**
 	 * Constructs a MessageFirstLine by parsing the given line.
@@ -47,7 +46,7 @@ public class MessageFirstLine
 		SUS.checkIfNulls("Can't parse a null line", fullRequestLine);
 		String[] tokensTemp = fullRequestLine.split(" ");
 
-		if (tokensTemp == null || tokensTemp.length < 3)
+		if (tokensTemp.length < 3)
 		{
 			throw new IllegalArgumentException("illegal tokens");
 		}

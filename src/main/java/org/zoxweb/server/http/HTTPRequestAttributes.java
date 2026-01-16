@@ -111,7 +111,7 @@ public class HTTPRequestAttributes {
 
             if (temp != null && temp.getAuthScheme() == HTTPAuthScheme.BEARER) {
                 try {
-                    JWT jwt = SecUtil.SINGLETON.parseJWT(temp.getToken());
+                    JWT jwt = SecUtil.parseJWT(temp.getToken());
                     jwtToken = new JWTToken();
                     jwtToken.setJWT(jwt);
                     jwtToken.setToken(temp.getToken());

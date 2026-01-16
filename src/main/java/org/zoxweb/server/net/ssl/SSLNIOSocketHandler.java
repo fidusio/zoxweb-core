@@ -298,7 +298,7 @@ public class SSLNIOSocketHandler
 
 
             //TaskUtil.setThreadMultiplier(4);
-            SSLContext sslContext = SecUtil.SINGLETON.initSSLContext(keystore, ksType, ksPassword.toCharArray(), null, null, null);
+            SSLContext sslContext = SecUtil.initSSLContext(keystore, ksType, ksPassword.toCharArray(), null, null, null);
 
             new NIOSocket(TaskUtil.defaultTaskProcessor(), TaskUtil.defaultTaskScheduler()).
                     addServerSocket(new InetSocketAddress(port), 512, new SSLNIOSocketHandlerFactory(new SSLContextInfo(sslContext), remoteAddress));

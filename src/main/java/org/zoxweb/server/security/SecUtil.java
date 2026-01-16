@@ -2,6 +2,7 @@ package org.zoxweb.server.security;
 
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.util.GSONUtil;
+import org.zoxweb.server.util.LockHolder;
 import org.zoxweb.server.util.ReflectionUtil;
 import org.zoxweb.shared.annotation.SecurityProp;
 import org.zoxweb.shared.crypto.CIPassword;
@@ -21,89 +22,26 @@ import java.security.*;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.*;
+import java.util.concurrent.locks.ReentrantLock;
 
 public final class SecUtil {
     public static CryptoConst.SecureRandomType SECURE_RANDOM_ALGO = null;
-    public static final SecUtil SINGLETON = new SecUtil();
-    private final Map<Method, ResourceSecurity> methodResourceSecurityMap = new LinkedHashMap<>();
-    private final Map<String, CredentialHasher<?>> credentialHasherMap = new LinkedHashMap<>();
-    private volatile SecureRandom defaultSecureRandom = null;
-    private static final Map<String, String> OID_MAP;
+    //public static final SecUtil SINGLETON = new SecUtil();
+    private static final Map<Method, ResourceSecurity> methodResourceSecurityMap = new LinkedHashMap<>();
+    private static final Map<String, CredentialHasher<?>> credentialHasherMap = new LinkedHashMap<>();
+    private static volatile SecureRandom defaultSecureRandom = null;
+
+
+    public static final LockHolder SEC_LOCK = new LockHolder(new ReentrantLock());
+    private SecUtil() {}
 
     static {
-        Map<String, String> m = new HashMap<>();
-
-        // --- Subject / Issuer Attribute OIDs (RDNs) ---
-        m.put("2.5.4.3", "CN (Common Name)");
-        m.put("2.5.4.6", "C (Country)");
-        m.put("2.5.4.7", "L (Locality)");
-        m.put("2.5.4.8", "ST (State/Province)");
-        m.put("2.5.4.10", "O (Organization)");
-        m.put("2.5.4.11", "OU (Organizational Unit)");
-        m.put("1.2.840.113549.1.9.1", "emailAddress");
-
-        // --- Signature / Public Key Algorithms ---
-        m.put("1.2.840.113549.1.1.1", "RSA Encryption");
-        m.put("1.2.840.113549.1.1.5", "sha1WithRSAEncryption");
-        m.put("1.2.840.113549.1.1.11", "sha256WithRSAEncryption");
-        m.put("1.2.840.113549.1.1.12", "sha384WithRSAEncryption");
-        m.put("1.2.840.113549.1.1.13", "sha512WithRSAEncryption");
-        m.put("1.2.840.113549.1.1.10", "RSASSA-PSS");
-        m.put("1.2.840.10045.2.1", "EC Public Key");
-        m.put("1.2.840.10045.4.3.2", "ecdsaWithSHA256");
-        m.put("1.2.840.10045.4.3.3", "ecdsaWithSHA384");
-        m.put("1.2.840.10045.4.3.4", "ecdsaWithSHA512");
-        m.put("1.3.101.112", "Ed25519");
-        m.put("1.3.101.113", "Ed448");
-
-        // --- Extensions ---
-        m.put("2.5.29.19", "Basic Constraints");
-        m.put("2.5.29.14", "Subject Key Identifier");
-        m.put("2.5.29.35", "Authority Key Identifier");
-        m.put("2.5.29.15", "Key Usage");
-        m.put("2.5.29.37", "Extended Key Usage");
-        m.put("2.5.29.17", "Subject Alternative Name");
-        m.put("2.5.29.18", "Issuer Alternative Name");
-        m.put("2.5.29.31", "CRL Distribution Points");
-        m.put("2.5.29.32", "Certificate Policies");
-        m.put("2.5.29.30", "Name Constraints");
-        m.put("2.5.29.36", "Policy Constraints");
-        m.put("2.5.29.46", "Freshest CRL");
-        m.put("1.3.6.1.5.5.7.1.1", "Authority Information Access");
-        m.put("1.3.6.1.5.5.7.48.1", "OCSP");
-        m.put("1.3.6.1.5.5.7.48.2", "CA Issuers");
-
-        // --- Extended Key Usages ---
-        m.put("1.3.6.1.5.5.7.3.1", "Server Authentication");
-        m.put("1.3.6.1.5.5.7.3.2", "Client Authentication");
-        m.put("1.3.6.1.5.5.7.3.3", "Code Signing");
-        m.put("1.3.6.1.5.5.7.3.4", "Email Protection");
-        m.put("1.3.6.1.5.5.7.3.8", "Time Stamping");
-        m.put("1.3.6.1.5.5.7.3.9", "OCSP Signing");
-
-        // --- Hash algorithms (sometimes referenced) ---
-        m.put("1.3.14.3.2.26", "SHA-1");
-        m.put("2.16.840.1.101.3.4.2.1", "SHA-256");
-        m.put("2.16.840.1.101.3.4.2.2", "SHA-384");
-        m.put("2.16.840.1.101.3.4.2.3", "SHA-512");
-        // --- Certificate Transparency (Google OIDs) ---
-        m.put("1.3.6.1.4.1.11129.2.4.2", "CT Precertificate SCTs");
-        m.put("1.3.6.1.4.1.11129.2.4.3", "CT Precertificate Poison");
-        m.put("1.3.6.1.4.1.11129.2.4.4", "CT Embedded SCT Extension");
-        m.put("1.3.6.1.4.1.11129.2.4.5", "CT Embedded OCSP SCTs");
-        m.put("1.3.6.1.4.1.11129.2.4.6", "CT Embedded CRL SCTs");
-
-        OID_MAP = Collections.unmodifiableMap(m);
-    }
-
-
-    private SecUtil() {
         addCredentialHasher(new BCryptPasswordHasher(10));
         addCredentialHasher(new SHAPasswordHasher(8196));
     }
 
 
-    public JWT parseJWT(String token)
+    public static JWT parseJWT(String token)
             throws InstantiationException, IllegalAccessException, ClassNotFoundException, NullPointerException, IllegalArgumentException {
         SUS.checkIfNulls("Null token", token);
         String[] tokens = token.trim().split("\\.");
@@ -159,13 +97,13 @@ public final class SecUtil {
         return ret;
     }
 
-    public JWT decodeJWT(String key, String token)
+    public static JWT decodeJWT(String key, String token)
             throws IOException,
             SecurityException, NullPointerException, IllegalArgumentException, GeneralSecurityException {
         return decodeJWT(key != null ? SharedStringUtil.getBytes(key) : null, token);
     }
 
-    public JWT decodeJWT(byte[] key, String token)
+    public static JWT decodeJWT(byte[] key, String token)
             throws IOException,
             SecurityException, GeneralSecurityException {
 
@@ -233,7 +171,7 @@ public final class SecUtil {
     }
 
 
-    public CIPassword fromCanonicalID(String passwordCanID) throws NoSuchAlgorithmException {
+    public static CIPassword fromCanonicalID(String passwordCanID) throws NoSuchAlgorithmException {
         SUS.checkIfNulls("null passwordCanID", passwordCanID);
         CredentialHasher<CIPassword> ch = findCredentialHasherByCanID(passwordCanID);
         if (ch == null)
@@ -242,33 +180,58 @@ public final class SecUtil {
         return ch.fromCanonicalID(passwordCanID);
     }
 
-    public synchronized CredentialHasher<CIPassword> findCredentialHasherByCanID(String passwordCanID) {
-        String[] tokens = SharedStringUtil.parseString(passwordCanID, "\\$", true);
-        if (tokens.length > 1)
-            return lookupCredentialHasher(tokens[0]);
-        return null;
+    public static CredentialHasher<CIPassword> findCredentialHasherByCanID(String passwordCanID) {
+        SEC_LOCK.lock(true);
+        try {
+
+            String[] tokens = SharedStringUtil.parseString(passwordCanID, "\\$", true);
+            if (tokens.length > 1)
+                return lookupCredentialHasher(tokens[0]);
+            return null;
+        }
+        finally {
+            SEC_LOCK.unlock(true);
+        }
     }
 
 
-    public synchronized SecUtil addCredentialHasher(CredentialHasher<?> credentialHasher) {
-        credentialHasherMap.put(DataEncoder.StringLower.encode(credentialHasher.getName()), credentialHasher);
-        for (String algo : credentialHasher.supportedAlgorithms())
-            credentialHasherMap.put(DataEncoder.StringLower.encode(algo), credentialHasher);
-        return this;
+    public static void addCredentialHasher(CredentialHasher<?> credentialHasher) {
+        SEC_LOCK.lock(true);
+        try {
+            credentialHasherMap.put(DataEncoder.StringLower.encode(credentialHasher.getName()), credentialHasher);
+            for (String algo : credentialHasher.supportedAlgorithms())
+                credentialHasherMap.put(DataEncoder.StringLower.encode(algo), credentialHasher);
+        }
+        finally {
+            SEC_LOCK.unlock(true);
+        }
+
     }
 
-    public String[] credentialHasherAlgorithms() {
+    public static String[] credentialHasherAlgorithms() {
         return credentialHasherMap.keySet().toArray(new String[0]);
     }
 
-    public synchronized void removeCredentialHasher(CredentialHasher<?> credentialHasher) {
-        credentialHasherMap.remove(DataEncoder.StringLower.encode(credentialHasher.getName()));
-        for (String algo : credentialHasher.supportedAlgorithms())
-            credentialHasherMap.remove(DataEncoder.StringLower.encode(algo));
+    public static  void removeCredentialHasher(CredentialHasher<?> credentialHasher) {
+        SEC_LOCK.lock(true);
+        try {
+            credentialHasherMap.remove(DataEncoder.StringLower.encode(credentialHasher.getName()));
+            for (String algo : credentialHasher.supportedAlgorithms())
+                credentialHasherMap.remove(DataEncoder.StringLower.encode(algo));
+        }
+        finally {
+            SEC_LOCK.unlock(true);
+        }
     }
 
-    public synchronized <T> CredentialHasher<T> lookupCredentialHasher(String name) {
-        return (CredentialHasher<T>) credentialHasherMap.get(DataEncoder.StringLower.encode(name));
+    public static  <T> CredentialHasher<T> lookupCredentialHasher(String name) {
+        SEC_LOCK.lock(true);
+        try {
+            return (CredentialHasher<T>) credentialHasherMap.get(DataEncoder.StringLower.encode(name));
+        }
+        finally {
+            SEC_LOCK.unlock(true);
+        }
     }
 
     public synchronized <T> CredentialHasher<T> lookupCredentialHasher(CryptoConst.HashType hashType) {
@@ -282,25 +245,31 @@ public final class SecUtil {
      * @param securityProfile if null SecurityProfile will be created
      * @return ResourceSecurity if applicable or null
      */
-    public synchronized ResourceSecurity applyAndCacheSecurityProfile(Method method, SecurityProfile securityProfile) {
-        SUS.checkIfNulls("Method null", method);
-        SecurityProp sp = ReflectionUtil.getAnnotationFromMethod(method, SecurityProp.class);
-        if (sp != null) {
-            ResourceSecurity ret = applySecurityProp(securityProfile != null ? securityProfile : new SecurityProfile(), sp);
-            methodResourceSecurityMap.put(method, ret);
-            return ret;
+    public static  ResourceSecurity applyAndCacheSecurityProfile(Method method, SecurityProfile securityProfile) {
+        SEC_LOCK.lock(true);
+        try {
+            SUS.checkIfNulls("Method null", method);
+            SecurityProp sp = ReflectionUtil.getAnnotationFromMethod(method, SecurityProp.class);
+            if (sp != null) {
+                ResourceSecurity ret = applySecurityProp(securityProfile != null ? securityProfile : new SecurityProfile(), sp);
+                methodResourceSecurityMap.put(method, ret);
+                return ret;
+            }
+            return null;
         }
-        return null;
+        finally {
+            SEC_LOCK.unlock(true);
+        }
     }
 
 
-    public boolean isPasswordValid(final CIPassword ciPassword, String password)
+    public static boolean isPasswordValid(final CIPassword ciPassword, String password)
             throws NullPointerException, IllegalArgumentException {
         SUS.checkIfNulls("Null values", ciPassword, password);
         return isPasswordValid(ciPassword, SharedStringUtil.getBytes(password));
     }
 
-    public boolean isPasswordValid(final CIPassword ciPassword, byte[] password)
+    public static boolean isPasswordValid(final CIPassword ciPassword, byte[] password)
             throws NullPointerException, IllegalArgumentException {
         SUS.checkIfNulls("Null values", ciPassword, password);
         CredentialHasher<CIPassword> passwordHasher = lookupCredentialHasher(ciPassword.getAlgorithm());
@@ -309,7 +278,7 @@ public final class SecUtil {
         return passwordHasher.validate(ciPassword, password);
     }
 
-    public boolean isPasswordValid(final CIPassword ciPassword, char[] password)
+    public static boolean isPasswordValid(final CIPassword ciPassword, char[] password)
             throws NullPointerException, IllegalArgumentException {
         SUS.checkIfNulls("Null values", ciPassword, password);
         CredentialHasher<CIPassword> passwordHasher = lookupCredentialHasher(ciPassword.getAlgorithm());
@@ -318,7 +287,7 @@ public final class SecUtil {
         return passwordHasher.validate(ciPassword, password);
     }
 
-    public void validatePassword(final CIPassword ciPassword, final char[] password)
+    public static void validatePassword(final CIPassword ciPassword, final char[] password)
             throws NullPointerException, IllegalArgumentException, AccessSecurityException {
 
         SUS.checkIfNulls("Null values", ciPassword, password);
@@ -329,7 +298,7 @@ public final class SecUtil {
     }
 
 
-    public void validatePassword(final CIPassword ciPassword, final byte[] password)
+    public static void validatePassword(final CIPassword ciPassword, final byte[] password)
             throws NullPointerException, IllegalArgumentException, AccessSecurityException {
 
         SUS.checkIfNulls("Null values", ciPassword, password);
@@ -339,7 +308,7 @@ public final class SecUtil {
         throw new AccessSecurityException("Invalid Credentials");
     }
 
-    public void validatePassword(final CIPassword ciPassword, String password)
+    public static void validatePassword(final CIPassword ciPassword, String password)
             throws NullPointerException, IllegalArgumentException, AccessSecurityException {
         SUS.checkIfNulls("Null values", ciPassword, password);
         if (isPasswordValid(ciPassword, password))
@@ -355,7 +324,7 @@ public final class SecUtil {
      * @param securityProp    to be applied
      * @return ResourceSecurity or null
      */
-    public ResourceSecurity applySecurityProp(SecurityProfile securityProfile, SecurityProp securityProp) {
+    public static ResourceSecurity applySecurityProp(SecurityProfile securityProfile, SecurityProp securityProp) {
         if (securityProfile != null && securityProp != null) {
             String[] roles = SUS.isEmpty(securityProp.roles()) ? null : SharedStringUtil.parseString(securityProp.roles(), ",", " ", "\t");
             String[] permissions = SUS.isEmpty(securityProp.permissions()) ? null : SharedStringUtil.parseString(securityProp.permissions(), ",", " ", "\t");
@@ -377,7 +346,7 @@ public final class SecUtil {
      * @param method to look for
      * @return associated ResourceSecurity if it exists
      */
-    public ResourceSecurity lookupCachedResourceSecurity(Method method) {
+    public static ResourceSecurity lookupCachedResourceSecurity(Method method) {
         return methodResourceSecurityMap.get(method);
     }
 
@@ -387,19 +356,24 @@ public final class SecUtil {
      * @param method that has been cached
      * @return ResourceSecurity if it existed
      */
-    public synchronized ResourceSecurity removeCachedResourceSecurity(Method method) {
-        return methodResourceSecurityMap.remove(method);
+    public static ResourceSecurity removeCachedResourceSecurity(Method method) {
+        SEC_LOCK.lock(true);
+        try {
+            return methodResourceSecurityMap.remove(method);
+        }finally {
+            SEC_LOCK.unlock(true);
+        }
     }
 
     /**
      * @return all cached methods
      */
-    public synchronized Method[] getAllCachedMethods() {
+    public static Method[] getAllCachedMethods() {
         return methodResourceSecurityMap.keySet().toArray(new Method[0]);
     }
 
 
-    public SSLContext initSSLContext(String keyStoreFilename,
+    public static SSLContext initSSLContext(String keyStoreFilename,
                                      String keyStoreType,
                                      final char[] keyStorePassword,
                                      final char[] crtPassword,
@@ -416,7 +390,7 @@ public final class SecUtil {
     }
 
 
-    public SSLContext initSSLContext(String protocol,
+    public static SSLContext initSSLContext(String protocol,
                                      final Provider provider,
                                      final File keyStoreFilename,
                                      String keyStoreType,
@@ -439,7 +413,7 @@ public final class SecUtil {
 
     }
 
-    public SSLContext initSSLContext(String protocol,
+    public static SSLContext initSSLContext(String protocol,
                                      final Provider provider,
                                      final InputStream keyStoreIS,
                                      String keyStoreType,
@@ -470,7 +444,7 @@ public final class SecUtil {
         return sslContext;
     }
 
-    public SSLContext initSSLContext(final String protocol,
+    public static SSLContext initSSLContext(final String protocol,
                                      final Provider provider,
                                      final KeyStore keyStore,
                                      final char[] keyStorePassword,
@@ -496,7 +470,7 @@ public final class SecUtil {
         return sslContext;
     }
 
-    public SecureRandom newSecureRandom(CryptoConst.SecureRandomType srt)
+    public static SecureRandom newSecureRandom(CryptoConst.SecureRandomType srt)
             throws NoSuchAlgorithmException {
         switch (srt) {
             case SECURE_RANDOM_VM_STRONG:
@@ -514,10 +488,11 @@ public final class SecUtil {
         }
     }
 
-    public SecureRandom defaultSecureRandom() {
+    public static SecureRandom defaultSecureRandom() {
         if (SECURE_RANDOM_ALGO == null && defaultSecureRandom == null) {
 
-            synchronized (this) {
+            SEC_LOCK.lock(true);
+            try{
                 if (SECURE_RANDOM_ALGO == null && defaultSecureRandom == null) {
                     for (CryptoConst.SecureRandomType srt : CryptoConst.SecureRandomType.values()) {
                         try {
@@ -531,18 +506,21 @@ public final class SecUtil {
                     }
                 }
             }
+            finally {
+                SEC_LOCK.unlock(true);
+            }
 
         }
 
         return defaultSecureRandom;
     }
 
-    public byte[] generateRandomBytes(int size)
+    public static byte[] generateRandomBytes(int size)
             throws NullPointerException, IllegalArgumentException {
         return generateRandomBytes(null, size);
     }
 
-    public byte[] generateRandomBytes(SecureRandom sr, int size)
+    public static byte[] generateRandomBytes(SecureRandom sr, int size)
             throws NullPointerException, IllegalArgumentException {
         if (size < 1) {
             throw new IllegalArgumentException("invalid size " + size + " must be greater than zero.");
@@ -559,7 +537,7 @@ public final class SecUtil {
     }
 
 
-    public String secProvidersToString(boolean detailed) {
+    public static String secProvidersToString(boolean detailed) {
         StringBuilder sb = new StringBuilder();
 
         // Loop over each provider and print its details
@@ -571,7 +549,7 @@ public final class SecUtil {
         return sb.toString();
     }
 
-    public String secProviderToString(Provider provider, boolean detailed) {
+    public static String secProviderToString(Provider provider, boolean detailed) {
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
 
@@ -598,31 +576,43 @@ public final class SecUtil {
      * @param provider to be added
      * @return the index on the provider in the array of providers
      */
-    public synchronized int addProvider(Provider provider) {
+    public static int addProvider(Provider provider) {
         return addProviderAt(provider, 0);
     }
 
-    public synchronized int addProviderAt(Provider provider, int position) {
-        SUS.checkIfNulls("Null provider", provider);
-        Provider[] providers = Security.getProviders();
-        for (int i = 0; i < providers.length; i++) {
-            if (providers[i].equals(provider)) {
-                return i;
+    public static int addProviderAt(Provider provider, int position) {
+        SEC_LOCK.lock(true);
+        try {
+            SUS.checkIfNulls("Null provider", provider);
+            Provider[] providers = Security.getProviders();
+            for (int i = 0; i < providers.length; i++) {
+                if (providers[i].equals(provider)) {
+                    return i;
+                }
             }
+            return Security.insertProviderAt(provider, position);
         }
-        return Security.insertProviderAt(provider, position);
+        finally {
+            SEC_LOCK.unlock(true);
+        }
     }
 
-    public synchronized boolean removeProvider(String name) {
-        Security.removeProvider(name);
-        return Security.getProvider(name) == null;
+    public static boolean removeProvider(String name) {
+        SEC_LOCK.lock(true);
+        try {
+            Security.removeProvider(name);
+            return Security.getProvider(name) == null;
+        }
+        finally {
+            SEC_LOCK.unlock(true);
+        }
     }
 
-    public synchronized Provider getProvider(String name) {
+    public static Provider getProvider(String name) {
         return Security.getProvider(name);
     }
 
-    public NVGenericMap certificateToNVGM(X509Certificate cert) throws CertificateEncodingException {
+    public static NVGenericMap certificateToNVGM(X509Certificate cert) throws CertificateEncodingException {
         NVGenericMap nvgm = new NVGenericMap();
 
         // Basic certificate fields
@@ -650,14 +640,14 @@ public final class SecUtil {
             NVGenericMap ext = new NVGenericMap();
             //ext.build("oid", OID_MAP.get(oid));
             ext.build(new NVBoolean("critical", true));
-            ext.build(new NVBlob(OID_MAP.get(oid) != null ? OID_MAP.get(oid) : oid, cert.getExtensionValue(oid)));
+            ext.build(new NVBlob(OIDCodecs.oidLookup(oid) != null ? OIDCodecs.oidLookup(oid) : oid, cert.getExtensionValue(oid)));
             extensions.add(ext);
         }
         for (String oid : cert.getNonCriticalExtensionOIDs() != null ? cert.getNonCriticalExtensionOIDs() : new HashSet<String>()) {
             NVGenericMap ext = new NVGenericMap();
             //ext.build("oid", OID_MAP.get(oid));
             //ext.build(new NVBoolean("critical", false));
-            ext.build(new NVBlob(OID_MAP.get(oid) != null ? OID_MAP.get(oid) : oid, cert.getExtensionValue(oid)));
+            ext.build(new NVBlob(OIDCodecs.oidLookup(oid) != null ? OIDCodecs.oidLookup(oid) : oid, cert.getExtensionValue(oid)));
             extensions.add(ext);
         }
         nvgm.build(extensions);

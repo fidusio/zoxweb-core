@@ -286,7 +286,7 @@ public class HashUtil {
             if (rounds < 0) {
                 rounds = 0;
             }
-            SecureRandom random = SecUtil.SINGLETON.defaultSecureRandom();
+            SecureRandom random = SecUtil.defaultSecureRandom();
             salt = new byte[saltLength];
             random.nextBytes(salt);
             MessageDigest md = MessageDigest.getInstance(algo.getName());

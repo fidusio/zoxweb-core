@@ -13,11 +13,11 @@ import org.zoxweb.shared.security.IPBlockerConfig;
 
 public class IPBlockerConfigTest {
 
-	IPBlockerConfig ipbc;
-	
-	
+	static IPBlockerConfig ipbc;
+
+
 	@BeforeAll
-	public void init()
+	public static void init()
 	{
 		ipbc = new IPBlockerConfig();
 		ipbc.setAuthFile("/var/log/auth.log");

@@ -25,7 +25,7 @@ public class SecureRandomTest {
   public static void main(String[] args) {
     for (SecureRandomType srt : SecureRandomType.values()) {
       try {
-        SecureRandom sr = SecUtil.SINGLETON.newSecureRandom(srt);
+        SecureRandom sr = SecUtil.newSecureRandom(srt);
         System.out.println(
             SharedUtil.toCanonicalID(':', srt.getName(), sr.getAlgorithm(), sr.getProvider()));
 
