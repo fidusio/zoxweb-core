@@ -4,7 +4,6 @@ import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.net.NIOSocket;
 import org.zoxweb.server.net.NIOSocketHandler;
-import org.zoxweb.server.net.NIOSocketHandlerFactory;
 import org.zoxweb.server.net.PlainSessionCallback;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.server.util.GSONUtil;
@@ -161,7 +160,7 @@ public class NIOClientConnectionTest {
             NIOSocket nioSocket = new NIOSocket(TaskUtil.defaultTaskProcessor(), TaskUtil.defaultTaskScheduler());
             ConnectionTracker connectionTracker = new ConnectionTracker();
 
-            NIOSocketHandlerFactory nshf = new NIOSocketHandlerFactory(ConnectionSession.class, false);
+            //NIOSocketHandlerFactory nshf = new NIOSocketHandlerFactory(ConnectionSession.class, false);
             for (IPAddress ipAddress : ipAddresses) {
                 //log.getLogger().info("" + ipAddress);
                 if (tracker)

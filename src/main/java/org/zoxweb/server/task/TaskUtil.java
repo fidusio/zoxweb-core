@@ -223,7 +223,7 @@ public class TaskUtil {
             // check after wait for reason
             // sometimes the tp and tsp needs some time to start working
             // the con is the caller will always have to wait at least one duration
-        } while (isBusy(tp, tsp));
+        } while (isBusy(tp, tsp));// || (exitCondition != null && exitCondition.getAsBoolean()));
 
         return System.currentTimeMillis();
     }

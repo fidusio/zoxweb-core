@@ -6,6 +6,8 @@ import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.io.UByteArrayOutputStream;
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.net.NIOSocket;
+import org.zoxweb.server.net.NIOSocketHandler;
+import org.zoxweb.server.net.PlainSessionCallback;
 import org.zoxweb.server.net.ssl.SSLNIOSocketHandler;
 import org.zoxweb.server.net.ssl.SSLSessionCallback;
 import org.zoxweb.server.task.TaskUtil;
@@ -18,9 +20,13 @@ import org.zoxweb.shared.util.Const;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -35,13 +41,19 @@ public class NIOSSLClientConnectionTest {
 
 
 
-    public static class TimeStampSession
+    public static class URISession
             extends SSLSessionCallback {
         AtomicBoolean closed = new AtomicBoolean(false);
         private UByteArrayOutputStream result = new UByteArrayOutputStream();
         private long timeStamp = System.currentTimeMillis();
+        private final URI uri;
 
 
+
+
+        public URISession(String url) throws URISyntaxException {
+             this.uri = new URI(url);
+        }
 
         /**
          * Closes this stream and releases any system resources associated
@@ -112,7 +124,7 @@ public class NIOSSLClientConnectionTest {
 
             //IOUtil.close(this);
 
-            HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit("https://xlogistx.io", "timestamp", "GET");
+            HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit(uri.getScheme() + uri.getHost() + ":" + uri.getPort(), uri.getRawPath(), "GET");
             hmci.setHTTPVersion(HTTPVersion.HTTP_1_1);
             HTTPRawFormatter hrf = new  HTTPRawFormatter(hmci);
 
@@ -130,8 +142,8 @@ public class NIOSSLClientConnectionTest {
 
 
 
-    public static class SSLConnectionSession
-            extends SSLSessionCallback {
+    public static class PlainSession
+            extends PlainSessionCallback {
         AtomicBoolean closed = new AtomicBoolean(false);
 
 
@@ -213,17 +225,39 @@ public class NIOSSLClientConnectionTest {
 
         try {
             long ts = System.currentTimeMillis();
-            IPAddress[] ipAddresses = IPAddress.parse(args);
+            List<IPAddress> ipAddresses = new ArrayList<IPAddress>();
             NIOSocket nioSocket = new NIOSocket(TaskUtil.defaultTaskProcessor(), TaskUtil.defaultTaskScheduler());
+            for(int i = 0; i < args.length; i++) {
+                IPAddress ipAddress = null;
+                try {
+                    ipAddress = IPAddress.URLDecoder.decode(args[i]);
 
-            for (IPAddress ipAddress : ipAddresses) {
-                log.getLogger().info("" + ipAddress);
+                    nioSocket.addClientSocket(new InetSocketAddress(ipAddress.getInetAddress(), ipAddress.getPort()), new SSLNIOSocketHandler(new URISession(args[i]), true), 5);
+                    ipAddresses.add(ipAddress);
+                    System.out.println(args[i]);
+                }
+                catch (Exception e) {
+                   ipAddress = null;
+                }
 
-                    nioSocket.addClientSocket(new InetSocketAddress(ipAddress.getInetAddress(), ipAddress.getPort()), new SSLNIOSocketHandler(new SSLConnectionSession(), true), 5);
+                if(ipAddress == null)
+                {
+                    try {
+
+                        ipAddress = IPAddress.parse(args[i]);
+                        nioSocket.addClientSocket(new InetSocketAddress(ipAddress.getInetAddress(), ipAddress.getPort()), new NIOSocketHandler(new PlainSession(), false), 5);
+                        ipAddresses.add(ipAddress);
+                        System.out.println(args[i]);
+                    }
+                    catch (Exception e) {
+                        System.err.println(args[i] + " FAILED!!!!");
+                    }
+                }
             }
 
-            TaskUtil.waitIfBusy(500, () -> total() == ipAddresses.length);
-            log.getLogger().info("Total: " + total() + " Success: " + successCount.get() + " Failed: " + failCount.get() + " it took " + Const.TimeInMillis.toString(System.currentTimeMillis() - ts));
+            int size = ipAddresses.size();
+            TaskUtil.waitIfBusy(500, () -> total() == size);
+            log.getLogger().info("IPAddresses " + ipAddresses + " Total: " + total() + " Success: " + successCount.get() + " Failed: " + failCount.get() + " it took " + Const.TimeInMillis.toString(System.currentTimeMillis() - ts));
 
             IOUtil.close(nioSocket);
 

@@ -35,8 +35,8 @@ public enum URIScheme
 	HTTPS("https", 443),
 	/** HTTP (port 80) */
 	HTTP("http", 80),
-	/** FTP (port 23) */
-	FTP("ftp", 23),
+	/** FTP (port 21) */
+	FTP("ftp", 21),
 	/** File system access (no port) */
 	FILE("file", -1),
 	/** Email mailto links (no port) */
@@ -47,6 +47,7 @@ public enum URIScheme
 	WSS("wss", 443),
 	/** WebSocket (port 80) */
 	WS("ws", 80),
+	SSH("ssh", 22),
 
 	;
 
