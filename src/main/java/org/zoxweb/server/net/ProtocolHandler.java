@@ -185,4 +185,7 @@ public abstract class ProtocolHandler
     }
 
     abstract protected void close_internal() throws IOException;
+    public boolean upgradeToTLS() throws IOException {
+        throw  new UnsupportedOperationException("UpgradeToTLS not supported");
+    }
 }

@@ -40,19 +40,18 @@ public class NIOSSLClientConnectionTest {
     static AtomicLong failCount = new AtomicLong(0);
 
 
-
     public static class URISession
             extends SSLSessionCallback {
         AtomicBoolean closed = new AtomicBoolean(false);
         private UByteArrayOutputStream result = new UByteArrayOutputStream();
         private long timeStamp = System.currentTimeMillis();
         private final URI uri;
-
-
+        private final String url;
 
 
         public URISession(String url) throws URISyntaxException {
-             this.uri = new URI(url);
+            this.url = url;
+            this.uri = new URI(url);
         }
 
         /**
@@ -73,7 +72,7 @@ public class NIOSSLClientConnectionTest {
 
             if (!closed.getAndSet(true)) {
                 IOUtil.close(getChannel());
-                log.getLogger().info("Closing connection: " + getRemoteAddress() + " it took " + Const.TimeInMillis.toString(System.currentTimeMillis() - timeStamp) );
+                log.getLogger().info("Closing connection: " + getRemoteAddress() + " it took " + Const.TimeInMillis.toString(System.currentTimeMillis() - timeStamp));
             }
         }
 
@@ -87,12 +86,12 @@ public class NIOSSLClientConnectionTest {
 
             try {
                 ByteBufferUtil.write(byteBuffer, result, true);
-                log.getLogger().info(""+result);
+                log.getLogger().info("" + result);
 
 
                 close();
             } catch (IOException e) {
-               e.printStackTrace();
+                e.printStackTrace();
             }
 
         }
@@ -100,7 +99,7 @@ public class NIOSSLClientConnectionTest {
 
         public void exception(Exception e) {
             failCount.incrementAndGet();
-            log.getLogger().info(getRemoteAddress()  + " " + e);
+            log.getLogger().info(url + " " + getRemoteAddress() + " " + e);
             IOUtil.close(this);
 
 
@@ -115,9 +114,9 @@ public class NIOSSLClientConnectionTest {
         public boolean isClosed() {
             return closed.get();
         }
+
         @Override
-        public void connected(SelectionKey key)
-        {
+        public void connected(SelectionKey key) {
             successCount.incrementAndGet();
             SocketChannel channel = (SocketChannel) getChannel();
             //System.out.println(getRemoteAddress() + " " + channel.isConnected() + " total: " + total());
@@ -126,7 +125,7 @@ public class NIOSSLClientConnectionTest {
 
             HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit(uri.getScheme() + uri.getHost() + ":" + uri.getPort(), uri.getRawPath(), "GET");
             hmci.setHTTPVersion(HTTPVersion.HTTP_1_1);
-            HTTPRawFormatter hrf = new  HTTPRawFormatter(hmci);
+            HTTPRawFormatter hrf = new HTTPRawFormatter(hmci);
 
 
             try {
@@ -139,13 +138,9 @@ public class NIOSSLClientConnectionTest {
     }
 
 
-
-
-
     public static class PlainSession
             extends PlainSessionCallback {
         AtomicBoolean closed = new AtomicBoolean(false);
-
 
 
         /**
@@ -186,7 +181,7 @@ public class NIOSSLClientConnectionTest {
 
         public void exception(Exception e) {
             failCount.incrementAndGet();
-            log.getLogger().info(getRemoteAddress()  + " " + e);
+            log.getLogger().info(getRemoteAddress() + " " + e);
             IOUtil.close(this);
 
 
@@ -201,9 +196,9 @@ public class NIOSSLClientConnectionTest {
         public boolean isClosed() {
             return closed.get();
         }
+
         @Override
-        public void connected(SelectionKey key)
-        {
+        public void connected(SelectionKey key) {
             successCount.incrementAndGet();
             SocketChannel channel = (SocketChannel) getChannel();
             //System.out.println(getRemoteAddress() + " " + channel.isConnected() + " total: " + total());
@@ -211,10 +206,6 @@ public class NIOSSLClientConnectionTest {
             IOUtil.close(this);
         }
     }
-
-
-
-
 
 
     public static long total() {
@@ -227,7 +218,7 @@ public class NIOSSLClientConnectionTest {
             long ts = System.currentTimeMillis();
             List<IPAddress> ipAddresses = new ArrayList<IPAddress>();
             NIOSocket nioSocket = new NIOSocket(TaskUtil.defaultTaskProcessor(), TaskUtil.defaultTaskScheduler());
-            for(int i = 0; i < args.length; i++) {
+            for (int i = 0; i < args.length; i++) {
                 IPAddress ipAddress = null;
                 try {
                     ipAddress = IPAddress.URLDecoder.decode(args[i]);
@@ -235,21 +226,18 @@ public class NIOSSLClientConnectionTest {
                     nioSocket.addClientSocket(new InetSocketAddress(ipAddress.getInetAddress(), ipAddress.getPort()), new SSLNIOSocketHandler(new URISession(args[i]), true), 5);
                     ipAddresses.add(ipAddress);
                     System.out.println(args[i]);
-                }
-                catch (Exception e) {
-                   ipAddress = null;
+                } catch (Exception e) {
+                    ipAddress = null;
                 }
 
-                if(ipAddress == null)
-                {
+                if (ipAddress == null) {
                     try {
 
                         ipAddress = IPAddress.parse(args[i]);
                         nioSocket.addClientSocket(new InetSocketAddress(ipAddress.getInetAddress(), ipAddress.getPort()), new NIOSocketHandler(new PlainSession(), false), 5);
                         ipAddresses.add(ipAddress);
                         System.out.println(args[i]);
-                    }
-                    catch (Exception e) {
+                    } catch (Exception e) {
                         System.err.println(args[i] + " FAILED!!!!");
                     }
                 }

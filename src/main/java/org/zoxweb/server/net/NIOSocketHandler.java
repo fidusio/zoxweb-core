@@ -37,7 +37,6 @@ public class NIOSocketHandler
 
     private volatile ByteBuffer phBB = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, Const.SizeInBytes.K.mult(1));
 
-    //private final PlainSessionCallback sessionCallback;
 
     public NIOSocketHandler(PlainSessionCallback psc) {
        this(psc, true);

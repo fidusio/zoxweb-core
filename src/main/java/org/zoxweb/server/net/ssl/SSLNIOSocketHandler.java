@@ -100,7 +100,7 @@ public class SSLNIOSocketHandler
 
 
     private volatile SSLConnectionHelper sslDispatcher = null;
-    private volatile SSLSessionConfig config = null;
+    private volatile SSLSessionConfig sslConfig = null;
     public final IPAddress remoteConnection;
     private transient SSLContextInfo sslContextInfo;
     //private final SSLSessionCallback sessionCallback;
@@ -159,13 +159,13 @@ public class SSLNIOSocketHandler
 
     @Override
     protected void close_internal() throws IOException {
-        IOUtil.close(config, sessionCallback);
+        IOUtil.close(sslConfig, sessionCallback);
     }
 
 
     @Override
     public boolean isClosed() {
-        return isClosed.get() || (config != null && config.sslChannel != null && !config.sslChannel.isOpen());
+        return isClosed.get() || (sslConfig != null && sslConfig.sslChannel != null && !sslConfig.sslChannel.isOpen());
     }
 
 
@@ -182,7 +182,7 @@ public class SSLNIOSocketHandler
         if (log.isEnabled()) log.getLogger().info("Start of Accept SSLNIOSocket");
         try {
             // begin handshake will be called once subsequent calls are ignored
-            config.beginHandshake(sslContextInfo.isClient());
+            sslConfig.beginHandshake(sslContextInfo.isClient());
 //            if(sslContextInfo.isClient()) {
 //                sessionCallback.connected(key);
 //            }
@@ -190,20 +190,20 @@ public class SSLNIOSocketHandler
             if (log.isEnabled()) log.getLogger().info("AcceptNewData: " + key);
 
             // channel selection data coming from ssl channel or tunnel response
-            if (key.channel() == config.sslChannel && config.sslChannel.isConnected()) {
+            if (key.channel() == sslConfig.sslChannel && sslConfig.sslChannel.isConnected()) {
                 // here we have an application code that will process decrypted data
-                sslDispatcher.publish(config.getHandshakeStatus(), (SSLSessionCallback) sessionCallback);
-            } else if (key.channel() == config.remoteChannel && config.remoteChannel.isConnected()) {
+                sslDispatcher.publish(sslConfig.getHandshakeStatus(), (SSLSessionCallback) sessionCallback);
+            } else if (key.channel() == sslConfig.remoteChannel && sslConfig.remoteChannel.isConnected()) {
                 // this is the tunnel section connection
                 int bytesRead;
                 do {
-                    bytesRead = config.remoteChannel.isConnected() ? config.remoteChannel.read(config.inRemoteData) : -1;
-                    if (bytesRead > 0) config.sslOutputStream.write(config.inRemoteData);
+                    bytesRead = sslConfig.remoteChannel.isConnected() ? sslConfig.remoteChannel.read(sslConfig.inRemoteData) : -1;
+                    if (bytesRead > 0) sslConfig.sslOutputStream.write(sslConfig.inRemoteData);
                 } while (bytesRead > 0);
 
                 if (bytesRead == -1) {
                     if (log.isEnabled())
-                        log.getLogger().info("SSL-CHANNEL-CLOSED-NEED_UNWRAP: " + config.getHandshakeStatus() + " bytesRead: " + bytesRead);
+                        log.getLogger().info("SSL-CHANNEL-CLOSED-NEED_UNWRAP: " + sslConfig.getHandshakeStatus() + " bytesRead: " + bytesRead);
                     IOUtil.close(this);
                 }
             }
@@ -220,7 +220,7 @@ public class SSLNIOSocketHandler
 
 
     @Override
-    public void setupConnection(AbstractSelectableChannel asc, boolean isBlocking) throws IOException {
+    public synchronized void setupConnection(AbstractSelectableChannel asc, boolean isBlocking) throws IOException {
         if(sslContextInfo == null) {
             try {
                 sslContextInfo = new SSLContextInfo((InetSocketAddress) ((SocketChannel)asc).getRemoteAddress(), trustAll);
@@ -230,12 +230,12 @@ public class SSLNIOSocketHandler
         }
         if (simpleStateMachine) {
             // CustomSSLStateMachine mode
-            config = new SSLSessionConfig(sslContextInfo);
-            config.selectorController = getSelectorController();
-            config.sslChannel = (SocketChannel) asc;
-            config.remoteConnection = remoteConnection;
-            config.sslOutputStream = new SSLChannelOutputStream(this, config, 512);
-            ((SSLSessionCallback)sessionCallback).setConfig(config);
+            sslConfig = new SSLSessionConfig(sslContextInfo);
+            sslConfig.selectorController = getSelectorController();
+            sslConfig.sslChannel = (SocketChannel) asc;
+            sslConfig.remoteConnection = remoteConnection;
+            sslConfig.sslOutputStream = new SSLChannelOutputStream(this, sslConfig, 512);
+            ((SSLSessionCallback)sessionCallback).setConfig(sslConfig);
             sslDispatcher = new CustomSSLStateMachine(this);
             sessionCallback.setProtocolHandler(this);
 
@@ -246,12 +246,12 @@ public class SSLNIOSocketHandler
             // SSLStateMachineMode
             SSLStateMachine sslStateMachine = SSLStateMachine.create(this);
             sslDispatcher = sslStateMachine;
-            config = sslStateMachine.getConfig();
-            config.selectorController = getSelectorController();
-            config.sslChannel = (SocketChannel) asc;
-            config.remoteConnection = remoteConnection;
-            config.sslOutputStream = new SSLChannelOutputStream(this, config, 512);
-            ((SSLSessionCallback)sessionCallback).setConfig(config);
+            sslConfig = sslStateMachine.getConfig();
+            sslConfig.selectorController = getSelectorController();
+            sslConfig.sslChannel = (SocketChannel) asc;
+            sslConfig.remoteConnection = remoteConnection;
+            sslConfig.sslOutputStream = new SSLChannelOutputStream(this, sslConfig, 512);
+            ((SSLSessionCallback)sessionCallback).setConfig(sslConfig);
             sessionCallback.setProtocolHandler(this);
             sslStateMachine.start(true);
             if (log.isEnabled()) log.getLogger().info("SSLStateMachine");
@@ -311,26 +311,32 @@ public class SSLNIOSocketHandler
 
 
     public SSLSessionConfig getConfig() {
-        return config;
+        return sslConfig;
+    }
+
+    @Override
+    public synchronized boolean upgradeToTLS() throws IOException
+    {
+        return sslConfig != null;
     }
 
 
     void createRemoteConnection() {
-        if (config.remoteConnection != null && config.inRemoteData == null) {
-            synchronized (config) {
-                if (config.inRemoteData == null) {
+        if (sslConfig.remoteConnection != null && sslConfig.inRemoteData == null) {
+            synchronized (sslConfig) {
+                if (sslConfig.inRemoteData == null) {
                     try {
 
-                        config.inRemoteData = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, 512);
-                        config.remoteChannel = SocketChannel.open((new InetSocketAddress(config.remoteConnection.getInetAddress(), config.remoteConnection.getPort())));
-                        getSelectorController().register(config.remoteChannel, SelectionKey.OP_READ, this, false);
+                        sslConfig.inRemoteData = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, 512);
+                        sslConfig.remoteChannel = SocketChannel.open((new InetSocketAddress(sslConfig.remoteConnection.getInetAddress(), sslConfig.remoteConnection.getPort())));
+                        getSelectorController().register(sslConfig.remoteChannel, SelectionKey.OP_READ, this, false);
                         //sessionCallback.setRemoteSocket(config.remoteChannel);
 
                     } catch (Exception e) {
                         e.printStackTrace();
                         if (log.isEnabled()) log.getLogger().info("" + e);
-                        if (log.isEnabled()) log.getLogger().info("connect to " + config.remoteConnection + " FAILED");
-                        config.close();
+                        if (log.isEnabled()) log.getLogger().info("connect to " + sslConfig.remoteConnection + " FAILED");
+                        sslConfig.close();
                     }
                 }
             }

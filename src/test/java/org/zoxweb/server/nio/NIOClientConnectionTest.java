@@ -154,7 +154,7 @@ public class NIOClientConnectionTest {
 
         try {
             long ts = System.currentTimeMillis();
-            IPAddress[] ipAddresses = IPAddress.parseRange(args[0]);
+            IPAddress[] ipAddresses = IPAddress.RangeDecoder.decode(args[0]);
             boolean tracker = args.length > 1 && args[1].equals("tracker");
             TaskUtil.setMaxTasksQueue(2000);
             NIOSocket nioSocket = new NIOSocket(TaskUtil.defaultTaskProcessor(), TaskUtil.defaultTaskScheduler());

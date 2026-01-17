@@ -240,19 +240,33 @@ public class NIOSocket
 //    }
 
 
-    public SelectionKey addClientSocket(InetSocketAddress sa, ProtocolHandler ph, int timeoutInSec) throws IOException {
+    public SelectionKey addClientSocket(InetSocketAddress sa, ProtocolHandler ph, int timeoutInSec)
+            throws IOException {
+
+        SUS.checkIfNulls("Null InetSocketAddress or ProtocolHandler", sa, ph);
         ScheduledAttachment<ProtocolHandler> scheduledAttachment = new ScheduledAttachment<>();
         scheduledAttachment.attach(ph);
         SocketChannel sc = SocketChannel.open();
 
         SelectionKey selectionKey = selectorController.register(sc, SelectionKey.OP_CONNECT, scheduledAttachment, false);
 
-        if (sc.connect(sa))
-            clientConnect(selectionKey);
-        else {
-            scheduledAttachment.setAppointment(taskSchedulerProcessor.queue(TimeInMillis.SECOND.mult(timeoutInSec), new NIOChannelMonitor(selectionKey, selectorController)));
-            //taskSchedulerProcessor.queue(TimeInMillis.SECOND.mult(timeoutInSec), new NIOChannelMonitor(selectionKey, selectorController));
+        try {
+            if (sc.connect(sa))
+                clientConnect(selectionKey);
+            else {
+                scheduledAttachment.setAppointment(taskSchedulerProcessor.queue(TimeInMillis.SECOND.mult(timeoutInSec), new NIOChannelMonitor(selectionKey, selectorController)));
+                //taskSchedulerProcessor.queue(TimeInMillis.SECOND.mult(timeoutInSec), new NIOChannelMonitor(selectionKey, selectorController));
+            }
+        } catch (IOException e) {
+            selectorController.cancelSelectionKey(selectionKey);
+            if(ph.getSessionCallback() != null)
+                ph.getSessionCallback().exception(e);
+            throw e;
         }
+
+
+
+
 
 
         return selectionKey;
