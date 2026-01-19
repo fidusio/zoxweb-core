@@ -182,62 +182,7 @@ public class NIOSocket
     }
 
 
-//    /**
-//     * Initiates a non-blocking TCP client connection to the specified address.
-//     *
-//     * <p>Convenience method that uses a default 10-second connection timeout with no rate limiting.
-//     * See {@link #addClientSocket(InetSocketAddress, ProtocolFactory, int)} for
-//     * detailed behavior.</p>
-//     *
-//     * @param sa  the remote server address to connect to
-//     * @param psf the protocol factory for creating the connection handler
-//     * @return the SelectionKey associated with the client socket channel
-//     * @throws IOException if the socket channel cannot be opened or connection initiation fails
-//     * @see #addClientSocket(InetSocketAddress, ProtocolFactory, int)
-//     */
-//    public SelectionKey addClientSocket(InetSocketAddress sa, ProtocolFactory<?> psf) throws IOException {
-//        return addClientSocket(sa, psf, 10);
-//    }
 
-//    /**
-//     * Initiates a non-blocking TCP client connection with configurable timeout and rate control.
-//     *
-//     * <p>This method opens a new SocketChannel and initiates a non-blocking connection to the
-//     * remote server. A {@link NIOChannelMonitor} is scheduled to detect and close stale
-//     * connections that fail to complete within the specified timeout.</p>
-//     *
-//     * <p>When a rate controller is provided, the connection attempt is delayed according to
-//     * the controller's rate limiting policy, which is useful for connection pooling or
-//     * preventing connection storms.</p>
-//     *
-//     * <p>Once the connection is established, the selector notifies via OP_CONNECT and a
-//     * new ProtocolHandler is created from the factory to handle the connection.</p>
-//     *
-//     * @param sa             the remote server address to connect to
-//     * @param psf            the protocol factory for creating the connection handler
-//     * @param timeoutInSec   connection timeout in seconds; the connection is closed if not
-//     *                       established within this time
-//
-//     * @return the SelectionKey associated with the client socket channel
-//     * @throws IOException if the socket channel cannot be opened or connection initiation fails
-//     */
-//    public SelectionKey addClientSocket(InetSocketAddress sa, ProtocolFactory<?> psf, int timeoutInSec) throws IOException {
-//        ScheduledAttachment<ProtocolFactory<?>> scheduledAttachment = new ScheduledAttachment<>();
-//        scheduledAttachment.attach(psf);
-//        SocketChannel sc = SocketChannel.open();
-//
-//        SelectionKey selectionKey = selectorController.register(sc, SelectionKey.OP_CONNECT, scheduledAttachment, false);
-//
-//        if (sc.connect(sa))
-//            clientConnect(selectionKey);
-//        else {
-//            scheduledAttachment.setAppointment(taskSchedulerProcessor.queue(TimeInMillis.SECOND.mult(timeoutInSec), new NIOChannelMonitor(selectionKey, selectorController)));
-//            //taskSchedulerProcessor.queue(TimeInMillis.SECOND.mult(timeoutInSec), new NIOChannelMonitor(selectionKey, selectorController));
-//        }
-//
-//
-//        return selectionKey;
-//    }
 
 
     public SelectionKey addClientSocket(InetSocketAddress sa, ProtocolHandler ph, int timeoutInSec)
@@ -263,11 +208,6 @@ public class NIOSocket
                 ph.getSessionCallback().exception(e);
             throw e;
         }
-
-
-
-
-
 
         return selectionKey;
     }
@@ -328,17 +268,17 @@ public class NIOSocket
      * rather than creating new channels for each remote endpoint.</p>
      *
      * @param sa  the socket address to bind to (IP address and port)
-     * @param psf the protocol factory for creating the datagram handler
+     * @param ph the protocol handler
      * @return the SelectionKey associated with the datagram channel
      * @throws IOException          if the datagram socket cannot be opened or bound
      * @throws NullPointerException if sa or psf is null
      */
-    public SelectionKey addDatagramSocket(InetSocketAddress sa, ProtocolFactory<?> psf) throws IOException {
-        SUS.checkIfNulls("Null values", sa, psf);
+    public SelectionKey addDatagramSocket(InetSocketAddress sa, ProtocolHandler ph) throws IOException {
+        SUS.checkIfNulls("Null values", sa, ph);
         DatagramChannel dc = DatagramChannel.open();
         dc.socket().bind(sa);
 
-        return addDatagramSocket(dc, psf);
+        return addDatagramSocket(dc, ph);
     }
 
     /**
@@ -354,16 +294,15 @@ public class NIOSocket
      * for all communication.</p>
      *
      * @param dc  the pre-configured and bound datagram channel
-     * @param psf the protocol factory for creating the datagram handler
+     * @param ph the protocol handler
      * @return the SelectionKey associated with the datagram channel
      * @throws IOException          if registration fails
      * @throws NullPointerException if dc or psf is null
      */
-    public SelectionKey addDatagramSocket(DatagramChannel dc, ProtocolFactory<?> psf) throws IOException {
-        SUS.checkIfNulls("Null values", dc, psf);
-        SelectionKey sk = selectorController.register(dc, SelectionKey.OP_READ, psf.newInstance(), false);
+    public SelectionKey addDatagramSocket(DatagramChannel dc, ProtocolHandler ph) throws IOException {
+        SUS.checkIfNulls("Null values", dc, ph);
+        SelectionKey sk = selectorController.register(dc, SelectionKey.OP_READ, ph, false);
         logger.getLogger().info(dc + " added");
-
         return sk;
     }
 
@@ -667,6 +606,7 @@ public class NIOSocket
 
             try {
                 finishConnecting(key);
+                connectionCount.incrementAndGet();
                 selectorController.cancelSelectionKey(key);
                 //**************************************************************************
 
@@ -701,6 +641,7 @@ public class NIOSocket
 
             try {
                 finishConnecting(key);
+                connectionCount.incrementAndGet();
                 // attach the protocol handler
                 ph.setSelectorController(selectorController);
                 ph.setupConnection((AbstractSelectableChannel) key.channel(), false);
@@ -709,8 +650,7 @@ public class NIOSocket
                 int keyOPs = key.interestOps();
                 key.interestOps(0);
                 if (executor != null) {
-                    // lambda requirement
-
+                    // lambda requirement in effect here
                     executor.execute(() ->
                     {
                         try {
@@ -754,7 +694,7 @@ public class NIOSocket
      * @param key isConnectable() true
      * @throws IOException case of error
      */
-    private void finishConnecting(SelectionKey key) throws IOException {
+    public static  void finishConnecting(SelectionKey key) throws IOException {
         synchronized (key) {
             if (key.isValid()) {
 
@@ -773,7 +713,7 @@ public class NIOSocket
      * @param connectTimeout could be null, if not will be closed
      * @throws IOException case of error
      */
-    private void finishConnecting(SocketChannel channel, Appointment connectTimeout) throws IOException {
+    public static void finishConnecting(SocketChannel channel, Appointment connectTimeout) throws IOException {
         try {
             if (channel.isOpen()) {
                 if (channel.isConnectionPending()) {
@@ -782,7 +722,6 @@ public class NIOSocket
                 }
 
                 if (channel.isConnected()) {
-                    connectionCount.incrementAndGet();
                     return;
                 }
             }

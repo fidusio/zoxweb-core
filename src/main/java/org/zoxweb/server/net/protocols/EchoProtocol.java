@@ -24,11 +24,11 @@ public class EchoProtocol {
             try {
                 ByteBufferUtil.write(byteBuffer, ubaos, true);
                 if (ubaos.byteAt(ubaos.size() - 1) == (byte) '\n') {
-                    get().write(ubaos, true);
+                    getOutputStream().write(ubaos, true);
                 }
             } catch (IOException e) {
                 e.printStackTrace();
-                IOUtil.close(get());
+                IOUtil.close(getOutputStream());
             }
         }
 
@@ -52,7 +52,7 @@ public class EchoProtocol {
 
         @Override
         public boolean isClosed() {
-            return get() != null && get().isClosed();
+            return getOutputStream() != null && getOutputStream().isClosed();
         }
     }
 
@@ -66,11 +66,11 @@ public class EchoProtocol {
             try {
                 ByteBufferUtil.write(byteBuffer, ubaos, true);
                 if (ubaos.byteAt(ubaos.size() - 1) == (byte) '\n') {
-                    get().write(ubaos, true);
+                    getOutputStream().write(ubaos, true);
                 }
             } catch (IOException e) {
                 e.printStackTrace();
-                IOUtil.close(get());
+                IOUtil.close(getOutputStream());
             }
         }
 
@@ -97,7 +97,7 @@ public class EchoProtocol {
          */
         @Override
         public boolean isClosed() {
-            return get() != null && get().isClosed();
+            return getOutputStream() != null && getOutputStream().isClosed();
         }
     }
 

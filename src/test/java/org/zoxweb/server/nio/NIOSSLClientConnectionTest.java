@@ -71,7 +71,7 @@ public class NIOSSLClientConnectionTest {
         public void close() throws IOException {
 
             if (!closed.getAndSet(true)) {
-                IOUtil.close(getChannel());
+                IOUtil.close(getOutputStream());
                 log.getLogger().info("Closing connection: " + getRemoteAddress() + " it took " + Const.TimeInMillis.toString(System.currentTimeMillis() - timeStamp));
             }
         }
@@ -116,7 +116,7 @@ public class NIOSSLClientConnectionTest {
         }
 
         @Override
-        public void connected(SelectionKey key) {
+        public int connected(SelectionKey key) {
             successCount.incrementAndGet();
             SocketChannel channel = (SocketChannel) getChannel();
             //System.out.println(getRemoteAddress() + " " + channel.isConnected() + " total: " + total());
@@ -129,11 +129,12 @@ public class NIOSSLClientConnectionTest {
 
 
             try {
-                get().write(hrf.format(), false);
+                getOutputStream().write(hrf.format(), false);
                 log.getLogger().info(getRemoteAddress() + " " + channel.isConnected() + " total: " + total() + " it took" + Const.TimeInMillis.toString(System.currentTimeMillis() - timeStamp));
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            return key != null ? key.interestOps() : 0;
         }
     }
 
@@ -198,12 +199,13 @@ public class NIOSSLClientConnectionTest {
         }
 
         @Override
-        public void connected(SelectionKey key) {
+        public int connected(SelectionKey key) {
             successCount.incrementAndGet();
             SocketChannel channel = (SocketChannel) getChannel();
             //System.out.println(getRemoteAddress() + " " + channel.isConnected() + " total: " + total());
             log.getLogger().info(getRemoteAddress() + " " + channel.isConnected() + " total: " + total());
             IOUtil.close(this);
+            return 0;
         }
     }
 

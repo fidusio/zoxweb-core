@@ -271,7 +271,7 @@ public class SSLContextInfo
      *       in production environments.</li>
      * </ul>
      *
-     * @param clientAddress the server address to connect to, containing hostname and port.
+     * @param clientAddress the client address to connect to, containing hostname and port.
      *                      The hostname is used for SNI. Must not be null.
      * @param acceptAll     if {@code true}, disables certificate validation.
      *                      <b>WARNING:</b> Never use {@code true} in production.

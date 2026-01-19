@@ -84,12 +84,13 @@ public class NIOClientConnectionTest {
             return closed.get();
         }
         @Override
-        public void connected(SelectionKey key)
+        public int connected(SelectionKey key)
         {
             successCount.incrementAndGet();
             SocketChannel channel = (SocketChannel) getChannel();
-            System.out.println(getRemoteAddress() + " " + channel.isConnected() + " total: " + total());
+            log.getLogger().info(getRemoteAddress() + " " + channel.isConnected() + " total: " + total());
             IOUtil.close(this);
+            return 0;
         }
     }
 

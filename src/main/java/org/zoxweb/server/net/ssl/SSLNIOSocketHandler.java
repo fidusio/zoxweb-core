@@ -86,7 +86,7 @@ public class SSLNIOSocketHandler
          */
         @Override
         public void close() throws IOException {
-            IOUtil.close(get());
+            IOUtil.close(getOutputStream());
         }
 
         /**
@@ -94,7 +94,7 @@ public class SSLNIOSocketHandler
          */
         @Override
         public boolean isClosed() {
-            return get() != null && get().isClosed();
+            return getOutputStream() != null && getOutputStream().isClosed();
         }
     }
 
