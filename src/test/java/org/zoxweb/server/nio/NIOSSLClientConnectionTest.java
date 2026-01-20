@@ -161,7 +161,7 @@ public class NIOSSLClientConnectionTest {
         public void close() throws IOException {
 
             if (!closed.getAndSet(true)) {
-                log.getLogger().info("Closing connection: " + getRemoteAddress());
+                //log.getLogger().info("Closing connection: " + getRemoteAddress());
                 IOUtil.close(getChannel());
             }
         }
@@ -182,7 +182,7 @@ public class NIOSSLClientConnectionTest {
 
         public void exception(Exception e) {
             failCount.incrementAndGet();
-            log.getLogger().info(getRemoteAddress() + " " + e);
+           // log.getLogger().info(getRemoteAddress() + " " + e);
             IOUtil.close(this);
 
 
@@ -218,7 +218,7 @@ public class NIOSSLClientConnectionTest {
 
         try {
             long ts = System.currentTimeMillis();
-            List<IPAddress> ipAddresses = new ArrayList<IPAddress>();
+            List<IPAddress> ipAddressesList = new ArrayList<IPAddress>();
             NIOSocket nioSocket = new NIOSocket(TaskUtil.defaultTaskProcessor(), TaskUtil.defaultTaskScheduler());
             for (int i = 0; i < args.length; i++) {
                 IPAddress ipAddress = null;
@@ -226,7 +226,7 @@ public class NIOSSLClientConnectionTest {
                     ipAddress = IPAddress.URLDecoder.decode(args[i]);
 
                     nioSocket.addClientSocket(new InetSocketAddress(ipAddress.getInetAddress(), ipAddress.getPort()), new SSLNIOSocketHandler(new URISession(args[i]), true), 5);
-                    ipAddresses.add(ipAddress);
+                    ipAddressesList.add(ipAddress);
                     System.out.println(args[i]);
                 } catch (Exception e) {
                     ipAddress = null;
@@ -235,19 +235,29 @@ public class NIOSSLClientConnectionTest {
                 if (ipAddress == null) {
                     try {
 
-                        ipAddress = IPAddress.parse(args[i]);
-                        nioSocket.addClientSocket(new InetSocketAddress(ipAddress.getInetAddress(), ipAddress.getPort()), new NIOSocketHandler(new PlainSession(), false), 5);
-                        ipAddresses.add(ipAddress);
-                        System.out.println(args[i]);
+                        IPAddress[] ipAddresses = IPAddress.RangeDecoder.decode(args[i]);
+                        for(int j = 0; j < ipAddresses.length; j++) {
+                            try {
+
+
+                                ipAddress = ipAddresses[j];
+                                nioSocket.addClientSocket(new InetSocketAddress(ipAddress.getInetAddress(), ipAddress.getPort()), new NIOSocketHandler(new PlainSession(), false), 5);
+                                ipAddressesList.add(ipAddress);
+                                //System.out.println(ipAddress);
+                            }
+                            catch (Exception e) {
+                                System.err.println(ipAddresses[j] + " FAILED!!!!");
+                            }
+                        }
                     } catch (Exception e) {
                         System.err.println(args[i] + " FAILED!!!!");
                     }
                 }
             }
 
-            int size = ipAddresses.size();
+            int size = ipAddressesList.size();
             TaskUtil.waitIfBusy(500, () -> total() == size);
-            log.getLogger().info("IPAddresses " + ipAddresses + " Total: " + total() + " Success: " + successCount.get() + " Failed: " + failCount.get() + " it took " + Const.TimeInMillis.toString(System.currentTimeMillis() - ts));
+            log.getLogger().info("IPAddresses " + ipAddressesList + " Total: " + total() + " Success: " + successCount.get() + " Failed: " + failCount.get() + " it took " + Const.TimeInMillis.toString(System.currentTimeMillis() - ts));
 
             IOUtil.close(nioSocket);
 

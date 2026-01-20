@@ -17,6 +17,7 @@ package org.zoxweb.server.net;
 
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.logging.LogWrapper;
+import org.zoxweb.server.net.common.ConnectionCallback;
 import org.zoxweb.server.task.TaskSchedulerProcessor;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.server.util.DateUtil;
@@ -33,7 +34,10 @@ import org.zoxweb.shared.util.Const.TimeInMillis;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.net.*;
+import java.net.ConnectException;
+import java.net.Inet4Address;
+import java.net.InetSocketAddress;
+import java.net.StandardSocketOptions;
 import java.nio.channels.*;
 import java.nio.channels.spi.AbstractSelectableChannel;
 import java.util.Date;
@@ -43,6 +47,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Consumer;
 
 /**
  * High-performance Non-blocking I/O (NIO) socket multiplexer that manages multiple server and client
@@ -236,9 +241,9 @@ public class NIOSocket
      * @return the SocketChannel being connected (may not yet be connected when returned)
      * @throws IOException if the socket channel cannot be opened or connection initiation fails
      */
-    public SelectionKey addClientSocket(InetSocketAddress sa, ConsumerCallback<SocketChannel> cc, int timeoutInSec) throws IOException {
+    public SelectionKey addClientSocket(InetSocketAddress sa, ConnectionCallback cc, int timeoutInSec) throws IOException {
 
-        ScheduledAttachment<ConsumerCallback<SocketChannel>> scheduledAttachment = new ScheduledAttachment<>();
+        ScheduledAttachment<ConnectionCallback> scheduledAttachment = new ScheduledAttachment<>();
         scheduledAttachment.attach(cc);
         SocketChannel sc = SocketChannel.open();
         SelectionKey selectionKey = selectorController.register(sc, SelectionKey.OP_CONNECT, scheduledAttachment, false);
@@ -401,8 +406,9 @@ public class NIOSocket
                                         && key.channel().isOpen()) {
                                     // channel has data to read
                                     // this is the reading part of the process
-                                    ProtocolHandler currentPP = (ProtocolHandler) key.attachment();
-                                    currentPP.updateUsage();
+                                    Consumer<SelectionKey> currentPP = (Consumer<SelectionKey>) key.attachment();
+                                    if(currentPP instanceof ProtocolHandler)
+                                        ((ProtocolHandler) currentPP).updateUsage();
 
 
                                     // very,very,very crucial setup prior to processing
@@ -596,9 +602,9 @@ public class NIOSocket
 
 
         if (key.attachment() instanceof ScheduledAttachment &&
-                ((ScheduledAttachment) key.attachment()).attachment() instanceof ConsumerCallback) {
+                ((ScheduledAttachment) key.attachment()).attachment() instanceof ConnectionCallback) {
 
-            ConsumerCallback<SocketChannel> connectData = (ConsumerCallback<SocketChannel>) ((ScheduledAttachment) key.attachment()).attachment();
+            ConnectionCallback connectData = (ConnectionCallback) ((ScheduledAttachment) key.attachment()).attachment();
             // the code read and write processing is done by outsiders
             // the read/write or waiting for connection is done my outsiders
             // selection key is to be canceled
@@ -607,13 +613,28 @@ public class NIOSocket
             try {
                 finishConnecting(key);
                 connectionCount.incrementAndGet();
-                selectorController.cancelSelectionKey(key);
+
                 //**************************************************************************
 
                 if (executor == null)
-                    executor.execute(() -> connectData.accept(sc));
-                else
-                    connectData.accept(sc);
+                    executor.execute(() -> {
+                        int keysOps = connectData.connected(key);
+                        if (keysOps > 0) {
+                            key.interestOps(keysOps);
+                            selectorController.wakeup();
+                        }
+                        else
+                            selectorController.cancelSelectionKey(key);
+                    });
+                else {
+                    int keysOps = connectData.connected(key);
+                    if (keysOps > 0) {
+                        key.interestOps(keysOps);
+                        selectorController.wakeup();
+                    }
+                    else
+                        selectorController.cancelSelectionKey(key);
+                }
 
             } catch (Exception e) {
                 IOUtil.close(key.channel());

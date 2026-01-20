@@ -2,7 +2,7 @@ package org.zoxweb.server.net;
 
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.logging.LogWrapper;
-import org.zoxweb.shared.task.ConsumerCallback;
+import org.zoxweb.server.net.common.ConnectionCallback;
 import org.zoxweb.shared.task.ScheduledAttachment;
 import org.zoxweb.shared.util.Const;
 
@@ -37,8 +37,8 @@ public class NIOChannelMonitor
                 if (logger.isEnabled())
                     logger.getLogger().info("Connection timed out: " + sk + " it took " + Const.TimeInMillis.toString(System.currentTimeMillis() - timestamp));
 
-                if (sk.attachment() instanceof ScheduledAttachment && ((ScheduledAttachment<?>) sk.attachment()).attachment() instanceof ConsumerCallback) {
-                    ConsumerCallback<SocketChannel> callback = (ConsumerCallback<SocketChannel>) ((ScheduledAttachment<?>) sk.attachment()).attachment();
+                if (sk.attachment() instanceof ScheduledAttachment && ((ScheduledAttachment<?>) sk.attachment()).attachment() instanceof ConnectionCallback) {
+                    ConnectionCallback callback = (ConnectionCallback) ((ScheduledAttachment<?>) sk.attachment()).attachment();
                     if (callback != null) {
                         callback.exception(new IOException("Connection timed out"));
                     }

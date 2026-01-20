@@ -21,6 +21,7 @@ import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.net.NIOSocket;
 import org.zoxweb.server.net.ProtocolHandler;
+import org.zoxweb.server.net.common.CommonChannelOutputStream;
 import org.zoxweb.server.security.SecUtil;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.shared.net.IPAddress;
@@ -31,6 +32,7 @@ import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
+import java.nio.channels.ByteChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.nio.channels.spi.AbstractSelectableChannel;
@@ -234,10 +236,13 @@ public class SSLNIOSocketHandler
             sslConfig.selectorController = getSelectorController();
             sslConfig.sslChannel = (SocketChannel) asc;
             sslConfig.remoteConnection = remoteConnection;
-            sslConfig.sslOutputStream = new SSLChannelOutputStream(this, sslConfig, 512);
+            sslConfig.sslOutputStream = new CommonChannelOutputStream(this, (ByteChannel) asc, 512)
+                    .setSSLSessionConfig(sslConfig)
+                    .setSSLMode(true);
             ((SSLSessionCallback)sessionCallback).setConfig(sslConfig);
             sslDispatcher = new CustomSSLStateMachine(this);
             sessionCallback.setProtocolHandler(this);
+            sessionCallback.setOutputStream(sslConfig.sslOutputStream);
 
             // not sure about
             // start the handshake here
@@ -250,9 +255,13 @@ public class SSLNIOSocketHandler
             sslConfig.selectorController = getSelectorController();
             sslConfig.sslChannel = (SocketChannel) asc;
             sslConfig.remoteConnection = remoteConnection;
-            sslConfig.sslOutputStream = new SSLChannelOutputStream(this, sslConfig, 512);
+            //sslConfig.sslOutputStream = new SSLChannelOutputStream(this, sslConfig, 512);
+            sslConfig.sslOutputStream = new CommonChannelOutputStream(this, (ByteChannel) asc, 512)
+                    .setSSLSessionConfig(sslConfig)
+                    .setSSLMode(true);
             ((SSLSessionCallback)sessionCallback).setConfig(sslConfig);
             sessionCallback.setProtocolHandler(this);
+            sessionCallback.setOutputStream(sslConfig.sslOutputStream);
             sslStateMachine.start(true);
             if (log.isEnabled()) log.getLogger().info("SSLStateMachine");
         }

@@ -20,7 +20,7 @@ public abstract class SessionCallback<CF, C, S> implements ConsumerSupplierCallb
         return config;
     }
 
-    final public void setConfig(CF config) {
+    public final void setConfig(CF config) {
         this.config = config;
     }
 

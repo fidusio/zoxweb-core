@@ -14,18 +14,18 @@ public class CommonProtocolHandler extends ProtocolHandler {
 
 
     private AtomicBoolean closed = new AtomicBoolean(false);
-    private final CommonSessionCallback skSessionCallback;
+    private final CommonSessionCallback commonSessionCallback;
 
     public CommonProtocolHandler(CommonSessionCallback skSessionCallback) {
         super(false);
-        this.skSessionCallback = skSessionCallback;
+        this.commonSessionCallback = skSessionCallback;
         skSessionCallback.setProtocolHandler(this);
     }
 
     @Override
     protected void close_internal() throws IOException {
         if (!closed.getAndSet(true)) {
-            IOUtil.close(skSessionCallback);
+            IOUtil.close(commonSessionCallback);
         }
     }
 
@@ -36,7 +36,7 @@ public class CommonProtocolHandler extends ProtocolHandler {
      */
     @Override
     public void accept(SelectionKey selectionKey) {
-        skSessionCallback.accept(selectionKey);
+        commonSessionCallback.accept(selectionKey);
     }
 
     /**

@@ -2,6 +2,7 @@ package org.zoxweb.server.net.ssl;
 
 import org.zoxweb.server.fsm.MonoStateMachine;
 import org.zoxweb.server.logging.LogWrapper;
+import org.zoxweb.server.net.common.CommonSessionCallback;
 import org.zoxweb.shared.util.Identifier;
 import org.zoxweb.shared.util.RateCounter;
 import org.zoxweb.shared.util.SharedStringUtil;
@@ -14,7 +15,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import static javax.net.ssl.SSLEngineResult.HandshakeStatus.*;
 
-class CustomSSLStateMachine extends MonoStateMachine<SSLEngineResult.HandshakeStatus, SSLSessionCallback>
+public class CustomSSLStateMachine extends MonoStateMachine<SSLEngineResult.HandshakeStatus, SSLSessionCallback>
         implements SSLConnectionHelper, Closeable, Identifier<Long> {
     public static final LogWrapper log = new LogWrapper(CustomSSLStateMachine.class).setEnabled(false);
 
@@ -26,15 +27,34 @@ class CustomSSLStateMachine extends MonoStateMachine<SSLEngineResult.HandshakeSt
 
     private static final AtomicLong counter = new AtomicLong();
     private final SSLNIOSocketHandler sslns;
+    private final CommonSessionCallback csc;
     private final long id;
 
     public static long getIDCount() {
         return counter.get();
     }
 
-    CustomSSLStateMachine(SSLNIOSocketHandler sslns) {
+
+
+    public CustomSSLStateMachine(CommonSessionCallback csc) {
+        super(false);
+        this.csc = csc;
+        sslns = null;
+        csc.getConfig().sslConnectionHelper = this;
+        id = counter.incrementAndGet();
+        register(NOT_HANDSHAKING, this::notHandshaking)
+                .register(NEED_WRAP, this::needWrap)
+                .register(NEED_UNWRAP, this::needUnwrap)
+                .register(FINISHED, this::finished)
+                .register(NEED_TASK, this::needTask)
+        ;
+    }
+
+
+    public CustomSSLStateMachine(SSLNIOSocketHandler sslns) {
         super(false);
         this.sslns = sslns;
+        csc = null;
         sslns.getConfig().sslConnectionHelper = this;
         id = counter.incrementAndGet();
         register(NOT_HANDSHAKING, this::notHandshaking)
@@ -76,11 +96,13 @@ class CustomSSLStateMachine extends MonoStateMachine<SSLEngineResult.HandshakeSt
 
     @Override
     public void createRemoteConnection() {
-        sslns.createRemoteConnection();
+        if (sslns != null) {
+            sslns.createRemoteConnection();
+        }
     }
 
     public SSLSessionConfig getConfig() {
-        return sslns.getConfig();
+        return sslns != null ? sslns.getConfig() : csc.getConfig();
     }
 
     public static String rates() {

@@ -2,6 +2,7 @@ package org.zoxweb.server.net.ssl;
 
 import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.server.logging.LogWrapper;
+import org.zoxweb.server.net.common.ConnectionCallback;
 import org.zoxweb.shared.util.SUS;
 
 import javax.net.ssl.SSLEngineResult;
@@ -94,11 +95,11 @@ public class SSLUtil {
         }
 
 
-        if (config.clientMode) {
+        if (config.clientMode && callback instanceof ConnectionCallback) {
             /*
              * special case if the connection is a client connection
              */
-            callback.connected(null);
+            ((ConnectionCallback) callback).sslHandshakeSuccessful();
         }
 
         if (config.inSSLNetData.position() > 0) {
@@ -110,8 +111,6 @@ public class SSLUtil {
             //**************************************************
             config.sslConnectionHelper.publish(config.getHandshakeStatus(), callback);
         }
-
-
 
 
         return System.currentTimeMillis() - ts;

@@ -58,20 +58,20 @@ import static javax.net.ssl.SSLEngineResult.HandshakeStatus.NOT_HANDSHAKING;
 public class SSLChannelOutputStream extends BaseChannelOutputStream {
 
     /** Configuration containing the SSLEngine and related SSL session state */
-    private final SSLSessionConfig config;
+    private final SSLSessionConfig sslConfig;
 
     /**
      * Constructs a new SSLChannelOutputStream with the specified parameters.
      *
      * @param protocolHandler the protocol handler for connection management, may be null
-     * @param config the SSL session configuration containing the SSLEngine and channel
+     * @param sslConfig the SSL session configuration containing the SSLEngine and channel
      * @param outAppBufferSize the size of the application output buffer in bytes
      * @throws IOException if unable to get the remote address from the channel
      * @throws NullPointerException if config or its channel is null
      */
-    public SSLChannelOutputStream(ProtocolHandler protocolHandler, SSLSessionConfig config, int outAppBufferSize) throws IOException {
-        super(protocolHandler, config.sslChannel, outAppBufferSize);
-        this.config = config;
+    public SSLChannelOutputStream(ProtocolHandler protocolHandler, SSLSessionConfig sslConfig, int outAppBufferSize) throws IOException {
+        super(protocolHandler, sslConfig.sslChannel, outAppBufferSize);
+        this.sslConfig = sslConfig;
     }
 
 
@@ -90,18 +90,18 @@ public class SSLChannelOutputStream extends BaseChannelOutputStream {
      */
     public synchronized int write(ByteBuffer bb) throws IOException {
         int written = -1;
-        if (config.getHandshakeStatus() == NOT_HANDSHAKING) {
-            SSLEngineResult result = config.smartWrap(bb, config.outSSLNetData); // at handshake stage, data in appOut won't be
+        if (sslConfig.getHandshakeStatus() == NOT_HANDSHAKING) {
+            SSLEngineResult result = sslConfig.smartWrap(bb, sslConfig.outSSLNetData); // at handshake stage, data in appOut won't be
             if (log.isEnabled())
                 log.getLogger().info("AFTER-NEED_WRAP-PROCESSING: " + result);
             switch (result.getStatus()) {
                 case BUFFER_UNDERFLOW:
                 case BUFFER_OVERFLOW:
                     throw new IOException(result.getStatus() + " invalid state context buffer size " +
-                            SharedUtil.toCanonicalID(',', config.outSSLNetData.capacity(), config.outSSLNetData.limit(), config.outSSLNetData.position()));
+                            SharedUtil.toCanonicalID(',', sslConfig.outSSLNetData.capacity(), sslConfig.outSSLNetData.limit(), sslConfig.outSSLNetData.position()));
                 case OK:
                     try {
-                        written = ByteBufferUtil.smartWrite(null, dataChannel, config.outSSLNetData);
+                        written = ByteBufferUtil.smartWrite(null, dataChannel, sslConfig.outSSLNetData);
                         if(protocolHandler != null) protocolHandler.updateUsage();
                     } catch (IOException e) {
                         IOUtil.close(this);
@@ -131,7 +131,7 @@ public class SSLChannelOutputStream extends BaseChannelOutputStream {
     public void close() throws IOException {
         if (!isClosed.getAndSet(true)) {
             if (log.isEnabled()) log.getLogger().info("Calling close");
-            IOUtil.close(config, protocolHandler);
+            IOUtil.close(sslConfig, protocolHandler);
             ByteBufferUtil.cache(outAppData);
         }
     }

@@ -18,6 +18,7 @@ package org.zoxweb.server.net;
 import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.logging.LogWrapper;
+import org.zoxweb.server.net.common.CommonChannelOutputStream;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.shared.util.Const;
 
@@ -72,7 +73,9 @@ public class NIOSocketHandler
             if (sessionCallback.getConfig() == null) {
                 synchronized (this) {
                     if (sessionCallback.getConfig() == null) {
-                        ((PlainSessionCallback) sessionCallback).setConfig(new ChannelOutputStream(this, phSChannel, Const.SizeInBytes.K.mult(1)));
+                        CommonChannelOutputStream cco = new CommonChannelOutputStream(this, phSChannel, Const.SizeInBytes.K.mult(1));
+                        sessionCallback.setOutputStream(cco);
+                        ((PlainSessionCallback) sessionCallback).setConfig(cco);
                         // need to notify session callback in case waiting for connection
                         sessionCallback.connected(key);
                     }

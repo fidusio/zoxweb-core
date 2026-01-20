@@ -5,10 +5,10 @@ import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.net.NIOSocket;
 import org.zoxweb.server.net.NIOSocketHandler;
 import org.zoxweb.server.net.PlainSessionCallback;
+import org.zoxweb.server.net.common.ConnectionCallback;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.net.IPAddress;
-import org.zoxweb.shared.task.ConsumerCallback;
 import org.zoxweb.shared.util.Const;
 
 import java.io.IOException;
@@ -95,39 +95,10 @@ public class NIOClientConnectionTest {
     }
 
     static class ConnectionTracker
-            implements ConsumerCallback<SocketChannel> {
+            implements ConnectionCallback {
 
 
-        /**
-         * Performs this operation on the given argument.
-         *
-         * @param channel the input argument
-         */
-        @Override
-        public void accept(SocketChannel channel) {
-            successCount.incrementAndGet();
-            try {
-                System.out.println(channel.getRemoteAddress() + " " + channel.isConnected() + " total: " + total());
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                IOUtil.close(channel);
 
-//                try {
-//
-//
-//                    long ts = Const.TimeInMillis.SECOND.MILLIS * (total() % 100);
-//                    //System.out.println(Const.TimeInMillis.toString(ts) + " " + channel.isConnected() + " tot: " + total());
-//                    TaskUtil.defaultTaskScheduler().queue(ts, () ->
-//                    {
-//                        //System.out.println("Closing " + channel);
-//                        IOUtil.close(channel);
-//                    });
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                }
-            }
-        }
 
         /**
          *
@@ -137,13 +108,48 @@ public class NIOClientConnectionTest {
         public void exception(Exception e) {
             //e.printStackTrace();
             failCount.incrementAndGet();
-            System.err.println(e +" " + total());
+            //System.err.println(e +" " + total());
         }
 
         public String toString() {
             return successCount.toString() + ", " + failCount.toString();
         }
 
+        /**
+         * Called when incoming data or something to do
+         *
+         * @param key the input argument
+         */
+        @Override
+        public void accept(SelectionKey key) {
+
+            try {
+                SocketChannel channel = (SocketChannel) key.channel();
+                System.out.println(channel.getRemoteAddress() + " " + channel.isConnected() + " total: " + total());
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                IOUtil.close(key.channel());
+            }
+        }
+
+        @Override
+        public void accept(ByteBuffer byteBuffer) {
+
+        }
+
+        @Override
+        public int connected(SelectionKey key) {
+            successCount.incrementAndGet();
+            SocketChannel channel = (SocketChannel) key.channel();
+            try {
+                System.out.println(channel.getRemoteAddress() + " " + channel.isConnected() + " total: " + total());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            IOUtil.close(key.channel());
+            return -1;
+        }
     }
 
 

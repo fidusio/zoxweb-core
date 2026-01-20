@@ -15,8 +15,7 @@ public abstract class BaseSessionCallback<CF>
     private transient BaseChannelOutputStream bcos;
     private transient ByteChannel channel;
 
-    public abstract BaseChannelOutputStream get();
-
+    ///public abstract BaseChannelOutputStream get();
 
 
     public SocketAddress getRemoteAddress() {
@@ -28,16 +27,23 @@ public abstract class BaseSessionCallback<CF>
     }
 
 
+    public int connected(SelectionKey key) {
+        return key.interestOps();
+    }
 
-    public int connected(SelectionKey key) {return key.interestOps();}
-
-
+    public BaseChannelOutputStream get() {
+        return bcos;
+    }
 
     public BaseSessionCallback<?> setOutputStream(BaseChannelOutputStream bcos) {
         this.bcos = bcos;
         return this;
     }
-    public BaseChannelOutputStream getOutputStream() { return bcos != null ? bcos : get();}
+
+    public BaseChannelOutputStream getOutputStream() {
+        return bcos;
+        ///return bcos != null ? bcos : get();
+    }
 
     public ByteChannel getChannel() {
         return channel != null ? channel : (getOutputStream() != null ? getOutputStream().dataChannel : null);

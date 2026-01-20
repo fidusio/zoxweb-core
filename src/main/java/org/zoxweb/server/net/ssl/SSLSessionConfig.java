@@ -4,6 +4,7 @@ package org.zoxweb.server.net.ssl;
 import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.logging.LogWrapper;
+import org.zoxweb.server.net.BaseChannelOutputStream;
 import org.zoxweb.server.net.SelectorController;
 import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.util.CloseableType;
@@ -23,12 +24,12 @@ public class SSLSessionConfig
     // Incoming encrypted data
     volatile ByteBuffer inSSLNetData = null;
     // Outgoing encrypted data
-    volatile ByteBuffer outSSLNetData = null;
+    public volatile ByteBuffer outSSLNetData = null;
     // clear text application data
     volatile ByteBuffer inAppData = null;
     // the encrypted channel
-    volatile SocketChannel sslChannel = null;
-    volatile SSLChannelOutputStream sslOutputStream = null;
+    public volatile SocketChannel sslChannel = null;
+    public volatile BaseChannelOutputStream sslOutputStream = null;
     volatile SelectorController selectorController = null;
 
     volatile SocketChannel remoteChannel = null;
@@ -92,8 +93,10 @@ public class SSLSessionConfig
 
             IOUtil.close(sslChannel);
             IOUtil.close(remoteChannel);
-            selectorController.cancelSelectionKey(sslChannel);
-            selectorController.cancelSelectionKey(remoteChannel);
+            if (sslConnectionHelper != null) {
+                selectorController.cancelSelectionKey(sslChannel);
+                selectorController.cancelSelectionKey(remoteChannel);
+            }
             IOUtil.close((AutoCloseable) sslConnectionHelper);
             ByteBufferUtil.cache(inSSLNetData, inAppData, outSSLNetData, inRemoteData);
             IOUtil.close(sslOutputStream);
