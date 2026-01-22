@@ -185,7 +185,7 @@ public class SSLNIOSocketHandler
         if (log.isEnabled()) log.getLogger().info("Start of Accept SSLNIOSocket");
         try {
             // begin handshake will be called once subsequent calls are ignored
-            sslConfig.beginHandshake(sslContextInfo.isClient());
+            //sslConfig.beginHandshake(sslContextInfo.isClient());
 //            if(sslContextInfo.isClient()) {
 //                sessionCallback.connected(key);
 //            }
@@ -267,6 +267,7 @@ public class SSLNIOSocketHandler
             if (log.isEnabled()) log.getLogger().info("SSLStateMachine");
         }
         sessionCallback.setRemoteAddress((((SocketChannel) asc).getRemoteAddress()));
+        sslConfig.beginHandshake(sslContextInfo.isClient());
         // not sure about
         //config.beginHandshake(false);
         getSelectorController().register(asc, SelectionKey.OP_READ, this, isBlocking);

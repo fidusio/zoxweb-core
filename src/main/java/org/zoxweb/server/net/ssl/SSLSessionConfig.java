@@ -34,7 +34,7 @@ public class SSLSessionConfig
 
     volatile SocketChannel remoteChannel = null;
     volatile ByteBuffer inRemoteData = null;
-    volatile SSLConnectionHelper sslConnectionHelper = null;
+    public volatile SSLConnectionHelper sslConnectionHelper = null;
     volatile boolean forcedClose = false;
     volatile IPAddress remoteConnection = null;
     private volatile String sniHostName = null;
@@ -93,7 +93,7 @@ public class SSLSessionConfig
 
             IOUtil.close(sslChannel);
             IOUtil.close(remoteChannel);
-            if (sslConnectionHelper != null) {
+            if (selectorController != null) {
                 selectorController.cancelSelectionKey(sslChannel);
                 selectorController.cancelSelectionKey(remoteChannel);
             }

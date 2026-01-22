@@ -17,6 +17,7 @@ package org.zoxweb.server.net;
 
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.logging.LogWrapper;
+import org.zoxweb.server.net.common.CommonAcceptSK;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.shared.util.*;
 
@@ -30,7 +31,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
 public abstract class ProtocolHandler
-        implements GetName, GetDescription, CloseableType, UsageTracker, Consumer<SelectionKey> {
+        implements GetName, GetDescription, CloseableType, UsageTracker, Consumer<SelectionKey>, CommonAcceptSK {
     public static final LogWrapper log = new LogWrapper(ProtocolHandler.class).setEnabled(false);
 
     static class PHTimeout
@@ -111,6 +112,8 @@ public abstract class ProtocolHandler
         return lastUsage.get();
     }
 
+    @Override
+    abstract public void accept(SelectionKey key);
 
     public long getID() {
         return id;

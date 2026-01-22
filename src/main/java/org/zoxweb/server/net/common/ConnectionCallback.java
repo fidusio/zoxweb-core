@@ -7,7 +7,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 
 public interface ConnectionCallback
-        extends ExceptionCallback {
+        extends ExceptionCallback, CommonAcceptSK {
     /**
      * Called when incoming data or something to do
      * @param key the input argument

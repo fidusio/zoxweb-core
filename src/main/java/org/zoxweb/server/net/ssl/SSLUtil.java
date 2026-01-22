@@ -10,7 +10,7 @@ import javax.net.ssl.SSLEngineResult;
 
 import static javax.net.ssl.SSLEngineResult.HandshakeStatus.*;
 
-public class SSLUtil {
+public final class SSLUtil {
     public static final LogWrapper log = new LogWrapper(SSLUtil.class).setEnabled(false);
 
     private SSLUtil() {
@@ -95,7 +95,6 @@ public class SSLUtil {
             config.sslConnectionHelper.createRemoteConnection();
         }
 
-
         if (config.clientMode && callback instanceof ConnectionCallback) {
             /*
              * special case if the connection is a client connection
@@ -112,7 +111,6 @@ public class SSLUtil {
             //**************************************************
             config.sslConnectionHelper.publish(config.getHandshakeStatus(), callback);
         }
-
 
         return System.currentTimeMillis() - ts;
     }

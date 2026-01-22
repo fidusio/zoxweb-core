@@ -17,6 +17,7 @@ package org.zoxweb.server.net;
 
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.logging.LogWrapper;
+import org.zoxweb.server.net.common.CommonAcceptSK;
 import org.zoxweb.server.net.common.ConnectionCallback;
 import org.zoxweb.server.task.TaskSchedulerProcessor;
 import org.zoxweb.server.task.TaskUtil;
@@ -47,7 +48,6 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Consumer;
 
 /**
  * High-performance Non-blocking I/O (NIO) socket multiplexer that manages multiple server and client
@@ -187,9 +187,6 @@ public class NIOSocket
     }
 
 
-
-
-
     public SelectionKey addClientSocket(InetSocketAddress sa, ProtocolHandler ph, int timeoutInSec)
             throws IOException {
 
@@ -199,17 +196,16 @@ public class NIOSocket
         SocketChannel sc = SocketChannel.open();
 
         SelectionKey selectionKey = selectorController.register(sc, SelectionKey.OP_CONNECT, scheduledAttachment, false);
+        scheduledAttachment.setAppointment(taskSchedulerProcessor.queue(TimeInMillis.SECOND.mult(timeoutInSec), new NIOChannelMonitor(selectionKey, selectorController)));
 
         try {
-            if (sc.connect(sa))
+            if (sc.connect(sa)) {
                 clientConnect(selectionKey);
-            else {
-                scheduledAttachment.setAppointment(taskSchedulerProcessor.queue(TimeInMillis.SECOND.mult(timeoutInSec), new NIOChannelMonitor(selectionKey, selectorController)));
-                //taskSchedulerProcessor.queue(TimeInMillis.SECOND.mult(timeoutInSec), new NIOChannelMonitor(selectionKey, selectorController));
             }
+
         } catch (IOException e) {
             selectorController.cancelSelectionKey(selectionKey);
-            if(ph.getSessionCallback() != null)
+            if (ph.getSessionCallback() != null)
                 ph.getSessionCallback().exception(e);
             throw e;
         }
@@ -247,12 +243,12 @@ public class NIOSocket
         scheduledAttachment.attach(cc);
         SocketChannel sc = SocketChannel.open();
         SelectionKey selectionKey = selectorController.register(sc, SelectionKey.OP_CONNECT, scheduledAttachment, false);
+        scheduledAttachment.setAppointment(taskSchedulerProcessor.queue(TimeInMillis.SECOND.mult(timeoutInSec), new NIOChannelMonitor(selectionKey, selectorController)));
         try {
             if (sc.connect(sa)) {
                 // we connected UTRA fast connection
                 clientConnect(selectionKey);
-            } else
-                scheduledAttachment.setAppointment(taskSchedulerProcessor.queue(TimeInMillis.SECOND.mult(timeoutInSec), new NIOChannelMonitor(selectionKey, selectorController)));
+            }
         } catch (IOException e) {
             selectorController.cancelSelectionKey(selectionKey);
             scheduledAttachment.attachment().exception(e);
@@ -406,8 +402,8 @@ public class NIOSocket
                                         && key.channel().isOpen()) {
                                     // channel has data to read
                                     // this is the reading part of the process
-                                    Consumer<SelectionKey> currentPP = (Consumer<SelectionKey>) key.attachment();
-                                    if(currentPP instanceof ProtocolHandler)
+                                    CommonAcceptSK currentPP = (CommonAcceptSK) key.attachment();
+                                    if (currentPP instanceof ProtocolHandler)
                                         ((ProtocolHandler) currentPP).updateUsage();
 
 
@@ -613,6 +609,7 @@ public class NIOSocket
             try {
                 finishConnecting(key);
                 connectionCount.incrementAndGet();
+                key.attach(connectData);
 
                 //**************************************************************************
 
@@ -627,8 +624,7 @@ public class NIOSocket
                                 selectorController.wakeup();
                             } else
                                 selectorController.cancelSelectionKey(key);
-                        }
-                        catch (IOException e) {
+                        } catch (IOException e) {
                             IOUtil.close(key.channel());
                         }
                     });
@@ -637,8 +633,7 @@ public class NIOSocket
                     if (keysOps > 0) {
                         key.interestOps(keysOps);
                         selectorController.wakeup();
-                    }
-                    else
+                    } else
                         selectorController.cancelSelectionKey(key);
                 }
 
@@ -653,7 +648,7 @@ public class NIOSocket
         } else {
 
 
-            ProtocolHandler phTemp  = null;
+            ProtocolHandler phTemp = null;
             Object attachment = ((ScheduledAttachment<?>) key.attachment()).attachment();
 
             if (attachment instanceof ProtocolHandler) {
@@ -721,7 +716,7 @@ public class NIOSocket
      * @param key isConnectable() true
      * @throws IOException case of error
      */
-    public static  void finishConnecting(SelectionKey key) throws IOException {
+    public static void finishConnecting(SelectionKey key) throws IOException {
         synchronized (key) {
             if (key.isValid()) {
 
