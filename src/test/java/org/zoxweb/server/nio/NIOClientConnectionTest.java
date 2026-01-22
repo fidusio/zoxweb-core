@@ -2,9 +2,7 @@ package org.zoxweb.server.nio;
 
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.logging.LogWrapper;
-import org.zoxweb.server.net.NIOSocket;
-import org.zoxweb.server.net.NIOSocketHandler;
-import org.zoxweb.server.net.PlainSessionCallback;
+import org.zoxweb.server.net.*;
 import org.zoxweb.server.net.common.ConnectionCallback;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.server.util.GSONUtil;
@@ -29,7 +27,7 @@ public class NIOClientConnectionTest {
     static AtomicLong failCount = new AtomicLong(0);
 
     public static class ConnectionSession
-            extends PlainSessionCallback {
+            extends BaseSessionCallback<BaseChannelOutputStream> {
         AtomicBoolean closed = new AtomicBoolean(false);
 
 

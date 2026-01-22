@@ -19,6 +19,7 @@ import org.zoxweb.server.fsm.StateMachine;
 import org.zoxweb.server.fsm.TriggerConsumer;
 import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.server.io.IOUtil;
+import org.zoxweb.server.net.BaseSessionCallback;
 import org.zoxweb.server.net.NIOSocket;
 import org.zoxweb.server.net.ProtocolHandler;
 import org.zoxweb.server.net.common.CommonChannelOutputStream;
@@ -44,7 +45,7 @@ public class SSLNIOSocketHandler
         extends ProtocolHandler {
 
 
-    private static class TunnelCallback extends SSLSessionCallback {
+    private static class TunnelCallback extends BaseSessionCallback<SSLSessionConfig> {
 
 
         @Override
@@ -116,11 +117,11 @@ public class SSLNIOSocketHandler
 //
 //		this(sslContext, ra, new TunnelCallback());
 //	}
-    public SSLNIOSocketHandler(SSLContextInfo sslContextInfo, SSLSessionCallback sessionCallback) {
+    public SSLNIOSocketHandler(SSLContextInfo sslContextInfo, BaseSessionCallback<SSLSessionConfig> sessionCallback) {
         this(sslContextInfo, sessionCallback, true, null);
     }
 
-    public SSLNIOSocketHandler(SSLContextInfo sslContextInfo, SSLSessionCallback sessionCallback, boolean simpleStateMachine,
+    public SSLNIOSocketHandler(SSLContextInfo sslContextInfo, BaseSessionCallback<SSLSessionConfig> sessionCallback, boolean simpleStateMachine,
                                IPAddress rc) {
         super(true);
         SUS.checkIfNulls("context  can't be null", sslContextInfo);
@@ -137,7 +138,7 @@ public class SSLNIOSocketHandler
         //SUS.checkIfNulls("Session callback can't be null", this.sessionCallback);
     }
 
-    public SSLNIOSocketHandler(SSLSessionCallback sessionCallback, boolean trustAll) {
+    public SSLNIOSocketHandler(BaseSessionCallback<SSLSessionConfig> sessionCallback, boolean trustAll) {
         super(false);
         remoteConnection = null;
         this.simpleStateMachine = true;
@@ -194,7 +195,7 @@ public class SSLNIOSocketHandler
             // channel selection data coming from ssl channel or tunnel response
             if (key.channel() == sslConfig.sslChannel && sslConfig.sslChannel.isConnected()) {
                 // here we have an application code that will process decrypted data
-                sslDispatcher.publish(sslConfig.getHandshakeStatus(), (SSLSessionCallback) sessionCallback);
+                sslDispatcher.publish(sslConfig.getHandshakeStatus(), (BaseSessionCallback<SSLSessionConfig>) sessionCallback);
             } else if (key.channel() == sslConfig.remoteChannel && sslConfig.remoteChannel.isConnected()) {
                 // this is the tunnel section connection
                 int bytesRead;
@@ -239,7 +240,7 @@ public class SSLNIOSocketHandler
             sslConfig.sslOutputStream = new CommonChannelOutputStream(this, (ByteChannel) asc, 512)
                     .setSSLSessionConfig(sslConfig)
                     .setSSLMode(true);
-            ((SSLSessionCallback)sessionCallback).setConfig(sslConfig);
+            ((BaseSessionCallback<SSLSessionConfig>)sessionCallback).setConfig(sslConfig);
             sslDispatcher = new CustomSSLStateMachine(this);
             sessionCallback.setProtocolHandler(this);
             sessionCallback.setOutputStream(sslConfig.sslOutputStream);
@@ -259,7 +260,7 @@ public class SSLNIOSocketHandler
             sslConfig.sslOutputStream = new CommonChannelOutputStream(this, (ByteChannel) asc, 512)
                     .setSSLSessionConfig(sslConfig)
                     .setSSLMode(true);
-            ((SSLSessionCallback)sessionCallback).setConfig(sslConfig);
+            ((BaseSessionCallback<SSLSessionConfig>)sessionCallback).setConfig(sslConfig);
             sessionCallback.setProtocolHandler(this);
             sessionCallback.setOutputStream(sslConfig.sslOutputStream);
             sslStateMachine.start(true);

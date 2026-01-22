@@ -39,11 +39,11 @@ public class NIOSocketHandler
     private volatile ByteBuffer phBB = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, Const.SizeInBytes.K.mult(1));
 
 
-    public NIOSocketHandler(PlainSessionCallback psc) {
+    public NIOSocketHandler(BaseSessionCallback<BaseChannelOutputStream> psc) {
        this(psc, true);
     }
 
-    public NIOSocketHandler(PlainSessionCallback psc, boolean timeout) {
+    public NIOSocketHandler(BaseSessionCallback<BaseChannelOutputStream> psc, boolean timeout) {
         super(timeout);
         this.sessionCallback = psc;
     }
@@ -75,7 +75,7 @@ public class NIOSocketHandler
                     if (sessionCallback.getConfig() == null) {
                         CommonChannelOutputStream cco = new CommonChannelOutputStream(this, phSChannel, Const.SizeInBytes.K.mult(1));
                         sessionCallback.setOutputStream(cco);
-                        ((PlainSessionCallback) sessionCallback).setConfig(cco);
+                        ((BaseSessionCallback<BaseChannelOutputStream>) sessionCallback).setConfig(cco);
                         // need to notify session callback in case waiting for connection
                         sessionCallback.connected(key);
                     }
@@ -123,7 +123,7 @@ public class NIOSocketHandler
         try {
             int index = 0;
             int port = Integer.parseInt(args[index++]);
-            Class<? extends PlainSessionCallback> clazz = (Class<? extends PlainSessionCallback>) Class.forName(args[index++]);
+            Class<? extends BaseSessionCallback<?>> clazz = (Class<? extends BaseSessionCallback<?>>) Class.forName(args[index++]);
             TaskUtil.setThreadMultiplier(8);
 
 

@@ -1,6 +1,7 @@
 package org.zoxweb.server.net.ssl;
 
 import org.zoxweb.server.fsm.*;
+import org.zoxweb.server.net.BaseSessionCallback;
 import org.zoxweb.shared.util.GetName;
 import org.zoxweb.shared.util.SharedStringUtil;
 import org.zoxweb.shared.util.SharedUtil;
@@ -14,9 +15,9 @@ public class SSLStateMachine extends StateMachine<SSLSessionConfig>
 
 
     @Override
-    public void publish(SSLEngineResult.HandshakeStatus status, SSLSessionCallback callback) {
+    public void publish(SSLEngineResult.HandshakeStatus status, BaseSessionCallback<SSLSessionConfig> callback) {
         if (!isClosed())
-            publishSync(new Trigger<SSLSessionCallback>(this, status, getCurrentState(), callback));
+            publishSync(new Trigger<BaseSessionCallback<SSLSessionConfig>>(this, status, getCurrentState(), callback));
     }
 
 

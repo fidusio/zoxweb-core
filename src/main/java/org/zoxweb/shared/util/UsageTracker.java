@@ -1,7 +1,7 @@
 package org.zoxweb.shared.util;
 
 public interface UsageTracker
-        extends IsExpired {
+        extends IsExpired, AutoCloseable {
 
     /**
      *

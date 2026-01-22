@@ -618,13 +618,19 @@ public class NIOSocket
 
                 if (executor == null)
                     executor.execute(() -> {
-                        int keysOps = connectData.connected(key);
-                        if (keysOps > 0) {
-                            key.interestOps(keysOps);
-                            selectorController.wakeup();
+                        try {
+
+
+                            int keysOps = connectData.connected(key);
+                            if (keysOps > 0) {
+                                key.interestOps(keysOps);
+                                selectorController.wakeup();
+                            } else
+                                selectorController.cancelSelectionKey(key);
                         }
-                        else
-                            selectorController.cancelSelectionKey(key);
+                        catch (IOException e) {
+                            IOUtil.close(key.channel());
+                        }
                     });
                 else {
                     int keysOps = connectData.connected(key);

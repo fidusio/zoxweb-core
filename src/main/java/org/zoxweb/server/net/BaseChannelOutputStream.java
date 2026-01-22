@@ -68,27 +68,27 @@ public abstract class BaseChannelOutputStream extends OutputStream
     /** Flag indicating whether this stream has been closed */
     protected final AtomicBoolean isClosed = new AtomicBoolean(false);
     /** Protocol handler for connection lifecycle management */
-    protected final ProtocolHandler protocolHandler;
+    protected final org.zoxweb.shared.util.UsageTracker usageTracker;
     /** Remote client address associated with this channel */
     protected final InetSocketAddress clientAddress;
 
     /**
      * Constructs a new BaseChannelOutputStream with the specified parameters.
      *
-     * @param ph the protocol handler for connection management, may be null
+     * @param ut the protocol handler for connection management, may be null
      * @param outByteChannel the NIO channel to write to, must not be null
      * @param outAppBufferSize the size of the output buffer in bytes, must be greater than 0
      * @throws IOException if unable to get the remote address from the channel
      * @throws NullPointerException if outByteChannel is null
      * @throws IllegalArgumentException if outAppBufferSize is not greater than 0
      */
-    protected BaseChannelOutputStream(ProtocolHandler ph, ByteChannel outByteChannel, int outAppBufferSize) throws IOException {
+    protected BaseChannelOutputStream(ProtocolHandler ut, ByteChannel outByteChannel, int outAppBufferSize) throws IOException {
         SUS.checkIfNulls("channel can't be null ", outByteChannel);
         this.clientAddress = (InetSocketAddress) ((SocketChannel) outByteChannel).getRemoteAddress();
         this.dataChannel = outByteChannel;
         if (outAppBufferSize > 0) {
             outAppData = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.DIRECT, outAppBufferSize);
-            this.protocolHandler = ph;
+            this.usageTracker = ut;
         } else
             throw new IllegalArgumentException("Invalid buffer size");
     }

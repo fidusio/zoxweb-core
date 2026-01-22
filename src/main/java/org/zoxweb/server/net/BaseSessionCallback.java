@@ -2,11 +2,13 @@ package org.zoxweb.server.net;
 
 import org.zoxweb.shared.util.CloseableType;
 
+import java.io.IOException;
 import java.io.OutputStream;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.ByteChannel;
 import java.nio.channels.SelectionKey;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class BaseSessionCallback<CF>
         extends SessionCallback<CF, ByteBuffer, OutputStream>
@@ -14,6 +16,8 @@ public abstract class BaseSessionCallback<CF>
     private SocketAddress remoteAddress;
     private transient BaseChannelOutputStream bcos;
     private transient ByteChannel channel;
+    protected final AtomicBoolean isClosed = new AtomicBoolean(false);
+
 
     ///public abstract BaseChannelOutputStream get();
 
@@ -27,7 +31,7 @@ public abstract class BaseSessionCallback<CF>
     }
 
 
-    public int connected(SelectionKey key) {
+    public int connected(SelectionKey key) throws IOException {
         return key.interestOps();
     }
 
@@ -63,5 +67,9 @@ public abstract class BaseSessionCallback<CF>
         return this;
     }
 
+
+    public boolean isClosed() {
+        return isClosed.get();
+    }
 
 }

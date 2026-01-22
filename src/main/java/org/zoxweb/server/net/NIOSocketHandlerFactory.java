@@ -7,7 +7,7 @@ public class NIOSocketHandlerFactory
         extends ProtocolFactoryBase<NIOSocketHandler> {
 
     private Class<? extends BaseSessionCallback> cbClass;
-    private InstanceFactory.Creator<PlainSessionCallback> creator;
+    private InstanceFactory.Creator<BaseSessionCallback<BaseChannelOutputStream>> creator;
     private boolean timeout = true;
 
     public NIOSocketHandlerFactory() {
@@ -24,19 +24,19 @@ public class NIOSocketHandlerFactory
 
     }
 
-    public NIOSocketHandlerFactory(InstanceFactory.Creator<PlainSessionCallback> creator) {
+    public NIOSocketHandlerFactory(InstanceFactory.Creator<BaseSessionCallback<BaseChannelOutputStream>> creator) {
         this.creator = creator;
     }
 
 
     @Override
     public NIOSocketHandler newInstance() {
-        PlainSessionCallback sc = null;
+        BaseSessionCallback<BaseChannelOutputStream> sc = null;
         try {
             if (creator != null)
                 sc = creator.newInstance();
             else if (cbClass != null)
-                sc = (PlainSessionCallback) cbClass.getDeclaredConstructor().newInstance();
+                sc = (BaseSessionCallback<BaseChannelOutputStream>) cbClass.getDeclaredConstructor().newInstance();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -52,7 +52,7 @@ public class NIOSocketHandlerFactory
     public void init() {
         try {
             if (getProperties().getValue("session_callback") != null) {
-                cbClass = (Class<PlainSessionCallback>) Class.forName(getProperties().getValue("session_callback"));
+                cbClass = (Class<BaseSessionCallback<BaseChannelOutputStream>>) Class.forName(getProperties().getValue("session_callback"));
             }
         } catch (Exception e) {
             e.printStackTrace();

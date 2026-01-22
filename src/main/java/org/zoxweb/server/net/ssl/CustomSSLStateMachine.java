@@ -2,6 +2,7 @@ package org.zoxweb.server.net.ssl;
 
 import org.zoxweb.server.fsm.MonoStateMachine;
 import org.zoxweb.server.logging.LogWrapper;
+import org.zoxweb.server.net.BaseSessionCallback;
 import org.zoxweb.server.net.common.CommonSessionCallback;
 import org.zoxweb.shared.util.Identifier;
 import org.zoxweb.shared.util.RateCounter;
@@ -15,7 +16,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import static javax.net.ssl.SSLEngineResult.HandshakeStatus.*;
 
-public class CustomSSLStateMachine extends MonoStateMachine<SSLEngineResult.HandshakeStatus, SSLSessionCallback>
+public class CustomSSLStateMachine extends MonoStateMachine<SSLEngineResult.HandshakeStatus, BaseSessionCallback<SSLSessionConfig>>
         implements SSLConnectionHelper, Closeable, Identifier<Long> {
     public static final LogWrapper log = new LogWrapper(CustomSSLStateMachine.class).setEnabled(false);
 
@@ -74,23 +75,23 @@ public class CustomSSLStateMachine extends MonoStateMachine<SSLEngineResult.Hand
         return id;
     }
 
-    public void needWrap(SSLSessionCallback callback) {
+    public void needWrap(BaseSessionCallback<SSLSessionConfig> callback) {
         rcNeedWrap.register(SSLUtil._needWrap(getConfig(), callback));
     }
 
-    public void needUnwrap(SSLSessionCallback callback) {
+    public void needUnwrap(BaseSessionCallback<SSLSessionConfig> callback) {
         rcNeedUnwrap.register(SSLUtil._needUnwrap(getConfig(), callback));
     }
 
-    public void needTask(SSLSessionCallback callback) {
+    public void needTask(BaseSessionCallback<SSLSessionConfig> callback) {
         rcNeedTask.register(SSLUtil._needTask(getConfig(), callback));
     }
 
-    public void finished(SSLSessionCallback callback) {
+    public void finished(BaseSessionCallback<SSLSessionConfig> callback) {
         rcFinished.register(SSLUtil._finished(getConfig(), callback));
     }
 
-    public void notHandshaking(SSLSessionCallback callback) {
+    public void notHandshaking(BaseSessionCallback<SSLSessionConfig> callback) {
         rcNotHandshaking.register(SSLUtil._notHandshaking(getConfig(), callback));
     }
 

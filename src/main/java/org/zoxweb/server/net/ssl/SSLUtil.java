@@ -2,6 +2,7 @@ package org.zoxweb.server.net.ssl;
 
 import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.server.logging.LogWrapper;
+import org.zoxweb.server.net.BaseSessionCallback;
 import org.zoxweb.server.net.common.ConnectionCallback;
 import org.zoxweb.shared.util.SUS;
 
@@ -15,7 +16,7 @@ public class SSLUtil {
     private SSLUtil() {
     }
 
-    public static long _notHandshaking(SSLSessionConfig config, SSLSessionCallback callback) {
+    public static long _notHandshaking(SSLSessionConfig config, BaseSessionCallback<SSLSessionConfig> callback) {
         long ts = System.currentTimeMillis();
         if (log.isEnabled()) log.getLogger().info("" + config.getHandshakeStatus());
 
@@ -83,7 +84,7 @@ public class SSLUtil {
     }
 
 
-    public static long _finished(SSLSessionConfig config, SSLSessionCallback callback) {
+    public static long _finished(SSLSessionConfig config, BaseSessionCallback<SSLSessionConfig> callback) {
         long ts = System.currentTimeMillis();
 
         // ********************************************
@@ -116,7 +117,7 @@ public class SSLUtil {
         return System.currentTimeMillis() - ts;
     }
 
-    public static long _needTask(SSLSessionConfig config, SSLSessionCallback callback) {
+    public static long _needTask(SSLSessionConfig config, BaseSessionCallback<SSLSessionConfig> callback) {
         long ts = System.currentTimeMillis();
 
         Runnable toRun;
@@ -135,7 +136,7 @@ public class SSLUtil {
     }
 
 
-    public static long _needUnwrap(SSLSessionConfig config, SSLSessionCallback callback) {
+    public static long _needUnwrap(SSLSessionConfig config, BaseSessionCallback<SSLSessionConfig> callback) {
 
         long ts = System.currentTimeMillis();
         if (log.isEnabled()) log.getLogger().info("Entry: " + config.getHandshakeStatus());
@@ -193,7 +194,7 @@ public class SSLUtil {
     }
 
 
-    public static long _needWrap(SSLSessionConfig config, SSLSessionCallback callback) {
+    public static long _needWrap(SSLSessionConfig config, BaseSessionCallback<SSLSessionConfig> callback) {
         long ts = System.currentTimeMillis();
 
         if (config.getHandshakeStatus() == NEED_WRAP) {

@@ -102,7 +102,7 @@ public class SSLChannelOutputStream extends BaseChannelOutputStream {
                 case OK:
                     try {
                         written = ByteBufferUtil.smartWrite(null, dataChannel, sslConfig.outSSLNetData);
-                        if(protocolHandler != null) protocolHandler.updateUsage();
+                        if(usageTracker != null) usageTracker.updateUsage();
                     } catch (IOException e) {
                         IOUtil.close(this);
                         throw e;
@@ -131,7 +131,7 @@ public class SSLChannelOutputStream extends BaseChannelOutputStream {
     public void close() throws IOException {
         if (!isClosed.getAndSet(true)) {
             if (log.isEnabled()) log.getLogger().info("Calling close");
-            IOUtil.close(sslConfig, protocolHandler);
+            IOUtil.close(sslConfig, usageTracker);
             ByteBufferUtil.cache(outAppData);
         }
     }

@@ -23,6 +23,12 @@ public class CommonChannelOutputStream
     private transient SSLSessionConfig sslConfig;
     private final AtomicBoolean sslMode = new AtomicBoolean(false);
 
+
+    public CommonChannelOutputStream(ByteChannel byteChannel, int outAppBufferSize) throws IOException {
+        super(null, byteChannel, outAppBufferSize);
+    }
+
+
     public CommonChannelOutputStream(ProtocolHandler protocolHandler, ByteChannel byteChannel, int outAppBufferSize) throws IOException {
         super(protocolHandler, byteChannel, outAppBufferSize);
     }
@@ -83,7 +89,7 @@ public class CommonChannelOutputStream
     private synchronized int plainWrite(ByteBuffer bb) throws IOException {
         try {
             int ret = ByteBufferUtil.smartWrite(null, dataChannel, bb);
-            if (protocolHandler != null) protocolHandler.updateUsage();
+            if (usageTracker != null) usageTracker.updateUsage();
             return ret;
         } catch (IOException e) {
             IOUtil.close(this);
@@ -123,7 +129,7 @@ public class CommonChannelOutputStream
                 case OK:
                     try {
                         written = ByteBufferUtil.smartWrite(null, dataChannel, sslConfig.outSSLNetData);
-                        if (protocolHandler != null) protocolHandler.updateUsage();
+                        if (usageTracker != null) usageTracker.updateUsage();
                     } catch (IOException e) {
                         IOUtil.close(this);
                         throw e;
@@ -153,9 +159,9 @@ public class CommonChannelOutputStream
         if (!isClosed.getAndSet(true)) {
             if (log.isEnabled()) log.getLogger().info("Calling close");
             if (sslConfig != null)
-                IOUtil.close(sslConfig, protocolHandler);
+                IOUtil.close(sslConfig, usageTracker);
             else
-                IOUtil.close(dataChannel, protocolHandler);
+                IOUtil.close(dataChannel, usageTracker);
             ByteBufferUtil.cache(outAppData);
         }
     }

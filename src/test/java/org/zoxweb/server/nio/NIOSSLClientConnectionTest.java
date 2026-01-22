@@ -5,11 +5,9 @@ import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.io.UByteArrayOutputStream;
 import org.zoxweb.server.logging.LogWrapper;
-import org.zoxweb.server.net.NIOSocket;
-import org.zoxweb.server.net.NIOSocketHandler;
-import org.zoxweb.server.net.PlainSessionCallback;
+import org.zoxweb.server.net.*;
 import org.zoxweb.server.net.ssl.SSLNIOSocketHandler;
-import org.zoxweb.server.net.ssl.SSLSessionCallback;
+import org.zoxweb.server.net.ssl.SSLSessionConfig;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.http.HTTPMessageConfig;
@@ -41,7 +39,7 @@ public class NIOSSLClientConnectionTest {
 
 
     public static class URISession
-            extends SSLSessionCallback {
+            extends BaseSessionCallback<SSLSessionConfig> {
         AtomicBoolean closed = new AtomicBoolean(false);
         private UByteArrayOutputStream result = new UByteArrayOutputStream();
         private long timeStamp = System.currentTimeMillis();
@@ -140,7 +138,7 @@ public class NIOSSLClientConnectionTest {
 
 
     public static class PlainSession
-            extends PlainSessionCallback {
+            extends BaseSessionCallback<BaseChannelOutputStream> {
         AtomicBoolean closed = new AtomicBoolean(false);
 
 

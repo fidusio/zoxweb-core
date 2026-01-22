@@ -3,20 +3,21 @@ package org.zoxweb.server.net.protocols;
 import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.io.UByteArrayOutputStream;
-import org.zoxweb.server.net.PlainSessionCallback;
-import org.zoxweb.server.net.ssl.SSLSessionCallback;
+import org.zoxweb.server.net.BaseChannelOutputStream;
+import org.zoxweb.server.net.BaseSessionCallback;
+import org.zoxweb.server.net.ssl.SSLSessionConfig;
 import org.zoxweb.shared.util.InstanceFactory;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
 public class EchoProtocol {
-    private final static InstanceFactory.Creator<PlainSessionCallback> echoPIC = EchoSession::new;
+    private final static InstanceFactory.Creator<BaseSessionCallback<BaseChannelOutputStream>> echoPIC = EchoSession::new;
 
-    private final static InstanceFactory.Creator<SSLSessionCallback> echoSIC = SSLEchoSession::new;
+    private final static InstanceFactory.Creator<BaseSessionCallback<SSLSessionConfig>> echoSIC = SSLEchoSession::new;
 
     public static class EchoSession
-            extends PlainSessionCallback {
+            extends BaseSessionCallback<BaseChannelOutputStream> {
         private final UByteArrayOutputStream ubaos = new UByteArrayOutputStream();
 
         @Override
@@ -57,7 +58,7 @@ public class EchoProtocol {
     }
 
     public static class SSLEchoSession
-            extends SSLSessionCallback {
+            extends BaseSessionCallback<SSLSessionConfig> {
 
         private final UByteArrayOutputStream ubaos = new UByteArrayOutputStream();
 

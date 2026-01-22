@@ -13,13 +13,13 @@ public class SSLNIOSocketHandlerFactory
     private IPAddress remoteConnection;
     private SSLContextInfo sslContext;
     private Class<? extends BaseSessionCallback> scClass;
-    private InstanceFactory.Creator<SSLSessionCallback> creator;
+    private InstanceFactory.Creator<BaseSessionCallback<SSLSessionConfig>> creator;
 
     public SSLNIOSocketHandlerFactory() {
         complexSetup = false;
     }
 
-    public SSLNIOSocketHandlerFactory(SSLContextInfo sslContext, InstanceFactory.Creator<SSLSessionCallback> creator) {
+    public SSLNIOSocketHandlerFactory(SSLContextInfo sslContext, InstanceFactory.Creator<BaseSessionCallback<SSLSessionConfig>> creator) {
         this();
         this.sslContext = sslContext;
         this.creator = creator;
@@ -45,12 +45,12 @@ public class SSLNIOSocketHandlerFactory
 
     @Override
     public SSLNIOSocketHandler newInstance() {
-        SSLSessionCallback sc = null;
+        BaseSessionCallback<SSLSessionConfig> sc = null;
         try {
             if (creator != null) {
                 sc = creator.newInstance();
             } else if (scClass != null)
-                sc = (SSLSessionCallback) scClass.getDeclaredConstructor().newInstance();
+                sc = (BaseSessionCallback<SSLSessionConfig>) scClass.getDeclaredConstructor().newInstance();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -69,7 +69,7 @@ public class SSLNIOSocketHandlerFactory
         sslContext = (SSLContextInfo) ((ConfigDAO) getProperties().getValue("ssl_engine")).attachment();
         try {
             if (getProperties().getValue("session_callback") != null) {
-                scClass = (Class<SSLSessionCallback>) Class.forName(getProperties().getValue("session_callback"));
+                scClass = (Class<BaseSessionCallback<SSLSessionConfig>>) Class.forName(getProperties().getValue("session_callback"));
             }
         } catch (Exception e) {
             e.printStackTrace();
