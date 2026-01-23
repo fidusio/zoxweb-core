@@ -66,13 +66,16 @@ public enum URIScheme
 	 * @param uri the URI string to match
 	 * @return the matching URIScheme, or null if not found
 	 */
-	public static URIScheme match(String uri)
+	public static URIScheme match(String uri, URIScheme ...schemes)
 	{
 		if (uri != null)
 		{
 			uri = uri.toLowerCase().trim();
 
-			for (URIScheme us: URIScheme.values())
+			if(schemes == null || schemes.length == 0)
+				schemes = URIScheme.values();
+
+			for (URIScheme us: schemes)
 			{
 				if (uri.startsWith(us.getName()))
                 {

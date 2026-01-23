@@ -8,14 +8,14 @@ import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.net.BaseChannelOutputStream;
 import org.zoxweb.server.net.BaseSessionCallback;
 import org.zoxweb.server.net.NIOSocket;
-import org.zoxweb.server.net.common.CommonSessionCallback;
+import org.zoxweb.server.net.common.TCPSessionCallback;
 import org.zoxweb.server.net.ssl.SSLContextInfo;
-import org.zoxweb.server.net.ssl.SSLNIOSocketHandler;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.http.HTTPMessageConfig;
 import org.zoxweb.shared.http.HTTPMessageConfigInterface;
 import org.zoxweb.shared.http.HTTPVersion;
+import org.zoxweb.shared.http.URIScheme;
 import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.util.Const;
 
@@ -44,9 +44,9 @@ public class NIOSSLClientConnectionTest {
 
 
     public static class URISession
-            extends CommonSessionCallback {
+            extends TCPSessionCallback {
         private UByteArrayOutputStream result = new UByteArrayOutputStream();
-        private long timeStamp = System.currentTimeMillis();
+        private final long timeStamp = System.currentTimeMillis();
         private final URI uri;
         private final String url;
 
@@ -55,11 +55,9 @@ public class NIOSSLClientConnectionTest {
             this.url = url;
             this.uri = new URI(url);
             setClient(true);
-            if ("https".equalsIgnoreCase(uri.getScheme())) {
+            if (URIScheme.match(url, URIScheme.HTTPS, URIScheme.WSS) != null) {
                 setSSLContextInfo(new SSLContextInfo(IPAddress.URLDecoder.decode(url), true));
             }
-
-
         }
 
         /**
@@ -119,17 +117,20 @@ public class NIOSSLClientConnectionTest {
         protected void connectedFinished() throws IOException {
             successCount.incrementAndGet();
             SocketChannel channel = (SocketChannel) getChannel();
-            //System.out.println(getRemoteAddress() + " " + channel.isConnected() + " total: " + total());
+            System.out.println(getRemoteAddress() + " " + channel.isConnected() + " total: " + total());
 
             //IOUtil.close(this);
 
             HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit(uri.getScheme() + uri.getHost() + ":" + uri.getPort(), uri.getRawPath(), "GET");
             hmci.setHTTPVersion(HTTPVersion.HTTP_1_1);
+            hmci.setHeader("Host", uri.getHost());
             HTTPRawFormatter hrf = new HTTPRawFormatter(hmci);
+            UByteArrayOutputStream ubaos = hrf.format();
+            //System.out.println(ubaos);
 
 
-            getOutputStream().write(hrf.format(), false);
-            log.getLogger().info(getRemoteAddress() + " " + channel.isConnected() + " total: " + total() + " it took" + Const.TimeInMillis.toString(System.currentTimeMillis() - timeStamp));
+            getOutputStream().write(ubaos, false);
+            log.getLogger().info(getRemoteAddress() + " " + channel.isConnected() + " total: " + total() + " took: " + Const.TimeInMillis.toString(System.currentTimeMillis() - timeStamp));
 
 
         }
@@ -137,8 +138,10 @@ public class NIOSSLClientConnectionTest {
 
 
     public static class PlainSessionCallback
-            extends CommonSessionCallback {
+            extends TCPSessionCallback {
 
+
+        PlainSessionCallback(IPAddress address) { super(address); }
 
         /**
          * Closes this stream and releases any system resources associated
@@ -300,8 +303,8 @@ public class NIOSSLClientConnectionTest {
                 try {
                     ipAddress = IPAddress.URLDecoder.decode(args[i]);
 
-                    nioSocket.addClientSocket(new InetSocketAddress(ipAddress.getInetAddress(), ipAddress.getPort()), new SSLNIOSocketHandler(new URISession(args[i]), true), 5);
-                    ipAddressesList.add(ipAddress);
+//                    nioSocket.addClientSocket(new InetSocketAddress(ipAddress.getInetAddress(), ipAddress.getPort()), new SSLNIOSocketHandler(new URISession(args[i]), true), 5);
+//                    ipAddressesList.add(ipAddress);
                     nioSocket.addClientSocket(new InetSocketAddress(ipAddress.getInetAddress(), ipAddress.getPort()), new URISession(args[i]), 5);
                     ipAddressesList.add(ipAddress);
                     System.out.println(args[i]);
@@ -319,7 +322,8 @@ public class NIOSSLClientConnectionTest {
 
                                 ipAddress = ipAddresses[j];
 //                                nioSocket.addClientSocket(new InetSocketAddress(ipAddress.getInetAddress(), ipAddress.getPort()), new NIOSocketHandler(new PlainSession(), false), 5);
-                                nioSocket.addClientSocket(new InetSocketAddress(ipAddress.getInetAddress(), ipAddress.getPort()), new PlainSessionCallback().setClient(true), 5);
+//                                nioSocket.addClientSocket(new InetSocketAddress(ipAddress.getInetAddress(), ipAddress.getPort()), new PlainSessionCallback(ipAddress), 5);
+                                nioSocket.addClientSocket(new PlainSessionCallback(ipAddress));
                                 ipAddressesList.add(ipAddress);
                                 //System.out.println(ipAddress);
                             } catch (Exception e) {

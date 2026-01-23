@@ -448,7 +448,7 @@ public class Range<T extends Comparable<T>>
     }
 
 
-    public static Range toRange(String rangeToken) {
+    public static  Range toRange(String rangeToken) {
         return toRange(rangeToken, null, null, null);
     }
 

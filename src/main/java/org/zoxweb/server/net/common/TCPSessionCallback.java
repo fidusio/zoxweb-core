@@ -8,31 +8,53 @@ import org.zoxweb.server.net.ssl.CustomSSLStateMachine;
 import org.zoxweb.server.net.ssl.SSLContextInfo;
 import org.zoxweb.server.net.ssl.SSLSessionConfig;
 import org.zoxweb.server.task.TaskUtil;
+import org.zoxweb.shared.net.IPAddress;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.channels.ByteChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 
-public abstract class CommonSessionCallback
+public abstract class TCPSessionCallback
         extends BaseSessionCallback<SSLSessionConfig>
-        implements ConnectionCallback {
-    public static final LogWrapper log = new LogWrapper(CommonSessionCallback.class).setEnabled(false);
+        implements ConnectionCallback<ByteBuffer> {
+    public static final LogWrapper log = new LogWrapper(TCPSessionCallback.class).setEnabled(false);
     private volatile boolean isClient;
     private volatile SSLContextInfo sslContextInfo;
-    //private volatile SSLConnectionHelper sslDispatcher = null;
-    //protected final AtomicBoolean isClosed = new AtomicBoolean(false);
     private final ByteBuffer dataBuffer = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.DIRECT, 1024);
 
+    protected TCPSessionCallback() {
+
+    }
+
+    protected TCPSessionCallback(IPAddress ipAddress) {
+        setRemoteAddress(new InetSocketAddress(ipAddress.getInetAddress(), ipAddress.getPort()));
+        setClient(true);
+    }
+
+    protected TCPSessionCallback(IPAddress ipAddress, boolean noSSLValidation) throws NoSuchAlgorithmException, KeyManagementException {
+        this(new SSLContextInfo(ipAddress, noSSLValidation));
+    }
+
+    protected TCPSessionCallback(SSLContextInfo sslContextInfo) {
+        setSSLContextInfo(sslContextInfo);
+        setRemoteAddress(sslContextInfo.getClientAddress());
+        setClient(sslContextInfo.isClient());
+    }
 
     public SSLContextInfo getSSLContextInfo() {
         return sslContextInfo;
     }
 
-    public CommonSessionCallback setSSLContextInfo(SSLContextInfo sslContextInfo) {
+    public TCPSessionCallback setSSLContextInfo(SSLContextInfo sslContextInfo) {
         this.sslContextInfo = sslContextInfo;
+        setClient(sslContextInfo.isClient());
+        setRemoteAddress(sslContextInfo.getClientAddress());
         return this;
     }
 
@@ -89,7 +111,7 @@ public abstract class CommonSessionCallback
      * @param isClient
      * @return
      */
-    public CommonSessionCallback setClient(boolean isClient) {
+    public synchronized TCPSessionCallback setClient(boolean isClient) {
         this.isClient = isClient;
         return this;
     }
@@ -103,7 +125,7 @@ public abstract class CommonSessionCallback
     protected boolean sslUpgrade(SelectionKey sk) throws IOException {
         if (log.isEnabled()) log.getLogger().info("SSL upgrade started");
         setChannel((ByteChannel) sk.channel());
-        setRemoteAddress(((SocketChannel) sk.channel()).getRemoteAddress());
+        setRemoteAddress((InetSocketAddress) ((SocketChannel) sk.channel()).getRemoteAddress());
         if (sslContextInfo != null) {
             if (log.isEnabled()) log.getLogger().info("SSLContextInfo: " + sslContextInfo + " isClient: " + isClient());
             SSLSessionConfig sslConfig = new SSLSessionConfig(sslContextInfo);

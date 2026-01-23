@@ -15,6 +15,7 @@
  */
 package org.zoxweb.shared.net;
 
+import org.zoxweb.shared.data.Range;
 import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedStringUtil;
 import org.zoxweb.shared.util.SharedUtil;
@@ -32,8 +33,9 @@ import java.util.Arrays;
 public class SharedNetUtil {
 
     /** Valid netmask byte values for IPv4 */
-    public static final byte MASK_VALS[] = {0, (byte) 128, (byte) 192, (byte) 224, (byte) 240, (byte) 248, (byte) 252, (byte) 254, (byte) 255};
+    public static final byte[] MASK_VALS = {0, (byte) 128, (byte) 192, (byte) 224, (byte) 240, (byte) 248, (byte) 252, (byte) 254, (byte) 255};
 
+    public static final Range<Integer> PORTS_RANGE = Range.toRange("[0,65535]");
     /**
      * Private constructor to prevent instantiation.
      */
@@ -251,13 +253,13 @@ public class SharedNetUtil {
                 if (SUS.isEmpty(nicd.getAddress()) || SUS.isEmpty(nicd.getNetmask())) {
                     throw new IOException("Network missing:" + SharedUtil.toCanonicalID(',', nicd.getAddress(), nicd.getNetmask()));
                 }
-                byte address[] = getV4Address(nicd.getAddress());
-                byte netmask[] = getV4Address(nicd.getNetmask());
+                byte[] address = getV4Address(nicd.getAddress());
+                byte[] netmask = getV4Address(nicd.getNetmask());
                 if (!validateV4Netmask(netmask)) {
                     return false;
                 }
-                byte gateway[] = nicd.getGateway() != null ? getV4Address(nicd.getGateway()) : null;
-                byte network[] = getNetwork(address, netmask);
+                byte[] gateway = nicd.getGateway() != null ? getV4Address(nicd.getGateway()) : null;
+                byte[] network = getNetwork(address, netmask);
                 if (gateway != null) {
                     // gateway must not be equal to address
                     if (Arrays.equals(address, gateway)) {

@@ -3,7 +3,7 @@ package org.zoxweb.server.net.ssl;
 import org.zoxweb.server.fsm.MonoStateMachine;
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.net.BaseSessionCallback;
-import org.zoxweb.server.net.common.CommonSessionCallback;
+import org.zoxweb.server.net.common.TCPSessionCallback;
 import org.zoxweb.shared.util.Identifier;
 import org.zoxweb.shared.util.RateCounter;
 import org.zoxweb.shared.util.SharedStringUtil;
@@ -28,7 +28,7 @@ public class CustomSSLStateMachine extends MonoStateMachine<SSLEngineResult.Hand
 
     private static final AtomicLong counter = new AtomicLong();
     private final SSLNIOSocketHandler sslns;
-    private final CommonSessionCallback csc;
+    private final TCPSessionCallback csc;
     private final long id;
 
     public static long getIDCount() {
@@ -37,7 +37,7 @@ public class CustomSSLStateMachine extends MonoStateMachine<SSLEngineResult.Hand
 
 
 
-    public CustomSSLStateMachine(CommonSessionCallback csc) {
+    public CustomSSLStateMachine(TCPSessionCallback csc) {
         super(false);
         this.csc = csc;
         sslns = null;

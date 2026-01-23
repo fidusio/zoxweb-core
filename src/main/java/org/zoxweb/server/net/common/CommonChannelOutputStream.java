@@ -14,7 +14,6 @@ import java.nio.ByteBuffer;
 import java.nio.channels.ByteChannel;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static javax.net.ssl.SSLEngineResult.HandshakeStatus.NOT_HANDSHAKING;
 
 public class CommonChannelOutputStream
         extends BaseChannelOutputStream {
@@ -117,7 +116,7 @@ public class CommonChannelOutputStream
             throw new SSLException("SSL engine not configured");
         }
 
-        if (sslConfig.getHandshakeStatus() == NOT_HANDSHAKING) {
+        if (sslConfig.getHandshakeStatus() == SSLEngineResult.HandshakeStatus.NOT_HANDSHAKING) {
             SSLEngineResult result = sslConfig.smartWrap(bb, sslConfig.outSSLNetData); // at handshake stage, data in appOut won't be
             if (log.isEnabled())
                 log.getLogger().info("AFTER-NEED_WRAP-PROCESSING: " + result);

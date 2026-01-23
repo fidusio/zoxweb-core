@@ -18,7 +18,9 @@ package org.zoxweb.server.net;
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.net.common.CommonAcceptSK;
+import org.zoxweb.server.net.common.TCPSessionCallback;
 import org.zoxweb.server.net.common.ConnectionCallback;
+import org.zoxweb.server.net.common.UDPSessionCallback;
 import org.zoxweb.server.task.TaskSchedulerProcessor;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.server.util.DateUtil;
@@ -229,6 +231,31 @@ public class NIOSocket
      * is invoked synchronously before this method returns. Otherwise, the callback is
      * invoked asynchronously when the connection completes or times out.</p>
      *
+     * @param cc           the callback to invoke with the connected SocketChannel on success,
+     *                     or with an exception on failure
+     * @return the SocketChannel being connected (may not yet be connected when returned)
+     * @throws IOException if the socket channel cannot be opened or connection initiation fails
+     */
+    public SelectionKey addClientSocket(TCPSessionCallback cc) throws IOException {
+        return addClientSocket(cc.getRemoteAddress(), cc, 10);
+    }
+
+
+    /**
+     * Initiates a non-blocking TCP client connection with callback-based notification.
+     *
+     * <p>This method provides a callback-style API for client connections, where the
+     * provided {@link ConsumerCallback} is invoked when the connection completes
+     * successfully or fails with an exception.</p>
+     *
+     * <p>Unlike the factory-based methods, this approach gives the caller direct access
+     * to the connected SocketChannel, allowing custom handling of the connection lifecycle
+     * outside the NIOSocket's protocol handler framework.</p>
+     *
+     * <p>If the connection completes immediately (ultra-fast local connection), the callback
+     * is invoked synchronously before this method returns. Otherwise, the callback is
+     * invoked asynchronously when the connection completes or times out.</p>
+     *
      * @param sa           the remote server address to connect to
      * @param timeoutInSec connection timeout in seconds; the connection is closed and
      *                     an exception is passed to the callback if not established within this time
@@ -257,6 +284,59 @@ public class NIOSocket
         return selectionKey;
     }
 
+
+
+    /**
+     * Creates and registers a UDP datagram socket on the specified address.
+     *
+     * <p>This method opens a new {@link DatagramChannel}, binds it to the specified
+     * address and port, and registers it with the selector for reading incoming datagrams.
+     * A single {@link UDPSessionCallback} instance is created from the factory to handle
+     * all incoming datagrams on this socket.</p>
+     *
+     * <p>Unlike TCP sockets, UDP sockets handle all communication through a single channel
+     * rather than creating new channels for each remote endpoint.</p>
+     *
+     * @param usc the UDPSessionCallback
+     * @return the SelectionKey associated with the datagram channel
+     * @throws IOException          if the datagram socket cannot be opened or bound
+     * @throws NullPointerException if sa or psf is null
+     */
+    public SelectionKey addDatagramSocket(UDPSessionCallback usc) throws IOException {
+        return  addDatagramSocket(new InetSocketAddress(usc.getPort()), usc);
+    }
+
+    /**
+     * Creates and registers a UDP datagram socket on the specified address.
+     *
+     * <p>This method opens a new {@link DatagramChannel}, binds it to the specified
+     * address and port, and registers it with the selector for reading incoming datagrams.
+     * A single {@link UDPSessionCallback} instance is created from the factory to handle
+     * all incoming datagrams on this socket.</p>
+     *
+     * <p>Unlike TCP sockets, UDP sockets handle all communication through a single channel
+     * rather than creating new channels for each remote endpoint.</p>
+     *
+     * @param sa  the socket address to bind to (IP address and port)
+     * @param usc the UDPSessionCallback
+     * @return the SelectionKey associated with the datagram channel
+     * @throws IOException          if the datagram socket cannot be opened or bound
+     * @throws NullPointerException if sa or psf is null
+     */
+    public SelectionKey addDatagramSocket(InetSocketAddress sa, UDPSessionCallback usc) throws IOException {
+        SUS.checkIfNulls("Null values", sa, usc);
+        DatagramChannel dc = DatagramChannel.open();
+        dc.setOption(StandardSocketOptions.SO_REUSEADDR, true);
+        dc.socket().bind(sa);
+        usc.setChannel(dc);
+        if(usc.getExecutor() == null)
+            usc.setExecutor(executor);
+        SelectionKey sk = selectorController.register(dc, SelectionKey.OP_READ, usc, false);
+        logger.getLogger().info(dc + " added");
+        return sk;
+    }
+
+
     /**
      * Creates and registers a UDP datagram socket on the specified address.
      *
@@ -277,6 +357,7 @@ public class NIOSocket
     public SelectionKey addDatagramSocket(InetSocketAddress sa, ProtocolHandler ph) throws IOException {
         SUS.checkIfNulls("Null values", sa, ph);
         DatagramChannel dc = DatagramChannel.open();
+        dc.setOption(StandardSocketOptions.SO_REUSEADDR, true);
         dc.socket().bind(sa);
 
         return addDatagramSocket(dc, ph);

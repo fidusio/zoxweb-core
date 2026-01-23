@@ -113,7 +113,7 @@ public class NIOSocketHandler
         phSChannel = (SocketChannel) asc;
         getSelectorController().register(phSChannel, SelectionKey.OP_READ, this, isBlocking);
         sessionCallback.setProtocolHandler(this);
-        sessionCallback.setRemoteAddress(phSChannel.getRemoteAddress());
+        sessionCallback.setRemoteAddress((InetSocketAddress) phSChannel.getRemoteAddress());
 
     }
 

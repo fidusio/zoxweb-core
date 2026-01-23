@@ -4,7 +4,7 @@ import org.zoxweb.shared.util.CloseableType;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.SocketAddress;
+import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.ByteChannel;
 import java.nio.channels.SelectionKey;
@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public abstract class BaseSessionCallback<CF>
         extends SessionCallback<CF, ByteBuffer, OutputStream>
         implements CloseableType {
-    private SocketAddress remoteAddress;
+    private InetSocketAddress remoteAddress;
     private transient BaseChannelOutputStream bcos;
     private transient ByteChannel channel;
     protected final AtomicBoolean isClosed = new AtomicBoolean(false);
@@ -22,11 +22,11 @@ public abstract class BaseSessionCallback<CF>
     ///public abstract BaseChannelOutputStream get();
 
 
-    public SocketAddress getRemoteAddress() {
+    public InetSocketAddress getRemoteAddress() {
         return remoteAddress;
     }
 
-    public void setRemoteAddress(SocketAddress remoteAddress) {
+    public void setRemoteAddress(InetSocketAddress remoteAddress) {
         this.remoteAddress = remoteAddress;
     }
 

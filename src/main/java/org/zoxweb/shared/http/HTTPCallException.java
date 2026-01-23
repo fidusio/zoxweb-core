@@ -15,6 +15,8 @@
  */
 package org.zoxweb.shared.http;
 
+import org.zoxweb.shared.util.SUS;
+
 import java.io.IOException;
 
 /**
@@ -123,7 +125,7 @@ extends IOException
 	
 	@Override
 	public String toString() {
-		return super.toString()+  " " +statusCode + "\n" + (getResponseData() != null ? getResponseData() : getMessageConfig());
+		return SUS.toCanonicalID(' ', super.toString(), statusCode) + "\n" + (getResponseData() != null ? getResponseData() : getMessageConfig());
 	}
 
 
