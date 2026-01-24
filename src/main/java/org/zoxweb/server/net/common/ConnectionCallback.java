@@ -16,7 +16,9 @@ public interface ConnectionCallback<D>
 
     void accept(D byteBuffer) throws IOException;
 
-    int connected(SelectionKey key) throws IOException;
+    default int connected(SelectionKey key) throws IOException {
+        return SelectionKey.OP_READ;
+    }
 
     default void sslHandshakeSuccessful() {
     }

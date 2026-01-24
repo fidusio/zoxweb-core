@@ -14,6 +14,7 @@ import java.nio.channels.DatagramChannel;
 import java.nio.channels.SelectionKey;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -27,6 +28,8 @@ public abstract class UDPSessionCallback
     protected int port;
     private transient Executor executor = null;
     protected final Lock lock = new ReentrantLock();
+    private AtomicLong readCounter = new AtomicLong();
+    private AtomicLong sendCounter = new AtomicLong();
 
     private final AtomicBoolean isClosed = new AtomicBoolean(false);
 
@@ -54,7 +57,6 @@ public abstract class UDPSessionCallback
     public int getPort() {
         return port;
     }
-
 
 
     public int getBufferSize() {
@@ -89,36 +91,39 @@ public abstract class UDPSessionCallback
         InetSocketAddress clientAddr = null;
         DatagramChannel channel = (DatagramChannel) key.channel();
         ByteBuffer buffer = null;
-        do {
-            try {
-                // allocate a data buffer from cache
-                buffer = ByteBufferUtil.allocateByteBuffer(bufferSize);
-                clientAddr = (InetSocketAddress) channel.receive(buffer);
-                if (clientAddr != null) {
-                    DataPacket dataPacket = new DataPacket(clientAddr, buffer);
-                    if (executor != null) {
-                        // lambda bypass
+        if (key.channel().isOpen()) {
+            do {
+                try {
+                    // allocate a data buffer from cache
+                    buffer = ByteBufferUtil.allocateByteBuffer(bufferSize);
+                    clientAddr = (InetSocketAddress) channel.receive(buffer);
+                    if (clientAddr != null) {
+                        readCounter.incrementAndGet();
+                        DataPacket<Long> dataPacket = new DataPacket<Long>(readCounter.incrementAndGet(), clientAddr, buffer);
+                        if (executor != null) {
+                            // lambda bypass
 
-                        executor.execute(() -> {
-                            try {
-                                recacheBufferAccept(dataPacket);
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                        });
-                    } else
-                        recacheBufferAccept(dataPacket);
+                            executor.execute(() -> {
+                                try {
+                                    recacheBufferAccept(dataPacket);
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            });
+                        } else
+                            recacheBufferAccept(dataPacket);
+                    }
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    // recache data buffer
+                    ByteBufferUtil.cache(buffer);
                 }
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                // recache data buffer
-                ByteBufferUtil.cache(buffer);
-            }
-        } while (clientAddr != null);
+            } while (clientAddr != null && key.channel().isOpen());
+        }
     }
 
-    private void recacheBufferAccept(DataPacket dataPacket) throws IOException {
+    private void recacheBufferAccept(DataPacket<?> dataPacket) throws IOException {
         try {
             dataPacket.getBuffer().flip();
             accept(dataPacket);
@@ -127,12 +132,6 @@ public abstract class UDPSessionCallback
             ByteBufferUtil.cache(dataPacket.getBuffer());
         }
 
-    }
-
-
-    @Override
-    public int connected(SelectionKey key) throws IOException {
-        return SelectionKey.OP_READ;
     }
 
 
@@ -150,23 +149,23 @@ public abstract class UDPSessionCallback
 
 
     public void send(DataPacket dataPacket) throws IOException {
-        lock.lock();
-        try {
-            getChannel().send(dataPacket.getBuffer(), dataPacket.getAddress());
-        }
-        finally {
-            lock.unlock();
-        }
+       send(dataPacket.getBuffer(), dataPacket.getAddress());
     }
+
+
     public void send(ByteBuffer byteBuffer, InetSocketAddress sa) throws IOException {
         lock.lock();
         try {
             getChannel().send(byteBuffer, sa);
-        }
-        finally {
+            sendCounter.incrementAndGet();
+        } finally {
             lock.unlock();
         }
     }
+
+    public long getReadCount() {return readCounter.get();}
+
+    public long getSendCount() {return sendCounter.get();}
 
 
 }

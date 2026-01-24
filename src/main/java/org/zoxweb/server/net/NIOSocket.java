@@ -329,8 +329,6 @@ public class NIOSocket
         dc.setOption(StandardSocketOptions.SO_REUSEADDR, true);
         dc.socket().bind(sa);
         usc.setChannel(dc);
-        if(usc.getExecutor() == null)
-            usc.setExecutor(executor);
         SelectionKey sk = selectorController.register(dc, SelectionKey.OP_READ, usc, false);
         logger.getLogger().info(dc + " added");
         return sk;
