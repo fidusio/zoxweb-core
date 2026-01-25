@@ -94,7 +94,8 @@ public class TCPPortScan {
                             ipAddressesList.add(ipAddress);
                             //System.out.println(ipAddress);
                         } catch (Exception e) {
-                            System.err.println(ipAddresses[j] + " FAILED!!!!");
+                            e.printStackTrace();
+                            System.err.println(ipAddresses[j] + " ConnectFailed");
                         }
                     }
                 } catch (Exception e) {

@@ -290,24 +290,35 @@ public class NIOSocket
      * @throws IOException if the socket channel cannot be opened or connection initiation fails
      */
     public SelectionKey addClientSocket(InetSocketAddress sa, ConnectionCallback<?> cc, int timeoutInSec) throws IOException {
+        // Logic to be applied
+        // 1. SocketChannel.open()
+        // 2. configureBlocking(false)
+        // 3. connect() ← Initiates connection FIRST
+        // 4. If pending, register(OP_CONNECT) ← Only register after connection started
+
 
         ScheduledAttachment<ConnectionCallback<?>> scheduledAttachment = new ScheduledAttachment<>();
         scheduledAttachment.attach(cc);
         SocketChannel sc = SocketChannel.open();
-        SelectionKey selectionKey = selectorController.register(sc, SelectionKey.OP_CONNECT, scheduledAttachment, false);
-        scheduledAttachment.setAppointment(taskSchedulerProcessor.queue(TimeInMillis.SECOND.mult(timeoutInSec), new NIOChannelMonitor(selectionKey, selectorController)));
+        // crucial here
+        sc.configureBlocking(false);
         cc.setChannel(sc);
         try {
             if (sc.connect(sa)) {
-                // we connected UTRA fast connection
+                // we connected ULTRA fast connection (loopback)
+                SelectionKey selectionKey = selectorController.register(sc, 0, scheduledAttachment, false);
                 clientConnect(selectionKey);
+                return selectionKey;
             }
+            // connection is pending, register for OP_CONNECT
+            SelectionKey selectionKey = selectorController.register(sc, SelectionKey.OP_CONNECT, scheduledAttachment, false);
+            scheduledAttachment.setAppointment(taskSchedulerProcessor.queue(TimeInMillis.SECOND.mult(timeoutInSec), new NIOChannelMonitor(selectionKey, selectorController)));
+            return selectionKey;
         } catch (IOException e) {
-            selectorController.cancelSelectionKey(selectionKey);
+            IOUtil.close(sc);
             scheduledAttachment.attachment().exception(e);
             throw e;
         }
-        return selectionKey;
     }
 
 
