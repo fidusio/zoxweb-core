@@ -24,8 +24,9 @@ public abstract class TCPSessionCallback
         extends BaseSessionCallback<SSLSessionConfig>
         implements ConnectionCallback<ByteBuffer> {
     public static final LogWrapper log = new LogWrapper(TCPSessionCallback.class).setEnabled(false);
-    private volatile boolean isClient;
+
     private volatile SSLContextInfo sslContextInfo;
+    private int timeoutInSec = 5;
     private final ByteBuffer dataBuffer = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.DIRECT, 1024);
 
     protected TCPSessionCallback() {
@@ -34,7 +35,7 @@ public abstract class TCPSessionCallback
 
     protected TCPSessionCallback(IPAddress ipAddress) {
         setRemoteAddress(new InetSocketAddress(ipAddress.getInetAddress(), ipAddress.getPort()));
-        setClient(true);
+
     }
 
     protected TCPSessionCallback(IPAddress ipAddress, boolean noSSLValidation) throws NoSuchAlgorithmException, KeyManagementException {
@@ -44,7 +45,17 @@ public abstract class TCPSessionCallback
     protected TCPSessionCallback(SSLContextInfo sslContextInfo) {
         setSSLContextInfo(sslContextInfo);
         setRemoteAddress(sslContextInfo.getClientAddress());
-        setClient(sslContextInfo.isClient());
+    }
+
+    public int timeoutInSec() {
+        return timeoutInSec;
+    }
+
+    public TCPSessionCallback timeoutInSec(int timeoutInSec) {
+        if (timeoutInSec < 1)
+            throw new IllegalArgumentException("timeoutInSec must be greater than zero " + timeoutInSec);
+        this.timeoutInSec = timeoutInSec;
+        return this;
     }
 
     public SSLContextInfo getSSLContextInfo() {
@@ -52,8 +63,10 @@ public abstract class TCPSessionCallback
     }
 
     public TCPSessionCallback setSSLContextInfo(SSLContextInfo sslContextInfo) {
+        if (!sslContextInfo.isClient()) {
+            throw new IllegalArgumentException("SSLContextInfo is not client mode");
+        }
         this.sslContextInfo = sslContextInfo;
-        setClient(sslContextInfo.isClient());
         setRemoteAddress(sslContextInfo.getClientAddress());
         return this;
     }
@@ -83,8 +96,6 @@ public abstract class TCPSessionCallback
                 if (read == -1) {
                     if (log.isEnabled()) log.getLogger().info("+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+Read:" + read);
                     IOUtil.close(this);
-                    if (log.isEnabled())
-                        log.getLogger().info(key + ":" + key.isValid() + " " + Thread.currentThread() + " " + TaskUtil.defaultTaskProcessor().availableExecutorThreads());
                 }
             } catch (Exception e) {
                 if (log.isEnabled()) e.printStackTrace();
@@ -103,18 +114,9 @@ public abstract class TCPSessionCallback
     public abstract void accept(ByteBuffer byteBuffer);
 
     public boolean isClient() {
-        return isClient;
+        return true;
     }
 
-    /**
-     * Set this session a client session
-     * @param isClient
-     * @return
-     */
-    public synchronized TCPSessionCallback setClient(boolean isClient) {
-        this.isClient = isClient;
-        return this;
-    }
 
     /**
      * perform the ssl upgrade
@@ -124,8 +126,6 @@ public abstract class TCPSessionCallback
      */
     protected boolean sslUpgrade(SelectionKey sk) throws IOException {
         if (log.isEnabled()) log.getLogger().info("SSL upgrade started");
-        setChannel((ByteChannel) sk.channel());
-        setRemoteAddress((InetSocketAddress) ((SocketChannel) sk.channel()).getRemoteAddress());
         if (sslContextInfo != null) {
             if (log.isEnabled()) log.getLogger().info("SSLContextInfo: " + sslContextInfo + " isClient: " + isClient());
             SSLSessionConfig sslConfig = new SSLSessionConfig(sslContextInfo);
@@ -147,15 +147,19 @@ public abstract class TCPSessionCallback
             return true;
         }
         if (log.isEnabled()) log.getLogger().info("Will return false");
-        setOutputStream(new CommonChannelOutputStream(null, (ByteChannel) sk.channel(), 512));
+
         return false;
     }
 
     public final int connected(SelectionKey sk) throws IOException {
+        setRemoteAddress((InetSocketAddress) ((SocketChannel) sk.channel()).getRemoteAddress());
+        setChannel(sk.channel());
         if (!sslUpgrade(sk)) {
             // this not a secure connection
+            setOutputStream(new CommonChannelOutputStream(null, (ByteChannel) sk.channel(), 512));
             connectedFinished();
         }
+
         return SelectionKey.OP_READ;
 
     }
@@ -174,8 +178,7 @@ public abstract class TCPSessionCallback
         }
     }
 
-    public void  close() throws IOException
-    {
+    public void close() throws IOException {
         if (!isClosed.getAndSet(true)) {
             IOUtil.close(getChannel(), getOutputStream());
         }

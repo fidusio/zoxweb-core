@@ -90,7 +90,7 @@ public class TCPPortScan {
 
                             ipAddress = ipAddresses[j];
 
-                            nioSocket.addClientSocket(new PlainSessionCallback(ipAddress), 10);
+                            nioSocket.addClientSocket(new PlainSessionCallback(ipAddress));
                             ipAddressesList.add(ipAddress);
                             //System.out.println(ipAddress);
                         } catch (Exception e) {

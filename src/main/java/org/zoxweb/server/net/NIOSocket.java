@@ -231,13 +231,13 @@ public class NIOSocket
      * is invoked synchronously before this method returns. Otherwise, the callback is
      * invoked asynchronously when the connection completes or times out.</p>
      *
-     * @param cc           the callback to invoke with the connected SocketChannel on success,
+     * @param tsc           the callback to invoke with the connected SocketChannel on success,
      *                     or with an exception on failure
      * @return the SocketChannel being connected (may not yet be connected when returned)
      * @throws IOException if the socket channel cannot be opened or connection initiation fails
      */
-    public SelectionKey addClientSocket(TCPSessionCallback cc) throws IOException {
-        return addClientSocket(cc.getRemoteAddress(), cc, 10);
+    public SelectionKey addClientSocket(TCPSessionCallback tsc) throws IOException {
+        return addClientSocket(tsc.getRemoteAddress(), tsc, tsc.timeoutInSec());
     }
 
     /**
@@ -762,7 +762,7 @@ public class NIOSocket
             }
 
         } else {
-
+            // CURRENTLY impossible case
 
             ProtocolHandler phTemp = null;
             Object attachment = ((ScheduledAttachment<?>) key.attachment()).attachment();

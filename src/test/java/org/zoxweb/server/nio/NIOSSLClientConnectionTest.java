@@ -50,7 +50,6 @@ public class NIOSSLClientConnectionTest {
         public URISession(String url) throws URISyntaxException, NoSuchAlgorithmException, KeyManagementException {
             this.url = url;
             this.uri = new URI(url);
-            setClient(true);
             if (URIScheme.match(url, URIScheme.HTTPS, URIScheme.WSS) != null) {
                 setSSLContextInfo(new SSLContextInfo(IPAddress.URLDecoder.decode(url), true));
             }
