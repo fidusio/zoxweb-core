@@ -5,8 +5,6 @@ import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.io.UByteArrayOutputStream;
 import org.zoxweb.server.logging.LogWrapper;
-import org.zoxweb.server.net.BaseChannelOutputStream;
-import org.zoxweb.server.net.BaseSessionCallback;
 import org.zoxweb.server.net.NIOSocket;
 import org.zoxweb.server.net.common.TCPSessionCallback;
 import org.zoxweb.server.net.ssl.SSLContextInfo;
@@ -24,13 +22,11 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
-import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 
@@ -60,27 +56,6 @@ public class NIOSSLClientConnectionTest {
             }
         }
 
-        /**
-         * Closes this stream and releases any system resources associated
-         * with it. If the stream is already closed then invoking this
-         * method has no effect.
-         *
-         * <p> As noted in {@link AutoCloseable#close()}, cases where the
-         * close may fail require careful attention. It is strongly advised
-         * to relinquish the underlying resources and to internally
-         * <em>mark</em> the {@code Closeable} as closed, prior to throwing
-         * the {@code IOException}.
-         *
-         * @throws IOException if an I/O error occurs
-         */
-        @Override
-        public void close() throws IOException {
-
-            if (!isClosed.getAndSet(true)) {
-                IOUtil.close(getOutputStream());
-                log.getLogger().info("Closing connection: " + getRemoteAddress() + " it took " + Const.TimeInMillis.toString(System.currentTimeMillis() - timeStamp));
-            }
-        }
 
         /**
          * Performs this operation on the given argument.
@@ -143,27 +118,6 @@ public class NIOSSLClientConnectionTest {
 
         PlainSessionCallback(IPAddress address) { super(address); }
 
-        /**
-         * Closes this stream and releases any system resources associated
-         * with it. If the stream is already closed then invoking this
-         * method has no effect.
-         *
-         * <p> As noted in {@link AutoCloseable#close()}, cases where the
-         * close may fail require careful attention. It is strongly advised
-         * to relinquish the underlying resources and to internally
-         * <em>mark</em> the {@code Closeable} as closed, prior to throwing
-         * the {@code IOException}.
-         *
-         * @throws IOException if an I/O error occurs
-         */
-        @Override
-        public void close() throws IOException {
-
-            if (!isClosed.getAndSet(true)) {
-                //log.getLogger().info("Closing connection: " + getRemoteAddress());
-                IOUtil.close(getChannel());
-            }
-        }
 
         /**
          * Performs this operation on the given argument.
@@ -187,25 +141,7 @@ public class NIOSSLClientConnectionTest {
 
         }
 
-//        /**
-//         * Checks if closed.
-//         *
-//         * @return true if closed
-//         */
-//        @Override
-//        public boolean isClosed() {
-//            return closed.get();
-//        }
-//
-//        @Override
-//        public int connected(SelectionKey key) {
-//            successCount.incrementAndGet();
-//            SocketChannel channel = (SocketChannel) getChannel();
-//            //System.out.println(getRemoteAddress() + " " + channel.isConnected() + " total: " + total());
-//            log.getLogger().info(getRemoteAddress() + " " + channel.isConnected() + " total: " + total());
-//            IOUtil.close(this);
-//            return 0;
-//        }
+
 
         @Override
         protected void connectedFinished() throws IOException {
@@ -217,75 +153,7 @@ public class NIOSSLClientConnectionTest {
         }
     }
 
-    public static class PlainSession
-            extends BaseSessionCallback<BaseChannelOutputStream> {
-        AtomicBoolean closed = new AtomicBoolean(false);
 
-
-        /**
-         * Closes this stream and releases any system resources associated
-         * with it. If the stream is already closed then invoking this
-         * method has no effect.
-         *
-         * <p> As noted in {@link AutoCloseable#close()}, cases where the
-         * close may fail require careful attention. It is strongly advised
-         * to relinquish the underlying resources and to internally
-         * <em>mark</em> the {@code Closeable} as closed, prior to throwing
-         * the {@code IOException}.
-         *
-         * @throws IOException if an I/O error occurs
-         */
-        @Override
-        public void close() throws IOException {
-
-            if (!closed.getAndSet(true)) {
-                //log.getLogger().info("Closing connection: " + getRemoteAddress());
-                IOUtil.close(getChannel());
-            }
-        }
-
-        /**
-         * Performs this operation on the given argument.
-         *
-         * @param byteBuffer the input argument
-         */
-        @Override
-        public void accept(ByteBuffer byteBuffer) {
-            SocketChannel channel = (SocketChannel) getChannel();
-            log.getLogger().info(getRemoteAddress() + " " + channel.isConnected() + " total: " + total());
-            IOUtil.close(this);
-
-        }
-
-
-        public void exception(Exception e) {
-            failCount.incrementAndGet();
-            // log.getLogger().info(getRemoteAddress() + " " + e);
-            IOUtil.close(this);
-
-
-        }
-
-        /**
-         * Checks if closed.
-         *
-         * @return true if closed
-         */
-        @Override
-        public boolean isClosed() {
-            return closed.get();
-        }
-
-        @Override
-        public int connected(SelectionKey key) {
-            successCount.incrementAndGet();
-            SocketChannel channel = (SocketChannel) getChannel();
-            //System.out.println(getRemoteAddress() + " " + channel.isConnected() + " total: " + total());
-            log.getLogger().info(getRemoteAddress() + " " + channel.isConnected() + " total: " + total());
-            IOUtil.close(this);
-            return 0;
-        }
-    }
 
 
     public static long total() {

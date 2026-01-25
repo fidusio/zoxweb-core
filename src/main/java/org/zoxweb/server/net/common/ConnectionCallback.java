@@ -4,6 +4,7 @@ import org.zoxweb.shared.task.ExceptionCallback;
 import org.zoxweb.shared.util.CloseableType;
 
 import java.io.IOException;
+import java.nio.channels.Channel;
 import java.nio.channels.SelectionKey;
 
 public interface ConnectionCallback<D>
@@ -19,6 +20,9 @@ public interface ConnectionCallback<D>
     default int connected(SelectionKey key) throws IOException {
         return SelectionKey.OP_READ;
     }
+
+    <V extends Channel>V getChannel();
+    void setChannel(Channel channel);
 
     default void sslHandshakeSuccessful() {
     }

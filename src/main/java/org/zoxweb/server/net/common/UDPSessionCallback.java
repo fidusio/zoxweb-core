@@ -10,6 +10,7 @@ import org.zoxweb.shared.util.Const;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
+import java.nio.channels.Channel;
 import java.nio.channels.DatagramChannel;
 import java.nio.channels.SelectionKey;
 import java.util.concurrent.Executor;
@@ -23,13 +24,12 @@ public abstract class UDPSessionCallback
 
     public static final LogWrapper log = new LogWrapper(UDPSessionCallback.class).setEnabled(false);
     private final int bufferSize;
-    private SelectionKey key;
     private volatile DatagramChannel channel;
     protected int port;
     private transient Executor executor = null;
     protected final Lock lock = new ReentrantLock();
-    private AtomicLong readCounter = new AtomicLong();
-    private AtomicLong sendCounter = new AtomicLong();
+    private final AtomicLong readCounter = new AtomicLong();
+    private final AtomicLong sendCounter = new AtomicLong();
 
     private final AtomicBoolean isClosed = new AtomicBoolean(false);
 
@@ -72,13 +72,12 @@ public abstract class UDPSessionCallback
         return this.executor;
     }
 
-    public UDPSessionCallback setChannel(DatagramChannel channel) {
-        this.channel = channel;
-        return this;
+    public void setChannel(Channel channel) {
+        this.channel = (DatagramChannel) channel;
     }
 
-    protected DatagramChannel getChannel() {
-        return channel;
+    public <V extends Channel> V getChannel() {
+        return (V) channel;
     }
 
     /**
@@ -148,7 +147,7 @@ public abstract class UDPSessionCallback
     }
 
 
-    public void send(DataPacket dataPacket) throws IOException {
+    public void send(DataPacket<?> dataPacket) throws IOException {
        send(dataPacket.getBuffer(), dataPacket.getAddress());
     }
 
@@ -156,7 +155,7 @@ public abstract class UDPSessionCallback
     public void send(ByteBuffer byteBuffer, InetSocketAddress sa) throws IOException {
         lock.lock();
         try {
-            getChannel().send(byteBuffer, sa);
+            ((DatagramChannel)getChannel()).send(byteBuffer, sa);
             sendCounter.incrementAndGet();
         } finally {
             lock.unlock();

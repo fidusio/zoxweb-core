@@ -7,6 +7,7 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.ByteChannel;
+import java.nio.channels.Channel;
 import java.nio.channels.SelectionKey;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -49,13 +50,12 @@ public abstract class BaseSessionCallback<CF>
         ///return bcos != null ? bcos : get();
     }
 
-    public ByteChannel getChannel() {
-        return channel != null ? channel : (getOutputStream() != null ? getOutputStream().dataChannel : null);
+    public <V extends Channel> V getChannel() {
+        return channel != null ? (V)channel : (getOutputStream() != null ? (V)getOutputStream().dataChannel : null);
     }
 
-    public BaseSessionCallback<?> setChannel(ByteChannel channel) {
-        this.channel = channel;
-        return this;
+    public void setChannel(Channel channel) {
+        this.channel = (ByteChannel) channel;
     }
 
     public ProtocolHandler getProtocolHandler() {
@@ -71,5 +71,6 @@ public abstract class BaseSessionCallback<CF>
     public boolean isClosed() {
         return isClosed.get();
     }
+
 
 }

@@ -189,31 +189,31 @@ public class NIOSocket
     }
 
 
-    public SelectionKey addClientSocket(InetSocketAddress sa, ProtocolHandler ph, int timeoutInSec)
-            throws IOException {
-
-        SUS.checkIfNulls("Null InetSocketAddress or ProtocolHandler", sa, ph);
-        ScheduledAttachment<ProtocolHandler> scheduledAttachment = new ScheduledAttachment<>();
-        scheduledAttachment.attach(ph);
-        SocketChannel sc = SocketChannel.open();
-
-        SelectionKey selectionKey = selectorController.register(sc, SelectionKey.OP_CONNECT, scheduledAttachment, false);
-        scheduledAttachment.setAppointment(taskSchedulerProcessor.queue(TimeInMillis.SECOND.mult(timeoutInSec), new NIOChannelMonitor(selectionKey, selectorController)));
-
-        try {
-            if (sc.connect(sa)) {
-                clientConnect(selectionKey);
-            }
-
-        } catch (IOException e) {
-            selectorController.cancelSelectionKey(selectionKey);
-            if (ph.getSessionCallback() != null)
-                ph.getSessionCallback().exception(e);
-            throw e;
-        }
-
-        return selectionKey;
-    }
+//    public SelectionKey addClientSocket(InetSocketAddress sa, ProtocolHandler ph, int timeoutInSec)
+//            throws IOException {
+//
+//        SUS.checkIfNulls("Null InetSocketAddress or ProtocolHandler", sa, ph);
+//        ScheduledAttachment<ProtocolHandler> scheduledAttachment = new ScheduledAttachment<>();
+//        scheduledAttachment.attach(ph);
+//        SocketChannel sc = SocketChannel.open();
+//
+//        SelectionKey selectionKey = selectorController.register(sc, SelectionKey.OP_CONNECT, scheduledAttachment, false);
+//        scheduledAttachment.setAppointment(taskSchedulerProcessor.queue(TimeInMillis.SECOND.mult(timeoutInSec), new NIOChannelMonitor(selectionKey, selectorController)));
+//
+//        try {
+//            if (sc.connect(sa)) {
+//                clientConnect(selectionKey);
+//            }
+//
+//        } catch (IOException e) {
+//            selectorController.cancelSelectionKey(selectionKey);
+//            if (ph.getSessionCallback() != null)
+//                ph.getSessionCallback().exception(e);
+//            throw e;
+//        }
+//
+//        return selectionKey;
+//    }
 
 
     /**
@@ -240,6 +240,31 @@ public class NIOSocket
         return addClientSocket(cc.getRemoteAddress(), cc, 10);
     }
 
+    /**
+     * Initiates a non-blocking TCP client connection with callback-based notification.
+     *
+     * <p>This method provides a callback-style API for client connections, where the
+     * provided {@link ConsumerCallback} is invoked when the connection completes
+     * successfully or fails with an exception.</p>
+     *
+     * <p>Unlike the factory-based methods, this approach gives the caller direct access
+     * to the connected SocketChannel, allowing custom handling of the connection lifecycle
+     * outside the NIOSocket's protocol handler framework.</p>
+     *
+     * <p>If the connection completes immediately (ultra-fast local connection), the callback
+     * is invoked synchronously before this method returns. Otherwise, the callback is
+     * invoked asynchronously when the connection completes or times out.</p>
+     *
+     * @param cc           the callback to invoke with the connected SocketChannel on success,
+     *                     or with an exception on failure
+     * @param timeoutInSec in seconds
+     * @return the SocketChannel being connected (may not yet be connected when returned)
+     * @throws IOException if the socket channel cannot be opened or connection initiation fails
+     */
+    public SelectionKey addClientSocket(TCPSessionCallback cc, int timeoutInSec) throws IOException {
+        return addClientSocket(cc.getRemoteAddress(), cc, timeoutInSec);
+    }
+
 
     /**
      * Initiates a non-blocking TCP client connection with callback-based notification.
@@ -264,13 +289,14 @@ public class NIOSocket
      * @return the SocketChannel being connected (may not yet be connected when returned)
      * @throws IOException if the socket channel cannot be opened or connection initiation fails
      */
-    public SelectionKey addClientSocket(InetSocketAddress sa, ConnectionCallback cc, int timeoutInSec) throws IOException {
+    public SelectionKey addClientSocket(InetSocketAddress sa, ConnectionCallback<?> cc, int timeoutInSec) throws IOException {
 
-        ScheduledAttachment<ConnectionCallback> scheduledAttachment = new ScheduledAttachment<>();
+        ScheduledAttachment<ConnectionCallback<?>> scheduledAttachment = new ScheduledAttachment<>();
         scheduledAttachment.attach(cc);
         SocketChannel sc = SocketChannel.open();
         SelectionKey selectionKey = selectorController.register(sc, SelectionKey.OP_CONNECT, scheduledAttachment, false);
         scheduledAttachment.setAppointment(taskSchedulerProcessor.queue(TimeInMillis.SECOND.mult(timeoutInSec), new NIOChannelMonitor(selectionKey, selectorController)));
+        cc.setChannel(sc);
         try {
             if (sc.connect(sa)) {
                 // we connected UTRA fast connection
@@ -352,14 +378,14 @@ public class NIOSocket
      * @throws IOException          if the datagram socket cannot be opened or bound
      * @throws NullPointerException if sa or psf is null
      */
-    public SelectionKey addDatagramSocket(InetSocketAddress sa, ProtocolHandler ph) throws IOException {
-        SUS.checkIfNulls("Null values", sa, ph);
-        DatagramChannel dc = DatagramChannel.open();
-        dc.setOption(StandardSocketOptions.SO_REUSEADDR, true);
-        dc.socket().bind(sa);
-
-        return addDatagramSocket(dc, ph);
-    }
+//    public SelectionKey addDatagramSocket(InetSocketAddress sa, ProtocolHandler ph) throws IOException {
+//        SUS.checkIfNulls("Null values", sa, ph);
+//        DatagramChannel dc = DatagramChannel.open();
+//        dc.setOption(StandardSocketOptions.SO_REUSEADDR, true);
+//        dc.socket().bind(sa);
+//
+//        return addDatagramSocket(dc, ph);
+//    }
 
     /**
      * Registers an existing DatagramChannel with the selector.
@@ -379,12 +405,12 @@ public class NIOSocket
      * @throws IOException          if registration fails
      * @throws NullPointerException if dc or psf is null
      */
-    public SelectionKey addDatagramSocket(DatagramChannel dc, ProtocolHandler ph) throws IOException {
-        SUS.checkIfNulls("Null values", dc, ph);
-        SelectionKey sk = selectorController.register(dc, SelectionKey.OP_READ, ph, false);
-        logger.getLogger().info(dc + " added");
-        return sk;
-    }
+//    public SelectionKey addDatagramSocket(DatagramChannel dc, ProtocolHandler ph) throws IOException {
+//        SUS.checkIfNulls("Null values", dc, ph);
+//        SelectionKey sk = selectorController.register(dc, SelectionKey.OP_READ, ph, false);
+//        logger.getLogger().info(dc + " added");
+//        return sk;
+//    }
 
     /**
      * Creates and registers a TCP server socket using an {@link IPAddress} specification.

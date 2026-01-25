@@ -174,7 +174,10 @@ public abstract class TCPSessionCallback
         }
     }
 
-    public boolean isClosed() {
-        return isClosed.get();
+    public void  close() throws IOException
+    {
+        if (!isClosed.getAndSet(true)) {
+            IOUtil.close(getChannel(), getOutputStream());
+        }
     }
 }
