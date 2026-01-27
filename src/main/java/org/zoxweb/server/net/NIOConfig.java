@@ -174,7 +174,9 @@ public class NIOConfig
                                 Class pClass = Class.forName(providerName);
                                 provider = (Provider) pClass.getDeclaredConstructor().newInstance();
                             }
-                            SSLContext sslContext = SecUtil.initSSLContext(protocol, provider, IOUtil.locateFile(config.getProperties().getValue("keystore_file")),
+                            SSLContext sslContext = SecUtil.initSSLContext(protocol,
+                                    provider != null ? provider.getName() : null,
+                                    IOUtil.locateFile(config.getProperties().getValue("keystore_file")),
                                     config.getProperties().getValue("keystore_type"),
                                     ksPassword.toCharArray(),
                                     aliasPassword != null ? aliasPassword.toCharArray() : null,

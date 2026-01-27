@@ -33,11 +33,15 @@ public final class SecUtil {
 
 
     public static final LockHolder SEC_LOCK = new LockHolder(new ReentrantLock());
-    private SecUtil() {}
+
+    private SecUtil() {
+    }
 
     static {
         addCredentialHasher(new BCryptPasswordHasher(10));
         addCredentialHasher(new SHAPasswordHasher(8196));
+        SecTag.REGISTRAR.registerValue(new SecTag(SecTag.SUN_JSSE, SecTag.TagID.X509, "SunX509"));
+        SecTag.REGISTRAR.registerValue(new SecTag(SecTag.SUN_JSSE, SecTag.TagID.TLS));
     }
 
 
@@ -188,8 +192,7 @@ public final class SecUtil {
             if (tokens.length > 1)
                 return lookupCredentialHasher(tokens[0]);
             return null;
-        }
-        finally {
+        } finally {
             SEC_LOCK.unlock(true);
         }
     }
@@ -201,8 +204,7 @@ public final class SecUtil {
             credentialHasherMap.put(DataEncoder.StringLower.encode(credentialHasher.getName()), credentialHasher);
             for (String algo : credentialHasher.supportedAlgorithms())
                 credentialHasherMap.put(DataEncoder.StringLower.encode(algo), credentialHasher);
-        }
-        finally {
+        } finally {
             SEC_LOCK.unlock(true);
         }
 
@@ -212,24 +214,22 @@ public final class SecUtil {
         return credentialHasherMap.keySet().toArray(new String[0]);
     }
 
-    public static  void removeCredentialHasher(CredentialHasher<?> credentialHasher) {
+    public static void removeCredentialHasher(CredentialHasher<?> credentialHasher) {
         SEC_LOCK.lock(true);
         try {
             credentialHasherMap.remove(DataEncoder.StringLower.encode(credentialHasher.getName()));
             for (String algo : credentialHasher.supportedAlgorithms())
                 credentialHasherMap.remove(DataEncoder.StringLower.encode(algo));
-        }
-        finally {
+        } finally {
             SEC_LOCK.unlock(true);
         }
     }
 
-    public static  <T> CredentialHasher<T> lookupCredentialHasher(String name) {
+    public static <T> CredentialHasher<T> lookupCredentialHasher(String name) {
         SEC_LOCK.lock(true);
         try {
             return (CredentialHasher<T>) credentialHasherMap.get(DataEncoder.StringLower.encode(name));
-        }
-        finally {
+        } finally {
             SEC_LOCK.unlock(true);
         }
     }
@@ -245,7 +245,7 @@ public final class SecUtil {
      * @param securityProfile if null SecurityProfile will be created
      * @return ResourceSecurity if applicable or null
      */
-    public static  ResourceSecurity applyAndCacheSecurityProfile(Method method, SecurityProfile securityProfile) {
+    public static ResourceSecurity applyAndCacheSecurityProfile(Method method, SecurityProfile securityProfile) {
         SEC_LOCK.lock(true);
         try {
             SUS.checkIfNulls("Method null", method);
@@ -256,8 +256,7 @@ public final class SecUtil {
                 return ret;
             }
             return null;
-        }
-        finally {
+        } finally {
             SEC_LOCK.unlock(true);
         }
     }
@@ -360,7 +359,7 @@ public final class SecUtil {
         SEC_LOCK.lock(true);
         try {
             return methodResourceSecurityMap.remove(method);
-        }finally {
+        } finally {
             SEC_LOCK.unlock(true);
         }
     }
@@ -374,11 +373,11 @@ public final class SecUtil {
 
 
     public static SSLContext initSSLContext(String keyStoreFilename,
-                                     String keyStoreType,
-                                     final char[] keyStorePassword,
-                                     final char[] crtPassword,
-                                     String trustStoreFilename,
-                                     final char[] trustStorePassword)
+                                            String keyStoreType,
+                                            final char[] keyStorePassword,
+                                            final char[] crtPassword,
+                                            String trustStoreFilename,
+                                            final char[] trustStorePassword)
             throws GeneralSecurityException, IOException {
 
         return initSSLContext("TLS", null, new File(keyStoreFilename),
@@ -390,14 +389,14 @@ public final class SecUtil {
     }
 
 
-    public static SSLContext initSSLContext(String protocol,
-                                     final Provider provider,
-                                     final File keyStoreFilename,
-                                     String keyStoreType,
-                                     final char[] keyStorePassword,
-                                     final char[] crtPassword,
-                                     final File trustStoreFilename,
-                                     final char[] trustStorePassword)
+    public static SSLContext initSSLContext(String algoProt,
+                                            final String provider,
+                                            final File keyStoreFilename,
+                                            String keyStoreType,
+                                            final char[] keyStorePassword,
+                                            final char[] crtPassword,
+                                            final File trustStoreFilename,
+                                            final char[] trustStorePassword)
             throws GeneralSecurityException, IOException {
         FileInputStream ksfis = null;
         FileInputStream tsfis = null;
@@ -405,7 +404,7 @@ public final class SecUtil {
         try {
             ksfis = new FileInputStream(keyStoreFilename);
             tsfis = trustStoreFilename != null ? new FileInputStream(trustStoreFilename) : null;
-            return initSSLContext(protocol, provider, ksfis, keyStoreType, keyStorePassword, crtPassword, tsfis, trustStorePassword);
+            return initSSLContext(algoProt, provider, ksfis, keyStoreType, keyStorePassword, crtPassword, tsfis, trustStorePassword);
         } finally {
             IOUtil.close(ksfis);
             IOUtil.close(tsfis);
@@ -413,19 +412,20 @@ public final class SecUtil {
 
     }
 
-    public static SSLContext initSSLContext(String protocol,
-                                     final Provider provider,
-                                     final InputStream keyStoreIS,
-                                     String keyStoreType,
-                                     final char[] keyStorePassword,
-                                     final char[] crtPassword,
-                                     final InputStream trustStoreIS,
-                                     final char[] trustStorePassword)
+    public static SSLContext initSSLContext(String algoProt,
+                                            final String provider,
+                                            final InputStream keyStoreIS,
+                                            String keyStoreType,
+                                            final char[] keyStorePassword,
+                                            final char[] crtPassword,
+                                            final InputStream trustStoreIS,
+                                            final char[] trustStorePassword)
             throws GeneralSecurityException, IOException {
         KeyStore ks = CryptoUtil.loadKeyStore(keyStoreIS, keyStoreType, keyStorePassword);
         KeyStore ts = null;
-        KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
-        TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
+        SecTag secTag509 = SecTag.lookup(provider, "x509");
+        KeyManagerFactory kmf = KeyManagerFactory.getInstance(secTag509.getTagValue(), secTag509.getProviderID());
+        TrustManagerFactory tmf = TrustManagerFactory.getInstance(secTag509.getTagValue(), secTag509.getProviderID());
 
         if (trustStoreIS != null) {
             ts = CryptoUtil.loadKeyStore(trustStoreIS, keyStoreType, trustStorePassword);
@@ -438,23 +438,24 @@ public final class SecUtil {
             kmf.init(ks, keyStorePassword);
             tmf.init(ts != null ? ts : ks);
         }
-
-        SSLContext sslContext = provider != null ? SSLContext.getInstance(protocol != null ? protocol : "TLS", provider) : SSLContext.getInstance("TLS");
+        SecTag secTagAlgo = SecTag.lookup(provider, algoProt != null ? algoProt : "TLS");
+        SSLContext sslContext = SSLContext.getInstance(secTagAlgo.getTagValue(), secTagAlgo.getProviderID());
         sslContext.init(kmf.getKeyManagers(), null, defaultSecureRandom());
         return sslContext;
     }
 
-    public static SSLContext initSSLContext(final String protocol,
-                                     final Provider provider,
-                                     final KeyStore keyStore,
-                                     final char[] keyStorePassword,
-                                     final char[] crtPassword,
-                                     final KeyStore trustStore)
+    public static SSLContext initSSLContext(final String algoProt,
+                                            final String provider,
+                                            final KeyStore keyStore,
+                                            final char[] keyStorePassword,
+                                            final char[] crtPassword,
+                                            final KeyStore trustStore)
             throws GeneralSecurityException {
 
 
-        KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
-        TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
+        SecTag secTag = SecTag.lookup(provider, "x509");
+        KeyManagerFactory kmf = KeyManagerFactory.getInstance(secTag.getTagValue(), secTag.getProviderID());
+        TrustManagerFactory tmf = TrustManagerFactory.getInstance(secTag.getTagValue(), secTag.getProviderID());
 
 
         if (crtPassword != null) {
@@ -465,7 +466,8 @@ public final class SecUtil {
             tmf.init(trustStore != null ? trustStore : keyStore);
         }
 
-        SSLContext sslContext = provider != null ? SSLContext.getInstance(protocol != null ? protocol : "TLS", provider) : SSLContext.getInstance("TLS");
+        SecTag secTagAlgo = SecTag.lookup(provider, algoProt != null ? algoProt : "TLS");
+        SSLContext sslContext = SSLContext.getInstance(secTagAlgo.getTagValue(), secTagAlgo.getProviderID());
         sslContext.init(kmf.getKeyManagers(), null, defaultSecureRandom());
         return sslContext;
     }
@@ -492,7 +494,7 @@ public final class SecUtil {
         if (SECURE_RANDOM_ALGO == null && defaultSecureRandom == null) {
 
             SEC_LOCK.lock(true);
-            try{
+            try {
                 if (SECURE_RANDOM_ALGO == null && defaultSecureRandom == null) {
                     for (CryptoConst.SecureRandomType srt : CryptoConst.SecureRandomType.values()) {
                         try {
@@ -505,8 +507,7 @@ public final class SecUtil {
                         }
                     }
                 }
-            }
-            finally {
+            } finally {
                 SEC_LOCK.unlock(true);
             }
 
@@ -591,8 +592,16 @@ public final class SecUtil {
                 }
             }
             return Security.insertProviderAt(provider, position);
+        } finally {
+            SEC_LOCK.unlock(true);
         }
-        finally {
+    }
+
+    public static Provider[] getProviders() {
+        SEC_LOCK.lock(true);
+        try {
+            return Security.getProviders();
+        } finally {
             SEC_LOCK.unlock(true);
         }
     }
@@ -602,8 +611,7 @@ public final class SecUtil {
         try {
             Security.removeProvider(name);
             return Security.getProvider(name) == null;
-        }
-        finally {
+        } finally {
             SEC_LOCK.unlock(true);
         }
     }

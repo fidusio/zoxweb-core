@@ -15,6 +15,7 @@
  */
 package org.zoxweb.server.net.ssl;
 
+import org.zoxweb.server.security.SSLGroupSetterInt;
 import org.zoxweb.server.security.SecUtil;
 import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.util.GetName;
@@ -39,6 +40,7 @@ import java.security.*;
  *   <li>Supports both server-side and client-side SSL/TLS configurations</li>
  *   <li>Allows custom protocol versions (e.g., TLSv1.2, TLSv1.3)</li>
  *   <li>Allows custom cipher suites</li>
+ *   <li>Supports custom named groups (elliptic curves) via {@link SSLGroupSetterInt}</li>
  *   <li>Supports trust-all mode for development/testing scenarios</li>
  *   <li>Thread-safe SSLEngine creation</li>
  * </ul>
@@ -116,6 +118,15 @@ public class SSLContextInfo
          * <p>Example values: "TLS_AES_256_GCM_SHA384", "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"</p>
          */
         CIPHERS("ciphers"),
+
+        /**
+         * Parameter name for specifying named groups (elliptic curves) for key exchange.
+         * <p>Named groups define the elliptic curves or finite field groups used during
+         * the TLS handshake for key agreement algorithms like ECDHE.</p>
+         * <p>Example values: "x25519", "secp256r1", "secp384r1"</p>
+         */
+        GROUPS("groups"),
+
         ;
 
         /** The string name of the parameter */
@@ -156,6 +167,20 @@ public class SSLContextInfo
      * <p>If null or empty, the SSLEngine will use its default cipher suites.</p>
      */
     private final String[] ciphers;
+
+
+    /**
+     * Optional SSLGroupSetter for configuring named groups (elliptic curves) on SSLEngine instances.
+     * <p>When set, the {@link #newInstance()} method will apply the configured named groups
+     * to each created SSLEngine via the {@link SSLGroupSetterInt#setGroups(SSLEngine)} method.</p>
+     * <p>Named groups control which elliptic curves or finite field groups are used during
+     * TLS key exchange (e.g., x25519, secp256r1).</p>
+     *
+     * @see SSLGroupSetterInt
+     * @see #setSSLGroupSetter(SSLGroupSetterInt)
+     * @see #getSSLGroupSetter()
+     */
+    private SSLGroupSetterInt sslGroupSetter = null;
 
     /**
      * The remote server address for client-mode connections.
@@ -299,6 +324,44 @@ public class SSLContextInfo
 
 
     /**
+     * Returns the SSLGroupSetter configured for this SSLContextInfo.
+     *
+     * <p>The SSLGroupSetter is used to configure named groups (elliptic curves)
+     * on SSLEngine instances created by {@link #newInstance()}.</p>
+     *
+     * @return the configured SSLGroupSetter, or null if no group setter is configured
+     * @see #setSSLGroupSetter(SSLGroupSetterInt)
+     */
+    public SSLGroupSetterInt getSSLGroupSetter() {
+        return sslGroupSetter;
+    }
+
+    /**
+     * Sets the SSLGroupSetter for configuring named groups on SSLEngine instances.
+     *
+     * <p>When an SSLGroupSetter is configured, the {@link #newInstance()} method will
+     * apply the named groups to each created SSLEngine. This allows fine-grained control
+     * over which elliptic curves or finite field groups are used during TLS key exchange.</p>
+     *
+     * <h3>Example:</h3>
+     * <pre>{@code
+     * SSLContextInfo info = new SSLContextInfo(sslContext);
+     * info.setSSLGroupSetter(new SSLGroupSetterImpl(
+     *     new String[]{"x25519", "secp256r1"}
+     * ));
+     * }</pre>
+     *
+     * @param sslGroupSetter the SSLGroupSetter to use, or null to disable group configuration
+     * @return this SSLContextInfo instance for method chaining
+     * @see SSLGroupSetterInt
+     * @see #getSSLGroupSetter()
+     */
+    public SSLContextInfo setSSLGroupSetter(SSLGroupSetterInt sslGroupSetter) {
+        this.sslGroupSetter = sslGroupSetter;
+        return this;
+    }
+
+    /**
      * Creates a new SSLEngine instance configured according to this SSLContextInfo.
      *
      * <p>The returned SSLEngine is pre-configured with the protocols and cipher suites
@@ -337,6 +400,15 @@ public class SSLContextInfo
         // Apply custom cipher suites if specified
         if (ciphers != null && ciphers.length > 0) {
             ret.setEnabledCipherSuites(ciphers);
+        }
+
+        // need to add groups here
+        if (getSSLGroupSetter() != null) {
+            try {
+                ret = getSSLGroupSetter().setGroups(ret);
+            } catch (GeneralSecurityException e) {
+                e.printStackTrace();
+            }
         }
 
         return ret;
