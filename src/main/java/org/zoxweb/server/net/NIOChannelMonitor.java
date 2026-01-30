@@ -3,45 +3,43 @@ package org.zoxweb.server.net;
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.net.common.ConnectionCallback;
-import org.zoxweb.shared.task.ScheduledAttachment;
 import org.zoxweb.shared.util.Const;
 
 import java.io.IOException;
-import java.nio.channels.SelectionKey;
+import java.nio.channels.Channel;
 import java.nio.channels.SocketChannel;
 
 
 public class NIOChannelMonitor
         implements Runnable {
     public static final LogWrapper logger = new LogWrapper(NIOChannelMonitor.class).setEnabled(false);
-    private final SelectionKey sk;
+    private final Channel channel;
     private final long timestamp;
     private final SelectorController selectorController;
+    private final ConnectionCallback<?> connectionCallback;
+    ;
 
-    public NIOChannelMonitor(SelectionKey sk, SelectorController selector) {
+    public NIOChannelMonitor(Channel channel, SelectorController selector, ConnectionCallback<?> connectionCallback) {
         timestamp = System.currentTimeMillis();
         selectorController = selector;
-        this.sk = sk;
+        this.channel = channel;
+        this.connectionCallback = connectionCallback;
     }
 
     @Override
     public void run() {
-        SocketChannel sc = (SocketChannel) sk.channel();
-//        Object attachement = sk.attachment();
+        SocketChannel sc = (SocketChannel) channel;
         try {
-            if (!sc.isConnected() || sk.isConnectable()) {
+            if (!sc.isConnected()) {
                 IOUtil.close(sc);
-                selectorController.cancelSelectionKey(sk);
+                selectorController.cancelSelectionKey(sc);
                 // we are still waiting for connection
                 // and the timeout expired we need to close the channel
                 if (logger.isEnabled())
-                    logger.getLogger().info("Connection timed out: " + sk + " it took " + Const.TimeInMillis.toString(System.currentTimeMillis() - timestamp));
+                    logger.getLogger().info("Connection timed out: " + sc + " it took " + Const.TimeInMillis.toString(System.currentTimeMillis() - timestamp));
 
-                if (sk.attachment() instanceof ScheduledAttachment && ((ScheduledAttachment<?>) sk.attachment()).attachment() instanceof ConnectionCallback) {
-                    ConnectionCallback callback = (ConnectionCallback) ((ScheduledAttachment<?>) sk.attachment()).attachment();
-                    if (callback != null) {
-                        callback.exception(new IOException("Connection timed out"));
-                    }
+                if (connectionCallback != null) {
+                    connectionCallback.exception(new IOException("Connection timed out"));
                 }
             }
         } catch (Exception e) {

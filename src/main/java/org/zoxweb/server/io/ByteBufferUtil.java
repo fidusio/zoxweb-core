@@ -223,7 +223,7 @@ public class ByteBufferUtil {
     }
 
     public static byte[] allocateByteArray(ByteBuffer bb, boolean flip) {
-        if(flip) bb.flip();
+        if (flip) bb.flip();
 
         byte[] ret = SINGLETON.toByteArray0(bb.limit());
         bb.get(ret);
@@ -266,7 +266,13 @@ public class ByteBufferUtil {
     }
 
     public static int write(ByteChannel bc, ByteBuffer bb) throws IOException {
-        ((Buffer) bb).flip();
+        return write(bc, bb, true);
+    }
+
+
+    public static int write(ByteChannel bc, ByteBuffer bb, boolean flip) throws IOException {
+        if (flip) ((Buffer) bb).flip();
+
         int totalWritten = 0;
         while (bb.hasRemaining()) {
             int written = bc.write(bb);

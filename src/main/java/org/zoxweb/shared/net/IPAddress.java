@@ -21,6 +21,7 @@ import org.zoxweb.shared.http.URIScheme;
 import org.zoxweb.shared.util.*;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -42,7 +43,6 @@ public class IPAddress
 
     /** NVConfigEntity definition for IPAddress */
     public static final NVConfigEntity NVC_IP_ADDRESS = new NVConfigEntityPortable("ip_address", null, "IPAddress", true, false, false, false, IPAddress.class, SharedUtil.toNVConfigList(INET_ADDRESS, PORT, BACKLOG, PROXY_TYPE), null, false, SetNameDAO.NVC_NAME_DAO);
-
 
 
     /**
@@ -179,6 +179,11 @@ public class IPAddress
         setValue(PORT, port);
     }
 
+
+    public boolean isPrivateIP() {
+        return SharedNetUtil.isPrivateIP(getInetAddress());
+    }
+
     /**
      * Sets the connection backlog.
      *
@@ -208,10 +213,7 @@ public class IPAddress
     public boolean equals(Object o) {
         if (o instanceof IPAddress) {
             if (getInetAddress() != null && getInetAddress().equalsIgnoreCase(((IPAddress) o).getInetAddress())) {
-
-                if (getPort() == ((IPAddress) o).getPort()) {
-                    return true;
-                }
+                return (getPort() == ((IPAddress) o).getPort());
             }
         }
         return false;
@@ -260,23 +262,35 @@ public class IPAddress
     }
 
 
-
     /**
      * Parse ipaddress of format ipaddress:[0,1025]
      * @param ips to be parsed
      * @return IPAddress[] of the specified range
      */
-    public static IPAddress[] parseList(String ...ips) {
+    public static IPAddress[] parseList(String... ips) {
 
         List<IPAddress> ipAddresses = new ArrayList<IPAddress>();
         for (String ip : ips) {
-            String[] parsed = ip.split(":");
             try {
-                int singlePort = Integer.parseInt(parsed[1]);
-                ipAddresses.add(new IPAddress(parsed[0], singlePort));
-
+                ipAddresses.add(URLDecoder.decode(ip));
             } catch (Exception e) {
+                try {
+                    IPAddress[] rangeIPs = RangeDecoder.decode(ip);
+
+                    if (rangeIPs != null && rangeIPs.length > 0) {
+                        Collections.addAll(ipAddresses, rangeIPs);
+                    }
+                } catch (Exception ex) {
+                }
             }
+
+//            String[] parsed = ip.split(":");
+//            try {
+//                int singlePort = Integer.parseInt(parsed[1]);
+//                ipAddresses.add(new IPAddress(parsed[0], singlePort));
+//
+//            } catch (Exception e) {
+//            }
         }
 
 
@@ -344,7 +358,7 @@ public class IPAddress
 
         // Check for scheme and get default port
         URIScheme uriScheme = URIScheme.match(input);
-        if(uriScheme == null) {
+        if (uriScheme == null) {
             throw new IllegalArgumentException("Invalid URL scheme: " + input);
         }
 
@@ -380,6 +394,10 @@ public class IPAddress
             }
         } else {
             host = input;
+        }
+
+        if (port == -1) {
+            port = uriScheme.getValue();
         }
 
         if (SUS.isEmpty(host)) {

@@ -20,7 +20,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public abstract class UDPSessionCallback
-        implements ConnectionCallback<DataPacket> {
+        implements ConnectionCallback<DataPacket<?>> {
 
     public static final LogWrapper log = new LogWrapper(UDPSessionCallback.class).setEnabled(false);
     private final int bufferSize;
@@ -148,23 +148,27 @@ public abstract class UDPSessionCallback
 
 
     public void send(DataPacket<?> dataPacket) throws IOException {
-       send(dataPacket.getBuffer(), dataPacket.getAddress());
+        send(dataPacket.getBuffer(), dataPacket.getAddress());
     }
 
 
     public void send(ByteBuffer byteBuffer, InetSocketAddress sa) throws IOException {
         lock.lock();
         try {
-            ((DatagramChannel)getChannel()).send(byteBuffer, sa);
+            ((DatagramChannel) getChannel()).send(byteBuffer, sa);
             sendCounter.incrementAndGet();
         } finally {
             lock.unlock();
         }
     }
 
-    public long getReadCount() {return readCounter.get();}
+    public long getReadCount() {
+        return readCounter.get();
+    }
 
-    public long getSendCount() {return sendCounter.get();}
+    public long getSendCount() {
+        return sendCounter.get();
+    }
 
 
 }

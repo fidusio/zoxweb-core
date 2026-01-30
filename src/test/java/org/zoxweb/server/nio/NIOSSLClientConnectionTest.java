@@ -115,7 +115,9 @@ public class NIOSSLClientConnectionTest {
             extends TCPSessionCallback {
 
 
-        PlainSessionCallback(IPAddress address) { super(address); }
+        PlainSessionCallback(IPAddress address) {
+            super(address);
+        }
 
 
         /**
@@ -141,7 +143,6 @@ public class NIOSSLClientConnectionTest {
         }
 
 
-
         @Override
         protected void connectedFinished() throws IOException {
             successCount.incrementAndGet();
@@ -151,8 +152,6 @@ public class NIOSSLClientConnectionTest {
             IOUtil.close(this);
         }
     }
-
-
 
 
     public static long total() {
@@ -170,9 +169,8 @@ public class NIOSSLClientConnectionTest {
                 try {
                     ipAddress = IPAddress.URLDecoder.decode(args[i]);
 
-//                    nioSocket.addClientSocket(new InetSocketAddress(ipAddress.getInetAddress(), ipAddress.getPort()), new SSLNIOSocketHandler(new URISession(args[i]), true), 5);
-//                    ipAddressesList.add(ipAddress);
-                    nioSocket.addClientSocket(new InetSocketAddress(ipAddress.getInetAddress(), ipAddress.getPort()), new URISession(args[i]), 5);
+
+                    nioSocket.addClientSocket(new InetSocketAddress(ipAddress.getInetAddress(), ipAddress.getPort()), new URISession(args[i]), 5, null);
                     ipAddressesList.add(ipAddress);
                     System.out.println(args[i]);
                 } catch (Exception e) {
@@ -188,8 +186,6 @@ public class NIOSSLClientConnectionTest {
 
 
                                 ipAddress = ipAddresses[j];
-//                                nioSocket.addClientSocket(new InetSocketAddress(ipAddress.getInetAddress(), ipAddress.getPort()), new NIOSocketHandler(new PlainSession(), false), 5);
-//                                nioSocket.addClientSocket(new InetSocketAddress(ipAddress.getInetAddress(), ipAddress.getPort()), new PlainSessionCallback(ipAddress), 5);
                                 nioSocket.addClientSocket(new PlainSessionCallback(ipAddress));
                                 ipAddressesList.add(ipAddress);
                                 //System.out.println(ipAddress);

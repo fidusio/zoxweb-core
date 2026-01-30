@@ -8,6 +8,7 @@ import org.zoxweb.server.net.ssl.CustomSSLStateMachine;
 import org.zoxweb.server.net.ssl.SSLContextInfo;
 import org.zoxweb.server.net.ssl.SSLSessionConfig;
 import org.zoxweb.server.task.TaskUtil;
+import org.zoxweb.shared.net.DNSResolverInt;
 import org.zoxweb.shared.net.IPAddress;
 
 import java.io.IOException;
@@ -29,6 +30,8 @@ public abstract class TCPSessionCallback
     private int timeoutInSec = 5;
     private final ByteBuffer dataBuffer = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.DIRECT, 1024);
 
+    private DNSResolverInt dnsResolver;
+
     protected TCPSessionCallback() {
 
     }
@@ -45,6 +48,15 @@ public abstract class TCPSessionCallback
     protected TCPSessionCallback(SSLContextInfo sslContextInfo) {
         setSSLContextInfo(sslContextInfo);
         setRemoteAddress(sslContextInfo.getClientAddress());
+    }
+
+    public DNSResolverInt dnsResolver() {
+        return dnsResolver;
+    }
+
+    public TCPSessionCallback dnsResolver(DNSResolverInt dnsResolver) {
+        this.dnsResolver = dnsResolver;
+        return this;
     }
 
     public int timeoutInSec() {

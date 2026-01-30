@@ -27,6 +27,7 @@ import org.zoxweb.server.util.DateUtil;
 import org.zoxweb.shared.data.events.BaseEventObject;
 import org.zoxweb.shared.data.events.EventListenerManager;
 import org.zoxweb.shared.data.events.IPAddressEvent;
+import org.zoxweb.shared.net.DNSResolverInt;
 import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.net.SharedNetUtil;
 import org.zoxweb.shared.security.SecurityStatus;
@@ -111,6 +112,10 @@ public class NIOSocket
     private final Executor executor;
     private final TaskSchedulerProcessor taskSchedulerProcessor;
     private final AtomicLong connectionCount = new AtomicLong(0);
+
+
+
+
 
 
     private long selectedCountTotal = 0;
@@ -237,7 +242,7 @@ public class NIOSocket
      * @throws IOException if the socket channel cannot be opened or connection initiation fails
      */
     public SelectionKey addClientSocket(TCPSessionCallback tsc) throws IOException {
-        return addClientSocket(tsc.getRemoteAddress(), tsc, tsc.timeoutInSec());
+        return addClientSocket(tsc.getRemoteAddress(), tsc, tsc.timeoutInSec(), tsc.dnsResolver());
     }
 
     /**
@@ -262,9 +267,8 @@ public class NIOSocket
      * @throws IOException if the socket channel cannot be opened or connection initiation fails
      */
     public SelectionKey addClientSocket(TCPSessionCallback cc, int timeoutInSec) throws IOException {
-        return addClientSocket(cc.getRemoteAddress(), cc, timeoutInSec);
+        return addClientSocket(cc.getRemoteAddress(), cc, timeoutInSec, cc.dnsResolver());
     }
-
 
     /**
      * Initiates a non-blocking TCP client connection with callback-based notification.
@@ -289,7 +293,7 @@ public class NIOSocket
      * @return the SocketChannel being connected (may not yet be connected when returned)
      * @throws IOException if the socket channel cannot be opened or connection initiation fails
      */
-    public SelectionKey addClientSocket(InetSocketAddress sa, ConnectionCallback<?> cc, int timeoutInSec) throws IOException {
+    public SelectionKey addClientSocket(InetSocketAddress sa, ConnectionCallback<?> cc, int timeoutInSec, DNSResolverInt resolver) throws IOException {
         // Logic to be applied
         // 1. SocketChannel.open()
         // 2. configureBlocking(false)
@@ -297,13 +301,19 @@ public class NIOSocket
         // 4. If pending, register(OP_CONNECT) ← Only register after connection started
 
 
+        if(resolver != null) {
+            resolver.resolveIPA(sa.getHostName());
+        }
         ScheduledAttachment<ConnectionCallback<?>> scheduledAttachment = new ScheduledAttachment<>();
         scheduledAttachment.attach(cc);
         SocketChannel sc = SocketChannel.open();
+        sc.setOption(StandardSocketOptions.SO_REUSEADDR, true);
+
         // crucial here
         sc.configureBlocking(false);
         cc.setChannel(sc);
         try {
+            scheduledAttachment.setAppointment(taskSchedulerProcessor.queue(TimeInMillis.SECOND.mult(timeoutInSec), new NIOChannelMonitor(sc, selectorController, cc)));
             if (sc.connect(sa)) {
                 // we connected ULTRA fast connection (loopback)
                 SelectionKey selectionKey = selectorController.register(sc, 0, scheduledAttachment, false);
@@ -312,7 +322,6 @@ public class NIOSocket
             }
             // connection is pending, register for OP_CONNECT
             SelectionKey selectionKey = selectorController.register(sc, SelectionKey.OP_CONNECT, scheduledAttachment, false);
-            scheduledAttachment.setAppointment(taskSchedulerProcessor.queue(TimeInMillis.SECOND.mult(timeoutInSec), new NIOChannelMonitor(selectionKey, selectorController)));
             return selectionKey;
         } catch (IOException e) {
             IOUtil.close(sc);
@@ -1022,5 +1031,8 @@ public class NIOSocket
                 build(callsCounter);
         return ret;
     }
+
+
+
 
 }

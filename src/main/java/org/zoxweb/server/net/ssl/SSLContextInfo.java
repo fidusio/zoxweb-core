@@ -202,6 +202,7 @@ public class SSLContextInfo
      *
      * @param ks               the KeyStore containing the server's certificate and private key.
      *                         Must not be null.
+     * @param providerName     the JSSE provider, null default
      * @param keyStorePassword the password to access the KeyStore and the private key.
      *                         The same password is used for both.
      * @param protocols        array of SSL/TLS protocol versions to enable (e.g., {"TLSv1.2", "TLSv1.3"}).
@@ -210,11 +211,11 @@ public class SSLContextInfo
      *                         If null or empty, default cipher suites are used.
      * @throws GeneralSecurityException if there is an error initializing the SSL context,
      *                                  such as invalid KeyStore or password
-     * @see SecUtil#initSSLContext(String, Provider, KeyStore, char[], char[], KeyStore)
+     * @see SecUtil#initSSLContext(String, String, KeyStore, char[], char[], KeyStore)
      */
-    public SSLContextInfo(KeyStore ks, char[] keyStorePassword, String[] protocols, String[] ciphers)
+    public SSLContextInfo(KeyStore ks, String providerName, char[] keyStorePassword, String[] protocols, String[] ciphers)
             throws GeneralSecurityException {
-        this(SecUtil.initSSLContext("TLS", null, ks, keyStorePassword, keyStorePassword, null),
+        this(SecUtil.initSSLContext("TLS", providerName, ks, keyStorePassword, keyStorePassword, null),
                 protocols,
                 ciphers);
     }

@@ -19,6 +19,7 @@ import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.shared.net.*;
 import org.zoxweb.shared.net.InetProp.*;
 import org.zoxweb.shared.security.SecurityStatus;
+import org.zoxweb.shared.util.Const;
 import org.zoxweb.shared.util.SUS;
 
 import java.io.Closeable;
@@ -193,6 +194,7 @@ public class NetUtil {
      */
     public static Inet4Address[] getIPV4AllAddresses(NetworkInterface ni)
             throws IOException {
+        SUS.checkIfNull("Network or IP address can't be null", ni);
         ArrayList<Inet4Address> v = new ArrayList<Inet4Address>();
         for (Enumeration<InetAddress> e = ni.getInetAddresses(); e.hasMoreElements(); ) {
             InetAddress addr = e.nextElement();
@@ -200,7 +202,7 @@ public class NetUtil {
                 v.add((Inet4Address) addr);
         }
 
-        return (Inet4Address[]) v.toArray(new Inet4Address[v.size()]);
+        return v.toArray(new Inet4Address[0]);
     }
 
 
@@ -318,41 +320,112 @@ public class NetUtil {
     }
 
 
+    /**
+     * Ping a host using default settings.
+     *
+     * @param host the hostname or IP address to ping
+     * @return true if the host is reachable
+     * @throws IOException if a network error occurs
+     * @throws IllegalArgumentException if host is null or empty
+     */
     public static boolean ping(String host) throws IOException {
         return ping(host, null);
     }
 
+    /**
+     * Ping a host through a specific network interface.
+     *
+     * @param host the hostname or IP address to ping
+     * @param niName the network interface name (can be null for default)
+     * @return true if the host is reachable
+     * @throws IOException if a network error occurs
+     * @throws IllegalArgumentException if host is null or empty
+     */
     public static boolean ping(String host, String niName) throws IOException {
+        SUS.checkIfNulls("Host cannot be null", host);
         return ping(InetAddress.getByName(host), (niName != null) ? NetworkInterface.getByName(niName) : null);
     }
 
+    /**
+     * Ping an address with default TTL (255) and timeout (5000ms).
+     *
+     * @param addr the InetAddress to ping
+     * @param ni the network interface (can be null for default)
+     * @return true if the address is reachable
+     * @throws IOException if a network error occurs
+     * @throws IllegalArgumentException if addr is null
+     */
     public static boolean ping(InetAddress addr, NetworkInterface ni) throws IOException {
         return ping(addr, ni, 255, 5000);
     }
 
-
+    /**
+     * Ping an address with statistics enabled.
+     *
+     * @param addr the InetAddress to ping
+     * @param ni the network interface (can be null for default)
+     * @param ttl the time-to-live (max hops)
+     * @param timeout the timeout in milliseconds
+     * @return true if the address is reachable
+     * @throws IOException if a network error occurs
+     * @throws IllegalArgumentException if addr is null
+     */
     public static boolean ping(InetAddress addr, NetworkInterface ni, int ttl, int timeout) throws IOException {
         return ping(addr, ni, ttl, timeout, true);
     }
 
-    public static boolean ping(InetAddress addr, NetworkInterface ni, int ttl, int timeout, boolean statOn) throws IOException {
+    /**
+     * Ping an address with full control over parameters.
+     *
+     * @param addr the InetAddress to ping
+     * @param ni the network interface (can be null for default)
+     * @param ttl the time-to-live (max hops)
+     * @param timeout the timeout in milliseconds
+     * @param logToOS if true, print timing statistics to stdout
+     * @return true if the address is reachable
+     * @throws IOException if a network error occurs
+     * @throws IllegalArgumentException if addr is null
+     */
+    public static boolean ping(InetAddress addr, NetworkInterface ni, int ttl, int timeout, boolean logToOS) throws IOException {
+        SUS.checkIfNulls("Address cannot be null", addr);
         long delta = 0;
-        if (statOn) {
+        if (logToOS) {
             delta = System.currentTimeMillis();
         }
         boolean ret = addr.isReachable(ni, ttl, timeout);
 
-        if (statOn) {
+        if (logToOS) {
             delta = System.currentTimeMillis() - delta;
             if (ret)
-                System.out.println("it took " + delta + " millis to ping: " + addr.getHostName());
+                System.out.println("it took " + Const.TimeInMillis.toString(delta) + " ping: " + addr.getHostName());
             else
                 System.out.println("ping timed out after " + timeout + " millis to ping: " + addr.getHostName());
-
         }
 
         return ret;
     }
+
+
+    /**
+     * Check if the input is a private IP address and return as inet address, null otherwise.
+     * Private IP ranges: 10.x.x.x, 192.168.x.x, 172.16-31.x.x
+     *
+     * @param input the string to check
+     * @return InetAddress if it's a private IP, null otherwise
+     */
+    public static InetAddress toPrivateIP(String input) {
+
+        try {
+            // Check for private IP patterns
+            if (SharedNetUtil.isPrivateIP(input)) {
+                return InetAddress.getByName(input);
+            }
+        } catch (UnknownHostException e) {
+            // Not a valid IP format
+        }
+        return null;
+    }
+
 
     public static String generateRoutingScript(ConnectionPropDAO[] nis) throws IOException {
         StringBuilder sb = new StringBuilder("#!/bin/sh\n");

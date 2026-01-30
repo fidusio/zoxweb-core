@@ -28,9 +28,9 @@ public class TCPPortScan {
     public static class PlainSessionCallback
             extends TCPSessionCallback {
 
-
         PlainSessionCallback(IPAddress address) {
             super(address);
+
         }
 
 
@@ -78,36 +78,30 @@ public class TCPPortScan {
             long ts = System.currentTimeMillis();
             List<IPAddress> ipAddressesList = new ArrayList<IPAddress>();
             NIOSocket nioSocket = new NIOSocket(TaskUtil.defaultTaskProcessor(), TaskUtil.defaultTaskScheduler());
-            for (int i = 0; i < args.length; i++) {
-                IPAddress ipAddress = null;
 
-                try {
+            try {
 
-                    IPAddress[] ipAddresses = IPAddress.RangeDecoder.decode(args[i]);
-                    for (int j = 0; j < ipAddresses.length; j++) {
-                        try {
+                IPAddress[] ipAddresses = IPAddress.parseList(args);
+                for (int j = 0; j < ipAddresses.length; j++) {
+                    try {
+                        IPAddress ipAddress = ipAddresses[j];
 
-
-                            ipAddress = ipAddresses[j];
-
-                            nioSocket.addClientSocket(new PlainSessionCallback(ipAddress));
-                            ipAddressesList.add(ipAddress);
-                            //System.out.println(ipAddress);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            System.err.println(ipAddresses[j] + " ConnectFailed");
-                        }
+                        nioSocket.addClientSocket(new PlainSessionCallback(ipAddress).timeoutInSec(2));
+                        ipAddressesList.add(ipAddress);
+                        //System.out.println(ipAddress);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        System.err.println(ipAddresses[j] + " ConnectFailed");
                     }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    System.err.println(args[i] + " FAILED!!!!");
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
 
             }
 
             int size = ipAddressesList.size();
-            TaskUtil.waitIfBusy(500, () -> total() == size);
-            log.getLogger().info("IPAddresses size" + ipAddressesList.size() + " Total: " + total() + " Success: " + successCount.get() + " Failed: " + failCount.get() + " it took " + Const.TimeInMillis.toString(System.currentTimeMillis() - ts));
+            TaskUtil.waitIfBusy(500, () -> total() < size);
+            log.getLogger().info("IPAddresses size: " + ipAddressesList.size() + " Total: " + total() + " Success: " + successCount.get() + " Failed: " + failCount.get() + " it took " + Const.TimeInMillis.toString(System.currentTimeMillis() - ts));
             log.getLogger().info(GSONUtil.toJSONDefault(nioSocket.getStats(), true));
             IOUtil.close(nioSocket);
 

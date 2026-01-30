@@ -36,6 +36,7 @@ public class SharedNetUtil {
     public static final byte[] MASK_VALS = {0, (byte) 128, (byte) 192, (byte) 224, (byte) 240, (byte) 248, (byte) 252, (byte) 254, (byte) 255};
 
     public static final Range<Integer> PORTS_RANGE = Range.toRange("[0,65535]");
+
     /**
      * Private constructor to prevent instantiation.
      */
@@ -277,6 +278,59 @@ public class SharedNetUtil {
         }
 
         return true;
+    }
+
+    /**
+     * Check is IPAddress is a private ip
+     * @param input to checked
+     * @return true private ip, false otherwise
+     */
+    public static boolean isPrivateIP(IPAddress input) {
+        return isPrivateIP(input.getInetAddress());
+    }
+
+    /**
+     * Check if the input is a private IP address and return true or false.
+     * Private IP ranges: 10.x.x.x, 192.168.x.x, 172.16-31.x.x
+     *
+     * @param input the string to check, if null return false
+     * @return true if it's a private IP, false otherwise
+     */
+    public static boolean isPrivateIP(String input) {
+        input = SUS.trimOrNull(input);
+        if (input == null) {
+            return false;
+        }
+
+        // Quick check - must start with digit and contain dots
+        char first = input.charAt(0);
+        if (!Character.isDigit(first) || input.indexOf('.') == -1) {
+            return false;
+        }
+
+        return input.startsWith("10.") ||
+                input.startsWith("192.168.") ||
+                isPrivate172Range(input);
+
+    }
+
+    /**
+     * Check if IP is in 172.16.0.0 - 172.31.255.255 range
+     */
+    private static boolean isPrivate172Range(String input) {
+        if (!input.startsWith("172.")) {
+            return false;
+        }
+        try {
+            int dotIndex = input.indexOf('.', 4);
+            if (dotIndex > 4) {
+                int secondOctet = Integer.parseInt(input.substring(4, dotIndex));
+                return secondOctet >= 16 && secondOctet <= 31;
+            }
+        } catch (NumberFormatException e) {
+            // Not a valid number
+        }
+        return false;
     }
 
 }
