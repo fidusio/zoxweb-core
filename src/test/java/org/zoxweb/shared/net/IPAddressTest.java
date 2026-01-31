@@ -395,13 +395,26 @@ public class IPAddressTest {
     }
 
     @Test
+
     public void testParseListLargeRange() {
-        IPAddress[] result = IPAddress.parseList("scanner:[1,10]", "https://xlogistx.io", "http://xlogistx.io:8080");
+        IPAddress[] result = IPAddress.parseList("scanner:[1,10]", "https://example.io", "http://example.io:8080");
         assertEquals(12, result.length);
-        for (int i = 0; i <result.length; i++) {
-            assert( result[i].getInetAddress() != null);
-            assert( result[i].getPort() != -1);
-            System.out.println( result[i]);
+        for (int i = 0; i < result.length; i++) {
+            assert (result[i].getInetAddress() != null);
+            assert (result[i].getPort() != -1);
+            System.out.println(result[i]);
         }
+    }
+
+
+    @Test
+    public void testParseFullUrl() {
+        String[] toTest = new String[]{"http://xlogistx.io/", "http://xlogistx.io:8080///", "https://xlogistx.com/index.html", "https://xlogistx.ai?a=1",
+                "https://finance.yahoo.com/news/why-your-utility-bills-are-out-of-control-its-not-just-the-arctic-blast-or-ai-100008895.html"};
+
+        for (String ip : toTest) {
+            System.out.println(IPAddress.parse(ip));
+        }
+
     }
 }

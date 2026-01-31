@@ -20,6 +20,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
+import java.util.UUID;
 
 public abstract class TCPSessionCallback
         extends BaseSessionCallback<SSLSessionConfig>
@@ -33,21 +34,25 @@ public abstract class TCPSessionCallback
     private DNSResolverInt dnsResolver;
 
     protected TCPSessionCallback() {
-
+        setID(UUID.randomUUID().toString());
     }
 
     protected TCPSessionCallback(IPAddress ipAddress) {
+        this();
         setRemoteAddress(new InetSocketAddress(ipAddress.getInetAddress(), ipAddress.getPort()));
-
     }
 
     protected TCPSessionCallback(IPAddress ipAddress, boolean noSSLValidation) throws NoSuchAlgorithmException, KeyManagementException {
-        this(new SSLContextInfo(ipAddress, noSSLValidation));
+        this(new SSLContextInfo(ipAddress, noSSLValidation), null);
     }
 
-    protected TCPSessionCallback(SSLContextInfo sslContextInfo) {
+    protected TCPSessionCallback(SSLContextInfo sslContextInfo, String id) {
         setSSLContextInfo(sslContextInfo);
         setRemoteAddress(sslContextInfo.getClientAddress());
+        if (id != null) {
+            id = UUID.randomUUID().toString();
+        }
+        setID(id);
     }
 
     public DNSResolverInt dnsResolver() {

@@ -1,16 +1,19 @@
 package org.zoxweb.server.net;
 
+import org.zoxweb.shared.util.Identifier;
+
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 
-public class DataPacket<I> {
+public class DataPacket<I>
+        implements Identifier<I> {
     private final ByteBuffer buffer;
     private final InetSocketAddress address;
     private final I id;
 
 
     public DataPacket(InetSocketAddress sa, ByteBuffer buffer) {
-        this(null, sa,  buffer);
+        this(null, sa, buffer);
     }
 
     public DataPacket(I id, InetSocketAddress sa, ByteBuffer buffer) {
@@ -27,5 +30,7 @@ public class DataPacket<I> {
         return address;
     }
 
-    public I getID() {return id;}
+    public I getID() {
+        return id;
+    }
 }

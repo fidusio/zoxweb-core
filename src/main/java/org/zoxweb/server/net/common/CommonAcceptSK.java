@@ -4,5 +4,4 @@ import java.nio.channels.SelectionKey;
 
 public interface CommonAcceptSK {
     void accept(SelectionKey sk);
-
 }

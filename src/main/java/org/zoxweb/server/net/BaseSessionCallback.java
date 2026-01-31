@@ -1,6 +1,7 @@
 package org.zoxweb.server.net;
 
 import org.zoxweb.shared.util.CloseableType;
+import org.zoxweb.shared.util.Identifier;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -13,11 +14,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class BaseSessionCallback<CF>
         extends SessionCallback<CF, ByteBuffer, OutputStream>
-        implements CloseableType {
+        implements CloseableType, Identifier<String> {
     private InetSocketAddress remoteAddress;
     private transient BaseChannelOutputStream bcos;
     private transient ByteChannel channel;
     protected final AtomicBoolean isClosed = new AtomicBoolean(false);
+    protected String instanceID = null;
 
 
     ///public abstract BaseChannelOutputStream get();
@@ -36,6 +38,15 @@ public abstract class BaseSessionCallback<CF>
         return key.interestOps();
     }
 
+    @Override
+    public String getID() {
+        return instanceID;
+    }
+
+    public void setID(String instanceID) {
+        this.instanceID = instanceID;
+    }
+
     public BaseChannelOutputStream get() {
         return bcos;
     }
@@ -51,7 +62,7 @@ public abstract class BaseSessionCallback<CF>
     }
 
     public <V extends Channel> V getChannel() {
-        return channel != null ? (V)channel : (getOutputStream() != null ? (V)getOutputStream().dataChannel : null);
+        return channel != null ? (V) channel : (getOutputStream() != null ? (V) getOutputStream().dataChannel : null);
     }
 
     public void setChannel(Channel channel) {

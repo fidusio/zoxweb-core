@@ -305,6 +305,10 @@ public class IPAddress
      * @return the parsed IPAddress
      */
     public static IPAddress parse(String addressPort) {
+        try {
+            return URLDecoder.decode(addressPort);
+        } catch (Exception e) {
+        }
         return new IPAddress(addressPort);
     }
 

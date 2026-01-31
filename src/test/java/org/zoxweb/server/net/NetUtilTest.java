@@ -372,11 +372,8 @@ public class NetUtilTest {
     // ==================== isActive Tests ====================
 
     @Test
-    public void testIsActiveNullStringThrows() {
-        // Note: isActive(String) does not handle null - it throws NPE from NetworkInterface.getByName()
-        assertThrows(NullPointerException.class, () -> {
-            NetUtil.isActive((String) null);
-        });
+    public void testIsActiveNullString() throws IOException {
+        assertFalse(NetUtil.isActive((String) null));
     }
 
     @Test

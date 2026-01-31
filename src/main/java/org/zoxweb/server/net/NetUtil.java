@@ -498,11 +498,14 @@ public class NetUtil {
     /**
      * This method invoke the isUp for currently associated NetworkInterface
      *
-     * @param niName
-     * @return true if active
-     * @throws IOException
+     * @param niName the network interface name
+     * @return true if active, false if null, non-existent, or down
+     * @throws IOException if a network error occurs
      */
     public static boolean isActive(String niName) throws IOException {
+        if (niName == null) {
+            return false;
+        }
         NetworkInterface ni = toNI(niName);
         if (ni != null) {
             return ni.isUp();
