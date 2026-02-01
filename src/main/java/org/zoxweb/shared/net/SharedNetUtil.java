@@ -314,6 +314,14 @@ public class SharedNetUtil {
 
     }
 
+
+    public static int parsePort(String p) {
+        int port = Integer.parseInt(p);
+        if (!PORTS_RANGE.within(port))
+            throw new IllegalArgumentException("Port out of range " + p);
+        return port;
+    }
+
     /**
      * Check if IP is in 172.16.0.0 - 172.31.255.255 range
      */

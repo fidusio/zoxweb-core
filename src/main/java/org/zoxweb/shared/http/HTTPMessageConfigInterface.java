@@ -108,6 +108,8 @@ public interface HTTPMessageConfigInterface
 
 
 
+    URLInfo toURLInfo();
+
     /**
      * @return the header collection
      */

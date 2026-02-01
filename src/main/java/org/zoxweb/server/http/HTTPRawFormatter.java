@@ -18,6 +18,8 @@ package org.zoxweb.server.http;
 import org.zoxweb.server.io.UByteArrayOutputStream;
 import org.zoxweb.shared.http.HTTPMessageConfigInterface;
 import org.zoxweb.shared.http.HTTPRequestLine;
+import org.zoxweb.shared.http.HTTPVersion;
+import org.zoxweb.shared.http.URLInfo;
 import org.zoxweb.shared.protocol.Delimiter;
 import org.zoxweb.shared.util.GetNameValue;
 import org.zoxweb.shared.util.NVGenericMap;
@@ -29,10 +31,12 @@ public class HTTPRawFormatter {
     private UByteArrayOutputStream ubaos;
 
     public HTTPRawFormatter(HTTPMessageConfigInterface hmci) {
-        String uri = hmci.getURI() ==  null ? "/" : hmci.getURI().startsWith("/") ? hmci.getURI() : "/" + hmci.getURI();
+        URLInfo urlInfo = hmci.toURLInfo();
+        hmci.setHTTPVersion(HTTPVersion.HTTP_1_1);
+//        String uri = hmci.getURI() ==  null ? "/" : hmci.getURI().startsWith("/") ? hmci.getURI() : "/" + hmci.getURI();
 
 
-        this.firstLine = hmci.getMethod().getName() + " " + uri+ " " + hmci.getHTTPVersion();
+        this.firstLine = hmci.getMethod().getName() + " " + urlInfo.toURI() + " " + hmci.getHTTPVersion();
         this.headers = hmci.getHeaders();
         this.content = hmci.getContent();
     }

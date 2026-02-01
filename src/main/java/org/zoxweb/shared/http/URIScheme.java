@@ -27,82 +27,78 @@ import org.zoxweb.shared.util.GetNameValue;
  * @author mnael
  */
 public enum URIScheme
-    implements GetNameValue<Integer>
-{
-	
-	// WARNING: it is crucial to define https before http otherwise the match will never detect https
-	/** Secure HTTP (port 443) */
-	HTTPS("https", 443),
-	/** HTTP (port 80) */
-	HTTP("http", 80),
-	/** FTP (port 21) */
-	FTP("ftp", 21),
-	/** File system access (no port) */
-	FILE("file", -1),
-	/** Email mailto links (no port) */
-	MAIL_TO("mailto", -1),
-	/** Data URLs (no port) */
-	DATA("data", -1),
-	/** Secure WebSocket (port 443) */
-	WSS("wss", 443),
-	/** WebSocket (port 80) */
-	WS("ws", 80),
-	SSH("ssh", 22),
+        implements GetNameValue<Integer> {
 
-	;
+    // WARNING: it is crucial to define https before http otherwise the match will never detect https
+    /** Secure HTTP (port 443) */
+    HTTPS("https", 443),
+    /** HTTP (port 80) */
+    HTTP("http", 80),
+    /** FTP (port 21) */
+    FTP("ftp", 21),
+    /** File system access (no port) */
+    FILE("file", -1),
+    /** Email mailto links (no port) */
+    MAIL_TO("mailto", -1),
+    /** Data URLs (no port) */
+    DATA("data", -1),
+    /** Secure WebSocket (port 443) */
+    WSS("wss", 443),
+    /** WebSocket (port 80) */
+    WS("ws", 80),
+    SSH("ssh", 22),
 
-	private final String name;
-	private final int defaultPort;
-	
-	URIScheme(String name, int port)
-	{
-		this.name= name;
-		this.defaultPort = port;
-	}
+    ;
 
-	/**
-	 * Matches a URI string to its corresponding URIScheme.
-	 *
-	 * @param uri the URI string to match
-	 * @return the matching URIScheme, or null if not found
-	 */
-	public static URIScheme match(String uri, URIScheme ...schemes)
-	{
-		if (uri != null)
-		{
-			uri = uri.toLowerCase().trim();
+    private final String name;
+    private final int defaultPort;
 
-			if(schemes == null || schemes.length == 0)
-				schemes = URIScheme.values();
+    URIScheme(String name, int port) {
+        this.name = name;
+        this.defaultPort = port;
+    }
 
-			for (URIScheme us: schemes)
-			{
-				if (uri.startsWith(us.getName()))
-                {
+    /**
+     * Matches a URI string to its corresponding URIScheme.
+     *
+     * @param uri the URI string to match
+     * @return the matching URIScheme, or null if not found
+     */
+    public static URIScheme match(String uri, URIScheme... schemes) {
+        if (uri != null) {
+            uri = uri.toLowerCase().trim();
+
+            if (schemes == null || schemes.length == 0)
+                schemes = URIScheme.values();
+
+            for (URIScheme us : schemes) {
+                if (uri.startsWith(us.getName())) {
                     return us;
                 }
-			}
-		}
+            }
+        }
 
-		return null;
-	}
+        return null;
+    }
 
     @Override
-    public String getName()
-    {
+    public String getName() {
         return name;
     }
-    
-    public String toString()
-    {
-    	return getName();
+
+    public String toString() {
+        return getName();
     }
+
     /**
      * @return the default port -1 not defined
      */
-	@Override
-	public Integer getValue()
-    {
-		return defaultPort;
-	}
+    @Override
+    public Integer getValue() {
+        return defaultPort;
+    }
+
+    public int defaultPort() {
+        return defaultPort;
+    }
 }

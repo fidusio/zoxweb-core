@@ -1,7 +1,7 @@
 package org.zoxweb.server.nio;
 
 import org.zoxweb.server.http.HTTPRawFormatter;
-import org.zoxweb.server.io.ByteBufferUtil;
+import org.zoxweb.server.http.HTTPRawMessage;
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.io.UByteArrayOutputStream;
 import org.zoxweb.server.logging.LogWrapper;
@@ -10,16 +10,13 @@ import org.zoxweb.server.net.common.TCPSessionCallback;
 import org.zoxweb.server.net.ssl.SSLContextInfo;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.server.util.GSONUtil;
-import org.zoxweb.shared.http.HTTPMessageConfig;
-import org.zoxweb.shared.http.HTTPMessageConfigInterface;
-import org.zoxweb.shared.http.HTTPVersion;
-import org.zoxweb.shared.http.URIScheme;
+import org.zoxweb.shared.http.*;
 import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.util.Const;
+import org.zoxweb.shared.util.SharedStringUtil;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
@@ -41,15 +38,17 @@ public class NIOSSLClientConnectionTest {
 
     public static class URISession
             extends TCPSessionCallback {
-        private UByteArrayOutputStream result = new UByteArrayOutputStream();
+        //private UByteArrayOutputStream result = new UByteArrayOutputStream();
         private final long timeStamp = System.currentTimeMillis();
-        private final URI uri;
+        HTTPRawMessage hrm = new HTTPRawMessage(true);
+
         private final String url;
+        private transient URLInfo urlInfo;
 
 
         public URISession(String url) throws URISyntaxException, NoSuchAlgorithmException, KeyManagementException {
             this.url = url;
-            this.uri = new URI(url);
+
             if (URIScheme.match(url, URIScheme.HTTPS, URIScheme.WSS) != null) {
                 setSSLContextInfo(new SSLContextInfo(IPAddress.URLDecoder.decode(url), true));
             }
@@ -65,13 +64,18 @@ public class NIOSSLClientConnectionTest {
         public void accept(ByteBuffer byteBuffer) {
 
             try {
-                ByteBufferUtil.write(byteBuffer, result, true);
-                log.getLogger().info("" + result);
 
-
-                close();
+                if (hrm.parseResponse(urlInfo.scheme, byteBuffer)) {
+                    HTTPMessageConfigInterface hmci = hrm.parse();
+                    hmci.setContent(hrm.getDataStream().toByteArray());
+                    System.out.println(hmci.getHTTPStatusCode());
+                    System.out.println(GSONUtil.toJSONDefault(hmci.getHeaders(), true));
+                    System.out.println(SharedStringUtil.toString(hmci.getContent()));
+                    close();
+                }
             } catch (IOException e) {
                 e.printStackTrace();
+                IOUtil.close(this);
             }
 
         }
@@ -95,12 +99,12 @@ public class NIOSSLClientConnectionTest {
 
             //IOUtil.close(this);
 
-            HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit(uri.getScheme() + uri.getHost() + ":" + uri.getPort(), uri.getRawPath(), "GET");
-            hmci.setHTTPVersion(HTTPVersion.HTTP_1_1);
-            hmci.setHeader("Host", uri.getHost());
+            HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit(url, null, "GET");
+            hmci.getHeaders().add(HTTPConst.CommonHeader.CONNECTION_KEEP_ALIVE);
             HTTPRawFormatter hrf = new HTTPRawFormatter(hmci);
             UByteArrayOutputStream ubaos = hrf.format();
             //System.out.println(ubaos);
+            urlInfo = hmci.toURLInfo();
 
 
             getOutputStream().write(ubaos, false);

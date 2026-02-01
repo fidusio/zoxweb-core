@@ -258,6 +258,31 @@ public class HTTPMessageConfig
         setValue(Params.URL, url);
     }
 
+    @Override
+    public URLInfo toURLInfo() {
+        String url = getURL();
+        if (SUS.isEmpty(url)) {
+            return null;
+        }
+
+        String uri = getURI();
+        String fullUrl;
+        if (!SUS.isEmpty(uri)) {
+            // Combine URL and URI, handling slash boundaries
+            if (url.endsWith("/") && uri.startsWith("/")) {
+                fullUrl = url + uri.substring(1);
+            } else if (!url.endsWith("/") && !uri.startsWith("/")) {
+                fullUrl = url + "/" + uri;
+            } else {
+                fullUrl = url + uri;
+            }
+        } else {
+            fullUrl = url;
+        }
+
+        return URLInfo.parse(fullUrl);
+    }
+
 
     /**
      * Set the request content

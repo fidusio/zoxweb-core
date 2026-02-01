@@ -16,6 +16,7 @@
 package org.zoxweb.shared.http;
 
 import org.zoxweb.shared.util.Const;
+import org.zoxweb.shared.util.NVGenericMap;
 
 import java.util.List;
 import java.util.Map;
@@ -29,8 +30,7 @@ import java.util.Map;
  * @author mnael
  */
 public class HTTPAPIResult<O>
-extends HTTPResponse
-{
+        extends HTTPResponse {
 
     private final O data;
 
@@ -42,28 +42,30 @@ extends HTTPResponse
      * @param data     the deserialized response data payload
      * @param duration the time taken for the HTTP call in milliseconds
      */
-    public HTTPAPIResult(int status, Map<String, List<String>> headers, O data, long duration)
-    {
+    public HTTPAPIResult(int status, Map<String, List<String>> headers, O data, long duration) {
         super(status, headers, duration);
         this.data = data;
     }
 
+    public HTTPAPIResult(int status, NVGenericMap headers, O data, long duration) {
+        super(status, headers, duration);
+        this.data = data;
+    }
 
     /**
      * Returns the deserialized response data payload.
      *
      * @return the response data of type O
      */
-    public O getData()
-    {
-        return  data;
+    public O getData() {
+        return data;
     }
 
     @Override
     public String toString() {
         return "HTTPAPIResult{" +
                 "status: " + getStatus() + ", " +
-                "headers: " + getHeaders() + ", " +
+                "headers: " + (headers() != null ? headers() : getHeaders()) + ", " +
                 "data: " + getData() + ", " +
                 "duration: " + Const.TimeInMillis.toString(getDuration()) +
                 "}";

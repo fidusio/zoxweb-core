@@ -276,8 +276,10 @@ public class SUS {
      * @return null or trimmed not empty string
      */
     public static String trimOrNull(String str) {
-        str = (str != null ? str.trim() : null);
-        return str != null ? (!str.isEmpty() ? str : null) : null;
+
+        return (str == null || str.trim().isEmpty()) ? null : str;
+//        str = (str != null ? str.trim() : null);
+//        return str != null ? (!str.isEmpty() ? str : null) : null;
     }
 
     /**

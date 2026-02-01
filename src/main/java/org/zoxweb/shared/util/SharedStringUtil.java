@@ -546,7 +546,7 @@ public final class SharedStringUtil {
      * @throws NullPointerException
      * @throws IllegalArgumentException
      */
-    public static String toString(byte array[])
+    public static String toString(byte[] array)
             throws NullPointerException, IllegalArgumentException {
         return toString(array, 0, array.length);
     }
@@ -566,15 +566,14 @@ public final class SharedStringUtil {
      * @throws NullPointerException
      * @throws IllegalArgumentException
      */
-    public static String toString(byte array[], int offset, int length)
+    public static String toString(byte[] array, int offset, int length)
             throws NullPointerException, IllegalArgumentException {
 
-        SUS.checkIfNulls("Null String", array);
+        SUS.checkIfNull("Null String", array);
 
         try {
             return new String(array, offset, length, Const.UTF_8);
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
             throw new IllegalArgumentException(e.getMessage());
         }
     }
@@ -1047,15 +1046,27 @@ public final class SharedStringUtil {
      */
     public static int hexToInt(char c)
             throws IllegalArgumentException {
-        c = Character.toUpperCase(c);
 
-        for (int j = 0; j < Const.HEX_TOKENS.length; j++) {
-            if (c == Const.HEX_TOKENS[j]) {
-                return j;
-            }
-        }
+//        c = Character.toUpperCase(c);
+//        for (int j = 0; j < Const.HEX_TOKENS.length; j++) {
+//            if (c == Const.HEX_TOKENS[j]) {
+//                return j;
+//            }
+//        }
+
+        if (c >= '0' && c <= '9') return c - '0';
+        if (c >= 'a' && c <= 'f') return c - 'a' + 10;
+        if (c >= 'A' && c <= 'F') return c - 'A' + 10;
+
 
         throw new IllegalArgumentException("Invalid character not a hex type 0-F:" + c);
+    }
+
+
+    public  static boolean isDigits(String s) {
+        for (int i = 0; i < s.length(); i++)
+            if (!Character.isDigit(s.charAt(i))) return false;
+        return !s.isEmpty();
     }
 
     /**

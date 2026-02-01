@@ -15,15 +15,15 @@
  */
 package org.zoxweb.server.http;
 
+import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.server.io.UByteArrayOutputStream;
 import org.zoxweb.server.logging.LogWrapper;
-import org.zoxweb.shared.http.HTTPMediaType;
-import org.zoxweb.shared.http.HTTPMessageConfig;
-import org.zoxweb.shared.http.HTTPMessageConfigInterface;
-import org.zoxweb.shared.http.HTTPMethod;
+import org.zoxweb.shared.http.*;
 import org.zoxweb.shared.protocol.Delimiter;
 import org.zoxweb.shared.util.*;
 
+import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 public class HTTPRawMessage
@@ -42,6 +42,7 @@ public class HTTPRawMessage
     private volatile HTTPMessageConfigInterface hmci = new HTTPMessageConfig();
     private volatile NamedValue<?> pendingParameter = null;
     private volatile NVGenericMap properties = new NVGenericMap("parsing-properties");
+    private boolean clientMode = false;
 
 
     private volatile NamedValue<?> lastParam = null;
@@ -61,6 +62,11 @@ public class HTTPRawMessage
 
     public HTTPRawMessage() {
         this(new UByteArrayOutputStream());
+    }
+
+    public HTTPRawMessage(boolean clientMode) {
+        this(new UByteArrayOutputStream());
+        this.clientMode = clientMode;
     }
 
 
@@ -89,7 +95,35 @@ public class HTTPRawMessage
                             GetNameValue<String> gnv = SharedUtil.toNVPair(currentHeaderLine, ":", true);
                             hmci.getHeaders().add(gnv);
                         } else {
-							/*
+
+
+                            if(isClientMode())
+                            {
+                                HTTPResponseLine fistLine = new HTTPResponseLine(currentHeaderLine);
+
+//                                int firstSpace = currentHeaderLine.indexOf(' ');
+//                                if (firstSpace == -1) {
+//                                    throw new IllegalArgumentException("Invalid status line: " + currentHeaderLine);
+//                                }
+//
+//                                String httpVersion = currentHeaderLine.substring(0, firstSpace);
+//
+//
+//                                int statusCode = -1;
+//                                int secondSpace = currentHeaderLine.indexOf(' ', firstSpace + 1);
+//                                if (secondSpace == -1) {
+//                                    // No reason phrase: "HTTP/1.1 200"
+//                                    statusCode = Integer.parseInt(currentHeaderLine.substring(firstSpace + 1).trim());
+//
+//                                }
+//
+//                                if(statusCode == -1)
+//                                    statusCode = Integer.parseInt(currentHeaderLine.substring(firstSpace + 1, secondSpace));
+                               hmci.setHTTPStatusCode(fistLine.getHTTPStatusCode());
+                               hmci.setHTTPVersion(fistLine.getVersion());
+                            }
+                            else {
+                                /*
 								first line of server request not part of the headers L=line H=header
 								=====================================================================================
 								(L1) POST /system-upload HTTP/1.1\r\n
@@ -102,24 +136,24 @@ public class HTTPRawMessage
 								(H7) User-Agent: okhttp/5.0.0-alpha.14\r\n\r\n
 								=====================================================================================
 							 */
-
-                            String[] tokens = currentHeaderLine.split(" ");
-                            for (int i = 0; i < tokens.length; i++) {
-                                String token = tokens[i];
-                                switch (i) {
-                                    case 0:
-                                        hmci.setMethod(HTTPMethod.lookup(token));
-                                        break;
-                                    case 1:
-                                        hmci.setURI(token);
-                                        break;
-                                    case 2:
-                                        hmci.setHTTPVersion(token);
-                                        break;
+                                String[] tokens = currentHeaderLine.split(" ");
+                                for (int i = 0; i < tokens.length; i++) {
+                                    String token = tokens[i];
+                                    switch (i) {
+                                        case 0:
+                                            hmci.setMethod(HTTPMethod.lookup(token));
+                                            break;
+                                        case 1:
+                                            hmci.setURI(token);
+                                            break;
+                                        case 2:
+                                            hmci.setHTTPVersion(token);
+                                            break;
+                                    }
                                 }
-                            }
-                            if (hmci.getMethod() == HTTPMethod.GET) {
-                                HTTPCodecs.WWW_URL_ENC.decode(this);
+                                if (hmci.getMethod() == HTTPMethod.GET) {
+                                    HTTPCodecs.WWW_URL_ENC.decode(this);
+                                }
                             }
 
                         }
@@ -185,8 +219,35 @@ public class HTTPRawMessage
     }
 
 
+    public synchronized boolean parseResponse(URIScheme protocolMode, ByteBuffer inBuffer) throws IOException {
+
+        ByteBufferUtil.write(inBuffer, getDataStream(), true);
+        switch (protocolMode) {
+            case HTTP:
+            case HTTPS:
+                HTTPMessageConfigInterface hmcitemp = parse();
+                boolean ret = isMessageComplete();// ? rawRequest.getHTTPMessageConfig() : null;
+                if (!ret && areHeadersParsed() && hmcitemp.isTransferChunked()) {
+                    ret = true;
+                }
+                if (log.isEnabled())
+                    log.getLogger().info("Protocol Mode: " + protocolMode + " message complete " + ret);
+                return ret;
+            case WS:
+            case WSS:
+                // to be added here
+                return true;
+            default:
+                throw new IllegalStateException("Unexpected value: " + protocolMode);
+        }
+    }
+
+    public boolean isClientMode() {
+        return clientMode;
+    }
+
     public synchronized HTTPMessageConfigInterface parse() {
-        if (hmci.getMethod() == null)
+        if (!isClientMode() && hmci.getMethod() == null)
             validateHTTPMethod();
 
 
