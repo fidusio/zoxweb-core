@@ -17,7 +17,7 @@ package org.zoxweb.shared.net;
 
 import org.zoxweb.shared.data.Range;
 import org.zoxweb.shared.data.SetNameDAO;
-import org.zoxweb.shared.http.URIScheme;
+import org.zoxweb.shared.http.URLInfo;
 import org.zoxweb.shared.util.*;
 
 import java.util.ArrayList;
@@ -352,63 +352,65 @@ public class IPAddress
      * </ul>
      */
     public static final DataDecoder<String, IPAddress> URLDecoder = (urlString) -> {
-        if (SUS.isEmpty(urlString)) {
-            throw new IllegalArgumentException("URL string cannot be null or empty");
-        }
+        return URLInfo.parse(urlString).ipAddress;
 
-        String input = urlString.trim();
-        String host;
-        int port = -1;
-
-        // Check for scheme and get default port
-        URIScheme uriScheme = URIScheme.match(input);
-        if (uriScheme == null) {
-            throw new IllegalArgumentException("Invalid URL scheme: " + input);
-        }
-
-        // Strip scheme (e.g., "http://")
-        input = input.substring(uriScheme.getName().length() + 3); // +3 for "://"
-        port = uriScheme.getValue(); // default port
-
-
-        // Remove path/query (everything after first /)
-        int pathIndex = input.indexOf('/');
-        if (pathIndex != -1) {
-            input = input.substring(0, pathIndex);
-        }
-
-        // Remove query string if no path but has query (e.g., host:port?query)
-        int queryIndex = input.indexOf('?');
-        if (queryIndex != -1) {
-            input = input.substring(0, queryIndex);
-        }
-
-        // Parse host:port - use lastIndexOf to handle IPv6 addresses
-        int colonIndex = input.lastIndexOf(':');
-        if (colonIndex != -1) {
-            // Check if this is a port or part of IPv6 address
-            String potentialPort = input.substring(colonIndex + 1);
-            try {
-                int parsedPort = Integer.parseInt(potentialPort);
-                host = input.substring(0, colonIndex);
-                port = parsedPort;
-            } catch (NumberFormatException e) {
-                // Not a port number, treat entire string as host
-                host = input;
-            }
-        } else {
-            host = input;
-        }
-
-        if (port == -1) {
-            port = uriScheme.getValue();
-        }
-
-        if (SUS.isEmpty(host)) {
-            throw new IllegalArgumentException("Invalid URL: no host found in " + urlString);
-        }
-
-        return new IPAddress(host, port);
+//        if (SUS.isEmpty(urlString)) {
+//            throw new IllegalArgumentException("URL string cannot be null or empty");
+//        }
+//
+//        String input = urlString.trim();
+//        String host;
+//        int port = -1;
+//
+//        // Check for scheme and get default port
+//        URIScheme uriScheme = URIScheme.match(input);
+//        if (uriScheme == null) {
+//            throw new IllegalArgumentException("Invalid URL scheme: " + input);
+//        }
+//
+//        // Strip scheme (e.g., "http://")
+//        input = input.substring(uriScheme.getName().length() + 3); // +3 for "://"
+//        port = uriScheme.getValue(); // default port
+//
+//
+//        // Remove path/query (everything after first /)
+//        int pathIndex = input.indexOf('/');
+//        if (pathIndex != -1) {
+//            input = input.substring(0, pathIndex);
+//        }
+//
+//        // Remove query string if no path but has query (e.g., host:port?query)
+//        int queryIndex = input.indexOf('?');
+//        if (queryIndex != -1) {
+//            input = input.substring(0, queryIndex);
+//        }
+//
+//        // Parse host:port - use lastIndexOf to handle IPv6 addresses
+//        int colonIndex = input.lastIndexOf(':');
+//        if (colonIndex != -1) {
+//            // Check if this is a port or part of IPv6 address
+//            String potentialPort = input.substring(colonIndex + 1);
+//            try {
+//                int parsedPort = Integer.parseInt(potentialPort);
+//                host = input.substring(0, colonIndex);
+//                port = parsedPort;
+//            } catch (NumberFormatException e) {
+//                // Not a port number, treat entire string as host
+//                host = input;
+//            }
+//        } else {
+//            host = input;
+//        }
+//
+//        if (port == -1) {
+//            port = uriScheme.getValue();
+//        }
+//
+//        if (SUS.isEmpty(host)) {
+//            throw new IllegalArgumentException("Invalid URL: no host found in " + urlString);
+//        }
+//
+//        return new IPAddress(host, port);
     };
 
 }

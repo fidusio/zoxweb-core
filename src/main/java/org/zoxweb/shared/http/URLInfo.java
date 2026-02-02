@@ -112,6 +112,11 @@ public final class URLInfo {
 
         return sb.toString();
     }
+    public String toBasicURL()
+    {
+        return  scheme + "://" + ipAddress.getInetAddress() + ":" + ipAddress.getPort();
+    }
+
 
 
     public String toURI() { // request-target (origin-form)

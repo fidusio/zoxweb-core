@@ -42,15 +42,17 @@ public class NIOSSLClientConnectionTest {
         private final long timeStamp = System.currentTimeMillis();
         HTTPRawMessage hrm = new HTTPRawMessage(true);
 
-        private final String url;
-        private transient URLInfo urlInfo;
+        //private final String url;
+        private final URLInfo urlInfo;
 
 
         public URISession(String url) throws URISyntaxException, NoSuchAlgorithmException, KeyManagementException {
-            this.url = url;
+
+            urlInfo = URLInfo.parse(url);
+            System.out.println(urlInfo.toBasicURL());
 
             if (URIScheme.match(url, URIScheme.HTTPS, URIScheme.WSS) != null) {
-                setSSLContextInfo(new SSLContextInfo(IPAddress.URLDecoder.decode(url), true));
+                setSSLContextInfo(new SSLContextInfo(urlInfo.ipAddress, true));
             }
         }
 
@@ -64,7 +66,6 @@ public class NIOSSLClientConnectionTest {
         public void accept(ByteBuffer byteBuffer) {
 
             try {
-
                 if (hrm.parseResponse(urlInfo.scheme, byteBuffer)) {
                     HTTPMessageConfigInterface hmci = hrm.parse();
                     hmci.setContent(hrm.getDataStream().toByteArray());
@@ -84,7 +85,7 @@ public class NIOSSLClientConnectionTest {
         public void exception(Exception e) {
             e.printStackTrace();
             failCount.incrementAndGet();
-            log.getLogger().info(url + " " + getRemoteAddress() + " " + e);
+            log.getLogger().info(urlInfo.ipAddress + " " + getRemoteAddress() + " " + e);
             IOUtil.close(this);
 
 
@@ -99,12 +100,19 @@ public class NIOSSLClientConnectionTest {
 
             //IOUtil.close(this);
 
-            HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit(url, null, "GET");
+            HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit(urlInfo.toBasicURL(), urlInfo.toURI(), "GET");
+
             hmci.getHeaders().add(HTTPConst.CommonHeader.CONNECTION_KEEP_ALIVE);
+            if(urlInfo.username != null)
+            {
+                hmci.setBasicAuthorization(urlInfo.username, urlInfo.password);
+                hmci.getHeaders().add(hmci.getAuthorization().toHTTPHeader());
+            }
+
             HTTPRawFormatter hrf = new HTTPRawFormatter(hmci);
             UByteArrayOutputStream ubaos = hrf.format();
             //System.out.println(ubaos);
-            urlInfo = hmci.toURLInfo();
+
 
 
             getOutputStream().write(ubaos, false);
