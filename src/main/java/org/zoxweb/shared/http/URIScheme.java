@@ -81,6 +81,16 @@ public enum URIScheme
         return null;
     }
 
+    /**
+     * Return true if the uri is matching any of the specified URIScheme
+     * @param uri to check
+     * @param schemes to check against to
+     * @return true is match is found
+     */
+    public static boolean isMatching(String uri, URIScheme... schemes) {
+        return match(uri, schemes) != null;
+    }
+
     @Override
     public String getName() {
         return name;

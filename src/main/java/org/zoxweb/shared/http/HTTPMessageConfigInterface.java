@@ -110,6 +110,9 @@ public interface HTTPMessageConfigInterface
 
     URLInfo toURLInfo();
 
+    URIScheme getURIScheme();
+
+
     /**
      * @return the header collection
      */
@@ -247,7 +250,7 @@ public interface HTTPMessageConfigInterface
      */
     void setTimeout(long connectTimeout);
 
-
+    boolean isSSL();
 
 
 

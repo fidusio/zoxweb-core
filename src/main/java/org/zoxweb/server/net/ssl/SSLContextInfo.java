@@ -264,19 +264,19 @@ public class SSLContextInfo
      *
      * @param clientAddress the server address to connect to, containing hostname and port.
      *                      Must not be null.
-     * @param noSSLValidation     if {@code true}, disables certificate validation (trust all certificates).
-     *                      <b>WARNING:</b> Only use {@code true} for development/testing.
-     *                      Using {@code true} in production makes the connection vulnerable
+     * @param certValidationEnabled     if {@code false}, disables certificate validation (trust all certificates).
+     *                      <b>WARNING:</b> Only false {@code false} for development/testing.
+     *                      Using {@code false} in production makes the connection vulnerable
      *                      to man-in-the-middle attacks.
-     *                      If {@code false}, uses the JVM's default trust store (cacerts)
+     *                      If {@code true}, uses the JVM's default trust store (cacerts)
      *                      for certificate validation.
      * @throws NoSuchAlgorithmException if the TLS algorithm is not available
      * @throws KeyManagementException   if there is an error initializing the SSL context
      * @see IPAddress
      */
-    public SSLContextInfo(IPAddress clientAddress, boolean noSSLValidation)
+    public SSLContextInfo(IPAddress clientAddress, boolean certValidationEnabled)
             throws NoSuchAlgorithmException, KeyManagementException {
-        this(new InetSocketAddress(clientAddress.getInetAddress(), clientAddress.getPort()), noSSLValidation);
+        this(new InetSocketAddress(clientAddress.getInetAddress(), clientAddress.getPort()), certValidationEnabled);
     }
 
     /**
@@ -288,10 +288,10 @@ public class SSLContextInfo
      *
      * <h3>Certificate Validation Modes:</h3>
      * <ul>
-     *   <li><b>noSSLValidation = false (recommended for production):</b> Uses the JVM's default
+     *   <li><b>certValidationEnabled = true (recommended for production):</b> Uses the JVM's default
      *       trust store (typically $JAVA_HOME/lib/security/cacerts) which contains
      *       certificates from well-known Certificate Authorities.</li>
-     *   <li><b>noSSLValidation = true (development only):</b> Disables all certificate validation.
+     *   <li><b>certValidationEnabled = false (development only):</b> Disables all certificate validation.
      *       The connection will trust any certificate, including self-signed and expired ones.
      *       This is useful for development but creates serious security vulnerabilities
      *       in production environments.</li>
@@ -299,22 +299,22 @@ public class SSLContextInfo
      *
      * @param clientAddress the client address to connect to, containing hostname and port.
      *                      The hostname is used for SNI. Must not be null.
-     * @param noSSLValidation     if {@code true}, disables certificate validation.
-     *                      <b>WARNING:</b> Never use {@code true} in production.
-     *                      If {@code false}, uses standard certificate validation.
+     * @param certValidationEnabled     if {@code false}, disables certificate validation.
+     *                      <b>WARNING:</b> Never use {@code false} in production.
+     *                      If {@code true}, uses standard certificate validation.
      * @throws NoSuchAlgorithmException if the TLS algorithm is not available in the JVM
      * @throws KeyManagementException   if there is an error initializing the SSL context
      * @see SSLCheckDisabler
      */
-    public SSLContextInfo(InetSocketAddress clientAddress, boolean noSSLValidation)
+    public SSLContextInfo(InetSocketAddress clientAddress, boolean certValidationEnabled)
             throws NoSuchAlgorithmException, KeyManagementException {
-        if (noSSLValidation) {
+        if (certValidationEnabled) {
+            // Production mode: use JVM's default trust store
+            this.sslContext = SSLContext.getDefault();
+        } else {
             // Development mode: trust all certificates (INSECURE)
             this.sslContext = SSLContext.getInstance("TLS");
             this.sslContext.init(null, SSLCheckDisabler.SINGLETON.getTrustManagers(), new SecureRandom());
-        } else {
-            // Production mode: use JVM's default trust store
-            this.sslContext = SSLContext.getDefault();
         }
         // Client mode uses default protocols and ciphers
         this.protocols = null;

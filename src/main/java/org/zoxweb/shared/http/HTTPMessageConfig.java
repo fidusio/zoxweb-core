@@ -283,6 +283,11 @@ public class HTTPMessageConfig
         return URLInfo.parse(fullUrl);
     }
 
+    @Override
+    public URIScheme getURIScheme() {
+        return URIScheme.match(getURL());
+    }
+
 
     /**
      * Set the request content
@@ -363,33 +368,33 @@ public class HTTPMessageConfig
         return createAndInit(url, uri, method, true);
     }
 
-    public static HTTPMessageConfigInterface createAndInit(String url, String uri, HTTPMethod method, boolean sslCheckEnabled) {
+    public static HTTPMessageConfigInterface createAndInit(String url, String uri, HTTPMethod method, boolean certValidationEnabled) {
         HTTPMessageConfigInterface ret = new HTTPMessageConfig();
         ret.setURL(url);
         ret.setURI(uri);
         ret.setMethod(method);
-        ret.setSecureCheckEnabled(sslCheckEnabled);
+        ret.setSecureCheckEnabled(certValidationEnabled);
         return ret;
     }
 
 
-    public static HTTPMessageConfigInterface createAndInit(String url, String uri, HTTPMethod method, boolean sslCheckEnabled, String contentType) {
+    public static HTTPMessageConfigInterface createAndInit(String url, String uri, HTTPMethod method, boolean certValidationEnabled, String contentType) {
         HTTPMessageConfigInterface ret = new HTTPMessageConfig();
         ret.setURL(url);
         ret.setURI(uri);
         ret.setMethod(method);
         ret.setContentType(contentType);
-        ret.setSecureCheckEnabled(sslCheckEnabled);
+        ret.setSecureCheckEnabled(certValidationEnabled);
         return ret;
     }
 
-    public static HTTPMessageConfigInterface createAndInit(String url, String uri, HTTPMethod method, boolean sslCheckEnabled, GetValue<String>... contentTypes) {
+    public static HTTPMessageConfigInterface createAndInit(String url, String uri, HTTPMethod method, boolean certValidationEnabled, GetValue<String>... contentTypes) {
         HTTPMessageConfigInterface ret = new HTTPMessageConfig();
         ret.setURL(url);
         ret.setURI(uri);
         ret.setMethod(method);
         ret.setContentType(contentTypes);
-        ret.setSecureCheckEnabled(sslCheckEnabled);
+        ret.setSecureCheckEnabled(certValidationEnabled);
         return ret;
     }
 
@@ -398,13 +403,24 @@ public class HTTPMessageConfig
         return createAndInit(url, uri, method, true);
     }
 
-    public static HTTPMessageConfigInterface createAndInit(String url, String uri, String method, boolean sslCheck) {
+    public static HTTPMessageConfigInterface createAndInit(String url, String uri, String method, boolean certValidationEnabled) {
         HTTPMessageConfigInterface ret = new HTTPMessageConfig();
         ret.setURL(url);
         ret.setURI(uri);
         ret.setMethod(method);
-        ret.setSecureCheckEnabled(sslCheck);
+        ret.setSecureCheckEnabled(certValidationEnabled);
         return ret;
+    }
+
+    public static HTTPMessageConfigInterface buildHMCI(String fullURL, HTTPMethod method, boolean certValidationEnabled){
+        URLInfo urlInfo = URLInfo.parse(fullURL);
+        HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit(urlInfo.toBasicURL(), urlInfo.toURI(), method, certValidationEnabled);
+        if(urlInfo.username != null)
+        {
+            hmci.setBasicAuthorization(urlInfo.username, urlInfo.password);
+        }
+
+        return hmci;
     }
 
 
@@ -449,6 +465,11 @@ public class HTTPMessageConfig
 
         setValue(Params.TIMEOUT, timeout);
 
+    }
+
+    @Override
+    public boolean isSSL() {
+        return URIScheme.isMatching(getURL(), URIScheme.WSS, URIScheme.HTTPS);
     }
 
     @Override

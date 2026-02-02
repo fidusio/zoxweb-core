@@ -43,7 +43,7 @@ public enum HTTPEncoder
 
             return nvp.getName() +
                     getNameValueSep() +
-                    (Object) nvp.getValue();// MN 2025-02-222 DO NOT REMOVE the Object casting It is on purpose to support int and long and other type NOT String
+                    (Object) nvp.getValue();// MN 2025-02-22 DO NOT REMOVE the Object casting It is on purpose to support int and long and other type NOT String
         }
 
         @Override
@@ -87,7 +87,7 @@ public enum HTTPEncoder
 
             return nvp.getName() +
                     getNameValueSep() +
-                    (Object) nvp.getValue();// MN 2025-02-222 DO NOT REMOVE the Object casting It is on purpose to support int and long and other type NOT String
+                    (Object) nvp.getValue();// MN 2025-02-22 DO NOT REMOVE the Object casting It is on purpose to support int and long and other type NOT String
         }
 
         @Override

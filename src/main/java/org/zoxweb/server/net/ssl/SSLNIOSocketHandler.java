@@ -226,7 +226,7 @@ public class SSLNIOSocketHandler
     public synchronized void setupConnection(AbstractSelectableChannel asc, boolean isBlocking) throws IOException {
         if(sslContextInfo == null) {
             try {
-                sslContextInfo = new SSLContextInfo((InetSocketAddress) ((SocketChannel)asc).getRemoteAddress(), trustAll);
+                sslContextInfo = new SSLContextInfo((InetSocketAddress) ((SocketChannel)asc).getRemoteAddress(), !trustAll);
             } catch (NoSuchAlgorithmException | KeyManagementException e) {
                 throw new IOException(e);
             }

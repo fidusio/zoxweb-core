@@ -2,6 +2,7 @@ package org.zoxweb.server.nio;
 
 import org.zoxweb.server.http.HTTPRawFormatter;
 import org.zoxweb.server.http.HTTPRawMessage;
+import org.zoxweb.server.http.HTTPURLCallback;
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.io.UByteArrayOutputStream;
 import org.zoxweb.server.logging.LogWrapper;
@@ -16,7 +17,6 @@ import org.zoxweb.shared.util.Const;
 import org.zoxweb.shared.util.SharedStringUtil;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
@@ -51,7 +51,7 @@ public class NIOSSLClientConnectionTest {
             urlInfo = URLInfo.parse(url);
             System.out.println(urlInfo.toBasicURL());
 
-            if (URIScheme.match(url, URIScheme.HTTPS, URIScheme.WSS) != null) {
+            if (URIScheme.isMatching(url, URIScheme.HTTPS, URIScheme.WSS)) {
                 setSSLContextInfo(new SSLContextInfo(urlInfo.ipAddress, true));
             }
         }
@@ -182,7 +182,14 @@ public class NIOSSLClientConnectionTest {
                     ipAddress = IPAddress.URLDecoder.decode(args[i]);
 
 
-                    nioSocket.addClientSocket(new InetSocketAddress(ipAddress.getInetAddress(), ipAddress.getPort()), new URISession(args[i]), 5, null);
+                    //nioSocket.addClientSocket(new InetSocketAddress(ipAddress.getInetAddress(), ipAddress.getPort()), new URISession(args[i]), 5, null);
+                    HTTPURLCallback huc = new HTTPURLCallback(args[i]);
+                    huc.send(nioSocket, (r)->{
+                        System.out.println(r.getStatus() + " " + Const.TimeInMillis.toString(r.getDuration()));
+                        successCount.incrementAndGet();
+
+                    });
+//                    nioSocket.addClientSocket(new HTTPURLCallback(args[i]));
                     ipAddressesList.add(ipAddress);
                     System.out.println(args[i]);
                 } catch (Exception e) {

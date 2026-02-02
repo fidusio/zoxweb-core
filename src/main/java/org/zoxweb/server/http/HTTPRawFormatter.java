@@ -16,13 +16,11 @@
 package org.zoxweb.server.http;
 
 import org.zoxweb.server.io.UByteArrayOutputStream;
-import org.zoxweb.shared.http.HTTPMessageConfigInterface;
-import org.zoxweb.shared.http.HTTPRequestLine;
-import org.zoxweb.shared.http.HTTPVersion;
-import org.zoxweb.shared.http.URLInfo;
+import org.zoxweb.shared.http.*;
 import org.zoxweb.shared.protocol.Delimiter;
 import org.zoxweb.shared.util.GetNameValue;
 import org.zoxweb.shared.util.NVGenericMap;
+import org.zoxweb.shared.util.SharedStringUtil;
 
 public class HTTPRawFormatter {
     private final String firstLine;
@@ -33,10 +31,29 @@ public class HTTPRawFormatter {
     public HTTPRawFormatter(HTTPMessageConfigInterface hmci) {
         URLInfo urlInfo = hmci.toURLInfo();
         hmci.setHTTPVersion(HTTPVersion.HTTP_1_1);
-//        String uri = hmci.getURI() ==  null ? "/" : hmci.getURI().startsWith("/") ? hmci.getURI() : "/" + hmci.getURI();
+
+        if (hmci.getAuthorization() != null)
+            hmci.getHeaders().add(hmci.getAuthorization().toHTTPHeader());
+        // need to process parameters also
+        String urlEncodedParameter;
+        String fullURI = urlInfo.toURI();
+        if (hmci.isContentURLEncoded()) {
+            urlEncodedParameter = SharedStringUtil.trimOrNull(HTTPEncoder.URL_ENCODED.format(hmci.getParameters().asArrayValuesString().values()));
+            if (hmci.getMethod() == HTTPMethod.GET && urlEncodedParameter != null) {
+                if (fullURI.indexOf('?') == -1)
+                    fullURI += "?" + urlEncodedParameter;
+                else if (fullURI.endsWith("&"))
+                    fullURI += urlEncodedParameter;
+                else
+                    fullURI += "&" + urlEncodedParameter;
+            } else if (urlEncodedParameter != null && hmci.getContent() == null) {
+                hmci.setContent(urlEncodedParameter);
+            }
+
+        }
 
 
-        this.firstLine = hmci.getMethod().getName() + " " + urlInfo.toURI() + " " + hmci.getHTTPVersion();
+        this.firstLine = hmci.getMethod().getName() + " " + fullURI + " " + hmci.getHTTPVersion();
         this.headers = hmci.getHeaders();
         this.content = hmci.getContent();
     }

@@ -20,22 +20,25 @@ public class OkHttpWebSocketTest {
         //params.hide("password");
         System.out.println(params);
         String url = params.stringValue("url", false);
-        String username = params.stringValue("user", false);
-        String password = params.stringValue("password", false);
+        String username = params.stringValue("user", true);
+        String password = params.stringValue("password", true);
         boolean binary = params.booleanValue("bin", true);
         boolean sslCheck = params.booleanValue("ssl-check", true);
         OkHttpClient client = OkHTTPCall.createOkHttpBuilder(null, true,null, HTTPMessageConfigInterface.DEFAULT_TIMEOUT_20_SECOND, sslCheck, 10, HTTPMessageConfigInterface.DEFAULT_TIMEOUT_20_SECOND).build();
 
         int repeat = params.intValue("repeat", 1000);
 
+
+        Request.Builder requestBuilder = new Request.Builder()
+                .url(url);
         // Generate the Basic Authorization header value
-        String credential = Credentials.basic(username, password);
+        if(username != null && password != null) {
+            requestBuilder.header("Authorization",Credentials.basic(username, password));
+        }
 
 
-        Request request = new Request.Builder()
-                .url(url)
-                .header("Authorization", credential)
-                .build();
+
+        Request request = requestBuilder.build();
 
         RateCounter rc = new RateCounter();
         long ts = System.currentTimeMillis();

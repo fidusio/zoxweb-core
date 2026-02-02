@@ -129,6 +129,10 @@ public class NVGenericMap
         return value.size();
     }
 
+    public boolean isEmpty() {
+        return value.isEmpty();
+    }
+
     /**
      * @see org.zoxweb.shared.util.ArrayValues#values()
      */
@@ -162,6 +166,15 @@ public class NVGenericMap
         return v;
     }
 
+
+    public String[] getAllNames() {
+        GetNameValue<?>[] allGNV = values();
+        String[] ret = new String[allGNV.length];
+        for (int i = 0; i < ret.length; i++) {
+            ret[i] = allGNV[i].getName();
+        }
+        return ret;
+    }
 
     public GetNameValue<?> add(String name, String value, FilterType ft) {
         NVPair nvp = new NVPair(name, value, ft);

@@ -97,32 +97,11 @@ public class HTTPRawMessage
                         } else {
 
 
-                            if(isClientMode())
-                            {
+                            if (isClientMode()) {
                                 HTTPResponseLine fistLine = new HTTPResponseLine(currentHeaderLine);
-
-//                                int firstSpace = currentHeaderLine.indexOf(' ');
-//                                if (firstSpace == -1) {
-//                                    throw new IllegalArgumentException("Invalid status line: " + currentHeaderLine);
-//                                }
-//
-//                                String httpVersion = currentHeaderLine.substring(0, firstSpace);
-//
-//
-//                                int statusCode = -1;
-//                                int secondSpace = currentHeaderLine.indexOf(' ', firstSpace + 1);
-//                                if (secondSpace == -1) {
-//                                    // No reason phrase: "HTTP/1.1 200"
-//                                    statusCode = Integer.parseInt(currentHeaderLine.substring(firstSpace + 1).trim());
-//
-//                                }
-//
-//                                if(statusCode == -1)
-//                                    statusCode = Integer.parseInt(currentHeaderLine.substring(firstSpace + 1, secondSpace));
-                               hmci.setHTTPStatusCode(fistLine.getHTTPStatusCode());
-                               hmci.setHTTPVersion(fistLine.getVersion());
-                            }
-                            else {
+                                hmci.setHTTPStatusCode(fistLine.getHTTPStatusCode());
+                                hmci.setHTTPVersion(fistLine.getVersion());
+                            } else {
                                 /*
 								first line of server request not part of the headers L=line H=header
 								=====================================================================================
@@ -135,7 +114,11 @@ public class HTTPRawMessage
 								(H6) Accept-Encoding: gzip\r\n
 								(H7) User-Agent: okhttp/5.0.0-alpha.14\r\n\r\n
 								=====================================================================================
-							 */
+							    */
+//                                HTTPResponseLine responseLine =  new HTTPResponseLine(currentHeaderLine);
+//                                hmci.setMethod(responseLine.getFirstToken());
+//                                hmci.setURI(responseLine.getSecondToken());
+//                                hmci.set(responseLine.getHTTPStatusCode());
                                 String[] tokens = currentHeaderLine.split(" ");
                                 for (int i = 0; i < tokens.length; i++) {
                                     String token = tokens[i];

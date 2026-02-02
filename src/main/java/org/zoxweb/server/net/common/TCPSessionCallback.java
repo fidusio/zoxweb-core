@@ -42,8 +42,8 @@ public abstract class TCPSessionCallback
         setRemoteAddress(new InetSocketAddress(ipAddress.getInetAddress(), ipAddress.getPort()));
     }
 
-    protected TCPSessionCallback(IPAddress ipAddress, boolean noSSLValidation) throws NoSuchAlgorithmException, KeyManagementException {
-        this(new SSLContextInfo(ipAddress, noSSLValidation), null);
+    protected TCPSessionCallback(IPAddress ipAddress, boolean certValidationEnabled) throws NoSuchAlgorithmException, KeyManagementException {
+        this(new SSLContextInfo(ipAddress, certValidationEnabled), null);
     }
 
     protected TCPSessionCallback(SSLContextInfo sslContextInfo, String id) {

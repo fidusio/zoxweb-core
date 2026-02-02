@@ -183,11 +183,11 @@ public abstract class HTTPResponse
      * @return array of header names
      */
     public String[] headerNames() {
-        if(headers() != null)
-        {
-            headers().getValue().keySet().toArray(new String[0]);
-        }
-        return headers.keySet().toArray(new String[0]);
+        if (headers() != null)
+            return headers().getAllNames();
+        if (headers != null)
+            return headers.keySet().toArray(new String[0]);
+        return null;
     }
 
     /**
