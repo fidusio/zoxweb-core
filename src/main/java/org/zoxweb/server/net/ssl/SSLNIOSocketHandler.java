@@ -49,7 +49,7 @@ public class SSLNIOSocketHandler
 
 
         @Override
-        public void exception(Exception e) {
+        public void exception(Throwable e) {
             // exception handling
             //e.printStackTrace();
             if (log.isEnabled()) log.getLogger().info(e + "");

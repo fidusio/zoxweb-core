@@ -134,7 +134,7 @@ public class APIIntegration
             HTTPCallback<NVGenericMap, NVGenericMap> callback = new HTTPCallback<NVGenericMap, NVGenericMap>(parameters) {
                 
                 @Override
-                public void exception(Exception e)
+                public void exception(Throwable e)
                 {
                     if (e instanceof HTTPCallException)
                     {

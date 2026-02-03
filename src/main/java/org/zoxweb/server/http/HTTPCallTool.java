@@ -46,7 +46,7 @@ public final class HTTPCallTool {
 
     private static final HTTPCallback<Void, byte[]> callback = new HTTPCallback<Void, byte[]>(null) {
         @Override
-        public void exception(Exception e) {
+        public void exception(Throwable e) {
             failCounter.incrementAndGet();
             e.printStackTrace();
             if (e instanceof HTTPCallException) {
@@ -146,7 +146,7 @@ public final class HTTPCallTool {
             }
             ConsumerCallback<HTTPResponse> cc = new ConsumerCallback<HTTPResponse>() {
                 @Override
-                public void exception(Exception e) {
+                public void exception(Throwable e) {
                     failCounter.incrementAndGet();
                     e.printStackTrace();
                     if (e instanceof HTTPCallException) {

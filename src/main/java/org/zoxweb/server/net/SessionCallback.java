@@ -25,7 +25,7 @@ public abstract class SessionCallback<CF, C, S> implements ConsumerSupplierCallb
     }
 
     @Override
-    public void exception(Exception e) {
+    public void exception(Throwable e) {
         log.getLogger().info("" + e);
     }
 }

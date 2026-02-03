@@ -133,6 +133,7 @@ public class Const {
         TRUE("true", true),
         FALSE("false", false),
         ON("on", true),
+        OK("ok", true),
         OFF("off", false),
         ENABLE("enable", true),
         ENABLED("enabled", true),

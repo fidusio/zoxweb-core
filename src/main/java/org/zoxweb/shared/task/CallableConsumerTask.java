@@ -41,7 +41,7 @@ implements CallableConsumer<V>
     }
 
     @Override
-    public void exception(Exception e)
+    public void exception(Throwable e)
     {
         if(exceptionCallback != null)
             exceptionCallback.exception(e);

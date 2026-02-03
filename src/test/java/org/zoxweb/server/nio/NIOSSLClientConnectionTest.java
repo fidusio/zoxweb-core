@@ -1,5 +1,6 @@
 package org.zoxweb.server.nio;
 
+import org.zoxweb.server.http.HTTPNIOSocket;
 import org.zoxweb.server.http.HTTPRawFormatter;
 import org.zoxweb.server.http.HTTPRawMessage;
 import org.zoxweb.server.http.HTTPURLCallback;
@@ -175,7 +176,8 @@ public class NIOSSLClientConnectionTest {
         try {
             long ts = System.currentTimeMillis();
             List<IPAddress> ipAddressesList = new ArrayList<IPAddress>();
-            NIOSocket nioSocket = new NIOSocket(TaskUtil.defaultTaskProcessor(), TaskUtil.defaultTaskScheduler());
+
+            HTTPNIOSocket httpNIOSocket = new HTTPNIOSocket(new NIOSocket(TaskUtil.defaultTaskProcessor(), TaskUtil.defaultTaskScheduler()));
             for (int i = 0; i < args.length; i++) {
                 IPAddress ipAddress = null;
                 try {
@@ -183,12 +185,18 @@ public class NIOSSLClientConnectionTest {
 
 
                     //nioSocket.addClientSocket(new InetSocketAddress(ipAddress.getInetAddress(), ipAddress.getPort()), new URISession(args[i]), 5, null);
-                    HTTPURLCallback huc = new HTTPURLCallback(args[i]);
-                    huc.send(nioSocket, (r)->{
+                    HTTPURLCallback huc = new HTTPURLCallback(args[i], (r)->{
                         System.out.println(r.getStatus() + " " + Const.TimeInMillis.toString(r.getDuration()));
-                        successCount.incrementAndGet();
+                        System.out.println(r);
+                        successCount.incrementAndGet();});
 
-                    });
+                    httpNIOSocket.send(huc);
+
+//                    huc.send(nioSocket, (r)->{
+//                        System.out.println(r.getStatus() + " " + Const.TimeInMillis.toString(r.getDuration()));
+//                        successCount.incrementAndGet();
+//
+//                    });
 //                    nioSocket.addClientSocket(new HTTPURLCallback(args[i]));
                     ipAddressesList.add(ipAddress);
                     System.out.println(args[i]);
@@ -205,7 +213,7 @@ public class NIOSSLClientConnectionTest {
 
 
                                 ipAddress = ipAddresses[j];
-                                nioSocket.addClientSocket(new PlainSessionCallback(ipAddress));
+                                httpNIOSocket.getNIOSocket().addClientSocket(new PlainSessionCallback(ipAddress));
                                 ipAddressesList.add(ipAddress);
                                 //System.out.println(ipAddress);
                             } catch (Exception e) {
@@ -221,8 +229,8 @@ public class NIOSSLClientConnectionTest {
             int size = ipAddressesList.size();
             TaskUtil.waitIfBusy(500, () -> total() == size);
             log.getLogger().info("IPAddresses size" + ipAddressesList.size() + " Total: " + total() + " Success: " + successCount.get() + " Failed: " + failCount.get() + " it took " + Const.TimeInMillis.toString(System.currentTimeMillis() - ts));
-            log.getLogger().info(GSONUtil.toJSONDefault(nioSocket.getStats(), true));
-            IOUtil.close(nioSocket);
+            log.getLogger().info(GSONUtil.toJSONDefault(httpNIOSocket.getNIOSocket().getStats(), true));
+            IOUtil.close(httpNIOSocket.getNIOSocket());
 
             log.getLogger().info(GSONUtil.toJSONDefault(TaskUtil.info()));
             TaskUtil.waitIfBusyThenClose(25);

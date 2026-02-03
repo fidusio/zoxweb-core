@@ -22,7 +22,7 @@ public class AsyncHTTPCallTest
     static final AtomicLong success = new AtomicLong();
     private static final HTTPCallback<Void, NVGenericMap> callback = new HTTPCallback<Void, NVGenericMap>() {
         @Override
-        public void exception(Exception e)
+        public void exception(Throwable e)
         {
             e.printStackTrace();
             log.getLogger().info("Error: " + error.incrementAndGet() + e);

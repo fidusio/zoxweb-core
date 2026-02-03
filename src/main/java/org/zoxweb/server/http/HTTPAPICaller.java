@@ -40,10 +40,10 @@ public class HTTPAPICaller
         }
 
         /**
-         * @param e exception tha occurred
+         * @param e exception that occurred
          */
         @Override
-        public void exception(Exception e) {
+        public void exception(Throwable e) {
             if (callback != null)
                 callback.exception(e);
         }

@@ -56,7 +56,7 @@ public class ExecutorServiceTest {
                         acceptCounter.incrementAndGet();
                 }
                 @Override
-                public void exception(Exception e)
+                public void exception(Throwable e)
                 {
                     exceptionCounter.incrementAndGet();
                 }
