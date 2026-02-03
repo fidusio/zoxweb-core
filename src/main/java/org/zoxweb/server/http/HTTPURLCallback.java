@@ -20,8 +20,8 @@ public class HTTPURLCallback extends TCPSessionCallback {
     public static final LogWrapper log = new LogWrapper(HTTPURLCallback.class);
     private HTTPMessageConfigInterface hmci;
     private HTTPRawMessage hrm = null;
-    private AtomicLong ts = new AtomicLong(0);
-    private ConsumerCallback<HTTPResponse> callback;
+    private transient AtomicLong ts = new AtomicLong(0);
+    private transient ConsumerCallback<HTTPResponse> callback;
 
     public HTTPURLCallback(String url, ConsumerCallback<HTTPResponse> callback) throws IOException {
         this(url, HTTPMethod.GET, false, callback);
@@ -33,7 +33,6 @@ public class HTTPURLCallback extends TCPSessionCallback {
 
     public HTTPURLCallback(HTTPMessageConfigInterface hmci, ConsumerCallback<HTTPResponse> callback)
             throws IOException {
-        //this.nioSocket = nioSocket;
         SUS.checkIfNulls("null HTTPMessageConfigInterface", hmci);
         this.callback = callback;
         this.hmci = hmci;
@@ -66,6 +65,16 @@ public class HTTPURLCallback extends TCPSessionCallback {
         return this;
     }
 
+    public synchronized HTTPURLCallback setCallback(ConsumerCallback<HTTPResponse> callback) {
+        this.callback = callback;
+        return this;
+
+    }
+
+    public ConsumerCallback<HTTPResponse> getCallback() {
+        return callback;
+    }
+
     public long getDuration() {
         return System.currentTimeMillis() - ts.get();
     }
@@ -77,18 +86,15 @@ public class HTTPURLCallback extends TCPSessionCallback {
      */
     @Override
     public void accept(ByteBuffer byteBuffer) {
-
         try {
             if (hrm.parseResponse(hmci.getURIScheme(), byteBuffer)) {
                 HTTPMessageConfigInterface hmci = hrm.parse();
                 hmci.setContent(hrm.getDataStream().toByteArray());
-                close();
+                IOUtil.close(this);
                 if (callback != null) {
-                    callback.accept(new HTTPResponseData(hmci.getHTTPStatusCode().CODE, hmci.getHeaders(), hmci.getContent(), System.currentTimeMillis() - ts.get()));
+                    callback.accept(new HTTPResponseData(hmci.getHTTPStatusCode().CODE, hmci.getHeaders(), hmci.getContent(), System.currentTimeMillis() - ts.get()).setCorrelationID(getID()));
                 }
-//                System.out.println(hmci.getHTTPStatusCode());
-//                System.out.println(GSONUtil.toJSONDefault(hmci.getHeaders(), true));
-//                System.out.println(SharedStringUtil.toString(hmci.getContent()));
+
 
             }
         } catch (Exception e) {
@@ -98,23 +104,19 @@ public class HTTPURLCallback extends TCPSessionCallback {
     }
 
 
-//    public void send(NIOSocket nioSocket, ConsumerCallback<HTTPResponse> callback) throws IOException {
-//        ts.set(System.currentTimeMillis());
-//        this.callback = callback;
-//        nioSocket.addClientSocket(this);
-//    }
-
     @Override
     protected void connectedFinished() throws IOException {
         SocketChannel channel = getChannel();
+        hrm = new HTTPRawMessage(true);
         HTTPRawFormatter hrf = new HTTPRawFormatter(hmci);
         getOutputStream().write(hrf.format(), true);
         if (log.isEnabled()) log.getLogger().info(getRemoteAddress() + " " + channel.isConnected());
-        hrm = new HTTPRawMessage(true);
+
     }
 
     @Override
     public void exception(Throwable e) {
+        e.printStackTrace();
         if (callback != null) {
             callback.exception(e);
         }

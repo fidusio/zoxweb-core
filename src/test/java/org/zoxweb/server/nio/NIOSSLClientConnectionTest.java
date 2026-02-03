@@ -126,12 +126,9 @@ public class NIOSSLClientConnectionTest {
 
     public static class PlainSessionCallback
             extends TCPSessionCallback {
-
-
         PlainSessionCallback(IPAddress address) {
             super(address);
         }
-
 
         /**
          * Performs this operation on the given argument.
@@ -146,8 +143,8 @@ public class NIOSSLClientConnectionTest {
 
         }
 
-
-        public void exception(Exception e) {
+        @Override
+        public void exception(Throwable e) {
             failCount.incrementAndGet();
             // log.getLogger().info(getRemoteAddress() + " " + e);
             IOUtil.close(this);
@@ -186,8 +183,8 @@ public class NIOSSLClientConnectionTest {
 
                     //nioSocket.addClientSocket(new InetSocketAddress(ipAddress.getInetAddress(), ipAddress.getPort()), new URISession(args[i]), 5, null);
                     HTTPURLCallback huc = new HTTPURLCallback(args[i], (r)->{
-                        System.out.println(r.getStatus() + " " + Const.TimeInMillis.toString(r.getDuration()));
-                        System.out.println(r);
+                        //System.out.println(r.getStatus() + " " + Const.TimeInMillis.toString(r.getDuration()));
+                        log.getLogger().info(r.getCorrelationID() + " " + r.getStatus() + " " + Const.TimeInMillis.toString(r.getDuration()));
                         successCount.incrementAndGet();});
 
                     httpNIOSocket.send(huc);
@@ -199,7 +196,7 @@ public class NIOSSLClientConnectionTest {
 //                    });
 //                    nioSocket.addClientSocket(new HTTPURLCallback(args[i]));
                     ipAddressesList.add(ipAddress);
-                    System.out.println(args[i]);
+                    System.out.println(ipAddress);
                 } catch (Exception e) {
                     ipAddress = null;
                 }
@@ -227,12 +224,13 @@ public class NIOSSLClientConnectionTest {
             }
 
             int size = ipAddressesList.size();
-            TaskUtil.waitIfBusy(500, () -> total() == size);
+            TaskUtil.waitIfBusy(50, () -> total() == size);
             log.getLogger().info("IPAddresses size" + ipAddressesList.size() + " Total: " + total() + " Success: " + successCount.get() + " Failed: " + failCount.get() + " it took " + Const.TimeInMillis.toString(System.currentTimeMillis() - ts));
             log.getLogger().info(GSONUtil.toJSONDefault(httpNIOSocket.getNIOSocket().getStats(), true));
             IOUtil.close(httpNIOSocket.getNIOSocket());
-
             log.getLogger().info(GSONUtil.toJSONDefault(TaskUtil.info()));
+
+
             TaskUtil.waitIfBusyThenClose(25);
             log.getLogger().info("******************************Total: " + total() + " Success: " + successCount.get() + " Failed: " + failCount.get() + " it took " + Const.TimeInMillis.toString(System.currentTimeMillis() - ts));
         } catch (Exception e) {

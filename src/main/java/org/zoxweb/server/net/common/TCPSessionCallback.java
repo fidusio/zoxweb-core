@@ -198,6 +198,7 @@ public abstract class TCPSessionCallback
     public void close() throws IOException {
         if (!isClosed.getAndSet(true)) {
             IOUtil.close(getChannel(), getOutputStream());
+            ByteBufferUtil.cache(dataBuffer);
         }
     }
 }

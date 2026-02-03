@@ -32,12 +32,11 @@ import java.util.Map;
  */
 public abstract class HTTPResponse
         implements GetNVProperties {
-    private final int status;
+    private final int statusCode;
     private final Map<String, List<String>> headers;
     private final NVGenericMap nvGenericMap;
-
-
     private final long duration;
+    private String correlationID;
 
 
     /**
@@ -48,14 +47,14 @@ public abstract class HTTPResponse
      * @param duration the request/response duration in milliseconds
      */
     protected HTTPResponse(int status, Map<String, List<String>> headers, long duration) {
-        this.status = status;
+        this.statusCode = status;
         this.headers = headers;
         this.duration = duration;
         this.nvGenericMap = null;
     }
 
     protected HTTPResponse(int status, NVGenericMap headers, long duration) {
-        this.status = status;
+        this.statusCode = status;
         this.headers = null;
         this.duration = duration;
         this.nvGenericMap = headers;
@@ -67,7 +66,7 @@ public abstract class HTTPResponse
      * @return the status code
      */
     public int getStatus() {
-        return status;
+        return statusCode;
     }
 
     /**
@@ -197,5 +196,26 @@ public abstract class HTTPResponse
     public long getDuration() {
         return duration;
     }
+
+
+    public boolean isSuccess() {
+        return statusCode >= 200 && statusCode < 300;
+    }
+
+//    public boolean isError() {
+//        return errorMessage != null;
+//    }
+
+
+    public String getCorrelationID() {
+        return correlationID;
+    }
+
+    public <V extends HTTPResponse> V  setCorrelationID(String correlationID) {
+        this.correlationID = correlationID;
+        return (V)this;
+    }
+
+
 
 }
