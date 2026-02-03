@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class HTTPURLCallback extends TCPSessionCallback {
 
-    public static final LogWrapper log = new LogWrapper(HTTPURLCallback.class);
+    public static final LogWrapper log = new LogWrapper(HTTPURLCallback.class).setEnabled(false);
     private HTTPMessageConfigInterface hmci;
     private HTTPRawMessage hrm = null;
     private transient AtomicLong ts = new AtomicLong(0);
