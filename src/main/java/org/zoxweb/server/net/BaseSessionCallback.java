@@ -1,5 +1,6 @@
 package org.zoxweb.server.net;
 
+import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.util.CloseableType;
 import org.zoxweb.shared.util.Identifier;
 
@@ -31,6 +32,10 @@ public abstract class BaseSessionCallback<CF>
 
     public void setRemoteAddress(InetSocketAddress remoteAddress) {
         this.remoteAddress = remoteAddress;
+    }
+
+    public void setRemoteAddress(IPAddress ipAddress) {
+        this.remoteAddress = new InetSocketAddress(ipAddress.getInetAddress(),  ipAddress.getPort());
     }
 
 

@@ -240,7 +240,7 @@ public class HTTPRawMessage
                 if (hmci.isMultiPartEncoding()) {
                     HTTPCodecs.MULTIPART_FORM_DATA_CHUNKED.decode(this);
                 }
-            } else if (isMessageComplete()) {
+            } else if (isMessageComplete() && !isClientMode()) {
                 if (hmci.getMethod() != HTTPMethod.GET) {
                     HTTPMediaType hmt = HTTPMediaType.lookup(hmci.getContentType());
                     if (hmt != null) {

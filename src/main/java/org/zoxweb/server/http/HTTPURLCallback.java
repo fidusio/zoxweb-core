@@ -50,10 +50,15 @@ public class HTTPURLCallback extends TCPSessionCallback {
         if (hmci.isSSL()) {
             SSLContextInfo sslContextInfo = new SSLContextInfo(urlInfo.ipAddress, hmci.isSecureCheckEnabled());
             setSSLContextInfo(sslContextInfo);
-            setRemoteAddress(sslContextInfo.getClientAddress());
         }
+        else
+            hmci.getHeaders().add("Host", urlInfo.ipAddress.getInetAddress());
+
         if (hmci.getAuthorization() != null)
             hmci.getHeaders().add(hmci.getAuthorization().toHTTPHeader());
+
+        setRemoteAddress(urlInfo.ipAddress);
+
     }
 
     public HTTPURLCallback updateTimeStamp() {
