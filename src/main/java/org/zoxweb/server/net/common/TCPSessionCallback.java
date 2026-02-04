@@ -32,7 +32,7 @@ public abstract class TCPSessionCallback
     private final ByteBuffer dataBuffer = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.DIRECT, 1024);
 
     private DNSResolverInt dnsResolver;
-
+    protected volatile int interestOps = SelectionKey.OP_READ;
     protected TCPSessionCallback() {
         setID(UUID.randomUUID().toString());
     }
@@ -177,7 +177,7 @@ public abstract class TCPSessionCallback
             connectedFinished();
         }
 
-        return SelectionKey.OP_READ;
+        return interestOps;
 
     }
 
@@ -200,5 +200,10 @@ public abstract class TCPSessionCallback
             IOUtil.close(getChannel(), getOutputStream());
             ByteBufferUtil.cache(dataBuffer);
         }
+    }
+
+    @Override
+    public int interestOps() {
+        return interestOps;
     }
 }

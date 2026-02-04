@@ -270,7 +270,9 @@ public class SSLNIOSocketHandler
         sslConfig.beginHandshake(sslContextInfo.isClient());
         // not sure about
         //config.beginHandshake(false);
-        getSelectorController().register(asc, SelectionKey.OP_READ, this, isBlocking);
+        int ops = SelectionKey.OP_READ;
+        getSelectorController().register(asc, ops, this, isBlocking);
+        interestOps = ops;
     }
 
 

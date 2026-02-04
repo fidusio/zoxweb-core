@@ -70,6 +70,7 @@ public abstract class ProtocolHandler
 
     private volatile NVGenericMap properties = null;
     protected volatile Executor executor;
+    protected volatile int interestOps = SelectionKey.OP_READ;
     protected final AtomicBoolean isClosed = new AtomicBoolean(false);
 
     protected BaseSessionCallback<?> sessionCallback;
@@ -139,6 +140,7 @@ public abstract class ProtocolHandler
     public void setupConnection(AbstractSelectableChannel asc, boolean isBlocking) throws IOException {
         phSChannel = (SocketChannel) asc;
         getSelectorController().register(phSChannel, SelectionKey.OP_READ, this, isBlocking);
+        interestOps = SelectionKey.OP_READ;
     }
 
 
@@ -190,5 +192,9 @@ public abstract class ProtocolHandler
     abstract protected void close_internal() throws IOException;
     public boolean upgradeToTLS() throws IOException {
         throw  new UnsupportedOperationException("UpgradeToTLS not supported");
+    }
+
+    public int interestOps() {
+        return interestOps;
     }
 }

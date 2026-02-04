@@ -7,6 +7,7 @@ import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.util.Const;
+import org.zoxweb.shared.util.SUS;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -75,13 +76,18 @@ public class TCPPortScan {
     public static void main(String[] args) {
 
         try {
+
+            IPAddress[] ipAddresses = IPAddress.parseList(args);
+            if(SUS.isEmpty(ipAddresses)) {
+                throw new IllegalArgumentException("Empty IP addresses");
+            }
             long ts = System.currentTimeMillis();
             List<IPAddress> ipAddressesList = new ArrayList<IPAddress>();
             NIOSocket nioSocket = new NIOSocket(TaskUtil.defaultTaskProcessor(), TaskUtil.defaultTaskScheduler());
 
             try {
 
-                IPAddress[] ipAddresses = IPAddress.parseList(args);
+
                 for (int j = 0; j < ipAddresses.length; j++) {
                     try {
                         IPAddress ipAddress = ipAddresses[j];

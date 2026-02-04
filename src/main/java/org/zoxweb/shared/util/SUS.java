@@ -34,13 +34,23 @@ public class SUS {
 
 
     /**
-     * Check if an array is empty not empty meaning not null and length > 0
+     * Check if an array is not empty meaning not null and length > 0
      *
      * @param array to be checked
      * @return true if the array exists and not empty
      */
     public static boolean isNotEmpty(Object[] array) {
         return (array != null && array.length != 0);
+    }
+
+    /**
+     * Check if an array is empty meaning null or length = 0
+     *
+     * @param array to be checked
+     * @return true if the array exists and not empty
+     */
+    public static boolean isEmpty(Object[] array) {
+        return (array == null || array.length == 0);
     }
 
     /**

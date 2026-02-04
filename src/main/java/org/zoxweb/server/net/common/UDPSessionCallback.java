@@ -27,6 +27,7 @@ public abstract class UDPSessionCallback
     private volatile DatagramChannel channel;
     protected int port;
     private transient Executor executor = null;
+    protected transient int interestOps;
     protected final Lock lock = new ReentrantLock();
     private final AtomicLong readCounter = new AtomicLong();
     private final AtomicLong sendCounter = new AtomicLong();
@@ -168,6 +169,11 @@ public abstract class UDPSessionCallback
 
     public long getSendCount() {
         return sendCounter.get();
+    }
+
+    @Override
+    public int interestOps() {
+        return interestOps;
     }
 
 

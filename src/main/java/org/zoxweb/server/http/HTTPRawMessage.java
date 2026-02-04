@@ -37,7 +37,7 @@ public class HTTPRawMessage
     private volatile int indexOfLastProcessedData = 0;
 
     private boolean endOfChunkedContentReached = false;
-    private volatile String firstLine = null;
+    //private volatile String firstLine = null;
     private volatile boolean endOfContent = false;
     private volatile HTTPMessageConfigInterface hmci = new HTTPMessageConfig();
     private volatile NamedValue<?> pendingParameter = null;
@@ -301,7 +301,7 @@ public class HTTPRawMessage
             hmci = new HTTPMessageConfig();
             parsedHeadersStatus = false;
             setDataMark(0);
-            firstLine = null;
+            //firstLine = null;
             endOfContent = false;
             lastParam = null;
             endOfChunkedContentReached = false;
@@ -333,7 +333,7 @@ public class HTTPRawMessage
     public String toString() {
         return "HTTPRawMessage [parsedHeadersStatus=" + areHeadersParsed()
                 + ", contentLength=" + hmci.getContentLength() + ", headers=" + hmci.getHeaders()
-                + ", firstLine=" + firstLine + ", baos=" + ubaos.size() + "]";
+                + /*", firstLine=" + firstLine +*/ ", baos=" + ubaos.size() + "]";
     }
 
     protected int getDataMark() {

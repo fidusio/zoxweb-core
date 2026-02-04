@@ -535,7 +535,7 @@ public class NIOSocket
                                     // very,very,very crucial setup prior to processing
                                     // we are disabling the key operations by the selector
                                     // for the current selection key
-                                    int keyOPs = key.interestOps();
+                                    //int keyOPs = key.interestOps();
                                     key.interestOps(0);
 
                                     // a channel is ready for reading
@@ -550,7 +550,7 @@ public class NIOSocket
                                             // very crucial step
                                             if (key.isValid()) {
                                                 // restoring selection ops for the selection key
-                                                key.interestOps(keyOPs);
+                                                key.interestOps(currentPP.interestOps());
                                                 selectorController.wakeup();
                                             }
                                         });
@@ -563,7 +563,7 @@ public class NIOSocket
                                         }
                                         // very crucial step
                                         if (key.isValid()) {
-                                            key.interestOps(keyOPs);
+                                            key.interestOps(currentPP.interestOps());
                                             selectorController.wakeup();
                                         }
                                     }
@@ -744,7 +744,7 @@ public class NIOSocket
 
 
                             int keysOps = connectData.connected(key);
-                            if (keysOps > 0) {
+                            if (keysOps >= 0) {
                                 key.interestOps(keysOps);
                                 selectorController.wakeup();
                             } else
@@ -755,7 +755,7 @@ public class NIOSocket
                     });
                 else {
                     int keysOps = connectData.connected(key);
-                    if (keysOps > 0) {
+                    if (keysOps >= 0) {
                         key.interestOps(keysOps);
                         selectorController.wakeup();
                     } else
