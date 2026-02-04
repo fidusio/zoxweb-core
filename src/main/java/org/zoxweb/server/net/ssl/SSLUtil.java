@@ -147,8 +147,8 @@ public final class SSLUtil {
                     if (log.isEnabled())
                         log.getLogger().info("SSLCHANNEL-CLOSED-NEED_UNWRAP: " + config.getHandshakeStatus() + " bytes read: " + bytesRead);
                     config.close();
-                } else //if (bytesRead > 0)
-                {
+                } else {
+                    // bytesRead 0 or more
                     // even if we have read zero it will trigger BUFFER_UNDERFLOW then we wait for incoming
                     // data
                     if (log.isEnabled())
