@@ -1,7 +1,7 @@
 package org.zoxweb.server.fsm;
 
 import org.zoxweb.server.logging.LogWrapper;
-import org.zoxweb.shared.util.NVGenericMap;
+import org.zoxweb.shared.util.NVGMProperties;
 import org.zoxweb.shared.util.SUS;
 
 import java.util.Arrays;
@@ -9,6 +9,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 
 public abstract class TriggerConsumer<T>
+        extends NVGMProperties
         implements TriggerConsumerInt<T> {
     public final static LogWrapper log = new LogWrapper(TriggerConsumer.class).setEnabled(false);
 
@@ -16,7 +17,6 @@ public abstract class TriggerConsumer<T>
     private StateInt<?> state;
     protected AtomicLong execCounter = new AtomicLong();
     private Function<T, ?> function;
-    private NVGenericMap nvgmConfig = null;
 
 
     public TriggerConsumer(Function<T, ?> f, String... canonicalIDs) {
@@ -30,10 +30,12 @@ public abstract class TriggerConsumer<T>
     }
 
     public TriggerConsumer(String... canonicalIDs) {
+        super(false);
         this.canonicalIDs = canonicalIDs;
     }
 
     public TriggerConsumer(Enum<?>... gnCanonicalIDs) {
+        super(false);
         canonicalIDs = SUS.enumNames(gnCanonicalIDs);
     }
 
@@ -108,13 +110,5 @@ public abstract class TriggerConsumer<T>
     @Override
     public StateMachineInt<?> getStateMachine() {
         return state.getStateMachine();
-    }
-
-    public void setProperties(NVGenericMap nvgm) {
-        this.nvgmConfig = nvgm;
-    }
-
-    public NVGenericMap getProperties() {
-        return nvgmConfig;
     }
 }

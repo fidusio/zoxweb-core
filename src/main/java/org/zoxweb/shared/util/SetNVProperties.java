@@ -1,7 +1,6 @@
 package org.zoxweb.shared.util;
 
 public interface SetNVProperties
-extends GetNVProperties
-{
+        extends GetNVProperties {
     void setProperties(NVGenericMap nvgm);
 }

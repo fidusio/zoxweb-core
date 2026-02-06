@@ -9,20 +9,22 @@ import java.util.function.Consumer;
 
 
 public class State<P>
+        extends NVGMProperties
         implements StateInt<P> {
 
     public final static LogWrapper log = new LogWrapper(State.class).setEnabled(false);
     private final String name;
-    private final NVGenericMap data = new NVGenericMap();
+    //    private final NVGenericMap data = new NVGenericMap();
     private volatile StateMachineInt<?> stateMachine;
 
     private final Map<String, Consumer<?>> triggerConsumers = new LinkedHashMap<String, Consumer<?>>();
 
     public State(String name, NVBase<?>... props) {
+        super(true);
         this.name = name;
         if (props != null) {
             for (NVBase<?> nvb : props) {
-                data.add(nvb);
+                getProperties().add(nvb);
             }
         }
     }
@@ -102,9 +104,6 @@ public class State<P>
         stateMachine = smi;
     }
 
-    public NVGenericMap getProperties() {
-        return data;
-    }
 
     public String toString() {
         return getName();

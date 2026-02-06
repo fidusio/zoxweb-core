@@ -1,6 +1,5 @@
 package org.zoxweb.shared.util;
 
-public interface GetNVProperties
-{
-	NVGenericMap getProperties();
+public interface GetNVProperties {
+    NVGenericMap getProperties();
 }
