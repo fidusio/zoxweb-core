@@ -5,6 +5,7 @@ import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.net.BaseChannelOutputStream;
 import org.zoxweb.server.net.ProtocolHandler;
 import org.zoxweb.server.net.ssl.SSLSessionConfig;
+import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedUtil;
 
 import javax.net.ssl.SSLEngineResult;
@@ -34,17 +35,19 @@ public class CommonChannelOutputStream
 
 
     public synchronized CommonChannelOutputStream setSSLSessionConfig(SSLSessionConfig sslConfig) {
+        SUS.checkIfNull("sslConfig", sslConfig);
         this.sslConfig = sslConfig;
+        this.sslMode.set(true);
         return this;
     }
 
-    public synchronized CommonChannelOutputStream setSSLMode(boolean sslMode) {
-        if (sslMode && sslConfig == null) {
-            throw new IllegalArgumentException("SSLSessionConfig cannot be null, set it first");
-        }
-        this.sslMode.set(sslMode);
-        return this;
-    }
+//    private synchronized CommonChannelOutputStream setSSLMode(boolean sslMode) {
+//        if (sslMode && sslConfig == null) {
+//            throw new IllegalArgumentException("SSLSessionConfig cannot be null, set it first");
+//        }
+//        this.sslMode.set(sslMode);
+//        return this;
+//    }
 
     public boolean isSSLMode() {
         return sslMode.get();
@@ -69,7 +72,7 @@ public class CommonChannelOutputStream
      */
     @Override
     public synchronized int write(ByteBuffer byteBuffer) throws IOException {
-        return sslMode.get() ? sslWrite(byteBuffer) : plainWrite(byteBuffer);
+        return isSSLMode() ? sslWrite(byteBuffer) : plainWrite(byteBuffer);
     }
 
 

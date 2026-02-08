@@ -150,8 +150,7 @@ public abstract class TCPSessionCallback
             sslConfig.sslChannel = (SocketChannel) sk.channel();
 
             sslConfig.sslOutputStream = new CommonChannelOutputStream(null, (ByteChannel) sk.channel(), 512)
-                    .setSSLSessionConfig(sslConfig)
-                    .setSSLMode(true);
+                    .setSSLSessionConfig(sslConfig);
             setConfig(sslConfig);
             setOutputStream(sslConfig.sslOutputStream);
 
