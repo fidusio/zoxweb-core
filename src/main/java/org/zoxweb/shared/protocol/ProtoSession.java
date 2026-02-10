@@ -16,7 +16,7 @@
 package org.zoxweb.shared.protocol;
 
 import org.zoxweb.shared.util.BaseSubjectID;
-import org.zoxweb.shared.util.CloseableType;
+import org.zoxweb.shared.io.CloseableType;
 import org.zoxweb.shared.util.GetNVProperties;
 
 import java.util.Set;

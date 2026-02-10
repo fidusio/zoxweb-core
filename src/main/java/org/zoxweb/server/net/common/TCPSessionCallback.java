@@ -34,12 +34,20 @@ public abstract class TCPSessionCallback
     private DNSResolverInt dnsResolver;
     protected volatile int interestOps = SelectionKey.OP_READ;
     protected TCPSessionCallback() {
+
         setID(UUID.randomUUID().toString());
+        boolean stat = closeableDelegate.setDelegate(()->{
+            IOUtil.close(getChannel(), getOutputStream());
+            ByteBufferUtil.cache(dataBuffer);
+        });
+        if(!stat)
+            throw new IllegalStateException("Cannot set delegate to TCPSessionCallback");
     }
 
     protected TCPSessionCallback(IPAddress ipAddress) {
         this();
         setRemoteAddress(new InetSocketAddress(ipAddress.getInetAddress(), ipAddress.getPort()));
+
     }
 
     protected TCPSessionCallback(IPAddress ipAddress, boolean certValidationEnabled) throws NoSuchAlgorithmException, KeyManagementException {
@@ -53,6 +61,12 @@ public abstract class TCPSessionCallback
             id = UUID.randomUUID().toString();
         }
         setID(id);
+        boolean stat = closeableDelegate.setDelegate(()->{
+            IOUtil.close(getChannel(), getOutputStream());
+            ByteBufferUtil.cache(dataBuffer);
+        });
+        if(!stat)
+            throw new IllegalStateException("Cannot set delegate to TCPSessionCallback");
     }
 
     public DNSResolverInt dnsResolver() {
@@ -155,7 +169,7 @@ public abstract class TCPSessionCallback
             setOutputStream(sslConfig.sslOutputStream);
 
 
-            sslConfig.beginHandshake(isClient());
+            sslConfig.beginHandshake();
             sslConfig.sslConnectionHelper = new CustomSSLStateMachine(this);
             getConfig().sslConnectionHelper.publish(getConfig().getHandshakeStatus(), this);
 
@@ -167,6 +181,7 @@ public abstract class TCPSessionCallback
         return false;
     }
 
+    @Override
     public final int connected(SelectionKey sk) throws IOException {
         setRemoteAddress((InetSocketAddress) ((SocketChannel) sk.channel()).getRemoteAddress());
         setChannel(sk.channel());
@@ -176,8 +191,13 @@ public abstract class TCPSessionCallback
             connectedFinished();
         }
 
-        return interestOps;
+        return interestOps();
 
+    }
+
+    @Override
+    public int interestOps() {
+        return interestOps;
     }
 
 
@@ -194,15 +214,13 @@ public abstract class TCPSessionCallback
         }
     }
 
-    public void close() throws IOException {
-        if (!isClosed.getAndSet(true)) {
-            IOUtil.close(getChannel(), getOutputStream());
-            ByteBufferUtil.cache(dataBuffer);
-        }
-    }
+//    public void close() throws IOException {
+////        if (!isClosed.getAndSet(true)) {
+////            IOUtil.close(getChannel(), getOutputStream());
+////            ByteBufferUtil.cache(dataBuffer);
+////        }
+//        closeableDelegate.close();
+//    }
 
-    @Override
-    public int interestOps() {
-        return interestOps;
-    }
+
 }

@@ -16,7 +16,7 @@
 package org.zoxweb.server.io;
 
 import org.junit.jupiter.api.Test;
-import org.zoxweb.shared.util.BytesArray;
+import org.zoxweb.shared.io.BytesArray;
 import org.zoxweb.shared.util.Const;
 import org.zoxweb.shared.util.Const.TypeInBytes;
 import org.zoxweb.shared.util.SharedStringUtil;

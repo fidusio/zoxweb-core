@@ -95,7 +95,7 @@ public final class SSLUtil {
             config.sslConnectionHelper.createRemoteConnection();
         }
 
-        if (config.clientMode && callback instanceof ConnectionCallback) {
+        if (config.isClientMode() && callback instanceof ConnectionCallback) {
             /*
              * special case if the connection is a client connection
              */

@@ -1,7 +1,8 @@
 package org.zoxweb.server.net;
 
+import org.zoxweb.shared.io.CloseableTypeDelegate;
 import org.zoxweb.shared.net.IPAddress;
-import org.zoxweb.shared.util.CloseableType;
+import org.zoxweb.shared.io.CloseableType;
 import org.zoxweb.shared.util.Identifier;
 
 import java.io.IOException;
@@ -11,15 +12,15 @@ import java.nio.ByteBuffer;
 import java.nio.channels.ByteChannel;
 import java.nio.channels.Channel;
 import java.nio.channels.SelectionKey;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class BaseSessionCallback<CF>
         extends SessionCallback<CF, ByteBuffer, OutputStream>
         implements CloseableType, Identifier<String> {
     private InetSocketAddress remoteAddress;
-    private transient BaseChannelOutputStream bcos;
-    private transient ByteChannel channel;
-    protected final AtomicBoolean isClosed = new AtomicBoolean(false);
+    private volatile BaseChannelOutputStream bcos;
+    private volatile ByteChannel channel;
+    //protected final AtomicBoolean isClosed = new AtomicBoolean(false);
+    protected final CloseableTypeDelegate closeableDelegate= new CloseableTypeDelegate(null);
     protected String instanceID = null;
 
 
@@ -40,7 +41,7 @@ public abstract class BaseSessionCallback<CF>
 
 
     public int connected(SelectionKey key) throws IOException {
-        return key.interestOps();
+        return protocolHandler !=null ? protocolHandler.interestOps() : SelectionKey.OP_READ ;
     }
 
     @Override
@@ -83,9 +84,14 @@ public abstract class BaseSessionCallback<CF>
         return this;
     }
 
-
+    @Override
     public boolean isClosed() {
-        return isClosed.get();
+        return closeableDelegate.isClosed();
+    }
+
+    @Override
+    public void close() throws IOException {
+        closeableDelegate.close();
     }
 
 

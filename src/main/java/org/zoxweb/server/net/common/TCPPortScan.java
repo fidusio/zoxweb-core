@@ -17,7 +17,8 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 
-public class TCPPortScan {
+public class TCPPortScan
+        extends TCPSessionCallback {
 
 
     public static final LogWrapper log = new LogWrapper(TCPPortScan.class).setEnabled(true);
@@ -26,46 +27,41 @@ public class TCPPortScan {
     static AtomicLong failCount = new AtomicLong(0);
 
 
-    public static class PlainSessionCallback
-            extends TCPSessionCallback {
-
-        PlainSessionCallback(IPAddress address) {
-            super(address);
-
-        }
+    TCPPortScan(IPAddress address) {
+        super(address);
+    }
 
 
-        /**
-         * Performs this operation on the given argument.
-         *
-         * @param byteBuffer the input argument
-         */
-        @Override
-        public void accept(ByteBuffer byteBuffer) {
-            SocketChannel channel = (SocketChannel) getChannel();
-            log.getLogger().info(getRemoteAddress() + " " + channel.isConnected() + " total: " + total());
-            IOUtil.close(this);
+    /**
+     * Performs this operation on the given argument.
+     *
+     * @param byteBuffer the input argument
+     */
+    @Override
+    public void accept(ByteBuffer byteBuffer) {
+        SocketChannel channel = (SocketChannel) getChannel();
+        log.getLogger().info(getRemoteAddress() + " " + channel.isConnected() + " total: " + total());
+        IOUtil.close(this);
 
-        }
-
-
-        public void exception(Exception e) {
-            failCount.incrementAndGet();
-            // log.getLogger().info(getRemoteAddress() + " " + e);
-            IOUtil.close(this);
+    }
 
 
-        }
+    @Override
+    public void exception(Throwable e) {
+
+        failCount.incrementAndGet();
+        log.getLogger().info(getRemoteAddress() + " " + e + " " + total());
+        IOUtil.close(this);
+    }
 
 
-        @Override
-        protected void connectedFinished() throws IOException {
-            successCount.incrementAndGet();
-            SocketChannel channel = (SocketChannel) getChannel();
-            //System.out.println(getRemoteAddress() + " " + channel.isConnected() + " total: " + total());
-            System.out.println(getRemoteAddress() + " " + channel.isConnected() + " total: " + total());
-            IOUtil.close(this);
-        }
+    @Override
+    protected void connectedFinished() throws IOException {
+        successCount.incrementAndGet();
+        SocketChannel channel = (SocketChannel) getChannel();
+        //System.out.println(getRemoteAddress() + " " + channel.isConnected() + " total: " + total());
+        System.out.println(getRemoteAddress() + " " + channel.isConnected() + " total: " + total());
+        IOUtil.close(this);
     }
 
 
@@ -78,7 +74,7 @@ public class TCPPortScan {
         try {
 
             IPAddress[] ipAddresses = IPAddress.parseList(args);
-            if(SUS.isEmpty(ipAddresses)) {
+            if (SUS.isEmpty(ipAddresses)) {
                 throw new IllegalArgumentException("Empty IP addresses");
             }
             long ts = System.currentTimeMillis();
@@ -92,7 +88,7 @@ public class TCPPortScan {
                     try {
                         IPAddress ipAddress = ipAddresses[j];
 
-                        nioSocket.addClientSocket(new PlainSessionCallback(ipAddress).timeoutInSec(2));
+                        nioSocket.addClientSocket(new TCPPortScan(ipAddress).timeoutInSec(2));
                         ipAddressesList.add(ipAddress);
                         //System.out.println(ipAddress);
                     } catch (Exception e) {
@@ -106,7 +102,7 @@ public class TCPPortScan {
             }
 
             int size = ipAddressesList.size();
-            TaskUtil.waitIfBusy(500, () -> total() < size);
+            TaskUtil.waitIfBusy(500, () -> total() == size);
             log.getLogger().info("IPAddresses size: " + ipAddressesList.size() + " Total: " + total() + " Success: " + successCount.get() + " Failed: " + failCount.get() + " it took " + Const.TimeInMillis.toString(System.currentTimeMillis() - ts));
             log.getLogger().info(GSONUtil.toJSONDefault(nioSocket.getStats(), true));
             IOUtil.close(nioSocket);

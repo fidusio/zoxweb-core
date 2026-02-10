@@ -15,6 +15,8 @@
  */
 package org.zoxweb.shared.util;
 
+import org.zoxweb.shared.io.CloseableType;
+
 import java.util.Comparator;
 import java.util.concurrent.Delayed;
 

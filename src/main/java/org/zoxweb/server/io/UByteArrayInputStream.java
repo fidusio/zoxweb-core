@@ -1,7 +1,7 @@
 package org.zoxweb.server.io;
 
-import org.zoxweb.shared.util.CloseableType;
-import org.zoxweb.shared.util.CloseableTypeHolder;
+import org.zoxweb.shared.io.CloseableType;
+import org.zoxweb.shared.io.CloseableTypeRunnable;
 import org.zoxweb.shared.util.NadaInstance;
 
 import java.io.ByteArrayInputStream;
@@ -15,7 +15,7 @@ public class UByteArrayInputStream
 
     public static final UByteArrayInputStream EMPTY_INPUT_STREAM = new UByteArrayInputStream(EMPTY_BYTE_ARRAY);
 
-    private final CloseableTypeHolder cth;
+    private final CloseableTypeRunnable cth;
 
     /**
      * Creates a {@code UByteArrayInputStream}
@@ -59,7 +59,7 @@ public class UByteArrayInputStream
 
     public UByteArrayInputStream(byte[] buf, int offset, int length, Runnable afterClose) {
         super(buf, offset, length);
-        cth = afterClose != null ? new CloseableTypeHolder(afterClose) : new CloseableTypeHolder((Runnable) NadaInstance::nada);
+        cth = afterClose != null ? new CloseableTypeRunnable(afterClose) : new CloseableTypeRunnable((Runnable) NadaInstance::nada);
     }
 
 

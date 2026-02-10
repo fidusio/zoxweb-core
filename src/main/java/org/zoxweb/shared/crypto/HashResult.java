@@ -1,6 +1,6 @@
 package org.zoxweb.shared.crypto;
 
-import org.zoxweb.shared.util.BytesArray;
+import org.zoxweb.shared.io.BytesArray;
 import org.zoxweb.shared.util.SharedBase64;
 
 public class HashResult

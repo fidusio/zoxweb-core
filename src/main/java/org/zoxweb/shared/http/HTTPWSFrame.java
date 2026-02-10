@@ -16,8 +16,8 @@
 package org.zoxweb.shared.http;
 
 import org.zoxweb.shared.protocol.MessageStatus;
-import org.zoxweb.shared.util.BytesArray;
-import org.zoxweb.shared.util.DataBufferController;
+import org.zoxweb.shared.io.BytesArray;
+import org.zoxweb.shared.io.DataBufferController;
 import org.zoxweb.shared.util.ProtocolException;
 
 import java.util.concurrent.atomic.AtomicLong;

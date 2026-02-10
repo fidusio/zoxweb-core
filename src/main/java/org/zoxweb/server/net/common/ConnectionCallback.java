@@ -1,7 +1,7 @@
 package org.zoxweb.server.net.common;
 
 import org.zoxweb.shared.task.ExceptionCallback;
-import org.zoxweb.shared.util.CloseableType;
+import org.zoxweb.shared.io.CloseableType;
 
 import java.io.IOException;
 import java.nio.channels.Channel;

@@ -15,8 +15,8 @@
  */
 package org.zoxweb.server.io;
 
-import org.zoxweb.shared.util.BytesArray;
-import org.zoxweb.shared.util.DataBufferController;
+import org.zoxweb.shared.io.BytesArray;
+import org.zoxweb.shared.io.DataBufferController;
 import org.zoxweb.shared.util.SharedStringUtil;
 import org.zoxweb.shared.util.SharedUtil;
 

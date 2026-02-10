@@ -1,6 +1,7 @@
 package org.zoxweb.server.net.common;
 
 import org.zoxweb.server.io.ByteBufferUtil;
+import org.zoxweb.shared.io.CloseableTypeDelegate;
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.net.DataPacket;
@@ -14,7 +15,6 @@ import java.nio.channels.Channel;
 import java.nio.channels.DatagramChannel;
 import java.nio.channels.SelectionKey;
 import java.util.concurrent.Executor;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -32,7 +32,8 @@ public abstract class UDPSessionCallback
     private final AtomicLong readCounter = new AtomicLong();
     private final AtomicLong sendCounter = new AtomicLong();
 
-    private final AtomicBoolean isClosed = new AtomicBoolean(false);
+    //private final AtomicBoolean isClosed = new AtomicBoolean(false);
+    private final CloseableTypeDelegate closeableDelegate;
 
     protected UDPSessionCallback(int port) {
         this(null, port, 0);
@@ -49,6 +50,7 @@ public abstract class UDPSessionCallback
             this.bufferSize = bufferSize;
 
         setExecutor(executor);
+        closeableDelegate = new CloseableTypeDelegate(()->IOUtil.close(channel));
     }
 
     protected UDPSessionCallback(Executor executor, int port) {
@@ -137,14 +139,12 @@ public abstract class UDPSessionCallback
 
     @Override
     public void close() throws IOException {
-        if (!isClosed.getAndSet(true)) {
-            IOUtil.close(channel);
-        }
+        closeableDelegate.close();
     }
 
     @Override
     public boolean isClosed() {
-        return isClosed.get();
+        return closeableDelegate.isClosed();
     }
 
 

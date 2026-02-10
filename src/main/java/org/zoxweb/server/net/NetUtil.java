@@ -26,6 +26,8 @@ import java.io.Closeable;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.*;
+import java.nio.channels.Channel;
+import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.util.*;
 
@@ -633,7 +635,28 @@ public class NetUtil {
             }
         }
 
-
         return false;
     }
+
+    public static void cancelSelectionKey(SelectionKey sk, boolean includeChannel) {
+        if(sk != null)
+        {
+            synchronized(sk)
+            {
+                Channel channel = sk.channel();
+                sk.cancel();
+                if(includeChannel)
+                    IOUtil.close(channel);
+            }
+        }
+    }
+    public static void cancelSelectionKeySet(Set<SelectionKey> skSet, boolean includeChannel) {
+        if (skSet != null) {
+            SelectionKey[] all = skSet.toArray(new SelectionKey[0]);
+            for (SelectionKey sk : all) {
+                cancelSelectionKey(sk, includeChannel);
+            }
+        }
+    }
+
 }

@@ -16,20 +16,22 @@
 package org.zoxweb.server.net;
 
 
-import org.zoxweb.shared.util.NVGenericMap;
+import org.zoxweb.shared.util.NVGMProperties;
 
 
 public abstract class ProtocolFactoryBase<P extends ProtocolHandler>
+        extends NVGMProperties
         implements ProtocolFactory<P> {
 
     private volatile InetFilterRulesManager incomingInetFilterRulesManager;
     private volatile InetFilterRulesManager outgoingInetFilterRulesManager;
 
-    private final NVGenericMap properties = new NVGenericMap();
-
 
     protected boolean complexSetup = false;
 
+    protected ProtocolFactoryBase() {
+        super(true);
+    }
 
     @Override
     public boolean isBlocking() {
@@ -63,9 +65,6 @@ public abstract class ProtocolFactoryBase<P extends ProtocolHandler>
         outgoingInetFilterRulesManager = incomingIFRM;
     }
 
-    public NVGenericMap getProperties() {
-        return properties;
-    }
 
     public boolean isComplexSetup() {
         return complexSetup;

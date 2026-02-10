@@ -41,14 +41,6 @@ public class CommonChannelOutputStream
         return this;
     }
 
-//    private synchronized CommonChannelOutputStream setSSLMode(boolean sslMode) {
-//        if (sslMode && sslConfig == null) {
-//            throw new IllegalArgumentException("SSLSessionConfig cannot be null, set it first");
-//        }
-//        this.sslMode.set(sslMode);
-//        return this;
-//    }
-
     public boolean isSSLMode() {
         return sslMode.get();
     }
@@ -167,25 +159,5 @@ public class CommonChannelOutputStream
             ByteBufferUtil.cache(outAppData);
         }
     }
-
-
-//    /**
-//     * Closes this output stream and releases associated resources.
-//     * <p>
-//     * This method closes the underlying channel, notifies the protocol handler,
-//     * and returns the output buffer to the cache for reuse. Multiple calls to
-//     * this method have no effect after the first call.
-//     * </p>
-//     *
-//     * @throws IOException if an I/O error occurs during closing
-//     */
-//    public void close() throws IOException {
-//
-//        if (!isClosed.getAndSet(true)) {
-//            if (log.isEnabled()) log.getLogger().info("Calling close");
-//            IOUtil.close(dataChannel, protocolHandler);
-//            ByteBufferUtil.cache(outAppData);
-//        }
-//    }
 
 }

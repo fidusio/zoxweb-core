@@ -302,7 +302,7 @@ public class NIOSocket
 
 
         if(resolver != null) {
-            resolver.resolveIPA(sa.getHostName());
+            resolver.resolveIPAddress(sa.getHostName());
         }
         ScheduledAttachment<ConnectionCallback<?>> scheduledAttachment = new ScheduledAttachment<>();
         scheduledAttachment.attach(cc);
@@ -674,8 +674,10 @@ public class NIOSocket
 
 
                             } catch (Exception e) {
-                                if (!(e instanceof CancelledKeyException || e instanceof ConnectException))
+                                logger.getLogger().info("DFDSAFGDSAGTRWETGREWTRETGREGREFDGERAGREATGRETGRETg");
+                                if (!(e instanceof CancelledKeyException || e instanceof ConnectException)) {
                                     e.printStackTrace();
+                                }
                             }
 
                             try {
@@ -686,6 +688,7 @@ public class NIOSocket
                                     key.channel().close();
                                 }
                             } catch (Exception e) {
+
                                 e.printStackTrace();
                             }
 
@@ -705,6 +708,8 @@ public class NIOSocket
                             " available workers:" + TaskUtil.availableThreads(executor) + "," + TaskUtil.pendingTasks(executor));
                 }
             } catch (Exception e) {
+
+
                 e.printStackTrace();
             }
         }
@@ -738,24 +743,24 @@ public class NIOSocket
 
                 //**************************************************************************
 
-                if (executor == null)
+                if (executor != null)
                     executor.execute(() -> {
                         try {
-
-
                             int keysOps = connectData.connected(key);
-                            if (keysOps >= 0) {
+                            if (keysOps >= 0 && key.isValid()) {
                                 key.interestOps(keysOps);
                                 selectorController.wakeup();
                             } else
                                 selectorController.cancelSelectionKey(key);
                         } catch (IOException e) {
                             IOUtil.close(key.channel());
+                            connectData.exception(e);
+
                         }
                     });
                 else {
                     int keysOps = connectData.connected(key);
-                    if (keysOps >= 0) {
+                    if (keysOps >= 0  && key.isValid()) {
                         key.interestOps(keysOps);
                         selectorController.wakeup();
                     } else
@@ -763,8 +768,11 @@ public class NIOSocket
                 }
 
             } catch (Exception e) {
+
+               // e.printStackTrace();
                 IOUtil.close(key.channel());
-                if (executor == null)
+
+                if (executor != null)
                     executor.execute(() -> connectData.exception(e));
                 else
                     connectData.exception(e);

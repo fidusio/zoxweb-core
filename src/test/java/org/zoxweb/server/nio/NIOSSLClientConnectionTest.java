@@ -1,28 +1,21 @@
 package org.zoxweb.server.nio;
 
 import org.zoxweb.server.http.HTTPNIOSocket;
-import org.zoxweb.server.http.HTTPRawFormatter;
-import org.zoxweb.server.http.HTTPRawMessage;
 import org.zoxweb.server.http.HTTPURLCallback;
 import org.zoxweb.server.io.IOUtil;
-import org.zoxweb.server.io.UByteArrayOutputStream;
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.net.NIOSocket;
 import org.zoxweb.server.net.common.TCPSessionCallback;
-import org.zoxweb.server.net.ssl.SSLContextInfo;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.server.util.GSONUtil;
-import org.zoxweb.shared.http.*;
+import org.zoxweb.shared.http.HTTPResponse;
 import org.zoxweb.shared.net.IPAddress;
+import org.zoxweb.shared.task.ConsumerCallback;
 import org.zoxweb.shared.util.Const;
-import org.zoxweb.shared.util.SharedStringUtil;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
@@ -37,91 +30,89 @@ public class NIOSSLClientConnectionTest {
     static AtomicLong failCount = new AtomicLong(0);
 
 
-    public static class URISession
-            extends TCPSessionCallback {
-        //private UByteArrayOutputStream result = new UByteArrayOutputStream();
-        private final long timeStamp = System.currentTimeMillis();
-        HTTPRawMessage hrm = new HTTPRawMessage(true);
-
-        //private final String url;
-        private final URLInfo urlInfo;
-
-
-        public URISession(String url) throws URISyntaxException, NoSuchAlgorithmException, KeyManagementException {
-
-            urlInfo = URLInfo.parse(url);
-            System.out.println(urlInfo.toBasicURL());
-
-            if (URIScheme.isMatching(url, URIScheme.HTTPS, URIScheme.WSS)) {
-                setSSLContextInfo(new SSLContextInfo(urlInfo.ipAddress, true));
-            }
-        }
-
-
-        /**
-         * Performs this operation on the given argument.
-         *
-         * @param byteBuffer the input argument
-         */
-        @Override
-        public void accept(ByteBuffer byteBuffer) {
-
-            try {
-                if (hrm.parseResponse(urlInfo.scheme, byteBuffer)) {
-                    HTTPMessageConfigInterface hmci = hrm.parse();
-                    hmci.setContent(hrm.getDataStream().toByteArray());
-                    System.out.println(hmci.getHTTPStatusCode());
-                    System.out.println(GSONUtil.toJSONDefault(hmci.getHeaders(), true));
-                    System.out.println(SharedStringUtil.toString(hmci.getContent()));
-                    close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-                IOUtil.close(this);
-            }
-
-        }
-
-
-        public void exception(Exception e) {
-            e.printStackTrace();
-            failCount.incrementAndGet();
-            log.getLogger().info(urlInfo.ipAddress + " " + getRemoteAddress() + " " + e);
-            IOUtil.close(this);
-
-
-        }
-
-
-        @Override
-        protected void connectedFinished() throws IOException {
-            successCount.incrementAndGet();
-            SocketChannel channel = (SocketChannel) getChannel();
-            System.out.println(getRemoteAddress() + " " + channel.isConnected() + " total: " + total());
-
-            //IOUtil.close(this);
-
-            HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit(urlInfo.toBasicURL(), urlInfo.toURI(), "GET");
-
-            hmci.getHeaders().add(HTTPConst.CommonHeader.CONNECTION_KEEP_ALIVE);
-            if(urlInfo.username != null)
-            {
-                hmci.setBasicAuthorization(urlInfo.username, urlInfo.password);
-                hmci.getHeaders().add(hmci.getAuthorization().toHTTPHeader());
-            }
-
-            HTTPRawFormatter hrf = new HTTPRawFormatter(hmci);
-            UByteArrayOutputStream ubaos = hrf.format();
-            //System.out.println(ubaos);
-
-
-
-            getOutputStream().write(ubaos, false);
-            log.getLogger().info(getRemoteAddress() + " " + channel.isConnected() + " total: " + total() + " took: " + Const.TimeInMillis.toString(System.currentTimeMillis() - timeStamp));
-
-
-        }
-    }
+//    public static class URISession
+//            extends TCPSessionCallback {
+//        //private UByteArrayOutputStream result = new UByteArrayOutputStream();
+//        private final long timeStamp = System.currentTimeMillis();
+//        HTTPRawMessage hrm = new HTTPRawMessage(true);
+//
+//        //private final String url;
+//        private final URLInfo urlInfo;
+//
+//
+//        public URISession(String url) throws URISyntaxException, NoSuchAlgorithmException, KeyManagementException {
+//
+//            urlInfo = URLInfo.parse(url);
+//            System.out.println(urlInfo.toBasicURL());
+//
+//            if (URIScheme.isMatching(url, URIScheme.HTTPS, URIScheme.WSS)) {
+//                setSSLContextInfo(new SSLContextInfo(urlInfo.ipAddress, true));
+//            }
+//        }
+//
+//
+//        /**
+//         * Performs this operation on the given argument.
+//         *
+//         * @param byteBuffer the input argument
+//         */
+//        @Override
+//        public void accept(ByteBuffer byteBuffer) {
+//
+//            try {
+//                if (hrm.parseResponse(urlInfo.scheme, byteBuffer)) {
+//                    HTTPMessageConfigInterface hmci = hrm.parse();
+//                    hmci.setContent(hrm.getDataStream().toByteArray());
+//                    System.out.println(hmci.getHTTPStatusCode());
+//                    System.out.println(GSONUtil.toJSONDefault(hmci.getHeaders(), true));
+//                    System.out.println(SharedStringUtil.toString(hmci.getContent()));
+//                    close();
+//                }
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//                IOUtil.close(this);
+//            }
+//
+//        }
+//
+//
+//        public void exception(Exception e) {
+//            e.printStackTrace();
+//            failCount.incrementAndGet();
+//            log.getLogger().info(urlInfo.ipAddress + " " + getRemoteAddress() + " " + e);
+//            IOUtil.close(this);
+//
+//
+//        }
+//
+//
+//        @Override
+//        protected void connectedFinished() throws IOException {
+//            successCount.incrementAndGet();
+//            SocketChannel channel = (SocketChannel) getChannel();
+//            System.out.println(getRemoteAddress() + " " + channel.isConnected() + " total: " + total());
+//
+//            //IOUtil.close(this);
+//
+//            HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit(urlInfo.toBasicURL(), urlInfo.toURI(), "GET");
+//
+//            hmci.getHeaders().add(HTTPConst.CommonHeader.CONNECTION_KEEP_ALIVE);
+//            if (urlInfo.username != null) {
+//                hmci.setBasicAuthorization(urlInfo.username, urlInfo.password);
+//                hmci.getHeaders().add(hmci.getAuthorization().toHTTPHeader());
+//            }
+//
+//            HTTPRawFormatter hrf = new HTTPRawFormatter(hmci);
+//            UByteArrayOutputStream ubaos = hrf.format();
+//            //System.out.println(ubaos);
+//
+//
+//            getOutputStream().write(ubaos, false);
+//            log.getLogger().info(getRemoteAddress() + " " + channel.isConnected() + " total: " + total() + " took: " + Const.TimeInMillis.toString(System.currentTimeMillis() - timeStamp));
+//
+//
+//        }
+//    }
 
 
     public static class PlainSessionCallback
@@ -146,7 +137,7 @@ public class NIOSSLClientConnectionTest {
         @Override
         public void exception(Throwable e) {
             failCount.incrementAndGet();
-            // log.getLogger().info(getRemoteAddress() + " " + e);
+            //log.getLogger().info(getRemoteAddress() + " " + e);
             IOUtil.close(this);
 
 
@@ -182,10 +173,35 @@ public class NIOSSLClientConnectionTest {
 
 
                     //nioSocket.addClientSocket(new InetSocketAddress(ipAddress.getInetAddress(), ipAddress.getPort()), new URISession(args[i]), 5, null);
-                    HTTPURLCallback huc = new HTTPURLCallback(args[i], (r)->{
-                        //System.out.println(r.getStatus() + " " + Const.TimeInMillis.toString(r.getDuration()));
-                        log.getLogger().info(r.getCorrelationID() + " " + r.getStatus() + " " + Const.TimeInMillis.toString(r.getDuration()));
-                        successCount.incrementAndGet();});
+//                    HTTPURLCallback huc = new HTTPURLCallback(args[i], (r) -> {
+//                        //System.out.println(r.getStatus() + " " + Const.TimeInMillis.toString(r.getDuration()));
+//                        log.getLogger().info(r.getCorrelationID() + " " + r.getStatus() + " " + Const.TimeInMillis.toString(r.getDuration()));
+//                        successCount.incrementAndGet();
+//                    });
+
+
+                    HTTPURLCallback huc = new HTTPURLCallback(args[i], new ConsumerCallback<HTTPResponse>() {
+                        @Override
+                        public void exception(Throwable e) {
+                            failCount.incrementAndGet();
+                        }
+
+                        /**
+                         * Performs this operation on the given argument.
+                         *
+                         * @param r the input argument
+                         */
+                        @Override
+                        public void accept(HTTPResponse r) {
+                            log.getLogger().info(r.getCorrelationID() + " " + r.getStatus() + " " + Const.TimeInMillis.toString(r.getDuration()));
+                            successCount.incrementAndGet();
+                        }
+                    });
+//                    (r) -> {
+//                        //System.out.println(r.getStatus() + " " + Const.TimeInMillis.toString(r.getDuration()));
+//                        log.getLogger().info(r.getCorrelationID() + " " + r.getStatus() + " " + Const.TimeInMillis.toString(r.getDuration()));
+//                        successCount.incrementAndGet();
+//                    });
 
                     httpNIOSocket.send(huc);
 

@@ -112,6 +112,11 @@ public class AppointmentTest {
         AtomicInteger counter = new AtomicInteger();
         for(int i=0; i < 20; i++)
             TaskUtil.defaultTaskProcessor().submit(new CallableConsumer<Integer>() {
+                @Override
+                public void exception(Throwable e) {
+
+                }
+
                 /**
                  * Performs this operation on the given argument.
                  *

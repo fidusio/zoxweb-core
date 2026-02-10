@@ -2,6 +2,7 @@ package org.zoxweb.shared.util;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.zoxweb.shared.io.BytesArray;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;

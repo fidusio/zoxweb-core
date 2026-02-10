@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.zoxweb.shared.util;
+package org.zoxweb.shared.io;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

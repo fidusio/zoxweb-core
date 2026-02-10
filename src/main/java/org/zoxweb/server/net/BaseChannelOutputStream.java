@@ -18,7 +18,7 @@ package org.zoxweb.server.net;
 import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.server.io.UByteArrayOutputStream;
 import org.zoxweb.server.logging.LogWrapper;
-import org.zoxweb.shared.util.CloseableType;
+import org.zoxweb.shared.io.CloseableType;
 import org.zoxweb.shared.util.SUS;
 
 import java.io.IOException;

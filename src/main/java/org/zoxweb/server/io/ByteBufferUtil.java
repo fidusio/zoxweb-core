@@ -16,6 +16,7 @@
 package org.zoxweb.server.io;
 
 import org.zoxweb.server.util.ServerUtil;
+import org.zoxweb.shared.io.BytesArray;
 import org.zoxweb.shared.util.*;
 
 import java.io.IOException;

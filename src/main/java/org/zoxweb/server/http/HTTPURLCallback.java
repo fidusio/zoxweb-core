@@ -105,6 +105,8 @@ public class HTTPURLCallback extends TCPSessionCallback {
         } catch (Exception e) {
             e.printStackTrace();
             IOUtil.close(this);
+            if (callback != null)
+                callback.exception(e);
         }
     }
 
@@ -121,9 +123,10 @@ public class HTTPURLCallback extends TCPSessionCallback {
 
     @Override
     public void exception(Throwable e) {
-        e.printStackTrace();
-        if (callback != null) {
+        if (callback != null)
             callback.exception(e);
-        }
+        else
+            e.printStackTrace();
+
     }
 }

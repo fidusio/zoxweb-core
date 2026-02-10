@@ -7,7 +7,7 @@ import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.http.*;
 import org.zoxweb.shared.util.*;
 
-public class APIIntegration
+public class APIIntegrationTest
 {
 
     public static void createXlogistXLoginEndPoint()
@@ -176,6 +176,11 @@ public class APIIntegration
             {
 
                 HTTPCallback<NVGenericMap, NVGenericMap> loginCallback = new HTTPCallback<NVGenericMap, NVGenericMap>() {
+
+                    @Override
+                    public void exception(Throwable e) {
+
+                    }
 
                     @Override
                     public void accept(HTTPAPIResult<NVGenericMap> apiResult)

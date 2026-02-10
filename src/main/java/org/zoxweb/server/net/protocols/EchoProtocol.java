@@ -55,6 +55,11 @@ public class EchoProtocol {
         public boolean isClosed() {
             return getOutputStream() != null && getOutputStream().isClosed();
         }
+
+        @Override
+        public void exception(Throwable e) {
+
+        }
     }
 
     public static class SSLEchoSession
@@ -99,6 +104,11 @@ public class EchoProtocol {
         @Override
         public boolean isClosed() {
             return getOutputStream() != null && getOutputStream().isClosed();
+        }
+
+        @Override
+        public void exception(Throwable e) {
+
         }
     }
 

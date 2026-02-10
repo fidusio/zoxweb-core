@@ -7,7 +7,7 @@ import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.net.BaseChannelOutputStream;
 import org.zoxweb.server.net.SelectorController;
 import org.zoxweb.shared.net.IPAddress;
-import org.zoxweb.shared.util.CloseableType;
+import org.zoxweb.shared.io.CloseableType;
 import org.zoxweb.shared.util.SUS;
 
 import javax.net.ssl.*;
@@ -41,12 +41,12 @@ public class SSLSessionConfig
 
 
     // used for remote connection creation only
-    final boolean clientMode;
+    private final boolean clientMode;
     final SSLEngine sslEngine; // the crypto engine
 
 
     private final AtomicBoolean isClosed = new AtomicBoolean(false);
-    final AtomicBoolean hasBegan = new AtomicBoolean(false);
+    private final AtomicBoolean hasBegan = new AtomicBoolean(false);
 
     public SSLSessionConfig(SSLContextInfo sslContext) {
         SUS.checkIfNulls("sslContext null", sslContext);
@@ -110,6 +110,13 @@ public class SSLSessionConfig
 
     }
 
+
+    public boolean isClientMode()
+    {
+        return clientMode;
+    }
+
+
     public boolean isClosed() {
         return isClosed.get();
     }
@@ -150,20 +157,20 @@ public class SSLSessionConfig
     }
 
 
-    public void beginHandshake(boolean clientMode) throws SSLException {
+    public void beginHandshake() throws SSLException {
         if (!hasBegan.get()) {
             if (!hasBegan.getAndSet(true)) {
                 // set the ssl engine mode client or sever
                 sslEngine.setUseClientMode(clientMode);
-                inSSLNetData = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, getPacketBufferSize());
-                outSSLNetData = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, getPacketBufferSize());
-                inAppData = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, getApplicationBufferSize());
-                // start the handshake
-                sslEngine.beginHandshake();
-                // create the necessary byte buffer with the proper length
 //                inSSLNetData = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, getPacketBufferSize());
 //                outSSLNetData = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, getPacketBufferSize());
 //                inAppData = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, getApplicationBufferSize());
+                // start the handshake
+                sslEngine.beginHandshake();
+                // create the necessary byte buffer with the proper length
+                inSSLNetData = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, getPacketBufferSize());
+                outSSLNetData = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, getPacketBufferSize());
+                inAppData = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, getApplicationBufferSize());
             }
         }
     }

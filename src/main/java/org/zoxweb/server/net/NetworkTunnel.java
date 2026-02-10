@@ -16,7 +16,7 @@
 package org.zoxweb.server.net;
 
 import org.zoxweb.server.io.IOUtil;
-import org.zoxweb.shared.util.CloseableType;
+import org.zoxweb.shared.io.CloseableType;
 
 import java.io.IOException;
 import java.io.InputStream;

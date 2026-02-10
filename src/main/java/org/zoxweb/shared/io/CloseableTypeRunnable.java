@@ -1,10 +1,12 @@
-package org.zoxweb.shared.util;
+package org.zoxweb.shared.io;
+
+import org.zoxweb.shared.util.SUS;
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class CloseableTypeHolder
+public class CloseableTypeRunnable
         implements CloseableType {
 
     private final Runnable runnable;
@@ -12,7 +14,7 @@ public class CloseableTypeHolder
     private final AtomicBoolean status;
 
 
-    public CloseableTypeHolder(Runnable runnable) {
+    public CloseableTypeRunnable(Runnable runnable) {
         SUS.checkIfNulls("Null closeable", runnable);
         this.runnable = runnable;
         this.reference = null;
@@ -20,7 +22,7 @@ public class CloseableTypeHolder
     }
 
 
-    public CloseableTypeHolder(Closeable ref) {
+    public CloseableTypeRunnable(Closeable ref) {
         SUS.checkIfNulls("Null closeable", ref);
         this.reference = ref;
         if (reference instanceof CloseableType)

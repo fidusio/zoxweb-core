@@ -1,4 +1,6 @@
-package org.zoxweb.shared.util;
+package org.zoxweb.shared.io;
+
+import org.zoxweb.shared.util.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

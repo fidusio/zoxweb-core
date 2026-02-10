@@ -6,7 +6,7 @@ import org.zoxweb.server.io.UByteArrayOutputStream;
 import org.zoxweb.server.security.HashUtil;
 import org.zoxweb.shared.http.HTTPWSFrame;
 import org.zoxweb.shared.http.HTTPWSProto;
-import org.zoxweb.shared.util.BytesArray;
+import org.zoxweb.shared.io.BytesArray;
 
 import java.io.IOException;
 import java.io.InputStream;

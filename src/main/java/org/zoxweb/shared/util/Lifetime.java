@@ -1,6 +1,8 @@
 package org.zoxweb.shared.util;
 
 
+import org.zoxweb.shared.io.CloseableType;
+
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
