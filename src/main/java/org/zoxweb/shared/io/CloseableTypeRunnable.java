@@ -2,7 +2,6 @@ package org.zoxweb.shared.io;
 
 import org.zoxweb.shared.util.SUS;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -10,28 +9,28 @@ public class CloseableTypeRunnable
         implements CloseableType {
 
     private final Runnable runnable;
-    private final Closeable reference;
+    // private final Closeable reference;
     private final AtomicBoolean status;
 
 
     public CloseableTypeRunnable(Runnable runnable) {
         SUS.checkIfNulls("Null closeable", runnable);
         this.runnable = runnable;
-        this.reference = null;
+        //this.reference = null;
         status = new AtomicBoolean(false);
     }
 
 
-    public CloseableTypeRunnable(Closeable ref) {
-        SUS.checkIfNulls("Null closeable", ref);
-        this.reference = ref;
-        if (reference instanceof CloseableType)
-            status = null;
-        else
-            status = new AtomicBoolean(false);
-
-        runnable = null;
-    }
+//    public CloseableTypeRunnable(Closeable ref) {
+//        SUS.checkIfNulls("Null closeable", ref);
+//        this.reference = ref;
+//        if (reference instanceof CloseableType)
+//            status = null;
+//        else
+//            status = new AtomicBoolean(false);
+//
+//        runnable = null;
+//    }
 
 
     /**
@@ -51,14 +50,15 @@ public class CloseableTypeRunnable
     public void close() throws IOException {
         if (status != null) {
             if (!status.getAndSet(true)) {
-                if (reference != null)
-                    reference.close();
-                else
-                    runnable.run();
+//                if (reference != null)
+//                    reference.close();
+//                else
+                runnable.run();
             }
 
-        } else
-            reference.close();
+        }
+//        else
+//            reference.close();
     }
 
     /**
@@ -68,9 +68,9 @@ public class CloseableTypeRunnable
      */
     @Override
     public boolean isClosed() {
-        if (status != null)
-            return status.get();
+//        if (status != null)
+        return status.get();
 
-        return ((CloseableType) reference).isClosed();
+//        return ((CloseableType) reference).isClosed();
     }
 }

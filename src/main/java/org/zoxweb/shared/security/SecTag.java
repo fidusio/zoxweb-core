@@ -103,7 +103,7 @@ public class SecTag {
      * allowing tags to be registered using {@code registerValue(tag)} without
      * explicitly providing a key.</p>
      *
-     * <h3>Usage:</h3>
+     * <b>Usage:</b>
      * <pre>{@code
      * // Register with automatic key generation
      * SecTag.REGISTRAR.registerValue(tag);

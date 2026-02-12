@@ -1,14 +1,23 @@
 package org.zoxweb.shared.io;
 
 import java.io.Closeable;
-import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+/**
+ * A {@link CloseableType} implementation that delegates close operations to an underlying
+ * {@link AutoCloseable} resource. This class ensures thread-safe, one-time closing semantics
+ * using an {@link AtomicBoolean} guard.
+ */
 public class CloseableTypeDelegate implements CloseableType {
-    private volatile Closeable delegate;
+    private volatile AutoCloseable delegate;
     private final AtomicBoolean isClosed = new AtomicBoolean(false);
 
-    public CloseableTypeDelegate(Closeable delegate) {
+    /**
+     * Creates a new CloseableTypeDelegate wrapping the given resource.
+     *
+     * @param delegate the AutoCloseable resource to delegate close operations to
+     */
+    public CloseableTypeDelegate(AutoCloseable delegate) {
         this.delegate = delegate;
     }
 
@@ -22,11 +31,9 @@ public class CloseableTypeDelegate implements CloseableType {
      * to relinquish the underlying resources and to internally
      * <em>mark</em> the {@code Closeable} as closed, prior to throwing
      * the {@code IOException}.
-     *
-     * @throws IOException if an I/O error occurs
      */
     @Override
-    public void close() throws IOException {
+    public void close(){
         if (delegate != null) {
             if (!isClosed.getAndSet(true)) {
                 try {
@@ -50,6 +57,13 @@ public class CloseableTypeDelegate implements CloseableType {
         return isClosed.get();
     }
 
+    /**
+     * Sets the delegate if it has not already been assigned. This method is synchronized
+     * to prevent concurrent reassignment.
+     *
+     * @param delegate the Closeable resource to set as the delegate
+     * @return true if the delegate was set, false if a delegate was already present or the argument is null
+     */
     public synchronized boolean setDelegate(Closeable delegate) {
         if (this.delegate == null && delegate != null) {
             this.delegate = delegate;

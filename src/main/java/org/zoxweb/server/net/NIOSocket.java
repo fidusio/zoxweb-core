@@ -17,9 +17,9 @@ package org.zoxweb.server.net;
 
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.logging.LogWrapper;
-import org.zoxweb.server.net.common.CommonAcceptSK;
-import org.zoxweb.server.net.common.TCPSessionCallback;
 import org.zoxweb.server.net.common.ConnectionCallback;
+import org.zoxweb.server.net.common.SKHandler;
+import org.zoxweb.server.net.common.TCPSessionCallback;
 import org.zoxweb.server.net.common.UDPSessionCallback;
 import org.zoxweb.server.task.TaskSchedulerProcessor;
 import org.zoxweb.server.task.TaskUtil;
@@ -43,7 +43,6 @@ import java.net.Inet4Address;
 import java.net.InetSocketAddress;
 import java.net.StandardSocketOptions;
 import java.nio.channels.*;
-import java.nio.channels.spi.AbstractSelectableChannel;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Set;
@@ -112,10 +111,6 @@ public class NIOSocket
     private final Executor executor;
     private final TaskSchedulerProcessor taskSchedulerProcessor;
     private final AtomicLong connectionCount = new AtomicLong(0);
-
-
-
-
 
 
     private long selectedCountTotal = 0;
@@ -192,34 +187,6 @@ public class NIOSocket
 
         return sk;
     }
-
-
-//    public SelectionKey addClientSocket(InetSocketAddress sa, ProtocolHandler ph, int timeoutInSec)
-//            throws IOException {
-//
-//        SUS.checkIfNulls("Null InetSocketAddress or ProtocolHandler", sa, ph);
-//        ScheduledAttachment<ProtocolHandler> scheduledAttachment = new ScheduledAttachment<>();
-//        scheduledAttachment.attach(ph);
-//        SocketChannel sc = SocketChannel.open();
-//
-//        SelectionKey selectionKey = selectorController.register(sc, SelectionKey.OP_CONNECT, scheduledAttachment, false);
-//        scheduledAttachment.setAppointment(taskSchedulerProcessor.queue(TimeInMillis.SECOND.mult(timeoutInSec), new NIOChannelMonitor(selectionKey, selectorController)));
-//
-//        try {
-//            if (sc.connect(sa)) {
-//                clientConnect(selectionKey);
-//            }
-//
-//        } catch (IOException e) {
-//            selectorController.cancelSelectionKey(selectionKey);
-//            if (ph.getSessionCallback() != null)
-//                ph.getSessionCallback().exception(e);
-//            throw e;
-//        }
-//
-//        return selectionKey;
-//    }
-
 
     /**
      * Initiates a non-blocking TCP client connection with callback-based notification.
@@ -301,35 +268,37 @@ public class NIOSocket
         // 4. If pending, register(OP_CONNECT) ← Only register after connection started
 
 
-        if(resolver != null) {
+        if (resolver != null) {
             resolver.resolveIPAddress(sa.getHostName());
         }
         ScheduledAttachment<ConnectionCallback<?>> scheduledAttachment = new ScheduledAttachment<>();
         scheduledAttachment.attach(cc);
-        SocketChannel sc = SocketChannel.open();
-        sc.setOption(StandardSocketOptions.SO_REUSEADDR, true);
+        SocketChannel channel = SocketChannel.open();
+        channel.setOption(StandardSocketOptions.SO_REUSEADDR, true);
 
         // crucial here
-        sc.configureBlocking(false);
-        cc.setChannel(sc);
+        channel.configureBlocking(false);
+        cc.setChannel(channel);
         try {
-            scheduledAttachment.setAppointment(taskSchedulerProcessor.queue(TimeInMillis.SECOND.mult(timeoutInSec), new NIOChannelMonitor(sc, selectorController, cc)));
-            if (sc.connect(sa)) {
+            scheduledAttachment.setAppointment(taskSchedulerProcessor.queue(TimeInMillis.SECOND.mult(timeoutInSec), new NIOChannelMonitor(channel, selectorController, cc)));
+            if (channel.connect(sa)) {
                 // we connected ULTRA fast connection (loopback)
-                SelectionKey selectionKey = selectorController.register(sc, 0, scheduledAttachment, false);
-                clientConnect(selectionKey);
+                SelectionKey selectionKey = selectorController.register(channel, 0, scheduledAttachment, false);
+                processConnectable(selectionKey);
                 return selectionKey;
             }
             // connection is pending, register for OP_CONNECT
-            SelectionKey selectionKey = selectorController.register(sc, SelectionKey.OP_CONNECT, scheduledAttachment, false);
+            SelectionKey selectionKey = selectorController.register(channel, SelectionKey.OP_CONNECT, scheduledAttachment, false);
             return selectionKey;
         } catch (IOException e) {
-            IOUtil.close(sc);
-            scheduledAttachment.attachment().exception(e);
+            IOUtil.close(channel);
+            if(scheduledAttachment.attachment() != null)
+                scheduledAttachment.attachment().exception(e);
+            if (scheduledAttachment.getAppointment() != null)
+                scheduledAttachment.getAppointment().cancel();
             throw e;
         }
     }
-
 
 
     /**
@@ -349,7 +318,7 @@ public class NIOSocket
      * @throws NullPointerException if sa or psf is null
      */
     public SelectionKey addDatagramSocket(UDPSessionCallback usc) throws IOException {
-        return  addDatagramSocket(new InetSocketAddress(usc.getPort()), usc);
+        return addDatagramSocket(new InetSocketAddress(usc.getPort()), usc);
     }
 
     /**
@@ -525,48 +494,8 @@ public class NIOSocket
                                 if (key.isReadable()
                                         && key.isValid()
                                         && key.channel().isOpen()) {
-                                    // channel has data to read
-                                    // this is the reading part of the process
-                                    CommonAcceptSK currentPP = (CommonAcceptSK) key.attachment();
-                                    if (currentPP instanceof ProtocolHandler)
-                                        ((ProtocolHandler) currentPP).updateUsage();
+                                    processReadable(key);
 
-
-                                    // very,very,very crucial setup prior to processing
-                                    // we are disabling the key operations by the selector
-                                    // for the current selection key
-                                    //int keyOPs = key.interestOps();
-                                    key.interestOps(0);
-
-                                    // a channel is ready for reading
-                                    if (executor != null) {
-                                        executor.execute(() ->
-                                        {
-                                            try {
-                                                currentPP.accept(key);
-                                            } catch (Exception e) {
-                                                e.printStackTrace();
-                                            }
-                                            // very crucial step
-                                            if (key.isValid()) {
-                                                // restoring selection ops for the selection key
-                                                key.interestOps(currentPP.interestOps());
-                                                selectorController.wakeup();
-                                            }
-                                        });
-                                    } else {
-                                        // no executor set so the current thread must process the incoming data
-                                        try {
-                                            currentPP.accept(key);
-                                        } catch (Exception e) {
-                                            e.printStackTrace();
-                                        }
-                                        // very crucial step
-                                        if (key.isValid()) {
-                                            key.interestOps(currentPP.interestOps());
-                                            selectorController.wakeup();
-                                        }
-                                    }
                                 } // server socket waiting for incoming connection
                                 else if (key.isAcceptable()
                                         && key.isValid()
@@ -668,7 +597,7 @@ public class NIOSocket
                                         && key.channel().isOpen()
                                         && key.isConnectable()) {
                                     // this is used by client connection
-                                    clientConnect(key);
+                                    processConnectable(key);
 
                                 }
 
@@ -716,7 +645,54 @@ public class NIOSocket
     }
 
 
-    private void clientConnect(SelectionKey key) throws IOException {
+    private void processReadable(SelectionKey key) {
+        // channel has data to read
+        // this is the reading part of the process
+        SKHandler skHandler = (SKHandler) key.attachment();
+        if (skHandler instanceof ProtocolHandler)
+            ((ProtocolHandler) skHandler).updateUsage();
+
+
+        // very,very,very crucial setup prior to processing
+        // we are disabling the key operations by the selector
+        // for the current selection key
+        //int keyOPs = key.interestOps();
+        key.interestOps(0);
+
+        // a channel is ready for reading
+        if (executor != null) {
+            // we have an executor
+            // delegate the data reading to an executor thread
+            executor.execute(() ->
+            {
+                try {
+                    skHandler.accept(key);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                // very crucial step
+                if (key.isValid()) {
+                    // restoring selection ops for the selection key
+                    key.interestOps(skHandler.interestOps());
+                    selectorController.wakeup();
+                }
+            });
+        } else {
+            // no executor set so the current thread must process the incoming data
+            try {
+                skHandler.accept(key);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            // very crucial step
+            if (key.isValid()) {
+                key.interestOps(skHandler.interestOps());
+                selectorController.wakeup();
+            }
+        }
+    }
+
+    private void processConnectable(SelectionKey key) throws IOException {
 
         // this is used by client connection
         // stop key interest first
@@ -760,7 +736,7 @@ public class NIOSocket
                     });
                 else {
                     int keysOps = connectData.connected(key);
-                    if (keysOps >= 0  && key.isValid()) {
+                    if (keysOps >= 0 && key.isValid()) {
                         key.interestOps(keysOps);
                         selectorController.wakeup();
                     } else
@@ -769,7 +745,7 @@ public class NIOSocket
 
             } catch (Exception e) {
 
-               // e.printStackTrace();
+                // e.printStackTrace();
                 IOUtil.close(key.channel());
 
                 if (executor != null)
@@ -778,70 +754,71 @@ public class NIOSocket
                     connectData.exception(e);
             }
 
-        } else {
-            // CURRENTLY impossible case
-
-            ProtocolHandler phTemp = null;
-            Object attachment = ((ScheduledAttachment<?>) key.attachment()).attachment();
-
-            if (attachment instanceof ProtocolHandler) {
-                phTemp = (ProtocolHandler) attachment;
-            } else if (attachment instanceof ProtocolFactory) {
-                ProtocolFactory<?> protocolFactory = (ProtocolFactory<?>) attachment;
-                phTemp = protocolFactory.newInstance();
-            }
-
-            // phTemp for lambda requirement
-            ProtocolHandler ph = phTemp;
-
-            try {
-                finishConnecting(key);
-                connectionCount.incrementAndGet();
-                // attach the protocol handler
-                ph.setSelectorController(selectorController);
-                ph.setupConnection((AbstractSelectableChannel) key.channel(), false);
-
-                // a channel is ready for reading
-                int keyOPs = key.interestOps();
-                key.interestOps(0);
-                if (executor != null) {
-                    // lambda requirement in effect here
-                    executor.execute(() ->
-                    {
-                        try {
-                            ph.accept(key);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                        // very crucial step
-                        if (key.isValid()) {
-                            key.interestOps(keyOPs);
-                            selectorController.wakeup();
-                        }
-                    });
-                } else {
-                    // no executor set so the current thread must process the incoming data
-                    try {
-                        ph.accept(key);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    // very crucial step
-                    if (key.isValid()) {
-                        key.interestOps(keyOPs);
-                        selectorController.wakeup();
-                    }
-                }
-            } catch (IOException e) {
-
-                if (ph.getSessionCallback() != null)
-                    ph.getSessionCallback().exception(e);
-
-                IOUtil.close(ph);
-                throw e;
-
-            }
         }
+//        else {
+//            // CURRENTLY impossible case
+//
+//            ProtocolHandler phTemp = null;
+//            Object attachment = ((ScheduledAttachment<?>) key.attachment()).attachment();
+//
+//            if (attachment instanceof ProtocolHandler) {
+//                phTemp = (ProtocolHandler) attachment;
+//            } else if (attachment instanceof ProtocolFactory) {
+//                ProtocolFactory<?> protocolFactory = (ProtocolFactory<?>) attachment;
+//                phTemp = protocolFactory.newInstance();
+//            }
+//
+//            // phTemp for lambda requirement
+//            ProtocolHandler ph = phTemp;
+//
+//            try {
+//                finishConnecting(key);
+//                connectionCount.incrementAndGet();
+//                // attach the protocol handler
+//                ph.setSelectorController(selectorController);
+//                ph.setupConnection((AbstractSelectableChannel) key.channel(), false);
+//
+//                // a channel is ready for reading
+//                int keyOPs = key.interestOps();
+//                key.interestOps(0);
+//                if (executor != null) {
+//                    // lambda requirement in effect here
+//                    executor.execute(() ->
+//                    {
+//                        try {
+//                            ph.accept(key);
+//                        } catch (Exception e) {
+//                            e.printStackTrace();
+//                        }
+//                        // very crucial step
+//                        if (key.isValid()) {
+//                            key.interestOps(keyOPs);
+//                            selectorController.wakeup();
+//                        }
+//                    });
+//                } else {
+//                    // no executor set so the current thread must process the incoming data
+//                    try {
+//                        ph.accept(key);
+//                    } catch (Exception e) {
+//                        e.printStackTrace();
+//                    }
+//                    // very crucial step
+//                    if (key.isValid()) {
+//                        key.interestOps(keyOPs);
+//                        selectorController.wakeup();
+//                    }
+//                }
+//            } catch (IOException e) {
+//
+//                if (ph.getSessionCallback() != null)
+//                    ph.getSessionCallback().exception(e);
+//
+//                IOUtil.close(ph);
+//                throw e;
+//
+//            }
+//        }
     }
 
     /**
@@ -1039,8 +1016,6 @@ public class NIOSocket
                 build(callsCounter);
         return ret;
     }
-
-
 
 
 }

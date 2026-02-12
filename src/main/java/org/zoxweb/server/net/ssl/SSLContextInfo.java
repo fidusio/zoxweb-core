@@ -286,7 +286,7 @@ public class SSLContextInfo
      * The server address is stored and used when creating SSLEngine instances to enable
      * SNI (Server Name Indication) and proper SSL session caching.</p>
      *
-     * <h3>Certificate Validation Modes:</h3>
+     * <b>Certificate Validation Modes:</b>
      * <ul>
      *   <li><b>certValidationEnabled = true (recommended for production):</b> Uses the JVM's default
      *       trust store (typically $JAVA_HOME/lib/security/cacerts) which contains
@@ -344,7 +344,7 @@ public class SSLContextInfo
      * apply the named groups to each created SSLEngine. This allows fine-grained control
      * over which elliptic curves or finite field groups are used during TLS key exchange.</p>
      *
-     * <h3>Example:</h3>
+     * <b>Example:</b>
      * <pre>{@code
      * SSLContextInfo info = new SSLContextInfo(sslContext);
      * info.setSSLGroupSetter(new SSLGroupSetterImpl(
@@ -369,14 +369,14 @@ public class SSLContextInfo
      * specified during construction. For client-side configurations, the SSLEngine is
      * created with the server's hostname and port to enable SNI (Server Name Indication).</p>
      *
-     * <h3>Important:</h3>
+     * <b>Important:</b>
      * <p>The caller must set the SSLEngine's mode before use:</p>
      * <ul>
      *   <li>For server connections: {@code engine.setUseClientMode(false)}</li>
      *   <li>For client connections: {@code engine.setUseClientMode(true)}</li>
      * </ul>
      *
-     * <h3>Example Usage:</h3>
+     * <b>Example Usage:</b>
      * <pre>{@code
      * SSLEngine engine = sslContextInfo.newInstance();
      * engine.setUseClientMode(sslContextInfo.isClient());

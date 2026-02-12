@@ -8,7 +8,7 @@ import java.nio.channels.Channel;
 import java.nio.channels.SelectionKey;
 
 public interface ConnectionCallback<D>
-        extends ExceptionCallback, CommonAcceptSK, CloseableType {
+        extends ExceptionCallback, SKHandler, CloseableType {
     /**
      * Called when incoming data or something to do
      * @param key the input argument
