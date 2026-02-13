@@ -27,6 +27,7 @@ import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.app.AppCreatorDefault;
 import org.zoxweb.shared.data.ConfigDAO;
+import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.security.IPBlockerConfig;
 import org.zoxweb.shared.util.ArrayValues;
 import org.zoxweb.shared.util.NVEntity;
@@ -297,7 +298,7 @@ public class NIOConfig
     public void close() throws IOException {
         // TODO Auto-generated method stub
         for (Closeable c : services) {
-            IOUtil.close(c);
+            SharedIOUtil.close(c);
         }
     }
 

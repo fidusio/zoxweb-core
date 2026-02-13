@@ -15,8 +15,8 @@
  */
 package org.zoxweb.server.net;
 
-import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.shared.io.CloseableType;
+import org.zoxweb.shared.io.SharedIOUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -54,13 +54,13 @@ public class NetworkTunnel
             if (!closedStat) {
                 if (debug) log.info("closed");
                 closedStat = true;
-                IOUtil.close(is);
-                IOUtil.close(os);
+                SharedIOUtil.close(is);
+                SharedIOUtil.close(os);
 
                 if (counterParts != null) {
                     for (CloseableType ic : counterParts) {
                         if (ic != null && !ic.isClosed())
-                            IOUtil.close(ic);
+                            SharedIOUtil.close(ic);
                     }
                 }
             }
@@ -86,7 +86,7 @@ public class NetworkTunnel
                 }
             }
 
-            IOUtil.close(this);
+            SharedIOUtil.close(this);
 
         }
 
@@ -123,10 +123,10 @@ public class NetworkTunnel
         if (!closedStat) {
 
             closedStat = true;
-            IOUtil.close(sr1);
-            IOUtil.close(sr2);
-            IOUtil.close(s1);
-            IOUtil.close(s2);
+            SharedIOUtil.close(sr1);
+            SharedIOUtil.close(sr2);
+            SharedIOUtil.close(s1);
+            SharedIOUtil.close(s2);
 
         }
 

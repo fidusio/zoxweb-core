@@ -19,6 +19,7 @@ import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.shared.data.ApplicationConfigDAO;
 import org.zoxweb.shared.data.ApplicationConfigDAO.ApplicationDefaultParam;
+import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.util.GetValue;
 import org.zoxweb.shared.util.NVGenericMap;
 import org.zoxweb.shared.util.SharedBase64.Base64Type;
@@ -157,7 +158,7 @@ public class ApplicationConfigManager {
             fos = new FileOutputStream(file);
             fos.write(jsonString.getBytes());
         } finally {
-            IOUtil.close(fos);
+            SharedIOUtil.close(fos);
         }
     }
 
@@ -234,7 +235,7 @@ public class ApplicationConfigManager {
             } finally {
                 // this close is required just in case we encounter IO error
                 // to prevent unclosed file descriptors
-                IOUtil.close(is);
+                SharedIOUtil.close(is);
             }
         }
 
@@ -248,7 +249,7 @@ public class ApplicationConfigManager {
         try {
             os.write(jsonString.getBytes());
         } finally {
-            IOUtil.close(os);
+            SharedIOUtil.close(os);
         }
     }
 

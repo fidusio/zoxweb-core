@@ -17,8 +17,8 @@ package org.zoxweb.server.net;
 
 import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.server.io.ByteBufferUtil.BufferType;
-import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.logging.LogWrapper;
+import org.zoxweb.shared.io.SharedIOUtil;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -83,13 +83,13 @@ public class ChannelRelayTunnel
 
         // TODO Auto-generated method stub
         if (closeInterface != null) {
-            IOUtil.close(closeInterface);
+            SharedIOUtil.close(closeInterface);
         } else {
-            IOUtil.close(readSource);
+            SharedIOUtil.close(readSource);
             getSelectorController().cancelSelectionKey(currentSK);
 
             if (autoCloseDestination) {
-                IOUtil.close(writeDestination);
+                SharedIOUtil.close(writeDestination);
             }
             ByteBufferUtil.cache(sBuffer);
         }
@@ -115,13 +115,13 @@ public class ChannelRelayTunnel
 
 
             if (read < 0) //end of stream we have to close
-                IOUtil.close(this);
+                SharedIOUtil.close(this);
 
         } catch (Exception e) {
             if (log.isEnabled()) log.getLogger().info("error:" + e);
             if (!(e instanceof IOException))
                 e.printStackTrace();
-            IOUtil.close(this);
+            SharedIOUtil.close(this);
         }
 
         notifyAll();
@@ -142,7 +142,7 @@ public class ChannelRelayTunnel
         if (currentSK != null)
             getSelectorController().cancelSelectionKey(currentSK);
         else
-            IOUtil.close(this);
+            SharedIOUtil.close(this);
 
     }
 

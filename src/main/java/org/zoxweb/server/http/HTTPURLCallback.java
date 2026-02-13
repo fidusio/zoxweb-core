@@ -1,10 +1,10 @@
 package org.zoxweb.server.http;
 
-import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.net.common.TCPSessionCallback;
 import org.zoxweb.server.net.ssl.SSLContextInfo;
 import org.zoxweb.shared.http.*;
+import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.task.ConsumerCallback;
 import org.zoxweb.shared.util.SUS;
 
@@ -95,7 +95,7 @@ public class HTTPURLCallback extends TCPSessionCallback {
             if (hrm.parseResponse(hmci.getURIScheme(), byteBuffer)) {
                 HTTPMessageConfigInterface hmci = hrm.parse();
                 hmci.setContent(hrm.getDataStream().toByteArray());
-                IOUtil.close(this);
+                SharedIOUtil.close(this);
                 if (callback != null) {
                     callback.accept(new HTTPResponseData(hmci.getHTTPStatusCode().CODE, hmci.getHeaders(), hmci.getContent(), System.currentTimeMillis() - ts.get()).setCorrelationID(getID()));
                 }
@@ -104,7 +104,7 @@ public class HTTPURLCallback extends TCPSessionCallback {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            IOUtil.close(this);
+            SharedIOUtil.close(this);
             if (callback != null)
                 callback.exception(e);
         }

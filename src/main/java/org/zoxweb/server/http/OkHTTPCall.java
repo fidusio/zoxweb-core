@@ -22,6 +22,7 @@ import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.net.ssl.SSLCheckDisabler;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.http.*;
+import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.task.ConsumerCallback;
 import org.zoxweb.shared.util.*;
@@ -93,7 +94,7 @@ public class OkHTTPCall {
                     }
                 }
             } finally {
-                IOUtil.close(is);
+                SharedIOUtil.close(is);
                 if (log.isEnabled())
                     log.getLogger().info("TotalRead :" + totalRead + " content-length: " + contentLength());
             }
@@ -342,7 +343,7 @@ public class OkHTTPCall {
                         callableConsumer.accept(hrd);
                     }
                 } finally {
-                    IOUtil.close(response);
+                    SharedIOUtil.close(response);
                 }
 
             }
@@ -380,7 +381,7 @@ public class OkHTTPCall {
                 throw new HTTPCallException(response.message(), hrd);
             }
         } finally {
-            IOUtil.close(response);
+            SharedIOUtil.close(response);
         }
 
 

@@ -19,6 +19,7 @@ import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.io.UByteArrayOutputStream;
 import org.zoxweb.shared.data.DataDAO;
 import org.zoxweb.shared.filters.MatchPatternFilter;
+import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.util.*;
 
 import java.io.*;
@@ -87,12 +88,12 @@ public class JarTool {
                     } catch (Exception e) {
                         e.printStackTrace();
                     } finally {
-                        IOUtil.close(fos);
+                        SharedIOUtil.close(fos);
                     }
                 }
             }
         } finally {
-            IOUtil.close(jf);
+            SharedIOUtil.close(jf);
         }
 
         return jarURLs;
@@ -191,7 +192,7 @@ public class JarTool {
             fis = new FileInputStream(zipFile);
             return zipList(fis, patterns);
         } finally {
-            IOUtil.close(fis);
+            SharedIOUtil.close(fis);
         }
     }
 
@@ -229,7 +230,7 @@ public class JarTool {
             fis = new FileInputStream(zipFile);
             return loadContents(fis, patterns);
         } finally {
-            IOUtil.close(fis);
+            SharedIOUtil.close(fis);
         }
     }
 
@@ -253,7 +254,7 @@ public class JarTool {
                 zis.closeEntry();
             }
         } finally {
-            IOUtil.close(zis);
+            SharedIOUtil.close(zis);
         }
     }
 
@@ -308,7 +309,7 @@ public class JarTool {
             return new ZipInputStream(baos.toByteArrayInputStream());
         } finally {
             if (!(is instanceof ByteArrayInputStream))
-                IOUtil.close(is);
+                SharedIOUtil.close(is);
         }
     }
 
@@ -327,7 +328,7 @@ public class JarTool {
             return new JarInputStream(baos.toByteArrayInputStream());
         } finally {
             if (!(is instanceof ByteArrayInputStream))
-                IOUtil.close(is);
+                SharedIOUtil.close(is);
         }
     }
 
@@ -401,7 +402,7 @@ public class JarTool {
             gzipOutputStream.finish();
             return output.toByteArray();
         } finally {
-            IOUtil.close(gzipOutputStream);
+            SharedIOUtil.close(gzipOutputStream);
         }
     }
 
@@ -418,7 +419,7 @@ public class JarTool {
         try {
             return IOUtil.inputStreamToByteArray(new GZIPInputStream(new ByteArrayInputStream(content)), false).toByteArray();
         } finally {
-            IOUtil.close(gzipInputStream);
+            SharedIOUtil.close(gzipInputStream);
         }
     }
 

@@ -15,6 +15,8 @@
  */
 package org.zoxweb.server.io;
 
+import org.zoxweb.shared.io.SharedIOUtil;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -47,9 +49,9 @@ public class IOStreamInfo
     @Override
     public void close()
             throws IOException {
-        IOUtil.close(is);
-        IOUtil.close(os);
-        IOUtil.close(s);
+        SharedIOUtil.close(is);
+        SharedIOUtil.close(os);
+        SharedIOUtil.close(s);
     }
 
 }

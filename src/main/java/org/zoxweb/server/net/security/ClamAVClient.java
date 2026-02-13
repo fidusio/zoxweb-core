@@ -16,8 +16,8 @@
 package org.zoxweb.server.net.security;
 
 import org.zoxweb.server.io.IOStreamInfo;
-import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.io.StreamStats;
+import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.security.ScanResult;
 import org.zoxweb.shared.util.Const;
@@ -84,8 +84,8 @@ public class ClamAVClient {
             } catch (Exception e) {
 
             }
-            IOUtil.close(in);
-            IOUtil.close(ci);
+            SharedIOUtil.close(in);
+            SharedIOUtil.close(ci);
         }
 
         public String toString() {
@@ -281,7 +281,7 @@ public class ClamAVClient {
             while (ret.read(chunk) >= 0) ;
             ret.close();
         } finally {
-            IOUtil.close(ret);
+            SharedIOUtil.close(ret);
         }
 
 
@@ -363,7 +363,7 @@ public class ClamAVClient {
                         e.printStackTrace();
                         System.out.println("Processing error:" + e);
                     } finally {
-                        IOUtil.close(is);
+                        SharedIOUtil.close(is);
                     }
                 }
 

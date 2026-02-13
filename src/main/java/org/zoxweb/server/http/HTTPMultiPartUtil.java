@@ -15,11 +15,11 @@
  */
 package org.zoxweb.server.http;
 
-import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.shared.http.HTTPAttribute;
 import org.zoxweb.shared.http.HTTPHeader;
 import org.zoxweb.shared.http.HTTPMessageConfigInterface;
 import org.zoxweb.shared.http.HTTPMethod;
+import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.protocol.Delimiter;
 import org.zoxweb.shared.util.ArrayValues;
 import org.zoxweb.shared.util.GetNameValue;
@@ -341,7 +341,7 @@ public final class HTTPMultiPartUtil {
                     }
                 } finally {
                     if (hmpp.isAutoClose()) {
-                        IOUtil.close(is);
+                        SharedIOUtil.close(is);
                     }
                 }
             } else if (hmpp.getContentValue() != null) {

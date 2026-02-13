@@ -17,9 +17,9 @@ package org.zoxweb.server.net.ssl;
 
 
 import org.zoxweb.server.io.ByteBufferUtil;
-import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.net.BaseChannelOutputStream;
 import org.zoxweb.server.net.ProtocolHandler;
+import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.util.SharedUtil;
 
 import javax.net.ssl.SSLEngineResult;
@@ -104,7 +104,7 @@ public class SSLChannelOutputStream extends BaseChannelOutputStream {
                         written = ByteBufferUtil.smartWrite(null, dataChannel, sslConfig.outSSLNetData);
                         if(usageTracker != null) usageTracker.updateUsage();
                     } catch (IOException e) {
-                        IOUtil.close(this);
+                        SharedIOUtil.close(this);
                         throw e;
                     }
                     break;
@@ -131,7 +131,7 @@ public class SSLChannelOutputStream extends BaseChannelOutputStream {
     public void close() throws IOException {
         if (!isClosed.getAndSet(true)) {
             if (log.isEnabled()) log.getLogger().info("Calling close");
-            IOUtil.close(sslConfig, usageTracker);
+            SharedIOUtil.close(sslConfig, usageTracker);
             ByteBufferUtil.cache(outAppData);
         }
     }

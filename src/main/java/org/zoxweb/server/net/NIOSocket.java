@@ -15,7 +15,6 @@
  */
 package org.zoxweb.server.net;
 
-import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.net.common.ConnectionCallback;
 import org.zoxweb.server.net.common.SKHandler;
@@ -27,6 +26,7 @@ import org.zoxweb.server.util.DateUtil;
 import org.zoxweb.shared.data.events.BaseEventObject;
 import org.zoxweb.shared.data.events.EventListenerManager;
 import org.zoxweb.shared.data.events.IPAddressEvent;
+import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.net.DNSResolverInt;
 import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.net.SharedNetUtil;
@@ -291,7 +291,7 @@ public class NIOSocket
             SelectionKey selectionKey = selectorController.register(channel, SelectionKey.OP_CONNECT, scheduledAttachment, false);
             return selectionKey;
         } catch (IOException e) {
-            IOUtil.close(channel);
+            SharedIOUtil.close(channel);
             if(scheduledAttachment.attachment() != null)
                 scheduledAttachment.attachment().exception(e);
             if (scheduledAttachment.getAppointment() != null)
@@ -560,7 +560,7 @@ public class NIOSocket
                                             e.printStackTrace();
                                         } finally {
                                             // had to close after log otherwise we have an open socket
-                                            IOUtil.close(sc);
+                                            SharedIOUtil.close(sc);
                                         }
 
                                     } else {
@@ -582,7 +582,7 @@ public class NIOSocket
                                                     connectionCount.incrementAndGet();
                                                 } catch (IOException e) {
                                                     e.printStackTrace();
-                                                    IOUtil.close(protocolHandler);
+                                                    SharedIOUtil.close(protocolHandler);
                                                 }
                                             });
                                         } else {
@@ -729,7 +729,7 @@ public class NIOSocket
                             } else
                                 selectorController.cancelSelectionKey(key);
                         } catch (IOException e) {
-                            IOUtil.close(key.channel());
+                            SharedIOUtil.close(key.channel());
                             connectData.exception(e);
 
                         }
@@ -746,7 +746,7 @@ public class NIOSocket
             } catch (Exception e) {
 
                 // e.printStackTrace();
-                IOUtil.close(key.channel());
+                SharedIOUtil.close(key.channel());
 
                 if (executor != null)
                     executor.execute(() -> connectData.exception(e));
@@ -858,7 +858,7 @@ public class NIOSocket
                 }
             }
         } finally {
-            IOUtil.close(connectTimeout);
+            SharedIOUtil.close(connectTimeout);
         }
 
         throw new IOException("failed to finish connection " + channel);
@@ -914,14 +914,14 @@ public class NIOSocket
             Set<SelectionKey> keys = selectorController.keys();
             for (SelectionKey sk : keys) {
                 if (sk.channel() != null)
-                    IOUtil.close(sk.channel());
+                    SharedIOUtil.close(sk.channel());
                 try {
                     selectorController.cancelSelectionKey(sk);
                 } catch (Exception e) {
                 }
             }
 
-            IOUtil.close(selectorController);
+            SharedIOUtil.close(selectorController);
         }
 
     }

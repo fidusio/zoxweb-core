@@ -13,6 +13,8 @@
 // Version: 1.5.0 final
 package org.zoxweb.shared.util;
 
+import org.zoxweb.shared.io.SharedIOUtil;
+
 public final class QuickLZ {
     // Streaming mode not supported
     public final static int QLZ_STREAMING_BUFFER = 0;
@@ -26,7 +28,7 @@ public final class QuickLZ {
 
     // Decrease QLZ_POINTERS_3 to increase compression speed of level 3. Do not
     // edit any other constants!
-    private final static int HASH_VALUES = 4096;
+    private final static int HASH_VALUES = SharedIOUtil.K_4;
     private final static int MINOFFSET = 2;
     private final static int UNCONDITIONAL_MATCHLEN = 6;
     private final static int UNCOMPRESSED_END = 4;

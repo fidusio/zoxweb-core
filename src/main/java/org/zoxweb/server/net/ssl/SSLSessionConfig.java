@@ -2,10 +2,10 @@ package org.zoxweb.server.net.ssl;
 
 
 import org.zoxweb.server.io.ByteBufferUtil;
-import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.net.BaseChannelOutputStream;
 import org.zoxweb.server.net.SelectorController;
+import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.io.CloseableType;
 import org.zoxweb.shared.util.SUS;
@@ -81,7 +81,7 @@ public class SSLSessionConfig
                                 //staticSSLStateMachine.dispatch(hs, null);
                                 break;
                             default:
-                                IOUtil.close(sslChannel);
+                                SharedIOUtil.close(sslChannel);
                         }
                     }
 
@@ -91,15 +91,15 @@ public class SSLSessionConfig
             }
 
 
-            IOUtil.close(sslChannel);
-            IOUtil.close(remoteChannel);
+            SharedIOUtil.close(sslChannel);
+            SharedIOUtil.close(remoteChannel);
             if (selectorController != null) {
                 selectorController.cancelSelectionKey(sslChannel);
                 selectorController.cancelSelectionKey(remoteChannel);
             }
-            IOUtil.close((AutoCloseable) sslConnectionHelper);
+            SharedIOUtil.close((AutoCloseable) sslConnectionHelper);
             ByteBufferUtil.cache(inSSLNetData, inAppData, outSSLNetData, inRemoteData);
-            IOUtil.close(sslOutputStream);
+            SharedIOUtil.close(sslOutputStream);
 
             if (log.isEnabled()) log.getLogger().info("SSLSessionConfig-CLOSED " + Thread.currentThread() + " " +
                     sslChannel);// + " Address: " + connectionRemoteAddress);

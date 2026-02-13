@@ -1,10 +1,10 @@
 package org.zoxweb.server.net.common;
 
 import org.zoxweb.server.io.ByteBufferUtil;
-import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.net.BaseChannelOutputStream;
 import org.zoxweb.server.net.ProtocolHandler;
 import org.zoxweb.server.net.ssl.SSLSessionConfig;
+import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedUtil;
 
@@ -86,7 +86,7 @@ public class CommonChannelOutputStream
             if (usageTracker != null) usageTracker.updateUsage();
             return ret;
         } catch (IOException e) {
-            IOUtil.close(this);
+            SharedIOUtil.close(this);
             throw e;
         }
     }
@@ -125,7 +125,7 @@ public class CommonChannelOutputStream
                         written = ByteBufferUtil.smartWrite(null, dataChannel, sslConfig.outSSLNetData);
                         if (usageTracker != null) usageTracker.updateUsage();
                     } catch (IOException e) {
-                        IOUtil.close(this);
+                        SharedIOUtil.close(this);
                         throw e;
                     }
                     break;
@@ -153,9 +153,9 @@ public class CommonChannelOutputStream
         if (!isClosed.getAndSet(true)) {
             if (log.isEnabled()) log.getLogger().info("Calling close");
             if (sslConfig != null)
-                IOUtil.close(sslConfig, usageTracker);
+                SharedIOUtil.close(sslConfig, usageTracker);
             else
-                IOUtil.close(dataChannel, usageTracker);
+                SharedIOUtil.close(dataChannel, usageTracker);
             ByteBufferUtil.cache(outAppData);
         }
     }

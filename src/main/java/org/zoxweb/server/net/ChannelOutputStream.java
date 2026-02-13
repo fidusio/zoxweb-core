@@ -16,7 +16,7 @@
 package org.zoxweb.server.net;
 
 import org.zoxweb.server.io.ByteBufferUtil;
-import org.zoxweb.server.io.IOUtil;
+import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.util.Const;
 
 import java.io.IOException;
@@ -89,7 +89,7 @@ public class ChannelOutputStream
             if (usageTracker != null) usageTracker.updateUsage();
             return ret;
         } catch (IOException e) {
-            IOUtil.close(this);
+            SharedIOUtil.close(this);
             throw e;
         }
     }
@@ -108,7 +108,7 @@ public class ChannelOutputStream
 
         if (!isClosed.getAndSet(true)) {
             if (log.isEnabled()) log.getLogger().info("Calling close");
-            IOUtil.close(dataChannel, usageTracker);
+            SharedIOUtil.close(dataChannel, usageTracker);
             ByteBufferUtil.cache(outAppData);
         }
     }

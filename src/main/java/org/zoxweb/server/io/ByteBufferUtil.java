@@ -17,6 +17,7 @@ package org.zoxweb.server.io;
 
 import org.zoxweb.server.util.ServerUtil;
 import org.zoxweb.shared.io.BytesArray;
+import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.util.*;
 
 import java.io.IOException;
@@ -45,7 +46,7 @@ public class ByteBufferUtil {
     volatile private int count;
     volatile private int availableCapacity;
 
-    public static final int DEFAULT_BUFFER_SIZE = 4096;
+
     /**
      * The maximum number of buffer cached per byte buffer capacity
      */
@@ -70,7 +71,7 @@ public class ByteBufferUtil {
     }
 
     private void cache0(UByteArrayOutputStream ubaos) {
-        if (cachedUBAOS.size() < CACHE_LIMIT && ubaos != null && ubaos.size() <= Const.SizeInBytes.K.SIZE) {
+        if (cachedUBAOS.size() < CACHE_LIMIT && ubaos != null && ubaos.size() <= SharedIOUtil.K_4) {
             synchronized (this) {
                 ubaos.reset();
                 cachedUBAOS.queue(ubaos);
@@ -196,7 +197,7 @@ public class ByteBufferUtil {
             throw new IllegalArgumentException("invalid offset " + off);
         }
 
-        ByteBuffer bb = allocateByteBuffer(BufferType.HEAP, DEFAULT_BUFFER_SIZE);
+        ByteBuffer bb = allocateByteBuffer(BufferType.HEAP, SharedIOUtil.K_4);
 
         try {
             int end = off + len;
@@ -236,7 +237,7 @@ public class ByteBufferUtil {
     }
 
     public static ByteBuffer allocateByteBuffer(BufferType bType) {
-        return SINGLETON.toByteBuffer0(bType, null, 0, DEFAULT_BUFFER_SIZE, false);
+        return SINGLETON.toByteBuffer0(bType, null, 0, SharedIOUtil.K_4, false);
     }
 
     public static ByteBuffer allocateByteBuffer(BufferType bType, int capacity) {

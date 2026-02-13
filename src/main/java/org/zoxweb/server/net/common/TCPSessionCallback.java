@@ -1,13 +1,13 @@
 package org.zoxweb.server.net.common;
 
 import org.zoxweb.server.io.ByteBufferUtil;
-import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.net.BaseSessionCallback;
 import org.zoxweb.server.net.ssl.CustomSSLStateMachine;
 import org.zoxweb.server.net.ssl.SSLContextInfo;
 import org.zoxweb.server.net.ssl.SSLSessionConfig;
 import org.zoxweb.server.task.TaskUtil;
+import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.net.DNSResolverInt;
 import org.zoxweb.shared.net.IPAddress;
 
@@ -37,7 +37,7 @@ public abstract class TCPSessionCallback
 
         setID(UUID.randomUUID().toString());
         boolean stat = closeableDelegate.setDelegate(()->{
-            IOUtil.close(getChannel(), getOutputStream());
+            SharedIOUtil.close(getChannel(), getOutputStream());
             ByteBufferUtil.cache(dataBuffer);
         });
         if(!stat)
@@ -62,7 +62,7 @@ public abstract class TCPSessionCallback
         }
         setID(id);
         boolean stat = closeableDelegate.setDelegate(()->{
-            IOUtil.close(getChannel(), getOutputStream());
+            SharedIOUtil.close(getChannel(), getOutputStream());
             ByteBufferUtil.cache(dataBuffer);
         });
         if(!stat)
@@ -126,11 +126,11 @@ public abstract class TCPSessionCallback
 
                 if (read == -1) {
                     if (log.isEnabled()) log.getLogger().info("+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+Read:" + read);
-                    IOUtil.close(this);
+                    SharedIOUtil.close(this);
                 }
             } catch (Exception e) {
                 if (log.isEnabled()) e.printStackTrace();
-                IOUtil.close(this);
+                SharedIOUtil.close(this);
                 if (log.isEnabled())
                     log.getLogger().info(System.currentTimeMillis() + ":Connection end " + key + ":" + key.isValid() + " " + Thread.currentThread() + " " + TaskUtil.defaultTaskProcessor().availableExecutorThreads());
 

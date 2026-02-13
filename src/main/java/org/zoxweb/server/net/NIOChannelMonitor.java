@@ -1,8 +1,8 @@
 package org.zoxweb.server.net;
 
-import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.net.common.ConnectionCallback;
+import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.util.Const;
 
 import java.io.IOException;
@@ -31,7 +31,7 @@ public class NIOChannelMonitor
         SocketChannel sc = (SocketChannel) channel;
         try {
             if (!sc.isConnected()) {
-                IOUtil.close(sc);
+                SharedIOUtil.close(sc);
                 selectorController.cancelSelectionKey(sc);
                 // we are still waiting for connection
                 // and the timeout expired we need to close the channel
@@ -43,7 +43,7 @@ public class NIOChannelMonitor
                 }
             }
         } catch (Exception e) {
-            IOUtil.close(sc);
+            SharedIOUtil.close(sc);
         }
 
 

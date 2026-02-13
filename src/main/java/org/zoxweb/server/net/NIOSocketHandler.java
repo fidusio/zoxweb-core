@@ -16,10 +16,10 @@
 package org.zoxweb.server.net;
 
 import org.zoxweb.server.io.ByteBufferUtil;
-import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.net.common.CommonChannelOutputStream;
 import org.zoxweb.server.task.TaskUtil;
+import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.util.Const;
 
 import java.io.IOException;
@@ -60,7 +60,7 @@ public class NIOSocketHandler
 
     @Override
     protected void close_internal() throws IOException {
-        IOUtil.close(phSChannel, sessionCallback);
+        SharedIOUtil.close(phSChannel, sessionCallback);
         ByteBufferUtil.cache(phBB);
     }
 
@@ -95,13 +95,13 @@ public class NIOSocketHandler
 
             if (read == -1) {
                 if (log.isEnabled()) log.getLogger().info("+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+Read:" + read);
-                IOUtil.close(this);
+                SharedIOUtil.close(this);
                 if (log.isEnabled())
                     log.getLogger().info(key + ":" + key.isValid() + " " + Thread.currentThread() + " " + TaskUtil.defaultTaskProcessor().availableExecutorThreads());
             }
         } catch (Exception e) {
             if (log.isEnabled()) e.printStackTrace();
-            IOUtil.close(this);
+            SharedIOUtil.close(this);
             if (log.isEnabled())
                 log.getLogger().info(System.currentTimeMillis() + ":Connection end " + key + ":" + key.isValid() + " " + Thread.currentThread() + " " + TaskUtil.defaultTaskProcessor().availableExecutorThreads());
 

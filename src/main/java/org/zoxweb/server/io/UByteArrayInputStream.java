@@ -1,7 +1,7 @@
 package org.zoxweb.server.io;
 
 import org.zoxweb.shared.io.CloseableType;
-import org.zoxweb.shared.io.CloseableTypeRunnable;
+import org.zoxweb.shared.io.CloseableTypeDelegate;
 import org.zoxweb.shared.util.NadaInstance;
 
 import java.io.ByteArrayInputStream;
@@ -15,7 +15,7 @@ public class UByteArrayInputStream
 
     public static final UByteArrayInputStream EMPTY_INPUT_STREAM = new UByteArrayInputStream(EMPTY_BYTE_ARRAY);
 
-    private final CloseableTypeRunnable cth;
+    private final CloseableTypeDelegate ctd;
 
     /**
      * Creates a {@code UByteArrayInputStream}
@@ -53,18 +53,18 @@ public class UByteArrayInputStream
         this(buf, offset, length, null);
     }
 
-    public UByteArrayInputStream(byte[] buf, Runnable afterClose) {
+    public UByteArrayInputStream(byte[] buf, AutoCloseable afterClose) {
         this(buf, 0, buf.length, afterClose);
     }
 
-    public UByteArrayInputStream(byte[] buf, int offset, int length, Runnable afterClose) {
+    public UByteArrayInputStream(byte[] buf, int offset, int length, AutoCloseable afterClose) {
         super(buf, offset, length);
-        cth = afterClose != null ? new CloseableTypeRunnable(afterClose) : new CloseableTypeRunnable((Runnable) NadaInstance::nada);
+        ctd = afterClose != null ? new CloseableTypeDelegate(afterClose, true) : new CloseableTypeDelegate(NadaInstance::nada, false);
     }
 
 
     public void close() throws IOException {
-        cth.close();
+        ctd.close();
     }
 
     /**
@@ -74,7 +74,7 @@ public class UByteArrayInputStream
      */
     @Override
     public boolean isClosed() {
-        return cth.isClosed();
+        return ctd.isClosed();
     }
 
 

@@ -1,10 +1,10 @@
 package org.zoxweb.server.net.common;
 
-import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.net.NIOSocket;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.server.util.GSONUtil;
+import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.util.Const;
 import org.zoxweb.shared.util.SUS;
@@ -41,7 +41,7 @@ public class TCPPortScan
     public void accept(ByteBuffer byteBuffer) {
         SocketChannel channel = (SocketChannel) getChannel();
         log.getLogger().info(getRemoteAddress() + " " + channel.isConnected() + " total: " + total());
-        IOUtil.close(this);
+        SharedIOUtil.close(this);
 
     }
 
@@ -51,7 +51,7 @@ public class TCPPortScan
 
         failCount.incrementAndGet();
         log.getLogger().info(getRemoteAddress() + " " + e + " " + total());
-        IOUtil.close(this);
+        SharedIOUtil.close(this);
     }
 
 
@@ -61,7 +61,7 @@ public class TCPPortScan
         SocketChannel channel = (SocketChannel) getChannel();
         //System.out.println(getRemoteAddress() + " " + channel.isConnected() + " total: " + total());
         System.out.println(getRemoteAddress() + " " + channel.isConnected() + " total: " + total());
-        IOUtil.close(this);
+        SharedIOUtil.close(this);
     }
 
 
@@ -105,7 +105,7 @@ public class TCPPortScan
             TaskUtil.waitIfBusy(500, () -> total() == size);
             log.getLogger().info("IPAddresses size: " + ipAddressesList.size() + " Total: " + total() + " Success: " + successCount.get() + " Failed: " + failCount.get() + " it took " + Const.TimeInMillis.toString(System.currentTimeMillis() - ts));
             log.getLogger().info(GSONUtil.toJSONDefault(nioSocket.getStats(), true));
-            IOUtil.close(nioSocket);
+            SharedIOUtil.close(nioSocket);
 
             log.getLogger().info(GSONUtil.toJSONDefault(TaskUtil.info()));
             TaskUtil.waitIfBusyThenClose(25);

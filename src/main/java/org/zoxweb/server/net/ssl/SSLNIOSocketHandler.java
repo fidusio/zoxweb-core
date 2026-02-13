@@ -18,13 +18,13 @@ package org.zoxweb.server.net.ssl;
 import org.zoxweb.server.fsm.StateMachine;
 import org.zoxweb.server.fsm.TriggerConsumer;
 import org.zoxweb.server.io.ByteBufferUtil;
-import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.net.BaseSessionCallback;
 import org.zoxweb.server.net.NIOSocket;
 import org.zoxweb.server.net.ProtocolHandler;
 import org.zoxweb.server.net.common.CommonChannelOutputStream;
 import org.zoxweb.server.security.SecUtil;
 import org.zoxweb.server.task.TaskUtil;
+import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.util.ParamUtil;
 import org.zoxweb.shared.util.SUS;
@@ -69,7 +69,7 @@ public class SSLNIOSocketHandler
                     e.printStackTrace();
                     if (log.isEnabled()) log.getLogger().info(e + "");
                     // we should close
-                    IOUtil.close(this);
+                    SharedIOUtil.close(this);
                 }
             }
         }
@@ -89,7 +89,7 @@ public class SSLNIOSocketHandler
          */
         @Override
         public void close() throws IOException {
-            IOUtil.close(getOutputStream());
+            SharedIOUtil.close(getOutputStream());
         }
 
         /**
@@ -162,7 +162,7 @@ public class SSLNIOSocketHandler
 
     @Override
     protected void close_internal() throws IOException {
-        IOUtil.close(sslConfig, sessionCallback);
+        SharedIOUtil.close(sslConfig, sessionCallback);
     }
 
 
@@ -207,13 +207,13 @@ public class SSLNIOSocketHandler
                 if (bytesRead == -1) {
                     if (log.isEnabled())
                         log.getLogger().info("SSL-CHANNEL-CLOSED-NEED_UNWRAP: " + sslConfig.getHandshakeStatus() + " bytesRead: " + bytesRead);
-                    IOUtil.close(this);
+                    SharedIOUtil.close(this);
                 }
             }
 
         } catch (Exception e) {
             e.printStackTrace();
-            IOUtil.close(this);
+            SharedIOUtil.close(this);
             if (log.isEnabled())
                 log.getLogger().info(System.currentTimeMillis() + ":Connection end " + key + ":" + key.isValid() + " " + TaskUtil.availableThreads(getExecutor()));
         }

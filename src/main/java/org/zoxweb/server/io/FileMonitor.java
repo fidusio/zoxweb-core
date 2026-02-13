@@ -19,6 +19,7 @@ import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.shared.data.events.BaseEventObject;
 import org.zoxweb.shared.data.events.EventListenerManager;
 import org.zoxweb.shared.data.events.StringTokenEvent;
+import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.util.Const.TimeInMillis;
 import org.zoxweb.shared.util.DaemonController;
 import org.zoxweb.shared.util.SUS;
@@ -72,7 +73,7 @@ public class FileMonitor
 
     private DataInput openFile(File file) throws IOException {
         if (bufferedReader instanceof Closeable) {
-            IOUtil.close((Closeable) bufferedReader);
+            SharedIOUtil.close((Closeable) bufferedReader);
         }
 
         if (device) {

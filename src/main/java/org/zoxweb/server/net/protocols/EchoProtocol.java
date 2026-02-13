@@ -1,11 +1,11 @@
 package org.zoxweb.server.net.protocols;
 
 import org.zoxweb.server.io.ByteBufferUtil;
-import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.io.UByteArrayOutputStream;
 import org.zoxweb.server.net.BaseChannelOutputStream;
 import org.zoxweb.server.net.BaseSessionCallback;
 import org.zoxweb.server.net.ssl.SSLSessionConfig;
+import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.util.InstanceFactory;
 
 import java.io.IOException;
@@ -29,7 +29,7 @@ public class EchoProtocol {
                 }
             } catch (IOException e) {
                 e.printStackTrace();
-                IOUtil.close(getOutputStream());
+                SharedIOUtil.close(getOutputStream());
             }
         }
 
@@ -76,7 +76,7 @@ public class EchoProtocol {
                 }
             } catch (IOException e) {
                 e.printStackTrace();
-                IOUtil.close(getOutputStream());
+                SharedIOUtil.close(getOutputStream());
             }
         }
 

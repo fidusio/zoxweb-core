@@ -17,6 +17,7 @@ package org.zoxweb.server.io;
 
 import org.zoxweb.shared.crypto.CryptoConst;
 import org.zoxweb.shared.crypto.HashResult;
+import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.net.ProxyType;
 import org.zoxweb.shared.util.Const;
@@ -44,29 +45,9 @@ import java.util.stream.Stream;
 
 public class IOUtil {
 
-    public static final int DEFAULT_BUFFER_SIZE = 8196;
-    //public static final SimpleDateFormat SDF = new SimpleDateFormat("[yyyy-MM-dd HH:mm:ss.SSS] ");
+
 
     private IOUtil() {
-    }
-
-    /**
-     * Close an AutoCloseable object if c is null the action is discarded, while closing catch any exception silently
-     *
-     * @param acs auto closable array
-     */
-    public static void close(AutoCloseable... acs) {
-        if (acs != null) {
-            for (AutoCloseable c : acs) {
-                if (c != null) {
-                    try {
-                        c.close();
-                    } catch (Exception e) {
-                        // Intentionally suppressed - close() should not throw during cleanup
-                    }
-                }
-            }
-        }
     }
 
 
@@ -95,22 +76,6 @@ public class IOUtil {
             throws IOException {
         br.seek(br.length());
         return br;
-    }
-
-    /**
-     * @param c closable
-     * @return IOException or null if none generated
-     */
-    public static IOException close(Closeable c) {
-        if (c != null) {
-            try {
-                c.close();
-            } catch (IOException e) {
-                return e;
-            }
-        }
-
-        return null;
     }
 
 
@@ -249,7 +214,7 @@ public class IOUtil {
 
     public static long countInputStreamBytes(InputStream is, boolean close)
             throws IOException {
-        byte[] buffer = ByteBufferUtil.allocateByteArray(DEFAULT_BUFFER_SIZE);
+        byte[] buffer = ByteBufferUtil.allocateByteArray(SharedIOUtil.K_8);
         int read;
         long counter = 0;
 
@@ -261,7 +226,7 @@ public class IOUtil {
         } finally {
             ByteBufferUtil.cache(buffer);
             if (close) {
-                close(is);
+                SharedIOUtil.close(is);
             }
         }
 
@@ -316,7 +281,7 @@ public class IOUtil {
      */
     public static String inputStreamToString(InputStream is, boolean close)
             throws IOException {
-        byte[] buffer = ByteBufferUtil.allocateByteArray(DEFAULT_BUFFER_SIZE);
+        byte[] buffer = ByteBufferUtil.allocateByteArray(SharedIOUtil.K_8);
         StringBuilder sb = new StringBuilder();
         int read;
         try {
@@ -327,7 +292,7 @@ public class IOUtil {
         } finally {
             ByteBufferUtil.cache(buffer);
             if (close) {
-                close(is);
+                SharedIOUtil.close(is);
             }
         }
 
@@ -343,7 +308,7 @@ public class IOUtil {
      */
     public static String readerToString(Reader reader, boolean close)
             throws IOException {
-        char[] buffer = new char[4096];
+        char[] buffer = new char[SharedIOUtil.K_4];
         StringBuilder sb = new StringBuilder();
         int read;
 
@@ -353,7 +318,7 @@ public class IOUtil {
             }
         } finally {
             if (close) {
-                close(reader);
+                SharedIOUtil.close(reader);
             }
         }
 
@@ -372,7 +337,7 @@ public class IOUtil {
     public static UByteArrayOutputStream inputStreamToByteArray(InputStream is, boolean close)
             throws IOException {
         UByteArrayOutputStream baos = new UByteArrayOutputStream();
-        byte[] buffer = ByteBufferUtil.allocateByteArray(DEFAULT_BUFFER_SIZE);
+        byte[] buffer = ByteBufferUtil.allocateByteArray(SharedIOUtil.K_8);
         try {
             int read;
 
@@ -382,7 +347,7 @@ public class IOUtil {
         } finally {
             ByteBufferUtil.cache(buffer);
             if (close) {
-                close(is);
+                SharedIOUtil.close(is);
             }
 
         }
@@ -419,7 +384,7 @@ public class IOUtil {
             is = new FileInputStream(file);
             return inputStreamToByteArray(is, close);
         } finally {
-            IOUtil.close(is);
+            SharedIOUtil.close(is);
         }
     }
 
@@ -450,7 +415,7 @@ public class IOUtil {
             fos = new FileOutputStream(file);
             fos.write(buffer);
         } finally {
-            IOUtil.close(fos);
+            SharedIOUtil.close(fos);
         }
 
     }
@@ -531,7 +496,7 @@ public class IOUtil {
 
         long totalCopied = 0;
         int read;
-        byte[] buffer = ByteBufferUtil.allocateByteArray(DEFAULT_BUFFER_SIZE);
+        byte[] buffer = ByteBufferUtil.allocateByteArray(SharedIOUtil.K_8);
         try {
             while ((read = is.read(buffer)) != -1) {
                 os.write(buffer, 0, read);
@@ -556,11 +521,11 @@ public class IOUtil {
                 totalCopied = relayStreams(md, is, os);
             } finally {
                 if (closeIS || is instanceof CloseEnabledInputStream) {
-                    close(is);
+                    SharedIOUtil.close(is);
                 }
 
                 if (closeOS || os instanceof CloseEnabledOutputStream) {
-                    close(os);
+                    SharedIOUtil.close(os);
                 }
             }
 
@@ -585,11 +550,11 @@ public class IOUtil {
             return relayStreams(null, is, os);
         } finally {
             if (closeIS || is instanceof CloseEnabledInputStream) {
-                close(is);
+                SharedIOUtil.close(is);
             }
 
             if (closeOS || os instanceof CloseEnabledOutputStream) {
-                close(os);
+                SharedIOUtil.close(os);
             }
         }
     }

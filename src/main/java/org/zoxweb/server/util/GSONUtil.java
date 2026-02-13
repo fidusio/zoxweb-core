@@ -19,12 +19,12 @@ import com.google.gson.*;
 import com.google.gson.internal.bind.JsonTreeWriter;
 import com.google.gson.stream.JsonWriter;
 import org.zoxweb.server.filters.TimestampFilter;
-import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.shared.api.APIException;
 import org.zoxweb.shared.db.*;
 import org.zoxweb.shared.filters.FilterType;
 import org.zoxweb.shared.filters.ValueFilter;
+import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.security.AccessException;
 import org.zoxweb.shared.util.*;
 import org.zoxweb.shared.util.Const.GNVType;
@@ -182,7 +182,7 @@ public final class GSONUtil {
                 toJSONStringList(jtw, src);
                 return jtw.get();
             } finally {
-                IOUtil.close(jtw);
+                SharedIOUtil.close(jtw);
             }
         }
 
@@ -211,7 +211,7 @@ public final class GSONUtil {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             } finally {
-                IOUtil.close(jtw);
+                SharedIOUtil.close(jtw);
             }
             return jtw.get();
         }
@@ -257,7 +257,7 @@ public final class GSONUtil {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             } finally {
-                IOUtil.close(jtw);
+                SharedIOUtil.close(jtw);
             }
 
             return jtw.get();

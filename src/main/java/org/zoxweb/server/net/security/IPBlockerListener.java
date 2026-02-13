@@ -16,12 +16,12 @@
 package org.zoxweb.server.net.security;
 
 import org.zoxweb.server.io.FileMonitor;
-import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.task.TaskSchedulerProcessor;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.server.util.RuntimeUtil;
 import org.zoxweb.shared.app.AppCreatorDefault;
 import org.zoxweb.shared.data.events.*;
+import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.security.IPBlockerConfig;
 import org.zoxweb.shared.util.Const.TimeInMillis;
@@ -271,7 +271,7 @@ public class IPBlockerListener
     @Override
     public void close() throws IOException {
         // TODO Auto-generated method stub
-        IOUtil.close(fileMonitor);
+        SharedIOUtil.close(fileMonitor);
     }
 
 

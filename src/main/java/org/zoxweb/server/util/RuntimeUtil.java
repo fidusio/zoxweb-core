@@ -21,6 +21,7 @@ import org.zoxweb.server.io.UByteArrayOutputStream;
 import org.zoxweb.shared.data.RuntimeResultDAO;
 import org.zoxweb.shared.data.RuntimeResultDAO.ResultAttribute;
 import org.zoxweb.shared.data.VMInfoDAO;
+import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.util.Const;
 import org.zoxweb.shared.util.Const.JavaClassVersion;
 import org.zoxweb.shared.util.GetValue;
@@ -300,7 +301,7 @@ public class RuntimeUtil {
 
             return checkClassVersion(fis);
         } finally {
-            IOUtil.close(fis);
+            SharedIOUtil.close(fis);
         }
     }
 
@@ -320,8 +321,8 @@ public class RuntimeUtil {
             int major = in.readUnsignedShort();
             return JavaClassVersion.lookup(major, minor);
         } finally {
-            IOUtil.close(fis);
-            IOUtil.close(in);
+            SharedIOUtil.close(fis);
+            SharedIOUtil.close(in);
 
         }
     }

@@ -16,9 +16,9 @@
 package org.zoxweb.server.net;
 
 import org.zoxweb.server.io.ByteBufferUtil;
-import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.task.TaskUtil;
+import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.net.IPAddress;
 
 import java.io.IOException;
@@ -101,8 +101,8 @@ public class NIOTunnel
     @Override
     protected void close_internal() throws IOException {
 
-        IOUtil.close(destinationChannel);
-        IOUtil.close(phSChannel);
+        SharedIOUtil.close(destinationChannel);
+        SharedIOUtil.close(phSChannel);
         ByteBufferUtil.cache(sourceBB, destinationBB);
         log.getLogger().info("closed: " + sourceAddress + " - " + remoteAddress);
 
@@ -165,7 +165,7 @@ public class NIOTunnel
             }
         } catch (Exception e) {
             if (log.isEnabled()) e.printStackTrace();
-            IOUtil.close(this);
+            SharedIOUtil.close(this);
             if (log.isEnabled())
                 log.getLogger().info(System.currentTimeMillis() + ":Connection end " + key + ":" + key.isValid() + " " + Thread.currentThread() + " " + TaskUtil.defaultTaskProcessor().availableExecutorThreads());
 

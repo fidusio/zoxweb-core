@@ -1,11 +1,11 @@
 package org.zoxweb.server.util;
 
-import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.task.TaskSchedulerProcessor;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.shared.data.events.BaseEventObject;
 import org.zoxweb.shared.data.events.EventHandlerListener;
 import org.zoxweb.shared.data.events.EventListenerManager;
+import org.zoxweb.shared.io.SharedIOUtil;
 
 
 public class DefaultEvenManager
@@ -42,6 +42,6 @@ public class DefaultEvenManager
 
     @Override
     public void close() {
-        IOUtil.close(tsp);
+        SharedIOUtil.close(tsp);
     }
 }

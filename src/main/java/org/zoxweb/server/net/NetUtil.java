@@ -15,7 +15,7 @@
  */
 package org.zoxweb.server.net;
 
-import org.zoxweb.server.io.IOUtil;
+import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.net.*;
 import org.zoxweb.shared.net.InetProp.*;
 import org.zoxweb.shared.security.SecurityStatus;
@@ -42,7 +42,7 @@ public class NetUtil {
             ret = ifrm.lookupSecurityStatus(host);
 
             if (ret != SecurityStatus.ALLOW) {
-                IOUtil.close(sc);
+                SharedIOUtil.close(sc);
             }
         }
 
@@ -56,7 +56,7 @@ public class NetUtil {
         if (ifrm != null) {
             ret = ifrm.lookupSecurityStatus(host);
             if (sc != null && ret != SecurityStatus.ALLOW) {
-                IOUtil.close(sc);
+                SharedIOUtil.close(sc);
             }
         }
 
@@ -68,7 +68,7 @@ public class NetUtil {
         if (ifrm != null) {
             ret = ifrm.lookupSecurityStatus(channel.getRemoteAddress());
             if (sc != null && ret != SecurityStatus.ALLOW) {
-                IOUtil.close(sc);
+                SharedIOUtil.close(sc);
             }
         }
 
@@ -80,7 +80,7 @@ public class NetUtil {
         if (ifrm != null) {
             ret = ifrm.lookupSecurityStatus(host);
             if (sc != null && ret != SecurityStatus.ALLOW) {
-                IOUtil.close(sc);
+                SharedIOUtil.close(sc);
             }
         }
 
@@ -646,7 +646,7 @@ public class NetUtil {
                 Channel channel = sk.channel();
                 sk.cancel();
                 if(includeChannel)
-                    IOUtil.close(channel);
+                    SharedIOUtil.close(channel);
             }
         }
     }

@@ -23,6 +23,7 @@ import org.zoxweb.server.net.NetworkTunnel;
 import org.zoxweb.server.security.SecUtil;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.server.util.GSONUtil;
+import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.net.IPAddress;
 
 import javax.net.ssl.SSLContext;
@@ -84,7 +85,7 @@ public class SecureNetworkTunnel
                 new NetworkTunnel(sIn, sRemote);
             }
         } catch (Exception e) {
-            IOUtil.close(ss);
+            SharedIOUtil.close(ss);
         }
     }
 

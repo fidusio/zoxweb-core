@@ -6,6 +6,7 @@ import java.security.KeyStore;
 import javax.crypto.SecretKey;
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.util.GSONUtil;
+import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.security.KeyStoreInfo;
 import org.zoxweb.shared.util.SharedStringUtil;
 
@@ -33,7 +34,7 @@ public class KeyStoreTest {
       if (args.length > index) {
         FileOutputStream fos = new FileOutputStream(args[index++]);
         ksPkcs12.store(fos, ksid.getKeyStorePassword().toCharArray());
-        IOUtil.close(fos);
+        SharedIOUtil.close(fos);
       }
 
     } catch (Exception e) {

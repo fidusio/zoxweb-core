@@ -9,6 +9,7 @@ import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.shared.data.ApplicationConfigDAO;
 import org.zoxweb.shared.data.ApplicationConfigDAO.ApplicationDefaultParam;
 import org.zoxweb.shared.data.ConfigDAO;
+import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.security.IPBlockerConfig;
 import org.zoxweb.shared.util.ResourceManager;
 
@@ -30,7 +31,7 @@ public class ServiceManager
 
     public static void close(Object obj) {
         if (obj instanceof AutoCloseable)
-            IOUtil.close((AutoCloseable) obj);
+            SharedIOUtil.close((AutoCloseable) obj);
     }
 
 

@@ -2,9 +2,9 @@ package org.zoxweb.server.net.common;
 
 import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.shared.io.CloseableTypeDelegate;
-import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.net.DataPacket;
+import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.net.SharedNetUtil;
 import org.zoxweb.shared.util.Const;
 
@@ -50,7 +50,7 @@ public abstract class UDPSessionCallback
             this.bufferSize = bufferSize;
 
         setExecutor(executor);
-        closeableDelegate = new CloseableTypeDelegate(()->IOUtil.close(channel));
+        closeableDelegate = new CloseableTypeDelegate(()-> SharedIOUtil.close(channel), true );
     }
 
     protected UDPSessionCallback(Executor executor, int port) {

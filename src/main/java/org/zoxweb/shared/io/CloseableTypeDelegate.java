@@ -1,6 +1,7 @@
 package org.zoxweb.shared.io;
 
 import java.io.Closeable;
+import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -11,14 +12,16 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class CloseableTypeDelegate implements CloseableType {
     private volatile AutoCloseable delegate;
     private final AtomicBoolean isClosed = new AtomicBoolean(false);
+    private final AtomicBoolean throwIOException = new AtomicBoolean(false);
 
     /**
      * Creates a new CloseableTypeDelegate wrapping the given resource.
      *
      * @param delegate the AutoCloseable resource to delegate close operations to
      */
-    public CloseableTypeDelegate(AutoCloseable delegate) {
+    public CloseableTypeDelegate(AutoCloseable delegate, boolean  throwIOException) {
         this.delegate = delegate;
+        this.throwIOException.set(throwIOException);
     }
 
     /**
@@ -33,13 +36,19 @@ public class CloseableTypeDelegate implements CloseableType {
      * the {@code IOException}.
      */
     @Override
-    public void close(){
+    public void close() throws IOException {
         if (delegate != null) {
             if (!isClosed.getAndSet(true)) {
                 try {
                     // DO NOT USE IOUtil here it is not available
                     delegate.close();
-                } catch (Exception e) {
+                }
+                catch (IOException e) {
+                    if(throwIOException.get()){
+                        throw e;
+                    }
+                }
+                catch (Exception e) {
 
                 }
 

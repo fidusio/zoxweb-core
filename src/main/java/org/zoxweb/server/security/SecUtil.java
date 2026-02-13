@@ -1,6 +1,5 @@
 package org.zoxweb.server.security;
 
-import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.server.util.LockHolder;
 import org.zoxweb.server.util.ReflectionUtil;
@@ -8,6 +7,7 @@ import org.zoxweb.shared.annotation.SecurityProp;
 import org.zoxweb.shared.crypto.CIPassword;
 import org.zoxweb.shared.crypto.CredentialHasher;
 import org.zoxweb.shared.crypto.CryptoConst;
+import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.security.*;
 import org.zoxweb.shared.util.*;
 
@@ -406,8 +406,8 @@ public final class SecUtil {
             tsfis = trustStoreFilename != null ? new FileInputStream(trustStoreFilename) : null;
             return initSSLContext(algoProt, provider, ksfis, keyStoreType, keyStorePassword, crtPassword, tsfis, trustStorePassword);
         } finally {
-            IOUtil.close(ksfis);
-            IOUtil.close(tsfis);
+            SharedIOUtil.close(ksfis);
+            SharedIOUtil.close(tsfis);
         }
 
     }

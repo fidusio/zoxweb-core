@@ -15,11 +15,11 @@
  */
 package org.zoxweb.server.net;
 
-import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.net.common.SKHandler;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.shared.io.CloseableType;
+import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.util.*;
 
 import java.io.IOException;
@@ -47,7 +47,7 @@ public abstract class ProtocolHandler
 
         public void run() {
             if (System.currentTimeMillis() - ph.lastUsage() > timeout.getDelayInMillis()) {
-                IOUtil.close(ph);
+                SharedIOUtil.close(ph);
                 log.getLogger().info("session timed out protocol handler closed.");
 
             } else {

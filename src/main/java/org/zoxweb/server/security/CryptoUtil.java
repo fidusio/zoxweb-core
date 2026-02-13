@@ -16,13 +16,13 @@
 package org.zoxweb.server.security;
 
 import org.zoxweb.server.http.HTTPUtil;
-import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.io.UByteArrayOutputStream;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.crypto.CryptoConst;
 import org.zoxweb.shared.crypto.EncryptedData;
 import org.zoxweb.shared.crypto.EncapsulatedKey;
 import org.zoxweb.shared.filters.BytesValueFilter;
+import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.security.JWT;
 import org.zoxweb.shared.security.KeyStoreInfo;
@@ -205,7 +205,7 @@ public class CryptoUtil {
                 baos.write(baos.size());
             }
 
-            IOUtil.close(baos);
+            SharedIOUtil.close(baos);
             data = baos.toByteArray();
         }
 
@@ -452,7 +452,7 @@ public class CryptoUtil {
             keystore.store(keyStoreOS, newKeystorePass.toCharArray());
 
         } finally {
-            IOUtil.close(keyStoreOS);
+            SharedIOUtil.close(keyStoreOS);
         }
     }
 
@@ -478,7 +478,7 @@ public class CryptoUtil {
             os = new FileOutputStream(keyStoreFile);
             return createKeyStore(os, keyStoreType, keyStorePass);
         } finally {
-            IOUtil.close(os);
+            SharedIOUtil.close(os);
         }
     }
 
@@ -491,7 +491,7 @@ public class CryptoUtil {
         try {
             ret.store(keyStoreOS, keyStorePass.toCharArray());
         } finally {
-            IOUtil.close(keyStoreOS);
+            SharedIOUtil.close(keyStoreOS);
         }
 
         return ret;
@@ -515,7 +515,7 @@ public class CryptoUtil {
             return keystore;
         } finally {
 
-            IOUtil.close(keyStoreIS);
+            SharedIOUtil.close(keyStoreIS);
         }
     }
 
@@ -901,7 +901,7 @@ public class CryptoUtil {
             socket.startHandshake();
             return socket.getSession().getPeerCertificates();
         } finally {
-            IOUtil.close(socket);
+            SharedIOUtil.close(socket);
         }
     }
 

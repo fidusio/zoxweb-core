@@ -19,12 +19,12 @@ package org.zoxweb.server.http.proxy;
 import org.zoxweb.server.http.HTTPUtil;
 import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.server.io.ByteBufferUtil.BufferType;
-import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.io.UByteArrayOutputStream;
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.net.*;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.shared.http.*;
+import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.protocol.Delimiter;
 import org.zoxweb.shared.security.SecurityStatus;
@@ -178,12 +178,12 @@ public class NIOProxyProtocol
     @Override
     protected void close_internal() throws IOException {
 
-        IOUtil.close(phSChannel);
+        SharedIOUtil.close(phSChannel);
 
         if (channelRelay != null) {
-            IOUtil.close(channelRelay);
+            SharedIOUtil.close(channelRelay);
         } else {
-            IOUtil.close(remoteChannel);
+            SharedIOUtil.close(remoteChannel);
         }
         ByteBufferUtil.cache(sourceBB);
 
@@ -246,7 +246,7 @@ public class NIOProxyProtocol
         } catch (Exception e) {
             if (log.isEnabled())
                 e.printStackTrace();
-            IOUtil.close(this);
+            SharedIOUtil.close(this);
 
         }
     }
@@ -392,7 +392,7 @@ public class NIOProxyProtocol
 
                 remoteChannelSK = getSelectorController().register(remoteChannel,
                         SelectionKey.OP_READ,
-                        new ChannelRelayTunnel(ByteBufferUtil.DEFAULT_BUFFER_SIZE, remoteChannel, phSChannel, phSK, true, getSelectorController()),
+                        new ChannelRelayTunnel(SharedIOUtil.K_4, remoteChannel, phSChannel, phSK, true, getSelectorController()),
                         false);
                 requestInfo = null;
 
@@ -473,7 +473,7 @@ public class NIOProxyProtocol
 
 
                 if (remoteChannelSK == null || !remoteChannelSK.isValid()) {
-                    channelRelay = new ChannelRelayTunnel(ByteBufferUtil.DEFAULT_BUFFER_SIZE, remoteChannel, phSChannel, phSK, true, getSelectorController());
+                    channelRelay = new ChannelRelayTunnel(SharedIOUtil.K_4, remoteChannel, phSChannel, phSK, true, getSelectorController());
                     remoteChannelSK = getSelectorController().register(remoteChannel, SelectionKey.OP_READ, channelRelay, false);
                 }
 
@@ -556,7 +556,7 @@ public class NIOProxyProtocol
                 public void run() {
                     long ts = System.nanoTime();
                     // TODO Auto-generated method stub
-                    IOUtil.close(toClose);
+                    SharedIOUtil.close(toClose);
                     TaskUtil.defaultTaskScheduler().close();
                     TaskUtil.defaultTaskProcessor().close();
                     ts = System.nanoTime() - ts;

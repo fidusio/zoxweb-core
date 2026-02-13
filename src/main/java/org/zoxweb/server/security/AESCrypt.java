@@ -15,8 +15,8 @@
  */
 package org.zoxweb.server.security;
 
-import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.io.UByteArrayOutputStream;
+import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.util.Const.TypeInBytes;
 import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedStringUtil;
@@ -358,8 +358,8 @@ public class AESCrypt {
             fos = new FileOutputStream(toPath);
             encrypt(version, new BufferedInputStream(fis), new BufferedOutputStream(fos));
         } finally {
-            IOUtil.close(fis);
-            IOUtil.close(fos);
+            SharedIOUtil.close(fis);
+            SharedIOUtil.close(fos);
         }
 
 
@@ -401,8 +401,8 @@ public class AESCrypt {
             fos = new FileOutputStream(toPath);
             decrypt(fromPath.length(), new BufferedInputStream(fis), new BufferedOutputStream(fos));
         } finally {
-            IOUtil.close(fis);
-            IOUtil.close(fos);
+            SharedIOUtil.close(fis);
+            SharedIOUtil.close(fos);
         }
     }
 
@@ -505,10 +505,10 @@ public class AESCrypt {
             throw new GeneralSecurityException(JCE_EXCEPTION_MESSAGE, e);
         } finally {
             if (closeIn) {
-                IOUtil.close(in);
+                SharedIOUtil.close(in);
             }
             if (closeOut) {
-                IOUtil.close(out);
+                SharedIOUtil.close(out);
             }
         }
     }
@@ -660,10 +660,10 @@ public class AESCrypt {
             throw new GeneralSecurityException(JCE_EXCEPTION_MESSAGE, e);
         } finally {
             if (closeIn) {
-                IOUtil.close(in);
+                SharedIOUtil.close(in);
             }
             if (closeOut) {
-                IOUtil.close(out);
+                SharedIOUtil.close(out);
             }
         }
     }

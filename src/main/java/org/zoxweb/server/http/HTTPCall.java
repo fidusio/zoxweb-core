@@ -22,6 +22,7 @@ import org.zoxweb.server.net.ssl.SSLCheckDisabler;
 import org.zoxweb.server.net.ssl.SSLSocketProp;
 import org.zoxweb.shared.filters.ReplacementFilter;
 import org.zoxweb.shared.http.*;
+import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.util.*;
 
 import java.io.ByteArrayOutputStream;
@@ -315,10 +316,10 @@ public class HTTPCall {
                 }
             }
 
-            IOUtil.close(os);
-            IOUtil.close(is);
-            IOUtil.close(isError);
-            IOUtil.close(contentAsIS);
+            SharedIOUtil.close(os);
+            SharedIOUtil.close(is);
+            SharedIOUtil.close(isError);
+            SharedIOUtil.close(contentAsIS);
         }
 
 

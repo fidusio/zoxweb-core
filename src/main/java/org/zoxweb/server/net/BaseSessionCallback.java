@@ -20,7 +20,7 @@ public abstract class BaseSessionCallback<CF>
     private volatile BaseChannelOutputStream bcos;
     private volatile ByteChannel channel;
     //protected final AtomicBoolean isClosed = new AtomicBoolean(false);
-    protected final CloseableTypeDelegate closeableDelegate= new CloseableTypeDelegate(null);
+    protected final CloseableTypeDelegate closeableDelegate= new CloseableTypeDelegate(null, false);
     protected String instanceID = null;
 
 

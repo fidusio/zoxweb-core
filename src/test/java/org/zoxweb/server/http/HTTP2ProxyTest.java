@@ -19,13 +19,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import org.zoxweb.server.io.IOUtil;
+
 import org.zoxweb.server.io.UByteArrayOutputStream;
 import org.zoxweb.server.net.ssl.SSLCheckDisabler;
 import org.zoxweb.shared.http.HTTPMessageConfig;
 import org.zoxweb.shared.http.HTTPMessageConfigInterface;
 import org.zoxweb.shared.http.HTTPMethod;
 import org.zoxweb.shared.http.HTTPVersion;
+import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.util.Const.TimeInMillis;
 import org.zoxweb.shared.util.SharedUtil;
@@ -97,7 +98,7 @@ public class HTTP2ProxyTest {
         System.out.println(new String(ubaos.toByteArray()));
         System.out.println("Proxy time:" + TimeInMillis.nanosToString(delta1));
 
-        IOUtil.close(s);
+        SharedIOUtil.close(s);
       }
     } catch (Exception e) {
       e.printStackTrace();

@@ -15,9 +15,9 @@
  */
 package org.zoxweb.server.util;
 
-import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.net.NetUtil;
 import org.zoxweb.shared.data.SystemInfoDAO;
+import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.net.NetworkInterfaceDAO;
 import org.zoxweb.shared.util.*;
 
@@ -115,7 +115,7 @@ public final class ServerUtil {
             fis = new FileInputStream(fileName);
             ret = toStringList(fis);
         } finally {
-            IOUtil.close(fis);
+            SharedIOUtil.close(fis);
         }
 
         return ret;
@@ -143,8 +143,8 @@ public final class ServerUtil {
                 line = textReader.readLine();
             }
         } finally {
-            IOUtil.close(textReader);
-            IOUtil.close(is);
+            SharedIOUtil.close(textReader);
+            SharedIOUtil.close(is);
         }
 
         return messageList;
@@ -166,8 +166,8 @@ public final class ServerUtil {
             //e.printStackTrace();
         }
 
-        IOUtil.close(decoder);
-        IOUtil.close(is);
+        SharedIOUtil.close(decoder);
+        SharedIOUtil.close(is);
 
         return ret.toArray();
     }
@@ -186,8 +186,8 @@ public final class ServerUtil {
         }
 
         enc.flush();
-        IOUtil.close(enc);
-        IOUtil.close(os);
+        SharedIOUtil.close(enc);
+        SharedIOUtil.close(os);
     }
 
     /**
