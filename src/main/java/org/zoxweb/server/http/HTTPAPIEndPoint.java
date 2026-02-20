@@ -29,6 +29,7 @@ public class HTTPAPIEndPoint<I, O>
     private final AtomicLong successCounter = new AtomicLong();
     private final AtomicLong failedCounter = new AtomicLong();
     private volatile NVGenericMap properties = new NVGenericMap();
+    private final boolean deepCopy = true;
 
 
     private class ToRun
@@ -68,7 +69,7 @@ public class HTTPAPIEndPoint<I, O>
         ret.executor = executor;
         ret.tsp = tsp;
         ret.okHttpClient = okHttpClient;
-        ret.properties = NVGenericMap.copy(properties, true);
+        ret.properties = NVGenericMap.copy(properties, deepCopy);
         ret.domain = domain;
         ret.rateController = rateController;
 
@@ -223,8 +224,8 @@ public class HTTPAPIEndPoint<I, O>
     private HTTPMessageConfigInterface createHMCI(I input, HTTPAuthorization authorization) {
 
         HTTPMessageConfigInterface ret = HTTPMessageConfig.createAndInit(config.getURL(), config.getURI(), config.getMethod(), config.isSecureCheckEnabled());
-        NVGenericMap.copy(config.getHeaders(), ret.getHeaders(), true);
-        NVGenericMap.copy(config.getParameters(), ret.getParameters(), true);
+        NVGenericMap.copy(config.getHeaders(), ret.getHeaders(), deepCopy);
+        NVGenericMap.copy(config.getParameters(), ret.getParameters(), deepCopy);
         ret.setProxyAddress(config.getProxyAddress());
         ret.setRedirectEnabled(config.isRedirectEnabled());
         ret.setHTTPErrorAsException(config.isHTTPErrorAsException());

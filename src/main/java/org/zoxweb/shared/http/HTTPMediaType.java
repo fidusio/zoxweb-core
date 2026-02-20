@@ -31,9 +31,12 @@ import org.zoxweb.shared.util.SharedUtil;
 public enum HTTPMediaType
         implements GetValue<String> {
     APPLICATION_WWW_URL_ENC("application/x-www-form-urlencoded"),
+    APPLICATION_DNS_MESSAGE("application/dns-message"),
+    APPLICATION_DNS_JSON("application/dns-json"),
     APPLICATION_JOSE("application/jose"),
     APPLICATION_JOSE_JSON("application/jose+json"),
     APPLICATION_JSON(HTTPConst.APPLICATION_JSON, "json"),
+
     APPLICATION_PDF(HTTPConst.APPLICATION_PDF, "json"),
     APPLICATION_OCTET_STREAM("application/octet-stream"),
     CHUNKED("chunked"),
