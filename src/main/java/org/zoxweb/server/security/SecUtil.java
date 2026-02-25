@@ -127,7 +127,7 @@ public final class SecUtil {
             case HS256:
             case HS384:
             case HS512:
-                SUS.checkIfNulls("Null key", key);
+                SUS.checkIfNull("Null key", key);
                 if (tokens.length != JWT.JWTField.values().length) {
                     throw new SecurityException("Invalid token");
                 }
@@ -155,7 +155,7 @@ public final class SecUtil {
             case ES256:
             case ES384:
             case ES512:
-                SUS.checkIfNulls("Null key", key);
+                SUS.checkIfNull("Null key", key);
                 if (tokens.length != JWT.JWTField.values().length) {
                     throw new SecurityException("Invalid token");
                 }
@@ -291,7 +291,7 @@ public final class SecUtil {
 
         SUS.checkIfNulls("Null values", ciPassword, password);
         if (isPasswordValid(ciPassword, password))
-            return; // we hava a valid password
+            return; // we have a valid password
         // password validation failed,
         throw new AccessSecurityException("Invalid Credentials");
     }
@@ -302,7 +302,7 @@ public final class SecUtil {
 
         SUS.checkIfNulls("Null values", ciPassword, password);
         if (isPasswordValid(ciPassword, password))
-            return; // we hava a valid password
+            return; // we have a valid password
         // password validation failed,
         throw new AccessSecurityException("Invalid Credentials");
     }
@@ -311,7 +311,7 @@ public final class SecUtil {
             throws NullPointerException, IllegalArgumentException, AccessSecurityException {
         SUS.checkIfNulls("Null values", ciPassword, password);
         if (isPasswordValid(ciPassword, password))
-            return; // we hava a valid password
+            return; // we have a valid password
         // password validation failed,
         throw new AccessSecurityException("Invalid Credentials");
     }
@@ -563,9 +563,7 @@ public final class SecUtil {
 
         // Print the services offered by this provider
         if (detailed)
-            provider.getServices().forEach(service -> {
-                pw.println("\t" + service);
-            });
+            provider.getServices().forEach(service -> pw.println("\t" + service));
 
 
         return sw.toString();
