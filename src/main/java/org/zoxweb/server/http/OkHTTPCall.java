@@ -250,7 +250,7 @@ public class OkHTTPCall {
         // set the url
         // if method is get and hmci.isURLEncodingEnabled() merge uri + encoded parameters
         if (hmci.isContentURLEncoded()) {
-            urlEncodedParameter = SharedStringUtil.trimOrNull(HTTPEncoder.URL_ENCODED.format(hmci.getParameters().asArrayValuesString().values()));
+            urlEncodedParameter = SUS.trimOrNull(HTTPEncoder.URL_ENCODED.format(hmci.getParameters().asArrayValuesString().values()));
             if (hmci.getMethod() == HTTPMethod.GET && urlEncodedParameter != null) {
                 if (fullURL.indexOf('?') == -1)
                     fullURL += "?" + urlEncodedParameter;

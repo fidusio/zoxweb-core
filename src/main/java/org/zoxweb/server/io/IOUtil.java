@@ -60,7 +60,7 @@ public class IOUtil {
     }
 
     public static File validateAsFile(String filename) {
-        filename = SharedStringUtil.trimOrNull(filename);
+        filename = SUS.trimOrNull(filename);
         SUS.checkIfNulls("Filename can't be null.", filename);
 
         return validateAsFile(new File(filename));

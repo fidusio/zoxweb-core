@@ -100,7 +100,7 @@ public class ReleaseManager {
     }
 
     public AppVersionDAO lookup(String name) {
-        name = SharedStringUtil.toLowerCase(SharedStringUtil.trimOrNull(name));
+        name = SharedStringUtil.toLowerCase(SUS.trimOrNull(name));
         return map.get(name);
     }
 

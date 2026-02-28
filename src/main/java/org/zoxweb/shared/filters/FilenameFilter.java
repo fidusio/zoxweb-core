@@ -17,8 +17,6 @@ package org.zoxweb.shared.filters;
 
 import org.zoxweb.shared.util.Const;
 import org.zoxweb.shared.util.SUS;
-import org.zoxweb.shared.util.SharedStringUtil;
-import org.zoxweb.shared.util.SharedUtil;
 
 /**
  * This class is used to filter file names.
@@ -53,7 +51,7 @@ public class FilenameFilter
 	 */
 	public String validate(String fileName) throws NullPointerException, IllegalArgumentException
     {
-		fileName = SharedStringUtil.trimOrNull(fileName);
+		fileName = SUS.trimOrNull(fileName);
 		SUS.checkIfNulls("Null filename ", fileName);
 		int lastIndex = -1;
 		
@@ -74,7 +72,7 @@ public class FilenameFilter
 		}
 		
 		fileName = fileName.substring(lastIndex+1);
-		fileName = SharedStringUtil.trimOrNull(fileName);
+		fileName = SUS.trimOrNull(fileName);
 		
 		if (fileName == null)
 		{

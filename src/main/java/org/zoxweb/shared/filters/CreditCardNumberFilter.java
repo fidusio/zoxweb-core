@@ -16,7 +16,7 @@
 package org.zoxweb.shared.filters;
 
 import org.zoxweb.shared.data.CreditCardType;
-import org.zoxweb.shared.util.SharedStringUtil;
+import org.zoxweb.shared.util.SUS;
 
 /**
  * This class filters the credit card number based on the credit card type.
@@ -101,7 +101,7 @@ public class CreditCardNumberFilter
 	public static String validateCVV(String ccNumber, String code)
     {
 		CreditCardType type = CreditCardType.lookup(ccNumber);
-		code = SharedStringUtil.trimOrNull(code);
+		code = SUS.trimOrNull(code);
 		
 		if (type == null)
 		{
@@ -156,7 +156,7 @@ public class CreditCardNumberFilter
 	public static String validateCVVByType(CreditCardType type, String code)
 		throws IllegalArgumentException
     {
-		code = SharedStringUtil.trimOrNull(code);
+		code = SUS.trimOrNull(code);
 		
 		if (type == null)
 		{

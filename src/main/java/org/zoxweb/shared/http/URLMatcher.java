@@ -16,7 +16,6 @@
 package org.zoxweb.shared.http;
 
 import org.zoxweb.shared.util.SUS;
-import org.zoxweb.shared.util.SharedStringUtil;
 import org.zoxweb.shared.util.Validator;
 
 import java.util.HashSet;
@@ -64,7 +63,7 @@ public class URLMatcher implements Validator<String> {
      */
     public URLMatcher(String pattern) {
         SUS.checkIfNulls("Pattern cannot be null", pattern);
-        this.pattern = SharedStringUtil.trimOrNull(pattern);
+        this.pattern = SUS.trimOrNull(pattern);
         if (this.pattern == null) {
             throw new IllegalArgumentException("Pattern cannot be empty");
         }
@@ -79,7 +78,7 @@ public class URLMatcher implements Validator<String> {
             this.strictDomains = new HashSet<>();
             String[] domains = this.pattern.split(",");
             for (String domain : domains) {
-                String trimmed = SharedStringUtil.trimOrNull(domain);
+                String trimmed = SUS.trimOrNull(domain);
                 if (trimmed != null) {
                     strictDomains.add(trimmed.toLowerCase());
                 }
@@ -132,7 +131,7 @@ public class URLMatcher implements Validator<String> {
      * @return the extracted host, or null if invalid
      */
     private String extractHost(String input) {
-        input = SharedStringUtil.trimOrNull(input);
+        input = SUS.trimOrNull(input);
         if (input == null) {
             return null;
         }
@@ -173,7 +172,7 @@ public class URLMatcher implements Validator<String> {
             }
         }
 
-        return SharedStringUtil.trimOrNull(host);
+        return SUS.trimOrNull(host);
     }
 
     /**

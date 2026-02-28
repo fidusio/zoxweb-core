@@ -258,7 +258,7 @@ public class DynamicEnumMap
 
         name = SharedStringUtil.filterString(name, NAME_PREFIX + ":", NAME_PREFIX);
 
-        name = SharedStringUtil.trimOrNull(name);
+        name = SUS.trimOrNull(name);
 
         if (name == null) {
             throw new IllegalArgumentException("Invalid name");

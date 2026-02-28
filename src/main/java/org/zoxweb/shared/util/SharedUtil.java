@@ -540,13 +540,13 @@ public class SharedUtil {
 
     public static NVPair toNVPair(String str, String sep, boolean trim) {
         NVPair ret = null;
-        str = SharedStringUtil.trimOrNull(str);
+        str = SUS.trimOrNull(str);
 
         if (str != null) {
             int index = str.indexOf(sep);
 
             if (index != -1) {
-                String name = SharedStringUtil.trimOrNull(str.substring(0, index));
+                String name = SUS.trimOrNull(str.substring(0, index));
                 String value = str.substring(index + sep.length());
 
                 if (value.isEmpty()) {
@@ -1176,7 +1176,7 @@ public class SharedUtil {
                 if (values != null) {
                     for (String value : values) {
                         if (!nullAllowed) {
-                            value = SharedStringUtil.trimOrNull(value);
+                            value = SUS.trimOrNull(value);
                         }
 
                         if ((nullAllowed || value != null) && nvp.getKey() != null) {
@@ -1587,7 +1587,7 @@ public class SharedUtil {
     }
 
     public static GetNameValueComment<String> parseGetNameStringComment(String line, String nvSeparator, String... commentTags) {
-        line = SharedStringUtil.trimOrNull(line);
+        line = SUS.trimOrNull(line);
         if (line != null) {
             if (!SharedStringUtil.isComment(line)) {
                 if (nvSeparator != null) {
@@ -2282,7 +2282,7 @@ public class SharedUtil {
         if (values != null) {
             for (String val : values) {
                 if (skipEmptyOrNull) {
-                    val = SharedStringUtil.trimOrNull(val);
+                    val = SUS.trimOrNull(val);
                     if (val == null)
                         continue;
                 }

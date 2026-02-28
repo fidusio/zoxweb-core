@@ -16,7 +16,7 @@
 package org.zoxweb.shared.filters;
 
 import org.zoxweb.shared.util.Const;
-import org.zoxweb.shared.util.SharedStringUtil;
+import org.zoxweb.shared.util.SUS;
 
 @SuppressWarnings("serial")
 public class CanonicalFilenameFilter
@@ -40,7 +40,7 @@ public class CanonicalFilenameFilter
         throws NullPointerException, IllegalArgumentException
     {
 		
-		filename = SharedStringUtil.trimOrNull( filename);
+		filename = SUS.trimOrNull( filename);
 
 		if (filename == null)
 		{

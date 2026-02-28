@@ -2,7 +2,7 @@ package org.zoxweb.shared.filters;
 
 import org.zoxweb.shared.util.Const;
 import org.zoxweb.shared.util.DataEncoder;
-import org.zoxweb.shared.util.SharedStringUtil;
+import org.zoxweb.shared.util.SUS;
 
 
 public class TokenFilter
@@ -19,14 +19,14 @@ public class TokenFilter
 
     public TokenFilter(String canID, Const.StringType st, String sep) {
         this.canID = canID;
-        this.sep = SharedStringUtil.trimOrNull(sep);
+        this.sep = SUS.trimOrNull(sep);
         this.st = st;
     }
 
 
     @Override
     public String validate(String value) throws NullPointerException, IllegalArgumentException {
-        value = SharedStringUtil.trimOrNull(value);
+        value = SUS.trimOrNull(value);
         if (value == null)
             throw new NullPointerException("value can be null or empty");
 
@@ -52,7 +52,7 @@ public class TokenFilter
 
     @Override
     public boolean isValid(String value) {
-        value = SharedStringUtil.trimOrNull(value);
+        value = SUS.trimOrNull(value);
         if (value != null && sep != null) {
 
             return (value.indexOf(sep) != 0);

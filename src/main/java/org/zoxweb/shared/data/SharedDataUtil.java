@@ -598,7 +598,7 @@ public class SharedDataUtil
 	{	
 		if (cardNumber != null && cardNumber.length() > 4)
 		{
-			cardNumber = SharedStringUtil.trimOrNull(cardNumber);
+			cardNumber = SUS.trimOrNull(cardNumber);
 			cardNumber = cardNumber.replaceAll("[ -]", "");
 			
 			String lastFourDigits = getCreditCardLastFourDigits(cardNumber);

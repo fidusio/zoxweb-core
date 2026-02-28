@@ -16,7 +16,7 @@
 package org.zoxweb.shared.http;
 
 import org.zoxweb.shared.util.GetValue;
-import org.zoxweb.shared.util.SharedStringUtil;
+import org.zoxweb.shared.util.SUS;
 
 /**
  * Enumeration of HTTP protocol versions.
@@ -74,7 +74,7 @@ public enum HTTPVersion
 	 */
 	public static HTTPVersion lookup(String val)
 	{
-		val = SharedStringUtil.trimOrNull(val);
+		val = SUS.trimOrNull(val);
 		
 		if (val != null)
 		{

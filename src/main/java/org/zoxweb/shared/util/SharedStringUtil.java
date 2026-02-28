@@ -281,38 +281,20 @@ public final class SharedStringUtil {
     }
 
     /**
-     * Returns null if str is null or str is empty, if not it will trim str from starting and ending whitespaces.
-     *
-     * @param str
-     * @return null if str is null or str is empty, if not it will trim str from starting and ending whitespaces.
-     */
-    public static String trimOrNull(String str) {
-        if (str != null) {
-            str = str.trim();
-
-            if (str.length() > 0) {
-                return str;
-            }
-        }
-
-        return null;
-    }
-
-    /**
      * Returns empty string if str is null, if not it will trim str from starting and ending whitespaces.
      *
      * @param str
      * @return empty string if str is null, if not it will trim str from starting and ending whitespaces.
      */
-    public static String trimOrEmpty(String str) {
-        if (str != null) {
-            str = str.trim();
-        } else {
-            str = "";
-        }
-
-        return str;
-    }
+//    public static String trimOrEmpty(String str) {
+//        if (str != null) {
+//            str = str.trim();
+//        } else {
+//            str = "";
+//        }
+//
+//        return str;
+//    }
 
     /**
      * Returns a substring to the right of the specified index if both val and token are not null,
@@ -511,7 +493,6 @@ public final class SharedStringUtil {
         try {
             return str.getBytes(Const.UTF_8);
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
             throw new IllegalArgumentException(e.getMessage());
         }
     }
@@ -600,22 +581,6 @@ public final class SharedStringUtil {
     }
 
     /**
-     * Checks if str is not null then return lowercase trimmed version if the length > 0 , otherwise return null.
-     *
-     * @param str to check
-     * @return lowered case trimmed string or null
-     */
-    public static String toTrimmedLowerCase(String str) {
-        if (str != null) {
-            str = str.toLowerCase().trim();
-            if (str.length() > 0)
-                return str;
-        }
-
-        return null;
-    }
-
-    /**
      * Trims the str and checks if its length = > minLength.
      *
      * @param str
@@ -623,7 +588,7 @@ public final class SharedStringUtil {
      * @return true if str match the min length criteria
      */
     public static boolean isMinimumLengthMet(String str, int minLength) {
-        str = trimOrNull(str);
+        str = SUS.trimOrNull(str);
 
         if (str == null) {
             if (minLength == 0) {
@@ -735,7 +700,7 @@ public final class SharedStringUtil {
 
     public static boolean isComment(String line, String... startTokenMarkers) {
 
-        line = trimOrNull(line);
+        line = SUS.trimOrNull(line);
         if (line != null) {
             for (String token : startTokenMarkers) {
                 if (line.startsWith(token))
@@ -782,9 +747,9 @@ public final class SharedStringUtil {
      * @return s1 + sep + s2
      */
     public static String concat(String s1, String s2, String sep) {
-        s1 = trimOrEmpty(s1);
-        s2 = trimOrEmpty(s2);
-        sep = trimOrEmpty(sep);
+        s1 = SUS.trimOrEmpty(s1);
+        s2 = SUS.trimOrEmpty(s2);
+        sep = SUS.trimOrEmpty(sep);
 
         if ((s1.endsWith(sep) && !s2.startsWith(sep)) || (!s1.endsWith(sep) && s2.startsWith(sep))) {
             return s1 + s2;
@@ -880,7 +845,7 @@ public final class SharedStringUtil {
         StringBuilder ret = new StringBuilder();
 
         for (String value : values) {
-            value = trimOrNull(value);
+            value = SUS.trimOrNull(value);
 
             if (value != null) {
                 if (ret.length() > 0) {
@@ -955,7 +920,7 @@ public final class SharedStringUtil {
         StringBuilder ret = new StringBuilder();
 
         for (GetName gn : gns) {
-            String value = trimOrNull(gn.getName());
+            String value = SUS.trimOrNull(gn.getName());
             if (value != null) {
                 if (ret.length() > 0) {
                     ret.append(sep);
@@ -973,7 +938,7 @@ public final class SharedStringUtil {
         StringBuilder ret = new StringBuilder();
 
         for (GetValue<?> gnv : values) {
-            String value = trimOrNull(gnv.getValue() != null ? "" + gnv.getValue() : null);
+            String value = SUS.trimOrNull(gnv.getValue() != null ? "" + gnv.getValue() : null);
 
             if (value != null) {
                 if (ret.length() > 0) {
@@ -1188,11 +1153,12 @@ public final class SharedStringUtil {
                     sb.append(postToken);
                 }
                 if (sb == null) {
-                    // try to predict the size
-                    int size = buffer.length * (2);
-                    size += preToken != null && preToken.length() > 0 ? (preToken.length() * buffer.length) : 0;
-                    size += postToken != null && postToken.length() > 0 && (buffer.length - 1) > 0 ? postToken.length() * (buffer.length - 1) : 0;
-                    sb = new StringBuilder(size);
+                    sb = new StringBuilder();
+//                    // try to predict the size
+//                    int size = buffer.length * (2);
+//                    size += preToken != null && preToken.length() > 0 ? (preToken.length() * buffer.length) : 0;
+//                    size += postToken != null && postToken.length() > 0 && (buffer.length - 1) > 0 ? postToken.length() * (buffer.length - 1) : 0;
+//                    sb = new StringBuilder(size);
                 }
                 sb = byteToHex(sb, preToken, buffer[i]);
             }

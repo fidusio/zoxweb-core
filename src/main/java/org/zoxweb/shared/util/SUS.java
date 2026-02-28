@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Sus(Shared Util Shortcut) basically to minimise typing
+ * Sus(Shared Util Shortcut) basically to minimize typing
  */
 public class SUS {
     private SUS() {
@@ -15,15 +15,36 @@ public class SUS {
     private static final Map<Object, Object> cache = new HashMap<>();
 
 
-
     private static final char[] HEX_CHARS = "0123456789abcdef".toCharArray();
 
-    public static String bytesToHex(String preToken, byte[] bytes) {
-        return isNotEmpty(preToken) ? preToken + bytesToHex(bytes) : bytesToHex(bytes);
+    /**
+     * Convert an entire byte array to a hex string.
+     *
+     * @param bytes the byte array to convert
+     * @return hex string representation of the bytes
+     */
+    public static String fastBytesToHex(byte[] bytes) {
+        return fastBytesToHex(bytes, 0, bytes != null ? bytes.length : 0);
     }
-    public static String bytesToHex(byte[] bytes) {
-        char[] hex = new char[bytes.length * 2];
-        for (int i = 0; i < bytes.length; i++) {
+
+    /**
+     * Convert a segment of a byte array to a hex string.
+     *
+     * @param bytes  the byte array to convert
+     * @param offset starting position in the array
+     * @param len    number of bytes to convert
+     * @return hex string representation of the specified byte range
+     * @throws NullPointerException      if bytes is null
+     * @throws IndexOutOfBoundsException if offset or len are out of range
+     */
+    public static String fastBytesToHex(byte[] bytes, int offset, int len) {
+        SUS.checkIfNull("Null bytes", bytes);
+        if (offset < 0 || len < 0 || offset + len > bytes.length) {
+            throw new IndexOutOfBoundsException("Offset or length out of range");
+        }
+
+        char[] hex = new char[len * 2];
+        for (int i = offset; i < offset + len; i++) {
             int v = bytes[i] & 0xFF;
             hex[i * 2] = HEX_CHARS[v >>> 4];
             hex[i * 2 + 1] = HEX_CHARS[v & 0x0F];
@@ -63,21 +84,31 @@ public class SUS {
      * Check if an array is empty meaning null or length = 0
      *
      * @param array to be checked
-     * @return true if the array exists and not empty
+     * @return true if the array is null or empty
      */
     public static boolean isEmpty(Object[] array) {
         return (array == null || array.length == 0);
     }
 
     /**
+     * Check if a byte array is not empty meaning not null and length > 0
+     *
      * @param array to check
-     * @return true if array == null or array.length = 0
+     * @return true if the array exists and not empty
      */
     public static boolean isNotEmpty(byte[] array) {
         return (array != null && array.length != 0);
     }
 
 
+    /**
+     * Check if all bytes in the specified range are zero.
+     *
+     * @param buffer the byte array to check
+     * @param offset starting position in the buffer
+     * @param length number of bytes to check
+     * @return true if all bytes in the range are zero
+     */
     public static boolean areAllDataZero(byte[] buffer, int offset, int length) {
         for (int i = offset; i < offset + length; i++) {
             if (buffer[i] != 0)
@@ -90,7 +121,7 @@ public class SUS {
      * Convert a NVEntity to NVGenericMap
      *
      * @param nve to be converted
-     * @return the nve as NVGenericMao
+     * @return the nve as NVGenericMap
      */
     public static NVGenericMap toNVGenericMap(NVEntity nve) {
         NVGenericMap ret = new NVGenericMap(nve.getName());
@@ -126,6 +157,13 @@ public class SUS {
     }
 
 
+    /**
+     * Check if a single object is null and throw NullPointerException if so.
+     *
+     * @param str error message for the NullPointerException
+     * @param obj the object to check
+     * @throws NullPointerException if obj is null
+     */
     public static void checkIfNull(String str, Object obj) {
         checkIfNulls(str, obj);
     }
@@ -148,10 +186,25 @@ public class SUS {
                 throw new NullPointerException(msg);
     }
 
+    /**
+     * Update the properties of a GetNVProperties object with values from an NVGenericMap.
+     *
+     * @param toUpdate the GetNVProperties whose properties will be updated
+     * @param value    the NVGenericMap containing new values
+     * @return the updated NVGenericMap
+     */
     public static NVGenericMap updateGetNVProperties(GetNVProperties toUpdate, NVGenericMap value) {
         return updateNVGenericMap(toUpdate.getProperties(), value);
     }
 
+    /**
+     * Update an NVGenericMap with values from another NVGenericMap.
+     * Existing entries are updated in place; new entries are added.
+     *
+     * @param toUpdate the target NVGenericMap to update
+     * @param value    the source NVGenericMap containing new values
+     * @return the updated toUpdate NVGenericMap
+     */
     @SuppressWarnings("unchecked")
     public static NVGenericMap updateNVGenericMap(NVGenericMap toUpdate, NVGenericMap value) {
         for (GetNameValue<?> gnv : value.values()) {
@@ -228,6 +281,16 @@ public class SUS {
 
     }
 
+    /**
+     * Internal helper to append a value to a canonical ID being built.
+     *
+     * @param pos        current position index in the sequence
+     * @param sb         the StringBuilder being constructed
+     * @param ignoreNull if true, null values are skipped
+     * @param sep        separator character between values
+     * @param val        the value to append
+     * @return the StringBuilder with the value appended
+     */
     private static StringBuilder _toCanonicalID(int pos, StringBuilder sb, boolean ignoreNull, char sep, Object val) {
         if (val == null && ignoreNull) {
             return sb;
@@ -302,10 +365,15 @@ public class SUS {
      * @return null or trimmed not empty string
      */
     public static String trimOrNull(String str) {
+        if (str != null) {
+            str = str.trim();
 
-        return (str == null || str.trim().isEmpty()) ? null : str;
-//        str = (str != null ? str.trim() : null);
-//        return str != null ? (!str.isEmpty() ? str : null) : null;
+            if (!str.isEmpty()) {
+                return str;
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -420,5 +488,22 @@ public class SUS {
      */
     public static String toSB(Object o, boolean addSpace) {
         return "[" + o + "]" + (addSpace ? " " : "");
+    }
+
+
+    /**
+     * Checks if str is not null then return lowercase trimmed version if the length > 0 , otherwise return null.
+     *
+     * @param str to check
+     * @return lowered case trimmed string or null
+     */
+    public static String toTrimmedLowerCase(String str) {
+        if (str != null) {
+            str = str.toLowerCase().trim();
+            if (!str.isEmpty())
+                return str;
+        }
+
+        return null;
     }
 }

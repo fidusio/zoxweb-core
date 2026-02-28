@@ -1,6 +1,6 @@
 package org.zoxweb.shared.filters;
 
-import org.zoxweb.shared.util.SharedStringUtil;
+import org.zoxweb.shared.util.SUS;
 
 @SuppressWarnings("serial")
 public class LowerCaseFilter
@@ -21,7 +21,7 @@ public class LowerCaseFilter
 
 	@Override
 	public String validate(String in) throws NullPointerException, IllegalArgumentException {
-		in = SharedStringUtil.trimOrNull(in);
+		in = SUS.trimOrNull(in);
 		if (in == null)
 			throw new NullPointerException("String null or empty");
 		// TODO Auto-generated method stub
@@ -31,7 +31,7 @@ public class LowerCaseFilter
 	@Override
 	public boolean isValid(String in) 
 	{
-		if (SharedStringUtil.trimOrNull(in) != null)
+		if (SUS.trimOrNull(in) != null)
 		{
 			return true;
 		}

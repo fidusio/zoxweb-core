@@ -5,7 +5,6 @@ import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.shared.data.RuntimeResultDAO;
 import org.zoxweb.shared.util.Const.TimeInMillis;
 import org.zoxweb.shared.util.SUS;
-import org.zoxweb.shared.util.SharedStringUtil;
 import org.zoxweb.shared.util.TaskListener;
 
 import java.io.IOException;
@@ -43,7 +42,7 @@ public class CronCommand
 
 
     public CronCommand(TaskListener<CronCommand, String> taskListener, int repeatCount, long delay, String command) {
-        SUS.checkIfNulls("Command cannot be null", SharedStringUtil.trimOrNull(command), taskListener);
+        SUS.checkIfNulls("Command cannot be null", SUS.trimOrNull(command), taskListener);
         if (repeatCount < 0 || delay < 0) {
             throw new IllegalArgumentException("Invalid dealy or repeatCount value");
         }

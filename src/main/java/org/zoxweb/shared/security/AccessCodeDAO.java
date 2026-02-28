@@ -19,14 +19,7 @@ import org.zoxweb.shared.data.DataConst.DataParam;
 import org.zoxweb.shared.data.DataContentDAO.Param;
 import org.zoxweb.shared.data.SetNameDescriptionDAO;
 import org.zoxweb.shared.filters.FilterType;
-import org.zoxweb.shared.util.GetNVConfig;
-import org.zoxweb.shared.util.NVConfig;
-import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityPortable;
-import org.zoxweb.shared.util.NVConfigManager;
-import org.zoxweb.shared.util.SetCanonicalID;
-import org.zoxweb.shared.util.SharedStringUtil;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.*;
 
 /**
  * @author mnael
@@ -93,7 +86,7 @@ public class AccessCodeDAO
 
 	public synchronized void setAccessCode(String code)
 	{
-		setValue(Params.ACCESS_CODE, SharedStringUtil.trimOrNull(code));
+		setValue(Params.ACCESS_CODE, SUS.trimOrNull(code));
 		setAccessCount(0);
 	}
 	
@@ -135,7 +128,7 @@ public class AccessCodeDAO
 
 		if(currentAccessCode != null)
 		{
-			toValidate = SharedStringUtil.trimOrNull(toValidate);
+			toValidate = SUS.trimOrNull(toValidate);
 
 			if (toValidate == null)
 			{

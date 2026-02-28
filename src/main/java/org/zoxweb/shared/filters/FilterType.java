@@ -267,7 +267,7 @@ public enum FilterType
          */
 		public  boolean isValid(String in)
         {
-            in = SharedStringUtil.trimOrNull(in);
+            in = SUS.trimOrNull(in);
 			
 			if (in != null)
 			{
@@ -360,7 +360,7 @@ public enum FilterType
          */
 		public boolean isValid(String in)
         {
-            in = SharedStringUtil.trimOrNull(in);
+            in = SUS.trimOrNull(in);
 			
 			if (in != null)
 			{
@@ -574,7 +574,7 @@ public enum FilterType
          */
 		public boolean isValid(String in)
         {
-            in = SharedStringUtil.trimOrNull(in);
+            in = SUS.trimOrNull(in);
 			
 			if (in != null)
 			{
@@ -642,7 +642,7 @@ public enum FilterType
 		public String validate(String in)
 				throws  NullPointerException, IllegalArgumentException
 	    {
-			in = SharedStringUtil.trimOrNull(in);
+			in = SUS.trimOrNull(in);
 			if (in == null)
 			{
 				throw new NullPointerException("Null or empty");
@@ -651,7 +651,7 @@ public enum FilterType
 	    }
 		public boolean isValid(String in)
 		{
-			 return SharedStringUtil.trimOrNull(in) != null;
+			 return SUS.trimOrNull(in) != null;
 		}
     },
 	UPPERCASE
@@ -717,7 +717,7 @@ public enum FilterType
          */
 		public  boolean isValid(String in)
         {
-            in = SharedStringUtil.trimOrNull(in);
+            in = SUS.trimOrNull(in);
 			
 			if (in != null)
 			{

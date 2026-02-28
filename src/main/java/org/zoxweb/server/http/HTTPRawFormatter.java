@@ -20,7 +20,7 @@ import org.zoxweb.shared.http.*;
 import org.zoxweb.shared.protocol.Delimiter;
 import org.zoxweb.shared.util.GetNameValue;
 import org.zoxweb.shared.util.NVGenericMap;
-import org.zoxweb.shared.util.SharedStringUtil;
+import org.zoxweb.shared.util.SUS;
 
 public class HTTPRawFormatter {
     private final String firstLine;
@@ -38,7 +38,7 @@ public class HTTPRawFormatter {
         String urlEncodedParameter;
         String fullURI = urlInfo.toURI();
         if (hmci.isContentURLEncoded()) {
-            urlEncodedParameter = SharedStringUtil.trimOrNull(HTTPEncoder.URL_ENCODED.format(hmci.getParameters().asArrayValuesString().values()));
+            urlEncodedParameter = SUS.trimOrNull(HTTPEncoder.URL_ENCODED.format(hmci.getParameters().asArrayValuesString().values()));
             if (hmci.getMethod() == HTTPMethod.GET && urlEncodedParameter != null) {
                 if (fullURI.indexOf('?') == -1)
                     fullURI += "?" + urlEncodedParameter;

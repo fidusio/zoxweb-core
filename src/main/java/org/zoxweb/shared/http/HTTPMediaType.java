@@ -16,6 +16,7 @@
 package org.zoxweb.shared.http;
 
 import org.zoxweb.shared.util.GetValue;
+import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedStringUtil;
 import org.zoxweb.shared.util.SharedUtil;
 
@@ -90,7 +91,7 @@ public enum HTTPMediaType
      * @return the matching HTTPMediaType, or null if not found
      */
     public static HTTPMediaType lookupByExtension(String str) {
-        str = SharedStringUtil.trimOrNull(str);
+        str = SUS.trimOrNull(str);
 
         if (str != null) {
             String ext = SharedStringUtil.valueAfterRightToken(str, ".").toLowerCase();

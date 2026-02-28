@@ -176,7 +176,7 @@ public class CryptoUtil {
 
             if (!SUS.isEmpty(ekd.getGUID())) {
                 hmac.update(
-                        SharedStringUtil.getBytes(SharedStringUtil.toTrimmedLowerCase(ekd.getGUID())));
+                        SharedStringUtil.getBytes(SUS.toTrimmedLowerCase(ekd.getGUID())));
             }
         }
 
@@ -286,7 +286,7 @@ public class CryptoUtil {
 
             if (!SUS.isEmpty(ekd.getGUID())) {
                 hmac.update(
-                        SharedStringUtil.getBytes(SharedStringUtil.toTrimmedLowerCase(ekd.getGUID())));
+                        SharedStringUtil.getBytes(SUS.toTrimmedLowerCase(ekd.getGUID())));
             }
         }
 
@@ -861,9 +861,8 @@ public class CryptoUtil {
 
 
     public static String toString(Key key) {
-        return SharedUtil
-                .toCanonicalID(':', key.getAlgorithm(), key.getEncoded().length, key.getFormat(),
-                        SharedStringUtil.bytesToHex(key.getEncoded()));
+        return SUS.toCanonicalID(':', key.getAlgorithm(), key.getEncoded().length, key.getFormat(),
+                        SUS.fastBytesToHex(key.getEncoded()));
     }
 
     public static KeyStoreInfo generateKeyStoreInfo(String keyStoreName, String alias,

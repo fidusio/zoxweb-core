@@ -162,7 +162,7 @@ public final class SecurityModel
 		StringBuilder sb = new StringBuilder();
 		for(String token : secTokens)
 		{
-			token = SharedStringUtil.toTrimmedLowerCase(token);
+			token = SUS.toTrimmedLowerCase(token);
 			if(token != null)
 			{
 				if(sb.length() > 0 && sb.charAt(sb.length() -1) != SEP.charAt(0) )

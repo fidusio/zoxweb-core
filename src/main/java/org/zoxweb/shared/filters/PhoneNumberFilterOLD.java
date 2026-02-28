@@ -17,8 +17,6 @@ package org.zoxweb.shared.filters;
 
 import org.zoxweb.shared.data.PhoneDAO;
 import org.zoxweb.shared.util.SUS;
-import org.zoxweb.shared.util.SharedStringUtil;
-import org.zoxweb.shared.util.SharedUtil;
 
 /**
  * This class is used to filter North American phone numbers into acceptable format.
@@ -54,7 +52,7 @@ public class PhoneNumberFilterOLD
 	public PhoneDAO validate(String num)
         throws NullPointerException, IllegalArgumentException
     {
-		num = SharedStringUtil.trimOrNull(num);
+		num = SUS.trimOrNull(num);
 		SUS.checkIfNulls("Phone number empty or null", num);
 		
 		String number = num.replaceAll("[\\s-()]", "");

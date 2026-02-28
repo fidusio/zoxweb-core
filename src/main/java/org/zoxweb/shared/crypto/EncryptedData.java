@@ -137,9 +137,9 @@ public class EncryptedData
         sb.append(':');
         sb.append(new String(SharedBase64.encode(getEncryptedData())));
         sb.append(':');
-        sb.append(SharedStringUtil.trimOrEmpty(getExpiryDate()));
+        sb.append(SUS.trimOrEmpty(getExpiryDate()));
         sb.append(':');
-        sb.append(SharedStringUtil.trimOrEmpty(getHint()));
+        sb.append(SUS.trimOrEmpty(getHint()));
         sb.append(':');
         sb.append(getHMACAlgoName());
         sb.append(':');

@@ -16,7 +16,6 @@
 package org.zoxweb.shared.filters;
 
 import org.zoxweb.shared.util.SUS;
-import org.zoxweb.shared.util.SharedStringUtil;
 
 public enum AddressFilterType
     implements ValueFilter<String, String>
@@ -35,7 +34,7 @@ public enum AddressFilterType
             throws NullPointerException, IllegalArgumentException
         {
 
-			in = SharedStringUtil.trimOrNull(in);
+			in = SUS.trimOrNull(in);
 			SUS.checkIfNulls("Postal code is null.", in);
 			
 			in = in.toUpperCase();
@@ -75,7 +74,7 @@ public enum AddressFilterType
 		public String validate(String in) 
             throws NullPointerException, IllegalArgumentException
         {
-			in = SharedStringUtil.trimOrNull(in);
+			in = SUS.trimOrNull(in);
 
 			SUS.checkIfNulls("ZIP code is null.", in);
 			

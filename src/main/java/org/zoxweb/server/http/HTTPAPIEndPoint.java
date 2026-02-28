@@ -122,7 +122,7 @@ public class HTTPAPIEndPoint<I, O>
     }
 
     public HTTPAPIEndPoint<I, O> setDomain(String domain) {
-        domain = SharedStringUtil.trimOrNull(domain);
+        domain = SUS.trimOrNull(domain);
         if (domain != null) {
             if (domain.endsWith("."))
                 domain = domain.substring(0, domain.length() - 1);

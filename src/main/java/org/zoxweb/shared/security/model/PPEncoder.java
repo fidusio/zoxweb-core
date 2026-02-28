@@ -2,10 +2,7 @@ package org.zoxweb.shared.security.model;
 
 
 import org.zoxweb.shared.security.model.SecurityModel.PermissionToken;
-import org.zoxweb.shared.util.DataEncoder;
-import org.zoxweb.shared.util.GetNameValue;
-import org.zoxweb.shared.util.SharedStringUtil;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.*;
 
 /**
  * Permission pattern encoder
@@ -22,7 +19,7 @@ implements DataEncoder<String[], String>
 	private PPEncoder() {}
 	public String encode(String ...patterns) 
 	{
-		return SharedStringUtil.trimOrEmpty(SharedUtil.toCanonicalID(PATTERN_SEP, (Object[])patterns)).toLowerCase();
+		return SUS.trimOrEmpty(SharedUtil.toCanonicalID(PATTERN_SEP, (Object[])patterns)).toLowerCase();
 	}
 	
 	

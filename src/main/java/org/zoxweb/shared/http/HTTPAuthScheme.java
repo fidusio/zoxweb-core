@@ -92,7 +92,7 @@ public enum HTTPAuthScheme
 
 
             // TODO Auto-generated method stub
-            return new HTTPAuthorizationBasic(SharedStringUtil.trimOrNull(user), SharedStringUtil.trimOrNull(password));
+            return new HTTPAuthorizationBasic(SUS.trimOrNull(user), SUS.trimOrNull(password));
         }
     },
     BEARER(CryptoConst.AuthenticationType.BEARER.getName()) {
@@ -128,7 +128,7 @@ public enum HTTPAuthScheme
 
             StringBuilder value = new StringBuilder();
             for (String t : args) {
-                t = SharedStringUtil.trimOrNull(t);
+                t = SUS.trimOrNull(t);
                 if (t != null) {
                     if (value.length() > 0) {
                         value.append(" ");

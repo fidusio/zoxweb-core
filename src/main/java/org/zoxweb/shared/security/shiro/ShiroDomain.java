@@ -41,7 +41,7 @@ public abstract class ShiroDomain
 	
 	public void setName(String name)
 	{
-		setValue(DataParam.NAME, SharedStringUtil.trimOrEmpty(SharedStringUtil.toLowerCase(name)));
+		setValue(DataParam.NAME, SUS.trimOrEmpty(SharedStringUtil.toLowerCase(name)));
 	}
 
 	@Override

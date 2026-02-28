@@ -17,8 +17,6 @@ package org.zoxweb.shared.data;
 
 import org.zoxweb.shared.filters.ValueFilter;
 import org.zoxweb.shared.util.SUS;
-import org.zoxweb.shared.util.SharedStringUtil;
-import org.zoxweb.shared.util.SharedUtil;
 
 /**
  * This enum includes credit card types and validates
@@ -112,7 +110,7 @@ public enum CreditCardType
 			throws NullPointerException, IllegalArgumentException 
 	{
 		SUS.checkIfNulls("Null credit card number", ccNumber);
-		ccNumber = SharedStringUtil.trimOrNull(ccNumber);
+		ccNumber = SUS.trimOrNull(ccNumber);
 		ccNumber = ccNumber.replaceAll("[ -]", "");
 		
     	if (ccNumber.matches(pattern))

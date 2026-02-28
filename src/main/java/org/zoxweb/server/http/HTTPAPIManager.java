@@ -158,7 +158,7 @@ public final class HTTPAPIManager
 
     public HTTPAPIEndPoint<?,?> unregister(String name, String domain)
     {
-        domain = SharedStringUtil.trimOrNull(domain);
+        domain = SUS.trimOrNull(domain);
         if (name != null)
         {
             return unregister(domain != null ? SharedUtil.toCanonicalID('.', domain, name) : name);
@@ -193,7 +193,7 @@ public final class HTTPAPIManager
     public HTTPAPIEndPoint<?,?>[] getDomainEndPoints(String domain, boolean copy)
     {
         List<HTTPAPIEndPoint<?,?>> ret = new ArrayList<>();
-        domain = SharedStringUtil.trimOrNull(domain);
+        domain = SUS.trimOrNull(domain);
         if (domain != null) {
             domain = domain.endsWith(".") ? domain : domain + ".";
             synchronized (this) {
