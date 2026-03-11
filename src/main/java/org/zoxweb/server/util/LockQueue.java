@@ -24,7 +24,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class LockQueue {
 
-    private SimpleQueue<Lock> queue = new SimpleQueue<Lock>();
+    private final SimpleQueue<Lock> queue = new SimpleQueue<Lock>();
 
     /**
      * Create an empty lock queue
@@ -53,10 +53,10 @@ public class LockQueue {
     public Lock dequeueLock() {
         Lock ret = null;
 
-        while ((ret = queue.dequeue()) == null) {
-            synchronized (this) {
+        synchronized (this) {
+            while ((ret = queue.dequeue()) == null) {
                 try {
-                    wait(Const.TimeInMillis.MILLI.MILLIS * 500);
+                    wait(Const.TimeInMillis.MILLI.mult(500));
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

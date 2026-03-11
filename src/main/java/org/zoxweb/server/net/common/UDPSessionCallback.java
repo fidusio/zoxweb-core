@@ -26,13 +26,12 @@ public abstract class UDPSessionCallback
     private final int bufferSize;
     private volatile DatagramChannel channel;
     protected int port;
-    private transient Executor executor = null;
-    protected transient int interestOps = SelectionKey.OP_READ;
+    private volatile Executor executor = null;
+    protected volatile int interestOps = SelectionKey.OP_READ;
     protected final Lock lock = new ReentrantLock();
     private final AtomicLong readCounter = new AtomicLong();
     private final AtomicLong sendCounter = new AtomicLong();
 
-    //private final AtomicBoolean isClosed = new AtomicBoolean(false);
     private final CloseableTypeDelegate closeableDelegate;
 
     protected UDPSessionCallback(int port) {
@@ -100,7 +99,8 @@ public abstract class UDPSessionCallback
                     buffer = ByteBufferUtil.allocateByteBuffer(bufferSize);
                     clientAddr = (InetSocketAddress) channel.receive(buffer);
                     if (clientAddr != null) {
-                        readCounter.incrementAndGet();
+                        // flip the buffer for reading
+                        buffer.flip();
                         DataPacket<Long> dataPacket = new DataPacket<Long>(readCounter.incrementAndGet(), clientAddr, buffer);
                         if (executor != null) {
                             // lambda bypass
@@ -115,6 +115,10 @@ public abstract class UDPSessionCallback
                         } else
                             recacheBufferAccept(dataPacket);
                     }
+                    else {
+                        // clientAddr is null no more data to read
+                        ByteBufferUtil.cache(buffer);
+                    }
 
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -127,7 +131,6 @@ public abstract class UDPSessionCallback
 
     private void recacheBufferAccept(DataPacket<?> dataPacket) throws IOException {
         try {
-            dataPacket.getBuffer().flip();
             accept(dataPacket);
         } finally {
             // recache data buffer

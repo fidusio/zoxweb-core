@@ -24,7 +24,7 @@ public interface SubjectID<T>
 {
     /**
      * Sets the subject ID.
-     * @param id
+     * @param id to be set.
      */
     void setSubjectID(T id);
 }

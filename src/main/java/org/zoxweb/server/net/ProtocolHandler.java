@@ -48,7 +48,7 @@ public abstract class ProtocolHandler
         public void run() {
             if (System.currentTimeMillis() - ph.lastUsage() > timeout.getDelayInMillis()) {
                 SharedIOUtil.close(ph);
-                log.getLogger().info("session timed out protocol handler closed.");
+                if(log.isEnabled()) log.getLogger().info("session timed out protocol handler closed.");
 
             } else {
                 timeout.reset(false);
@@ -74,12 +74,12 @@ public abstract class ProtocolHandler
     protected volatile int interestOps = SelectionKey.OP_READ;
     protected final AtomicBoolean isClosed = new AtomicBoolean(false);
 
-    protected BaseSessionCallback<?> sessionCallback;
+    protected volatile BaseSessionCallback<?> sessionCallback;
     private final PHTimeout phTimeout;
 
 
     protected ProtocolHandler(boolean enableTimeout) {
-        this(enableTimeout ? SESSION_TIMEOUT: 0);
+        this(enableTimeout ? SESSION_TIMEOUT : 0);
     }
 
     protected ProtocolHandler(long timeout) {
@@ -179,9 +179,14 @@ public abstract class ProtocolHandler
 
     public final void close() throws IOException {
         if (!isClosed.getAndSet(true)) {
-            close_internal();
-            if (phTimeout != null)
-                phTimeout.timeout.cancel();
+            try {
+                close_internal();
+            }
+            finally {
+                if (phTimeout != null)
+                    phTimeout.timeout.cancel();
+            }
+
         }
     }
 

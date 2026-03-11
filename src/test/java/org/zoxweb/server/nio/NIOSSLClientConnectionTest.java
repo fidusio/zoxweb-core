@@ -45,7 +45,7 @@ public class NIOSSLClientConnectionTest {
          */
         @Override
         public void accept(ByteBuffer byteBuffer) {
-            SocketChannel channel = (SocketChannel) getChannel();
+            SocketChannel channel = getChannel();
             log.getLogger().info(getRemoteAddress() + " " + channel.isConnected() + " total: " + total());
             SharedIOUtil.close(this);
 
@@ -64,7 +64,7 @@ public class NIOSSLClientConnectionTest {
         @Override
         protected void connectedFinished() throws IOException {
             successCount.incrementAndGet();
-            SocketChannel channel = (SocketChannel) getChannel();
+            SocketChannel channel = getChannel();
             //System.out.println(getRemoteAddress() + " " + channel.isConnected() + " total: " + total());
             log.getLogger().info(getRemoteAddress() + " " + channel.isConnected() + " total: " + total());
             SharedIOUtil.close(this);

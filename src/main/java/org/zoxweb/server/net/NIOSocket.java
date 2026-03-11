@@ -117,7 +117,7 @@ public class NIOSocket
     private long statLogCounter = 0;
     private long attackTotalCount = 0;
     private final long startTime = System.currentTimeMillis();
-    private EventListenerManager<BaseEventObject<?>, ?> eventListenerManager = null;
+    private volatile EventListenerManager<BaseEventObject<?>, ?> eventListenerManager = null;
     private final RateCounter callsCounter = new RateCounter("nio-calls-counter");
 
 

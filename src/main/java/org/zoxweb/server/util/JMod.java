@@ -14,7 +14,7 @@ public enum JMod
     FINAL(Modifier.FINAL, "final"),
     TRANSIENT(Modifier.TRANSIENT, "transient"),
     VOLATILE(Modifier.VOLATILE, "volatile"),
-    SYNCHRONIZED(Modifier.SYNCHRONIZED, "interface"),
+    SYNCHRONIZED(Modifier.SYNCHRONIZED, "synchronized"),
     NATIVE(Modifier.NATIVE, "native"),
     INTERFACE(Modifier.INTERFACE, "interface"),
     ABSTRACT(Modifier.ABSTRACT, "abstract"),

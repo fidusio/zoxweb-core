@@ -202,9 +202,9 @@ public class HTTPRawMessage
     }
 
 
-    public synchronized boolean parseResponse(URIScheme protocolMode, ByteBuffer inBuffer) throws IOException {
+    public synchronized boolean parseResponse(URIScheme protocolMode, ByteBuffer inBuffer, boolean flip) throws IOException {
 
-        ByteBufferUtil.write(inBuffer, getDataStream(), true);
+        ByteBufferUtil.write(inBuffer, getDataStream(), flip);
         switch (protocolMode) {
             case HTTP:
             case HTTPS:

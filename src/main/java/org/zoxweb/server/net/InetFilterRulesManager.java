@@ -37,8 +37,8 @@ public class InetFilterRulesManager {
     public static class InetFilterRule
             extends SetNameDAO
             implements Comparable<InetFilterRule> {
-        private transient byte[] networkBytes = null;
-        private transient byte[] maskBytes = null;
+        private volatile byte[] networkBytes = null;
+        private volatile byte[] maskBytes = null;
 
         public enum Params
                 implements GetNVConfig {

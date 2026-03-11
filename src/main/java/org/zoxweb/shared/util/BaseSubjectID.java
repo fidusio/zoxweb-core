@@ -15,7 +15,7 @@ public interface BaseSubjectID<T> {
 
     /**
      * Returns the subject ID.
-     * @return
+     * @return The subject ID.
      */
     T getSubjectID();
 }

@@ -184,11 +184,6 @@ public class SSLNIOSocketHandler
     public void accept(SelectionKey key) {
         if (log.isEnabled()) log.getLogger().info("Start of Accept SSLNIOSocket");
         try {
-            // begin handshake will be called once subsequent calls are ignored
-            //sslConfig.beginHandshake(sslContextInfo.isClient());
-//            if(sslContextInfo.isClient()) {
-//                sessionCallback.connected(key);
-//            }
 
             if (log.isEnabled()) log.getLogger().info("AcceptNewData: " + key);
 

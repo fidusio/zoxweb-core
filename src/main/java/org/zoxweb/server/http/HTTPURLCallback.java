@@ -20,8 +20,8 @@ public class HTTPURLCallback extends TCPSessionCallback {
     public static final LogWrapper log = new LogWrapper(HTTPURLCallback.class).setEnabled(false);
     private HTTPMessageConfigInterface hmci;
     private HTTPRawMessage hrm = null;
-    private transient AtomicLong ts = new AtomicLong(0);
-    private transient ConsumerCallback<HTTPResponse> callback;
+    private volatile AtomicLong ts = new AtomicLong(0);
+    private volatile ConsumerCallback<HTTPResponse> callback;
 
     public HTTPURLCallback(String url, ConsumerCallback<HTTPResponse> callback) throws IOException {
         this(url, HTTPMethod.GET, false, callback);
@@ -92,7 +92,7 @@ public class HTTPURLCallback extends TCPSessionCallback {
     @Override
     public void accept(ByteBuffer byteBuffer) {
         try {
-            if (hrm.parseResponse(hmci.getURIScheme(), byteBuffer)) {
+            if (hrm.parseResponse(hmci.getURIScheme(), byteBuffer, false )) {
                 HTTPMessageConfigInterface hmci = hrm.parse();
                 hmci.setContent(hrm.getDataStream().toByteArray());
                 SharedIOUtil.close(this);

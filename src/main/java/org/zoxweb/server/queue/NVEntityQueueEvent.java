@@ -42,11 +42,12 @@ public class NVEntityQueueEvent extends QueueEvent<NVEntity> {
         // TODO Auto-generated constructor stub
     }
 
-    @Override
+
     /**
      * Convert the object to base64 url encoded json byte array
-     * @return the json byte array
+     * @return byte array as JSON
      */
+    @Override
     public byte[] toBytes() {
         try {
             return SharedStringUtil.getBytes(GSONUtil.toJSON(getContent(), false, false, true, Base64Type.URL));

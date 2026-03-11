@@ -109,7 +109,7 @@ public class SUS {
      * @param length number of bytes to check
      * @return true if all bytes in the range are zero
      */
-    public static boolean areAllDataZero(byte[] buffer, int offset, int length) {
+    public static boolean areAllBytesZero(byte[] buffer, int offset, int length) {
         for (int i = offset; i < offset + length; i++) {
             if (buffer[i] != 0)
                 return false;

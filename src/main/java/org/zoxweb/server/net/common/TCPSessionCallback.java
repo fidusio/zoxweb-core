@@ -29,7 +29,7 @@ public abstract class TCPSessionCallback
 
     private volatile SSLContextInfo sslContextInfo;
     private int timeoutInSec = 5;
-    private final ByteBuffer dataBuffer = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.DIRECT, 1024);
+    private final ByteBuffer dataBuffer = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.DIRECT, SharedIOUtil.K_1);
 
     private DNSResolverInt dnsResolver;
     protected volatile int interestOps = SelectionKey.OP_READ;
@@ -57,7 +57,7 @@ public abstract class TCPSessionCallback
     protected TCPSessionCallback(SSLContextInfo sslContextInfo, String id) {
         setSSLContextInfo(sslContextInfo);
         setRemoteAddress(sslContextInfo.getClientAddress());
-        if (id != null) {
+        if (id == null) {
             id = UUID.randomUUID().toString();
         }
         setID(id);
@@ -118,8 +118,10 @@ public abstract class TCPSessionCallback
                     ((Buffer) dataBuffer).clear();
                     read = ((SocketChannel) key.channel()).isConnected() ? ((SocketChannel) key.channel()).read(dataBuffer) : -1;
 
-                    if (read > 0)
+                    if (read > 0) {
+                        dataBuffer.flip();
                         accept(dataBuffer);
+                    }
                 }
                 while (read > 0);
 

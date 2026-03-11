@@ -22,19 +22,19 @@ import org.zoxweb.shared.util.SharedUtil;
 /**
  * The UQueueBound class is a bounded queue with a high and low marks. The
  * purpose of this type of queue is not to overflow the system by forcing the
- * queuing thread to wait when the high mark is reached till the dequeuing
+ * queuing thread to wait when the high mark is reached till the Dequeuing
  * thread reaches the low mark. <br>
  * Note: this class must be used by 2 threads simultaneously a
  * <code>queuing</code> thread and a <code>dequeuing</code>thread. The
  * <code>dequeuing</code> thread must be running continuously otherwise the
- * <code>dequeuing</code> will be pending till the dequeuing process starts
+ * <code>dequeuing</code> will be pending till the Dequeuing  process starts
  * again.
  */
 public class ThresholdQueue<O>
         extends ArrayQueue<O> {
 
     private final int threshold;
-    private boolean thresholdEnabled = false;
+    private volatile boolean thresholdEnabled = false;
 
 
     public ThresholdQueue(int capacity) {
