@@ -519,7 +519,7 @@ public class NVConfigEntityPortable
     @Override
     public String toCanonicalID() {
         if (!SUS.isEmpty(getDomainID())) {
-            return SharedUtil.toCanonicalID('.', getDomainID(), getName());
+            return SUS.toCanonicalID('.', getDomainID(), getName());
         }
 
         return getName();
@@ -575,7 +575,7 @@ public class NVConfigEntityPortable
      */
     @Override
     public void setGUID(String gid) {
-       setReferenceID(gid);
+        setReferenceID(gid);
     }
 
     /**

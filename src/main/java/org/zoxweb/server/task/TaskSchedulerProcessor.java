@@ -448,7 +448,7 @@ public class TaskSchedulerProcessor
 
     public String toString() {
         return (getExecutor() != null ? getExecutor().toString() + ", TaskSchedulerProcessor[ " : "TaskSchedulerProcessor[") +
-                SharedUtil.toCanonicalID(',', counterID, live, queue.size(), Const.TimeInMillis.toString(waitTime())) + "]";
+                SUS.toCanonicalID(',', counterID, live, queue.size(), Const.TimeInMillis.toString(waitTime())) + "]";
     }
 
 

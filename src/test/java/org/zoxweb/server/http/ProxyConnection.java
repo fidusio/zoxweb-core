@@ -1,14 +1,12 @@
 package org.zoxweb.server.http;
 
+import org.zoxweb.shared.http.*;
+import org.zoxweb.shared.net.IPAddress;
+import org.zoxweb.shared.util.SUS;
+import org.zoxweb.shared.util.SharedUtil;
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentSkipListMap;
-import org.zoxweb.shared.http.HTTPMessageConfig;
-import org.zoxweb.shared.http.HTTPMessageConfigInterface;
-import org.zoxweb.shared.http.HTTPMethod;
-import org.zoxweb.shared.http.HTTPResponseData;
-import org.zoxweb.shared.http.HTTPStatusCode;
-import org.zoxweb.shared.net.IPAddress;
-import org.zoxweb.shared.util.SharedUtil;
 
 public class ProxyConnection {
 
@@ -30,7 +28,7 @@ public class ProxyConnection {
         ts = System.currentTimeMillis() - ts;
         System.out.println(HTTPStatusCode.statusByCode(rd.getStatus()));
 
-        String str = SharedUtil.toCanonicalID(' ', proxy, args[i]);
+        String str = SUS.toCanonicalID(' ', proxy, args[i]);
         SharedUtil.putUnique(results, ts,
             rd.getStatus() + " Command: " + str + " it took " + ts + " millis");
       }

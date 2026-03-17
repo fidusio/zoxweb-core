@@ -79,7 +79,7 @@ public class CanonicalIDSetter {
             for (int i = 0; i < attrNames.length; i++) {
                 values[i] = nve.lookupValue(attrNames[i]);
             }
-            ((SetCanonicalID) nve).setCanonicalID(SharedUtil.toCanonicalID(true, sep, values));
+            ((SetCanonicalID) nve).setCanonicalID(SUS.toCanonicalID(true, sep, values));
         }
     }
 }

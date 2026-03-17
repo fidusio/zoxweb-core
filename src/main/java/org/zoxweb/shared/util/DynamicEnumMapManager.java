@@ -103,7 +103,7 @@ public class DynamicEnumMapManager {
         DynamicEnumMap ret = allEnumMaps.get(enumMapName);
 
         if (ret == null && enumMapName != null) {
-            ret = allEnumMaps.get(SharedUtil.toCanonicalID(':', DynamicEnumMap.NAME_PREFIX, enumMapName));
+            ret = allEnumMaps.get(SUS.toCanonicalID(':', DynamicEnumMap.NAME_PREFIX, enumMapName));
         }
 
         return ret;

@@ -364,7 +364,7 @@ public class TaskProcessor
 
     private boolean notWorkingAtAll() {
         if (log.isEnabled())
-            log.getLogger().info(SharedUtil.toCanonicalID(',', tasksQueue.size(), workersQueue.capacity(), workersQueue.size()));
+            log.getLogger().info(SUS.toCanonicalID(',', tasksQueue.size(), workersQueue.capacity(), workersQueue.size()));
         return tasksQueue.isEmpty() && workersQueue.size() == workersQueue.capacity();
     }
 

@@ -26,7 +26,6 @@ import org.zoxweb.shared.util.Const;
 import org.zoxweb.shared.util.Const.JavaClassVersion;
 import org.zoxweb.shared.util.GetValue;
 import org.zoxweb.shared.util.SUS;
-import org.zoxweb.shared.util.SharedUtil;
 
 import java.io.*;
 import java.lang.management.ManagementFactory;
@@ -217,7 +216,7 @@ public class RuntimeUtil {
     public static RuntimeResultDAO runAndFinish(String command, String... params)
             throws InterruptedException, IOException {
         if (params.length > 0) {
-            String parameters = SharedUtil.toCanonicalID(' ', (Object[]) params);
+            String parameters = SUS.toCanonicalID(' ', (Object[]) params);
             if (!SUS.isEmpty(parameters)) {
                 command = command + " " + parameters;
             }

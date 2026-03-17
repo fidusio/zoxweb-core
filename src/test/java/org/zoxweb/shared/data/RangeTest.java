@@ -3,7 +3,7 @@ package org.zoxweb.shared.data;
 
 import org.junit.jupiter.api.Test;
 import org.zoxweb.server.util.GSONUtil;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.SUS;
 
 import java.io.IOException;
 
@@ -46,7 +46,7 @@ public class RangeTest {
             Range r = Range.toRange(value);
             Range rr = Range.toRange(r.toString());
             System.out.println(value+":" + Range.Inclusive.match(value) + " " + r +","  + rr);
-            System.out.println(SharedUtil.toCanonicalID(':',rr.getInclusive(), rr, rr.getStart(), rr.getEnd(), rr.getLoopStart(), rr.getLoopEnd()));
+            System.out.println(SUS.toCanonicalID(':',rr.getInclusive(), rr, rr.getStart(), rr.getEnd(), rr.getLoopStart(), rr.getLoopEnd()));
 
         }
     }

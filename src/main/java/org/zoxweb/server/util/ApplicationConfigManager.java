@@ -22,9 +22,9 @@ import org.zoxweb.shared.data.ApplicationConfigDAO.ApplicationDefaultParam;
 import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.util.GetValue;
 import org.zoxweb.shared.util.NVGenericMap;
+import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedBase64.Base64Type;
 import org.zoxweb.shared.util.SharedStringUtil;
-import org.zoxweb.shared.util.SharedUtil;
 
 import java.io.*;
 
@@ -83,7 +83,7 @@ public class ApplicationConfigManager {
     private ApplicationConfigDAO load()
             throws NullPointerException, IOException {
         if (defaultFile == null) {
-            defaultFile = new File(SharedUtil.toCanonicalID('/', getDefaultApplicationEnvVar(), ApplicationDefaultParam.CONF_DIR.getValue()), ApplicationConfigDAO.DEFAULT_APPLICATION_CONF_FILENAME);
+            defaultFile = new File(SUS.toCanonicalID('/', getDefaultApplicationEnvVar(), ApplicationDefaultParam.CONF_DIR.getValue()), ApplicationConfigDAO.DEFAULT_APPLICATION_CONF_FILENAME);
         }
 
         if (!defaultFile.exists()) {
@@ -122,7 +122,7 @@ public class ApplicationConfigManager {
         String varValue = acd.lookupValue(varName);
 
         if (varValue != null) {
-            return SharedUtil.toCanonicalID('/', base, varValue) + "/";
+            return SUS.toCanonicalID('/', base, varValue) + "/";
         }
 
         return base;
@@ -140,7 +140,7 @@ public class ApplicationConfigManager {
                 values[index++] = s;
             }
 
-            return SharedUtil.toCanonicalID('/', (Object[]) values);
+            return SUS.toCanonicalID('/', (Object[]) values);
         }
 
         return base;
@@ -149,7 +149,7 @@ public class ApplicationConfigManager {
     public void save(ApplicationConfigDAO acd)
             throws NullPointerException, IOException {
         //File file = new File(concatAsDirName( acd, acd.lookupValue(ApplicationDefaultParam.CONF_DIR)), ApplicationConfigDAO.DEFAULT_APPLICATION_CONF_FILENAME);
-        File file = new File(SharedUtil.toCanonicalID('/', getDefaultApplicationEnvVar(), ApplicationDefaultParam.CONF_DIR.getValue()), ApplicationConfigDAO.DEFAULT_APPLICATION_CONF_FILENAME);
+        File file = new File(SUS.toCanonicalID('/', getDefaultApplicationEnvVar(), ApplicationDefaultParam.CONF_DIR.getValue()), ApplicationConfigDAO.DEFAULT_APPLICATION_CONF_FILENAME);
         String jsonString = GSONUtil.toJSONGenericMap(acd.getProperties(), true, false, true);
 
         FileOutputStream fos = null;

@@ -171,9 +171,9 @@ public class DeviceDAO
         String subID = lookupValue(Param.SUBJECT_ID);
         if (subID == null) {
             if (!SUS.isEmpty(getManufacturer()))
-                subID = SharedUtil.toCanonicalID(ShiroBase.CAN_ID_SEP, getManufacturer(), getModel(), getVersion(), getSerialNumber(), getDeviceID());
+                subID = SUS.toCanonicalID(ShiroBase.CAN_ID_SEP, getManufacturer(), getModel(), getVersion(), getSerialNumber(), getDeviceID());
             else
-                subID = SharedUtil.toCanonicalID(ShiroBase.CAN_ID_SEP, getModel(), getVersion(), getSerialNumber(), getDeviceID());
+                subID = SUS.toCanonicalID(ShiroBase.CAN_ID_SEP, getModel(), getVersion(), getSerialNumber(), getDeviceID());
 
             setValue(Param.SUBJECT_ID, subID);
         }

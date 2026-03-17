@@ -360,7 +360,7 @@ public final class SecurityModel
 	
 	public static String toSubjectID(String domainID, String appID, String name)
 	{
-		return SharedUtil.toCanonicalID(ShiroBase.CAN_ID_SEP, domainID, appID, name);
+		return SUS.toCanonicalID(ShiroBase.CAN_ID_SEP, domainID, appID, name);
 	}
 	
 	public enum AppPermission

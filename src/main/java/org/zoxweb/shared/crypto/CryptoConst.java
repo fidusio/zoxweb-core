@@ -81,7 +81,7 @@ public final class CryptoConst {
         }
 
         public String toCanonicalID() {
-            return SharedUtil.toCanonicalID(':', type, name);
+            return SUS.toCanonicalID(':', type, name);
         }
 
         public static PKInfo parse(String keyCanonicalID) {

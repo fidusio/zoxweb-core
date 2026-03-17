@@ -6,36 +6,31 @@ import org.zoxweb.shared.security.shiro.ShiroBase;
 import org.zoxweb.shared.util.*;
 
 public class AppIDResource
-    extends PropertyDAO
-    implements AppID<String>,
-        CanonicalID
-{
+        extends PropertyDAO
+        implements AppID<String>,
+        CanonicalID {
     public enum Param
-            implements GetNVConfig
-    {
-        APP_ID(NVConfigManager.createNVConfig("app_id", "App ID","AppID", true, false, false, String.class, AppIDNameFilter.SINGLETON)),
+            implements GetNVConfig {
+        APP_ID(NVConfigManager.createNVConfig("app_id", "App ID", "AppID", true, false, false, String.class, AppIDNameFilter.SINGLETON)),
         DOMAIN_ID(NVConfigManager.createNVConfig("domain_id", "Domain ID", "Domain ID", true, true, false, String.class, FilterType.DOMAIN)),
         DOMAIN_APP_ID(NVConfigManager.createNVConfig("domain_app_id", "Domain APP ID", "DomainAppID", true, false, true, String.class, null)),
         ;
 
         private final NVConfig nvc;
 
-        Param(NVConfig nvc)
-        {
+        Param(NVConfig nvc) {
             this.nvc = nvc;
         }
 
-        public NVConfig getNVConfig()
-        {
+        public NVConfig getNVConfig() {
             return nvc;
         }
     }
 
 
-
     public static final NVConfigEntity NVC_APP_ID_RESOURCE = new NVConfigEntityPortable(
             "app_id_resource",
-            "AppIDResource" ,
+            "AppIDResource",
             AppIDResource.class.getSimpleName(),
             true, false,
             false, false,
@@ -47,27 +42,22 @@ public class AppIDResource
     );
 
 
-    public AppIDResource()
-    {
+    public AppIDResource() {
         super(NVC_APP_ID_RESOURCE);
     }
 
-    public AppIDResource(String domainID, String appID)
-    {
+    public AppIDResource(String domainID, String appID) {
         super(NVC_APP_ID_RESOURCE);
         setDomainAppID(domainID, appID);
     }
 
 
-
-    protected AppIDResource(NVConfigEntity nvce)
-    {
+    protected AppIDResource(NVConfigEntity nvce) {
         super(nvce);
     }
 
 
-    public String getDomainID()
-    {
+    public String getDomainID() {
         return lookupValue(Param.DOMAIN_ID);
     }
 
@@ -75,14 +65,12 @@ public class AppIDResource
      * @param domainID not to be used call #setDomainAppID
      */
     @Deprecated
-    public void setDomainID(String domainID)
-    {
+    public void setDomainID(String domainID) {
         throw new UnsupportedOperationException("Method not supported use setDomainAppID method.");
     }
 
 
-    public String getAppID()
-    {
+    public String getAppID() {
         return lookupValue(Param.APP_ID);
     }
 
@@ -90,8 +78,7 @@ public class AppIDResource
      * @param appID not to be used call #setDomainAppID
      */
     @Deprecated
-    public void setAppID(String appID)
-    {
+    public void setAppID(String appID) {
         throw new UnsupportedOperationException("Method not supported use setDomainAppID method.");
     }
 
@@ -101,40 +88,32 @@ public class AppIDResource
      * @param appID to be set
      * @throws IllegalArgumentException if the domain value or app value are invalid
      */
-    public synchronized void setDomainAppID(String domainID, String appID)
-    {
+    public synchronized void setDomainAppID(String domainID, String appID) {
         setValue(Param.DOMAIN_APP_ID, toDomainAppID(domainID, appID));
         setValue(Param.APP_ID, AppIDNameFilter.SINGLETON.validate(appID));
         setValue(Param.DOMAIN_ID, FilterType.DOMAIN.validate(domainID));
     }
 
 
-
-    public String getDomainAppID()
-    {
+    public String getDomainAppID() {
         return lookupValue(Param.DOMAIN_APP_ID);
     }
 
-    public String toCanonicalID()
-    {
+    public String toCanonicalID() {
         return toDomainAppID(getDomainID(), getAppID());
     }
 
 
-
-    public static String toDomainAppID(String domainID, String appIDName)
-    {
-        return SharedUtil.toCanonicalID(ShiroBase.CAN_ID_SEP, FilterType.DOMAIN.validate(domainID),AppIDNameFilter.SINGLETON.validate(appIDName));
+    public static String toDomainAppID(String domainID, String appIDName) {
+        return SUS.toCanonicalID(ShiroBase.CAN_ID_SEP, FilterType.DOMAIN.validate(domainID), AppIDNameFilter.SINGLETON.validate(appIDName));
     }
 
     public boolean equals(Object obj) {
-        if (obj == this)
-        {
+        if (obj == this) {
             return true;
         }
 
-        if (obj instanceof AppIDResource)
-        {
+        if (obj instanceof AppIDResource) {
             AppIDResource appIDResource = (AppIDResource) obj;
 
             if (SharedStringUtil.equals(getDomainID(), appIDResource.getDomainID(), true)
@@ -146,8 +125,7 @@ public class AppIDResource
     }
 
     @Override
-    public int hashCode()
-    {
+    public int hashCode() {
 
 
         if (getDomainID() != null && getAppID() != null) {
@@ -166,13 +144,12 @@ public class AppIDResource
     }
 
 
-    public static AppIDResource toAppID(String gid)
-    {
+    public static AppIDResource toAppID(String gid) {
         gid = SUS.trimOrNull(gid);
         SUS.checkIfNulls("Null app global ig", gid);
         int sepIndex = gid.lastIndexOf(ShiroBase.CAN_ID_SEP);
         if (sepIndex < 1 || sepIndex + 1 == gid.length())
-            throw new IllegalArgumentException("Illegal gid:"+ gid);
+            throw new IllegalArgumentException("Illegal gid:" + gid);
 
         String domainID = FilterType.DOMAIN.validate(gid.substring(0, sepIndex));
         String appID = AppIDNameFilter.SINGLETON.validate(gid.substring(sepIndex + 1));
@@ -182,8 +159,7 @@ public class AppIDResource
 
     }
 
-    public static AppIDResource toAppID(String domainID, String appID)
-    {
+    public static AppIDResource toAppID(String domainID, String appID) {
         return new AppIDResource(domainID, appID);
     }
 }

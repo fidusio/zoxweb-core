@@ -291,7 +291,7 @@ public class HashUtil {
             random.nextBytes(salt);
             MessageDigest md = MessageDigest.getInstance(algo.getName());
             hashedPassword = hashWithIterations(md, salt, password, rounds, false);
-            ciPassword.setCanonicalID(SharedUtil.toCanonicalID('$',
+            ciPassword.setCanonicalID(SUS.toCanonicalID('$',
                     "$" + DataEncoder.StringLower.encode(algo.getName()),
                     rounds,
                     SharedBase64.encodeAsString(SharedBase64.Base64Type.DEFAULT_NP, salt),

@@ -15,12 +15,12 @@
  */
 package org.zoxweb.shared.util;
 
+import org.zoxweb.server.http.HTTPMultiPartUtil;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-
-import org.zoxweb.server.http.HTTPMultiPartUtil;
 
 
 public class UtilTest {
@@ -82,10 +82,10 @@ public class UtilTest {
 		result =  SharedUtil.toNVPairs("pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=196.43.230.86  user=root", "=", " ");
 		System.out.println(result);
 
-		System.out.println(SharedUtil.toCanonicalID('-', null, "a", null));
-		System.out.println(SharedUtil.toCanonicalID(true, '-', "a", null));
-		System.out.println(SharedUtil.toCanonicalID(false, '-', "a", null, "b"));
-		String concat = SharedUtil.toCanonicalID(true, '-', "a", null, "b");
+		System.out.println(SUS.toCanonicalID('-', null, "a", null));
+		System.out.println(SUS.toCanonicalID(true, '-', "a", null));
+		System.out.println(SUS.toCanonicalID(false, '-', "a", null, "b"));
+		String concat = SUS.toCanonicalID(true, '-', "a", null, "b");
 		System.out.println(concat);
 		String parsedContact[] = SharedStringUtil.parseString(concat, "-");
 		System.out.println(Arrays.toString(parsedContact));

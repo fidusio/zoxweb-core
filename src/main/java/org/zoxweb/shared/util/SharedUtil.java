@@ -220,7 +220,7 @@ public class SharedUtil {
      * @return obj0.toString() + sep + obj1.toString() + sep + obj2.toString() ...
      */
     public static String toCanonicalID(char sep, Object... objArray) {
-        return SUS.toCanonicalID(sep, objArray);
+        return SUS.toCanonicalID(false, sep, objArray);
     }
 
 
@@ -1368,97 +1368,8 @@ public class SharedUtil {
      * @param config
      * @return nvbase based on nvconfig
      */
-    @SuppressWarnings("unchecked")
     public static NVBase<?> metaConfigToNVBase(NVConfig config) {
-        Class<?> c = config.getMetaType();
-
-        if (config.isArray()) {
-            if (config instanceof NVConfigEntity) {
-                NVConfigEntity nvce = (NVConfigEntity) config;
-                //System.out.println(""+config);
-
-                switch (nvce.getArrayType()) {
-                    case GET_NAME_MAP:
-                        return new NVEntityGetNameMap(config.getName());
-                    case LIST:
-                        return new NVEntityReferenceList(config.getName());
-                    case REFERENCE_ID_MAP:
-                        return new NVEntityReferenceIDMap(config.getName());
-                    case NOT_ARRAY:
-                    default:
-                        break;
-
-                }
-
-                //return new NVEntityReferenceList(config.getName());
-            }
-
-            // enum must be checked first
-            if (config.isEnum()) {
-                return (new NVEnumList(config.getName(), new ArrayList<Enum<?>>()));
-            } else if (String[].class.equals(c)) {
-                if (config.isUnique()) {
-                    return (new NVPairGetNameMap(config.getName(), new LinkedHashMap<GetName, GetNameValue<String>>()));
-                }
-
-                return (new NVPairList(config.getName(), new ArrayList<NVPair>()));
-            } else if (Long[].class.equals(c)) {
-                return (new NVLongList(config.getName(), new ArrayList<Long>()));
-            } else if (byte[].class.equals(c)) {
-                return (new NVBlob(config.getName(), null));
-            } else if (Integer[].class.equals(c)) {
-                return (new NVIntList(config.getName(), new ArrayList<Integer>()));
-            } else if (Float[].class.equals(c)) {
-                return (new NVFloatList(config.getName(), new ArrayList<Float>()));
-            } else if (Double[].class.equals(c)) {
-                return (new NVDoubleList(config.getName(), new ArrayList<Double>()));
-            } else if (Date[].class.equals(c)) {
-                return (new NVLongList(config.getName(), new ArrayList<Long>()));
-            } else if (BigDecimal[].class.equals(c)) {
-                return (new NVBigDecimalList(config.getName(), new ArrayList<BigDecimal>()));
-            }
-        } else {
-            // Not array
-            if (config instanceof NVConfigEntity) {
-                return new NVEntityReference(config);
-            }
-
-            if (config.isEnum()) {
-                return (new NVEnum(config.getName(), null));
-            } else if (String.class.equals(c)) {
-                NVPair nvp = new NVPair(config.getName(), (String) null);
-                nvp.setValueFilter(config.getValueFilter());
-                return nvp;
-            } else if (Long.class.equals(c)) {
-                return new NVLong(config.getName(), 0);
-            } else if (Integer.class.equals(c)) {
-                return new NVInt(config.getName(), 0);
-            } else if (Boolean.class.equals(c)) {
-                return (new NVBoolean(config.getName(), false));
-            } else if (Float.class.equals(c)) {
-                return new NVFloat(config.getName(), 0);
-            } else if (Double.class.equals(c)) {
-                return new NVDouble(config.getName(), 0);
-            } else if (Date.class.equals(c)) {
-                return new NVLong(config.getName(), 0);
-            } else if (BigDecimal.class.equals(c)) {
-                return new NVBigDecimal(config.getName(), new BigDecimal(0));
-            } else if (Number.class.equals(c)) {
-                return new NVNumber(config.getName(), null);
-            } else if (NVGenericMap.class.equals(c)) {
-                return new NVGenericMap(config.getName());
-            } else if (NVGenericMapList.class.equals(c)) {
-                return new NVGenericMapList(config.getName());
-            } else if (NVStringList.class.equals(c)) {
-                return new NVStringList(config.getName());
-            } else if (NVStringSet.class.equals(c)) {
-                return new NVStringSet(config.getName());
-            } else if (NamedValue.class.equals(c)) {
-                return new NamedValue(config.getName());
-            }
-        }
-
-        throw new IllegalArgumentException("Unsupported type " + config + " class:" + c);
+        return MetaToInstance.SINGLETON.toNVBase(config);
     }
 
     public static NVBase<?> classToNVBase(Class<?> c, String name, String value) {

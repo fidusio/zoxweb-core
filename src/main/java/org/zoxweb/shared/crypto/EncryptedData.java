@@ -129,7 +129,7 @@ public class EncryptedData
 //		sb.append(':');
 //		sb.append(SharedUtil.toCanonicalID(',', (Object[])getSubjectProperties().values()));
         sb.append(':');
-        sb.append(SharedUtil.toCanonicalID(',', (Object[]) getAlgoProperties().values()));
+        sb.append(SUS.toCanonicalID(',', (Object[]) getAlgoProperties().values()));
         sb.append(':');
         sb.append(new String(SharedBase64.encode(getIV())));
         sb.append(':');

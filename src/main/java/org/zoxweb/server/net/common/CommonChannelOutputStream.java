@@ -6,7 +6,6 @@ import org.zoxweb.server.net.ProtocolHandler;
 import org.zoxweb.server.net.ssl.SSLSessionConfig;
 import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.util.SUS;
-import org.zoxweb.shared.util.SharedUtil;
 
 import javax.net.ssl.SSLEngineResult;
 import javax.net.ssl.SSLException;
@@ -119,7 +118,7 @@ public class CommonChannelOutputStream
                 case BUFFER_UNDERFLOW:
                 case BUFFER_OVERFLOW:
                     throw new IOException(result.getStatus() + " invalid state context buffer size " +
-                            SharedUtil.toCanonicalID(',', sslConfig.outSSLNetData.capacity(), sslConfig.outSSLNetData.limit(), sslConfig.outSSLNetData.position()));
+                            SUS.toCanonicalID(',', sslConfig.outSSLNetData.capacity(), sslConfig.outSSLNetData.limit(), sslConfig.outSSLNetData.position()));
                 case OK:
                     try {
                         written = ByteBufferUtil.smartWrite(null, dataChannel, sslConfig.outSSLNetData);

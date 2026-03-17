@@ -5,7 +5,7 @@ import org.zoxweb.server.http.OkHTTPCall;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.util.GetNameValue;
 import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.SUS;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -100,7 +100,7 @@ public class HTTPAuthorizationTest {
     public void userInfoFromURL() throws MalformedURLException {
         URL url = new URL("http://john:secret123@example.com:8080/resource?name=mario&lastname=taza");
 
-        System.out.println(SharedUtil.toCanonicalID(',', url.getProtocol(), url.getUserInfo(), url.getHost(), url.getPort(), url.getPath(), url.getQuery()));
+        System.out.println(SUS.toCanonicalID(',', url.getProtocol(), url.getUserInfo(), url.getHost(), url.getPort(), url.getPath(), url.getQuery()));
         GetNameValue<String> authorization = HTTPAuthScheme.BASIC.toHTTPHeader(url.getUserInfo());
         System.out.println(authorization);
     }
@@ -117,9 +117,6 @@ public class HTTPAuthorizationTest {
 
 
         System.out.println("attributes:" + authToken.getAttributes());
-
-
-
 
 
         HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit("https://iot.xlogistx.io", "login", HTTPMethod.GET);

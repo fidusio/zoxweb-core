@@ -26,7 +26,7 @@ public class SharedUtilTest {
 		String stringArray = "hi";
 		
 		for (int i = 0; i < enumList.values().length; i++) {
-			stringArray = SharedUtil.toCanonicalID('/', enumList.values()[i]);
+			stringArray = SUS.toCanonicalID('/', enumList.values()[i]);
 		}
 		
 		System.out.println(stringArray);

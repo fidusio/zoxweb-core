@@ -3,8 +3,8 @@ package org.zoxweb.server.net.ssl;
 import org.zoxweb.server.fsm.*;
 import org.zoxweb.server.net.BaseSessionCallback;
 import org.zoxweb.shared.util.GetName;
+import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedStringUtil;
-import org.zoxweb.shared.util.SharedUtil;
 
 import javax.net.ssl.SSLEngineResult;
 import java.util.concurrent.Executor;
@@ -174,7 +174,7 @@ public class SSLStateMachine extends StateMachine<SSLSessionConfig>
 
 
     public static String rates() {
-        return SharedUtil.toCanonicalID(',', SSLHandshakingState.rcNeedWrap, SSLHandshakingState.rcNeedUnwrap, SSLHandshakingState.rcNeedTask, SSLHandshakingState.rcFinished, SSLDataReadyState.rcNotHandshaking);
+        return SUS.toCanonicalID(',', SSLHandshakingState.rcNeedWrap, SSLHandshakingState.rcNeedUnwrap, SSLHandshakingState.rcNeedTask, SSLHandshakingState.rcFinished, SSLDataReadyState.rcNotHandshaking);
     }
 
     public static <T> T lookupType(String type) {

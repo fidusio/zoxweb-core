@@ -4,14 +4,14 @@ package org.zoxweb.server.security;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.crypto.CryptoConst;
 import org.zoxweb.shared.crypto.CryptoConst.SignatureAlgo;
-import org.zoxweb.shared.crypto.EncryptedData;
 import org.zoxweb.shared.crypto.EncapsulatedKey;
+import org.zoxweb.shared.crypto.EncryptedData;
 import org.zoxweb.shared.security.JWT;
 import org.zoxweb.shared.util.Const.TimeInMillis;
+import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedBase64;
 import org.zoxweb.shared.util.SharedBase64.Base64Type;
 import org.zoxweb.shared.util.SharedStringUtil;
-import org.zoxweb.shared.util.SharedUtil;
 
 import java.security.Key;
 import java.security.KeyPair;
@@ -90,7 +90,7 @@ public class KeyGenerationTest {
       }
       ts = System.currentTimeMillis() - ts;
       for (Key k : keys) {
-        System.out.println(SharedUtil.toCanonicalID(',', k.getAlgorithm(), k.getEncoded().length,
+        System.out.println(SUS.toCanonicalID(',', k.getAlgorithm(), k.getEncoded().length,
             SharedStringUtil.bytesToHex(k.getEncoded())));
       }
       System.out.println("it took " + TimeInMillis.toString(ts));

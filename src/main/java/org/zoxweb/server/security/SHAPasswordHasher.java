@@ -7,7 +7,6 @@ import org.zoxweb.shared.security.AccessException;
 import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedBase64;
 import org.zoxweb.shared.util.SharedStringUtil;
-import org.zoxweb.shared.util.SharedUtil;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -70,7 +69,7 @@ public class SHAPasswordHasher
             default:
                 throw new IllegalArgumentException("Invalid password format");
         }
-        ret.setCanonicalID(SharedUtil.toCanonicalID('$',
+        ret.setCanonicalID(SUS.toCanonicalID('$',
                 "$" + ret.getAlgorithm().toLowerCase(),
                 ret.getRounds(),
                 SharedBase64.encodeAsString(SharedBase64.Base64Type.DEFAULT_NP, ret.getSalt()),

@@ -17,11 +17,7 @@ package org.zoxweb.shared.net;
 
 import org.zoxweb.shared.data.SetNameDAO;
 import org.zoxweb.shared.net.InetProp.IPVersion;
-import org.zoxweb.shared.util.NVConfig;
-import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityPortable;
-import org.zoxweb.shared.util.NVConfigManager;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.*;
 
 /**
  * Data access object for internet address information.
@@ -89,7 +85,7 @@ public class InetAddressDAO
      * @return the canonical string representation
      */
     public String toString() {
-        return SharedUtil.toCanonicalID(':', getIPVersion(), getInetAddress());
+        return SUS.toCanonicalID(':', getIPVersion(), getInetAddress());
     }
 
 }

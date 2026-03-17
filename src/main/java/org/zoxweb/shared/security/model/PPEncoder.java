@@ -19,7 +19,7 @@ implements DataEncoder<String[], String>
 	private PPEncoder() {}
 	public String encode(String ...patterns) 
 	{
-		return SUS.trimOrEmpty(SharedUtil.toCanonicalID(PATTERN_SEP, (Object[])patterns)).toLowerCase();
+		return SUS.trimOrEmpty(SUS.toCanonicalID(PATTERN_SEP, (Object[])patterns)).toLowerCase();
 	}
 	
 	

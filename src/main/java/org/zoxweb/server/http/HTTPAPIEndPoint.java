@@ -132,7 +132,7 @@ public class HTTPAPIEndPoint<I, O>
     }
 
     public String toCanonicalID() {
-        return SharedUtil.toCanonicalID(true, '.', domain, getName());
+        return SUS.toCanonicalID(true, '.', domain, getName());
     }
 
 

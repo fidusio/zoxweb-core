@@ -252,7 +252,7 @@ public class SharedNetUtil {
                 break;
             case STATIC:
                 if (SUS.isEmpty(nicd.getAddress()) || SUS.isEmpty(nicd.getNetmask())) {
-                    throw new IOException("Network missing:" + SharedUtil.toCanonicalID(',', nicd.getAddress(), nicd.getNetmask()));
+                    throw new IOException("Network missing:" + SUS.toCanonicalID(',', nicd.getAddress(), nicd.getNetmask()));
                 }
                 byte[] address = getV4Address(nicd.getAddress());
                 byte[] netmask = getV4Address(nicd.getNetmask());
@@ -268,7 +268,7 @@ public class SharedNetUtil {
                     }
                     if (!(belongsToNetwork(address, netmask, network) &&
                             belongsToNetwork(gateway, netmask, network))) {
-                        throw new IOException("BAD Network config:" + SharedUtil.toCanonicalID(',', nicd.getNIName(), nicd.getAddress(), nicd.getNetmask(), nicd.getGateway()));
+                        throw new IOException("BAD Network config:" + SUS.toCanonicalID(',', nicd.getNIName(), nicd.getAddress(), nicd.getNetmask(), nicd.getGateway()));
                     }
                 }
 

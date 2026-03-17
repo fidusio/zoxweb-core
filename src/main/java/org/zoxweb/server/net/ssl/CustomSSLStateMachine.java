@@ -4,10 +4,7 @@ import org.zoxweb.server.fsm.MonoStateMachine;
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.net.BaseSessionCallback;
 import org.zoxweb.server.net.common.TCPSessionCallback;
-import org.zoxweb.shared.util.Identifier;
-import org.zoxweb.shared.util.RateCounter;
-import org.zoxweb.shared.util.SharedStringUtil;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.*;
 
 import javax.net.ssl.SSLEngineResult;
 import java.io.Closeable;
@@ -107,7 +104,7 @@ public class CustomSSLStateMachine extends MonoStateMachine<SSLEngineResult.Hand
     }
 
     public static String rates() {
-        return SharedUtil.toCanonicalID(',', rcNeedWrap, rcNeedUnwrap, rcNeedTask, rcFinished, rcNotHandshaking);
+        return SUS.toCanonicalID(',', rcNeedWrap, rcNeedUnwrap, rcNeedTask, rcFinished, rcNotHandshaking);
     }
 
     public static <T> T lookupType(String type) {

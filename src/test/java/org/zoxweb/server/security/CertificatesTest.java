@@ -3,11 +3,8 @@ package org.zoxweb.server.security;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.crypto.CryptoConst.SignatureAlgo;
 import org.zoxweb.shared.security.JWT;
-import org.zoxweb.shared.util.NVGenericMap;
-import org.zoxweb.shared.util.SharedBase64;
+import org.zoxweb.shared.util.*;
 import org.zoxweb.shared.util.SharedBase64.Base64Type;
-import org.zoxweb.shared.util.SharedStringUtil;
-import org.zoxweb.shared.util.SharedUtil;
 
 import java.security.KeyPair;
 import java.security.PrivateKey;
@@ -55,10 +52,10 @@ public class CertificatesTest {
 
             KeyPair kp = CryptoUtil.generateKeyPair("EC", 256);
             System.out.println(
-                    SharedUtil.toCanonicalID(',', kp.getPublic().getAlgorithm(), kp.getPublic().getFormat(),
+                    SUS.toCanonicalID(',', kp.getPublic().getAlgorithm(), kp.getPublic().getFormat(),
                             SharedBase64.encodeAsString(Base64Type.URL, kp.getPublic().getEncoded())));
             System.out.println(
-                    SharedUtil.toCanonicalID(',', kp.getPrivate().getAlgorithm(), kp.getPrivate().getFormat(),
+                    SUS.toCanonicalID(',', kp.getPrivate().getAlgorithm(), kp.getPrivate().getFormat(),
                             SharedBase64.encodeAsString(Base64Type.URL, kp.getPrivate().getEncoded())));
             PublicKey pubKeyEC = CryptoUtil.generatePublicKey("EC", kp.getPublic().getEncoded());
             PrivateKey priKeyEC = CryptoUtil.generatePrivateKey("EC", kp.getPrivate().getEncoded());
@@ -68,8 +65,7 @@ public class CertificatesTest {
             KeyPair aliceKey = CryptoUtil.generateKeyPair("RSA", 2048);
             PublicKey alicePubK = aliceKey.getPublic();
             PrivateKey alicePriK = aliceKey.getPrivate();
-            System.out.println(SharedUtil
-                    .toCanonicalID(',', aliceKey.getPublic().getAlgorithm(), aliceKey.getPublic().getFormat(),
+            System.out.println(SUS.toCanonicalID(',', aliceKey.getPublic().getAlgorithm(), aliceKey.getPublic().getFormat(),
                             SharedBase64.encodeAsString(Base64Type.URL, aliceKey.getPublic().getEncoded())));
 
             PublicKey pubK = CryptoUtil.generatePublicKey("RSA", aliceKey.getPublic().getEncoded());

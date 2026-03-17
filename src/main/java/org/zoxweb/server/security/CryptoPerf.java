@@ -2,6 +2,7 @@ package org.zoxweb.server.security;
 
 import org.zoxweb.shared.crypto.CryptoConst;
 import org.zoxweb.shared.util.Const;
+import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedUtil;
 
 import java.security.NoSuchAlgorithmException;
@@ -112,7 +113,7 @@ public class CryptoPerf {
         } catch (Exception e) {
             System.err.println(e.getMessage());
             System.err.println("Usage: command ...");
-            System.err.println("generate random: gen-rnds [" + SharedUtil.toCanonicalID(',', (Object[]) CryptoConst.SecureRandomType.values()) + "] size-in-bytes count repeat");
+            System.err.println("generate random: gen-rnds [" + SUS.toCanonicalID(',', (Object[]) CryptoConst.SecureRandomType.values()) + "] size-in-bytes count repeat");
             System.err.println("generate random: gen-keys [aes,des,rsa,ec]  key-size-in-bits count repeat");
         }
     }

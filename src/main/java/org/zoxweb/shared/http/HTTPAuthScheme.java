@@ -42,7 +42,7 @@ public enum HTTPAuthScheme
             if (SUS.isNotEmpty(usernameAndMaybePassword) && SUS.isNotEmpty(password)) {
 
                 return new NVPair(HTTPHeader.AUTHORIZATION,
-                        BASIC.getName() + " " + new String(SharedBase64.encode(SharedStringUtil.getBytes(SharedUtil.toCanonicalID(':', usernameAndMaybePassword, password)))));
+                        BASIC.getName() + " " + new String(SharedBase64.encode(SharedStringUtil.getBytes(SUS.toCanonicalID(':', usernameAndMaybePassword, password)))));
             }
 
             if (SUS.isNotEmpty(usernameAndMaybePassword)) {

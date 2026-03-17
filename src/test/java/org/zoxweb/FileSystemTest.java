@@ -15,22 +15,16 @@
  */
 package org.zoxweb;
 
-import java.io.File;
+import org.zoxweb.shared.util.SUS;
+import org.zoxweb.shared.util.SharedBase64;
 
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
-import java.io.RandomAccessFile;
+import java.io.*;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.FileStore;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.util.Iterator;
-
-import org.zoxweb.shared.util.SharedBase64;
-import org.zoxweb.shared.util.SharedUtil;
 
 public class FileSystemTest {
 
@@ -39,13 +33,13 @@ public class FileSystemTest {
 
 		try {
             FileSystem fs = FileSystems.getDefault();
-            System.out.println(SharedUtil.toCanonicalID(',', fs, fs.provider(), fs.supportedFileAttributeViews()));
+            System.out.println(SUS.toCanonicalID(',', fs, fs.provider(), fs.supportedFileAttributeViews()));
             Iterable<FileStore> ifs = fs.getFileStores();
             Iterator<FileStore> fsi = ifs.iterator();
 
             while (fsi.hasNext()) {
                 FileStore fStore = fsi.next();
-                System.out.println(SharedUtil.toCanonicalID(',', fStore.name(), fStore.type(), fStore.getTotalSpace(), fStore.getUnallocatedSpace(), fStore.getUsableSpace()));
+                System.out.println(SUS.toCanonicalID(',', fStore.name(), fStore.type(), fStore.getTotalSpace(), fStore.getUnallocatedSpace(), fStore.getUsableSpace()));
             }
 
             File file = new File("/temp/dummy.lnk");
@@ -70,7 +64,7 @@ public class FileSystemTest {
 
             System.exit(0);
 
-            System.out.println(SharedUtil.toCanonicalID(',', file.canRead(), file.canWrite(), file.getName()));
+            System.out.println(SUS.toCanonicalID(',', file.canRead(), file.canWrite(), file.getName()));
 
             PipedInputStream in = new PipedInputStream();
             PipedOutputStream out = new PipedOutputStream(in);

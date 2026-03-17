@@ -64,7 +64,7 @@ public class TimeInMillisTest {
         };
 
         for (Object duration : durations) {
-            System.out.println(SharedUtil.toCanonicalID(',', duration, Const.TimeInMillis.toMillis(duration)));
+            System.out.println(SUS.toCanonicalID(',', duration, Const.TimeInMillis.toMillis(duration)));
         }
     }
 

@@ -16,7 +16,7 @@
 package org.zoxweb.server.util;
 
 import org.zoxweb.shared.util.ArrayQueue;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.SUS;
 
 
 /**
@@ -107,7 +107,7 @@ public class ThresholdQueue<O>
      */
     @Override
     public String toString() {
-        return SharedUtil.toCanonicalID(',', array.length, threshold, size(), thresholdEnabled);
+        return SUS.toCanonicalID(',', array.length, threshold, size(), thresholdEnabled);
     }
 
 

@@ -156,7 +156,7 @@ public final class KeyMakerProvider
                                                               String dataRefGUID, String subjectGUID)
             throws NullPointerException, IllegalArgumentException, AccessException {
         SUS.checkIfNulls("Null parameters", dataStore, dataRefGUID);
-        EncapsulatedKey ekd = keyMap.get(SharedUtil.toCanonicalID(':', dataRefGUID, subjectGUID));
+        EncapsulatedKey ekd = keyMap.get(SUS.toCanonicalID(':', dataRefGUID, subjectGUID));
 
         if (ekd == null) {
             List<EncapsulatedKey> keyMatches = dataStore
@@ -168,7 +168,7 @@ public final class KeyMakerProvider
                 return null;
             }
             ekd = keyMatches.get(0);
-            keyMap.put(SharedUtil.toCanonicalID(':', dataRefGUID, subjectGUID), ekd);
+            keyMap.put(SUS.toCanonicalID(':', dataRefGUID, subjectGUID), ekd);
         }
 
         return ekd;

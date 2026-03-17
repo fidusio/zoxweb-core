@@ -326,13 +326,13 @@ public final class ServerUtil {
     public static void main(String... args) {
         try {
             SystemInfoDAO siDAO = loadSystemInfoDAO();
-            System.out.println(SharedUtil.toCanonicalID(':', siDAO.getName(), siDAO.getDescription()));
+            System.out.println(SUS.toCanonicalID(':', siDAO.getName(), siDAO.getDescription()));
             System.out.println(siDAO.getSystemProperties());
             NVEntity[] allInterfaces = siDAO.getNetworkInterfaces().values();
             //Iterator<NetworkInterfaceDAO> it = (Iterator<NetworkInterfaceDAO> )allInterfaces.iterator();
             for (int i = 0; i < allInterfaces.length; i++) {
                 NetworkInterfaceDAO niDAO = (NetworkInterfaceDAO) allInterfaces[i];
-                System.out.println(SharedUtil.toCanonicalID(',', i, niDAO.getName(), niDAO.getMACAddress()));
+                System.out.println(SUS.toCanonicalID(',', i, niDAO.getName(), niDAO.getMACAddress()));
                 System.out.println(niDAO.getInetAddresses());
             }
 

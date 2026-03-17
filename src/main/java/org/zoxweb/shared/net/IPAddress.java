@@ -244,7 +244,7 @@ public class IPAddress
      */
     @Override
     public String toString() {
-        return SharedUtil.toCanonicalID(':', getInetAddress(), getPort());
+        return SUS.toCanonicalID(':', getInetAddress(), getPort());
     }
 
     /**

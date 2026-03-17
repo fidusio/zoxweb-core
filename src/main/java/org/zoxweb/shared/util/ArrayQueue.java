@@ -99,7 +99,7 @@ public class ArrayQueue<O>
 
 
     public String toString() {
-        return "[" + SharedUtil.toCanonicalID(',', array.length, head, end, size()) + "]";
+        return "[" + SUS.toCanonicalID(',', array.length, head, end, size()) + "]";
     }
 
 

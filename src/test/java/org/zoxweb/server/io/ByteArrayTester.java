@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.zoxweb.shared.io.BytesArray;
 import org.zoxweb.shared.util.Const;
 import org.zoxweb.shared.util.Const.TypeInBytes;
+import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedStringUtil;
 import org.zoxweb.shared.util.SharedUtil;
 
@@ -251,12 +252,12 @@ public class ByteArrayTester
 			bb =  ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, buffer, 0, buffer.length, true);
 			System.out.println(bb.getClass().getName());
 
-			System.out.println(SharedUtil.toCanonicalID(',', bb.position(), bb.limit(), bb.capacity()));
+			System.out.println(SUS.toCanonicalID(',', bb.position(), bb.limit(), bb.capacity()));
 			while (bb.hasRemaining()) {
 				bb.get();
-				//System.out.println(SharedUtil.toCanonicalID(',', bb.position(), bb.limit(), bb.capacity()));
+				//System.out.println(SUS.toCanonicalID(',', bb.position(), bb.limit(), bb.capacity()));
 			}
-			System.out.println(SharedUtil.toCanonicalID(',', bb.position(), bb.limit(), bb.capacity()));
+			System.out.println(SUS.toCanonicalID(',', bb.position(), bb.limit(), bb.capacity()));
 
 			bb.clear();
 			//bb.flip();
@@ -264,7 +265,7 @@ public class ByteArrayTester
 			for (int i=0; i < 11; i++) {
 				try {
 					bb.put((byte) i);
-					System.out.println(SharedUtil.toCanonicalID(',', bb.position(), bb.limit(), bb.capacity()));
+					System.out.println(SUS.toCanonicalID(',', bb.position(), bb.limit(), bb.capacity()));
 				} catch(Exception e) {
 					e.printStackTrace();
 					break;
@@ -272,11 +273,11 @@ public class ByteArrayTester
 			}
 
 			bb.flip();
-			System.out.println(SharedUtil.toCanonicalID(',', bb.position(), bb.limit(), bb.capacity()));
+			System.out.println(SUS.toCanonicalID(',', bb.position(), bb.limit(), bb.capacity()));
 
 			while(bb.hasRemaining()) {
 				bb.get();
-				System.out.println(SharedUtil.toCanonicalID(',', bb.position(), bb.limit(), bb.capacity()));
+				System.out.println(SUS.toCanonicalID(',', bb.position(), bb.limit(), bb.capacity()));
 			}
 
 		} catch (Exception e) {

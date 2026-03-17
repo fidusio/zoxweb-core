@@ -161,7 +161,7 @@ public final class HTTPAPIManager
         domain = SUS.trimOrNull(domain);
         if (name != null)
         {
-            return unregister(domain != null ? SharedUtil.toCanonicalID('.', domain, name) : name);
+            return unregister(domain != null ? SUS.toCanonicalID('.', domain, name) : name);
         }
 
         return null;

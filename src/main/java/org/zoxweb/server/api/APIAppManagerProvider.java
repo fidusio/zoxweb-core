@@ -869,7 +869,7 @@ public class APIAppManagerProvider
             throws NullPointerException, IllegalArgumentException, AccessException {
         String permission = PPEncoder.SINGLETON.encode(SecurityModel.PERM_ADD_ROLE, appID.getGUID());
         if (log.isEnabled()) log.getLogger().info("permision to check:" + permission);
-        if (log.isEnabled()) log.getLogger().info(SharedUtil.toCanonicalID(',', subjectID, roleName));
+        if (log.isEnabled()) log.getLogger().info(SUS.toCanonicalID(',', subjectID, roleName));
         getAPISecurityManager().checkPermissions(permission);
         // permission checked
         UserIDDAO userID = lookupUserIDDAO(subjectID);

@@ -15,12 +15,7 @@
  */
 package org.zoxweb.shared.http;
 
-import org.zoxweb.shared.util.GetNameValue;
-import org.zoxweb.shared.util.NVConfig;
-import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityPortable;
-import org.zoxweb.shared.util.NVConfigManager;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.*;
 
 /**
  * HTTP Basic Authentication credentials container as defined in RFC 7617.
@@ -36,98 +31,84 @@ import org.zoxweb.shared.util.SharedUtil;
  */
 @SuppressWarnings("serial")
 public class HTTPAuthorizationBasic
-extends HTTPAuthorization
-{
+        extends HTTPAuthorization {
 
-	public static final NVConfig NVC_USER = NVConfigManager.createNVConfig("user", null, "User", false, true, String.class);
-	public static final NVConfig NVC_PASSWORD = NVConfigManager.createNVConfig("password", null, "Password", false, true, String.class);
-	
-	public static final NVConfigEntity NVC_HTTP_AUTHORIZATION_BASIC = new NVConfigEntityPortable("http_authorization_basic", null , null, true, false, false, false, HTTPAuthorizationBasic.class, SharedUtil.toNVConfigList(NVC_USER, NVC_PASSWORD), null, false, HTTPAuthorization.NVC_HTTP_AUTHORIZATION);
-	
+    public static final NVConfig NVC_USER = NVConfigManager.createNVConfig("user", null, "User", false, true, String.class);
+    public static final NVConfig NVC_PASSWORD = NVConfigManager.createNVConfig("password", null, "Password", false, true, String.class);
 
-	/**
-	 * Default constructor creating an empty Basic authorization.
-	 */
-	public HTTPAuthorizationBasic()
-	{
-		super(NVC_HTTP_AUTHORIZATION_BASIC, HTTPAuthScheme.BASIC);
-	}
-	
-	
-
-	
-	
-	
-	/**
-	 * Constructs an HTTPAuthorizationBasic with the specified username and password.
-	 *
-	 * @param user     the username for authentication
-	 * @param password the password for authentication
-	 */
-	public HTTPAuthorizationBasic(String user, String password)
-	{
-		this();
-		setUser(user);
-		setPassword(password);
-	}
-	
-
-	/**
-	 * @return the user
-	 */
-	public String getUser()
-	{
-		return lookupValue(NVC_USER);
-	}
+    public static final NVConfigEntity NVC_HTTP_AUTHORIZATION_BASIC = new NVConfigEntityPortable("http_authorization_basic", null, null, true, false, false, false, HTTPAuthorizationBasic.class, SharedUtil.toNVConfigList(NVC_USER, NVC_PASSWORD), null, false, HTTPAuthorization.NVC_HTTP_AUTHORIZATION);
 
 
-	/**
-	 * @param user the user to set
-	 */
-	public void setUser(String user)
-	{
-		setValue(NVC_USER, user);
-	}
+    /**
+     * Default constructor creating an empty Basic authorization.
+     */
+    public HTTPAuthorizationBasic() {
+        super(NVC_HTTP_AUTHORIZATION_BASIC, HTTPAuthScheme.BASIC);
+    }
 
 
-	/**
-	 * @return the password
-	 */
-	public String getPassword()
-	{
-		return  lookupValue(NVC_PASSWORD);
-	}
+    /**
+     * Constructs an HTTPAuthorizationBasic with the specified username and password.
+     *
+     * @param user     the username for authentication
+     * @param password the password for authentication
+     */
+    public HTTPAuthorizationBasic(String user, String password) {
+        this();
+        setUser(user);
+        setPassword(password);
+    }
 
 
-	/**
-	 * @param password the password to set
-	 */
-	public void setPassword(String password)
-	{
-		setValue(NVC_PASSWORD, password);
-	}
-	
-	
-	
-	/**
-	 * Returns a string representation of this Basic authorization.
-	 *
-	 * @return string containing the scheme, username, and password
-	 */
-	public String toString()
-	{
-		return SharedUtil.toCanonicalID(' ', getAuthScheme(), getUser(), getPassword());
-	}
+    /**
+     * @return the user
+     */
+    public String getUser() {
+        return lookupValue(NVC_USER);
+    }
 
-	/**
-	 * Converts this Basic authorization to an HTTP Authorization header.
-	 * The result is in the format: "Basic base64(username:password)".
-	 *
-	 * @return the Authorization header as a name-value pair
-	 */
-	public GetNameValue<String> toHTTPHeader()
-	{
-		return getAuthScheme().toHTTPHeader(getUser(), getPassword());
-	}
-	
+
+    /**
+     * @param user the user to set
+     */
+    public void setUser(String user) {
+        setValue(NVC_USER, user);
+    }
+
+
+    /**
+     * @return the password
+     */
+    public String getPassword() {
+        return lookupValue(NVC_PASSWORD);
+    }
+
+
+    /**
+     * @param password the password to set
+     */
+    public void setPassword(String password) {
+        setValue(NVC_PASSWORD, password);
+    }
+
+
+    /**
+     * Returns a string representation of this Basic authorization.
+     *
+     * @return string containing the scheme, username, and password
+     */
+    public String toString() {
+        return SUS.toCanonicalID(' ', getAuthScheme(), getUser(), getPassword());
+    }
+
+    /**
+     * Converts this Basic authorization to an HTTP Authorization header.
+     * The result is in the format: "Basic base64(username:password)".
+     *
+     * @return the Authorization header as a name-value pair
+     */
+    public GetNameValue<String> toHTTPHeader() {
+        return getAuthScheme().toHTTPHeader(getUser(), getPassword());
+    }
+
 }

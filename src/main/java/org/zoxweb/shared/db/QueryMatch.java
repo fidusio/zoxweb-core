@@ -25,165 +25,143 @@ import org.zoxweb.shared.util.*;
  */
 @SuppressWarnings("serial")
 public class QueryMatch<V>
-    implements SetNameValue<V>, QueryMarker
-{
-	private String name;
-	private V value;
-	private RelationalOperator operator;
+        implements SetNameValue<V>, QueryMarker {
+    private String name;
+    private V value;
+    private RelationalOperator operator;
 
-	/**
-	 * This is the default constructor.
-	 */
-	public QueryMatch()
-    {
-		
-	}
+    /**
+     * This is the default constructor.
+     */
+    public QueryMatch() {
 
-	public QueryMatch (GetNameValue<V> nv, RelationalOperator operator)
-	{
-		setName(nv.getName());
-		setValue(nv.getValue());
-		setOperator(operator);
-	}
-	
-	/**
-	 * This constructor instantiates QueryMatch object based on name, value, and operator
-	 * parameters.
-	 * @param name
-	 * @param value
-	 * @param operator
-	 */
-	public QueryMatch(String name, V value, RelationalOperator operator)
-    {
-		setName(name);
-		setValue(value);
-		setOperator(operator);
-	}
+    }
 
-	public QueryMatch(RelationalOperator operator, V value, String... names)
-    {
-		setName(SharedUtil.toCanonicalID('.', (Object[])names));
-		
-		setValue(value);
-		setOperator(operator);
-	}
+    public QueryMatch(GetNameValue<V> nv, RelationalOperator operator) {
+        setName(nv.getName());
+        setValue(nv.getValue());
+        setOperator(operator);
+    }
 
-	public QueryMatch(RelationalOperator operator, V value, GetName... names)
-    {
-		StringBuilder name = new StringBuilder();
+    /**
+     * This constructor instantiates QueryMatch object based on name, value, and operator
+     * parameters.
+     * @param name
+     * @param value
+     * @param operator
+     */
+    public QueryMatch(String name, V value, RelationalOperator operator) {
+        setName(name);
+        setValue(value);
+        setOperator(operator);
+    }
 
-		for (int i = 0; i < names.length ; i++)
-		{
-			if (names[i] != null)
-			{
-				if (name.length() > 0)
-				{
-					name.append('.');
-				}
+    public QueryMatch(RelationalOperator operator, V value, String... names) {
+        setName(SUS.toCanonicalID('.', (Object[]) names));
 
-				name.append(names[i].getName());
-			}
-		}
+        setValue(value);
+        setOperator(operator);
+    }
 
-		setName(name.toString());
-		
-		setValue(value);
-		setOperator(operator);
-	}
+    public QueryMatch(RelationalOperator operator, V value, GetName... names) {
+        StringBuilder name = new StringBuilder();
 
-	public QueryMatch(RelationalOperator operator, V value, GetNVConfig... gnvs)
-    {
-		StringBuilder name = new StringBuilder();
+        for (int i = 0; i < names.length; i++) {
+            if (names[i] != null) {
+                if (name.length() > 0) {
+                    name.append('.');
+                }
 
-		for (int i = 0; i < gnvs.length ; i++)
-		{
-			if (gnvs[i] != null)
-			{
-				if (name.length() > 0)
-				{
-					name.append('.');
-				}
+                name.append(names[i].getName());
+            }
+        }
 
-				name.append(gnvs[i].getNVConfig().getName());
-			}
-		}
+        setName(name.toString());
 
-		setName(name.toString());
-		setValue(value);
-		setOperator(operator);
-	}
+        setValue(value);
+        setOperator(operator);
+    }
 
-	/**
-	 * Returns the name.
-	 * @return name
-	 */
-	@Override
-	public String getName()
-    {
-		return name;
-	}
+    public QueryMatch(RelationalOperator operator, V value, GetNVConfig... gnvs) {
+        StringBuilder name = new StringBuilder();
 
-	/**
-	 * Sets the name.
-	 * @param name
-	 */
-	@Override
-	public void setName(String name)
-    {
-		if (SUS.isEmpty(name))
-		{
-			throw new NullPointerException("Name is null.");
-		}
+        for (int i = 0; i < gnvs.length; i++) {
+            if (gnvs[i] != null) {
+                if (name.length() > 0) {
+                    name.append('.');
+                }
 
-		this.name = name;
-	}
-		
-	/**
-	 * Returns the relational operator.
-	 * @return the relational operator.
-	 */
-	public RelationalOperator getOperator()
-    {
-		return operator;
-	}
-	
-	/**
-	 * Sets the relational operator.
-	 * @param operator
-	 */
-	public void setOperator(RelationalOperator operator)
-    {
-		this.operator = operator;
-	}
+                name.append(gnvs[i].getNVConfig().getName());
+            }
+        }
 
-	/**
-	 * Returns the value.
-	 * @return value
-	 */
-	@Override
-	public V getValue() 
-	{
-		return value;
-	}
+        setName(name.toString());
+        setValue(value);
+        setOperator(operator);
+    }
 
-	/**
-	 * Sets the value.
-	 * @param value
-	 */
-	@Override
-	public void setValue(V value)
-    {
-		this.value = value;
-	}
+    /**
+     * Returns the name.
+     * @return name
+     */
+    @Override
+    public String getName() {
+        return name;
+    }
 
-	public boolean isCanonicalName()
-    {
-		return getName().indexOf('.') != -1;
-	}
+    /**
+     * Sets the name.
+     * @param name
+     */
+    @Override
+    public void setName(String name) {
+        if (SUS.isEmpty(name)) {
+            throw new NullPointerException("Name is null.");
+        }
 
-	@Override
-    public String toString()
-    {
+        this.name = name;
+    }
+
+    /**
+     * Returns the relational operator.
+     * @return the relational operator.
+     */
+    public RelationalOperator getOperator() {
+        return operator;
+    }
+
+    /**
+     * Sets the relational operator.
+     * @param operator
+     */
+    public void setOperator(RelationalOperator operator) {
+        this.operator = operator;
+    }
+
+    /**
+     * Returns the value.
+     * @return value
+     */
+    @Override
+    public V getValue() {
+        return value;
+    }
+
+    /**
+     * Sets the value.
+     * @param value
+     */
+    @Override
+    public void setValue(V value) {
+        this.value = value;
+    }
+
+    public boolean isCanonicalName() {
+        return getName().indexOf('.') != -1;
+    }
+
+    @Override
+    public String toString() {
         return getName() + ":" + getOperator() + ":" + getValue();
     }
 

@@ -38,7 +38,7 @@ public final class SharedStringUtil {
         int referenceIndex;
 
         public String toString() {
-            return SharedUtil.toCanonicalID(':', token, referenceIndex, index, count);
+            return SUS.toCanonicalID(':', token, referenceIndex, index, count);
         }
 
         public int getIndex() {
@@ -1028,7 +1028,7 @@ public final class SharedStringUtil {
     }
 
 
-    public  static boolean isDigits(String s) {
+    public static boolean isDigits(String s) {
         for (int i = 0; i < s.length(); i++)
             if (!Character.isDigit(s.charAt(i))) return false;
         return !s.isEmpty();

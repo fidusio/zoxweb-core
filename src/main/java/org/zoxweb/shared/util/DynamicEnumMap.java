@@ -202,7 +202,7 @@ public class DynamicEnumMap
      * @return to string conversion
      */
     public String toString() {
-        return name + ':' + SharedUtil.toCanonicalID(',', value.toArray());
+        return name + ':' + SUS.toCanonicalID(',', value.toArray());
     }
 
     /**
@@ -264,7 +264,7 @@ public class DynamicEnumMap
             throw new IllegalArgumentException("Invalid name");
         }
 
-        this.name = SharedUtil.toCanonicalID(':', NAME_PREFIX, name);
+        this.name = SUS.toCanonicalID(':', NAME_PREFIX, name);
 
         if (oldName != null) {
             DynamicEnumMapManager.SINGLETON.deleteDynamicEnumMap(oldName);
