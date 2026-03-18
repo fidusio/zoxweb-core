@@ -18,7 +18,7 @@ public class MetaToInstanceTest {
     @Test
     public void testBooleanConfig() {
         NVConfig config = NVConfigManager.createNVConfig("flag", null, null, false, false, Boolean.class);
-        NVBase<?> result = SharedUtil.metaConfigToNVBase(config);
+        NVBase<?> result = MetaUtil.metaConfigToNVBase(config);
         assertInstanceOf(NVBoolean.class, result);
         assertEquals("flag", result.getName());
         assertEquals(false, result.getValue());
@@ -27,7 +27,7 @@ public class MetaToInstanceTest {
     @Test
     public void testIntegerConfig() {
         NVConfig config = NVConfigManager.createNVConfig("count", null, null, false, false, Integer.class);
-        NVBase<?> result = SharedUtil.metaConfigToNVBase(config);
+        NVBase<?> result = MetaUtil.metaConfigToNVBase(config);
         assertInstanceOf(NVInt.class, result);
         assertEquals("count", result.getName());
         assertEquals(0, result.getValue());
@@ -36,7 +36,7 @@ public class MetaToInstanceTest {
     @Test
     public void testLongConfig() {
         NVConfig config = NVConfigManager.createNVConfig("timestamp", null, null, false, false, Long.class);
-        NVBase<?> result = SharedUtil.metaConfigToNVBase(config);
+        NVBase<?> result = MetaUtil.metaConfigToNVBase(config);
         assertInstanceOf(NVLong.class, result);
         assertEquals("timestamp", result.getName());
         assertEquals(0L, result.getValue());
@@ -45,7 +45,7 @@ public class MetaToInstanceTest {
     @Test
     public void testFloatConfig() {
         NVConfig config = NVConfigManager.createNVConfig("ratio", null, null, false, false, Float.class);
-        NVBase<?> result = SharedUtil.metaConfigToNVBase(config);
+        NVBase<?> result = MetaUtil.metaConfigToNVBase(config);
         assertInstanceOf(NVFloat.class, result);
         assertEquals("ratio", result.getName());
     }
@@ -53,7 +53,7 @@ public class MetaToInstanceTest {
     @Test
     public void testDoubleConfig() {
         NVConfig config = NVConfigManager.createNVConfig("amount", null, null, false, false, Double.class);
-        NVBase<?> result = SharedUtil.metaConfigToNVBase(config);
+        NVBase<?> result = MetaUtil.metaConfigToNVBase(config);
         assertInstanceOf(NVDouble.class, result);
         assertEquals("amount", result.getName());
     }
@@ -61,7 +61,7 @@ public class MetaToInstanceTest {
     @Test
     public void testStringConfig() {
         NVConfig config = NVConfigManager.createNVConfig("name", null, null, false, false, String.class);
-        NVBase<?> result = SharedUtil.metaConfigToNVBase(config);
+        NVBase<?> result = MetaUtil.metaConfigToNVBase(config);
         assertInstanceOf(NVPair.class, result);
         assertEquals("name", result.getName());
         assertNull(result.getValue());
@@ -70,7 +70,7 @@ public class MetaToInstanceTest {
     @Test
     public void testStringWithValueFilter() {
         NVConfig config = NVConfigManager.createNVConfig("email", null, null, false, false, false, String.class, FilterType.EMAIL);
-        NVBase<?> result = SharedUtil.metaConfigToNVBase(config);
+        NVBase<?> result = MetaUtil.metaConfigToNVBase(config);
         assertInstanceOf(NVPair.class, result);
         NVPair nvp = (NVPair) result;
         assertEquals("email", nvp.getName());
@@ -81,7 +81,7 @@ public class MetaToInstanceTest {
     @Test
     public void testDateConfig() {
         NVConfig config = NVConfigManager.createNVConfig("created", null, null, false, false, Date.class);
-        NVBase<?> result = SharedUtil.metaConfigToNVBase(config);
+        NVBase<?> result = MetaUtil.metaConfigToNVBase(config);
         assertInstanceOf(NVLong.class, result);
         assertEquals("created", result.getName());
     }
@@ -89,7 +89,7 @@ public class MetaToInstanceTest {
     @Test
     public void testBigDecimalConfig() {
         NVConfig config = NVConfigManager.createNVConfig("price", null, null, false, false, BigDecimal.class);
-        NVBase<?> result = SharedUtil.metaConfigToNVBase(config);
+        NVBase<?> result = MetaUtil.metaConfigToNVBase(config);
         assertInstanceOf(NVBigDecimal.class, result);
         assertEquals("price", result.getName());
     }
@@ -97,7 +97,7 @@ public class MetaToInstanceTest {
     @Test
     public void testNumberConfig() {
         NVConfig config = NVConfigManager.createNVConfig("num", null, null, false, false, Number.class);
-        NVBase<?> result = SharedUtil.metaConfigToNVBase(config);
+        NVBase<?> result = MetaUtil.metaConfigToNVBase(config);
         assertInstanceOf(NVNumber.class, result);
         assertEquals("num", result.getName());
     }
@@ -105,7 +105,7 @@ public class MetaToInstanceTest {
     @Test
     public void testEnumConfig() {
         NVConfig config = NVConfigManager.createNVConfig("status", null, null, false, false, TestEnum.class);
-        NVBase<?> result = SharedUtil.metaConfigToNVBase(config);
+        NVBase<?> result = MetaUtil.metaConfigToNVBase(config);
         assertInstanceOf(NVEnum.class, result);
         assertEquals("status", result.getName());
     }
@@ -115,7 +115,7 @@ public class MetaToInstanceTest {
     @Test
     public void testNVGenericMapConfig() {
         NVConfig config = NVConfigManager.createNVConfig("map", null, null, false, false, NVGenericMap.class);
-        NVBase<?> result = SharedUtil.metaConfigToNVBase(config);
+        NVBase<?> result = MetaUtil.metaConfigToNVBase(config);
         assertInstanceOf(NVGenericMap.class, result);
         assertEquals("map", result.getName());
     }
@@ -123,7 +123,7 @@ public class MetaToInstanceTest {
     @Test
     public void testNVGenericMapListConfig() {
         NVConfig config = NVConfigManager.createNVConfig("maps", null, null, false, false, NVGenericMapList.class);
-        NVBase<?> result = SharedUtil.metaConfigToNVBase(config);
+        NVBase<?> result = MetaUtil.metaConfigToNVBase(config);
         assertInstanceOf(NVGenericMapList.class, result);
         assertEquals("maps", result.getName());
     }
@@ -131,7 +131,7 @@ public class MetaToInstanceTest {
     @Test
     public void testNVStringListConfig() {
         NVConfig config = NVConfigManager.createNVConfig("tags", null, null, false, false, NVStringList.class);
-        NVBase<?> result = SharedUtil.metaConfigToNVBase(config);
+        NVBase<?> result = MetaUtil.metaConfigToNVBase(config);
         assertInstanceOf(NVStringList.class, result);
         assertEquals("tags", result.getName());
     }
@@ -139,7 +139,7 @@ public class MetaToInstanceTest {
     @Test
     public void testNVStringSetConfig() {
         NVConfig config = NVConfigManager.createNVConfig("unique_tags", null, null, false, false, NVStringSet.class);
-        NVBase<?> result = SharedUtil.metaConfigToNVBase(config);
+        NVBase<?> result = MetaUtil.metaConfigToNVBase(config);
         assertInstanceOf(NVStringSet.class, result);
         assertEquals("unique_tags", result.getName());
     }
@@ -147,7 +147,7 @@ public class MetaToInstanceTest {
     @Test
     public void testNamedValueConfig() {
         NVConfig config = NVConfigManager.createNVConfig("nv", null, null, false, false, NamedValue.class);
-        NVBase<?> result = SharedUtil.metaConfigToNVBase(config);
+        NVBase<?> result = MetaUtil.metaConfigToNVBase(config);
         assertInstanceOf(NamedValue.class, result);
         assertEquals("nv", result.getName());
     }
@@ -157,7 +157,7 @@ public class MetaToInstanceTest {
     @Test
     public void testStringArrayConfig() {
         NVConfig config = NVConfigManager.createNVConfig("items", null, null, false, false, String[].class);
-        NVBase<?> result = SharedUtil.metaConfigToNVBase(config);
+        NVBase<?> result = MetaUtil.metaConfigToNVBase(config);
         assertInstanceOf(NVPairList.class, result);
         assertEquals("items", result.getName());
     }
@@ -165,7 +165,7 @@ public class MetaToInstanceTest {
     @Test
     public void testStringArrayUniqueConfig() {
         NVConfig config = NVConfigManager.createNVConfig("unique_items", null, null, false, false, true, String[].class, null);
-        NVBase<?> result = SharedUtil.metaConfigToNVBase(config);
+        NVBase<?> result = MetaUtil.metaConfigToNVBase(config);
         assertInstanceOf(NVPairGetNameMap.class, result);
         assertEquals("unique_items", result.getName());
     }
@@ -173,7 +173,7 @@ public class MetaToInstanceTest {
     @Test
     public void testLongArrayConfig() {
         NVConfig config = NVConfigManager.createNVConfig("ids", null, null, false, false, Long[].class);
-        NVBase<?> result = SharedUtil.metaConfigToNVBase(config);
+        NVBase<?> result = MetaUtil.metaConfigToNVBase(config);
         assertInstanceOf(NVLongList.class, result);
         assertEquals("ids", result.getName());
     }
@@ -181,7 +181,7 @@ public class MetaToInstanceTest {
     @Test
     public void testByteArrayConfig() {
         NVConfig config = NVConfigManager.createNVConfig("data", null, null, false, false, byte[].class);
-        NVBase<?> result = SharedUtil.metaConfigToNVBase(config);
+        NVBase<?> result = MetaUtil.metaConfigToNVBase(config);
         assertInstanceOf(NVBlob.class, result);
         assertEquals("data", result.getName());
     }
@@ -189,7 +189,7 @@ public class MetaToInstanceTest {
     @Test
     public void testIntegerArrayConfig() {
         NVConfig config = NVConfigManager.createNVConfig("numbers", null, null, false, false, Integer[].class);
-        NVBase<?> result = SharedUtil.metaConfigToNVBase(config);
+        NVBase<?> result = MetaUtil.metaConfigToNVBase(config);
         assertInstanceOf(NVIntList.class, result);
         assertEquals("numbers", result.getName());
     }
@@ -197,7 +197,7 @@ public class MetaToInstanceTest {
     @Test
     public void testFloatArrayConfig() {
         NVConfig config = NVConfigManager.createNVConfig("ratios", null, null, false, false, Float[].class);
-        NVBase<?> result = SharedUtil.metaConfigToNVBase(config);
+        NVBase<?> result = MetaUtil.metaConfigToNVBase(config);
         assertInstanceOf(NVFloatList.class, result);
         assertEquals("ratios", result.getName());
     }
@@ -205,7 +205,7 @@ public class MetaToInstanceTest {
     @Test
     public void testDoubleArrayConfig() {
         NVConfig config = NVConfigManager.createNVConfig("amounts", null, null, false, false, Double[].class);
-        NVBase<?> result = SharedUtil.metaConfigToNVBase(config);
+        NVBase<?> result = MetaUtil.metaConfigToNVBase(config);
         assertInstanceOf(NVDoubleList.class, result);
         assertEquals("amounts", result.getName());
     }
@@ -213,7 +213,7 @@ public class MetaToInstanceTest {
     @Test
     public void testDateArrayConfig() {
         NVConfig config = NVConfigManager.createNVConfig("dates", null, null, false, false, Date[].class);
-        NVBase<?> result = SharedUtil.metaConfigToNVBase(config);
+        NVBase<?> result = MetaUtil.metaConfigToNVBase(config);
         assertInstanceOf(NVLongList.class, result);
         assertEquals("dates", result.getName());
     }
@@ -221,7 +221,7 @@ public class MetaToInstanceTest {
     @Test
     public void testBigDecimalArrayConfig() {
         NVConfig config = NVConfigManager.createNVConfig("prices", null, null, false, false, BigDecimal[].class);
-        NVBase<?> result = SharedUtil.metaConfigToNVBase(config);
+        NVBase<?> result = MetaUtil.metaConfigToNVBase(config);
         assertInstanceOf(NVBigDecimalList.class, result);
         assertEquals("prices", result.getName());
     }
@@ -229,7 +229,7 @@ public class MetaToInstanceTest {
     @Test
     public void testEnumArrayConfig() {
         NVConfig config = NVConfigManager.createNVConfig("statuses", null, null, false, false, TestEnum[].class);
-        NVBase<?> result = SharedUtil.metaConfigToNVBase(config);
+        NVBase<?> result = MetaUtil.metaConfigToNVBase(config);
         assertInstanceOf(NVEnumList.class, result);
         assertEquals("statuses", result.getName());
     }
@@ -239,7 +239,7 @@ public class MetaToInstanceTest {
     @Test
     public void testNVConfigEntityScalar() {
         NVConfig config = NVConfigManager.createNVConfigEntity("device", null, null, false, false, DeviceDAO.NVC_DEVICE_DAO);
-        NVBase<?> result = SharedUtil.metaConfigToNVBase(config);
+        NVBase<?> result = MetaUtil.metaConfigToNVBase(config);
         assertInstanceOf(NVEntityReference.class, result);
         assertEquals("device", result.getName());
     }
@@ -247,7 +247,7 @@ public class MetaToInstanceTest {
     @Test
     public void testNVConfigEntityArrayList() {
         NVConfig config = NVConfigManager.createNVConfigEntity("devices", null, null, false, false, DeviceDAO.NVC_DEVICE_DAO, NVConfigEntity.ArrayType.LIST);
-        NVBase<?> result = SharedUtil.metaConfigToNVBase(config);
+        NVBase<?> result = MetaUtil.metaConfigToNVBase(config);
         assertInstanceOf(NVEntityReferenceList.class, result);
         assertEquals("devices", result.getName());
     }
@@ -255,7 +255,7 @@ public class MetaToInstanceTest {
     @Test
     public void testNVConfigEntityArrayGetNameMap() {
         NVConfig config = NVConfigManager.createNVConfigEntity("device_map", null, null, false, false, DeviceDAO.NVC_DEVICE_DAO, NVConfigEntity.ArrayType.GET_NAME_MAP);
-        NVBase<?> result = SharedUtil.metaConfigToNVBase(config);
+        NVBase<?> result = MetaUtil.metaConfigToNVBase(config);
         assertInstanceOf(NVEntityGetNameMap.class, result);
         assertEquals("device_map", result.getName());
     }
@@ -263,7 +263,7 @@ public class MetaToInstanceTest {
     @Test
     public void testNVConfigEntityArrayReferenceIDMap() {
         NVConfig config = NVConfigManager.createNVConfigEntity("device_ref_map", null, null, false, false, DeviceDAO.NVC_DEVICE_DAO, NVConfigEntity.ArrayType.REFERENCE_ID_MAP);
-        NVBase<?> result = SharedUtil.metaConfigToNVBase(config);
+        NVBase<?> result = MetaUtil.metaConfigToNVBase(config);
         assertInstanceOf(NVEntityReferenceIDMap.class, result);
         assertEquals("device_ref_map", result.getName());
     }
@@ -273,7 +273,7 @@ public class MetaToInstanceTest {
     @Test
     public void testUnsupportedType() {
         NVConfig config = NVConfigManager.createNVConfig("bad", null, null, false, false, Object.class);
-        assertThrows(IllegalArgumentException.class, () -> SharedUtil.metaConfigToNVBase(config));
+        assertThrows(IllegalArgumentException.class, () -> MetaUtil.metaConfigToNVBase(config));
     }
 
     // ==================== Performance benchmark ====================
@@ -309,8 +309,8 @@ public class MetaToInstanceTest {
         // Warmup both paths thoroughly so JIT compiles them
         for (int w = 0; w < warmupIterations; w++) {
             for (NVConfig config : configs) {
-                MetaToInstance.SINGLETON.toNVBase(config);
-                SharedUtil.metaConfigToNVBase(config);
+                MetaUtil.SINGLETON.toNVBase(config);
+                MetaUtil.metaConfigToNVBase(config);
             }
         }
 
@@ -325,7 +325,7 @@ public class MetaToInstanceTest {
                 long start = System.nanoTime();
                 for (int i = 0; i < iterations; i++) {
                     for (NVConfig config : configs) {
-                        MetaToInstance.SINGLETON.toNVBase(config);
+                        MetaUtil.SINGLETON.toNVBase(config);
                     }
                 }
                 mapTotal += System.nanoTime() - start;
@@ -333,7 +333,7 @@ public class MetaToInstanceTest {
                 start = System.nanoTime();
                 for (int i = 0; i < iterations; i++) {
                     for (NVConfig config : configs) {
-                        SharedUtil.metaConfigToNVBase(config);
+                        MetaUtil.metaConfigToNVBase(config);
                     }
                 }
                 delegateTotal += System.nanoTime() - start;
@@ -342,7 +342,7 @@ public class MetaToInstanceTest {
                 long start = System.nanoTime();
                 for (int i = 0; i < iterations; i++) {
                     for (NVConfig config : configs) {
-                        SharedUtil.metaConfigToNVBase(config);
+                        MetaUtil.metaConfigToNVBase(config);
                     }
                 }
                 delegateTotal += System.nanoTime() - start;
@@ -350,7 +350,7 @@ public class MetaToInstanceTest {
                 start = System.nanoTime();
                 for (int i = 0; i < iterations; i++) {
                     for (NVConfig config : configs) {
-                        MetaToInstance.SINGLETON.toNVBase(config);
+                        MetaUtil.SINGLETON.toNVBase(config);
                     }
                 }
                 mapTotal += System.nanoTime() - start;
@@ -359,22 +359,22 @@ public class MetaToInstanceTest {
 
         long totalCalls = (long) iterations * configs.length * rounds;
 
-        System.out.println("===== MetaToInstance Performance (IdentityHashMap) =====");
+        System.out.println("===== MetaUtil Performance =====");
         System.out.println("Configs tested: " + configs.length);
         System.out.println("Iterations per round: " + iterations);
         System.out.println("Rounds: " + rounds);
         System.out.println("Total calls per method: " + totalCalls);
         System.out.println();
-        System.out.println("MetaToInstance.SINGLETON.toNVBase() direct:");
+        System.out.println("toNVBase() [IdentityHashMap-based]:");
         System.out.println("  Total: " + (mapTotal / 1_000_000) + " ms");
         System.out.println("  Per call: " + (mapTotal / totalCalls) + " ns");
         System.out.println();
-        System.out.println("SharedUtil.metaConfigToNVBase() (delegate):");
+        System.out.println("metaConfigToNVBase() [if-else chain]:");
         System.out.println("  Total: " + (delegateTotal / 1_000_000) + " ms");
         System.out.println("  Per call: " + (delegateTotal / totalCalls) + " ns");
         System.out.println();
 
         double ratio = (double) delegateTotal / mapTotal;
-        System.out.printf("Ratio (delegate/direct): %.2fx%n", ratio);
+        System.out.printf("Ratio (if-else / map): %.2fx%n", ratio);
     }
 }
