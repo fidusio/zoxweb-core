@@ -2,19 +2,36 @@ package org.zoxweb.shared.util;
 
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.function.Function;
 
-public class MetaUtil {
-    private static final Map<Class<?>, Function<String, NVBase<?>>> metaToInstance = new IdentityHashMap<>();
-    public static final MetaUtil SINGLETON = new MetaUtil();
+/**
+ * Utility class that converts {@link NVConfig} metadata descriptors into concrete {@link NVBase} data instances.
+ * <p>
+ * Uses an {@link IdentityHashMap} keyed by {@code Class<?>} to map meta types to
+ * {@link InstanceFactory.ParamCreator} lambdas for O(1) instance creation.
+ * The map is extensible at runtime via {@link #addM2I(Class, InstanceFactory.ParamCreator)}.
+ * <p>
+ * Supported scalar types: Boolean, Integer, Long, Float, Double, String, Date, BigDecimal,
+ * Number, Enum, NVGenericMap, NVGenericMapList, NVStringList, NVStringSet, NamedValue.
+ * <br>
+ * Supported array types: Enum[], String[], Long[], byte[], Integer[], Float[], Double[],
+ * Date[], BigDecimal[].
+ * <br>
+ * {@link NVConfigEntity} types are dispatched by {@link NVConfigEntity.ArrayType}.
+ */
+public class SharedMetaUtil {
+    private static final Map<Class<?>, InstanceFactory.ParamCreator<NVBase<?>, NVConfig>> metaToInstance = new IdentityHashMap<>();
+    /** Singleton instance with all default type mappings registered. */
+    public static final SharedMetaUtil SINGLETON = new SharedMetaUtil();
 
-    private MetaUtil() {
+    private SharedMetaUtil() {
         init();
     }
 
     /**
-     * @param params
-     * @return create map nvbase based on the meta params
+     * Converts a list of {@link NVConfig} descriptors into a name-keyed map of {@link NVBase} instances.
+     *
+     * @param params the list of NVConfig metadata descriptors
+     * @return a {@link LinkedHashMap} of name to NVBase instances preserving insertion order
      */
     public static Map<String, NVBase<?>> toData(List<NVConfig> params) {
         HashMap<String, NVBase<?>> ret = new LinkedHashMap<String, NVBase<?>>();
@@ -26,9 +43,12 @@ public class MetaUtil {
         return ret;
     }
 
+
     /**
-     * @param params
-     * @return create list nvbased on nvconfig array
+     * Converts an array of {@link NVConfig} descriptors into a list of {@link NVBase} instances.
+     *
+     * @param params the NVConfig metadata descriptors
+     * @return list of NVBase instances
      */
     public static ArrayList<NVBase<?>> toData(NVConfig[] params) {
         ArrayList<NVBase<?>> ret = new ArrayList<NVBase<?>>();
@@ -40,9 +60,12 @@ public class MetaUtil {
         return ret;
     }
 
+
     /**
-     * @param params
-     * @return create list nvbased on nvconfig array
+     * Converts an array of {@link GetNVConfig} wrappers into a list of {@link NVBase} instances.
+     *
+     * @param params the GetNVConfig metadata wrappers
+     * @return list of NVBase instances
      */
     public static ArrayList<NVBase<?>> toData(GetNVConfig[] params) {
         ArrayList<NVBase<?>> ret = new ArrayList<NVBase<?>>();
@@ -54,10 +77,14 @@ public class MetaUtil {
         return ret;
     }
 
+
     /**
-     * @param nvce
-     * @param values
-     * @return create list nvbased on nvce
+     * Converts the attributes of an {@link NVConfigEntity} into {@link NVBase} instances
+     * and appends them to the given list.
+     *
+     * @param nvce   the NVConfigEntity whose attributes to convert
+     * @param values the list to append to, or null to create a new list
+     * @return the list of NVBase instances
      */
     public static ArrayList<NVBase<?>> toData(NVConfigEntity nvce, ArrayList<NVBase<?>> values) {
         if (values == null) {
@@ -95,7 +122,7 @@ public class MetaUtil {
      * <li>Double array type class to NVDoubleList</li>
      * </ul>
      *
-     * @param config
+     * @param config meta data descriptor
      * @return nvbase based on nvconfig
      */
     public static NVBase<?> metaConfigToNVBase(NVConfig config) {
@@ -192,50 +219,77 @@ public class MetaUtil {
 
     private void init() {
         // Scalar types
-        addM2I(Boolean.class, (name) -> new NVBoolean(name, false))
-                .addM2I(Integer.class, (name) -> new NVInt(name, 0))
-                .addM2I(Long.class, (name) -> new NVLong(name, 0))
-                .addM2I(Float.class, (name) -> new NVFloat(name, 0))
-                .addM2I(Double.class, (name) -> new NVDouble(name, 0))
-                .addM2I(String.class, (name) -> new NVPair(name, (String) null))
-                .addM2I(Date.class, (name) -> new NVLong(name, 0))
-                .addM2I(BigDecimal.class, (name) -> new NVBigDecimal(name, new BigDecimal(0)))
-                .addM2I(Number.class, (name) -> new NVNumber(name, null))
-                .addM2I(Enum.class, (name) -> new NVEnum(name, null))
+        addM2I(Boolean.class, (nvc) -> new NVBoolean(nvc.getName(), false))
+                .addM2I(Integer.class, (nvc) -> new NVInt(nvc.getName(), 0))
+                .addM2I(Long.class, (nvc) -> new NVLong(nvc.getName(), 0))
+                .addM2I(Float.class, (nvc) -> new NVFloat(nvc.getName(), 0))
+                .addM2I(Double.class, (nvc) -> new NVDouble(nvc.getName(), 0))
+                .addM2I(String.class, (nvc) -> {
+                    NVPair ret = new NVPair(nvc.getName(), (String) null);
+                    ret.setValueFilter(nvc.getValueFilter());
+                    return ret;
+                })
+                .addM2I(Date.class, (nvc) -> new NVLong(nvc.getName(), 0))
+                .addM2I(BigDecimal.class, (nvc) -> new NVBigDecimal(nvc.getName(), new BigDecimal(0)))
+                .addM2I(Number.class, (nvc) -> new NVNumber(nvc.getName(), null))
+                .addM2I(Enum.class, (nvc) -> new NVEnum(nvc.getName(), null))
                 // Composite scalar types
-                .addM2I(NVGenericMap.class, (name) -> new NVGenericMap(name))
-                .addM2I(NVGenericMapList.class, (name) -> new NVGenericMapList(name))
-                .addM2I(NVStringList.class, (name) -> new NVStringList(name))
-                .addM2I(NVStringSet.class, (name) -> new NVStringSet(name))
-                .addM2I(NamedValue.class, (name) -> new NamedValue(name))
+                .addM2I(NVGenericMap.class, (nvc) -> new NVGenericMap(nvc.getName()))
+                .addM2I(NVGenericMapList.class, (nvc) -> new NVGenericMapList(nvc.getName()))
+                .addM2I(NVStringList.class, (nvc) -> new NVStringList(nvc.getName()))
+                .addM2I(NVStringSet.class, (nvc) -> new NVStringSet(nvc.getName()))
+                .addM2I(NamedValue.class, (nvc) -> new NamedValue(nvc.getName()))
                 // Array types
-                .addM2I(Enum[].class, (name) -> new NVEnumList(name, new ArrayList<>()))
-                .addM2I(String[].class, (name) -> new NVPairList(name, new ArrayList<>()))
-                .addM2I(Long[].class, (name) -> new NVLongList(name, new ArrayList<>()))
-                .addM2I(byte[].class, (name) -> new NVBlob(name, null))
-                .addM2I(Integer[].class, (name) -> new NVIntList(name, new ArrayList<>()))
-                .addM2I(Float[].class, (name) -> new NVFloatList(name, new ArrayList<>()))
-                .addM2I(Double[].class, (name) -> new NVDoubleList(name, new ArrayList<>()))
-                .addM2I(Date[].class, (name) -> new NVLongList(name, new ArrayList<>()))
-                .addM2I(BigDecimal[].class, (name) -> new NVBigDecimalList(name, new ArrayList<>()))
+                .addM2I(Enum[].class, (nvc) -> new NVEnumList(nvc.getName(), new ArrayList<>()))
+                .addM2I(String[].class, (nvc) -> {
+                    if (nvc.isUnique()) {
+                        return new NVPairGetNameMap(nvc.getName(), new LinkedHashMap<GetName, GetNameValue<String>>());
+                    }
+                    return new NVPairList(nvc.getName(), new ArrayList<>());
+                })
+                .addM2I(Long[].class, (nvc) -> new NVLongList(nvc.getName(), new ArrayList<>()))
+                .addM2I(byte[].class, (nvc) -> new NVBlob(nvc.getName(), null))
+                .addM2I(Integer[].class, (nvc) -> new NVIntList(nvc.getName(), new ArrayList<>()))
+                .addM2I(Float[].class, (nvc) -> new NVFloatList(nvc.getName(), new ArrayList<>()))
+                .addM2I(Double[].class, (nvc) -> new NVDoubleList(nvc.getName(), new ArrayList<>()))
+                .addM2I(Date[].class, (nvc) -> new NVLongList(nvc.getName(), new ArrayList<>()))
+                .addM2I(BigDecimal[].class, (nvc) -> new NVBigDecimalList(nvc.getName(), new ArrayList<>()))
         ;
     }
 
 
-    public MetaUtil addM2I(Class<?> clazz, Function<String, NVBase<?>> creator) {
+    /**
+     * Registers a type-to-instance mapping. Can be used to extend or override default mappings.
+     *
+     * @param clazz   the meta type class key (e.g., {@code Integer.class}, {@code String[].class})
+     * @param creator the factory lambda that creates an {@link NVBase} from an {@link NVConfig}
+     * @return this instance for method chaining
+     */
+    public SharedMetaUtil addM2I(Class<?> clazz, InstanceFactory.ParamCreator<NVBase<?>, NVConfig> creator) {
         metaToInstance.put(clazz, creator);
         return this;
     }
 
-    public  <I extends NVBase<?>> I toNVBase(NVConfig nvc)
-    {
+    /**
+     * Converts an {@link NVConfig} metadata descriptor into a concrete {@link NVBase} data instance
+     * using the registered type mappings.
+     * <p>
+     * {@link NVConfigEntity} types are handled separately via {@link NVConfigEntity.ArrayType} dispatch.
+     * Enum types are normalized to {@code Enum.class} / {@code Enum[].class} canonical keys.
+     *
+     * @param nvc the NVConfig metadata descriptor
+     * @param <I> the expected NVBase subtype
+     * @return a new NVBase instance matching the config's meta type
+     * @throws IllegalArgumentException if the meta type is not supported
+     */
+    public <I extends NVBase<?>> I toNVBase(NVConfig nvc) {
         // Handle NVConfigEntity separately — requires config-specific dispatch
         if (nvc instanceof NVConfigEntity) {
             NVConfigEntity nvce = (NVConfigEntity) nvc;
             if (nvc.isArray()) {
                 switch (nvce.getArrayType()) {
                     case GET_NAME_MAP:
-                        return (I)new NVEntityGetNameMap(nvc.getName());
+                        return (I) new NVEntityGetNameMap(nvc.getName());
                     case LIST:
                         return (I) new NVEntityReferenceList(nvc.getName());
                     case REFERENCE_ID_MAP:
@@ -256,19 +310,9 @@ public class MetaUtil {
         else if (type.isEnum())
             type = Enum.class;
 
-        // String[] with unique flag returns NVPairGetNameMap instead of NVPairList
-        if (type == String[].class && nvc.isUnique()) {
-            return (I)new NVPairGetNameMap(nvc.getName(), new LinkedHashMap<GetName, GetNameValue<String>>());
-        }
-
-        Function<String, NVBase<?>> instanceCreator = metaToInstance.get(type);
+        InstanceFactory.ParamCreator<NVBase<?>, NVConfig> instanceCreator = metaToInstance.get(type);
         if (instanceCreator != null) {
-            NVBase<?> result = instanceCreator.apply(nvc.getName());
-            // String scalar: apply value filter from config
-            if (type == String.class && nvc.getValueFilter() != null) {
-                ((NVPair) result).setValueFilter(nvc.getValueFilter());
-            }
-            return (I) result;
+            return (I) instanceCreator.newInstance(nvc);
         }
 
         throw new IllegalArgumentException("Unsupported type " + nvc + " class:" + type);
