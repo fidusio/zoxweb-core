@@ -52,6 +52,7 @@ public final class SSLUtil {
                                     // check if we have data to process
                                     if (callback != null && bytesRead >= 0 && result.bytesProduced() > 0) {
                                         // we have decrypted data to process
+                                        //config.inSSLNetData.flip();
                                         callback.accept(config.inAppData);
                                     }
                                     break;
@@ -209,7 +210,7 @@ public final class SSLUtil {
                         config.forcedClose = true;
                         throw new IllegalStateException(result + " invalid state context " + config.outSSLNetData + " " + config.sslChannel.getRemoteAddress());
                     case OK:
-                        int written = ByteBufferUtil.smartWrite(null, config.sslChannel, config.outSSLNetData);
+                        int written = ByteBufferUtil.smartWrite(null, config.sslChannel, config.outSSLNetData, true);
                         if (log.isEnabled())
                             log.getLogger().info(result.getHandshakeStatus() + " After writing data HANDSHAKING-NEED_WRAP: " + config.outSSLNetData + " written:" + written);
                         config.sslConnectionHelper.publish(result.getHandshakeStatus(), callback);

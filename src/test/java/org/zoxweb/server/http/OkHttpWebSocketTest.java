@@ -24,7 +24,7 @@ public class OkHttpWebSocketTest {
         String password = params.stringValue("password", true);
         boolean binary = params.booleanValue("bin", true);
         boolean sslCheck = params.booleanValue("ssl-check", true);
-        OkHttpClient client = OkHTTPCall.createOkHttpBuilder(null, true,null, HTTPMessageConfigInterface.DEFAULT_TIMEOUT_20_SECOND, sslCheck, 10, HTTPMessageConfigInterface.DEFAULT_TIMEOUT_20_SECOND).build();
+        OkHttpClient client = OkHTTPCall.createOkHttpBuilder(null, true, null, HTTPMessageConfigInterface.DEFAULT_TIMEOUT_20_SECOND, sslCheck, 10, HTTPMessageConfigInterface.DEFAULT_TIMEOUT_20_SECOND).build();
 
         int repeat = params.intValue("repeat", 1000);
 
@@ -32,10 +32,9 @@ public class OkHttpWebSocketTest {
         Request.Builder requestBuilder = new Request.Builder()
                 .url(url);
         // Generate the Basic Authorization header value
-        if(username != null && password != null) {
-            requestBuilder.header("Authorization",Credentials.basic(username, password));
+        if (username != null && password != null) {
+            requestBuilder.header("Authorization", Credentials.basic(username, password));
         }
-
 
 
         Request request = requestBuilder.build();
@@ -43,6 +42,7 @@ public class OkHttpWebSocketTest {
         RateCounter rc = new RateCounter();
         long ts = System.currentTimeMillis();
         AtomicInteger ai = new AtomicInteger();
+        long timerAfterClose = 1;
         WebSocketListener listener = new WebSocketListener() {
             @Override
             public void onOpen(WebSocket webSocket, Response response) {
@@ -52,27 +52,26 @@ public class OkHttpWebSocketTest {
 
             @Override
             public void onMessage(WebSocket webSocket, String text) {
-//                synchronized (this)
-                {
-                    int count = ai.incrementAndGet();
-                    //System.out.println(count + " " + text);
-                    if (count == repeat) {
-                        long delta = System.currentTimeMillis() - ts;
-                        rc.register(delta, ai.get());
-                        System.out.println(text);
-                        System.out.println(ai.get() + "  " + Const.TimeInMillis.toString(delta) + " " + rc.rate(1000) + " msg/sec");
-                        TaskUtil.defaultTaskScheduler().queue(Const.TimeInMillis.SECOND.MILLIS * 5, () ->
-                        {
-                            try {
-                                webSocket.close(1000, "finished");
-                                TaskUtil.sleep(Const.TimeInMillis.SECOND.MILLIS * 5);
-                                System.exit(0);
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                        });
-                    }
+
+                int count = ai.incrementAndGet();
+//                    System.out.println(count + " " + text);
+                if (count == repeat) {
+                    long delta = System.currentTimeMillis() - ts;
+                    rc.register(delta, ai.get());
+                    System.out.println(text);
+                    System.out.println(ai.get() + "  " + Const.TimeInMillis.toString(delta) + " " + rc.rate(1000) + " msg/sec");
+                    TaskUtil.defaultTaskScheduler().queue(Const.TimeInMillis.SECOND.mult(timerAfterClose), () ->
+                    {
+                        try {
+                            webSocket.close(1000, "finished");
+                            TaskUtil.sleep(Const.TimeInMillis.SECOND.mult(5));
+                            System.exit(0);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    });
                 }
+
             }
 
             @Override
@@ -83,7 +82,7 @@ public class OkHttpWebSocketTest {
                 if (count == repeat) {
                     long delta = System.currentTimeMillis() - ts;
                     rc.register(delta, ai.get());
-                    System.out.println(bytes + ": " + bytes.string(StandardCharsets.UTF_8));
+                    System.out.println(bytes.string(StandardCharsets.UTF_8));
                     System.out.println(ai.get() + "  " + Const.TimeInMillis.toString(delta) + " " + rc.rate(1000) + " msg/sec");
                     TaskUtil.defaultTaskScheduler().queue(Const.TimeInMillis.SECOND.MILLIS * 5, () ->
                     {
@@ -119,7 +118,7 @@ public class OkHttpWebSocketTest {
         WebSocket ws = client.newWebSocket(request, listener);
         //TaskUtil.sleep(Const.TimeInMillis.SECOND.MILLIS*5);
         for (int i = 0; i < repeat; i++) {
-            String message = i + 1 + " hello";
+            String message = i + 1 + " hello ";
             //TaskUtil.defaultTaskScheduler().execute( ()->ws.send(message);
             if (binary)
                 ws.send(ByteString.encodeUtf8(message));

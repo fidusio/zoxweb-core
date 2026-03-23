@@ -1,5 +1,6 @@
 package org.zoxweb.shared.util;
 
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.zoxweb.shared.data.DeviceDAO;
 import org.zoxweb.shared.filters.FilterType;
@@ -14,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class MetaToInstanceTest {
 
-    private enum TestEnum { A, B, C }
+    private enum TestEnum {A, B, C}
 
     // ==================== Scalar type validation ====================
 
@@ -484,5 +485,10 @@ public class MetaToInstanceTest {
 
         double r = (double) paramCreatorTotal / functionTotal;
         System.out.printf("Ratio (ParamCreator / Function): %.2fx%n", r);
+    }
+
+    @AfterAll
+    static void lastTest() {
+        System.out.println("Last Test number of created NVBases: " + SharedMetaUtil.SINGLETON.creationCount());
     }
 }

@@ -87,8 +87,10 @@ public class NIOSocketHandler
                 ((Buffer) phBB).clear();
                 read = phSChannel.isConnected() ? phSChannel.read(phBB) : -1;
 
-                if (read > 0)
+                if (read > 0) {
+                    //phBB.flip();
                     sessionCallback.accept(phBB);
+                }
             }
             while (read > 0);
 

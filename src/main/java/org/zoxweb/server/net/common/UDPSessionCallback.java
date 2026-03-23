@@ -151,19 +151,27 @@ public abstract class UDPSessionCallback
     }
 
 
-    public void send(DataPacket<?> dataPacket) throws IOException {
-        send(dataPacket.getBuffer(), dataPacket.getAddress());
+    public int send(DataPacket<?> dataPacket, boolean flip) throws IOException {
+        return send(dataPacket.getBuffer(), dataPacket.getAddress(), flip);
     }
 
 
-    public void send(ByteBuffer byteBuffer, InetSocketAddress sa) throws IOException {
-        lock.lock();
-        try {
-            ((DatagramChannel) getChannel()).send(byteBuffer, sa);
-            sendCounter.incrementAndGet();
-        } finally {
-            lock.unlock();
-        }
+    public int send(ByteBuffer byteBuffer, InetSocketAddress sa, boolean flip) throws IOException {
+//        lock.lock();
+//        int ret = 0;
+//        try {
+//            ret = ((DatagramChannel) getChannel()).send(byteBuffer, sa);
+//            sendCounter.incrementAndGet();
+//        } finally {
+//            lock.unlock();
+//        }
+//
+//        return ret;
+
+
+        int ret = ByteBufferUtil.send(lock, getChannel(), byteBuffer, sa, flip);
+        sendCounter.incrementAndGet();
+        return ret;
     }
 
     public long getReadCount() {

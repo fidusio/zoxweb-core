@@ -27,7 +27,7 @@ import java.io.Serializable;
  * @author mzebib
  */
 @SuppressWarnings("serial")
-public class NVBase<V>
+public abstract class NVBase<V>
         implements Serializable, SetNameValue<V>, ReferenceID<String> {
 
     protected String referenceId;
@@ -37,20 +37,20 @@ public class NVBase<V>
     /**
      * This constructor maps GetNameValue to NVBase object.
      *
-     * @param nv
+     * @param gnv the GetNameValue object
      */
-    public NVBase(GetNameValue<V> nv) {
-        this(nv.getName(), nv.getValue());
+    protected NVBase(GetNameValue<V> gnv) {
+        this(gnv.getName(), gnv.getValue());
     }
 
     /**
      * This constructor maps GetName to NVBase object and
      * generic value entered externally.
      *
-     * @param gn
-     * @param v
+     * @param gn GetName  object
+     * @param v value
      */
-    public NVBase(GetName gn, V v) {
+    protected NVBase(GetName gn, V v) {
         this(gn.getName(), v);
     }
 
@@ -58,21 +58,22 @@ public class NVBase<V>
      * This constructor instantiates NVBase based
      * on name and generic type value.
      *
-     * @param name
-     * @param value
+     * @param name of the object
+     * @param value of the object
      */
-    public NVBase(String name, V value) {
+    protected NVBase(String name, V value) {
         // Note value must be set first
         setValue(value);
         // name set next NOT FIRST
         setName(name);
+        SharedMetaUtil.SINGLETON.incCreationCount();
     }
 
     /**
      * The default constructor.
      */
-    public NVBase() {
-
+    protected NVBase() {
+        SharedMetaUtil.SINGLETON.incCreationCount();
     }
 
     /**
@@ -99,7 +100,7 @@ public class NVBase<V>
     /**
      * Sets the reference ID.
      *
-     * @param referenceId
+     * @param referenceId of the object
      */
     public void setReferenceID(String referenceId) {
         this.referenceId = referenceId;
@@ -108,7 +109,7 @@ public class NVBase<V>
     /**
      * Sets the name.
      *
-     * @param name
+     * @param name to be set
      */
     public void setName(String name) {
         this.name = name;
@@ -117,7 +118,7 @@ public class NVBase<V>
     /**
      * Sets the value.
      *
-     * @param value
+     * @param value top be set
      */
     public void setValue(V value) {
         this.value = value;

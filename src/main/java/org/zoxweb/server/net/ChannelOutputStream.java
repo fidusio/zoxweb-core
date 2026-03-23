@@ -85,7 +85,7 @@ public class ChannelOutputStream
      */
     public synchronized int write(ByteBuffer bb) throws IOException {
         try {
-            int ret = ByteBufferUtil.smartWrite(null, dataChannel, bb);
+            int ret = ByteBufferUtil.smartWrite(null, dataChannel, bb, true);
             if (usageTracker != null) usageTracker.updateUsage();
             return ret;
         } catch (IOException e) {

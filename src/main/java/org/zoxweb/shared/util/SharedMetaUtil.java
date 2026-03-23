@@ -2,6 +2,7 @@ package org.zoxweb.shared.util;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Utility class that converts {@link NVConfig} metadata descriptors into concrete {@link NVBase} data instances.
@@ -22,6 +23,7 @@ public class SharedMetaUtil {
     private static final Map<Class<?>, InstanceFactory.ParamCreator<NVBase<?>, NVConfig>> metaToInstance = new IdentityHashMap<>();
     /** Singleton instance with all default type mappings registered. */
     public static final SharedMetaUtil SINGLETON = new SharedMetaUtil();
+    private final AtomicLong nvBaseCreateCounter = new AtomicLong();
 
     private SharedMetaUtil() {
         init();
@@ -34,7 +36,7 @@ public class SharedMetaUtil {
      * @return a {@link LinkedHashMap} of name to NVBase instances preserving insertion order
      */
     public static Map<String, NVBase<?>> toData(List<NVConfig> params) {
-        HashMap<String, NVBase<?>> ret = new LinkedHashMap<String, NVBase<?>>();
+        HashMap<String, NVBase<?>> ret = new LinkedHashMap<>();
 
         for (NVConfig config : params) {
             ret.put(config.getName(), SINGLETON.toNVBase(config));
@@ -68,7 +70,7 @@ public class SharedMetaUtil {
      * @return list of NVBase instances
      */
     public static ArrayList<NVBase<?>> toData(GetNVConfig[] params) {
-        ArrayList<NVBase<?>> ret = new ArrayList<NVBase<?>>();
+        ArrayList<NVBase<?>> ret = new ArrayList<>();
 
         for (GetNVConfig config : params) {
             ret.add(SINGLETON.toNVBase(config.getNVConfig()));
@@ -257,6 +259,9 @@ public class SharedMetaUtil {
         ;
     }
 
+    public long incCreationCount() {
+        return nvBaseCreateCounter.incrementAndGet();
+    }
 
     /**
      * Registers a type-to-instance mapping. Can be used to extend or override default mappings.
@@ -278,28 +283,29 @@ public class SharedMetaUtil {
      * Enum types are normalized to {@code Enum.class} / {@code Enum[].class} canonical keys.
      *
      * @param nvc the NVConfig metadata descriptor
-     * @param <I> the expected NVBase subtype
+     * @param <V> the expected NVBase subtype
      * @return a new NVBase instance matching the config's meta type
      * @throws IllegalArgumentException if the meta type is not supported
      */
-    public <I extends NVBase<?>> I toNVBase(NVConfig nvc) {
+    public <V extends NVBase<?>> V toNVBase(NVConfig nvc) {
         // Handle NVConfigEntity separately — requires config-specific dispatch
         if (nvc instanceof NVConfigEntity) {
             NVConfigEntity nvce = (NVConfigEntity) nvc;
             if (nvc.isArray()) {
                 switch (nvce.getArrayType()) {
                     case GET_NAME_MAP:
-                        return (I) new NVEntityGetNameMap(nvc.getName());
+                        return (V) new NVEntityGetNameMap(nvc.getName());
                     case LIST:
-                        return (I) new NVEntityReferenceList(nvc.getName());
+                        return (V) new NVEntityReferenceList(nvc.getName());
                     case REFERENCE_ID_MAP:
-                        return (I) new NVEntityReferenceIDMap(nvc.getName());
+                        return (V) new NVEntityReferenceIDMap(nvc.getName());
                     case NOT_ARRAY:
                     default:
                         break;
                 }
             } else {
-                return (I) new NVEntityReference(nvc);
+
+                return (V) new NVEntityReference(nvc);
             }
         }
 
@@ -312,10 +318,17 @@ public class SharedMetaUtil {
 
         InstanceFactory.ParamCreator<NVBase<?>, NVConfig> instanceCreator = metaToInstance.get(type);
         if (instanceCreator != null) {
-            return (I) instanceCreator.newInstance(nvc);
+            return (V) instanceCreator.newInstance(nvc);
         }
 
         throw new IllegalArgumentException("Unsupported type " + nvc + " class:" + type);
+    }
+
+    /**
+     * @return total number of created NVBase objects
+     */
+    public long creationCount() {
+        return nvBaseCreateCounter.get();
     }
 
 }

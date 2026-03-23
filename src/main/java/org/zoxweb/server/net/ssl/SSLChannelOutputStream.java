@@ -101,7 +101,7 @@ public class SSLChannelOutputStream extends BaseChannelOutputStream {
                             SUS.toCanonicalID(',', sslConfig.outSSLNetData.capacity(), sslConfig.outSSLNetData.limit(), sslConfig.outSSLNetData.position()));
                 case OK:
                     try {
-                        written = ByteBufferUtil.smartWrite(null, dataChannel, sslConfig.outSSLNetData);
+                        written = ByteBufferUtil.smartWrite(null, dataChannel, sslConfig.outSSLNetData, true);
                         if(usageTracker != null) usageTracker.updateUsage();
                     } catch (IOException e) {
                         SharedIOUtil.close(this);

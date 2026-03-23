@@ -64,7 +64,7 @@ public class SSLNIOSocketHandler
             if (buffer != null) {
                 if (log.isEnabled()) log.getLogger().info("We have data to send: " + buffer);
                 try {
-                    ByteBufferUtil.smartWrite(null, getConfig().remoteChannel, buffer);
+                    ByteBufferUtil.smartWrite(null, getConfig().remoteChannel, buffer, true );
                 } catch (Exception e) {
                     e.printStackTrace();
                     if (log.isEnabled()) log.getLogger().info(e + "");

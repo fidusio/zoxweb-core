@@ -15,16 +15,22 @@
  */
 package org.zoxweb.server.io;
 
+import org.zoxweb.server.net.DataPacket;
 import org.zoxweb.server.util.ServerUtil;
 import org.zoxweb.shared.io.BytesArray;
 import org.zoxweb.shared.io.SharedIOUtil;
-import org.zoxweb.shared.util.*;
+import org.zoxweb.shared.util.Const;
+import org.zoxweb.shared.util.SUS;
+import org.zoxweb.shared.util.SimpleQueue;
+import org.zoxweb.shared.util.UniqueSimpleQueue;
 
 import java.io.IOException;
+import java.net.SocketAddress;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.channels.ByteChannel;
+import java.nio.channels.DatagramChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -287,8 +293,27 @@ public class ByteBufferUtil {
     }
 
 
-    public static int smartWrite(Lock lock, ByteChannel bc, ByteBuffer bb) throws IOException {
-        return smartWrite(lock, bc, bb, true);
+//    public static int smartWrite(Lock lock, ByteChannel bc, ByteBuffer bb) throws IOException {
+//        return smartWrite(lock, bc, bb, true);
+//    }
+
+    public static int send(Lock lock, DatagramChannel channel, DataPacket<?> dataPacket, boolean flip) throws IOException {
+        return send(lock, channel, dataPacket.getBuffer(), dataPacket.getAddress(), flip);
+    }
+    public static int send(Lock lock, DatagramChannel channel, ByteBuffer bb, SocketAddress destinationAddress, boolean flip) throws IOException {
+        int sent = 0;
+        if (flip)
+            bb.flip();
+
+        ServerUtil.lock(lock);
+        try {
+            sent = channel.send(bb, destinationAddress);
+        }
+        finally {
+            ServerUtil.unlock(lock);
+        }
+
+        return sent;
     }
 
     public static int smartWrite(Lock lock, ByteChannel bc, ByteBuffer bb, boolean flip) throws IOException {
@@ -297,7 +322,7 @@ public class ByteBufferUtil {
 
         try {
             if (flip)
-                ((Buffer) bb).flip();
+                 bb.flip();
 
             while (bb.hasRemaining()) {
                 int written = bc.write(bb);

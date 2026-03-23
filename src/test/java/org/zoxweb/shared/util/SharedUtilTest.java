@@ -72,7 +72,7 @@ public class SharedUtilTest {
 //		System.out.println("\nLength of REVERSE_BASE_64 Array: " + SharedBase64.REVERSE_BASE_64.length);
 //		
 //		
-		NVBase<Integer> nvTest1 = new NVBase<Integer>("Hello", 125);
+		NVInt nvTest1 = new NVInt("Hello", 125);
 		nvTest1.setReferenceID(""+125555);
 		System.out.println(nvTest1.getReferenceID());
 		nvTest1.setName("Mustapha");
@@ -80,14 +80,14 @@ public class SharedUtilTest {
 		nvTest1.setValue(125);
 		System.out.println(nvTest1.getValue());
 				
-		NVBase<Integer> nvTest2 = new NVBase<Integer>("Marwan", 100);
+		NVInt nvTest2 = new NVInt("Mario", 100);
 		nvTest2.setReferenceID(""+125556);
 		System.out.println(nvTest2.getReferenceID());
 		System.out.println(nvTest2.getName());
 		System.out.println(nvTest2.getValue());
 		
 		
-		NVBase<String> nvTest3 = new NVBase<String>("Marwan", "Nael");
+		NVPair nvTest3 = new NVPair("Mario", "Taza");
 		nvTest3.setReferenceID(""+125556);
 		System.out.println(nvTest3.getReferenceID());
 		System.out.println(nvTest3.getName());

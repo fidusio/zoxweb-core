@@ -23,6 +23,7 @@ public abstract class SessionCallback<CF, C, S> implements ConsumerSupplierCallb
     public final void setConfig(CF config) {
         this.config = config;
     }
+    public abstract void accept(C t);
 
 //    @Override
 //    public void exception(Throwable e) {
