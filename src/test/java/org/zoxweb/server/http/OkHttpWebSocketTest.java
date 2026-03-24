@@ -13,22 +13,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class OkHttpWebSocketTest {
 
-    public static void main(String[] args) {
+    static AtomicInteger receiveCounter = new AtomicInteger(0);
 
-        //OkHttpClient client = new OkHttpClient();
-        ParamUtil.ParamMap params = ParamUtil.parse("=", args);
-        //params.hide("password");
-        System.out.println(params);
-        String url = params.stringValue("url", false);
-        String username = params.stringValue("user", true);
-        String password = params.stringValue("password", true);
-        boolean binary = params.booleanValue("bin", true);
-        boolean sslCheck = params.booleanValue("ssl-check", true);
-        OkHttpClient client = OkHTTPCall.createOkHttpBuilder(null, true, null, HTTPMessageConfigInterface.DEFAULT_TIMEOUT_20_SECOND, sslCheck, 10, HTTPMessageConfigInterface.DEFAULT_TIMEOUT_20_SECOND).build();
-
-        int repeat = params.intValue("repeat", 1000);
-
-
+    public static WebSocket creatWebSocket(OkHttpClient client, String url, String username, String password, int repeat) {
         Request.Builder requestBuilder = new Request.Builder()
                 .url(url);
         // Generate the Basic Authorization header value
@@ -42,7 +29,7 @@ public class OkHttpWebSocketTest {
         RateCounter rc = new RateCounter();
         long ts = System.currentTimeMillis();
         AtomicInteger ai = new AtomicInteger();
-        long timerAfterClose = 1;
+        long timerAfterClose = 2;
         WebSocketListener listener = new WebSocketListener() {
             @Override
             public void onOpen(WebSocket webSocket, Response response) {
@@ -52,20 +39,19 @@ public class OkHttpWebSocketTest {
 
             @Override
             public void onMessage(WebSocket webSocket, String text) {
-
+                receiveCounter.incrementAndGet();
                 int count = ai.incrementAndGet();
 //                    System.out.println(count + " " + text);
                 if (count == repeat) {
                     long delta = System.currentTimeMillis() - ts;
                     rc.register(delta, ai.get());
                     System.out.println(text);
-                    System.out.println(ai.get() + "  " + Const.TimeInMillis.toString(delta) + " " + rc.rate(1000) + " msg/sec");
+                    System.out.println(receiveCounter.get() + " " + ai.get() + "  " + Const.TimeInMillis.toString(delta) + " " + rc.rate(1000) + " msg/sec");
                     TaskUtil.defaultTaskScheduler().queue(Const.TimeInMillis.SECOND.mult(timerAfterClose), () ->
                     {
                         try {
                             webSocket.close(1000, "finished");
-                            TaskUtil.sleep(Const.TimeInMillis.SECOND.mult(5));
-                            System.exit(0);
+                            //TaskUtil.sleep(Const.TimeInMillis.SECOND.mult(timerAfterClose));
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -89,7 +75,6 @@ public class OkHttpWebSocketTest {
                         try {
                             webSocket.close(1000, "finished");
                             TaskUtil.sleep(Const.TimeInMillis.SECOND.MILLIS * 5);
-                            System.exit(0);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -115,24 +100,53 @@ public class OkHttpWebSocketTest {
         };
 
         // Establish the WebSocket connection
-        WebSocket ws = client.newWebSocket(request, listener);
+        return client.newWebSocket(request, listener);
         //TaskUtil.sleep(Const.TimeInMillis.SECOND.MILLIS*5);
-        for (int i = 0; i < repeat; i++) {
-            String message = i + 1 + " hello ";
-            //TaskUtil.defaultTaskScheduler().execute( ()->ws.send(message);
-            if (binary)
-                ws.send(ByteString.encodeUtf8(message));
-            else
-                ws.send(message);
+    }
 
+    public static void main(String[] args) {
+
+        //OkHttpClient client = new OkHttpClient();
+        ParamUtil.ParamMap params = ParamUtil.parse("=", args);
+        //params.hide("password");
+        System.out.println(params);
+        String url = params.stringValue("url", false);
+        String username = params.stringValue("user", true);
+        String password = params.stringValue("password", true);
+        boolean binary = params.booleanValue("bin", true);
+        boolean sslCheck = params.booleanValue("ssl-check", true);
+        OkHttpClient client = OkHTTPCall.createOkHttpBuilder(null, true, null, HTTPMessageConfigInterface.DEFAULT_TIMEOUT_20_SECOND, sslCheck, 10, HTTPMessageConfigInterface.DEFAULT_TIMEOUT_20_SECOND).build();
+
+        int repeat = params.intValue("repeat", 1000);
+        int clientNum = params.intValue("client-num", 1);
+
+
+        WebSocket[] wsArray = new WebSocket[clientNum];
+
+        for (int i = 0; i < clientNum; i++) {
+            wsArray[i] = creatWebSocket(client, url, username, password, repeat);
         }
 
 
+        for (int i = 0; i < repeat; i++) {
+            String message = (i + 1) + " hello ";
+            //TaskUtil.defaultTaskScheduler().execute( ()->ws.send(message);
+            for (int j = 0; j < wsArray.length; j++) {
+                if (binary)
+                    wsArray[j].send(ByteString.encodeUtf8(message));
+                else
+                    wsArray[j].send(message);
+            }
+
+        }
+
+        TaskUtil.waitIfBusyThenClose(500, () -> (receiveCounter.get() >= wsArray.length * repeat));
         //TaskUtil.waitIfBusy();
-        System.out.println("Done sending " + repeat);
+        System.out.println("Done sending " + receiveCounter.get());
+        System.exit(0);
 
         // The client will continue to run; you can shut it down when you're done:
-        // client.dispatcher().executorService().shutdown();
+        //client.dispatcher().executorService().shutdown();
     }
 }
 
