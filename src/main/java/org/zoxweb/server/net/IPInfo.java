@@ -119,7 +119,7 @@ public class IPInfo {
                 for (InterfaceAddress ia : lia) {
 
                     if (main.equals(ia.getAddress())) {
-                        ret = NetUtil.getNetwork(ia);
+                        ret = NetUtil.getNetworkIPV4(ia);
                         break;
                     }
                 }

@@ -109,19 +109,19 @@ public class NetUtilTest {
 
     @Test
     public void testGetNetworkStringWithMask() throws IOException {
-        String network = NetUtil.getNetwork("192.168.1.100", "255.255.255.0");
+        String network = NetUtil.getNetworkIPV4("192.168.1.100", "255.255.255.0");
         assertEquals("192.168.1.0", network);
     }
 
     @Test
     public void testGetNetworkStringWithNullMask() throws IOException {
-        String network = NetUtil.getNetwork("192.168.1.100", null);
+        String network = NetUtil.getNetworkIPV4("192.168.1.100", null);
         assertEquals("192.168.1.100", network);
     }
 
     @Test
     public void testGetNetworkClass16() throws IOException {
-        String network = NetUtil.getNetwork("172.16.50.100", "255.255.0.0");
+        String network = NetUtil.getNetworkIPV4("172.16.50.100", "255.255.0.0");
         assertEquals("172.16.0.0", network);
     }
 
@@ -129,7 +129,7 @@ public class NetUtilTest {
     public void testGetNetworkInetAddress() throws IOException {
         InetAddress address = InetAddress.getByName("10.20.30.40");
         InetAddress mask = InetAddress.getByName("255.255.255.0");
-        InetAddress network = NetUtil.getNetwork(address, mask);
+        InetAddress network = NetUtil.getNetworkIPV4(address, mask);
         assertEquals("10.20.30.0", network.getHostAddress());
     }
 

@@ -15,6 +15,7 @@
  */
 package org.zoxweb.server.net;
 
+import org.zoxweb.server.util.ServerUtil;
 import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.net.*;
 import org.zoxweb.shared.net.InetProp.*;
@@ -33,6 +34,35 @@ import java.util.*;
 
 public class NetUtil {
     private NetUtil() {
+    }
+
+    private static volatile InetAddress INET_V4_ZERO = null;
+    private static volatile InetAddress INET_V6_ZERO = null;
+
+    public static InetAddress inetAddressZero(boolean ipv6) throws IOException {
+
+        // for fast response
+        if (ipv6 && INET_V6_ZERO != null) {
+            return INET_V6_ZERO;
+        }
+        // for fast response
+        if (!ipv6 && INET_V4_ZERO != null) {
+            return INET_V4_ZERO;
+        }
+        if (INET_V4_ZERO == null || INET_V6_ZERO == null) {
+            ServerUtil.LOCK.lock();
+
+            try {
+                if (INET_V4_ZERO == null)
+                    INET_V4_ZERO = InetAddress.getByName("0.0.0.0");
+                if (INET_V6_ZERO == null)
+                    INET_V6_ZERO = InetAddress.getByName("::");
+            } finally {
+                ServerUtil.LOCK.unlock();
+            }
+        }
+
+        return ipv6 ? INET_V6_ZERO : INET_V4_ZERO;
     }
 
     public static SecurityStatus checkSecurityStatus(InetFilterRulesManager ifrm, String host, Closeable sc) throws IOException {
@@ -137,7 +167,7 @@ public class NetUtil {
 
     public static boolean belongsToNetwork(InetFilterDAO ipf, String ipAddress)
             throws IOException {
-        String tempNetwork = getNetwork(ipAddress, ipf.getNetworkMask());
+        String tempNetwork = getNetworkIPV4(ipAddress, ipf.getNetworkMask());
         return tempNetwork.equals(ipf.getNetwork());
     }
 
@@ -267,6 +297,7 @@ public class NetUtil {
      */
     public static Inet6Address[] getIPV6AllAddresses(NetworkInterface ni)
             throws IOException {
+        SUS.checkIfNull("Network or IP address can't be null", ni);
         ArrayList<Inet6Address> v = new ArrayList<Inet6Address>();
         for (Enumeration<InetAddress> e = ni.getInetAddresses(); e.hasMoreElements(); ) {
             InetAddress addr = e.nextElement();
@@ -284,7 +315,7 @@ public class NetUtil {
         return InetAddress.getByAddress(SharedNetUtil.toNetmaskIPV4(netPrefix));
     }
 
-    public static InetAddress getNetwork(InterfaceAddress ia) throws IOException {
+    public static InetAddress getNetworkIPV4(InterfaceAddress ia) throws IOException {
         InetAddress address = ia.getAddress();
         byte[] addressBytes = address.getAddress();
         short mask = ia.getNetworkPrefixLength();
@@ -304,19 +335,19 @@ public class NetUtil {
     }
 
 
-    public static String getNetwork(String address, String mask)
+    public static String getNetworkIPV4(String address, String mask)
             throws IOException {
 
         InetAddress ret = null;
         if (mask != null) {
-            ret = getNetwork(InetAddress.getByName(address), InetAddress.getByName(mask));
+            ret = getNetworkIPV4(InetAddress.getByName(address), InetAddress.getByName(mask));
         } else {
             return address;
         }
         return (ret != null) ? ret.getHostAddress() : null;
     }
 
-    public static InetAddress getNetwork(InetAddress address, InetAddress mask)
+    public static InetAddress getNetworkIPV4(InetAddress address, InetAddress mask)
             throws IOException {
         return InetAddress.getByAddress(SharedNetUtil.getNetwork(address.getAddress(), mask.getAddress()));
     }
@@ -461,15 +492,20 @@ public class NetUtil {
     /**
      * Return the protocol type of network connection static or dhcp
      *
-     * @param niName
+     * @param niName network interface name
      * @return Inet protocol
      * @throws IOException if protocol is different from static or dhcp
      */
     public static InetProto getProtoType(String niName) throws IOException {
+        SUS.checkIfNull("Network interface name can't be null", niName);
         Properties ifcfg = new Properties();
-        FileReader fr = new FileReader(IPInfo.LINUX_NI_CFG_PREFIX + niName);
-        ifcfg.load(fr);
-        fr.close();
+        FileReader fr = null;
+        try {
+            fr = new FileReader(IPInfo.LINUX_NI_CFG_PREFIX + niName);
+            ifcfg.load(fr);
+        } finally {
+            SharedIOUtil.close(fr);
+        }
 
         String proto = ifcfg.getProperty(IPInfo.LINUX_BOOTPROTO);
         InetProto pt = InetProto.valueOf(proto.toUpperCase());
@@ -533,17 +569,6 @@ public class NetUtil {
         ret.setIPVersion(addr instanceof Inet4Address ? IPVersion.V4 : IPVersion.V6);
 
         return ret;
-    }
-
-    /**
-     * Convert the property to a network interface
-     *
-     * @param ni
-     * @return network interface
-     * @throws IOException if the network interface do not exist
-     */
-    public static NetworkInterface toNI(NetworkInterface ni) throws IOException {
-        return NetworkInterface.getByName(ni.getName());
     }
 
     /**
@@ -639,17 +664,16 @@ public class NetUtil {
     }
 
     public static void cancelSelectionKey(SelectionKey sk, boolean includeChannel) {
-        if(sk != null)
-        {
-            synchronized(sk)
-            {
+        if (sk != null) {
+            synchronized (sk) {
                 Channel channel = sk.channel();
                 sk.cancel();
-                if(includeChannel)
+                if (includeChannel)
                     SharedIOUtil.close(channel);
             }
         }
     }
+
     public static void cancelSelectionKeySet(Set<SelectionKey> skSet, boolean includeChannel) {
         if (skSet != null) {
             SelectionKey[] all = skSet.toArray(new SelectionKey[0]);

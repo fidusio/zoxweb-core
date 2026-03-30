@@ -86,7 +86,7 @@ public class InetFilterRulesManager {
         public synchronized void setInetFilterDAO(InetFilterDAO inetFilter) throws IOException {
             setValue(Params.IP_FILTER, inetFilter);
             //maskBytes    = InetAddress.getByName(inetFilter.getNetworkMask()).getAddress();
-            byte[] networkBytesTemp = InetAddress.getByName(NetUtil.getNetwork(inetFilter.getIP(), inetFilter.getNetworkMask())).getAddress();
+            byte[] networkBytesTemp = InetAddress.getByName(NetUtil.getNetworkIPV4(inetFilter.getIP(), inetFilter.getNetworkMask())).getAddress();
             inetFilter.setNetwork(InetAddress.getByAddress(networkBytesTemp).getHostAddress());
 
         }
@@ -97,7 +97,7 @@ public class InetFilterRulesManager {
                 synchronized (this) {
                     if (networkBytes == null) {
                         try {
-                            networkBytes = InetAddress.getByName(NetUtil.getNetwork(getInetFilterDAO().getIP(), getInetFilterDAO().getNetworkMask())).getAddress();
+                            networkBytes = InetAddress.getByName(NetUtil.getNetworkIPV4(getInetFilterDAO().getIP(), getInetFilterDAO().getNetworkMask())).getAddress();
                         } catch (IOException e) {
                             // TODO Auto-generated catch block
                             e.printStackTrace();
@@ -195,7 +195,7 @@ public class InetFilterRulesManager {
 
     public synchronized void addInetFilterProp(InetFilterRule ipfp) throws IOException {
         if (ipfp != null) {
-            ipfp.getInetFilterDAO().setNetwork(NetUtil.getNetwork(ipfp.getInetFilterDAO().getIP(), ipfp.getInetFilterDAO().getNetworkMask()));
+            ipfp.getInetFilterDAO().setNetwork(NetUtil.getNetworkIPV4(ipfp.getInetFilterDAO().getIP(), ipfp.getInetFilterDAO().getNetworkMask()));
             set.add(ipfp);
         }
     }
@@ -245,24 +245,24 @@ public class InetFilterRulesManager {
 
 
     public SecurityStatus lookupSecurityStatus(InetAddress address) {
-        if(log.isEnabled()) log.getLogger().info("address " + address);
+        if (log.isEnabled()) log.getLogger().info("address " + address);
         if (address.isLoopbackAddress()) {
             return SecurityStatus.ALLOW;
         }
 
 
         if (address instanceof Inet4Address) {
-            if(log.isEnabled()) log.getLogger().info("Inet4Address to check:" + address);
+            if (log.isEnabled()) log.getLogger().info("Inet4Address to check:" + address);
             return checkIPSecurityStatus(address.getAddress());
         }
 
         if (address instanceof Inet6Address) {
-            if(log.isEnabled()) log.getLogger().info("Inet6Address to check:" + address);
+            if (log.isEnabled()) log.getLogger().info("Inet6Address to check:" + address);
             return checkIPSecurityStatus(address.getAddress());
         }
 
 
-        if(log.isEnabled()) log.getLogger().info("we have ip v6 deny access:" + address);
+        if (log.isEnabled()) log.getLogger().info("we have ip v6 deny access:" + address);
         // we ip v6
         return SecurityStatus.DENY;
 
@@ -273,7 +273,7 @@ public class InetFilterRulesManager {
         if (address instanceof InetSocketAddress) {
             return lookupSecurityStatus(((InetSocketAddress) address).getAddress());
         }
-        if(log.isEnabled()) log.getLogger().info("we have ip v6 deny access:" + address);
+        if (log.isEnabled()) log.getLogger().info("we have ip v6 deny access:" + address);
         // we ip v6
         return SecurityStatus.DENY;
 
@@ -308,10 +308,10 @@ public class InetFilterRulesManager {
                 case REJECT:
                 case DENY:
                     try {
-                        if(log.isEnabled()) log.getLogger().info(""+ipfp);
+                        if (log.isEnabled()) log.getLogger().info("" + ipfp);
                         ret = SecurityStatus.ALLOW;
                         if (SharedNetUtil.belongsToNetwork(ipAddress, ipfp.getNetMaskBytes(), ipfp.getNetworkBytes())) {
-                            if(log.isEnabled()) log.getLogger().info("deny:"+ipfp);
+                            if (log.isEnabled()) log.getLogger().info("deny:" + ipfp);
                             return SecurityStatus.DENY;
                         }
                     } catch (IOException e) {
