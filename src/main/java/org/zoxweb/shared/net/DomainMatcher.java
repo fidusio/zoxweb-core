@@ -3,10 +3,10 @@ package org.zoxweb.shared.net;
 import org.zoxweb.shared.util.DataEncoder;
 import org.zoxweb.shared.util.SUS;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 
 /**
@@ -29,7 +29,7 @@ public class DomainMatcher {
     // Tier 2: suffix match for "*.suffix" patterns — O(label count)
     private final Set<String> suffixSet = ConcurrentHashMap.newKeySet();
     // Tier 3: complex globs (?, or * not at prefix) — linear scan
-    private final List<String> globPatterns = new CopyOnWriteArrayList<>();
+    private final List<String> globPatterns = new ArrayList<String>();
 
     /**
      * Adds a domain pattern to the matcher.
@@ -50,20 +50,21 @@ public class DomainMatcher {
         }
         pattern = DataEncoder.StringLower.encode(pattern);
 
-
-        if (pattern.indexOf('*') == -1 && pattern.indexOf('?') == -1) {
-            // no wildcards → exact
-            exactSet.add(pattern);
-        } else if (pattern.startsWith("*.")) {
-            String suffix = pattern.substring(2);
-            if (suffix.indexOf('*') == -1 && suffix.indexOf('?') == -1) {
-                // pure suffix wildcard like *.xlogistx.io
-                suffixSet.add(suffix);
+        synchronized (this) {
+            if (pattern.indexOf('*') == -1 && pattern.indexOf('?') == -1) {
+                // no wildcards → exact
+                exactSet.add(pattern);
+            } else if (pattern.startsWith("*.")) {
+                String suffix = pattern.substring(2);
+                if (suffix.indexOf('*') == -1 && suffix.indexOf('?') == -1) {
+                    // pure suffix wildcard like *.xlogistx.io
+                    suffixSet.add(suffix);
+                } else {
+                    globPatterns.add(pattern);
+                }
             } else {
                 globPatterns.add(pattern);
             }
-        } else {
-            globPatterns.add(pattern);
         }
     }
 
@@ -78,10 +79,12 @@ public class DomainMatcher {
         if(SUS.isEmpty(pattern)) {
             throw new IllegalArgumentException("Pattern cannot be empty");
         }
-        pattern = DataEncoder.StringLower.encode(pattern);
-        return exactSet.remove(pattern)
-                || suffixSet.remove(pattern.startsWith("*.") ? pattern.substring(2) : pattern)
-                || globPatterns.remove(pattern);
+        synchronized (this) {
+            pattern = DataEncoder.StringLower.encode(pattern);
+            return exactSet.remove(pattern)
+                    || suffixSet.remove(pattern.startsWith("*.") ? pattern.substring(2) : pattern)
+                    || globPatterns.remove(pattern);
+        }
     }
 
     /**
