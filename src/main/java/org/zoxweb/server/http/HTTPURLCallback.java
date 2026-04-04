@@ -18,9 +18,9 @@ import java.util.concurrent.atomic.AtomicLong;
 public class HTTPURLCallback extends TCPSessionCallback {
 
     public static final LogWrapper log = new LogWrapper(HTTPURLCallback.class).setEnabled(false);
-    private HTTPMessageConfigInterface hmci;
-    private HTTPRawMessage hrm = null;
-    private volatile AtomicLong ts = new AtomicLong(0);
+    private final HTTPMessageConfigInterface hmci;
+    private volatile HTTPRawMessage hrm = null;
+    private final AtomicLong ts = new AtomicLong(0);
     private volatile ConsumerCallback<HTTPResponse> callback;
 
     public HTTPURLCallback(String url, ConsumerCallback<HTTPResponse> callback) throws IOException {
@@ -51,8 +51,8 @@ public class HTTPURLCallback extends TCPSessionCallback {
             SSLContextInfo sslContextInfo = new SSLContextInfo(urlInfo.ipAddress, hmci.isSecureCheckEnabled());
             setSSLContextInfo(sslContextInfo);
         }
-        else
-            hmci.getHeaders().add("Host", urlInfo.ipAddress.getInetAddress());
+
+        hmci.getHeaders().add("Host", urlInfo.ipAddress.getInetAddress());
 
         if (hmci.getAuthorization() != null)
             hmci.getHeaders().add(hmci.getAuthorization().toHTTPHeader());
@@ -92,12 +92,12 @@ public class HTTPURLCallback extends TCPSessionCallback {
     @Override
     public void accept(ByteBuffer byteBuffer) {
         try {
-            if (hrm.parseResponse(hmci.getURIScheme(), byteBuffer, false )) {
-                HTTPMessageConfigInterface hmci = hrm.parse();
-                hmci.setContent(hrm.getDataStream().toByteArray());
+            if (hrm.parseResponse(hmci.getURIScheme(), byteBuffer, false)) {
+                HTTPMessageConfigInterface respHMCI = hrm.parse();
+                respHMCI.setContent(hrm.getDataStream().toByteArray());
                 SharedIOUtil.close(this);
                 if (callback != null) {
-                    callback.accept(new HTTPResponseData(hmci.getHTTPStatusCode().CODE, hmci.getHeaders(), hmci.getContent(), System.currentTimeMillis() - ts.get()).setCorrelationID(getID()));
+                    callback.accept(new HTTPResponseData(respHMCI.getHTTPStatusCode().CODE, respHMCI.getHeaders(), respHMCI.getContent(), System.currentTimeMillis() - ts.get()).setCorrelationID(getID()));
                 }
 
 
@@ -113,11 +113,11 @@ public class HTTPURLCallback extends TCPSessionCallback {
 
     @Override
     protected void connectedFinished() throws IOException {
-        SocketChannel channel = getChannel();
         hrm = new HTTPRawMessage(true);
         HTTPRawFormatter hrf = new HTTPRawFormatter(hmci);
         getOutputStream().write(hrf.format(), true);
-        if (log.isEnabled()) log.getLogger().info(getRemoteAddress() + " " + channel.isConnected());
+        if (log.isEnabled())
+            log.getLogger().info(getRemoteAddress() + " " + ((SocketChannel) getChannel()).isConnected());
 
     }
 

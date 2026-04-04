@@ -273,7 +273,7 @@ public class HTTPCall {
                     case MOVED_PERMANENTLY:
                     case FOUND:
                     case SEE_OTHER:
-                        NVPair cookie = HTTPUtil.extractCookie(con.getHeaderFields(), 0);
+                        NVPair cookie = HTTPUtil.extractCookie(con.getHeaderFields());
                         if (cookie != null)
                             hcc.getHeaders().add(cookie);
                         String newURL = con.getHeaderField("Location");

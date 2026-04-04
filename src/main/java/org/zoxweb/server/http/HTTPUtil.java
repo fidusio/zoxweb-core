@@ -63,13 +63,8 @@ public class HTTPUtil {
 
     public static String toWebSocketAcceptValue(String secWebSocketKey) throws NoSuchAlgorithmException {
 
-        byte[] secWebSocketAcceptBytes = null;
-        try {
-            lock.lock();
-            secWebSocketAcceptBytes = HashUtil.getMessageDigestSilent("SHA-1").digest(SharedStringUtil.getBytes(secWebSocketKey + HTTPWSProto.WEB_SOCKET_UUID));
-        } finally {
-            lock.unlock();
-        }
+        byte[] secWebSocketAcceptBytes = HashUtil.getMessageDigestSilent("SHA-1").digest(SharedStringUtil.getBytes(secWebSocketKey + HTTPWSProto.WEB_SOCKET_UUID));
+
         return SharedBase64.encodeAsString(SharedBase64.Base64Type.DEFAULT, secWebSocketAcceptBytes);
     }
 
@@ -807,13 +802,24 @@ public class HTTPUtil {
         // detect scheme type
         {
             URIScheme us = URIScheme.match(url);
-            if (us == URIScheme.HTTPS || us == URIScheme.WSS) {
-                ret.setPort(us.getValue());
-            } else if (us == URIScheme.HTTP || us == URIScheme.WS) {
-                ret.setPort(us.getValue());
-            } else {
-                ret.setPort(defaultPort);
+            switch(us)
+            {
+                case HTTP:
+                case HTTPS:
+                case WSS:
+                case WS:
+                    ret.setPort(us.defaultPort());
+                    break;
+                default:
+                    ret.setPort(defaultPort);
             }
+//            if (us == URIScheme.HTTPS || us == URIScheme.WSS) {
+//                ret.setPort(us.getValue());
+//            } else if (us == URIScheme.HTTP || us == URIScheme.WS) {
+//                ret.setPort(us.getValue());
+//            } else {
+//                ret.setPort(defaultPort);
+//            }
         }
 
         return ret;
@@ -891,7 +897,7 @@ public class HTTPUtil {
 
 
     public static String extractRequestCookie(HTTPResponseData rd) {
-        List<String> cookies = SharedUtil.lookupMap(rd.getHeaders(), "Set-Cookie", true);
+        List<String> cookies = SharedUtil.lookupMap(rd.getHeaders(), HTTPHeader.SET_COOKIE.getName(), true);
 
         if (cookies != null && cookies.size() > 0) {
             StringBuilder sb = new StringBuilder();
@@ -903,13 +909,9 @@ public class HTTPUtil {
                     if (sb.length() > 0) {
                         sb.append("; ");
                     }
-
                     sb.append(httpCookie.getName() + (httpCookie.getValue() != null ? "=" + httpCookie.getValue() : ""));
-                    //httpCookie.setVersion(version);
-                    //sb.append(httpCookie);
                 }
             }
-
             return sb.toString();
         }
 
@@ -917,7 +919,7 @@ public class HTTPUtil {
     }
 
     public static GetNameValue<String> extractHeaderCookie(HTTPResponse rd) {
-        List<String> cookies = SharedUtil.lookupMap(rd.getHeaders(), "Set-Cookie", true);
+        List<String> cookies = SharedUtil.lookupMap(rd.getHeaders(), HTTPHeader.SET_COOKIE.getName(), true);
 
         if (cookies != null && cookies.size() > 0) {
             StringBuilder sb = new StringBuilder();
@@ -942,8 +944,8 @@ public class HTTPUtil {
         return null;
     }
 
-    public static NVPair extractCookie(Map<String, List<String>> rd, int version) {
-        List<String> cookies = SharedUtil.lookupMap(rd, "Set-Cookie", true);
+    public static NVPair extractCookie(Map<String, List<String>> rd) {
+        List<String> cookies = SharedUtil.lookupMap(rd, HTTPHeader.SET_COOKIE.getName(), true);
 
         if (cookies != null && cookies.size() > 0) {
             StringBuilder sb = new StringBuilder();
@@ -962,7 +964,7 @@ public class HTTPUtil {
                 }
             }
 
-            return new NVPair("Cookie", sb.toString());
+            return new NVPair(HTTPHeader.COOKIE, sb.toString());
         }
 
         return null;
@@ -971,7 +973,7 @@ public class HTTPUtil {
 
     public static List<HttpCookie> extractCookies(HTTPResponse rd) {
         List<HttpCookie> ret = new ArrayList<HttpCookie>();
-        List<String> cookies = SharedUtil.lookupMap(rd.getHeaders(), "Set-Cookie", true);
+        List<String> cookies = SharedUtil.lookupMap(rd.getHeaders(), HTTPHeader.SET_COOKIE.getName(), true);
 
         if (cookies != null && cookies.size() > 0) {
             for (String cookie : cookies) {
@@ -986,7 +988,7 @@ public class HTTPUtil {
 
     public static HttpCookie lookupCookieByName(HTTPResponseData rd, String name) {
         if (name != null) {
-            List<String> cookies = SharedUtil.lookupMap(rd.getHeaders(), "Set-Cookie", true);
+            List<String> cookies = SharedUtil.lookupMap(rd.getHeaders(), HTTPHeader.SET_COOKIE.getName(), true);
 
             if (cookies != null && cookies.size() > 0) {
                 for (String cookie : cookies) {

@@ -35,19 +35,19 @@ public class SharedUtil {
     }
 
 
-    /**
-     * Checks all the objs if any of them is null it will throw a NullPointerException.
-     *
-     * @param msg  to be added to the NullPointerException
-     * @param objs to be checked
-     * @throws NullPointerException if any of the Object is null
-     * @deprecated Use {@link SUS#checkIfNulls(String, Object...)}instead.
-     */
-    @Deprecated
-    public static void checkIfNulls(String msg, Object... objs)
-            throws NullPointerException {
-        SUS.checkIfNulls(msg, objs);
-    }
+//    /**
+//     * Checks all the objs if any of them is null it will throw a NullPointerException.
+//     *
+//     * @param msg  to be added to the NullPointerException
+//     * @param objs to be checked
+//     * @throws NullPointerException if any of the Object is null
+//     * @deprecated Use {@link SUS#checkIfNulls(String, Object...)}instead.
+//     */
+//    @Deprecated
+//    public static void checkIfNulls(String msg, Object... objs)
+//            throws NullPointerException {
+//        SUS.checkIfNulls(msg, objs);
+//    }
 
     public static void illegalCondition(String message, boolean... conditions)
             throws IllegalArgumentException {
@@ -1283,7 +1283,7 @@ public class SharedUtil {
     }
 
     public static NVBase<?> classToNVBase(Class<?> c, String name, String value) {
-        checkIfNulls("Class or name can't be null", c, name);
+        SUS.checkIfNulls("Class or name can't be null", c, name);
         c = Const.wrap(c);
         NVBase<?> nvbArray = null;
         if (c.isArray()) {
@@ -1495,7 +1495,7 @@ public class SharedUtil {
      * @return true if primitive note string is considered primitive
      */
     public static boolean isPrimitive(Class<?> c) {
-        checkIfNulls("Class is null.", c);
+        SUS.checkIfNulls("Class is null.", c);
 
         if (c.isArray()) {
             c = c.getComponentType();
@@ -1967,7 +1967,7 @@ public class SharedUtil {
     }
 
     public static <V extends TimeStampInterface> V touch(V ts, CRUD... ops) {
-        SharedUtil.checkIfNulls("Document info is null.", ts);
+        SUS.checkIfNulls("Document info is null.", ts);
 
         if (ts.getCreationTime() == 0) {
             ts.setCreationTime(System.currentTimeMillis());
