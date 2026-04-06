@@ -516,27 +516,31 @@ public final class SecUtil {
         return defaultSecureRandom;
     }
 
-    public static byte[] generateRandomBytes(int size)
+    public static byte[] randomBytes(int sizeInBytes)
             throws NullPointerException, IllegalArgumentException {
-        return generateRandomBytes(null, size);
+        return randomBytes(null, sizeInBytes);
     }
 
-    public static byte[] generateRandomBytes(SecureRandom sr, int size)
+    public static byte[] randomBytes(SecureRandom sr, int sizeInBytes)
             throws NullPointerException, IllegalArgumentException {
-        if (size < 1) {
-            throw new IllegalArgumentException("invalid size " + size + " must be greater than zero.");
+        if (sizeInBytes < 1) {
+            throw new IllegalArgumentException("invalid size " + sizeInBytes + " must be greater than zero.");
         }
 
         if (sr == null) {
             sr = defaultSecureRandom();
         }
 
-        byte[] ret = new byte[size];
+        byte[] ret = new byte[sizeInBytes];
         sr.nextBytes(ret);
 
         return ret;
     }
 
+
+    public static String hexRandomBytes(SecureRandom sr, int sizeInBytes) {
+        return SUS.fastBytesToHex(SecUtil.randomBytes(sr, sizeInBytes));
+    }
 
     public static String secProvidersToString(boolean detailed) {
         StringBuilder sb = new StringBuilder();

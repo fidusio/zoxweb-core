@@ -556,7 +556,7 @@ public class CryptoUtil {
             throws NoSuchAlgorithmException {
         SecureRandom random = SecUtil.defaultSecureRandom();
 
-        byte[] bytes = SecUtil.generateRandomBytes(random, arraySize);
+        byte[] bytes = SecUtil.randomBytes(random, arraySize);
 
         digest.reset();
         digest.update(bytes);

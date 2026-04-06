@@ -29,6 +29,7 @@ import org.zoxweb.server.util.ReflectionUtil;
 import org.zoxweb.server.util.RuntimeUtil;
 import org.zoxweb.shared.data.SimpleMessage;
 import org.zoxweb.shared.http.*;
+import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.protocol.Delimiter;
 import org.zoxweb.shared.protocol.MessageStatus;
@@ -101,18 +102,6 @@ public class HTTPUtil {
         return hmci;
 
     }
-
-
-//	public static HTTPMessageConfigInterface formatResponse(HTTPStatusCode statusCode, GetNameValue<?> ...headers)
-//	{
-//		HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit(null, null, (HTTPMethod) null);
-//		hmci.setHTTPStatusCode(statusCode);
-//		if( headers != null)
-//			for (GetNameValue<?> header : headers)
-//				hmci.getHeaders().add(header);
-//		hmci.setContentType(HTTPMediaType.APPLICATION_JSON, HTTPConst.CHARSET_UTF_8);
-//		return hmci;
-//	}
 
     public static HTTPMessageConfigInterface buildResponse(NVEntity nve, HTTPStatusCode statusCode, GetNameValue<?>... headers)
             throws IOException {
@@ -213,18 +202,12 @@ public class HTTPUtil {
         // write the first line
         ubaos.write(hv.getValue() + " " + hmci.getHTTPStatusCode().CODE + " " + hmci.getHTTPStatusCode().REASON + Delimiter.CRLF.getValue());
         // set content length if available
-//        if (hmci.getContent() != null && hmci.getContent().length > 0) {
-//            hmci.setContentLength(hmci.getContent().length);
-//        }
-
         if (hmci.getHeaders().getNV(HTTPHeader.CONTENT_LENGTH) == null && hmci.getContent() != null) {
             hmci.setContentLength(hmci.getContent().length);
         }
         // write headers
         for (GetNameValue<String> header : hmci.getHeaders().asArrayValuesString().values()) {
-            // header.getName() + ": " + header.getValue())
             ubaos.write(HTTPConst.toBytes(header));
-            // header end of line
             ubaos.write(Delimiter.CRLF.getValue());
         }
         // header separator
@@ -252,7 +235,7 @@ public class HTTPUtil {
         memBuffer = formatResponseHeaders(hmci, memBuffer, headers);
 
         byte[] content = hmci.getContent();
-        if (content != null && content.length <= Const.SizeInBytes.K.SIZE * 16) {
+        if (content != null && content.length <= SharedIOUtil.K_16) {
             memBuffer.write(content);
             memBuffer.writeTo(outputStream);
         } else if (hmci.getContentAsIS() != null) {
@@ -315,7 +298,6 @@ public class HTTPUtil {
 
     public static UByteArrayOutputStream formatRequest(HTTPMessageConfigInterface hcc, boolean parseURI, UByteArrayOutputStream ubaos, String... headersToRemove) {
 
-        //InetSocketAddressDAO  isad = HTTPUtil.parseHost(hcc.getURI());
         if (parseURI) {
             hcc.setURI(HTTPUtil.parseURI(hcc.getURI()));
         }
@@ -338,7 +320,6 @@ public class HTTPUtil {
         if (hcc.getContent() != null && hcc.getContent().length > 0) {
             hcc.setContentLength(hcc.getContent().length);
         }
-        //hcc.getHeaderParameters().remove(HTTPHeaderName.HOST.getName());
         for (GetNameValue<String> header : hcc.getHeaders().asArrayValuesString().values()) {
             ubaos.write(header.getName() + ": " + header.getValue() + Delimiter.CRLF.getValue());
         }
@@ -361,26 +342,6 @@ public class HTTPUtil {
                 if (!extraMethodAdded.get()) {
                     if (RuntimeUtil.getJavaVersion() <= 11)
                         ReflectionUtil.updateFinalStatic(HttpURLConnection.class, "methods", HTTPMethod.toMethodNames());
-//					new String[]
-//							{
-//								// We are adding patch at the end
-//								"GET", "POST", "HEAD", "OPTIONS", "PUT", "DELETE", "TRACE", "PATCH", "COPY", "LINK", "UNLINK", "PURGE", "LOCK", "UNLOCK"
-//							});
-
-//					String[] propNames = {
-//							"http.keepAlive",
-//							"http.maxConnections",
-//							"sun.net.http.keepAliveTimeout",
-//					};
-//					for (String propName: propNames)
-//						System.out.println(propName + "=" + System.getProperty(propName));
-//
-//
-//					System.setProperty("http.keepAlive", "true"); // Default is true
-//					System.setProperty("http.maxConnections", "8"); // Maximum number of connections per destination
-//					System.setProperty("sun.net.http.keepAliveTimeout", "5000");
-//					for (String propName: propNames)
-//						System.out.println(propName + "=" + System.getProperty(propName));
 
                     extraMethodAdded.set(true);
                 }
@@ -388,37 +349,6 @@ public class HTTPUtil {
                 lock.unlock();
             }
         }
-//		Class<?> httpUrlConnection = HttpURLConnection.class;
-//		Field field = httpUrlConnection.getDeclaredField("methods");
-//		System.out.println("" + field);
-//		field.setAccessible( true);
-//
-//		String methods[] = (String[]) field.get((Object) null);
-//////		ArrayList<String> strList = new ArrayList<String>();
-////
-////		for ( int i = 0; i < methods.length; i++)
-////        {
-////			//strList.add(methods[i]);
-////			if ( methods[i].equals("TRACE"))
-////            {
-//////				strList.add(methods[i]);
-////				methods[i] = HTTPMethod.PATCH.name();
-////            }
-////        }
-//////		strList.add( HTTPMethod.PATCH.name());
-//////
-//////		methods = strList.toArray( new String[0]);
-//////		System.out.println(" list " + strList);
-//////		//field.set(null, methods);
-//////		setFinalStatic( field, methods);
-//
-//
-//		methods = (String[]) field.get((Object) null);
-//
-//		for ( int i = 0; i < methods.length; i++)
-//		{
-//			System.out.println( methods[i]);
-//		}
     }
 
 
@@ -536,29 +466,6 @@ public class HTTPUtil {
         }
         return sb.toString();
     }
-
-//	public static String formatParametersNoEncoding( ArrayValues<GetNameValue<String>> params)
-//	{
-//		StringBuilder sb = new StringBuilder();
-//		if ( params != null)
-//		{
-//			for ( GetNameValue<String> nvp : params.values())
-//			{
-//				if ( sb.length() > 0)
-//				{
-//					sb.append('&');
-//				}
-//				if ( nvp != null && nvp.getName() != null)
-//				{
-//					sb.append( nvp.getName());
-//					sb.append('=');
-//					if (nvp.getValue() != null)
-//						sb.append( nvp.getValue());
-//				}
-//			}
-//		}
-//		return sb.toString();
-//	}
 
 
     public static List<GetNameValue<String>> parseQuery(URL url) {
@@ -690,32 +597,6 @@ public class HTTPUtil {
         return ret;
     }
 
-//	public static NVGenericMap parsePathParameters(String pathWithMetas, String pathWithValues, ReflectionUtil.MethodAnnotations metaData)
-//	{
-//		NVGenericMap nvgm = new NVGenericMap();
-//		String[] paramNames = pathWithMetas.split("/");
-//		String[] paramValues = pathWithValues.split("/");
-//		int paramCounter = 0;
-//		for(int i = 0; i < paramNames.length; i++)
-//		{
-//			List<CharSequence> ch = SharedStringUtil.parseGroup(paramNames[i], "{","}", false);
-//
-//			if(ch.size() == 1)
-//			{
-//				String value = i < paramValues.length ? paramValues[i] : null;
-//				Parameter
-//				if(value != null)
-//				{
-//
-//				}
-//				nvgm.add(ch.get(0).toString(), value);
-//			}
-//		}
-//
-//
-//		return nvgm;
-//	}
-
 
     public static String parseHostURL(URL url) {
         StringBuilder ret = new StringBuilder();
@@ -734,7 +615,6 @@ public class HTTPUtil {
 
     public static String parseURI(URL url, boolean includeParam) {
         StringBuilder ret = new StringBuilder();
-        //ret.append(url.getPath());
         ret.append(url.getPath());
         if (includeParam && url.getQuery() != null) {
             ret.append("?");
@@ -813,13 +693,6 @@ public class HTTPUtil {
                 default:
                     ret.setPort(defaultPort);
             }
-//            if (us == URIScheme.HTTPS || us == URIScheme.WSS) {
-//                ret.setPort(us.getValue());
-//            } else if (us == URIScheme.HTTP || us == URIScheme.WS) {
-//                ret.setPort(us.getValue());
-//            } else {
-//                ret.setPort(defaultPort);
-//            }
         }
 
         return ret;
@@ -933,8 +806,6 @@ public class HTTPUtil {
                     }
 
                     sb.append(httpCookie.getName() + (httpCookie.getValue() != null ? "=" + httpCookie.getValue() : ""));
-                    //httpCookie.setVersion(version);
-                    //sb.append(httpCookie);
                 }
             }
 
@@ -959,8 +830,6 @@ public class HTTPUtil {
                     }
 
                     sb.append(httpCookie.getName() + (httpCookie.getValue() != null ? "=" + httpCookie.getValue() : ""));
-                    //httpCookie.setVersion(version);
-                    //sb.append(httpCookie);
                 }
             }
 
@@ -1016,7 +885,6 @@ public class HTTPUtil {
             String formMethod = element.attr("method");
             String formEncoding = element.attr("enctype");
             String formName = element.attr("name");
-            //String formID = element.attr("id");
             HTTPMediaType encoding = HTTPMediaType.lookup(formEncoding);
             if (encoding == null) {
                 encoding = HTTPMediaType.APPLICATION_WWW_URL_ENC;
@@ -1024,14 +892,9 @@ public class HTTPUtil {
 
 
             Elements formInputs = element.getAllElements();
-            //System.out.println(SharedUtil.toCanonicalID('#', formName, formID, formAction, formMethod, formEncoding));
-            //System.out.println("Inputs:" + formInputs);
-
-
             // extract cookie if it exists
             String reqCookie = extractRequestCookie(rd);
 
-            //ArrayList<GetNameValue<String>> params = new ArrayList<GetNameValue<String>>();
             HTTPMessageConfig ret = new HTTPMessageConfig();
 
             for (Element ele : formInputs) {
@@ -1039,7 +902,6 @@ public class HTTPUtil {
                 String name = ele.attr("name");
                 String value = ele.attr("value");
                 if (!SUS.isEmpty(name)) {
-                    //System.out.println( name + ":" + value);
                     switch (encoding) {
 
                         case MULTIPART_FORM_DATA:
@@ -1058,9 +920,7 @@ public class HTTPUtil {
 
             if (encoding == HTTPMediaType.MULTIPART_FORM_DATA) {
                 ret.setContentType(HTTPMediaType.MULTIPART_FORM_DATA);
-                //ret.setMultiPartEncoding( true);
             }
-            //ret.setParameters(params);
             ret.setName(formName);
             formAction = URLDecoder.decode(formAction, Const.UTF_8);
             try {
@@ -1087,8 +947,6 @@ public class HTTPUtil {
     public static MessageStatus checkRequestStatus(HTTPMessageConfigInterface hmci) {
         if (hmci != null) {
             if (hmci.getMethod() != null) {
-                //int tempContent = hcc.getContentLength();
-                //byte content[] = hcc.getContent();
                 if (hmci.getContent() != null && hmci.getContent().length == hmci.getContentLength()) {
                     return MessageStatus.COMPLETE;
                 }
@@ -1096,11 +954,6 @@ public class HTTPUtil {
                 if (hmci.getContentLength() < 1 && (hmci.getContent() == null || hmci.getContent().length == 0)) {
                     return MessageStatus.COMPLETE;
                 }
-
-//				if (hmci.getContentLength() >= 0 && hmci.getContent() != null && hmci.getContent().length != hmci.getContentLength())
-//				{
-//					return MessageStatus.PARTIAL;
-//				}
 
                 if (hmci.getContentLength() > 0 && (hmci.getContent() == null || (hmci.getContent().length != hmci.getContentLength()))) {
                     return MessageStatus.PARTIAL;
@@ -1132,6 +985,8 @@ public class HTTPUtil {
             throws NullPointerException, IllegalArgumentException {
         // locate the end of headers
         int endOfHeadersIndex = ubaos.indexOf(Delimiter.CRLFCRLF.getBytes());
+        if(endOfHeadersIndex > SharedIOUtil.K_8)
+            throw new IllegalArgumentException("HTTPHeader size bigger " + endOfHeadersIndex + " than " + SharedIOUtil.K_8);
 
         if (endOfHeadersIndex > 0 && (hmci == null || hmci.getHeaders().size() == 0)) {
             // find the termination
