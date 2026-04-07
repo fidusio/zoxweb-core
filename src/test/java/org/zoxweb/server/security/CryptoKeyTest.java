@@ -17,7 +17,7 @@ import java.util.Set;
 
 public class CryptoKeyTest {
     @Test
-    public void ECKey256() throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, NoSuchProviderException {
+    public void ECKey256() throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, NoSuchProviderException, InvalidKeySpecException {
         KeyPair kp = CryptoUtil.generateKeyPair(CryptoConst.PKInfo.EC_256);//"ec", 256);
         X509EncodedKeySpec kSpec = new X509EncodedKeySpec(kp.getPublic().getEncoded());
         Assertions.assertTrue(kp.getPublic() instanceof ECPublicKey);
