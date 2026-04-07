@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.zoxweb.server.util.GSONUtil;
+import org.zoxweb.shared.crypto.CryptoConst;
 import org.zoxweb.shared.crypto.CryptoConst.JWTAlgo;
 import org.zoxweb.shared.security.JWT;
 import org.zoxweb.shared.security.JWTHeader;
@@ -201,7 +202,7 @@ public class JWTTest {
     System.out.println(jwtES256);
 
     System.out.println(localJwt.getPayload());
-    KeyPair kp = CryptoUtil.generateKeyPair("EC", 256);
+    KeyPair kp = CryptoUtil.generateKeyPair(CryptoConst.PKInfo.EC_256);//"EC", 256);
 
     String test = CryptoUtil.encodeJWT(kp.getPrivate().getEncoded(), localJwt);
     System.out.println("Encoded: " + test);
@@ -314,8 +315,8 @@ public class JWTTest {
     payload.setSubjectID("support@xlogistx.io");
 
 
-    KeyPair ecKP = CryptoUtil.generateKeyPair("EC", 521);
-    KeyPair rsaKP = CryptoUtil.generateKeyPair("RSA", 2048);
+    KeyPair ecKP = CryptoUtil.generateKeyPair(CryptoConst.PKInfo.EC_521);
+    KeyPair rsaKP = CryptoUtil.generateKeyPair(CryptoConst.PKInfo.RSA_2048);
 
     JWTAlgo[] list = {
         JWTAlgo.ES256, JWTAlgo.ES512, JWTAlgo.RS256, JWTAlgo.RS512

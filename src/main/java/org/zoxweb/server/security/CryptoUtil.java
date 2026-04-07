@@ -757,11 +757,16 @@ public class CryptoUtil {
     }
 
 
-    public static KeyPair generateKeyPair(String type, int keySizeInBits)
-            throws NoSuchAlgorithmException {
-        KeyPairGenerator kg = KeyPairGenerator.getInstance(type);
-        kg.initialize(keySizeInBits);//, (SecureRandom)defaultSecureRandom());
-        return kg.generateKeyPair();
+//    public static KeyPair generateKeyPair(String type, int keySizeInBits)
+//            throws NoSuchAlgorithmException {
+//        KeyPairGenerator kg = KeyPairGenerator.getInstance(type);
+//        kg.initialize(keySizeInBits);//, (SecureRandom)defaultSecureRandom());
+//        return kg.generateKeyPair();
+//    }
+
+    public static KeyPair generateKeyPair(CryptoConst.PKInfo keyInfo)
+            throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, NoSuchProviderException {
+        return generateKeyPair(keyInfo, null, null);
     }
 
 
@@ -778,19 +783,21 @@ public class CryptoUtil {
     public static KeyPair generateKeyPair(String keyCanonicalID, String provider, SecureRandom sr)
             throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, NoSuchProviderException {
 
-        CryptoConst.PKInfo pkInfo = CryptoConst.PKInfo.parse(keyCanonicalID);
+        return generateKeyPair(CryptoConst.PKInfo.parse(keyCanonicalID), provider, sr);
+    }
 
+    public static KeyPair generateKeyPair(CryptoConst.PKInfo pkInfo, String provider, SecureRandom sr)
+            throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, NoSuchProviderException {
+        SUS.checkIfNull("PKInfo null", pkInfo);
         if (sr == null)
             sr = SecUtil.defaultSecureRandom(); // get the default secure random
         KeyPairGenerator keyPairGenerator = provider != null ? KeyPairGenerator.getInstance(pkInfo.getType(), provider) : KeyPairGenerator.getInstance(pkInfo.getType());
-        RSAKeyGenParameterSpec h;
-
         if ("RSA".equals(pkInfo.getType())) {
             keyPairGenerator.initialize(Integer.parseInt(pkInfo.getName()), sr);
         } else if ("EC".equals(pkInfo.getType())) {
             keyPairGenerator.initialize(new ECGenParameterSpec(pkInfo.getName()), sr);
         } else {
-            throw new IllegalArgumentException("Unsupported key type: " + keyCanonicalID);
+            throw new IllegalArgumentException("Unsupported key type: " + pkInfo.toCanonicalID());
         }
 
         return keyPairGenerator.generateKeyPair();
@@ -862,7 +869,7 @@ public class CryptoUtil {
 
     public static String toString(Key key) {
         return SUS.toCanonicalID(':', key.getAlgorithm(), key.getEncoded().length, key.getFormat(),
-                        SUS.fastBytesToHex(key.getEncoded()));
+                SUS.fastBytesToHex(key.getEncoded()));
     }
 
     public static KeyStoreInfo generateKeyStoreInfo(String keyStoreName, String alias,

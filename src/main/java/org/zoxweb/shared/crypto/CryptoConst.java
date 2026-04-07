@@ -45,6 +45,7 @@ public final class CryptoConst {
         EC_256(CryptoAlgo.EC, "secp256r1"),
         EC_384(CryptoAlgo.EC, "secp384r1"),
         EC_521(CryptoAlgo.EC, "secp521r1"),
+        EC_256K(CryptoAlgo.EC, "secp256k1"),
         RSA_2048(CryptoAlgo.RSA, "2048"),
         RSA_3072(CryptoAlgo.RSA, "3072"),
         RSA_4096(CryptoAlgo.RSA, "4096"),
@@ -287,6 +288,9 @@ public final class CryptoConst {
         SHA256_RSA(CryptoAlgo.RSA, "SHA256withRSA"),
         SHA384_RSA(CryptoAlgo.RSA, "SHA384withRSA"),
         SHA512_RSA(CryptoAlgo.RSA, "SHA512withRSA"),
+        SHA256_RSA_MGF1(CryptoAlgo.RSA, "SHA256withRSAandMGF1"),
+        SHA384_RSA_MGF1(CryptoAlgo.RSA, "SHA384withRSAandMGF1"),
+        SHA512_RSA_MGF1(CryptoAlgo.RSA, "SHA512withRSAandMGF1"),
         SHA256_EC(CryptoAlgo.EC, "SHA256withECDSA"),
         SHA384_EC(CryptoAlgo.EC, "SHA384withECDSA"),
         SHA512_EC(CryptoAlgo.EC, "SHA512withECDSA"),
@@ -449,22 +453,27 @@ public final class CryptoConst {
         RS256(SignatureAlgo.SHA256_RSA, null),
         RS384(SignatureAlgo.SHA384_RSA, null),
         RS512(SignatureAlgo.SHA512_RSA, null),
-        ES256(SignatureAlgo.SHA256_EC, "secp256r1", "P-256"),
-        ES384(SignatureAlgo.SHA384_EC, "secp256r1", "P-256"),
-        ES512(SignatureAlgo.SHA512_EC, "secp521r1", "P-521"),
+        PS256(SignatureAlgo.SHA256_RSA_MGF1, null),
+        PS384(SignatureAlgo.SHA384_RSA_MGF1, null),
+        PS512(SignatureAlgo.SHA512_RSA_MGF1, null),
+        ES256(SignatureAlgo.SHA256_EC, "P-256"),
+        ES384(SignatureAlgo.SHA384_EC,  "P-384"),
+        ES512(SignatureAlgo.SHA512_EC,  "P-521"),
+        ES256K(SignatureAlgo.SHA256_EC, null),
+
         ;
 
         private final SignatureAlgo signatureAlgo;
-        private final String paramSpec;
+        //private final String paramSpec;
         private final String altName;
 
-        JWTAlgo(SignatureAlgo signatureAlgo, String paramSpec) {
-            this(signatureAlgo, paramSpec, null);
-        }
+        //JWTAlgo(SignatureAlgo signatureAlgo, String paramSpec) {
+          //  this(signatureAlgo, paramSpec, null);
+        //}
 
-        JWTAlgo(SignatureAlgo signatureAlgo, String paramSpec, String altName) {
+        JWTAlgo(SignatureAlgo signatureAlgo, String altName) {
             this.signatureAlgo = signatureAlgo;
-            this.paramSpec = paramSpec;
+            //this.paramSpec = paramSpec;
             this.altName = altName;
         }
 
@@ -481,16 +490,16 @@ public final class CryptoConst {
             return altName;
         }
 
-        public String getParamSpec() {
-            return paramSpec;
-        }
+//        public String getParamSpec() {
+//            return paramSpec;
+//        }
 
 
         public static JWTAlgo lookup(String algo) {
             JWTAlgo ret = SharedUtil.lookupEnum(algo, JWTAlgo.values());
             if (ret == null && algo != null) {
                 for (JWTAlgo jwta : JWTAlgo.values()) {
-                    if (algo.equalsIgnoreCase(jwta.getParamSpec()) || algo.equalsIgnoreCase(jwta.getAltName())) {
+                    if (jwta.getAltName() != null && algo.equalsIgnoreCase(jwta.getAltName())) {
                         ret = jwta;
                         break;
                     }

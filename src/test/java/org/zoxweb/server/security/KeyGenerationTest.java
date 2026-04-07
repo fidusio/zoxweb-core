@@ -32,9 +32,9 @@ public class KeyGenerationTest {
         EncryptedData ed = CryptoUtil
             .encryptData(new EncapsulatedKey(), SharedStringUtil.getBytes("password"), null, 1);
         String json = GSONUtil.toJSON(ed, false, false, false, Base64Type.URL);
-        KeyPair aliceKey = CryptoUtil.generateKeyPair("RSA", 2048);
+        KeyPair aliceKey = CryptoUtil.generateKeyPair(CryptoConst.PKInfo.RSA_2048);//"RSA", 2048);
         long ts = System.nanoTime();
-        KeyPair bobKey = CryptoUtil.generateKeyPair("RSA", 2048);
+        KeyPair bobKey = CryptoUtil.generateKeyPair(CryptoConst.PKInfo.RSA_2048);//"RSA", 2048);
         ts = System.nanoTime() - ts;
         System.out.println("" + bobKey.toString() + " it took " + TimeInMillis.nanosToString(ts));
         System.out.println("json:" + json);
@@ -164,7 +164,7 @@ public class KeyGenerationTest {
     }
 
     try {
-      KeyPair aliceKey = CryptoUtil.generateKeyPair("RSA", 2048);
+      KeyPair aliceKey = CryptoUtil.generateKeyPair(CryptoConst.PKInfo.RSA_2048);//"RSA", 2048);
       PublicKey alicePubK = aliceKey.getPublic();
       PrivateKey alicePriK = aliceKey.getPrivate();
 

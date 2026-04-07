@@ -1,6 +1,7 @@
 package org.zoxweb.server.security;
 
 import org.zoxweb.server.util.GSONUtil;
+import org.zoxweb.shared.crypto.CryptoConst;
 import org.zoxweb.shared.crypto.CryptoConst.SignatureAlgo;
 import org.zoxweb.shared.security.JWT;
 import org.zoxweb.shared.util.*;
@@ -50,7 +51,7 @@ public class CertificatesTest {
 
         try {
 
-            KeyPair kp = CryptoUtil.generateKeyPair("EC", 256);
+            KeyPair kp = CryptoUtil.generateKeyPair(CryptoConst.PKInfo.EC_256);//"EC", 256);
             System.out.println(
                     SUS.toCanonicalID(',', kp.getPublic().getAlgorithm(), kp.getPublic().getFormat(),
                             SharedBase64.encodeAsString(Base64Type.URL, kp.getPublic().getEncoded())));
@@ -62,7 +63,7 @@ public class CertificatesTest {
             System.out.println(
                     "EC:" + pubKeyEC.equals(kp.getPublic()) + ", " + priKeyEC.equals(kp.getPrivate()));
 
-            KeyPair aliceKey = CryptoUtil.generateKeyPair("RSA", 2048);
+            KeyPair aliceKey = CryptoUtil.generateKeyPair(CryptoConst.PKInfo.RSA_2048);//"RSA", 2048);
             PublicKey alicePubK = aliceKey.getPublic();
             PrivateKey alicePriK = aliceKey.getPrivate();
             System.out.println(SUS.toCanonicalID(',', aliceKey.getPublic().getAlgorithm(), aliceKey.getPublic().getFormat(),

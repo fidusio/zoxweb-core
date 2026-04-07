@@ -58,11 +58,11 @@ public class CryptoPerf {
                     break;
                 case "ec":
                 case "rsa":
-                    if (verify) {
-                        set.add(CryptoUtil.generateKeyPair(keyName, keySizeInBits));
-                    } else
-                        assert CryptoUtil.generateKeyPair(keyName, keySizeInBits) != null;
-                    break;
+//                    if (verify) {
+//                        set.add(CryptoUtil.generateKeyPair(keyName, keySizeInBits));
+//                    } else
+//                        assert CryptoUtil.generateKeyPair(keyName, keySizeInBits) != null;
+//                    break;
                 default:
                     throw new IllegalArgumentException("Unsupported key type " + keyName);
             }
