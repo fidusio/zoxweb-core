@@ -47,6 +47,7 @@ public enum URIScheme
     /** WebSocket (port 80) */
     WS("ws", 80),
     SSH("ssh", 22),
+    MONGODB("mongodb", 27017)
 
     ;
 

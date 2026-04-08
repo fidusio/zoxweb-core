@@ -19,10 +19,10 @@ public final class URLInfo {
     public final String fragment;
 
     private URLInfo(URIScheme scheme, String username, String password,
-                   IPAddress ipAddress,
-                   String path, String query,
-                   Map<String, List<String>> params,
-                   String fragment) {
+                    IPAddress ipAddress,
+                    String path, String query,
+                    Map<String, List<String>> params,
+                    String fragment) {
         this.scheme = scheme;
         this.username = username;
         this.password = password;
@@ -112,12 +112,17 @@ public final class URLInfo {
 
         return sb.toString();
     }
-    public String toBasicURL()
-    {
-        return  scheme + "://" + ipAddress.getInetAddress() + ":" + ipAddress.getPort();
+
+    public String toBasicURL() {
+        return scheme + "://" + ipAddress.getInetAddress() + ":" + ipAddress.getPort();
     }
 
 
+    public String justPath() {
+        if (path.startsWith("/"))
+            return path.substring(1);
+        return path;
+    }
 
     public String toURI() { // request-target (origin-form)
         StringBuilder sb = new StringBuilder();
@@ -165,7 +170,6 @@ public final class URLInfo {
         }
         return q.toString();
     }
-
 
 
     public static URLInfo parse(String input) {
@@ -294,7 +298,6 @@ public final class URLInfo {
     }
 
 
-
     private static IPAddress parseHostPort(String hp) {
         if (hp == null || hp.isEmpty()) return new IPAddress("", -1, -1, null);
 
@@ -323,7 +326,6 @@ public final class URLInfo {
 
 
     /* ========================= */
-
 
 
     private static int firstIndexOfAny(String s, char... cs) {

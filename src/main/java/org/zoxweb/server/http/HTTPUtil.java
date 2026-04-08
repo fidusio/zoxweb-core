@@ -483,7 +483,7 @@ public class HTTPUtil {
                 query = query.substring(index + 1);
         }
 
-        String allParams[] = query.split("&");
+        String[] allParams = query.split("&");
         ArrayList<GetNameValue<String>> ret = new ArrayList<GetNameValue<String>>();
 
         for (String param : allParams) {
@@ -508,7 +508,7 @@ public class HTTPUtil {
                 query = query.substring(index + 1);
         }
 
-        String allParams[] = query.split("&");
+        String[] allParams = query.split("&");
 
         for (String param : allParams) {
             NVPair nvp = SharedUtil.toNVPair(param);
