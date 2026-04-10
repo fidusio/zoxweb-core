@@ -32,6 +32,7 @@ import java.util.*;
 public class ReflectionUtil {
 
     public static LogWrapper log = new LogWrapper(ReflectionUtil.class);
+    private static final String[] DEFAULT_SINGLETON_METHOD_NAMES = {"singleton", "onlyInstance"};
 
 
     public static class MethodAnnotations {
@@ -390,7 +391,7 @@ public class ReflectionUtil {
         Parameter[] parameters = m.getParameters();
         if (parameters.length != 0) {
             if (startIndex < 0 || startIndex > parameters.length) {
-                throw new IndexOutOfBoundsException(parameters.length + " startIndex " + parameters.length);
+                throw new IndexOutOfBoundsException(parameters.length + " startIndex " + startIndex);
             }
             for (int i = startIndex; i < parameters.length; i++) {
                 Class<?> toCheck = parameters[i].getType();
@@ -506,7 +507,7 @@ public class ReflectionUtil {
     }
 
 
-    public Method matchMethod(Class<?> clazz, String methodName, Class<?>... parameters) throws NoSuchMethodException {
+    public static Method matchMethod(Class<?> clazz, String methodName, Class<?>... parameters) throws NoSuchMethodException {
         return clazz.getMethod(methodName, parameters);
     }
 
@@ -568,29 +569,70 @@ public class ReflectionUtil {
 
     }
 
-
-    public static Object invokeMethod(boolean strict, Object source, Method method, Object... inputValues)
+    @SuppressWarnings("unchecked")
+    public static <T> T invokeMethod(boolean strict, Object source, Method method, Object... inputValues)
             throws InvocationTargetException, IllegalAccessException {
-        return method.invoke(source, arrangeMethodParameters(strict, method, inputValues));
+        return (T)method.invoke(source, arrangeMethodParameters(strict, method, inputValues));
     }
 
-    public static <T> T createBean(String className)
+    public static <T> T createBean(String className,final String... staticMethodNoParamNames)
             throws
             ClassNotFoundException,
-            NoSuchMethodException,
             IllegalAccessException,
             InvocationTargetException,
             InstantiationException {
-        return createBean(Class.forName(className));
+        return createBean(Class.forName(className), staticMethodNoParamNames);
     }
 
-    public static <T> T createBean(Class<?> clazz)
+    @SuppressWarnings("unchecked")
+    public static <T> T createBean(Class<?> clazz, final String... methodNoParamNames)
             throws
-            NoSuchMethodException,
             IllegalAccessException,
             InvocationTargetException,
             InstantiationException {
-        return (T) clazz.getDeclaredConstructor().newInstance();
+        try {
+            Constructor<?> defaultConstructor = clazz.getDeclaredConstructor();
+            if (defaultConstructor.getModifiers() == Modifier.PUBLIC)
+                return (T) defaultConstructor.newInstance();
+        } catch (NoSuchMethodException | IllegalAccessException e) {
+            // no default constructor — fall through to singleton lookup
+        }
+
+        // try a public static final field of the same type (common singleton pattern)
+        T ret = getValueFromField(clazz, clazz, JMod.PUBLIC, JMod.STATIC, JMod.FINAL);
+        if (ret != null)
+            return ret;
+
+        return getPublicStaticInstanceFromMethod(clazz, methodNoParamNames.length == 0 ? DEFAULT_SINGLETON_METHOD_NAMES : methodNoParamNames);
+
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> T getPublicStaticInstanceFromMethod(Class<?> clazz, final String... staticMethodNoParamNames) throws InstantiationException, InvocationTargetException, IllegalAccessException {
+        // try a public static singleton accessor method
+        Method objectInstance = null;
+        for (String name : staticMethodNoParamNames) {
+            try {
+                Method m = matchMethod(clazz, name);
+                int mods = m.getModifiers();
+                if (Modifier.isPublic(mods)
+                        && Modifier.isStatic(mods)
+                        && clazz.isAssignableFrom(m.getReturnType())) {
+                    objectInstance = m;
+                    break;
+                }
+            } catch (NoSuchMethodException ignore) {
+                // try next name
+            }
+        }
+        if (objectInstance == null)
+            throw new InstantiationException("Cannot find singleton instance " + clazz.getName());
+
+        T ret = (T) objectInstance.invoke(null);
+        if (ret == null)
+            throw new InstantiationException("Cannot find singleton instance " + clazz.getName());
+
+        return ret;
     }
 
 }
