@@ -47,6 +47,10 @@ public @interface EndPointProp {
      */
     String uris();
 
+    /**
+     * return filers class name it must implement HTTPHandler interface
+     */
+    String[] filters() default {};
 
     /**
      * List of HTTPMethod to be called GET=HTTPMethod.GET, POST=HTTPMethod.POST ...
