@@ -26,7 +26,7 @@ public class WSTest
 
 
     @Test
-    public void testSecWebSocketAccept() throws NoSuchAlgorithmException
+    public void testSecWebSocketAccept()
     {
         String webSecKey ="dGhlIHNhbXBsZSBub25jZQ==";
 

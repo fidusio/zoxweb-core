@@ -161,7 +161,7 @@ public class HTTPWSFrame
     }
 
     /**
-     * If is masked is true return byte[4] the masking key that need to be xored with the payload data
+     * If is masked is true return byte[4] the masking key that need to be xor-ed with the payload data
      *
      * @return byte[4] or null array
      */
@@ -171,11 +171,11 @@ public class HTTPWSFrame
         byte[] maskingKey = null;
         if (isMasked())
         {
-            int index = 0;
-            if (dataLength() < 126)
-                index = 2;
-            else
-                index = 4;
+            int index = dataLength() < 126 ? 2 : 4;
+//            if (dataLength() < 126)
+//                index = 2;
+//            else
+//                index = 4;
 
             maskingKey = new byte[4];
             for(int i = 0; i < maskingKey.length; i++)

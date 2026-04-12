@@ -106,47 +106,53 @@ public class OkHttpWebSocketTest {
 
     public static void main(String[] args) {
 
-        //OkHttpClient client = new OkHttpClient();
-        ParamUtil.ParamMap params = ParamUtil.parse("=", args);
-        //params.hide("password");
-        System.out.println(params);
-        String url = params.stringValue("url", false);
-        String username = params.stringValue("user", true);
-        String password = params.stringValue("password", true);
-        boolean binary = params.booleanValue("bin", true);
-        boolean sslCheck = params.booleanValue("ssl-check", true);
-        OkHttpClient client = OkHTTPCall.createOkHttpBuilder(null, true, null, HTTPMessageConfigInterface.DEFAULT_TIMEOUT_20_SECOND, sslCheck, 10, HTTPMessageConfigInterface.DEFAULT_TIMEOUT_20_SECOND).build();
+        try {
+            ParamUtil.ParamMap params = ParamUtil.parse("=", args);
+            params.hide("password");
+            System.out.println(params);
+            String url = params.stringValue("url", false);
+            String username = params.stringValue("user", true);
+            String password = params.stringValue("password", true);
+            boolean binary = params.booleanValue("bin", true);
+            boolean sslCheck = params.booleanValue("ssl-check", true);
+            OkHttpClient client = OkHTTPCall.createOkHttpBuilder(null, true, null, HTTPMessageConfigInterface.DEFAULT_TIMEOUT_20_SECOND, sslCheck, 10, HTTPMessageConfigInterface.DEFAULT_TIMEOUT_20_SECOND).build();
 
-        int repeat = params.intValue("repeat", 1000);
-        int clientNum = params.intValue("client-num", 1);
-
-
-        WebSocket[] wsArray = new WebSocket[clientNum];
-
-        for (int i = 0; i < clientNum; i++) {
-            wsArray[i] = creatWebSocket(client, url, username, password, repeat);
-        }
+            int repeat = params.intValue("repeat", 1000);
+            int clientNum = params.intValue("client-num", 1);
 
 
-        for (int i = 0; i < repeat; i++) {
-            String message = (i + 1) + " hello ";
-            //TaskUtil.defaultTaskScheduler().execute( ()->ws.send(message);
-            for (int j = 0; j < wsArray.length; j++) {
-                if (binary)
-                    wsArray[j].send(ByteString.encodeUtf8(message));
-                else
-                    wsArray[j].send(message);
+            WebSocket[] wsArray = new WebSocket[clientNum];
+
+            for (int i = 0; i < clientNum; i++) {
+                wsArray[i] = creatWebSocket(client, url, username, password, repeat);
             }
 
+
+            for (int i = 0; i < repeat; i++) {
+                String message = (i + 1) + " hello ";
+                //TaskUtil.defaultTaskScheduler().execute( ()->ws.send(message);
+                for (int j = 0; j < wsArray.length; j++) {
+                    if (binary)
+                        wsArray[j].send(ByteString.encodeUtf8(message));
+                    else
+                        wsArray[j].send(message);
+                }
+
+            }
+
+            TaskUtil.waitIfBusyThenClose(500, () -> (receiveCounter.get() >= wsArray.length * repeat));
+            //TaskUtil.waitIfBusy();
+            System.out.println("Done sending " + receiveCounter.get());
+            System.exit(0);
+
+            // The client will continue to run; you can shut it down when you're done:
+            //client.dispatcher().executorService().shutdown();
         }
-
-        TaskUtil.waitIfBusyThenClose(500, () -> (receiveCounter.get() >= wsArray.length * repeat));
-        //TaskUtil.waitIfBusy();
-        System.out.println("Done sending " + receiveCounter.get());
-        System.exit(0);
-
-        // The client will continue to run; you can shut it down when you're done:
-        //client.dispatcher().executorService().shutdown();
+        catch (Exception e) {
+            e.printStackTrace();
+            System.err.println("usage: url=https://domain.com/websocket [user=userName password=userPassword] [repeat=x] [bin=true] [client-num=y]");
+        }
     }
+
 }
 

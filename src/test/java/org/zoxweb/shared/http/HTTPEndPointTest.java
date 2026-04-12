@@ -4,22 +4,23 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.zoxweb.shared.util.SharedStringUtil;
 
+import java.io.IOException;
 import java.util.Arrays;
 
-public class HTTPEndPointTest
-{
+public class HTTPEndPointTest {
 
     static HTTPEndPoint hep;
 
     static HTTPEndPoint sysHep;
+
     @BeforeAll
-    public static  void setup()
-    {
+    public static void setup() {
         hep = new HTTPEndPoint();
         hep.setName("test");
         hep.setBeanClassName("org.zoxweb.shared.data.AddressDAO");
         hep.setHTTPMethods(HTTPMethod.GET, HTTPMethod.POST);
         hep.setPaths("/ping/{detailed}", "/info/{level}/{detailed}");
+
 
         sysHep = new HTTPEndPoint();
         sysHep.setName("system");
@@ -29,27 +30,39 @@ public class HTTPEndPointTest
     }
 
     @Test
-    public void pathSupport()
-    {
+    public void pathSupport() {
         String[] uris = {"/ping", "/ping/", "ping/", "ping", "/pings", "/ping/detailed", "/info/1/detailed", "/info", "/info/1"};
 
-        for (String uri: uris)
-        {
+        for (String uri : uris) {
             uri = SharedStringUtil.removeCharFromEnd('/', uri);
-            System.out.println(uri + ":" + hep.isPathSupported(uri)  +", ParseString:" + Arrays.toString(SharedStringUtil.parseString(uri, "/", true)));
+            System.out.println(uri + ":" + hep.isPathSupported(uri) + ", ParseString:" + Arrays.toString(SharedStringUtil.parseString(uri, "/", true)));
         }
     }
 
     @Test
-    public void pathSysSupport()
-    {
-        String[] uris = {"/system/reboot", "/system/shutdown", "/system/reboot/", "system/reboot/","/system//////////",  "system/reboot/now" };
+    public void pathSysSupport() {
+        String[] uris = {"/system/reboot", "/system/shutdown", "/system/reboot/", "system/reboot/", "/system//////////", "system/reboot/now"};
 
-        for (String uri: uris)
-        {
+        for (String uri : uris) {
             uri = SharedStringUtil.removeCharFromEnd('/', uri);
-            System.out.println(uri + ":" + sysHep.isPathSupported(uri)  +", ParseString:" + Arrays.toString(SharedStringUtil.parseString(uri, "/", true)));
+            System.out.println(uri + ":" + sysHep.isPathSupported(uri) + ", ParseString:" + Arrays.toString(SharedStringUtil.parseString(uri, "/", true)));
 
         }
+    }
+
+
+    @Test
+    public void preFilterTest() throws IOException {
+        HTTPEndPoint localHep = new HTTPEndPoint();
+        localHep.setName("test");
+        localHep.setBeanClassName("org.zoxweb.shared.data.AddressDAO");
+        localHep.setHTTPMethods(HTTPMethod.GET, HTTPMethod.POST);
+        localHep.setPaths("/ping/{detailed}", "/info/{level}/{detailed}");
+
+        localHep.setPrefilter((S) -> {
+            System.out.println(S);
+            return true;
+        });
+        System.out.println(localHep.getPrefilter().handle("hello"));
     }
 }

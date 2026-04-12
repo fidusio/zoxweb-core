@@ -39,7 +39,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.*;
-import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
@@ -62,7 +61,7 @@ public class HTTPUtil {
     private HTTPUtil() {
     }
 
-    public static String toWebSocketAcceptValue(String secWebSocketKey) throws NoSuchAlgorithmException {
+    public static String toWebSocketAcceptValue(String secWebSocketKey) {
 
         byte[] secWebSocketAcceptBytes = HashUtil.getMessageDigestSilent("SHA-1").digest(SharedStringUtil.getBytes(secWebSocketKey + HTTPWSProto.WEB_SOCKET_UUID));
 
@@ -124,8 +123,8 @@ public class HTTPUtil {
     }
 
 
-    public static HTTPMessageConfigInterface buildErrorResponse(HTTPMessageConfigInterface hmci, Object content, HTTPStatusCode hsc, GetNameValue<?>... headers) {
-        hmci = buildResponse(hmci, hsc, headers);
+    public static HTTPMessageConfigInterface buildErrorResponse(HTTPMessageConfigInterface hmci, Object content, HTTPStatusCode statusCode, GetNameValue<?>... headers) {
+        hmci = buildResponse(hmci, statusCode, headers);
 
         if (content != null) {
             if (content instanceof String)
@@ -145,11 +144,11 @@ public class HTTPUtil {
     }
 
 
-    public static HTTPMessageConfigInterface buildErrorResponse(String msg, HTTPStatusCode hsc, GetNameValue<?>... headers) {
-        SimpleMessage sem = new SimpleMessage(msg, hsc.CODE, hsc.REASON);
+    public static HTTPMessageConfigInterface buildErrorResponse(String msg, HTTPStatusCode statusCode, GetNameValue<?>... headers) {
+        SimpleMessage sem = new SimpleMessage(msg, statusCode.CODE, statusCode.REASON);
         sem.setCreationTime(System.currentTimeMillis());
 
-        return buildErrorResponse(null, sem, hsc, headers);
+        return buildErrorResponse(null, sem, statusCode, headers);
     }
 
 

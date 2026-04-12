@@ -200,7 +200,7 @@ public enum HTTPStatusCode
     /**
      * 422
      */
-    UNPROCESSABLE_ENTITY(422, " Unprocessable Entity"),
+    UNPROCESSABLE_ENTITY(422, "Unprocessable Entity"),
     /**
      * 423
      */

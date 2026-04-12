@@ -38,7 +38,7 @@ extends SecurityProfile
         BEAN_CLASS_NAME(NVConfigManager.createNVConfig("bean", "Bean class name", "Bean", false, true, String.class)),
         PATHS(NVConfigManager.createNVConfig("paths", "Paths", "Paths", false, true, NVStringList.class)),
         HTTP_METHODS(NVConfigManager.createNVConfig("methods", "HTTP Methods", "Methods", false, true, HTTPMethod[].class)),
-        //PROTOCOLS(NVConfigManager.createNVConfig("protocols", "Http, Https...", "Protocols", false, true, URIScheme[].class)),
+        PRE_FILTER(NVConfigManager.createNVConfig("pre_filter", "http filter", "PreFilter", false, true, NamedValue.class)),
         INPUT_CONTENT_TYPE(NVConfigManager.createNVConfig("input_content_type", "InputContentType", "IContentType", false, true, String.class)),
         OUTPUT_CONTENT_TYPE(NVConfigManager.createNVConfig("output_content_type", "OutputContentType", "OContentType", false, true, String.class)),
         ;
@@ -120,6 +120,17 @@ extends SecurityProfile
 
 
 
+
+    public void setPrefilter(HTTPHandler<?> prefilter)
+    {
+        NamedValue<Object> nvPF = lookup(Param.PRE_FILTER);
+        nvPF.setValue(prefilter);
+    }
+
+    public <V> HTTPHandler<V>  getPrefilter()
+    {
+        return lookupValue(Param.PRE_FILTER);
+    }
 
     public String[] getPaths()
     {
