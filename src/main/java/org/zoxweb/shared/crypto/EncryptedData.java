@@ -166,14 +166,15 @@ public class EncryptedData
             throw new NullPointerException("empty dao");
         }
 
-        String tokens[] = encryptedDAOCanonicalFormat.split(":");
+        String[] tokens = encryptedDAOCanonicalFormat.split(":");
+        System.out.println("Token length: " + tokens.length);
         EncryptedData ret = new EncryptedData();
         int index = 0;
         switch (tokens.length) {
-            case 11:
+            case 10:
                 ret.setName(tokens[index++]);
                 ret.setDescription(tokens[index++]);
-                index++;// skip supbject prop
+//                index++;// skip subject prop
                 index++;// skip algo prop
                 ret.setIV(SharedBase64.decode(tokens[index++].getBytes()));
                 ret.setDataLength(Long.parseLong(tokens[index++]));

@@ -38,6 +38,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public class EncryptedContentTest {
 
     private static AtomicLong totalTime = new AtomicLong();
+    private static final String DEFAULT_PASSWORD = "P!ssWord0";
 
     public static void jckTest()
             throws UnrecoverableKeyException, KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
@@ -57,19 +58,19 @@ public class EncryptedContentTest {
                     new FileInputStream("/home/fidus-store/ssl/fidus-store-test.jck"),
                     CryptoConst.KEY_STORE_TYPE,
                     "changeit", "fidus-store-mk", "changeit",
-                    new FileOutputStream(fNewStore), "password", "fidus-store-mk", "password");
+                    new FileOutputStream(fNewStore), DEFAULT_PASSWORD, "fidus-store-mk", DEFAULT_PASSWORD);
 
             k = (SecretKeySpec) CryptoUtil
-                    .getKeyFromKeyStore(new FileInputStream(fNewStore), CryptoConst.KEY_STORE_TYPE, "password",
-                            "fidus-store-mk", "password");
+                    .getKeyFromKeyStore(new FileInputStream(fNewStore), CryptoConst.KEY_STORE_TYPE, DEFAULT_PASSWORD,
+                            "fidus-store-mk", DEFAULT_PASSWORD);
             System.out.println(k.getAlgorithm() + ":" + k.getFormat() + ":" + SharedStringUtil
                     .bytesToHex(k.getEncoded()));
 
             KeyStore ks = CryptoUtil
                     .loadKeyStore(new FileInputStream(fNewStore), CryptoConst.KEY_STORE_TYPE,
-                            "password".toCharArray());
+                            DEFAULT_PASSWORD.toCharArray());
 
-            char[] aliasPassword = "password".toCharArray();
+            char[] aliasPassword = DEFAULT_PASSWORD.toCharArray();
 
             for (int i = 0; i < 10; i++) {
                 long tempTS = System.nanoTime();
@@ -122,17 +123,17 @@ public class EncryptedContentTest {
                 CIPassword passwordDAO = null;
                 for (int i = 0; i < 10; i++) {
                     long ts = System.nanoTime();
-                    passwordDAO = HashUtil.toPassword("sha-256", 0, 8196, "password");
+                    passwordDAO = HashUtil.toPassword("sha-256", 0, 8196, DEFAULT_PASSWORD);
                     ts = System.nanoTime() - ts;
                     System.out.println("it took " + ts + " nanos for interation " + i);
                 }
 
                 //System.out.println( passwordDAO.toCanonicalID());
-                System.out.println("passwordDAO:" + SecUtil.isPasswordValid(passwordDAO, "password"));
+                System.out.println("passwordDAO:" + SecUtil.isPasswordValid(passwordDAO, DEFAULT_PASSWORD));
                 CIPassword passwordFromCanonicalID = SecUtil.findCredentialHasherByCanID(passwordDAO.getCanonicalID())
                         .fromCanonicalID(passwordDAO.toCanonicalID());
                 System.out.println("passwordFromCanonicalID:" + SecUtil
-                        .isPasswordValid(passwordFromCanonicalID, "password"));
+                        .isPasswordValid(passwordFromCanonicalID, DEFAULT_PASSWORD));
                 System.out.println(passwordFromCanonicalID.toCanonicalID());
                 String json = GSONUtil.toJSON(passwordDAO, true, false, false);
                 System.out.println(json);
@@ -142,23 +143,23 @@ public class EncryptedContentTest {
                 System.out.println(passwordDAO.toCanonicalID());
                 System.out.println(fromJSON.toCanonicalID());
 
-                System.out.println("password is equal " + SecUtil.isPasswordValid(fromJSON, "password"));
+                System.out.println("password is equal " + SecUtil.isPasswordValid(fromJSON, DEFAULT_PASSWORD));
 
-                EncapsulatedKey ekd = CryptoUtil.createEncryptedKey("password");
+                EncapsulatedKey ekd = CryptoUtil.createEncryptedKey(DEFAULT_PASSWORD);
                 String ekdJSON = GSONUtil.toJSON(ekd, true, false, false);
                 System.out.println(ekdJSON);
-                byte[] key = CryptoUtil.decryptEncryptedData(ekd, "password");
+                byte[] key = CryptoUtil.decryptEncryptedData(ekd, DEFAULT_PASSWORD);
                 System.out.println(key.length + " " + SharedStringUtil.bytesToHex(key));
                 System.out.println(key.length + " " + SharedStringUtil.bytesToHex(ekd.getEncryptedData()));
 
                 EncapsulatedKey ekdFromJSON = GSONUtil.fromJSON(ekdJSON, EncapsulatedKey.class);
 
-                key = CryptoUtil.decryptEncryptedData(ekdFromJSON, "password");
+                key = CryptoUtil.decryptEncryptedData(ekdFromJSON, DEFAULT_PASSWORD);
                 System.out.println("from json       key:" + SharedStringUtil.bytesToHex(key));
                 System.out.println(
                         "from json encrypted:" + SharedStringUtil.bytesToHex(ekdFromJSON.getEncryptedData()));
 
-                ekd = CryptoUtil.rekeyEncryptedKey(ekd, "password", "newpassword");
+                ekd = CryptoUtil.rekeyEncryptedKey(ekd, DEFAULT_PASSWORD, "newpassword");
                 key = CryptoUtil.decryptEncryptedData(ekd, "newpassword");
 
                 System.out.println("rekeyed         key:" + SharedStringUtil.bytesToHex(key));
@@ -183,21 +184,21 @@ public class EncryptedContentTest {
                             "generateRandomHashedBytes" + "," + SharedStringUtil.bytesToHex(randomBytes));
 
                     ts = System.nanoTime();
-                    EncapsulatedKey ekdTest = CryptoUtil.createEncryptedKey("password");
+                    EncapsulatedKey ekdTest = CryptoUtil.createEncryptedKey(DEFAULT_PASSWORD);
                     ts = System.nanoTime() - ts;
                     System.out.print("[" + ts + " ns]");
                     System.out.println(ekdTest.getName() + "\t,Encrypted data " + SharedStringUtil
                             .bytesToHex(ekdTest.getEncryptedData()));
 
                     ts = System.nanoTime();
-                    byte[] drecryptedKey = CryptoUtil.decryptEncryptedData(ekdTest, ("password"));
+                    byte[] drecryptedKey = CryptoUtil.decryptEncryptedData(ekdTest, (DEFAULT_PASSWORD));
                     ts = System.nanoTime() - ts;
                     System.out.print("[" + ts + " ns]");
                     System.out.println(ekdTest.getName() + "\t,Decrypted data " + SharedStringUtil
                             .bytesToHex(drecryptedKey));
                 }
 
-                //key = CryptoUtil.decryptKey(ekd, "password");
+                //key = CryptoUtil.decryptKey(ekd, DEFAULT_PASSWORD);
                 // C8FC42534A6D00F82DEC5CE76FBD9C57E9DB38C6A486D42AD722179B6F86C953
                 // C8FC42534A6D00F82DEC5CE76FBD9C57E9DB38C6A486D42AD722179B6F86C953
 
@@ -238,13 +239,13 @@ public class EncryptedContentTest {
 
             for (HashType mdt : HashType.values()) {
                 try {
-                    CIPassword pDAO = HashUtil.toPassword(mdt.getName(), 0, -1, "password");
+                    CIPassword pDAO = HashUtil.toPassword(mdt.getName(), 0, -1, DEFAULT_PASSWORD);
                     System.out.println(SecUtil
-                            .isPasswordValid(SecUtil.fromCanonicalID(pDAO.toCanonicalID()), "password")
+                            .isPasswordValid(SecUtil.fromCanonicalID(pDAO.toCanonicalID()), DEFAULT_PASSWORD)
                             + "::::" + pDAO.toCanonicalID());
                 } catch (NullPointerException | IllegalArgumentException
                          | NoSuchAlgorithmException e) {
-                    e.printStackTrace();
+                    //e.printStackTrace();
                 }
             }
 
@@ -267,6 +268,7 @@ public class EncryptedContentTest {
 
                 System.out.println(GSONUtil.toJSON(ed, true, true, true));
                 ed = CryptoUtil.encryptData(new EncryptedData(), sk.getEncoded(), data);
+                System.out.println(ed.toCanonicalID());
                 EncryptedData fromCanID = EncryptedData.fromCanonicalID(ed.toCanonicalID());
                 System.out.println(new String(CryptoUtil.decryptEncryptedData(fromCanID, sk.getEncoded())));
             } catch (Exception e) {

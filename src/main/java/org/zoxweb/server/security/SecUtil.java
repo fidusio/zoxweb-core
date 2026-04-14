@@ -537,6 +537,9 @@ public final class SecUtil {
         return ret;
     }
 
+    public static String hexRandomBytes(int sizeInBytes) {
+        return SUS.fastBytesToHex(SecUtil.randomBytes(null, sizeInBytes));
+    }
 
     public static String hexRandomBytes(SecureRandom sr, int sizeInBytes) {
         return SUS.fastBytesToHex(SecUtil.randomBytes(sr, sizeInBytes));

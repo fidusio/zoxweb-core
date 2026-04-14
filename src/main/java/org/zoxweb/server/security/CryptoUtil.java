@@ -19,8 +19,8 @@ import org.zoxweb.server.http.HTTPUtil;
 import org.zoxweb.server.io.UByteArrayOutputStream;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.crypto.CryptoConst;
-import org.zoxweb.shared.crypto.EncryptedData;
 import org.zoxweb.shared.crypto.EncapsulatedKey;
+import org.zoxweb.shared.crypto.EncryptedData;
 import org.zoxweb.shared.filters.BytesValueFilter;
 import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.net.IPAddress;
@@ -44,6 +44,8 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.security.spec.*;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -52,6 +54,7 @@ public class CryptoUtil {
 
     private static final Lock LOCK = new ReentrantLock();
     //private static final Logger  log = Logger.getLogger(CryptoUtil.class.getName());
+    private static final Map cacheMap =  new HashMap();
 
 
     public static final int MIN_KEY_BYTES = 6;
@@ -746,10 +749,22 @@ public class CryptoUtil {
 
     public static SecretKey generateKey(String type, int keySizeInBits)
             throws NoSuchAlgorithmException {
-        KeyGenerator kg = KeyGenerator.getInstance(type);
-        //kg.init(keySizeInBits, (SecureRandom)defaultSecureRandom());
-        kg.init(keySizeInBits);
-        return kg.generateKey();
+        String key = type + "-" + keySizeInBits;
+        LOCK.lock();
+        try {
+            KeyGenerator kg = (KeyGenerator) cacheMap.get(key);
+            if (kg == null) {
+                kg = KeyGenerator.getInstance(type);
+                //kg.init(keySizeInBits, (SecureRandom)defaultSecureRandom());
+                kg.init(keySizeInBits);
+                cacheMap.put(key, kg);
+            }
+
+            return kg.generateKey();
+        }
+        finally {
+            LOCK.unlock();
+        }
     }
 
     public static SecretKey toSecretKey(byte[] key, String algoName) {
