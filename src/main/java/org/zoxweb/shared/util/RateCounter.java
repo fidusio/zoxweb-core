@@ -194,11 +194,13 @@ public class RateCounter
     @Override
     public String toString() {
         return "{" +
-                "name=\"" + getName() + "\"" +
-                (getDescription() != null ? ", description=\"" + getDescription() + "\"" : "") +
-                ", counts=" + getCounts() +
-                ", deltas=" + getDeltas() +
-                ", average=" + average() +
+                (getName() != null ? "name: \"" + getName() + "\", " : "" )+
+                (getDescription() != null ? "description: \"" + getDescription() + "\", " : "") +
+                "counts: " + getCounts() +
+                ", deltas-in-millis: " + getDeltas() +
+                ", average-in-millis: " + average() +
+                ", rate-per-sec: " + rate(Const.TimeInMillis.SECOND.MILLIS) +
+                (getDeltas() > 0 ? ", duration: " + '\"' +Const.TimeInMillis.toString(getDeltas()) +'\"': "") +
                 '}';
     }
 }

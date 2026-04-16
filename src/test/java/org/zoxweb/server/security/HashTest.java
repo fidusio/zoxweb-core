@@ -16,7 +16,6 @@
 package org.zoxweb.server.security;
 
 import org.junit.jupiter.api.Test;
-import org.zoxweb.shared.util.Const;
 import org.zoxweb.shared.util.RateCounter;
 
 import java.security.MessageDigest;
@@ -64,15 +63,17 @@ public class HashTest {
     byte[][] result = new byte[count][];
 
     MessageDigest md = MessageDigest.getInstance("sha256");
-
-
+    //warmup
+    md.digest(SecUtil.randomBytes(32));
+    md.digest(SecUtil.randomBytes(32));
+    md.digest(SecUtil.randomBytes(32));
+    // warmup end
     rateCounter.start();
     for (int i = 0; i < count; i++) {
       //byte[] array = SecUtil.randomBytes(32);
       result[i] = md.digest(SecUtil.randomBytes(32));
     }
     rateCounter.stop(count);
-    System.out.println("it took: " + Const.TimeInMillis.toString(rateCounter.getDeltas()) + " " + rateCounter.average());
-    System.out.printf("rate:  (%.0f hashes/sec)%n" , rateCounter.rate(1000));
+    System.out.println("it took: " + rateCounter);
   }
 }
