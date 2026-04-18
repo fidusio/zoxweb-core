@@ -192,6 +192,7 @@ public final class HTTPCallTool {
 
             log.getLogger().info("ENDPOINT OkHTTPCall stat: " + Const.TimeInMillis.toString(rc.lastDeltaInMillis()) + " to send: " + rc.getCounts() + " failed: " + failCounter +
                     " rate: " + rc.rate(Const.TimeInMillis.SECOND.MILLIS) + " per/second" + " average call duration: " + rc.average() + " millis");
+            log.getLogger().info("" + rc);
 
             rc.reset().start();
             successCounter.set(0);
@@ -230,6 +231,7 @@ public final class HTTPCallTool {
 
             log.getLogger().info("RAW OkHTTPCall stat: " + Const.TimeInMillis.toString(rc.lastDeltaInMillis()) + " to send: " + rc.getCounts() + " failed: " + failCounter +
                     " rate: " + rc.rate(Const.TimeInMillis.SECOND.MILLIS) + " per/second" + " average call duration: " + rc.average() + " millis");
+            log.getLogger().info("" + rc);
 
 
 //            log.getLogger().info(GSONUtil.toJSONDefault(TaskUtil.info(), true));

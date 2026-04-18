@@ -20,6 +20,7 @@ import org.zoxweb.server.io.UByteArrayOutputStream;
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.shared.io.CloseableType;
 import org.zoxweb.shared.util.SUS;
+import org.zoxweb.shared.util.UsageTracker;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -68,7 +69,7 @@ public abstract class BaseChannelOutputStream extends OutputStream
     /** Flag indicating whether this stream has been closed */
     protected final AtomicBoolean isClosed = new AtomicBoolean(false);
     /** Protocol handler for connection lifecycle management */
-    protected final org.zoxweb.shared.util.UsageTracker usageTracker;
+    protected final UsageTracker usageTracker;
     /** Remote client address associated with this channel */
     protected final InetSocketAddress clientAddress;
 
@@ -143,15 +144,12 @@ public abstract class BaseChannelOutputStream extends OutputStream
      */
     @Override
     public synchronized void write(byte[] b, int off, int len) throws IOException {
-        if (off > b.length || len > (b.length - off) || off < 0 || len < 0)
+        if (off < 0 || len < 0 || off > b.length - len)
             throw new IndexOutOfBoundsException();
-        // len == 0 condition implicitly handled by loop bounds
-        while (off < len) {
-            int tempLen = len - off;
-            if (tempLen > (outAppData.capacity() - outAppData.position()))
-                tempLen = outAppData.capacity() - outAppData.position();
 
-
+        int end = off + len;
+        while (off < end) {
+            int tempLen = Math.min(end - off, outAppData.capacity() - outAppData.position());
             outAppData.put(b, off, tempLen);
             write(outAppData);
             off += tempLen;
@@ -159,17 +157,18 @@ public abstract class BaseChannelOutputStream extends OutputStream
     }
 
 
+
     /**
      * Returns the remote client address associated with this channel.
      *
      * @return the remote socket address of the connected client
      */
-    public InetSocketAddress getClientAddress(){
+    public InetSocketAddress getClientAddress() {
         return clientAddress;
     }
 
     /**
-     * Writes the contents of a {@link ByteBuffer} to the underlying channel.
+     * Sends the contents of a {@link ByteBuffer} to the underlying channel.
      * <p>
      * Subclasses must implement this method to handle the actual writing mechanism,
      * which may involve encryption (SSL/TLS) or direct channel writes.
@@ -182,6 +181,8 @@ public abstract class BaseChannelOutputStream extends OutputStream
      */
     public abstract int write(ByteBuffer byteBuffer) throws IOException;
 
+
+
     /**
      * Checks whether this output stream has been closed.
      *
@@ -190,5 +191,7 @@ public abstract class BaseChannelOutputStream extends OutputStream
     public boolean isClosed() {
         return isClosed.get() || !dataChannel.isOpen();
     }
+
+
 
 }

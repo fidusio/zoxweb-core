@@ -4,10 +4,10 @@ import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.server.net.BaseChannelOutputStream;
 import org.zoxweb.server.net.ProtocolHandler;
 import org.zoxweb.server.net.ssl.SSLSessionConfig;
+import org.zoxweb.server.net.ssl.SSLUtil;
 import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.util.SUS;
 
-import javax.net.ssl.SSLEngineResult;
 import javax.net.ssl.SSLException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -63,7 +63,7 @@ public class CommonChannelOutputStream
      */
     @Override
     public synchronized int write(ByteBuffer byteBuffer) throws IOException {
-        return isSSLMode() ? sslWrite(byteBuffer) : plainWrite(byteBuffer);
+        return isSSLMode() ?  SSLUtil.sslChunkedWrite(sslConfig, dataChannel, byteBuffer, usageTracker, this) : plainWrite(byteBuffer);
     }
 
 
@@ -104,39 +104,40 @@ public class CommonChannelOutputStream
      * @throws IOException if an I/O error occurs during encryption or writing
      * @throws SSLException if the SSL handshake is not complete and data cannot be sent
      */
-    private synchronized int sslWrite(ByteBuffer bb) throws IOException {
-        int written = -1;
-        if (sslConfig == null) {
-            throw new SSLException("SSL engine not configured");
-        }
-
-        if (sslConfig.getHandshakeStatus() == SSLEngineResult.HandshakeStatus.NOT_HANDSHAKING) {
-            SSLEngineResult result = sslConfig.smartWrap(bb, sslConfig.outSSLNetData); // at handshake stage, data in appOut won't be
-            if (log.isEnabled())
-                log.getLogger().info("AFTER-NEED_WRAP-PROCESSING: " + result);
-            switch (result.getStatus()) {
-                case BUFFER_UNDERFLOW:
-                case BUFFER_OVERFLOW:
-                    throw new IOException(result.getStatus() + " invalid state context buffer size " +
-                            SUS.toCanonicalID(',', sslConfig.outSSLNetData.capacity(), sslConfig.outSSLNetData.limit(), sslConfig.outSSLNetData.position()));
-                case OK:
-                    try {
-                        written = ByteBufferUtil.smartWrite(null, dataChannel, sslConfig.outSSLNetData, true);
-                        if (usageTracker != null) usageTracker.updateUsage();
-                    } catch (IOException e) {
-                        SharedIOUtil.close(this);
-                        throw e;
-                    }
-                    break;
-                case CLOSED:
-                    throw new IOException("Closed");
-            }
-        } else {
-            throw new SSLException("handshaking state can't send data yet");
-        }
-
-        return written;
-    }
+//    private synchronized int sslWrite(ByteBuffer bb) throws IOException {
+//
+//        int written = -1;
+//        if (sslConfig == null) {
+//            throw new SSLException("SSL engine not configured");
+//        }
+//
+//        if (sslConfig.getHandshakeStatus() == SSLEngineResult.HandshakeStatus.NOT_HANDSHAKING) {
+//            SSLEngineResult result = sslConfig.smartWrap(bb, sslConfig.outSSLNetData); // at handshake stage, data in appOut won't be
+//            if (log.isEnabled())
+//                log.getLogger().info("AFTER-NEED_WRAP-PROCESSING: " + result);
+//            switch (result.getStatus()) {
+//                case BUFFER_UNDERFLOW:
+//                case BUFFER_OVERFLOW:
+//                    throw new IOException(result.getStatus() + " invalid state context buffer size " +
+//                            SUS.toCanonicalID(',', sslConfig.outSSLNetData.capacity(), sslConfig.outSSLNetData.limit(), sslConfig.outSSLNetData.position()));
+//                case OK:
+//                    try {
+//                        written = ByteBufferUtil.smartWrite(null, dataChannel, sslConfig.outSSLNetData, true);
+//                        if (usageTracker != null) usageTracker.updateUsage();
+//                    } catch (IOException e) {
+//                        SharedIOUtil.close(this);
+//                        throw e;
+//                    }
+//                    break;
+//                case CLOSED:
+//                    throw new IOException("Closed");
+//            }
+//        } else {
+//            throw new SSLException("handshaking state can't send data yet");
+//        }
+//
+//        return written;
+//    }
 
     /**
      * Closes this SSL output stream and releases associated resources.

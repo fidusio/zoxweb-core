@@ -59,7 +59,7 @@ public class HashTest {
   public void testHash256_1M() throws NoSuchAlgorithmException {
     RateCounter rateCounter = new RateCounter();
 
-    int count = 1_000_000;
+    int count = 100_000_000;
     byte[][] result = new byte[count][];
 
     MessageDigest md = MessageDigest.getInstance("sha256");

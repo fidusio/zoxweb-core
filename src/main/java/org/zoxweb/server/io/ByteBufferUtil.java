@@ -153,6 +153,11 @@ public class ByteBufferUtil {
 
     }
 
+
+    public static ByteBuffer wrap(UByteArrayOutputStream ubaos) {
+        return ByteBuffer.wrap(ubaos.getInternalBuffer(), 0, ubaos.size());
+    }
+
     private ByteBuffer toByteBuffer0(BufferType bType, byte[] buffer, int offset, int length, boolean copy) {
         ByteBuffer bb = null;
         SimpleQueue<ByteBuffer> sq = null;
