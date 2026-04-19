@@ -29,7 +29,7 @@ public abstract class TCPSessionCallback
 
     private volatile SSLContextInfo sslContextInfo;
     private int timeoutInSec = 5;
-    private final ByteBuffer dataBuffer = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.DIRECT, SharedIOUtil.K_1);
+    private final ByteBuffer dataBuffer = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, SharedIOUtil.K_1);
 
     private DNSResolverInt dnsResolver;
     protected volatile int interestOps = SelectionKey.OP_READ;
@@ -165,7 +165,7 @@ public abstract class TCPSessionCallback
 //            sslConfig.selectorController = getSelectorController();
             sslConfig.sslChannel = (SocketChannel) sk.channel();
 
-            sslConfig.sslOutputStream = new CommonChannelOutputStream(null, (ByteChannel) sk.channel(), 512)
+            sslConfig.sslOutputStream = new CommonChannelOutputStream(null, (ByteChannel) sk.channel())
                     .setSSLSessionConfig(sslConfig);
             setConfig(sslConfig);
             setOutputStream(sslConfig.sslOutputStream);
@@ -190,7 +190,7 @@ public abstract class TCPSessionCallback
         setChannel(sk.channel());
         if (!sslUpgrade(sk)) {
             // this not a secure connection
-            setOutputStream(new CommonChannelOutputStream(null, (ByteChannel) sk.channel(), 512));
+            setOutputStream(new CommonChannelOutputStream(null, (ByteChannel) sk.channel()));
             connectedFinished();
         }
 

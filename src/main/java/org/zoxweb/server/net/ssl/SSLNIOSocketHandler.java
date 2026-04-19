@@ -196,7 +196,7 @@ public class SSLNIOSocketHandler
                 int bytesRead;
                 do {
                     bytesRead = sslConfig.remoteChannel.isConnected() ? sslConfig.remoteChannel.read(sslConfig.inRemoteData) : -1;
-                    if (bytesRead > 0) sslConfig.sslOutputStream.write(sslConfig.inRemoteData);
+                    if (bytesRead > 0) sslConfig.sslOutputStream.write(sslConfig.inRemoteData, true);
                 } while (bytesRead > 0);
 
                 if (bytesRead == -1) {
@@ -232,7 +232,7 @@ public class SSLNIOSocketHandler
             sslConfig.selectorController = getSelectorController();
             sslConfig.sslChannel = (SocketChannel) asc;
             sslConfig.remoteConnection = remoteConnection;
-            sslConfig.sslOutputStream = new CommonChannelOutputStream(this, (ByteChannel) asc, 512)
+            sslConfig.sslOutputStream = new CommonChannelOutputStream(this, (ByteChannel) asc)
                     .setSSLSessionConfig(sslConfig);
             ((BaseSessionCallback<SSLSessionConfig>)sessionCallback).setConfig(sslConfig);
             sslDispatcher = new CustomSSLStateMachine(this);
@@ -251,7 +251,7 @@ public class SSLNIOSocketHandler
             sslConfig.sslChannel = (SocketChannel) asc;
             sslConfig.remoteConnection = remoteConnection;
             //sslConfig.sslOutputStream = new SSLChannelOutputStream(this, sslConfig, 512);
-            sslConfig.sslOutputStream = new CommonChannelOutputStream(this, (ByteChannel) asc, 512)
+            sslConfig.sslOutputStream = new CommonChannelOutputStream(this, (ByteChannel) asc)
                     .setSSLSessionConfig(sslConfig);
             ((BaseSessionCallback<SSLSessionConfig>)sessionCallback).setConfig(sslConfig);
             sessionCallback.setProtocolHandler(this);

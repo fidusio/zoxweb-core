@@ -118,8 +118,8 @@ public class NIOTunnel
                     if (destinationChannel == null) {
                         sourceAddress = phSChannel.getRemoteAddress();
                         destinationChannel = SocketChannel.open((new InetSocketAddress(remoteAddress.getInetAddress(), remoteAddress.getPort())));
-                        destinationBB = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.DIRECT);
-                        sourceBB = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.DIRECT);
+                        destinationBB = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP);
+                        sourceBB = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP);
                         getSelectorController().register(destinationChannel, SelectionKey.OP_READ, this, false);
                     }
                 }

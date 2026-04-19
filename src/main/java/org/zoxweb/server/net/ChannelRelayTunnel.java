@@ -57,7 +57,7 @@ public class ChannelRelayTunnel
                               SelectorController sc, Closeable closeInterface) {
         //this.origin = origin;
         super(true);
-        sBuffer = ByteBufferUtil.allocateByteBuffer(BufferType.DIRECT, bufferSize);
+        sBuffer = ByteBufferUtil.allocateByteBuffer(BufferType.HEAP, bufferSize);
         this.readSource = readSource;
         this.writeDestination = writeDestination;
         this.writeChannelSK = writeChannelSK;

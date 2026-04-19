@@ -73,7 +73,7 @@ public class NIOSocketHandler
             if (sessionCallback.getConfig() == null) {
                 synchronized (this) {
                     if (sessionCallback.getConfig() == null) {
-                        CommonChannelOutputStream cco = new CommonChannelOutputStream(this, phSChannel, Const.SizeInBytes.K.mult(1));
+                        CommonChannelOutputStream cco = new CommonChannelOutputStream(this, phSChannel);
                         sessionCallback.setOutputStream(cco);
                         ((BaseSessionCallback<BaseChannelOutputStream>) sessionCallback).setConfig(cco);
                         // need to notify session callback in case waiting for connection

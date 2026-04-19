@@ -142,8 +142,10 @@ public class SSLSessionConfig
     }
 
 
-    public synchronized SSLEngineResult smartWrap(ByteBuffer source, ByteBuffer destination) throws SSLException {
-        ((Buffer) source).flip();
+    public synchronized SSLEngineResult smartWrap(ByteBuffer source, ByteBuffer destination, boolean flip)
+            throws SSLException {
+        if(flip)
+            ((Buffer) source).flip();
         SSLEngineResult ret = sslEngine.wrap(source, destination);
         source.compact();
         return ret;

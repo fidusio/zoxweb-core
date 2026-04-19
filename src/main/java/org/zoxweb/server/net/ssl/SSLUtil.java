@@ -306,7 +306,7 @@ public final class SSLUtil {
 
         if (config.getHandshakeStatus() == NEED_WRAP) {
             try {
-                SSLEngineResult result = config.smartWrap(ByteBufferUtil.EMPTY, config.outSSLNetData);
+                SSLEngineResult result = config.smartWrap(ByteBufferUtil.EMPTY, config.outSSLNetData, true);
                 // at handshake stage, data in appOut won't be
                 // processed hence dummy buffer
                 if (log.isEnabled())
@@ -341,36 +341,45 @@ public final class SSLUtil {
      * Single-record SSL write: encrypt {@code bb} into {@code outSSLNetData} and
      * drain the resulting ciphertext to {@code dataChannel}.
      * <p>
-     * <b>Buffer-mode contract.</b> {@code bb} must be in write-mode on entry
-     * (position = end of plaintext, limit = capacity). {@link SSLSessionConfig#smartWrap}
-     * flips, wraps, and compacts it — so on return {@code bb} is back in
-     * write-mode with any unconsumed bytes shifted to the front. The
-     * destination {@code outSSLNetData} is always flipped by
-     * {@link ByteBufferUtil#smartWrite} before the channel write and compacted
-     * after.
+     * <b>Buffer-mode contract.</b> The {@code flip} flag describes the caller's
+     * buffer mode for {@code bb}:
+     * </p>
+     * <ul>
+     *     <li>{@code flip=true} — {@code bb} is in write-mode
+     *         (position = end of plaintext, limit = capacity);
+     *         {@link SSLSessionConfig#smartWrap} will flip it before wrap.</li>
+     *     <li>{@code flip=false} — {@code bb} is already in read-mode
+     *         (position = start of plaintext, limit = end); no flip performed.</li>
+     * </ul>
+     * <p>
+     * After wrap, {@link SSLSessionConfig#smartWrap} compacts {@code bb}.
+     * The destination {@code outSSLNetData} is always in write-mode after wrap,
+     * so the subsequent {@link ByteBufferUtil#smartWrite} is invoked with
+     * {@code flip=true} unconditionally.
      * </p>
      * <p>
-     * The handshake must be complete ({@code NOT_HANDSHAKING}); otherwise an
-     * {@link SSLException} is thrown. {@code BUFFER_UNDERFLOW}/{@code OVERFLOW}
+     * The session must be past handshake ({@code NOT_HANDSHAKING}); otherwise
+     * an {@link SSLException} is thrown. {@code BUFFER_UNDERFLOW}/{@code OVERFLOW}
      * and {@code CLOSED} are translated to {@link IOException}.
      * </p>
      *
      * @param sslConfig    session state providing the engine and net buffer
      * @param dataChannel  channel to receive ciphertext
-     * @param bb           plaintext source in write-mode
+     * @param bb           plaintext source
      * @param usageTracker activity notifier; may be {@code null}
      * @param closeable    closed via {@link SharedIOUtil#close} on channel I/O error
+     * @param flip         {@code true} if {@code bb} is in write-mode; {@code false} if read-mode
      * @return ciphertext bytes written to the channel, or -1 on channel EOF
      * @throws SSLException if the session is still handshaking
      * @throws IOException  on {@code BUFFER_*}, {@code CLOSED}, or channel error
      */
-    private static int _sslWrite(SSLSessionConfig sslConfig, ByteChannel dataChannel, ByteBuffer bb, UsageTracker usageTracker, AutoCloseable closeable) throws IOException {
+    private static int _sslWrite(SSLSessionConfig sslConfig, ByteChannel dataChannel, ByteBuffer bb, UsageTracker usageTracker, AutoCloseable closeable, boolean flip) throws IOException {
         int written = -1;
         if (sslConfig.getHandshakeStatus() == NOT_HANDSHAKING) {
 
 
 
-            SSLEngineResult result = sslConfig.smartWrap(bb, sslConfig.outSSLNetData); // at handshake stage, data in appOut won't be
+            SSLEngineResult result = sslConfig.smartWrap(bb, sslConfig.outSSLNetData, flip); // at handshake stage, data in appOut won't be
             if (log.isEnabled())
                 log.getLogger().info("AFTER-NEED_WRAP-PROCESSING: " + result);
             switch (result.getStatus()) {
@@ -402,42 +411,64 @@ public final class SSLUtil {
     /**
      * Encrypt {@code src} and send it to {@code dataChannel}, chunking the
      * payload into TLS-record-sized pieces when it exceeds what a single
-     * {@code SSLEngine.wrap()} call can consume.
+     * {@link javax.net.ssl.SSLEngine#wrap} call can consume.
      * <p>
-     * For payloads smaller than {@code min(applicationBufferSize, K_8)} this
-     * delegates to a single {@link #_sslWrite}. Larger payloads are sliced
-     * into {@link SharedIOUtil#K_8} (8&nbsp;KB) chunks and each chunk is
-     * encrypted and transmitted as its own TLS record. The chunk size is
-     * deliberately chosen below {@code SSLSession.getApplicationBufferSize()}
-     * so every {@code wrap()} fully consumes its chunk — no under-consumption
-     * and no {@code BUFFER_OVERFLOW} on the output side.
+     * <b>Dispatch.</b>
      * </p>
+     * <ul>
+     *     <li>Payloads with data size {@code < min(applicationBufferSize, K_8)}
+     *         delegate to a single {@link #_sslWrite}.</li>
+     *     <li>Larger payloads are sliced into {@link SharedIOUtil#K_8} (8&nbsp;KB)
+     *         chunks; each chunk is encrypted and transmitted as one TLS record.
+     *         The chunk size is deliberately below
+     *         {@code SSLSession.getApplicationBufferSize()} so every {@code wrap()}
+     *         fully consumes its chunk — no under-consumption and no
+     *         {@code BUFFER_OVERFLOW} on the output side.</li>
+     * </ul>
      * <p>
-     * <b>Buffer-mode contract.</b> {@code src} must be in write-mode on entry
-     * (position = end of plaintext, limit = capacity). On return {@code src} is
-     * in write-mode and empty (position = 0, limit = capacity). The method
-     * drains all data; there is no partial-consume semantic on success. On
-     * channel error or EOF mid-stream the undrained remainder is compacted
-     * to the start of {@code src} so the caller can retry.
+     * <b>Buffer-mode contract.</b> The {@code flip} flag describes the caller's
+     * buffer mode for {@code src}:
+     * </p>
+     * <ul>
+     *     <li>{@code flip=true} — {@code src} is in write-mode; data size is
+     *         {@code src.position()}. The chunking branch flips {@code src} once
+     *         to enter read-mode; the short-circuit branch passes the flag to
+     *         {@link #_sslWrite}.</li>
+     *     <li>{@code flip=false} — {@code src} is already read-mode (e.g. from
+     *         {@link ByteBuffer#wrap}); data size is {@code src.remaining()}.
+     *         No extra flip is performed.</li>
+     * </ul>
+     * <p>
+     * All data is drained on success. On channel error or EOF mid-stream the
+     * undrained remainder is compacted to the start of {@code src} — the
+     * buffer ends in write-mode regardless of the input mode. Callers that
+     * handed in a throwaway read-mode buffer via {@code wrap()} should discard
+     * it; callers that expect their write-mode buffer to be empty-and-ready
+     * for the next {@code put()} can reuse it directly.
      * </p>
      *
      * @param sslConfig    session state
      * @param dataChannel  channel to receive ciphertext
-     * @param src          plaintext to encrypt, in write-mode
+     * @param src          plaintext to encrypt
      * @param usageTracker activity notifier; may be {@code null}
      * @param closeable    closed via {@link SharedIOUtil#close} on channel I/O error
+     * @param flip         {@code true} if {@code src} is in write-mode; {@code false} if read-mode
      * @return total ciphertext bytes written to the channel, or -1 if EOF occurred before any bytes were sent
      * @throws SSLException if the session is still handshaking
      * @throws IOException  on channel error
      */
-    public static int sslChunkedWrite(SSLSessionConfig sslConfig, ByteChannel dataChannel, ByteBuffer src, UsageTracker usageTracker, AutoCloseable closeable) throws IOException {
-        if(src.position() < Math.min(sslConfig.getApplicationBufferSize(), SharedIOUtil.K_8)) {
-            return _sslWrite(sslConfig, dataChannel, src, usageTracker, closeable);
+    public static int sslChunkedWrite(SSLSessionConfig sslConfig, ByteChannel dataChannel, ByteBuffer src, UsageTracker usageTracker, AutoCloseable closeable, boolean flip) throws IOException {
+        // dataSize semantics depend on caller's buffer mode:
+        //   flip=true  → src is write-mode, data is [0..position), size = position()
+        //   flip=false → src is read-mode,  data is [position..limit), size = remaining()
+        int dataSize = flip ? src.position() : src.remaining();
+        if (dataSize < Math.min(sslConfig.getApplicationBufferSize(), SharedIOUtil.K_8)) {
+            return _sslWrite(sslConfig, dataChannel, src, usageTracker, closeable, flip);
         }
 
-
-        // Chunk the data window [0..position) in write-mode-for-smartWrap chunks.
-        src.flip();                            // now read-mode: [0..dataEnd)
+        // Ensure src is in read-mode for the chunking loop regardless of caller convention.
+        if (flip)
+            src.flip();                            // write-mode → read-mode: [0..dataEnd)
         int savedLimit = src.limit();
         int total = 0, written = 0;
         try {
@@ -447,7 +478,7 @@ public final class SSLUtil {
                 ByteBuffer view = src.slice();
                 view.position(n);              // write-mode for smartWrap's flip
                 src.limit(savedLimit);
-                written = _sslWrite(sslConfig, dataChannel, view, usageTracker, closeable);
+                written = _sslWrite(sslConfig, dataChannel, view, usageTracker, closeable, true);
                 if (written < 0) break;
                 total += written;
                 src.position(src.position() + n);

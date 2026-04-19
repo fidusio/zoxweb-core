@@ -23,13 +23,13 @@ public class CommonChannelOutputStream
     private final AtomicBoolean sslMode = new AtomicBoolean(false);
 
 
-    public CommonChannelOutputStream(ByteChannel byteChannel, int outAppBufferSize) throws IOException {
-        super(null, byteChannel, outAppBufferSize);
+    public CommonChannelOutputStream(ByteChannel byteChannel) throws IOException {
+        super(null, byteChannel);
     }
 
 
-    public CommonChannelOutputStream(ProtocolHandler protocolHandler, ByteChannel byteChannel, int outAppBufferSize) throws IOException {
-        super(protocolHandler, byteChannel, outAppBufferSize);
+    public CommonChannelOutputStream(ProtocolHandler protocolHandler, ByteChannel byteChannel) throws IOException {
+        super(protocolHandler, byteChannel);
     }
 
 
@@ -50,38 +50,47 @@ public class CommonChannelOutputStream
 
 
     /**
-     * Writes the contents of a {@link ByteBuffer} to the underlying channel.
+     * Sends the contents of a {@link ByteBuffer} to the underlying channel,
+     * choosing the plaintext or SSL/TLS path based on {@link #isSSLMode()}.
      * <p>
-     * Subclasses must implement this method to handle the actual writing mechanism,
-     * which may involve encryption (SSL/TLS) or direct channel writes.
-     * The buffer should be in read mode (flipped) or the implementation should handle flipping.
+     * In SSL mode the payload is encrypted and chunked via
+     * {@link SSLUtil#sslChunkedWrite}; in plaintext mode it is drained directly
+     * through {@link #plainWrite}. The {@code flip} flag is forwarded in both
+     * cases to describe the caller's buffer mode.
      * </p>
      *
-     * @param byteBuffer the buffer containing data to write
-     * @return the number of bytes written to the channel
-     * @throws IOException if an I/O error occurs during writing
+     * @param byteBuffer payload to transmit
+     * @param flip       {@code true} if {@code byteBuffer} is in write-mode (needs flipping);
+     *                   {@code false} if already in read-mode (e.g. from {@link ByteBuffer#wrap})
+     * @return number of bytes transmitted to the channel, or -1 on EOF
+     * @throws IOException if an I/O or SSL error occurs
      */
     @Override
-    public synchronized int write(ByteBuffer byteBuffer) throws IOException {
-        return isSSLMode() ?  SSLUtil.sslChunkedWrite(sslConfig, dataChannel, byteBuffer, usageTracker, this) : plainWrite(byteBuffer);
+    public synchronized int write(ByteBuffer byteBuffer, boolean flip) throws IOException {
+        return isSSLMode() ?  SSLUtil.sslChunkedWrite(sslConfig, dataChannel, byteBuffer, usageTracker, this, flip) : plainWrite(byteBuffer, flip);
     }
 
 
     /**
-     * Writes the contents of a {@link ByteBuffer} directly to the underlying channel.
+     * Drains a plaintext {@link ByteBuffer} to the underlying channel via
+     * {@link ByteBufferUtil#smartWrite}.
      * <p>
-     * This method performs a smart write operation that handles partial writes
-     * and ensures all data in the buffer is sent. The buffer is automatically
-     * flipped and compacted as needed.
+     * {@code smartWrite} will flip {@code bb} iff {@code flip=true}, then drain
+     * and compact it. If {@code flip=false} the buffer is assumed to be in
+     * read-mode already and is drained as-is.
+     * </p>
+     * <p>
+     * On I/O error the stream is closed before rethrowing.
      * </p>
      *
-     * @param bb the buffer containing data to write
-     * @return the number of bytes written to the channel
-     * @throws IOException if an I/O error occurs; the stream will be closed on error
+     * @param bb   payload
+     * @param flip {@code true} if {@code bb} is in write-mode, {@code false} if already read-mode
+     * @return bytes written to the channel
+     * @throws IOException on channel error; the stream is closed before the exception propagates
      */
-    private synchronized int plainWrite(ByteBuffer bb) throws IOException {
+    private synchronized int plainWrite(ByteBuffer bb, boolean flip) throws IOException {
         try {
-            int ret = ByteBufferUtil.smartWrite(null, dataChannel, bb, true );
+            int ret = ByteBufferUtil.smartWrite(null, dataChannel, bb, flip );
             if (usageTracker != null) usageTracker.updateUsage();
             return ret;
         } catch (IOException e) {
@@ -156,7 +165,7 @@ public class CommonChannelOutputStream
                 SharedIOUtil.close(sslConfig, usageTracker);
             else
                 SharedIOUtil.close(dataChannel, usageTracker);
-            ByteBufferUtil.cache(outAppData);
+            //ByteBufferUtil.cache(outAppData);
         }
     }
 
