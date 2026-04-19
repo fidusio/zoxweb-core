@@ -15,9 +15,11 @@
  */
 package org.zoxweb.server.net;
 
+import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.server.io.UByteArrayOutputStream;
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.shared.io.CloseableType;
+import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.UsageTracker;
 
@@ -74,6 +76,7 @@ public abstract class BaseChannelOutputStream extends OutputStream
     protected final UsageTracker usageTracker;
     /** Remote peer address captured at construction. */
     protected final InetSocketAddress clientAddress;
+    protected volatile ByteBuffer outAppData;
 
     /**
      * Constructs a new output stream bound to the given NIO channel.
@@ -83,11 +86,13 @@ public abstract class BaseChannelOutputStream extends OutputStream
      * @throws IOException          if the remote address cannot be read from the channel
      * @throws NullPointerException if {@code outByteChannel} is {@code null}
      */
-    protected BaseChannelOutputStream(ProtocolHandler ut, ByteChannel outByteChannel) throws IOException {
+    protected BaseChannelOutputStream(ProtocolHandler ut, ByteChannel outByteChannel, boolean useAppDataBuffer) throws IOException {
         SUS.checkIfNulls("channel can't be null ", outByteChannel);
         this.clientAddress = (InetSocketAddress) ((SocketChannel) outByteChannel).getRemoteAddress();
         this.dataChannel = outByteChannel;
         this.usageTracker = ut;
+        if (useAppDataBuffer)
+            outAppData = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, SharedIOUtil.K_4);
     }
 
 
@@ -121,7 +126,7 @@ public abstract class BaseChannelOutputStream extends OutputStream
      */
     public void write(UByteArrayOutputStream byteArrayOutputStream, boolean reset) throws IOException {
         synchronized (byteArrayOutputStream) {
-            write(ByteBuffer.wrap(byteArrayOutputStream.getInternalBuffer(), 0, byteArrayOutputStream.size()), false);
+            write(byteArrayOutputStream.getInternalBuffer(), 0, byteArrayOutputStream.size());
             if (reset)
                 byteArrayOutputStream.reset();
         }
@@ -147,9 +152,21 @@ public abstract class BaseChannelOutputStream extends OutputStream
     public void write(byte[] b, int off, int len) throws IOException {
         if (off < 0 || len < 0 || off > b.length - len)
             throw new IndexOutOfBoundsException();
-        write(ByteBuffer.wrap(b, off, len), false);
-    }
 
+
+        // added duel mode from performance tuning !?!?
+        if (outAppData == null)
+            write(ByteBuffer.wrap(b, off, len), false);
+        else {
+            int end = off + len;
+            while (off < end) {
+                int tempLen = Math.min(end - off, outAppData.capacity() - outAppData.position());
+                outAppData.put(b, off, tempLen);
+                write(outAppData, true);
+                off += tempLen;
+            }
+        }
+    }
 
 
     /**
@@ -189,7 +206,6 @@ public abstract class BaseChannelOutputStream extends OutputStream
     public abstract int write(ByteBuffer byteBuffer, boolean flip) throws IOException;
 
 
-
     /**
      * Checks whether this output stream has been closed.
      *
@@ -198,7 +214,6 @@ public abstract class BaseChannelOutputStream extends OutputStream
     public boolean isClosed() {
         return isClosed.get() || !dataChannel.isOpen();
     }
-
 
 
 }

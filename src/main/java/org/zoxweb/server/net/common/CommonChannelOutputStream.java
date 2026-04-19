@@ -24,12 +24,12 @@ public class CommonChannelOutputStream
 
 
     public CommonChannelOutputStream(ByteChannel byteChannel) throws IOException {
-        super(null, byteChannel);
+        super(null, byteChannel, true);
     }
 
 
     public CommonChannelOutputStream(ProtocolHandler protocolHandler, ByteChannel byteChannel) throws IOException {
-        super(protocolHandler, byteChannel);
+        super(protocolHandler, byteChannel, true);
     }
 
 
@@ -68,6 +68,7 @@ public class CommonChannelOutputStream
     @Override
     public synchronized int write(ByteBuffer byteBuffer, boolean flip) throws IOException {
         return isSSLMode() ?  SSLUtil.sslChunkedWrite(sslConfig, dataChannel, byteBuffer, usageTracker, this, flip) : plainWrite(byteBuffer, flip);
+//        return isSSLMode() ?  sslChunkedWrite(byteBuffer, flip) : plainWrite(byteBuffer, flip);
     }
 
 
@@ -90,7 +91,7 @@ public class CommonChannelOutputStream
      */
     private synchronized int plainWrite(ByteBuffer bb, boolean flip) throws IOException {
         try {
-            int ret = ByteBufferUtil.smartWrite(null, dataChannel, bb, flip );
+            int ret = ByteBufferUtil.smartWrite(null, dataChannel, bb, flip);
             if (usageTracker != null) usageTracker.updateUsage();
             return ret;
         } catch (IOException e) {
@@ -165,8 +166,153 @@ public class CommonChannelOutputStream
                 SharedIOUtil.close(sslConfig, usageTracker);
             else
                 SharedIOUtil.close(dataChannel, usageTracker);
-            //ByteBufferUtil.cache(outAppData);
+            ByteBufferUtil.cache(outAppData);
         }
     }
+
+    /**
+     * Single-record SSL write: encrypt {@code bb} into {@code outSSLNetData} and
+     * drain the resulting ciphertext to {@code dataChannel}.
+     * <p>
+     * <b>Buffer-mode contract.</b> The {@code flip} flag describes the caller's
+     * buffer mode for {@code bb}:
+     * </p>
+     * <ul>
+     *     <li>{@code flip=true} — {@code bb} is in write-mode
+     *         (position = end of plaintext, limit = capacity);
+     *         {@link SSLSessionConfig#smartWrap} will flip it before wrap.</li>
+     *     <li>{@code flip=false} — {@code bb} is already in read-mode
+     *         (position = start of plaintext, limit = end); no flip performed.</li>
+     * </ul>
+     * <p>
+     * After wrap, {@link SSLSessionConfig#smartWrap} compacts {@code bb}.
+     * The destination {@code outSSLNetData} is always in write-mode after wrap,
+     * so the subsequent {@link ByteBufferUtil#smartWrite} is invoked with
+     * {@code flip=true} unconditionally.
+     * </p>
+     * <p>
+     * The session must be past handshake ({@code NOT_HANDSHAKING}); otherwise
+     * an {@link SSLException} is thrown. {@code BUFFER_UNDERFLOW}/{@code OVERFLOW}
+     * and {@code CLOSED} are translated to {@link IOException}.
+     * </p>
+     *
+     * @param bb           plaintext source
+     * @param flip         {@code true} if {@code bb} is in write-mode; {@code false} if read-mode
+     * @return ciphertext bytes written to the channel, or -1 on channel EOF
+     * @throws SSLException if the session is still handshaking
+     * @throws IOException  on {@code BUFFER_*}, {@code CLOSED}, or channel error
+     */
+//    private  int _sslWrite(ByteBuffer bb, boolean flip) throws IOException {
+//        int written = -1;
+//        if (sslConfig.getHandshakeStatus() == NOT_HANDSHAKING) {
+//
+//
+//
+//            SSLEngineResult result = sslConfig.smartWrap(bb, sslConfig.outSSLNetData, flip); // at handshake stage, data in appOut won't be
+//            if (log.isEnabled())
+//                log.getLogger().info("AFTER-NEED_WRAP-PROCESSING: " + result);
+//            switch (result.getStatus()) {
+//                case BUFFER_UNDERFLOW:
+//                case BUFFER_OVERFLOW:
+//                    throw new IOException(result.getStatus() + " invalid state context buffer size " +
+//                            SUS.toCanonicalID(',', sslConfig.outSSLNetData.capacity(), sslConfig.outSSLNetData.limit(), sslConfig.outSSLNetData.position()));
+//                case OK:
+//                    try {
+//                        written = ByteBufferUtil.smartWrite(null, dataChannel, sslConfig.outSSLNetData, true);
+//                        if(usageTracker != null) usageTracker.updateUsage();
+//                    } catch (IOException e) {
+//                        SharedIOUtil.close(this);
+//                        throw e;
+//                    }
+//                    break;
+//                case CLOSED:
+//                    throw new IOException("Closed");
+//            }
+//        } else {
+//            throw new SSLException("handshaking state can't send data yet");
+//        }
+//
+//        return written;
+//    }
+
+
+
+    /**
+     * Encrypt {@code src} and send it to {@code dataChannel}, chunking the
+     * payload into TLS-record-sized pieces when it exceeds what a single
+     * {@link javax.net.ssl.SSLEngine#wrap} call can consume.
+     * <p>
+     * <b>Dispatch.</b>
+     * </p>
+     * <ul>
+     *     <li>Payloads with data size {@code < min(applicationBufferSize, K_8)}
+     *         delegate to a single {@link #_sslWrite}.</li>
+     *     <li>Larger payloads are sliced into {@link SharedIOUtil#K_8} (8&nbsp;KB)
+     *         chunks; each chunk is encrypted and transmitted as one TLS record.
+     *         The chunk size is deliberately below
+     *         {@code SSLSession.getApplicationBufferSize()} so every {@code wrap()}
+     *         fully consumes its chunk — no under-consumption and no
+     *         {@code BUFFER_OVERFLOW} on the output side.</li>
+     * </ul>
+     * <p>
+     * <b>Buffer-mode contract.</b> The {@code flip} flag describes the caller's
+     * buffer mode for {@code src}:
+     * </p>
+     * <ul>
+     *     <li>{@code flip=true} — {@code src} is in write-mode; data size is
+     *         {@code src.position()}. The chunking branch flips {@code src} once
+     *         to enter read-mode; the short-circuit branch passes the flag to
+     *         {@link #_sslWrite}.</li>
+     *     <li>{@code flip=false} — {@code src} is already read-mode (e.g. from
+     *         {@link ByteBuffer#wrap}); data size is {@code src.remaining()}.
+     *         No extra flip is performed.</li>
+     * </ul>
+     * <p>
+     * All data is drained on success. On channel error or EOF mid-stream the
+     * undrained remainder is compacted to the start of {@code src} — the
+     * buffer ends in write-mode regardless of the input mode. Callers that
+     * handed in a throwaway read-mode buffer via {@code wrap()} should discard
+     * it; callers that expect their write-mode buffer to be empty-and-ready
+     * for the next {@code put()} can reuse it directly.
+     * </p>
+     *
+     * @param src          plaintext to encrypt
+     * @param flip         {@code true} if {@code src} is in write-mode; {@code false} if read-mode
+     * @return total ciphertext bytes written to the channel, or -1 if EOF occurred before any bytes were sent
+     * @throws SSLException if the session is still handshaking
+     * @throws IOException  on channel error
+     */
+//    private  int sslChunkedWrite(ByteBuffer src, boolean flip) throws IOException {
+//        // dataSize semantics depend on caller's buffer mode:
+//        //   flip=true  → src is write-mode, data is [0..position), size = position()
+//        //   flip=false → src is read-mode,  data is [position..limit), size = remaining()
+//        int dataSize = flip ? src.position() : src.remaining();
+//        if (dataSize < Math.min(sslConfig.getApplicationBufferSize(), SharedIOUtil.K_8)) {
+//            return _sslWrite(src,flip);
+//        }
+//
+//        // Ensure src is in read-mode for the chunking loop regardless of caller convention.
+//        if (flip)
+//            src.flip();                            // write-mode → read-mode: [0..dataEnd)
+//        int savedLimit = src.limit();
+//        int total = 0, written = 0;
+//        try {
+//            while (src.hasRemaining()) {
+//                int n = Math.min(SharedIOUtil.K_8, src.remaining());
+//                src.limit(src.position() + n);
+//                ByteBuffer view = src.slice();
+//                view.position(n);              // write-mode for smartWrap's flip
+//                src.limit(savedLimit);
+//                written = _sslWrite(view, true);
+//                if (written < 0) break;
+//                total += written;
+//                src.position(src.position() + n);
+//            }
+//        } finally {
+//            src.compact();                     // back to write-mode for next caller put()
+//        }
+//        return written < 0 && total == 0 ? -1 : total;
+//
+//    }
 
 }

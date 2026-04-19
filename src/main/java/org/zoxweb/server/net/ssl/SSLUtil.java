@@ -439,6 +439,11 @@ public final class SSLUtil {
      *         No extra flip is performed.</li>
      * </ul>
      * <p>
+     * Inside the chunking loop each {@link ByteBuffer#slice() slice} is handed
+     * to {@link #_sslWrite} with {@code flip=false} — slices are born read-mode
+     * (pos=0, lim=n), so no additional flip round-trip is needed.
+     * </p>
+     * <p>
      * All data is drained on success. On channel error or EOF mid-stream the
      * undrained remainder is compacted to the start of {@code src} — the
      * buffer ends in write-mode regardless of the input mode. Callers that
@@ -475,10 +480,9 @@ public final class SSLUtil {
             while (src.hasRemaining()) {
                 int n = Math.min(SharedIOUtil.K_8, src.remaining());
                 src.limit(src.position() + n);
-                ByteBuffer view = src.slice();
-                view.position(n);              // write-mode for smartWrap's flip
+                ByteBuffer view = src.slice();   // already read-mode: pos=0, lim=n
                 src.limit(savedLimit);
-                written = _sslWrite(sslConfig, dataChannel, view, usageTracker, closeable, true);
+                written = _sslWrite(sslConfig, dataChannel, view, usageTracker, closeable, false);
                 if (written < 0) break;
                 total += written;
                 src.position(src.position() + n);
