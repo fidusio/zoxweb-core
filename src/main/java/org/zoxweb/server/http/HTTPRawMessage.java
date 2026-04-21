@@ -250,11 +250,11 @@ public class HTTPRawMessage
                                 HTTPCodecs.WWW_URL_ENC.decode(this);
                                 break;
 
-                            case APPLICATION_OCTET_STREAM:
-                                break;
                             case MULTIPART_FORM_DATA:
                                 HTTPCodecs.MULTIPART_FORM_DATA.decode(this);
                                 break;
+                            case APPLICATION_OCTET_STREAM:
+
                             case TEXT_CSV:
 
                             case TEXT_CSS:

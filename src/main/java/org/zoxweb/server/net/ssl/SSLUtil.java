@@ -159,7 +159,12 @@ public final class SSLUtil {
             /*
              * special case if the connection is a client connection
              */
-            ((ConnectionCallback) callback).sslHandshakeSuccessful();
+            try{
+                ((ConnectionCallback) callback).sslHandshakeSuccessful();
+            }catch(Exception e){
+                SharedIOUtil.close(config, callback);
+                callback.exception(e);
+            }
         }
 
         if (config.inSSLNetData.position() > 0) {
@@ -277,6 +282,7 @@ public final class SSLUtil {
             } catch (Exception e) {
                 if (log.isEnabled())
                     e.printStackTrace();
+                if (callback != null) callback.exception(e);
                 config.close();
             }
         }
@@ -330,6 +336,7 @@ public final class SSLUtil {
             } catch (Exception e) {
                 if (log.isEnabled())
                     e.printStackTrace();
+                if (callback != null) callback.exception(e);
 
                 config.close();
             }
@@ -379,7 +386,7 @@ public final class SSLUtil {
 
 
 
-            SSLEngineResult result = sslConfig.smartWrap(bb, sslConfig.outSSLNetData, flip); // at handshake stage, data in appOut won't be
+            SSLEngineResult result = sslConfig.smartWrap(bb, sslConfig.outSSLNetData, flip);
             if (log.isEnabled())
                 log.getLogger().info("AFTER-NEED_WRAP-PROCESSING: " + result);
             switch (result.getStatus()) {

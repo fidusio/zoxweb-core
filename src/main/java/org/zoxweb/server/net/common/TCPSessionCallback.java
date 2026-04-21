@@ -33,14 +33,15 @@ public abstract class TCPSessionCallback
 
     private DNSResolverInt dnsResolver;
     protected volatile int interestOps = SelectionKey.OP_READ;
+
     protected TCPSessionCallback() {
 
         setID(UUID.randomUUID().toString());
-        boolean stat = closeableDelegate.setDelegate(()->{
+        boolean stat = closeableDelegate.setDelegate(() -> {
             SharedIOUtil.close(getChannel(), getOutputStream());
             ByteBufferUtil.cache(dataBuffer);
         });
-        if(!stat)
+        if (!stat)
             throw new IllegalStateException("Cannot set delegate to TCPSessionCallback");
     }
 
@@ -61,11 +62,11 @@ public abstract class TCPSessionCallback
             id = UUID.randomUUID().toString();
         }
         setID(id);
-        boolean stat = closeableDelegate.setDelegate(()->{
+        boolean stat = closeableDelegate.setDelegate(() -> {
             SharedIOUtil.close(getChannel(), getOutputStream());
             ByteBufferUtil.cache(dataBuffer);
         });
-        if(!stat)
+        if (!stat)
             throw new IllegalStateException("Cannot set delegate to TCPSessionCallback");
     }
 
@@ -209,12 +210,8 @@ public abstract class TCPSessionCallback
     /**
      * will be called in one condition when the connection is secure and finished the ssl handshake
      */
-    public void sslHandshakeSuccessful() {
-        try {
-            connectedFinished();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public void sslHandshakeSuccessful() throws IOException {
+        connectedFinished();
     }
 
 //    public void close() throws IOException {

@@ -1,11 +1,14 @@
 package org.zoxweb.server.http;
 
+import org.zoxweb.server.io.UByteArrayOutputStream;
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.net.common.TCPSessionCallback;
 import org.zoxweb.server.net.ssl.SSLContextInfo;
 import org.zoxweb.shared.http.*;
 import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.task.ConsumerCallback;
+import org.zoxweb.shared.util.Const;
+import org.zoxweb.shared.util.RateCounter;
 import org.zoxweb.shared.util.SUS;
 
 import java.io.IOException;
@@ -62,6 +65,7 @@ public class HTTPURLCallback extends TCPSessionCallback {
 
     /** Whether incoming {@link ByteBuffer}s should be flipped by the parser before reading. */
     private final boolean flip;
+    private final RateCounter rc = new RateCounter();
 
     /**
      * GET request with certificate validation disabled and buffer-flip enabled.
@@ -226,10 +230,13 @@ public class HTTPURLCallback extends TCPSessionCallback {
             if (hrm.parseResponse(hmci.getURIScheme(), byteBuffer, flip)) {
                 HTTPMessageConfigInterface respHMCI = hrm.parse();
                 respHMCI.setContent(hrm.getDataStream().toByteArray());
-                SharedIOUtil.close(this);
+
                 if (callback != null) {
                     callback.accept(new HTTPResponseData(respHMCI.getHTTPStatusCode().CODE, respHMCI.getHeaders(), respHMCI.getContent(), System.currentTimeMillis() - ts.get()).setCorrelationID(getID()));
                 }
+                rc.stop();
+                if (log.isEnabled()) log.getLogger().info(rc.toString());
+                SharedIOUtil.close(this);
 
 
             }
@@ -251,11 +258,17 @@ public class HTTPURLCallback extends TCPSessionCallback {
      */
     @Override
     protected void connectedFinished() throws IOException {
+        rc.start();
         hrm = new HTTPRawMessage(true);
         HTTPRawFormatter hrf = new HTTPRawFormatter(hmci);
-        getOutputStream().write(hrf.format(), true);
+        UByteArrayOutputStream ubaos = hrf.format();
+        if(log.isEnabled()) log.getLogger().info(getID() + " Before sending request ");
+        long start = System.currentTimeMillis();
+        //getOutputStream().write(ByteBuffer.wrap(ubaos.getInternalBuffer(), 0, ubaos.size()), false);
+        getOutputStream().write(ubaos, true);
+        if (log.isEnabled())  log.getLogger().info(getID()+ " After sending request " + Const.TimeInMillis.toString(System.currentTimeMillis() - start));
         if (log.isEnabled())
-            log.getLogger().info(getRemoteAddress() + " " + ((SocketChannel) getChannel()).isConnected());
+            log.getLogger().info(getID() + " " + getRemoteAddress() + " " + ((SocketChannel) getChannel()).isConnected());
 
     }
 

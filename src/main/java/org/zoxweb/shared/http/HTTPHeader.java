@@ -68,6 +68,12 @@ public enum HTTPHeader
     USER_AGENT("User-Agent"),
     WWW_AUTHENTICATE("WWW-Authenticate"),
     X_ACCEPT_ENCODING("X-Accept-Encoding"),
+    X_REQUEST_ID("X-Request-ID"),
+    X_TRACE_ID("X-Trace-ID"),
+    X_CORRELATION_ID("X-Correlation-ID"),
+    X_TIMESTAMP("X-Timestamp"),
+    X_TRAILER("X-Trailer"),
+    X_FORWARDED_FOR("X-Forwarded-For"),
     ;
 
 

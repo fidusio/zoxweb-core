@@ -125,6 +125,7 @@ public abstract class BaseChannelOutputStream extends OutputStream
      * @throws IOException if an I/O error occurs during writing
      */
     public void write(UByteArrayOutputStream byteArrayOutputStream, boolean reset) throws IOException {
+        SUS.checkIfNulls("byteArrayOutputStream can't be null ", byteArrayOutputStream);
         synchronized (byteArrayOutputStream) {
             write(byteArrayOutputStream.getInternalBuffer(), 0, byteArrayOutputStream.size());
             if (reset)

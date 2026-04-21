@@ -25,11 +25,10 @@ public interface ConnectionCallback<D>
      */
     int connected(SelectionKey key) throws IOException;
 
-    <V extends Channel>V getChannel();
+    <V extends Channel> V getChannel();
 
     void setChannel(Channel channel);
 
-    default void sslHandshakeSuccessful() {
-    }
+    void sslHandshakeSuccessful() throws IOException;
 
 }
