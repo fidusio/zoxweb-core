@@ -71,7 +71,7 @@ import java.io.InputStream;
 public final class HTTPCodecs {
 
     /** Logger for debugging codec operations */
-    public final static LogWrapper log = new LogWrapper(HTTPCodecs.class).setEnabled(false);
+    public final static LogWrapper log = new LogWrapper(HTTPCodecs.class).setEnabled(true);
 
     /**
      * Private constructor to prevent instantiation of this utility class.
@@ -590,7 +590,7 @@ public final class HTTPCodecs {
                                 String fieldName = contentDisposition.getProperties().getValue("name");
 
                                 if (log.isEnabled())
-                                    log.getLogger().info(hmci.getBoundary() + " DataMark: " + hrm.getDataMark() + " dataContentStartIndex: " + dataContentEndIndex + " dataContentEndIndex: " + dataContentEndIndex + " isAFile: " + isAFile);
+                                    log.getLogger().info(hmci.getBoundary() + " DataMark: " + hrm.getDataMark() + " dataContentStartIndex: " + dataContentStartIndex + " dataContentEndIndex: " + dataContentEndIndex + " isAFile: " + isAFile);
 
 
                                 if (isAFile) {
@@ -643,7 +643,7 @@ public final class HTTPCodecs {
                                         if (location != null && location.getValue() != null)
                                             paramFileToAdd.getProperties().build(location.getName(), "" + location.getValue());
 
-                                        hmci.getParameters().add(paramFileToAdd);
+                                        //hmci.getParameters().add(paramFileToAdd);
                                         UByteArrayInputStream is = new UByteArrayInputStream(ubaos.getInternalBuffer(), dataContentStartIndex, dataContentEndIndex - dataContentStartIndex);
                                         paramFileToAdd.setValue(is);
                                         hmci.getParameters().add(paramFileToAdd);

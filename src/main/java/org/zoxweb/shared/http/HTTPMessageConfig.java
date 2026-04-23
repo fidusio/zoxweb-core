@@ -96,6 +96,8 @@ public class HTTPMessageConfig
             HTTPMessageConfig.class,
             SharedUtil.extractNVConfigs(Params.values()), null, false, SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO);
 
+    private volatile transient NamedValue<?> correlationContext;
+
 
     /**
      * Explicit definition to make the class a java bean
@@ -888,8 +890,19 @@ public class HTTPMessageConfig
             } else
                 parameters.add(name, (String) value);
         }
-
-
         return this;
     }
+
+    @Override
+    public NamedValue<?> correlationContext() {
+        if (correlationContext == null) {
+            synchronized (this){
+                if (correlationContext == null) {
+                    correlationContext = new NamedValue<>();
+                }
+            }
+        }
+        return correlationContext;
+    }
+
 }

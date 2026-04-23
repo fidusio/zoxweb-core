@@ -427,5 +427,11 @@ public interface HTTPMessageConfigInterface
 
     HTTPMessageConfigInterface setHeader(GetName headerName, GetValue<String>... values);
 
+    /**
+     * This is an optional object that could be for interstate processing
+     * @return a correlation for context switching
+     */
+    NamedValue<?> correlationContext();
+
 
 }

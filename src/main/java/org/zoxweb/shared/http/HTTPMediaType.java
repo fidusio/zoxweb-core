@@ -37,6 +37,7 @@ public enum HTTPMediaType
     APPLICATION_JOSE("application/jose"),
     APPLICATION_JOSE_JSON("application/jose+json"),
     APPLICATION_JSON(HTTPConst.APPLICATION_JSON, "json"),
+    APPLICATION_ZIP("application/zip"),
 
     APPLICATION_PDF(HTTPConst.APPLICATION_PDF, "json"),
     APPLICATION_OCTET_STREAM("application/octet-stream"),
@@ -55,6 +56,29 @@ public enum HTTPMediaType
     IMAGE_SVG("image/svg+xml", "svg"),
     IMAGE_ICON("image/x-icon", "ico"),
     IMAGE_TIF("image/tiff", "tiff", "tif"),
+    AUDIO_AAC("audio/aac", "aac"),
+    AUDIO_FLAC("audio/flac", "flac"),
+    AUDIO_MIDI("audio/midi", "midi", "mid"),
+    AUDIO_MP4("audio/mp4", "m4a"),
+    AUDIO_MPEG("audio/mpeg", "mp3"),
+    AUDIO_OGG("audio/ogg", "oga", "ogg"),
+    AUDIO_OPUS("audio/opus", "opus"),
+    AUDIO_WAV("audio/wav", "wav"),
+    AUDIO_WEBM("audio/webm", "weba"),
+
+    VIDEO_3GPP2("video/3gpp2", "3g2"),
+    VIDEO_3GPP("video/3gpp", "3gp"),
+    VIDEO_AVI("video/x-msvideo", "avi"),
+    VIDEO_MATROSKA("video/x-matroska", "mkv"),
+    VIDEO_MP2T("video/mp2t", "ts"),
+    VIDEO_MP4("video/mp4", "mp4", "m4v"),
+    VIDEO_MPEG("video/mpeg", "mpeg", "mpe", "mpg"),
+    VIDEO_OGG("video/ogg", "ogv"),
+    VIDEO_QUICKTIME("video/quicktime", "mov", "qt"),
+    VIDEO_WEBM("video/webm", "webm"),
+
+    APPLICATION_HLS("application/vnd.apple.mpegurl", "m3u8"),
+    APPLICATION_DASH("application/dash+xml", "mpd"),
     ;
 
     private final String value;

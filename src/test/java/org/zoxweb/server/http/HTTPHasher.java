@@ -83,6 +83,7 @@ public class HTTPHasher {
             String url = params.stringValue("url", false);
             String user = params.stringValue("user", false);
             String password = params.stringValue("password", false);
+            int repeat = params.intValue("repeat", 5);
             //String hash = params.stringValue("hash", false);
             String filename = params.stringValue("file", false);
             HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit(url, null, HTTPMethod.POST, false);
@@ -90,12 +91,12 @@ public class HTTPHasher {
             hmci.setContent(ubaos.toByteArray());
             hmci.setContentType(HTTPMediaType.APPLICATION_OCTET_STREAM);
             hmci.setBasicAuthorization(user, password);
-            //hmci.getHeaders().build(HTTPHeader.X_REQUEST_ID, UUID.randomUUID().toString());
+
             HTTPNIOSocket httpNIOSocket = new HTTPNIOSocket(new NIOSocket(TaskUtil.defaultTaskProcessor(), TaskUtil.defaultTaskScheduler()));
 
-            int count = 5;
+
             AtomicInteger counter = new AtomicInteger(0);
-            for (int i = 0; i < count; i++) {
+            for (int i = 0; i < repeat; i++) {
 
 
                 HTTPURLCallback httpurlCallback = new HTTPURLCallback(hmci, new ConsumerCallback<HTTPResponse>() {
@@ -125,7 +126,7 @@ public class HTTPHasher {
                     }
                 });
             }
-        TaskUtil.waitIfBusyThenClose(50, ()->count*2==counter.get());
+        TaskUtil.waitIfBusyThenClose(50, ()->repeat*2==counter.get());
         httpNIOSocket.getNIOSocket().close();
 
 

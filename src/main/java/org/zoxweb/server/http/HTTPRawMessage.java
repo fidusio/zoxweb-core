@@ -40,7 +40,7 @@ public class HTTPRawMessage
     //private volatile String firstLine = null;
     private volatile boolean endOfContent = false;
     private volatile HTTPMessageConfigInterface hmci = new HTTPMessageConfig();
-    private volatile NamedValue<?> pendingParameter = null;
+    //private volatile NamedValue<?> pendingParameter = null;
     private volatile NVGenericMap properties = new NVGenericMap("parsing-properties");
     private boolean clientMode = false;
 
@@ -348,14 +348,14 @@ public class HTTPRawMessage
         this.dataMark += inc;
         return dataMark;
     }
-
-    public NamedValue<?> getPendingParameter() {
-        return pendingParameter;
-    }
-
-    public void setPendingParameter(NamedValue<?> pending) {
-        this.pendingParameter = pending;
-    }
+//
+//    public NamedValue<?> getPendingParameter() {
+//        return pendingParameter;
+//    }
+//
+//    public void setPendingParameter(NamedValue<?> pending) {
+//        this.pendingParameter = pending;
+//    }
 
 
     public NamedValue<?> incompleteParam() {
