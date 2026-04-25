@@ -790,29 +790,29 @@ public class HTTPUtil {
         return null;
     }
 
-    public static GetNameValue<String> extractHeaderCookie(HTTPResponse rd) {
-        List<String> cookies = SharedUtil.lookupMap(rd.getHeaders(), HTTPHeader.SET_COOKIE.getName(), true);
-
-        if (cookies != null && cookies.size() > 0) {
-            StringBuilder sb = new StringBuilder();
-
-            for (String cookie : cookies) {
-                List<HttpCookie> httpCookies = HttpCookie.parse(cookie);
-
-                for (HttpCookie httpCookie : httpCookies) {
-                    if (sb.length() > 0) {
-                        sb.append("; ");
-                    }
-
-                    sb.append(httpCookie.getName() + (httpCookie.getValue() != null ? "=" + httpCookie.getValue() : ""));
-                }
-            }
-
-            return new NVPair(HTTPHeader.COOKIE, sb.toString());
-        }
-
-        return null;
-    }
+//    public static GetNameValue<String> extractHeaderCookie(HTTPResponse rd) {
+//        List<String> cookies = SharedUtil.lookupMap(rd.getHeaders(), HTTPHeader.SET_COOKIE.getName(), true);
+//
+//        if (cookies != null && cookies.size() > 0) {
+//            StringBuilder sb = new StringBuilder();
+//
+//            for (String cookie : cookies) {
+//                List<HttpCookie> httpCookies = HttpCookie.parse(cookie);
+//
+//                for (HttpCookie httpCookie : httpCookies) {
+//                    if (sb.length() > 0) {
+//                        sb.append("; ");
+//                    }
+//
+//                    sb.append(httpCookie.getName() + (httpCookie.getValue() != null ? "=" + httpCookie.getValue() : ""));
+//                }
+//            }
+//
+//            return new NVPair(HTTPHeader.COOKIE, sb.toString());
+//        }
+//
+//        return null;
+//    }
 
     public static NVPair extractCookie(Map<String, List<String>> rd) {
         List<String> cookies = SharedUtil.lookupMap(rd, HTTPHeader.SET_COOKIE.getName(), true);
@@ -964,21 +964,21 @@ public class HTTPUtil {
     }
 
 
-    public static boolean isContentComplete(HTTPMessageConfigInterface hcc) {
-        int contentLength = hcc.getContentLength();
-        byte content[] = hcc.getContent();
-
-
-        if (content != null && content.length == contentLength) {
-            return true;
-        }
-
-        if (contentLength < 1 && (content == null || content.length == 0)) {
-            return true;
-        }
-
-        return false;
-    }
+//    public static boolean isContentComplete(HTTPMessageConfigInterface hcc) {
+//        int contentLength = hcc.getContentLength();
+//        byte[] content = hcc.getContent();
+//
+//
+//        if (content != null && content.length == contentLength) {
+//            return true;
+//        }
+//
+//        if (contentLength < 1 && (content == null || content.length == 0)) {
+//            return true;
+//        }
+//
+//        return false;
+//    }
 
     public static HTTPMessageConfigInterface parseRawHTTPRequest(UByteArrayOutputStream ubaos, HTTPMessageConfigInterface hmci, boolean headerOnly)
             throws NullPointerException, IllegalArgumentException {

@@ -41,6 +41,22 @@ public final class HTTPConst {
 
     public static final GetNameValue<String> CHARSET_UTF_8 = new NVPair("charset", Const.UTF_8);
 
+    public enum Token
+        implements GetName
+    {
+        FILE("file"),
+        CONTENT("content"),
+        IS_PARTIAL("is-partial"),
+        IS_COMPLETED("is-completed"),
+        ;
+        private final String name;
+        Token(String name) {
+            this.name = name;
+        }
+        public String getName() {
+            return name;
+        }
+    }
 
     /**
      * Enumeration of HTTP common-name parameters used in multipart messages
@@ -217,7 +233,6 @@ public final class HTTPConst {
 
             }
         }
-
         return new NVPair(name, headerValue.toString());
     }
 

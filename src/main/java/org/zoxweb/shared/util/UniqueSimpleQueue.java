@@ -11,10 +11,10 @@ import java.util.concurrent.atomic.AtomicLong;
 public class UniqueSimpleQueue<E>
         implements SimpleQueueInterface<E> {
 
-    private final AtomicLong totalQueued = new AtomicLong();
+    private volatile AtomicLong totalQueued = new AtomicLong();
 
-    private final AtomicLong totalDeQueued = new AtomicLong();
-    private final LinkedHashSet<E> set = new LinkedHashSet<>();
+    private volatile AtomicLong totalDeQueued = new AtomicLong();
+    private volatile LinkedHashSet<E> set = new LinkedHashSet<>();
 
     /**
      * Clears the queue content.

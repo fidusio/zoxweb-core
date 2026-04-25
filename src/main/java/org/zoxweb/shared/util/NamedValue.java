@@ -23,7 +23,7 @@ public class NamedValue<V>
     }
 
     public NamedValue(Enum<?> name, V value) {
-        super(name instanceof GetName ? ((GetName) name).getName() : "" + name, value);
+        super(name instanceof GetName ? ((GetName) name).getName() : "" + name , value);
     }
 
 

@@ -96,7 +96,7 @@ public class HTTPMessageConfig
             HTTPMessageConfig.class,
             SharedUtil.extractNVConfigs(Params.values()), null, false, SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO);
 
-    private volatile transient NamedValue<?> correlationContext;
+    private volatile transient NVGenericMap attachment;
 
 
     /**
@@ -134,12 +134,6 @@ public class HTTPMessageConfig
     }
 
 
-//	public void setMultiPartEncoding(boolean multiPartEncoding)
-//	{
-//		setValue(Params.MULTI_PART_ENCODING, multiPartEncoding);
-//	}
-
-
     /**
      * Get the action parameters as an array list of NVPairs.
      * The parameters sequence should be preserved during invocation
@@ -150,10 +144,6 @@ public class HTTPMessageConfig
         return (NVGenericMap) lookup(Params.PARAMETERS);
     }
 
-//	@Override
-//	public NVGenericMap getParametersNVGM() {
-//		return (NVGenericMap) lookup(Params.PARAMETERS);
-//	}
 
     /**
      * Set the action parameters list
@@ -199,6 +189,7 @@ public class HTTPMessageConfig
             headerParameters.add(gnv);
         }
     }
+
 
     /**
      * Get the action type
@@ -342,9 +333,9 @@ public class HTTPMessageConfig
      * @param is the input stream to set as content
      */
     @Override
-    public synchronized void setContentAsIS(InputStream is) throws IOException {
+    public synchronized void setContentAsIS(InputStream is, boolean updateContentLength) throws IOException {
         contentAsIS = is;
-        if (contentAsIS != null) {
+        if (contentAsIS != null && updateContentLength) {
             setContentLength(contentAsIS.available());
         }
     }
@@ -414,11 +405,10 @@ public class HTTPMessageConfig
         return ret;
     }
 
-    public static HTTPMessageConfigInterface buildHMCI(String fullURL, HTTPMethod method, boolean certValidationEnabled){
+    public static HTTPMessageConfigInterface buildHMCI(String fullURL, HTTPMethod method, boolean certValidationEnabled) {
         URLInfo urlInfo = URLInfo.parse(fullURL);
         HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit(urlInfo.toBasicURL(), urlInfo.toURI(), method, certValidationEnabled);
-        if(urlInfo.username != null)
-        {
+        if (urlInfo.username != null) {
             hmci.setBasicAuthorization(urlInfo.username, urlInfo.password);
         }
 
@@ -694,14 +684,14 @@ public class HTTPMessageConfig
 
     @Override
     public synchronized void setContentLength(int length) {
+        getHeaders().add(HTTPConst.toHTTPHeader(HTTPHeader.CONTENT_LENGTH, "" + length));
 
-
-        SetNameValue<String> ct = (SetNameValue<String>) getHeaders().get(HTTPHeader.CONTENT_LENGTH.getName());
-        if (ct != null) {
-            ct.setValue("" + length);
-        } else {
-            getHeaders().add(HTTPConst.toHTTPHeader(HTTPHeader.CONTENT_LENGTH, "" + length));
-        }
+//        SetNameValue<String> ct = (SetNameValue<String>) getHeaders().get(HTTPHeader.CONTENT_LENGTH.getName());
+//        if (ct != null) {
+//            ct.setValue("" + length);
+//        } else {
+//            getHeaders().add(HTTPConst.toHTTPHeader(HTTPHeader.CONTENT_LENGTH, "" + length));
+//        }
 
     }
 
@@ -894,15 +884,16 @@ public class HTTPMessageConfig
     }
 
     @Override
-    public NamedValue<?> correlationContext() {
-        if (correlationContext == null) {
-            synchronized (this){
-                if (correlationContext == null) {
-                    correlationContext = new NamedValue<>();
+    public NVGenericMap attachment() {
+        if (attachment == null) {
+            synchronized (this) {
+                if (attachment == null) {
+                    attachment = new NVGenericMap();
                 }
             }
         }
-        return correlationContext;
+        return attachment;
     }
+
 
 }

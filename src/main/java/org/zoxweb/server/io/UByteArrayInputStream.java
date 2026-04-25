@@ -6,6 +6,7 @@ import org.zoxweb.shared.util.NadaInstance;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
 import static org.zoxweb.shared.util.Const.EMPTY_BYTE_ARRAY;
 
@@ -75,6 +76,12 @@ public class UByteArrayInputStream
     @Override
     public boolean isClosed() {
         return ctd.isClosed();
+    }
+
+    public synchronized ByteBuffer wrap(){
+        ByteBuffer ret = ByteBuffer.wrap(buf, pos, available());
+        pos=count;
+        return ret;
     }
 
 

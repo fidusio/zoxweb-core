@@ -11,6 +11,7 @@ import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.task.ConsumerCallback;
 import org.zoxweb.shared.util.Const;
+import org.zoxweb.shared.util.NVGenericMap;
 import org.zoxweb.shared.util.ParamUtil;
 
 import java.io.IOException;
@@ -74,35 +75,72 @@ public class HTTPHasher {
         return successCount.get() + failCount.get();
     }
 
+
+    public static HTTPMessageConfigInterface copy(HTTPMessageConfigInterface config, UByteArrayOutputStream content) throws IOException {
+        HTTPMessageConfigInterface ret = new HTTPMessageConfig();
+        ret.setURL(config.getURL());
+        ret.setMethod(config.getMethod());
+        ret.setURI(config.getURI());
+        ret.setAuthorization(config.getAuthorization());
+        NVGenericMap.copy(config.getHeaders(), ret.getHeaders(), true);
+        ret.setSecureCheckEnabled(config.isSecureCheckEnabled());
+        ret.setContentAsIS(content.unsafeWrap(null), true);
+        return ret;
+    }
     public static void main(String[] args) {
 
         try {
             long ts = System.currentTimeMillis();
             ParamUtil.ParamMap params = ParamUtil.parse("=", args);
             params.hide("password");
+            log.getLogger().info("" + params);
             String url = params.stringValue("url", false);
             String user = params.stringValue("user", false);
             String password = params.stringValue("password", false);
             int repeat = params.intValue("repeat", 5);
             //String hash = params.stringValue("hash", false);
             String filename = params.stringValue("file", false);
+            UByteArrayOutputStream content = IOUtil.inputStreamToByteArray(filename, true);
             HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit(url, null, HTTPMethod.POST, false);
-            UByteArrayOutputStream ubaos = IOUtil.inputStreamToByteArray(filename, true);
-            hmci.setContent(ubaos.toByteArray());
             hmci.setContentType(HTTPMediaType.APPLICATION_OCTET_STREAM);
             hmci.setBasicAuthorization(user, password);
 
             HTTPNIOSocket httpNIOSocket = new HTTPNIOSocket(new NIOSocket(TaskUtil.defaultTaskProcessor(), TaskUtil.defaultTaskScheduler()));
+            AtomicLong lowestUrlHTTP = new AtomicLong(-1);
+            AtomicLong lowestOkHTTP = new AtomicLong(-1);
 
 
             AtomicInteger counter = new AtomicInteger(0);
             for (int i = 0; i < repeat; i++) {
 
 
-                HTTPURLCallback httpurlCallback = new HTTPURLCallback(hmci, new ConsumerCallback<HTTPResponse>() {
+                TaskUtil.defaultTaskProcessor().execute(() -> {
+                    try {
+                        HTTPResponse hr = OkHTTPCall.send(copy(hmci, content));
+                        if(lowestOkHTTP.get() == -1){
+                            lowestOkHTTP.set(hr.getDuration());
+                        }
+
+                        if(hr.getDuration()< lowestOkHTTP.get())
+                            lowestOkHTTP.set(hr.getDuration());
+
+                        log.getLogger().info("OkHTTPCall" + hr);
+                        counter.incrementAndGet();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                });
+
+                HTTPURLCallback httpurlCallback = new HTTPURLCallback(copy(hmci, content), new ConsumerCallback<HTTPResponse>() {
                     @Override
-                    public void accept(HTTPResponse httpResponse) {
-                        System.out.println("HTTPURLCallback: " + httpResponse);
+                    public void accept(HTTPResponse hr) {
+                        log.getLogger().info("HTTPURLCallback: " + hr);
+                        if(lowestUrlHTTP.get() == -1){
+                            lowestUrlHTTP.set(hr.getDuration());
+                        }
+                        if(hr.getDuration()< lowestUrlHTTP.get())
+                            lowestUrlHTTP.set(hr.getDuration());
+
                         counter.incrementAndGet();
                     }
 
@@ -116,27 +154,29 @@ public class HTTPHasher {
 
                 httpNIOSocket.send(httpurlCallback);
 
-                TaskUtil.defaultTaskProcessor().execute(() -> {
-                    try {
-                        HTTPResponse hr = OkHTTPCall.send(hmci);
-                        System.out.println(hr);
-                        counter.incrementAndGet();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                });
+//                TaskUtil.defaultTaskProcessor().execute(() -> {
+//                    try {
+//                        HTTPResponse hr = OkHTTPCall.send(hmci);
+//                        log.getLogger().info("" + hr);
+//                        counter.incrementAndGet();
+//                    } catch (Exception e) {
+//                        e.printStackTrace();
+//                    }
+//                });
             }
-        TaskUtil.waitIfBusyThenClose(50, ()->repeat*2==counter.get());
-        httpNIOSocket.getNIOSocket().close();
+
+            log.getLogger().info("All request sent " + repeat*2);
+            TaskUtil.waitIfBusyThenClose(50, () -> repeat * 2 == counter.get());
+            httpNIOSocket.getNIOSocket().close();
 
 
-        log.getLogger().info("******************************Total: " + total() + " Success: " + successCount.get() + " Failed: " + failCount.get() + " it took " + Const.TimeInMillis.toString(System.currentTimeMillis() - ts));
-    } catch(
-    Exception e)
+            log.getLogger().info("******************************Total: " + total() + " Success: " + successCount.get() + " Failed: " + failCount.get() + " it took " + Const.TimeInMillis.toString(System.currentTimeMillis() - ts));
+            log.getLogger().info("LowestOKHTTP: " + lowestOkHTTP.get() + " lowestUrlHTTP: " + lowestUrlHTTP.get());
 
-    {
-        e.printStackTrace();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
-
-}
 }

@@ -1,6 +1,6 @@
 package org.zoxweb.server.http;
 
-import org.zoxweb.server.io.UByteArrayOutputStream;
+import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.net.common.TCPSessionCallback;
 import org.zoxweb.server.net.ssl.SSLContextInfo;
@@ -260,12 +260,16 @@ public class HTTPURLCallback extends TCPSessionCallback {
     protected void connectedFinished() throws IOException {
         rc.start();
         hrm = new HTTPRawMessage(true);
-        HTTPRawFormatter hrf = new HTTPRawFormatter(hmci);
-        UByteArrayOutputStream ubaos = hrf.format();
+        HTTPRequestFormatter hrf = new HTTPRequestFormatter(hmci);
+
         if(log.isEnabled()) log.getLogger().info(getID() + " Before sending request ");
         long start = System.currentTimeMillis();
+        hrf.writeTo(getOutputStream());
         //getOutputStream().write(ByteBuffer.wrap(ubaos.getInternalBuffer(), 0, ubaos.size()), false);
-        getOutputStream().write(ubaos, true);
+        //getOutputStream().write(ubaos, true);
+        if(hmci.getContentAsIS() != null)
+            IOUtil.relayStreams(hmci.getContentAsIS(), getOutputStream(), true, false);
+
         if (log.isEnabled())  log.getLogger().info(getID()+ " After sending request " + Const.TimeInMillis.toString(System.currentTimeMillis() - start));
         if (log.isEnabled())
             log.getLogger().info(getID() + " " + getRemoteAddress() + " " + ((SocketChannel) getChannel()).isConnected());

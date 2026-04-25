@@ -5,16 +5,16 @@ import org.zoxweb.shared.http.HTTPMessageConfig;
 import org.zoxweb.shared.http.HTTPMessageConfigInterface;
 import org.zoxweb.shared.http.HTTPVersion;
 
-public class HTTPRawFormatterTest {
+public class HTTPRequestFormatterTest {
 
     @Test
     public void testHMCI()
     {
         HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit("https://xlogistx.io", "timestamps", "GET");
         hmci.setHTTPVersion(HTTPVersion.HTTP_1_1);
-        HTTPRawFormatter hrf = new  HTTPRawFormatter(hmci);
+        HTTPRequestFormatter hrf = new HTTPRequestFormatter(hmci);
 
 
-        System.out.println(hrf.format());
+        System.out.println(hrf.formatHeader());
     }
 }

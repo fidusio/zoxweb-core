@@ -226,6 +226,10 @@ public abstract class NVEntity
         }
     }
 
+    protected void updateAttribute(GetName getName, NVBase<?> value) {
+
+    }
+
     /**
      * Sets the value to the given NVBase object.
      * @param gnvc

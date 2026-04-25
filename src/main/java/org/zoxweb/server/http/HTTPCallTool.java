@@ -101,6 +101,7 @@ public final class HTTPCallTool {
 
             log.getLogger().info("proxy: " + proxy);
             IPAddress proxyAddress = proxy != null ? IPAddress.parse(proxy, ProxyType.HTTP) : null;
+            log.getLogger().info(""+params);
 
             List<HTTPAPIEndPoint<Void, byte[]>> endpoints = new ArrayList<>();
             HTTPMessageConfigInterface[] hmcis = new HTTPMessageConfigInterface[urls.size()];

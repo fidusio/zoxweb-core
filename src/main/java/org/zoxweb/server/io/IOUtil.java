@@ -511,6 +511,36 @@ public class IOUtil {
         return totalCopied;
     }
 
+    /**
+     * hash and input  the call must invoke md.digest()
+     * @param messageDigest to be updated
+     * @param inputStream input stream
+     * @param closeIS if true the input stream will be closed when is.read() == -1
+     * @return total data copied between is and os
+     * @throws IOException in case of IO errors
+     * @throws NullPointerException if messageDigest or inputStream are null
+     */
+    public static long hashInputStream(MessageDigest messageDigest, InputStream inputStream, boolean closeIS)
+            throws IOException {
+        SUS.checkIfNulls("message digest and input stream must not be null", messageDigest, inputStream);
+        long totalCopied = 0;
+        int read;
+        byte[] buffer = ByteBufferUtil.allocateByteArray(SharedIOUtil.K_8);
+        try {
+            while ((read = inputStream.read(buffer)) != -1) {
+                totalCopied += read;
+                if (messageDigest != null)
+                    messageDigest.update(buffer, 0, read);
+            }
+        } finally {
+            ByteBufferUtil.cache(buffer);
+            if (closeIS) {
+                SharedIOUtil.close(inputStream);
+            }
+        }
+        return totalCopied;
+    }
+
 
     public static HashResult relayStreams(CryptoConst.HashType hashType, InputStream is, OutputStream os, boolean closeIS, boolean closeOS)
             throws IOException {

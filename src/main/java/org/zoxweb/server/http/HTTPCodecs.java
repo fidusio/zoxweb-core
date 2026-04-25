@@ -71,7 +71,7 @@ import java.io.InputStream;
 public final class HTTPCodecs {
 
     /** Logger for debugging codec operations */
-    public final static LogWrapper log = new LogWrapper(HTTPCodecs.class).setEnabled(true);
+    public final static LogWrapper log = new LogWrapper(HTTPCodecs.class).setEnabled(false);
 
     /**
      * Private constructor to prevent instantiation of this utility class.
@@ -420,16 +420,16 @@ public final class HTTPCodecs {
                                         if (log.isEnabled()) log.getLogger().info("toAdd: " + toAdd);
                                         // must add it a t the end
 
-                                        hmci.getParameters().add(toAdd);
+                                        hmci.attachment().add(toAdd);
                                     } else {
                                         String value = ubaos.getString(startOfData, dataLength);
                                         if (mediaType != null && HTTPMediaType.lookup(mediaType) == HTTPMediaType.APPLICATION_JSON) {
                                             NVGenericMap toAdd = GSONUtil.fromJSONDefault(ubaos.getString(startOfData, dataLength), NVGenericMap.class);
                                             toAdd.setName(name);
-                                            hmci.getParameters().build(toAdd);
+                                            hmci.attachment().build(toAdd);
                                         } else {
                                             NVPair nvp = new NVPair(name, value);
-                                            hmci.getParameters().build(nvp);
+                                            hmci.attachment().build(nvp);
                                             if (log.isEnabled()) log.getLogger().info("adding nvp: " + nvp);
                                         }
                                     }
@@ -610,7 +610,8 @@ public final class HTTPCodecs {
                                             if (location != null && location.getValue() != null)
                                                 paramFileToAdd.getProperties().build(location.getName(), "" + location.getValue());
 
-                                            hmci.getParameters().add(paramFileToAdd);
+//                                            hmci.getParameters() .add(paramFileToAdd);
+                                            hmci.attachment().add(paramFileToAdd);
                                             int lastDataMark = hrm.getDataMark();
                                             UByteArrayInputStream is = new UByteArrayInputStream(ubaos.getInternalBuffer(), dataContentStartIndex, safetyIndex - dataContentStartIndex
                                                     , () -> {
@@ -643,10 +644,11 @@ public final class HTTPCodecs {
                                         if (location != null && location.getValue() != null)
                                             paramFileToAdd.getProperties().build(location.getName(), "" + location.getValue());
 
-                                        //hmci.getParameters().add(paramFileToAdd);
+
                                         UByteArrayInputStream is = new UByteArrayInputStream(ubaos.getInternalBuffer(), dataContentStartIndex, dataContentEndIndex - dataContentStartIndex);
                                         paramFileToAdd.setValue(is);
-                                        hmci.getParameters().add(paramFileToAdd);
+//                                        hmci.getParameters() .add(paramFileToAdd);
+                                        hmci.attachment().add(paramFileToAdd);
                                         if (log.isEnabled())
                                             log.getLogger().info("adding completed file: " + paramFileToAdd);
                                         // update index here
@@ -659,13 +661,14 @@ public final class HTTPCodecs {
                                     if (contentType != null && HTTPMediaType.lookup((String) contentType.getValue()) == HTTPMediaType.APPLICATION_JSON) {
                                         NVGenericMap nvgm = GSONUtil.fromJSONDefault(value, NVGenericMap.class);
                                         nvgm.setName(fieldName);
-                                        hmci.getParameters().build(nvgm);
+//                                        hmci.getParameters() .build(nvgm);
+                                        hmci.attachment().add(nvgm);
                                         if (log.isEnabled()) log.getLogger().info("adding nvmg: " + nvgm);
                                         // update index here
                                     } else {
                                         NVPair nvp = new NVPair(fieldName, value);
-                                        hmci.getParameters().build(nvp);
-
+//                                        hmci.getParameters() .build(nvp);
+                                        hmci.attachment().add(nvp);
                                         if (log.isEnabled()) log.getLogger().info("adding nvp: " + nvp);
                                     }
 

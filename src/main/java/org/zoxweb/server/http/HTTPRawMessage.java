@@ -23,8 +23,10 @@ import org.zoxweb.shared.protocol.Delimiter;
 import org.zoxweb.shared.util.*;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class HTTPRawMessage
         implements GetNVProperties {
@@ -43,6 +45,8 @@ public class HTTPRawMessage
     //private volatile NamedValue<?> pendingParameter = null;
     private volatile NVGenericMap properties = new NVGenericMap("parsing-properties");
     private boolean clientMode = false;
+    private AtomicInteger contentProcessed = new AtomicInteger(0);
+
 
 
     private volatile NamedValue<?> lastParam = null;
@@ -181,6 +185,10 @@ public class HTTPRawMessage
 
     }
 
+    public synchronized void write(ByteBuffer bb, boolean flip) throws IOException {
+        ByteBufferUtil.write(bb, ubaos, flip);
+    }
+
 
     public synchronized boolean isMessageComplete() {
         if (areHeadersParsed()) {
@@ -188,7 +196,7 @@ public class HTTPRawMessage
                 // content length is set
                 if (log.isEnabled())
                     log.getLogger().info(SUS.toCanonicalID(',', hmci.getContentLength(), ubaos.size(), (hmci.getContentLength() - ubaos.size())));
-                return (hmci.getContentLength() == ubaos.size());
+                return (hmci.getContentLength() == ubaos.size() || hmci.getContentLength() == contentProcessed.get());
             } else if (hmci.isTransferChunked()) {
                 if (hmci.isMultiPartEncoding())// we have a chunked request
                     return endOfContent;
@@ -240,9 +248,23 @@ public class HTTPRawMessage
                 if (hmci.isMultiPartEncoding()) {
                     HTTPCodecs.MULTIPART_FORM_DATA_CHUNKED.decode(this);
                 }
-            } else if (isMessageComplete() && !isClientMode()) {
-                if (hmci.getMethod() != HTTPMethod.GET) {
+            } else if (!isClientMode() && hmci.getMethod() != HTTPMethod.GET) {
+                // headers are parsed
+
+                if (canProceedAsPartial()) {
+                    // very critical calculation point
+                    contentProcessed.addAndGet(ubaos.size());
+                    NamedValue<InputStream> content = new NamedValue<>(HTTPConst.Token.CONTENT,
+                            ubaos.unsafeWrap(() -> ubaos.reset()));
+                    content.getProperties().build(new NVBoolean(HTTPConst.Token.IS_COMPLETED, isMessageComplete()));
+
+                    hmci.attachment().add(content);
+                    return hmci;
+                }
+                if (isMessageComplete()) {
+                    // we have complete message
                     HTTPMediaType hmt = HTTPMediaType.lookup(hmci.getContentType());
+
                     if (hmt != null) {
                         switch (hmt) {
 
@@ -253,7 +275,7 @@ public class HTTPRawMessage
                             case MULTIPART_FORM_DATA:
                                 HTTPCodecs.MULTIPART_FORM_DATA.decode(this);
                                 break;
-                            case APPLICATION_OCTET_STREAM:
+
 
                             case TEXT_CSV:
 
@@ -270,28 +292,68 @@ public class HTTPRawMessage
                             case APPLICATION_JSON:
                                 hmci.setContent(ubaos.copyBytes(0));
                                 break;
-                            case IMAGE_BMP:
-                                break;
-                            case IMAGE_GIF:
-                                break;
-                            case IMAGE_JPEG:
-                                break;
-                            case IMAGE_PNG:
-                                break;
-                            case IMAGE_SVG:
-                                break;
-                            case IMAGE_ICON:
-                                break;
-                            case IMAGE_TIF:
-                                break;
+//                                case IMAGE_BMP:
+//                                    break;
+//                                case IMAGE_GIF:
+//                                    break;
+//                                case IMAGE_JPEG:
+//                                    break;
+//                                case IMAGE_PNG:
+//                                    break;
+//                                case IMAGE_SVG:
+//                                    break;
+//                                case IMAGE_ICON:
+//                                    break;
+//                                case IMAGE_TIF:
+//                                    break;
                         }
+
                     }
                 }
+
+
             }
 
         }
 
         return hmci;
+    }
+
+
+
+    public boolean canProceedAsPartial() {
+        if (isMessageComplete())
+            return true;
+
+
+        if (areHeadersParsed()) {
+            if (hmci.isTransferChunked()) {
+                return true;
+            }
+            HTTPMediaType hmt = HTTPMediaType.lookup(hmci.getContentType());
+            if (hmt != null) {
+                switch (hmt) {
+                    case APPLICATION_OCTET_STREAM:
+
+                    case IMAGE_BMP:
+
+                    case IMAGE_GIF:
+
+                    case IMAGE_JPEG:
+
+                    case IMAGE_PNG:
+
+                    case IMAGE_SVG:
+
+                    case IMAGE_ICON:
+
+                    case IMAGE_TIF:
+                        return true;
+                }
+            }
+        }
+
+        return false;
     }
 
 
@@ -306,6 +368,7 @@ public class HTTPRawMessage
             lastParam = null;
             endOfChunkedContentReached = false;
             properties.clear();
+            contentProcessed.set(0);
         }
     }
 

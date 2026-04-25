@@ -15,11 +15,9 @@
  */
 package org.zoxweb.server.net;
 
-import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.server.io.UByteArrayOutputStream;
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.shared.io.CloseableType;
-import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.UsageTracker;
 
@@ -91,8 +89,8 @@ public abstract class BaseChannelOutputStream extends OutputStream
         this.clientAddress = (InetSocketAddress) ((SocketChannel) outByteChannel).getRemoteAddress();
         this.dataChannel = outByteChannel;
         this.usageTracker = ut;
-        if (useAppDataBuffer)
-            outAppData = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, SharedIOUtil.K_4);
+//        if (useAppDataBuffer)
+//            outAppData = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, SharedIOUtil.K_4);
     }
 
 

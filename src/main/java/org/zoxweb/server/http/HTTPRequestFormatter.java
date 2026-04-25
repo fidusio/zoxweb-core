@@ -15,20 +15,29 @@
  */
 package org.zoxweb.server.http;
 
+import org.zoxweb.server.io.IOUtil;
+import org.zoxweb.server.io.UByteArrayInputStream;
 import org.zoxweb.server.io.UByteArrayOutputStream;
 import org.zoxweb.shared.http.*;
+import org.zoxweb.shared.io.WriteTo;
 import org.zoxweb.shared.protocol.Delimiter;
 import org.zoxweb.shared.util.GetNameValue;
 import org.zoxweb.shared.util.NVGenericMap;
 import org.zoxweb.shared.util.SUS;
 
-public class HTTPRawFormatter {
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+
+public class HTTPRequestFormatter
+        implements WriteTo {
     private final String firstLine;
     private final NVGenericMap headers;
-    private final byte[] content;
-    private UByteArrayOutputStream ubaos;
+    private volatile UByteArrayOutputStream ubaos;
+    private volatile InputStream bodyASIS;
 
-    public HTTPRawFormatter(HTTPMessageConfigInterface hmci) {
+
+    public HTTPRequestFormatter(HTTPMessageConfigInterface hmci) {
         URLInfo urlInfo = hmci.toURLInfo();
         hmci.setHTTPVersion(HTTPVersion.HTTP_1_1);
 
@@ -55,25 +64,29 @@ public class HTTPRawFormatter {
 
         this.firstLine = hmci.getMethod().getName() + " " + fullURI + " " + hmci.getHTTPVersion();
         this.headers = hmci.getHeaders();
-        this.content = hmci.getContent();
+        bodyASIS = hmci.getContentAsIS();
+
+
     }
 
 
-    public HTTPRawFormatter(HTTPRequestLine rrl, NVGenericMap headers, byte[] content) {
+    public HTTPRequestFormatter(HTTPRequestLine rrl, NVGenericMap headers, byte[] content) {
         this.firstLine = rrl.toString();
         this.headers = headers;
-        this.content = content;
+        if (SUS.isNotEmpty(content))
+            bodyASIS = new UByteArrayInputStream(content);
     }
 
-    public HTTPRawFormatter(String firstLine, NVGenericMap headers, byte[] content) {
+    public HTTPRequestFormatter(String firstLine, NVGenericMap headers, byte[] content) {
         this.firstLine = firstLine;
         this.headers = headers;
-        this.content = content;
+        if (SUS.isNotEmpty(content))
+            bodyASIS = new UByteArrayInputStream(content);
     }
 
-    public synchronized UByteArrayOutputStream format() {
+    public synchronized UByteArrayOutputStream formatHeader() {
         if (ubaos == null) {
-            ubaos = new UByteArrayOutputStream();
+            ubaos = new UByteArrayOutputStream(512);
             ubaos.write(firstLine);
             ubaos.write(Delimiter.CRLF.getBytes());
             if (headers != null) {
@@ -93,13 +106,32 @@ public class HTTPRawFormatter {
             }
 
             ubaos.write(Delimiter.CRLF.getBytes());
-
-            if (content != null) {
-                ubaos.write(content);
-            }
         }
         return ubaos;
     }
 
 
+    /**
+     * Write the whole content to output stream
+     *
+     * @param out stream
+     * @throws IOException in case of error
+     */
+    @Override
+    public synchronized void writeTo(OutputStream out) throws IOException {
+
+
+//        if (out instanceof CommonChannelOutputStream) {
+//            ((CommonChannelOutputStream) out).write(formatHeader(), false);//.writeTo(out);
+//            if (bodyASIS != null && bodyASIS instanceof UByteArrayInputStream) {
+//                ((CommonChannelOutputStream) out).write(((UByteArrayInputStream) bodyASIS).wrap(), false);
+//                return;
+//            }
+//        }
+
+        formatHeader().writeTo(out);
+        if (bodyASIS != null)
+            IOUtil.relayStreams(bodyASIS, out, false);
+
+    }
 }

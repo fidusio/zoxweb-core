@@ -117,7 +117,7 @@ public class UByteArrayOutputStream
      *
      * @return ByteArrayInputStream, the data in the input stream after the call are immutable, the implementing class create a new buffer and size() = 0
      */
-    public synchronized ByteArrayInputStream toByteArrayInputStream() {
+    public synchronized UByteArrayInputStream toByteArrayInputStream() {
         byte[] tempBuf = buf;
         int tempCount = size();
         buf = new byte[32];
@@ -126,6 +126,16 @@ public class UByteArrayOutputStream
         valid = new AtomicBoolean(true);
 
         return new UByteArrayInputStream(tempBuf, 0, tempCount);
+    }
+
+    /**
+     * This method must be used with extreme care it is the responsibility of the caller to make sure the UByteArrayInputStream is not used
+     * while the UByteArrayInputStream. The reason for such function to exist is quite simple in heavy io and connectivity it provides zero byte buffer copying
+     * @param closeDirective post close instruction what to do very useful in callback mode
+     * @return the input stream object ready for reading
+     */
+    public synchronized UByteArrayInputStream unsafeWrap(AutoCloseable closeDirective) {
+        return new UByteArrayInputStream(buf, 0, count, closeDirective);
     }
 
     /**

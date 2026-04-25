@@ -181,7 +181,7 @@ public interface HTTPMessageConfigInterface
 
     InputStream getContentAsIS();
 
-    void setContentAsIS(InputStream is) throws IOException;
+    void setContentAsIS(InputStream is, boolean updateContentLength) throws IOException;
 
     /**
      * @return content length
@@ -431,7 +431,9 @@ public interface HTTPMessageConfigInterface
      * This is an optional object that could be for interstate processing
      * @return a correlation for context switching
      */
-    NamedValue<?> correlationContext();
+    NVGenericMap attachment();
+
+
 
 
 }

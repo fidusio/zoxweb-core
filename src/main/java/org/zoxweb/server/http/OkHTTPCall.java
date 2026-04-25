@@ -17,7 +17,9 @@ package org.zoxweb.server.http;
 
 import okhttp3.*;
 import okio.BufferedSink;
+import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.server.io.IOUtil;
+import org.zoxweb.server.io.UByteArrayInputStream;
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.net.ssl.SSLCheckDisabler;
 import org.zoxweb.server.util.GSONUtil;
@@ -105,22 +107,31 @@ public class OkHTTPCall {
             extends RequestBody {
 
         private final MediaType mediaType;
-        private final byte[] content;
+        //private final byte[] content;
+        private final InputStream contentAsIS;
 
         RBBinaryContent(NVGenericMap nvgm) {
             mediaType = MediaType.parse(HTTPMediaType.APPLICATION_JSON.getValue());
-            content = SharedStringUtil.getBytes(GSONUtil.toJSONDefault(nvgm));
+            //content = SharedStringUtil.getBytes(GSONUtil.toJSONDefault(nvgm));
+            this.contentAsIS = new UByteArrayInputStream(SharedStringUtil.getBytes(GSONUtil.toJSONDefault(nvgm)));
         }
 
         RBBinaryContent(MediaType mediaType, String content) {
             this.mediaType = mediaType;
-            this.content = SUS.isNotEmpty(content) ? SharedStringUtil.getBytes(content) : null;
-
+//            this.content = SUS.isNotEmpty(content) ? SharedStringUtil.getBytes(content) : null;
+            this.contentAsIS = SUS.isNotEmpty(content) ? new UByteArrayInputStream(SharedStringUtil.getBytes(content)) : new ByteArrayInputStream(Const.EMPTY_BYTE_ARRAY);
         }
 
-        RBBinaryContent(MediaType mediaType, byte[] content) {
+//        RBBinaryContent(MediaType mediaType, byte[] content) {
+//            this.mediaType = mediaType;
+//            this.content = content;
+//            this.contentAsIS = null;
+//        }
+
+        RBBinaryContent(MediaType mediaType, InputStream contentAsIS) {
             this.mediaType = mediaType;
-            this.content = content;
+//            this.content = null;
+            this.contentAsIS = contentAsIS;
         }
 
         /**
@@ -134,8 +145,9 @@ public class OkHTTPCall {
 
         @Override
         public long contentLength() throws IOException {
-            if (content != null)
-                return content.length;
+
+            if (contentAsIS != null)
+                return contentAsIS.available();
 
             return super.contentLength();
         }
@@ -147,14 +159,22 @@ public class OkHTTPCall {
         @Override
         public void writeTo(BufferedSink bufferedSink)
                 throws IOException {
-            if (content != null) {
-                if (log.isEnabled()) log.getLogger().info("Content size : " + content.length);
-                ByteArrayInputStream inputStream = new ByteArrayInputStream(content);
-                byte[] buffer = new byte[4092]; // 8KB buffer
+            //if (content != null)
+            {
+//                if (log.isEnabled()) log.getLogger().info("Content size : " + content.length);
+//
+//                ByteArrayInputStream inputStream = null;
+//                if (content != null)
+//                    inputStream = new ByteArrayInputStream(content);
+//                else if (contentAsIS != null)
+//                    inputStream = (ByteArrayInputStream) contentAsIS;
+
+                byte[] buffer = ByteBufferUtil.allocateByteArray(SharedIOUtil.K_4); // 8KB buffer
                 int bytesRead;
-                while ((bytesRead = inputStream.read(buffer)) != -1) {
+                while ((bytesRead = contentAsIS.read(buffer)) != -1) {
                     bufferedSink.write(buffer, 0, bytesRead);
                 }
+                ByteBufferUtil.cache(buffer);
 
                 if (log.isEnabled()) log.getLogger().info("Finished");
             }
@@ -293,13 +313,11 @@ public class OkHTTPCall {
                 } else if (gnv instanceof NVGenericMap) {
                     mbBuilder.addFormDataPart(gnv.getName(), gnv.getName(), new RBBinaryContent((NVGenericMap) gnv));
                 }
-
             }
             requestBody = mbBuilder.build();
-        } else if (SUS.isNotEmpty(hmci.getContent())) {
-            requestBody = new RBBinaryContent(null, hmci.getContent());
+        } else if (hmci.getMethod() != HTTPMethod.GET) {
+            requestBody = new RBBinaryContent(null, hmci.getContentAsIS());
         }
-
 
         requestBuilder.method(hmci.getMethod().getName(), requestBody);
         Request request = requestBuilder.build();
