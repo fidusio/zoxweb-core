@@ -11,6 +11,7 @@ import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.task.ConsumerCallback;
 import org.zoxweb.shared.util.Const;
+import org.zoxweb.shared.util.MinMax;
 import org.zoxweb.shared.util.NVGenericMap;
 import org.zoxweb.shared.util.ParamUtil;
 
@@ -84,7 +85,7 @@ public class HTTPHasher {
         ret.setAuthorization(config.getAuthorization());
         NVGenericMap.copy(config.getHeaders(), ret.getHeaders(), true);
         ret.setSecureCheckEnabled(config.isSecureCheckEnabled());
-        ret.setContentAsIS(content.unsafeWrap(null), true);
+        ret.setContentAsIS(content.unsafeInputStream(null), true);
         return ret;
     }
     public static void main(String[] args) {
@@ -106,8 +107,10 @@ public class HTTPHasher {
             hmci.setBasicAuthorization(user, password);
 
             HTTPNIOSocket httpNIOSocket = new HTTPNIOSocket(new NIOSocket(TaskUtil.defaultTaskProcessor(), TaskUtil.defaultTaskScheduler()));
-            AtomicLong lowestUrlHTTP = new AtomicLong(-1);
-            AtomicLong lowestOkHTTP = new AtomicLong(-1);
+
+
+            MinMax urlHTTP = new MinMax("ulr-http");
+            MinMax okHTTP = new MinMax("ok-http");
 
 
             AtomicInteger counter = new AtomicInteger(0);
@@ -117,12 +120,7 @@ public class HTTPHasher {
                 TaskUtil.defaultTaskProcessor().execute(() -> {
                     try {
                         HTTPResponse hr = OkHTTPCall.send(copy(hmci, content));
-                        if(lowestOkHTTP.get() == -1){
-                            lowestOkHTTP.set(hr.getDuration());
-                        }
-
-                        if(hr.getDuration()< lowestOkHTTP.get())
-                            lowestOkHTTP.set(hr.getDuration());
+                        okHTTP.update(hr.getDuration());
 
                         log.getLogger().info("OkHTTPCall" + hr);
                         counter.incrementAndGet();
@@ -135,12 +133,7 @@ public class HTTPHasher {
                     @Override
                     public void accept(HTTPResponse hr) {
                         log.getLogger().info("HTTPURLCallback: " + hr);
-                        if(lowestUrlHTTP.get() == -1){
-                            lowestUrlHTTP.set(hr.getDuration());
-                        }
-                        if(hr.getDuration()< lowestUrlHTTP.get())
-                            lowestUrlHTTP.set(hr.getDuration());
-
+                        urlHTTP.update(hr.getDuration());
                         counter.incrementAndGet();
                     }
 
@@ -171,7 +164,7 @@ public class HTTPHasher {
 
 
             log.getLogger().info("******************************Total: " + total() + " Success: " + successCount.get() + " Failed: " + failCount.get() + " it took " + Const.TimeInMillis.toString(System.currentTimeMillis() - ts));
-            log.getLogger().info("LowestOKHTTP: " + lowestOkHTTP.get() + " lowestUrlHTTP: " + lowestUrlHTTP.get());
+            log.getLogger().info( okHTTP + " "  + urlHTTP);
 
 
         } catch (Exception e) {

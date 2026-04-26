@@ -74,7 +74,7 @@ public abstract class BaseChannelOutputStream extends OutputStream
     protected final UsageTracker usageTracker;
     /** Remote peer address captured at construction. */
     protected final InetSocketAddress clientAddress;
-    protected volatile ByteBuffer outAppData;
+    //protected volatile ByteBuffer outAppData;
 
     /**
      * Constructs a new output stream bound to the given NIO channel.
@@ -84,7 +84,7 @@ public abstract class BaseChannelOutputStream extends OutputStream
      * @throws IOException          if the remote address cannot be read from the channel
      * @throws NullPointerException if {@code outByteChannel} is {@code null}
      */
-    protected BaseChannelOutputStream(ProtocolHandler ut, ByteChannel outByteChannel, boolean useAppDataBuffer) throws IOException {
+    protected BaseChannelOutputStream(ProtocolHandler ut, ByteChannel outByteChannel) throws IOException {
         SUS.checkIfNulls("channel can't be null ", outByteChannel);
         this.clientAddress = (InetSocketAddress) ((SocketChannel) outByteChannel).getRemoteAddress();
         this.dataChannel = outByteChannel;
@@ -125,7 +125,7 @@ public abstract class BaseChannelOutputStream extends OutputStream
     public void write(UByteArrayOutputStream byteArrayOutputStream, boolean reset) throws IOException {
         SUS.checkIfNulls("byteArrayOutputStream can't be null ", byteArrayOutputStream);
         synchronized (byteArrayOutputStream) {
-            write(byteArrayOutputStream.getInternalBuffer(), 0, byteArrayOutputStream.size());
+            write(byteArrayOutputStream.unsafeByteBuffer(), false);
             if (reset)
                 byteArrayOutputStream.reset();
         }
@@ -154,17 +154,17 @@ public abstract class BaseChannelOutputStream extends OutputStream
 
 
         // added duel mode from performance tuning !?!?
-        if (outAppData == null)
-            write(ByteBuffer.wrap(b, off, len), false);
-        else {
-            int end = off + len;
-            while (off < end) {
-                int tempLen = Math.min(end - off, outAppData.capacity() - outAppData.position());
-                outAppData.put(b, off, tempLen);
-                write(outAppData, true);
-                off += tempLen;
-            }
-        }
+//        if (outAppData == null)
+        write(ByteBuffer.wrap(b, off, len), false);
+//        else {
+//            int end = off + len;
+//            while (off < end) {
+//                int tempLen = Math.min(end - off, outAppData.capacity() - outAppData.position());
+//                outAppData.put(b, off, tempLen);
+//                write(outAppData, true);
+//                off += tempLen;
+//            }
+//        }
     }
 
 

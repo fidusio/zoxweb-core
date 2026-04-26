@@ -255,7 +255,7 @@ public class HTTPRawMessage
                     // very critical calculation point
                     contentProcessed.addAndGet(ubaos.size());
                     NamedValue<InputStream> content = new NamedValue<>(HTTPConst.Token.CONTENT,
-                            ubaos.unsafeWrap(() -> ubaos.reset()));
+                            ubaos.unsafeInputStream(() -> ubaos.reset()));
                     content.getProperties().build(new NVBoolean(HTTPConst.Token.IS_COMPLETED, isMessageComplete()));
 
                     hmci.attachment().add(content);

@@ -21,6 +21,7 @@ import org.zoxweb.shared.util.SharedStringUtil;
 import org.zoxweb.shared.util.SharedUtil;
 
 import java.io.*;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -134,8 +135,12 @@ public class UByteArrayOutputStream
      * @param closeDirective post close instruction what to do very useful in callback mode
      * @return the input stream object ready for reading
      */
-    public synchronized UByteArrayInputStream unsafeWrap(AutoCloseable closeDirective) {
+    public synchronized UByteArrayInputStream unsafeInputStream(AutoCloseable closeDirective) {
         return new UByteArrayInputStream(buf, 0, count, closeDirective);
+    }
+
+    public ByteBuffer unsafeByteBuffer() {
+        return ByteBufferUtil.wrap(this);
     }
 
     /**

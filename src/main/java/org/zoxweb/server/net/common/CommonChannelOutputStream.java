@@ -24,12 +24,12 @@ public class CommonChannelOutputStream
 
 
     public CommonChannelOutputStream(ByteChannel byteChannel) throws IOException {
-        super(null, byteChannel, true);
+        super(null, byteChannel);
     }
 
 
     public CommonChannelOutputStream(ProtocolHandler protocolHandler, ByteChannel byteChannel) throws IOException {
-        super(protocolHandler, byteChannel, true);
+        super(protocolHandler, byteChannel);
     }
 
 
@@ -166,7 +166,7 @@ public class CommonChannelOutputStream
                 SharedIOUtil.close(sslConfig, usageTracker);
             else
                 SharedIOUtil.close(dataChannel, usageTracker);
-            ByteBufferUtil.cache(outAppData);
+//            ByteBufferUtil.cache(outAppData);
         }
     }
 
