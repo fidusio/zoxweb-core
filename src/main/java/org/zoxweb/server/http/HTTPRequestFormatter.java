@@ -119,19 +119,9 @@ public class HTTPRequestFormatter
      */
     @Override
     public synchronized void writeTo(OutputStream out) throws IOException {
-
-
-//        if (out instanceof CommonChannelOutputStream) {
-//            ((CommonChannelOutputStream) out).write(formatHeader(), false);//.writeTo(out);
-//            if (bodyASIS != null && bodyASIS instanceof UByteArrayInputStream) {
-//                ((CommonChannelOutputStream) out).write(((UByteArrayInputStream) bodyASIS).wrap(), false);
-//                return;
-//            }
-//        }
-
         formatHeader().writeTo(out);
         if (bodyASIS != null)
-            IOUtil.relayStreams(bodyASIS, out, false);
+            IOUtil.relayStreams(bodyASIS, out, true, false);
 
     }
 }

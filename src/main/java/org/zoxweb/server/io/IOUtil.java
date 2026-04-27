@@ -493,6 +493,11 @@ public class IOUtil {
      */
     public static long relayStreams(MessageDigest md, InputStream is, OutputStream os)
             throws IOException {
+        return relayStreams(md, is, os, false, false);
+    }
+
+    public static long relayStreams(MessageDigest md, InputStream is, OutputStream os, boolean closeIS, boolean closeOS)
+            throws IOException {
 
         long totalCopied = 0;
         int read;
@@ -506,6 +511,12 @@ public class IOUtil {
             }
             os.flush();
         } finally {
+            if (closeIS) {
+                SharedIOUtil.close(is);
+            }
+            if (closeOS) {
+                SharedIOUtil.close(os);
+            }
             ByteBufferUtil.cache(buffer);
         }
         return totalCopied;

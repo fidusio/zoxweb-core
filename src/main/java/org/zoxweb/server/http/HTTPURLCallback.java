@@ -1,6 +1,5 @@
 package org.zoxweb.server.http;
 
-import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.net.common.TCPSessionCallback;
 import org.zoxweb.server.net.ssl.SSLContextInfo;
@@ -61,7 +60,7 @@ public class HTTPURLCallback extends TCPSessionCallback {
     private final AtomicLong ts = new AtomicLong(0);
 
     /** Completion handler; may be swapped via {@link #setCallback(ConsumerCallback)}. */
-    private volatile ConsumerCallback<HTTPResponse> callback;
+    private volatile ConsumerCallback<? extends HTTPResponse> callback;
 
     /** Whether incoming {@link ByteBuffer}s should be flipped by the parser before reading. */
     private final boolean flip;
@@ -119,7 +118,7 @@ public class HTTPURLCallback extends TCPSessionCallback {
      * @throws IOException        if the SSL context cannot be built ({@link NoSuchAlgorithmException}/{@link KeyManagementException} wrapped)
      * @throws NullPointerException if {@code hmci} is {@code null}
      */
-    public HTTPURLCallback(HTTPMessageConfigInterface hmci, ConsumerCallback<HTTPResponse> callback, boolean flip)
+    public HTTPURLCallback(HTTPMessageConfigInterface hmci, ConsumerCallback<? extends HTTPResponse> callback, boolean flip)
             throws IOException {
         SUS.checkIfNulls("null HTTPMessageConfigInterface", hmci);
         this.callback = callback;
@@ -197,7 +196,7 @@ public class HTTPURLCallback extends TCPSessionCallback {
      * @return the current completion callback, or {@code null} if none is set
      */
     public ConsumerCallback<HTTPResponse> getCallback() {
-        return callback;
+        return (ConsumerCallback<HTTPResponse>) callback;
     }
 
     /**
@@ -265,10 +264,8 @@ public class HTTPURLCallback extends TCPSessionCallback {
         if(log.isEnabled()) log.getLogger().info(getID() + " Before sending request ");
         long start = System.currentTimeMillis();
         hrf.writeTo(getOutputStream());
-        //getOutputStream().write(ByteBuffer.wrap(ubaos.getInternalBuffer(), 0, ubaos.size()), false);
-        //getOutputStream().write(ubaos, true);
-        if(hmci.getContentAsIS() != null)
-            IOUtil.relayStreams(hmci.getContentAsIS(), getOutputStream(), true, false);
+//        if(hmci.getContentAsIS() != null)
+//            IOUtil.relayStreams(hmci.getContentAsIS(), getOutputStream(), true, false);
 
         if (log.isEnabled())  log.getLogger().info(getID()+ " After sending request " + Const.TimeInMillis.toString(System.currentTimeMillis() - start));
         if (log.isEnabled())

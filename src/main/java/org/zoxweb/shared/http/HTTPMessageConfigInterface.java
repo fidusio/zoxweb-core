@@ -154,7 +154,11 @@ public interface HTTPMessageConfigInterface
      */
     boolean isTransferChunked();
 
-
+    /**
+     *
+     * @param enable TRANSFER_CHUNKED
+     */
+    void setTransferChunked(boolean enable);
 
 
     /**
@@ -183,6 +187,11 @@ public interface HTTPMessageConfigInterface
 
     void setContentAsIS(InputStream is, boolean updateContentLength) throws IOException;
 
+    /**
+     *
+     * @return the input stream if contentAsIS was set otherwise null
+     */
+    InputStream getContentAsISIfAvailable();
     /**
      * @return content length
      */

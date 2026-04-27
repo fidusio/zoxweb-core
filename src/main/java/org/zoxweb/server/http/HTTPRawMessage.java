@@ -45,7 +45,7 @@ public class HTTPRawMessage
     //private volatile NamedValue<?> pendingParameter = null;
     private volatile NVGenericMap properties = new NVGenericMap("parsing-properties");
     private boolean clientMode = false;
-    private AtomicInteger contentProcessed = new AtomicInteger(0);
+    private volatile AtomicInteger contentProcessed = new AtomicInteger(0);
 
 
 
@@ -247,18 +247,24 @@ public class HTTPRawMessage
                 HTTPCodecs.TRANSFER_CHUNKED.decode(this);
                 if (hmci.isMultiPartEncoding()) {
                     HTTPCodecs.MULTIPART_FORM_DATA_CHUNKED.decode(this);
+                    return hmci;
                 }
-            } else if (!isClientMode() && hmci.getMethod() != HTTPMethod.GET) {
+            }
+            if (!isClientMode() && hmci.getMethod() != HTTPMethod.GET) {
                 // headers are parsed
 
                 if (canProceedAsPartial()) {
                     // very critical calculation point
-                    contentProcessed.addAndGet(ubaos.size());
-                    NamedValue<InputStream> content = new NamedValue<>(HTTPConst.Token.CONTENT,
-                            ubaos.unsafeInputStream(() -> ubaos.reset()));
-                    content.getProperties().build(new NVBoolean(HTTPConst.Token.IS_COMPLETED, isMessageComplete()));
 
-                    hmci.attachment().add(content);
+                    if (!hmci.isTransferChunked()) {
+                        contentProcessed.addAndGet(ubaos.size());
+                        NamedValue<InputStream> content = new NamedValue<>(HTTPConst.Token.CONTENT,
+                                ubaos.unsafeInputStream(() -> ubaos.reset()));
+                        content.getProperties().build(new NVBoolean(HTTPConst.Token.IS_COMPLETED, isMessageComplete()));
+
+                        hmci.attachment().add(content);
+                    }
+
                     return hmci;
                 }
                 if (isMessageComplete()) {

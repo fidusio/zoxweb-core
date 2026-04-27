@@ -186,6 +186,78 @@ public final class HTTPCodecs {
      *
      * <p>Returns the same {@link HTTPRawMessage} with reassembled content.</p>
      */
+    public static final DataDecoder<HTTPRawMessage, HTTPRawMessage> TRANSFER_CHUNKED_TO_REMOVE = (hrm) ->
+    {
+        // the headers are already parsed
+        // we need to parse the body as chunks
+        // hex-size\r\n
+        // binary-data\r\n
+        //
+        UByteArrayOutputStream ubaos = hrm.getDataStream();
+        if (log.isEnabled()) log.getLogger().info("TRANSFER_CHUNKED entry point\n");
+        if (!hrm.isEndOfChunkedContentReached())
+            do {
+                // parse the data size line in hex
+                int index = ubaos.indexOf(hrm.getDataMark(), Delimiter.CRLF.getBytes());
+                if (log.isEnabled()) log.getLogger().info("index of chunk marker : " + index);
+                if (index == -1)
+                    break;
+                String hexSize = ubaos.getString(hrm.getDataMark(), index - hrm.getDataMark());
+                if (log.isEnabled())
+                    log.getLogger().info("dataMark : " + hrm.getDataMark() + " match index: " + index + " ubaos size: " + ubaos.size());
+                int chunkSize = SharedUtil.hexToInt(hexSize);
+                if (log.isEnabled()) log.getLogger().info("chunk size : " + chunkSize);
+                if (chunkSize == 0) {
+                    // we have the last chunk
+
+                    hrm.endOfChunksReached();
+                    // delete the last 0 chunk and trailing headers
+                    ubaos.removeAt(hrm.getDataMark(), ubaos.size() - hrm.getDataMark());
+
+                    // for now NO support for trailer header
+                    break;
+                }
+
+                if (log.isEnabled())
+                    log.getLogger().info("we have a chunk of size " + chunkSize + " raw data buffer size " + ubaos.size() + " dataMark: " + hrm.getDataMark() + " @ " + index);
+
+                if (ubaos.size() >= (index + Delimiter.CRLF.length() + chunkSize + Delimiter.CRLF.length())) {
+                    byte r = ubaos.byteAt(index + Delimiter.CRLF.length() + chunkSize);
+                    byte n = ubaos.byteAt(index + Delimiter.CRLF.length() + chunkSize + 1);
+
+
+                    if (r == '\r' && n == '\n') {
+                        // we have at least one full chunk
+
+                        // 1. remove the hex-size\r\n
+                        ubaos.shiftLeft(index + Delimiter.CRLF.length(), hrm.getDataMark());
+
+                        hrm.incDataMark(chunkSize);
+                        // 2. remove the \r\n at the end of binary data
+                        ubaos.removeAt(hrm.getDataMark(), Delimiter.CRLF.length());
+
+                        if (log.isEnabled())
+                            log.getLogger().info("After the cleanup chunk of size " + chunkSize + " raw data buffer size " + ubaos.size() + " dataMark: " + hrm.getDataMark() + " @ " + index + "\n" + ubaos);
+
+                        continue;
+                    } else {
+                        // we have a problem
+                        log.getLogger().info(index + " The end of the chunked is missing " + (index + Delimiter.CRLF.length() + chunkSize));
+                    }
+                }
+                // datamark should be used by subsequent decoder as the end of HTTPRawMessage.getDataStream() as the end of the stream
+                // after processing the data they should invoke
+                // HTTPRawMessage.getDataStream().shiftLeft(datamark, 0)
+                // then set datamark to zero
+                // so the next call to TRANSFER_CHUNKED will process the remaining data
+                break;
+
+            } while (true);
+
+        return hrm;
+    };
+
+
     public static final DataDecoder<HTTPRawMessage, HTTPRawMessage> TRANSFER_CHUNKED = (hrm) ->
     {
         // the headers are already parsed
@@ -253,6 +325,40 @@ public final class HTTPCodecs {
                 break;
 
             } while (true);
+
+        // Pre-condition: at least one chunk was decoded since lastProcessedDataIndex
+        if (!hrm.getHTTPMessageConfig().isMultiPartEncoding() &&(hrm.getDataMark() > hrm.getLastProcessedDataIndex() || hrm.isEndOfChunkedContentReached()))
+        {
+            int start = hrm.getLastProcessedDataIndex();
+            int length = hrm.getDataMark() - start;
+
+            UByteArrayInputStream bodyStream = new UByteArrayInputStream(
+                    ubaos.getInternalBuffer(),   // stable while no more bytes are written to ubaos
+                    start,
+                    length,
+                    () -> {
+                        // close-callback: collapse the consumed body out of ubaos
+                        hrm.getDataStream().shiftLeft(hrm.getDataMark(), 0);
+                        hrm.setDataMark(0);
+                        hrm.setLastProcessedDataIndex(0);
+                        hrm.getHTTPMessageConfig().attachment().remove(HTTPConst.Token.CONTENT);
+                    }
+            );
+
+            NamedValue<InputStream> body = new NamedValue<>(HTTPConst.Token.CONTENT, bodyStream);
+            body.getProperties()
+                    .build(new NVBoolean(HTTPConst.Token.IS_COMPLETED, hrm.isEndOfChunkedContentReached()))
+                    .build(new NVLong("length", length));
+
+            hrm.getHTTPMessageConfig().attachment().add(body);
+
+            // Important: advance the cursor so a subsequent emission within the
+            // same parse() call (e.g. terminator after a partial flush) doesn't
+            // re-emit the same bytes. The close-callback also resets it to 0
+            // once the consumer drains, which is fine — the two paths converge.
+            hrm.setLastProcessedDataIndex(hrm.getDataMark());
+        }
+
 
         return hrm;
     };

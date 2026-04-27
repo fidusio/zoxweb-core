@@ -329,6 +329,11 @@ public class HTTPMessageConfig
 //        return getContent() != null ;
     }
 
+    @Override
+    public InputStream getContentAsISIfAvailable(){
+        return contentAsIS;
+    }
+
     /**
      * @param is the input stream to set as content
      */
@@ -814,6 +819,14 @@ public class HTTPMessageConfig
             return SharedStringUtil.contains(mp, HTTPMediaType.CHUNKED.getValue(), true);
         }
         return false;
+    }
+
+    @Override
+    public void setTransferChunked(boolean enable) {
+        if(enable)
+            getHeaders().add(HTTPHeader.TRANSFER_ENCODING, HTTPMediaType.CHUNKED.getValue());
+        else
+            getHeaders().remove(HTTPHeader.TRANSFER_ENCODING);
     }
 
 

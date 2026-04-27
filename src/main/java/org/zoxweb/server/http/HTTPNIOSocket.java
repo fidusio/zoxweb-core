@@ -7,6 +7,7 @@ import org.zoxweb.shared.task.ConsumerCallback;
 import java.io.IOException;
 
 public class HTTPNIOSocket
+    implements AutoCloseable
 {
     private final NIOSocket nioSocket;
     public HTTPNIOSocket(NIOSocket nioSocket) {
@@ -26,5 +27,8 @@ public class HTTPNIOSocket
 
     public NIOSocket getNIOSocket() {
         return nioSocket;
+    }
+    public void close() throws IOException {
+        nioSocket.close();
     }
 }

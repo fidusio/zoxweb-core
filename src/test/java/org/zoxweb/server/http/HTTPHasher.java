@@ -4,11 +4,8 @@ import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.io.UByteArrayOutputStream;
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.net.NIOSocket;
-import org.zoxweb.server.net.common.TCPSessionCallback;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.shared.http.*;
-import org.zoxweb.shared.io.SharedIOUtil;
-import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.task.ConsumerCallback;
 import org.zoxweb.shared.util.Const;
 import org.zoxweb.shared.util.MinMax;
@@ -16,8 +13,6 @@ import org.zoxweb.shared.util.NVGenericMap;
 import org.zoxweb.shared.util.ParamUtil;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.channels.SocketChannel;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -32,44 +27,7 @@ public class HTTPHasher {
     static AtomicLong failCount = new AtomicLong(0);
 
 
-    public static class PlainSessionCallback
-            extends TCPSessionCallback {
-        PlainSessionCallback(IPAddress address) {
-            super(address);
-        }
 
-        /**
-         * Performs this operation on the given argument.
-         *
-         * @param byteBuffer the input argument
-         */
-        @Override
-        public void accept(ByteBuffer byteBuffer) {
-            SocketChannel channel = getChannel();
-            log.getLogger().info(getRemoteAddress() + " " + channel.isConnected() + " total: " + total());
-            SharedIOUtil.close(this);
-
-        }
-
-        @Override
-        public void exception(Throwable e) {
-            failCount.incrementAndGet();
-            //log.getLogger().info(getRemoteAddress() + " " + e);
-            SharedIOUtil.close(this);
-
-
-        }
-
-
-        @Override
-        protected void connectedFinished() throws IOException {
-            successCount.incrementAndGet();
-            SocketChannel channel = getChannel();
-            //System.out.println(getRemoteAddress() + " " + channel.isConnected() + " total: " + total());
-            log.getLogger().info(getRemoteAddress() + " " + channel.isConnected() + " total: " + total());
-            SharedIOUtil.close(this);
-        }
-    }
 
 
     public static long total() {
@@ -147,15 +105,15 @@ public class HTTPHasher {
 
                 httpNIOSocket.send(httpurlCallback);
 
-//                TaskUtil.defaultTaskProcessor().execute(() -> {
-//                    try {
-//                        HTTPResponse hr = OkHTTPCall.send(hmci);
-//                        log.getLogger().info("" + hr);
-//                        counter.incrementAndGet();
-//                    } catch (Exception e) {
-//                        e.printStackTrace();
-//                    }
-//                });
+                TaskUtil.defaultTaskProcessor().execute(() -> {
+                    try {
+                        HTTPResponse hr = OkHTTPCall.send(hmci);
+                        log.getLogger().info("" + hr);
+                        counter.incrementAndGet();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                });
             }
 
             log.getLogger().info("All request sent " + repeat*2);

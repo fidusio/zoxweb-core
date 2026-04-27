@@ -46,11 +46,12 @@ public class OkHTTPCall {
             extends RequestBody {
 
         private final NamedValue<?> namedValue;
+        private final boolean isTransferChunked;
 
-        RBNamedValue(NamedValue<?> nvc) {
+        RBNamedValue(NamedValue<?> nvc, boolean isTransferChunked) {
             this.namedValue = nvc;
+            this.isTransferChunked = isTransferChunked;
         }
-
 
         /**
          * @return
@@ -62,8 +63,10 @@ public class OkHTTPCall {
         }
 
         @Override
-        public long contentLength()
-                throws IOException {
+        public long contentLength() {
+            if (isTransferChunked) {
+                return -1;
+            }
             return namedValue.getProperties().getValue(HTTPConst.CNP.CONTENT_LENGTH);
         }
 
@@ -75,6 +78,7 @@ public class OkHTTPCall {
         public void writeTo(BufferedSink bufferedSink) throws IOException {
             InputStream is = null;
             long totalRead = 0;
+            byte[] buffer = null;
             try {
                 if (log.isEnabled()) log.getLogger().info("namedvalue " + namedValue);
                 if (namedValue.getValue() != null) {
@@ -85,17 +89,17 @@ public class OkHTTPCall {
                     }
 
                     if (is != null) {
-                        byte[] buffer = new byte[4092]; // 4KB buffer
-                        int bytesRead;
+                        buffer = ByteBufferUtil.allocateByteArray(SharedIOUtil.K_8);
 
+                        int bytesRead;
                         while ((bytesRead = is.read(buffer)) != -1) {
                             bufferedSink.write(buffer, 0, bytesRead);
-                            bufferedSink.flush();
                             totalRead += bytesRead;
                         }
                     }
                 }
             } finally {
+                ByteBufferUtil.cache(buffer);
                 SharedIOUtil.close(is);
                 if (log.isEnabled())
                     log.getLogger().info("TotalRead :" + totalRead + " content-length: " + contentLength());
@@ -107,31 +111,26 @@ public class OkHTTPCall {
             extends RequestBody {
 
         private final MediaType mediaType;
-        //private final byte[] content;
         private final InputStream contentAsIS;
+        private final boolean isTransferChunked;
 
         RBBinaryContent(NVGenericMap nvgm) {
-            mediaType = MediaType.parse(HTTPMediaType.APPLICATION_JSON.getValue());
-            //content = SharedStringUtil.getBytes(GSONUtil.toJSONDefault(nvgm));
-            this.contentAsIS = new UByteArrayInputStream(SharedStringUtil.getBytes(GSONUtil.toJSONDefault(nvgm)));
+            this(MediaType.parse(HTTPMediaType.APPLICATION_JSON.getValue()),
+                    new UByteArrayInputStream(SharedStringUtil.getBytes(GSONUtil.toJSONDefault(nvgm))),
+                    false);
         }
 
         RBBinaryContent(MediaType mediaType, String content) {
-            this.mediaType = mediaType;
-//            this.content = SUS.isNotEmpty(content) ? SharedStringUtil.getBytes(content) : null;
-            this.contentAsIS = SUS.isNotEmpty(content) ? new UByteArrayInputStream(SharedStringUtil.getBytes(content)) : new ByteArrayInputStream(Const.EMPTY_BYTE_ARRAY);
+            this(mediaType,
+                    SUS.isNotEmpty(content) ? new UByteArrayInputStream(SharedStringUtil.getBytes(content)) : new ByteArrayInputStream(Const.EMPTY_BYTE_ARRAY),
+                    false);
         }
 
-//        RBBinaryContent(MediaType mediaType, byte[] content) {
-//            this.mediaType = mediaType;
-//            this.content = content;
-//            this.contentAsIS = null;
-//        }
-
-        RBBinaryContent(MediaType mediaType, InputStream contentAsIS) {
+        RBBinaryContent(MediaType mediaType, InputStream contentAsIS, boolean isTransferChunked) {
             this.mediaType = mediaType;
-//            this.content = null;
             this.contentAsIS = contentAsIS;
+            this.isTransferChunked = isTransferChunked;
+
         }
 
         /**
@@ -145,7 +144,8 @@ public class OkHTTPCall {
 
         @Override
         public long contentLength() throws IOException {
-
+            if (isTransferChunked)
+                return -1;
             if (contentAsIS != null)
                 return contentAsIS.available();
 
@@ -159,25 +159,21 @@ public class OkHTTPCall {
         @Override
         public void writeTo(BufferedSink bufferedSink)
                 throws IOException {
-            //if (content != null)
-            {
-//                if (log.isEnabled()) log.getLogger().info("Content size : " + content.length);
-//
-//                ByteArrayInputStream inputStream = null;
-//                if (content != null)
-//                    inputStream = new ByteArrayInputStream(content);
-//                else if (contentAsIS != null)
-//                    inputStream = (ByteArrayInputStream) contentAsIS;
 
-                byte[] buffer = ByteBufferUtil.allocateByteArray(SharedIOUtil.K_4); // 8KB buffer
-                int bytesRead;
+            byte[] buffer = ByteBufferUtil.allocateByteArray(SharedIOUtil.K_8); // 8KB buffer
+            int bytesRead;
+            try {
                 while ((bytesRead = contentAsIS.read(buffer)) != -1) {
                     bufferedSink.write(buffer, 0, bytesRead);
                 }
+            } finally {
                 ByteBufferUtil.cache(buffer);
-
-                if (log.isEnabled()) log.getLogger().info("Finished");
+                if(!isTransferChunked)
+                    SharedIOUtil.close(contentAsIS);
             }
+
+            if (log.isEnabled()) log.getLogger().info("Finished");
+
         }
     }
 
@@ -307,16 +303,19 @@ public class OkHTTPCall {
 
             for (GetNameValue<?> gnv : hmci.getParameters().values()) {
                 if (gnv instanceof NamedValue) {
-                    mbBuilder.addFormDataPart(gnv.getName(), ((NamedValue<?>) gnv).getProperties().getValue(HTTPConst.CNP.FILENAME), new RBNamedValue((NamedValue<?>) gnv));
+                    mbBuilder.addFormDataPart(gnv.getName(),
+                            ((NamedValue<?>) gnv).getProperties().getValue(HTTPConst.CNP.FILENAME),
+                            new RBNamedValue((NamedValue<?>) gnv, hmci.isTransferChunked()));
                 } else if (SUS.isPrimitiveGNV(gnv)) {
                     mbBuilder.addFormDataPart(gnv.getName(), "" + gnv.getValue());
                 } else if (gnv instanceof NVGenericMap) {
                     mbBuilder.addFormDataPart(gnv.getName(), gnv.getName(), new RBBinaryContent((NVGenericMap) gnv));
                 }
             }
+
             requestBody = mbBuilder.build();
         } else if (hmci.getMethod() != HTTPMethod.GET) {
-            requestBody = new RBBinaryContent(null, hmci.getContentAsIS());
+            requestBody = new RBBinaryContent(null, hmci.getContentAsIS(), hmci.isTransferChunked());
         }
 
         requestBuilder.method(hmci.getMethod().getName(), requestBody);
@@ -399,7 +398,8 @@ public class OkHTTPCall {
                 throw new HTTPCallException(response.message(), hrd);
             }
         } finally {
-            SharedIOUtil.close(response);
+            SharedIOUtil.close(response, hmci.getContentAsISIfAvailable());
+
         }
 
 
