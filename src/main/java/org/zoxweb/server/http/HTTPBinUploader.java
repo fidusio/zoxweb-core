@@ -3,18 +3,27 @@ package org.zoxweb.server.http;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.server.util.ServerUtil;
 import org.zoxweb.shared.http.*;
-import org.zoxweb.shared.util.*;
+import org.zoxweb.shared.util.NVEnum;
+import org.zoxweb.shared.util.NVGenericMap;
+import org.zoxweb.shared.util.NamedValue;
+import org.zoxweb.shared.util.ParamUtil;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.concurrent.atomic.AtomicLong;
 
 public class HTTPBinUploader {
-    static AtomicLong counter = new AtomicLong(0);
-
-
+    /**
+     *
+     * @param url the upalod url
+     * @param username the user id
+     * @param password the user password
+     * @param filepath file to upload
+     * @param cmp content multipart form data if true otherwise octet stream
+     * @return the json response as NVGenericMap
+     * @throws IOException in case of error
+     */
     public static NVGenericMap uploadFile(String url, String username, String password, String filepath, boolean cmp)
             throws IOException {
         File file = new File(filepath);
@@ -24,27 +33,26 @@ public class HTTPBinUploader {
         }
         System.out.println("Uploading file: " + file);
 
-        if(!cmp)
+        if (!cmp)
             url = url + (url.endsWith("/") ? "" : "/") + file.getName();
         System.out.println("URL: " + url);
 
         HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit(url, null, HTTPMethod.POST, false);
         hmci.setBasicAuthorization(username, password);
         FileInputStream fis = new FileInputStream(file);
-        if(cmp) {
-
+        hmci.setTransferChunked(true);
+        if (cmp) {
+            // content type MULTIPART-FORM-DATA
             hmci.setContentType(HTTPMediaType.MULTIPART_FORM_DATA);
             hmci.setBasicAuthorization(username, password);
-            hmci.setTransferChunked(true);
-            NamedValue<InputStream> nv = new  NamedValue<>("file", fis);
+            NamedValue<InputStream> nv = new NamedValue<>("file", fis);
             nv.getProperties().build(HTTPConst.CNP.FILENAME, file.getName())
                     .build(new NVEnum(HTTPConst.CNP.MEDIA_TYPE, HTTPMediaType.APPLICATION_OCTET_STREAM));
             hmci.getParameters().add(nv);
-        } else{
+        } else {
+            // content APPLICATION-OCTET-STREAM
             hmci.setContentType(HTTPMediaType.APPLICATION_OCTET_STREAM);
-
             hmci.setContentAsIS(fis, false);
-            hmci.setTransferChunked(true);
         }
 
         HTTPResponseData hrd = OkHTTPCall.send(hmci);
