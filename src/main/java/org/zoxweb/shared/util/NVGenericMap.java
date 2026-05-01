@@ -37,6 +37,10 @@ public class NVGenericMap
         this(name, new LinkedHashMap<GetName, GetNameValue<?>>());
     }
 
+    public NVGenericMap(GetName name) {
+        this(name != null ? name.getName() : null, new LinkedHashMap<GetName, GetNameValue<?>>());
+    }
+
     public NVGenericMap(String name, Map<GetName, GetNameValue<?>> map) {
         super(name, map);
     }
@@ -84,6 +88,19 @@ public class NVGenericMap
         return getValueAsLong(name.getName());
     }
 
+    public long getValueAsLong(String name) {
+        Object value = getValue(name);
+        if (value instanceof Number)
+            return ((Number) value).longValue();
+
+        return Long.parseLong((String) value);
+    }
+
+    public long getValueAsLong(GetName name, long defaultValue)
+            throws RuntimeException {
+        return getValueAsLong(name.getName(), defaultValue);
+    }
+
     /**
      * This method can throw exception ClassCastException or number formating exception
      *
@@ -91,11 +108,14 @@ public class NVGenericMap
      * @return long value
      * @throws RuntimeException it could NullPointer ClassCast ...
      */
-    public long getValueAsLong(String name)
+    public long getValueAsLong(String name, long defaultValue)
             throws RuntimeException {
         Object value = getValue(name);
+        if (value == null) {
+            return defaultValue;
+        }
         if (value instanceof Number)
-            return ((Number)value).longValue();
+            return ((Number) value).longValue();
 
         return Long.parseLong((String) value);
     }

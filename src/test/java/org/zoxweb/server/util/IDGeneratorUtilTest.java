@@ -13,15 +13,15 @@ public class IDGeneratorUtilTest {
     @Test
     public void perfTest() {
         // invoke it for the first time to force class loading
-        IDGs.UUIDSHA256Base64.generateID();
-        IDGs.SHA256Base64.generateID();
+        IDGs.UUIDSHA256Base64.genID();
+        IDGs.SHA256Base64.genID();
 
         StatCounter sc = new StatCounter();
 
 
         int max = 10000;
         for (int i = 0; i < max; i++) {
-            IDGs.SHA256Base64.generateID();
+            IDGs.SHA256Base64.genID();
         }
 
         System.out.println(TimeInMillis.toString(sc.deltaNow()) + " for " + max + " " + sc.deltaNow());
@@ -30,7 +30,7 @@ public class IDGeneratorUtilTest {
         sc.setReferenceTime();
 
         for (int i = 0; i < max; i++) {
-            String id = IDGs.SHA256Base64.generateID();
+            String id = IDGs.SHA256Base64.genID();
             System.out.println(id + " length:" + id.length());
         }
 
@@ -39,7 +39,7 @@ public class IDGeneratorUtilTest {
         sc.setReferenceTime();
         max = 10000;
         for (int i = 0; i < max; i++) {
-            IDGs.UUIDBase64.generateID();
+            IDGs.UUIDBase64.genID();
         }
 
         System.out.println(sc.deltaNow() + " millis for " + max);
@@ -48,7 +48,7 @@ public class IDGeneratorUtilTest {
         sc.setReferenceTime();
 
         for (int i = 0; i < max; i++) {
-            String id = IDGs.UUIDBase64.generateID();
+            String id = IDGs.UUIDBase64.genID();
             System.out.println(id + " length:" + id.length());
         }
 
@@ -64,7 +64,7 @@ public class IDGeneratorUtilTest {
     @Test
     public void testUUIDV4()
     {
-        String id = IDGs.UUIDV4.generateID();
+        String id = IDGs.UUIDV4.genID();
         String b64 = SharedBase64.encodeAsString(Base64Type.URL, id);
         System.out.println(id + " length:" + id.length());
         System.out.println(b64 + " length:" + b64.length());

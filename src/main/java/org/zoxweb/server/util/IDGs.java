@@ -35,7 +35,7 @@ public class IDGs {
         }
 
         @Override
-        public String generateID() {
+        public String genID() {
 
             try {
                 String ret;
@@ -60,7 +60,7 @@ public class IDGs {
             return "UUIDSHA256Base64";
         }
 
-        public byte[] generateNativeID() {
+        public byte[] genNativeID() {
             byte[] ret = null;
 
             do {
@@ -101,7 +101,7 @@ public class IDGs {
         }
 
         @Override
-        public String generateID() {
+        public String genID() {
             String ret = null;
 
             do {
@@ -122,7 +122,7 @@ public class IDGs {
             return "SHA256Base64";
         }
 
-        public byte[] generateNativeID() {
+        public byte[] genNativeID() {
 
             byte[] ret = null;
 
@@ -143,7 +143,7 @@ public class IDGs {
     public static final IDGenerator<String, byte[]> UUIDBase64 = new IDGenerator<String, byte[]>() {
 
         @Override
-        public String generateID() {
+        public String genID() {
             String ret;
 
             do {
@@ -153,7 +153,7 @@ public class IDGs {
             return ret;
         }
 
-        public byte[] generateNativeID() {
+        public byte[] genNativeID() {
             byte[] ret;
 
             do {
@@ -220,14 +220,56 @@ public class IDGs {
         }
 
         @Override
-        public String generateID() {
+        public String genID() {
             // TODO Auto-generated method stub
-            return generateNativeID().toString();
+            return genNativeID().toString();
         }
 
-        public UUID generateNativeID() {
+        public UUID genNativeID() {
             // TODO Auto-generated method stub
             return UUID.randomUUID();
+        }
+
+
+    };
+
+    public static final IDGenerator<String, UUID> UUIDV7 = new IDGenerator<String, UUID>() {
+
+        /**
+         *
+         * @param input
+         * @return
+         */
+        @Override
+        public UUID decode(String input) {
+            return UUID.fromString(input);
+        }
+
+        /**
+         *
+         * @param input
+         * @return
+         */
+        @Override
+        public String encode(UUID input) {
+            return input.toString();
+        }
+
+        @Override
+        public String getName() {
+            // TODO Auto-generated method stub
+            return "UUID-V4";
+        }
+
+        @Override
+        public String genID() {
+            // TODO Auto-generated method stub
+            return genNativeID().toString();
+        }
+
+        public UUID genNativeID() {
+            // TODO Auto-generated method stub
+            return UUID7.randomUUID();
         }
 
 

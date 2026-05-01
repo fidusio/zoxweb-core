@@ -75,6 +75,7 @@
         <jsoup.version>1.22.1</jsoup.version>
         <junit.version>6.0.1</junit.version>
         <okhttp.version>5.3.2</okhttp.version>
+        <uuid.gen.version>RELEASE</uuid.gen.version>
     </properties>
 
     <build>
@@ -218,6 +219,11 @@
             <groupId>javax.cache</groupId>
             <artifactId>cache-api</artifactId>
             <version>${javax-cache.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.f4b6a3</groupId>
+            <artifactId>uuid-creator</artifactId>
+            <version>${uuid.gen.version}</version>
         </dependency>
 
         <dependency>

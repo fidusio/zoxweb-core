@@ -7,9 +7,9 @@ public interface IDGenerator<I, N>
      * Generate a unique random ID.
      * @return a new ID.
      */
-    I generateID();
+    I genID();
 
-    N generateNativeID();
+    N genNativeID();
 
     default boolean isValid(I toValidate) {
         try {

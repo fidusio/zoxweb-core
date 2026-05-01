@@ -1,11 +1,14 @@
 package org.zoxweb.shared.util;
 
+
+import java.util.concurrent.atomic.AtomicLong;
+
 public class LongIDGenerator implements IDGenerator<Long, Long> {
 
     public static final LongIDGenerator DEFAULT = new LongIDGenerator();
 
 
-    private volatile long currentID = 0;
+    private volatile AtomicLong currentID = new AtomicLong(0);
 
     @Override
     public String getName() {
@@ -14,23 +17,23 @@ public class LongIDGenerator implements IDGenerator<Long, Long> {
     }
 
     @Override
-    public Long generateID() {
+    public Long genID() {
         // TODO Auto-generated method stub
         return nextID();
     }
 
     @Override
-    public Long generateNativeID() {
+    public Long genNativeID() {
         // TODO Auto-generated method stub
         return nextID();
     }
 
     public long currentID() {
-        return currentID;
+        return currentID.get();
     }
 
-    public synchronized long nextID() {
-        return ++currentID;
+    public long nextID() {
+        return currentID.incrementAndGet();
     }
 
     /**

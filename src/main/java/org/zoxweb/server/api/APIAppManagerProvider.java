@@ -113,7 +113,7 @@ public class APIAppManagerProvider
         SUS.checkIfNulls("Null SubjectAPIKey", subjectAPIKey);
 
         if (subjectAPIKey.getSubjectID() == null) {
-            subjectAPIKey.setSubjectID(IDGs.SHA256Base64.generateID());
+            subjectAPIKey.setSubjectID(IDGs.SHA256Base64.genID());
         }
 
         if (subjectAPIKey.getAPIKey() == null) {
@@ -250,8 +250,8 @@ public class APIAppManagerProvider
         SharedUtil.validate(userID, true, true);
 
         // special case to avoid chicken and egg situation
-        String userIDRef = getAPIDataStore().getIDGenerator().generateID();
-        String globalID = IDGs.UUIDV4.generateID();
+        String userIDRef = getAPIDataStore().getIDGenerator().genID();
+        String globalID = IDGs.UUIDV4.genID();
         getAPISecurityManager().associateNVEntityToSubjectUserID(userID, userIDRef);
         userID.setReferenceID(userIDRef);
         userID.setSubjectGUID(userIDRef);
