@@ -99,10 +99,10 @@ public class ReflectionUtil {
         }
 
 
-        public synchronized Method[] findMethodsByType(Class<? extends Annotation> annotatioType) {
+        public synchronized Method[] findMethodsByType(Class<? extends Annotation> annotationType) {
             List<Method> match = new ArrayList<>();
             for (MethodAnnotations ma : methodsAnnotations.values()) {
-                if (ma.isMethodAnnotatedBy(annotatioType))
+                if (ma.isMethodAnnotatedBy(annotationType))
                     match.add(ma.method);
             }
             return match.isEmpty() ? null : match.toArray(new Method[0]);

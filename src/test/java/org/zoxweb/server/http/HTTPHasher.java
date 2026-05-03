@@ -7,7 +7,6 @@ import org.zoxweb.server.net.NIOSocket;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.shared.http.*;
 import org.zoxweb.shared.task.ConsumerCallback;
-import org.zoxweb.shared.util.Const;
 import org.zoxweb.shared.util.MinMax;
 import org.zoxweb.shared.util.NVGenericMap;
 import org.zoxweb.shared.util.ParamUtil;
@@ -105,23 +104,15 @@ public class HTTPHasher {
 
                 httpNIOSocket.send(httpurlCallback);
 
-                TaskUtil.defaultTaskProcessor().execute(() -> {
-                    try {
-                        HTTPResponse hr = OkHTTPCall.send(hmci);
-                        log.getLogger().info("" + hr);
-                        counter.incrementAndGet();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                });
+
             }
 
             log.getLogger().info("All request sent " + repeat*2);
-            TaskUtil.waitIfBusyThenClose(50, () -> repeat * 2 == counter.get());
+            TaskUtil.waitIfBusyThenClose(250, () -> repeat * 2 == counter.get());
             httpNIOSocket.getNIOSocket().close();
 
 
-            log.getLogger().info("******************************Total: " + total() + " Success: " + successCount.get() + " Failed: " + failCount.get() + " it took " + Const.TimeInMillis.toString(System.currentTimeMillis() - ts));
+           // log.getLogger().info("******************************Total: " + total() + " Success: " + successCount.get() + " Failed: " + failCount.get() + " it took " + Const.TimeInMillis.toString(System.currentTimeMillis() - ts));
             log.getLogger().info( okHTTP + " "  + urlHTTP);
 
 

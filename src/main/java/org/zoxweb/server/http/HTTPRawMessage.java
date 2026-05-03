@@ -328,8 +328,8 @@ public class HTTPRawMessage
 
 
     public boolean canProceedAsPartial() {
-        if (isMessageComplete())
-            return true;
+//        if (isMessageComplete())
+//            return true;
 
 
         if (areHeadersParsed()) {

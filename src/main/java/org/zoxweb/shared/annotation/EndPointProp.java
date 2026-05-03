@@ -70,6 +70,9 @@ public @interface EndPointProp {
      */
     String name();
 
+
+    boolean partialRequest() default false;
+
     /**
      * Describe the handler
      *

@@ -30,31 +30,27 @@ import java.util.Arrays;
  * @see SecurityProfile
  */
 public class HTTPEndPoint
-extends SecurityProfile
-{
+        extends SecurityProfile {
     public enum Param
-            implements GetNVConfig
-    {
+            implements GetNVConfig {
         BEAN_CLASS_NAME(NVConfigManager.createNVConfig("bean", "Bean class name", "Bean", false, true, String.class)),
         PATHS(NVConfigManager.createNVConfig("paths", "Paths", "Paths", false, true, NVStringList.class)),
         HTTP_METHODS(NVConfigManager.createNVConfig("methods", "HTTP Methods", "Methods", false, true, HTTPMethod[].class)),
         PRE_FILTER(NVConfigManager.createNVConfig("pre_filter", "http filter", "PreFilter", false, true, NamedValue.class)),
         INPUT_CONTENT_TYPE(NVConfigManager.createNVConfig("input_content_type", "InputContentType", "IContentType", false, true, String.class)),
         OUTPUT_CONTENT_TYPE(NVConfigManager.createNVConfig("output_content_type", "OutputContentType", "OContentType", false, true, String.class)),
+        IS_PARTIAL_REQUEST_ENABLED(NVConfigManager.createNVConfig("is_partial_request_enabled", "True partial request with no complete contents are accepted", "IsPartialRequestEnabled", false, true, boolean.class)),
         ;
         private final NVConfig nvc;
 
-        Param(NVConfig nvc)
-        {
+        Param(NVConfig nvc) {
             this.nvc = nvc;
         }
 
-        public NVConfig getNVConfig()
-        {
+        public NVConfig getNVConfig() {
             return nvc;
         }
     }
-
 
 
     /**
@@ -74,72 +70,57 @@ extends SecurityProfile
             SecurityProfile.NVC_SECURITY_PROFILE);
 
 
-    public HTTPEndPoint()
-    {
+    public HTTPEndPoint() {
         super(NVC_HTTP_END_POINT);
     }
 
-    public String getName()
-    {
+    public String getName() {
         String ret = lookupValue(DataConst.DataParam.NAME);
-        if(ret == null)
+        if (ret == null)
             ret = getBeanClassName();
         return ret;
     }
 
-    public String getBeanClassName()
-    {
+    public String getBeanClassName() {
         return lookupValue(Param.BEAN_CLASS_NAME);
     }
 
-    public void setBeanClassName(String beanClassName)
-    {
+    public void setBeanClassName(String beanClassName) {
         setValue(Param.BEAN_CLASS_NAME, beanClassName);
     }
 
-    public String getOutputContentType()
-    {
+    public String getOutputContentType() {
         return lookupValue(Param.OUTPUT_CONTENT_TYPE);
     }
 
-    public void setOutputContentType(String outputContentType)
-    {
+    public void setOutputContentType(String outputContentType) {
         setValue(Param.OUTPUT_CONTENT_TYPE, outputContentType);
     }
 
-    public String getInputContentType()
-    {
+    public String getInputContentType() {
         return lookupValue(Param.INPUT_CONTENT_TYPE);
     }
 
-    public void setInputContentType(String inputContentType)
-    {
+    public void setInputContentType(String inputContentType) {
         setValue(Param.INPUT_CONTENT_TYPE, inputContentType);
     }
 
 
-
-
-
-    public void setPrefilter(HTTPHandler<?> prefilter)
-    {
+    public void setPrefilter(HTTPHandler<?> prefilter) {
         NamedValue<Object> nvPF = lookup(Param.PRE_FILTER);
         nvPF.setValue(prefilter);
     }
 
-    public <V> HTTPHandler<V>  getPrefilter()
-    {
+    public <V> HTTPHandler<V> getPrefilter() {
         return lookupValue(Param.PRE_FILTER);
     }
 
-    public String[] getPaths()
-    {
-        return ((NVStringList)lookup(Param.PATHS)).getValues();
+    public String[] getPaths() {
+        return ((NVStringList) lookup(Param.PATHS)).getValues();
     }
 
-    public void setPaths(String ...paths)
-    {
-        ((NVStringList)lookup(Param.PATHS)).setValues(paths);
+    public void setPaths(String... paths) {
+        ((NVStringList) lookup(Param.PATHS)).setValues(paths);
     }
 
 //    public boolean isPathSupported(String path)
@@ -147,28 +128,25 @@ extends SecurityProfile
 //        return ((NVStringList)lookup(Param.PATHS)).contains(path);
 //    }
 
-    public boolean isPathSupported(String uri)
-    {
+    public boolean isPathSupported(String uri) {
         uri = SharedStringUtil.removeCharFromEnd('/', uri);
 
         //NVStringList toParse =  ((NVStringList)lookup(Param.PATHS));
         String[] uriTokens = SharedStringUtil.parseString(uri, "/", true);//uri.split("/");
-        for(String path: getPaths())
-        {
+        for (String path : getPaths()) {
             path = SharedStringUtil.removeCharFromEnd('/', path);
-            if(uri.equalsIgnoreCase(path)){
+            if (uri.equalsIgnoreCase(path)) {
                 return true;
             }
 
             String[] pathTokens = SharedStringUtil.parseString(path, "/", true);//path.split("/");
             System.out.println(Arrays.toString(uriTokens) + ":" + Arrays.toString(pathTokens));
-            for(int i = 0; i < pathTokens.length; i++)
-            {
+            for (int i = 0; i < pathTokens.length; i++) {
                 boolean optional = pathTokens[i].startsWith("{");
-                if(!optional && uriTokens.length == i)
+                if (!optional && uriTokens.length == i)
                     break;
 
-                if(optional || uriTokens.length == i ) {
+                if (optional || uriTokens.length == i) {
                     return true;
                 }
 
@@ -181,26 +159,31 @@ extends SecurityProfile
         return false;
     }
 
-    public HTTPMethod[] getHTTPMethods()
-    {
-        return ((NVEnumList)lookup(Param.HTTP_METHODS)).getValues(new HTTPMethod[0]);
+    public HTTPMethod[] getHTTPMethods() {
+        return ((NVEnumList) lookup(Param.HTTP_METHODS)).getValues(new HTTPMethod[0]);
     }
 
-    public boolean isHTTPMethodSupported(String httpMethod)
-    {
-        return isHTTPMethodSupported((HTTPMethod)SharedUtil.lookupEnum(httpMethod, HTTPMethod.values()));
+    public boolean isHTTPMethodSupported(String httpMethod) {
+        return isHTTPMethodSupported((HTTPMethod) SharedUtil.lookupEnum(httpMethod, HTTPMethod.values()));
     }
-    public boolean isHTTPMethodSupported(HTTPMethod httpMethod)
-    {
-        NVEnumList methodList = (NVEnumList)lookup(Param.HTTP_METHODS);
+
+    public boolean isHTTPMethodSupported(HTTPMethod httpMethod) {
+        NVEnumList methodList = (NVEnumList) lookup(Param.HTTP_METHODS);
         return methodList.getValue().size() > 0 ? methodList.contains(httpMethod) : true;
     }
 
-    public void setHTTPMethods(HTTPMethod ...methods)
-    {
-        ((NVEnumList)lookup(Param.HTTP_METHODS)).setValues(methods);
+    public void setHTTPMethods(HTTPMethod... methods) {
+        ((NVEnumList) lookup(Param.HTTP_METHODS)).setValues(methods);
     }
 
+
+    public boolean isPartialRequestEnabled() {
+        return lookupValue(Param.IS_PARTIAL_REQUEST_ENABLED);
+    }
+
+    public void setPartialRequestEnabled(boolean partialRequest) {
+        setValue(Param.IS_PARTIAL_REQUEST_ENABLED, partialRequest);
+    }
 
 
 //    public URIScheme[] getProtocols()
