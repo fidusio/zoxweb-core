@@ -212,6 +212,26 @@ public class IOUtil {
         return new String(baos.getInternalBuffer(), 0, baos.size(), charsetEncoding);
     }
 
+    /**
+     *
+     * @param clazz for resource access
+     * @param resource resource name looking for
+     * @return String object of the content
+     * @throws NullPointerException
+     * @throws IOException
+     */
+    public static String inputStreamToString(Class<?> clazz, String resource) throws NullPointerException, IOException {
+
+        String content = null;
+        try {
+            content = (inputStreamToString(clazz.getResourceAsStream(resource), true));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return content;
+    }
+
     public static long countInputStreamBytes(InputStream is, boolean close)
             throws IOException {
         byte[] buffer = ByteBufferUtil.allocateByteArray(SharedIOUtil.K_8);
@@ -575,6 +595,7 @@ public class IOUtil {
             throw new IOException(he);
         }
     }
+
 
     /**
      * @param is
