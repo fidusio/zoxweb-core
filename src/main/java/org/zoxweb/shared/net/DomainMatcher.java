@@ -1,177 +1,156 @@
 package org.zoxweb.shared.net;
 
-import org.zoxweb.shared.util.DataEncoder;
-import org.zoxweb.shared.util.SUS;
+import org.zoxweb.shared.filters.TokenMatcher;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-
 /**
- * Thread-safe domain matcher with tiered lookup strategy.
+ * Thread-safe, case-insensitive domain matcher.
  * <p>
- * Patterns are classified into three tiers for optimal matching performance:
- * <ul>
- *   <li><b>Tier 1 — Exact:</b> literal domains with no wildcards, matched via O(1) hash lookup.</li>
- *   <li><b>Tier 2 — Suffix:</b> patterns of the form {@code *.suffix} (e.g. {@code *.xlogistx.io}),
- *       matched by walking parent domain labels against a hash set.</li>
- *   <li><b>Tier 3 — Glob:</b> complex patterns containing {@code *} or {@code ?} in non-prefix
- *       positions, matched via iterative glob scan.</li>
- * </ul>
- * All pattern and domain comparisons are case-insensitive.
+ * Thin facade over {@link TokenMatcher} configured for case-insensitive matching, plus DNS-style
+ * apex auto-registration: when a pure suffix pattern like {@code *.foo.com} is added, the bare
+ * apex {@code foo.com} is automatically also matched. This mirrors the X.509 / cookie convention
+ * where {@code *.foo.com} covers both subdomains and the apex itself.
+ * <p>
+ * Apex auto-registration is reference-counted: removing {@code *.foo.com} also removes the
+ * implicit apex, unless the user has explicitly added {@code foo.com} as its own pattern (in
+ * which case the apex stays).
+ * <p>
+ * Supported wildcards: {@code *} (zero or more) and {@code ?} (exactly one).
+ *
+ * @see TokenMatcher
  */
 public class DomainMatcher {
 
-    // Tier 1: exact match — O(1)
-    private final Set<String> exactSet = ConcurrentHashMap.newKeySet();
-    // Tier 2: suffix match for "*.suffix" patterns — O(label count)
-    private final Set<String> suffixSet = ConcurrentHashMap.newKeySet();
-    // Tier 3: complex globs (?, or * not at prefix) — linear scan
-    private final List<String> globPatterns = new ArrayList<String>();
+    private final TokenMatcher tokenMatcher = new TokenMatcher(true);
+    // The patterns the user explicitly added (lowercased, stars-collapsed). This is the
+    // public-facing rule set and the source of truth for size() and dedup.
+    private final Set<String> userPatterns = ConcurrentHashMap.newKeySet();
+    // Refcount of "*.<apex>" patterns per apex literal. While count > 0 we keep <apex>
+    // registered in tokenMatcher so the bare apex matches too. Guarded by writeMutex.
+    private final Map<String, Integer> apexRefcount = new HashMap<String, Integer>();
+    private final Object writeMutex = new Object();
 
     /**
-     * Adds a domain pattern to the matcher.
-     * <p>
-     * The pattern is automatically classified into the appropriate tier:
-     * <ul>
-     *   <li>No wildcards → exact set</li>
-     *   <li>{@code *.suffix} with no further wildcards → suffix set</li>
-     *   <li>All other wildcard patterns → glob list</li>
-     * </ul>
+     * Adds a domain pattern.
      *
-     * @param pattern the domain pattern (e.g. {@code "xlogistx.io"}, {@code "*.xlogistx.io"}, {@code "api-?.example.com"})
-     * @throws IllegalArgumentException if pattern is null or empty
+     * @param pattern e.g. {@code "xlogistx.io"}, {@code "*.xlogistx.io"}, {@code "api-?.example.com"}
+     * @return {@code true} if newly added; {@code false} if already present
+     * @throws NullPointerException     if pattern is null
+     * @throws IllegalArgumentException if pattern is empty
      */
-    public void addPattern(String pattern) {
-        if(SUS.isEmpty(pattern)) {
-            throw new IllegalArgumentException("Pattern cannot be empty");
-        }
-        pattern = DataEncoder.StringLower.encode(pattern);
-
-        synchronized (this) {
-            if (pattern.indexOf('*') == -1 && pattern.indexOf('?') == -1) {
-                // no wildcards → exact
-                exactSet.add(pattern);
-            } else if (pattern.startsWith("*.")) {
-                String suffix = pattern.substring(2);
-                if (suffix.indexOf('*') == -1 && suffix.indexOf('?') == -1) {
-                    // pure suffix wildcard like *.xlogistx.io
-                    suffixSet.add(suffix);
-                } else {
-                    globPatterns.add(pattern);
+    public boolean addPattern(String pattern) {
+        String norm = normalize(pattern);
+        synchronized (writeMutex) {
+            if (!userPatterns.add(norm)) return false;
+            // May return false if the apex auto-added this exact literal earlier; that's fine.
+            tokenMatcher.addPattern(norm);
+            String apex = pureSuffixApex(norm);
+            if (apex != null) {
+                Integer cur = apexRefcount.get(apex);
+                int next = (cur == null ? 0 : cur) + 1;
+                apexRefcount.put(apex, next);
+                if (next == 1 && !userPatterns.contains(apex)) {
+                    tokenMatcher.addPattern(apex);
                 }
-            } else {
-                globPatterns.add(pattern);
             }
+            return true;
         }
     }
 
     /**
-     * Removes a previously added pattern from the matcher.
+     * Removes a previously added pattern.
      *
-     * @param pattern the pattern to remove
-     * @return {@code true} if the pattern was found and removed
-     * @throws IllegalArgumentException if pattern is null or empty
+     * @return {@code true} if the pattern was present and removed
+     * @throws NullPointerException     if pattern is null
+     * @throws IllegalArgumentException if pattern is empty
      */
     public boolean removePattern(String pattern) {
-        if(SUS.isEmpty(pattern)) {
-            throw new IllegalArgumentException("Pattern cannot be empty");
-        }
-        synchronized (this) {
-            pattern = DataEncoder.StringLower.encode(pattern);
-            return exactSet.remove(pattern)
-                    || suffixSet.remove(pattern.startsWith("*.") ? pattern.substring(2) : pattern)
-                    || globPatterns.remove(pattern);
+        String norm = normalize(pattern);
+        synchronized (writeMutex) {
+            if (!userPatterns.remove(norm)) return false;
+
+            String apex = pureSuffixApex(norm);
+            if (apex != null) {
+                int next = apexRefcount.get(apex) - 1;
+                if (next == 0) {
+                    apexRefcount.remove(apex);
+                    // Drop the implicit apex unless the user also explicitly added it.
+                    if (!userPatterns.contains(apex)) {
+                        tokenMatcher.removePattern(apex);
+                    }
+                } else {
+                    apexRefcount.put(apex, next);
+                }
+            }
+
+            // Remove the user's pattern from the engine — unless it's an exact literal still
+            // referenced as an apex by some surviving "*.<that-literal>" pattern.
+            if (isExactLiteral(norm) && apexRefcount.containsKey(norm)) {
+                // leave it in tokenMatcher; an outstanding *.X still needs it
+            } else {
+                tokenMatcher.removePattern(norm);
+            }
+            return true;
         }
     }
 
     /**
-     * Tests whether a domain matches any of the registered patterns.
-     * <p>
-     * Matching proceeds through tiers in order (exact → suffix → glob)
-     * and returns on the first hit.
+     * Tests whether a domain matches any registered pattern.
      *
-     * @param domain the domain name to test (e.g. {@code "api.xlogistx.io"})
-     * @return {@code true} if the domain matches at least one pattern
-     * @throws NullPointerException if domain is null
+     * @return {@code true} on match; {@code false} on no match or when {@code domain} is null
      */
     public boolean matches(String domain) {
-        SUS.checkIfNull("Null pattern", domain);
-        domain = DataEncoder.StringLower.encode(domain);
-
-        // Tier 1: exact
-        if (exactSet.contains(domain))
-            return true;
-
-        // Tier 2: suffix set — also match the bare domain itself
-        // "a.b.xlogistx.io" checks "a.b.xlogistx.io", "b.xlogistx.io", then "xlogistx.io"
-        if (suffixSet.contains(domain))
-            return true;
-        int dot = domain.indexOf('.');
-        while (dot != -1) {
-            if (suffixSet.contains(domain.substring(dot + 1)))
-                return true;
-            dot = domain.indexOf('.', dot + 1);
-        }
-
-        // Tier 3: glob patterns
-        for (String pattern : globPatterns) {
-            if (globMatch(pattern, domain))
-                return true;
-        }
-
-        return false;
+        return tokenMatcher.matches(domain);
     }
 
-    /**
-     * Iterative glob matching — no regex, no recursion.
-     * <ul>
-     *   <li>{@code *} matches zero or more of any character</li>
-     *   <li>{@code ?} matches exactly one character</li>
-     * </ul>
-     *
-     * @param pattern the glob pattern
-     * @param text    the text to match against
-     * @return {@code true} if the text matches the pattern
-     */
-    private static boolean globMatch(String pattern, String text) {
-        int pi = 0, ti = 0;
-        int starPi = -1, starTi = -1;
-        int pLen = pattern.length(), tLen = text.length();
+    /** @return number of patterns the user has explicitly added (apex auto-registrations are not counted). */
+    public int size() {
+        return userPatterns.size();
+    }
 
-        while (ti < tLen) {
-            if (pi < pLen && (pattern.charAt(pi) == '?' || pattern.charAt(pi) == text.charAt(ti))) {
-                pi++;
-                ti++;
-            } else if (pi < pLen && pattern.charAt(pi) == '*') {
-                // record backtrack anchor
-                starPi = pi;
-                starTi = ti;
-                pi++;
-            } else if (starPi != -1) {
-                // backtrack: let * consume one more char
-                pi = starPi + 1;
-                starTi++;
-                ti = starTi;
+    /** @return every user-added pattern as a fresh array (apex auto-registrations are not included). */
+    public String[] getAll() {
+        return userPatterns.toArray(new String[0]);
+    }
+
+    // -------- internals --------
+
+    private static String normalize(String pattern) {
+        if (pattern == null) throw new NullPointerException("pattern");
+        if (pattern.isEmpty()) throw new IllegalArgumentException("Pattern cannot be empty");
+        return collapseStars(pattern.toLowerCase());
+    }
+
+    /** Returns the apex literal for a pure {@code *.<literal>} pattern (no other wildcards), else null. */
+    private static String pureSuffixApex(String norm) {
+        if (!norm.startsWith("*.") || norm.length() < 3) return null;
+        String rest = norm.substring(2);
+        if (rest.indexOf('*') >= 0 || rest.indexOf('?') >= 0) return null;
+        return rest;
+    }
+
+    private static boolean isExactLiteral(String s) {
+        return s.indexOf('*') < 0 && s.indexOf('?') < 0;
+    }
+
+    private static String collapseStars(String r) {
+        if (r.indexOf("**") < 0) return r;
+        StringBuilder sb = new StringBuilder(r.length());
+        boolean prev = false;
+        for (int i = 0; i < r.length(); i++) {
+            char c = r.charAt(i);
+            if (c == '*') {
+                if (!prev) sb.append(c);
+                prev = true;
             } else {
-                return false;
+                sb.append(c);
+                prev = false;
             }
         }
-        // consume trailing *'s in pattern
-        while (pi < pLen && pattern.charAt(pi) == '*')
-            pi++;
-
-        return pi == pLen;
-    }
-
-    /**
-     * Returns the total number of registered patterns across all tiers.
-     *
-     * @return the pattern count
-     */
-    public int size() {
-        return exactSet.size() + suffixSet.size() + globPatterns.size();
+        return sb.toString();
     }
 }
