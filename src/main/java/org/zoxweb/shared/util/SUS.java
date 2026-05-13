@@ -132,6 +132,22 @@ public class SUS {
         return ret;
     }
 
+
+    public static NVStringList enumsToStringList(String name, Enum<?>... enums) {
+        NVStringList ret = new NVStringList(name);
+        for (Enum<?> e : enums) {
+            ret.add(enumToString(e));
+        }
+
+        return ret;
+    }
+
+    public static String enumToString(Enum<?> enumToConvert) {
+        if (enumToConvert instanceof GetName) return ((GetName) enumToConvert).getName();
+        if (enumToConvert instanceof GetValue) return ((GetValue<?>) enumToConvert).getValue() + "";
+        return enumToConvert != null ? enumToConvert.toString() : null;
+    }
+
     /**
      * Return the enum name if it implements GetName if not enum.name()
      *

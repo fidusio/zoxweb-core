@@ -104,7 +104,7 @@ public class TCPPortScan
             int size = ipAddressesList.size();
             TaskUtil.waitIfBusy(500, () -> total() == size);
             log.getLogger().info("IPAddresses size: " + ipAddressesList.size() + " Total: " + total() + " Success: " + successCount.get() + " Failed: " + failCount.get() + " it took " + Const.TimeInMillis.toString(System.currentTimeMillis() - ts));
-            log.getLogger().info(GSONUtil.toJSONDefault(nioSocket.getStats(), true));
+            log.getLogger().info(GSONUtil.toJSONDefault(nioSocket.toProperties(false), true));
             SharedIOUtil.close(nioSocket);
 
             log.getLogger().info(GSONUtil.toJSONDefault(TaskUtil.info()));

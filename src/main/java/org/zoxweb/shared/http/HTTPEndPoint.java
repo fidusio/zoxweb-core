@@ -30,11 +30,13 @@ import java.util.Arrays;
  * @see SecurityProfile
  */
 public class HTTPEndPoint
-        extends SecurityProfile {
+        extends SecurityProfile
+        implements ToNVProperties{
     public enum Param
             implements GetNVConfig {
         BEAN_CLASS_NAME(NVConfigManager.createNVConfig("bean", "Bean class name", "Bean", false, true, String.class)),
         PATHS(NVConfigManager.createNVConfig("paths", "Paths", "Paths", false, true, NVStringList.class)),
+        RAW_PATH(NVConfigManager.createNVConfig("raw_path", "Raw path", "RawPath", false, true, String.class)),
         HTTP_METHODS(NVConfigManager.createNVConfig("methods", "HTTP Methods", "Methods", false, true, HTTPMethod[].class)),
         PRE_FILTER(NVConfigManager.createNVConfig("pre_filter", "http filter", "PreFilter", false, true, NamedValue.class)),
         INPUT_CONTENT_TYPE(NVConfigManager.createNVConfig("input_content_type", "InputContentType", "IContentType", false, true, String.class)),
@@ -123,6 +125,15 @@ public class HTTPEndPoint
         ((NVStringList) lookup(Param.PATHS)).setValues(paths);
     }
 
+
+    public String getRawPath() {
+        return lookupValue(Param.RAW_PATH);
+    }
+
+    public void setRawPath(String rawPath) {
+        setValue(Param.RAW_PATH, rawPath);
+    }
+
 //    public boolean isPathSupported(String path)
 //    {
 //        return ((NVStringList)lookup(Param.PATHS)).contains(path);
@@ -183,6 +194,17 @@ public class HTTPEndPoint
 
     public void setPartialRequestEnabled(boolean partialRequest) {
         setValue(Param.IS_PARTIAL_REQUEST_ENABLED, partialRequest);
+    }
+
+    @Override
+    public NVGenericMap toProperties(boolean detailed) {
+        return new NVGenericMap(getName())
+                .build("uri-path", getRawPath())
+                .build(lookup(Param.INPUT_CONTENT_TYPE))
+                .build(lookup(Param.OUTPUT_CONTENT_TYPE))
+                .build(SUS.enumsToStringList("http_methods", getHTTPMethods()))
+                .build(lookup(Param.IS_PARTIAL_REQUEST_ENABLED));
+
     }
 
 

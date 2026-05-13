@@ -104,7 +104,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * @see NIOChannelMonitor
  */
 public class NIOSocket
-        implements Runnable, DaemonController, Closeable {
+        implements Runnable, DaemonController, Closeable, ToNVProperties {
     public static final LogWrapper logger = new LogWrapper(NIOSocket.class).setEnabled(false);
     private final AtomicBoolean live = new AtomicBoolean(true);
     private final SelectorController selectorController;
@@ -1005,7 +1005,8 @@ public class NIOSocket
      *
      * @return an NVGenericMap containing the current statistics
      */
-    public NVGenericMap getStats() {
+    @Override
+    public NVGenericMap toProperties(boolean detailed) {
         NVGenericMap ret = new NVGenericMap("nio_socket");
         ret.add("time_stamp", DateUtil.DEFAULT_DATE_FORMAT_TZ.format(new Date()));
         ret.build(new NVLong("connection_counts", totalConnections())).

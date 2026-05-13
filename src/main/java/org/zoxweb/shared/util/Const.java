@@ -411,7 +411,7 @@ public class Const {
                     }
 
 
-                    return result + "/" + sibs[i].getName();
+                    return result + " " + sibs[i].getName();
                 }
             }
             return "0";

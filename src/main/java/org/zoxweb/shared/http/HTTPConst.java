@@ -28,16 +28,17 @@ public final class HTTPConst {
     private HTTPConst() {
     }
 
-    public final static String APPLICATION_JSON = "application/json";
-    public final static String APPLICATION_PDF = "application/pdf";
-    public final static String TEXT_CSV = "text/csv";
-    public final static String TEXT_CSS = "text/css";
-    public final static String TEXT_JAVASCRIPT = "text/javascript";
-    public final static String TEXT_HTML = "text/html";
-    public final static String TEXT_PLAIN = "text/plain";
-    public final static String TEXT_YAML = "text/yaml";
+    public static final String APPLICATION_JSON = "application/json";
+    public static final String APPLICATION_PDF = "application/pdf";
+    public static final String TEXT_CSV = "text/csv";
+    public static final String TEXT_CSS = "text/css";
+    public static final String TEXT_JAVASCRIPT = "text/javascript";
+    public static final String TEXT_HTML = "text/html";
+    public static final String TEXT_PLAIN = "text/plain";
+    public static final String TEXT_YAML = "text/yaml";
+    public static final String APPLICATION_WWW_URL_ENC = "application/x-www-form-urlencoded";
 
-    public final static String SESSION_ID = "JSESSIONID";
+    public static final String SESSION_ID = "JSESSIONID";
 
     public static final GetNameValue<String> CHARSET_UTF_8 = new NVPair("charset", Const.UTF_8);
 

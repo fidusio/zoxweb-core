@@ -60,6 +60,8 @@ public class HashResult
 
     @Override
     public NVGenericMap getProperties() {
-        return new NVGenericMap(hashType.getName().toLowerCase()).build(new NVLong("data-length", dataLength)).build(formatType, result());
+        return new NVGenericMap(hashType.getName().toLowerCase()).build(new NVLong("data-length", dataLength))
+                .build("readable-length",Const.SizeInBytes.toString(dataLength))
+                .build(formatType, result());
     }
 }
