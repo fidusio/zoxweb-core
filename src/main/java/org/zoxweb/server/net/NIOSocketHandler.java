@@ -20,7 +20,6 @@ import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.net.common.CommonChannelOutputStream;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.shared.io.SharedIOUtil;
-import org.zoxweb.shared.util.Const;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -36,7 +35,7 @@ public class NIOSocketHandler
 
     public static final LogWrapper log = new LogWrapper(ProtocolHandler.class).setEnabled(false);
 
-    private volatile ByteBuffer phBB = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, Const.SizeInBytes.K.mult(1));
+    private volatile ByteBuffer phBB = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, SharedIOUtil.K_4);
 
 
     public NIOSocketHandler(BaseSessionCallback<BaseChannelOutputStream> psc) {

@@ -15,6 +15,7 @@
  */
 package org.zoxweb.server.task;
 
+import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.util.Const;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -35,12 +36,13 @@ public class TaskProcessorTest
     }
 
     public void lockInc() {
-        try {
+//        try {
             lock.lock();
             counter++;
-        } finally {
             lock.unlock();
-        }
+//        } finally {
+//            lock.unlock();
+//        }
 
     }
 
@@ -92,6 +94,8 @@ public class TaskProcessorTest
         runTest(te, new TaskProcessorTest(), numberOfTasks);
         log.info("DONE " + TaskUtil.isBusy() + " thread count " + TaskUtil.defaultTaskProcessor().availableExecutorThreads() +
                 " pending task " + TaskUtil.defaultTaskProcessor().pendingTasks());
+
+        log.info(GSONUtil.toJSONDefault(TaskUtil.info(), true));
         TaskUtil.close();
     }
 

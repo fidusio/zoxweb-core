@@ -26,15 +26,63 @@ import static javax.net.ssl.SSLEngineResult.HandshakeStatus.*;
  * status through {@link SSLSessionConfig#sslConnectionHelper} so the next step
  * can be scheduled.
  * </p>
+ *
+ * <h2>Load-bearing invariants</h2>
+ * The code below looks like it would race or leak under casual reading. It does
+ * not, because three architectural invariants hold across the entire SSL/NIO
+ * stack. Anyone editing this class without internalizing all three will introduce
+ * real bugs.
+ *
+ * <h3>1. Key-interest gating &rArr; single-thread-per-session per dispatch</h3>
+ * The selector thread never blocks and never calls
+ * {@code wrap}/{@code unwrap}/{@code getDelegatedTask} itself. When a channel
+ * becomes readable, the selector <b>sets the key's interest set to {@code 0}</b>
+ * before dispatching to a worker. The key is re-armed to {@code OP_READ} only
+ * after the worker finishes its full cycle and returns to the pool. While a
+ * worker holds the session, the channel cannot be dispatched to any other
+ * worker — there is no concurrent access to the {@link javax.net.ssl.SSLEngine},
+ * the net/app buffers, or {@link SSLSessionConfig} state.
  * <p>
- * <b>Threading model.</b> Within a single SSL session, handshake steps must run
- * serially on one worker thread at a time. {@code SSLEngine}'s handshake state
- * transitions are not safe under concurrent {@code wrap}/{@code unwrap}/
- * {@code getDelegatedTask}. The selector thread never blocks — it dispatches
- * ready events to a worker pool; a session's handshake may hop between workers
- * but never overlaps. Once {@link javax.net.ssl.SSLEngineResult.HandshakeStatus#NOT_HANDSHAKING}
- * is reached, app-data paths may fan out across threads.
+ * The assigned worker performs the entire sequence on the same thread:
  * </p>
+ * <ol>
+ *     <li>read encrypted bytes from the channel</li>
+ *     <li>decrypt via {@link SSLSessionConfig#smartUnwrap smartUnwrap}</li>
+ *     <li>deliver decrypted app data to the callback</li>
+ *     <li>write any response back through the channel (synchronous — see invariant 2)</li>
+ *     <li><b>try again</b> — re-read in case more ciphertext arrived during processing
+ *         (this is exactly what the {@code do/while} loop in
+ *         {@link #_notHandshaking _notHandshaking} is doing — it is not defensive
+ *         code, it is the documented "try again before releasing" step)</li>
+ *     <li>re-arm {@code OP_READ} and release the thread to the pool</li>
+ * </ol>
+ * <p>
+ * Different sessions process fully in parallel on different workers; a single
+ * session is strictly single-thread per dispatch window. The {@code synchronized}
+ * keyword on {@link SSLSessionConfig#smartWrap smartWrite}/{@link SSLSessionConfig#smartUnwrap smartUnwrap}
+ * is belt-and-suspenders, not the actual serialization mechanism — the key gate is.
+ * </p>
+ *
+ * <h3>2. NIO write is synchronous and complete-or-fail</h3>
+ * {@link org.zoxweb.server.io.ByteBufferUtil#smartWrite ByteBufferUtil.smartWrite}
+ * loops until every byte queued for the current call is drained to the channel,
+ * or it fails. By the time {@link #sslChunkedWrite} returns normally, every byte
+ * of {@code src} has been encrypted AND sent on the wire. There is no
+ * "partial write left in {@code outSSLNetData}" steady state to reason about;
+ * callers never need to retry an unsent tail because there is no unsent tail
+ * on success.
+ *
+ * <h3>3. Plaintext IO buffers &lt; ½ SSL net buffers &rArr; {@code BUFFER_OVERFLOW} unreachable</h3>
+ * Application IO buffers in this codebase are bounded to 4–8&nbsp;KB in any
+ * direction. The SSL net buffers ({@code inSSLNetData}, {@code outSSLNetData})
+ * are sized to {@link javax.net.ssl.SSLSession#getPacketBufferSize() packetBufferSize}
+ * (≥ ~16&nbsp;KB for TLS). With at most 8&nbsp;KB of plaintext going into a
+ * ≥ 16&nbsp;KB net destination on {@code wrap}, and at most an 8&nbsp;KB-bounded
+ * record being decrypted into an inbound app buffer, {@code BUFFER_OVERFLOW}
+ * cannot occur. The {@code IllegalStateException} paths for {@code BUFFER_OVERFLOW}
+ * in {@link #_notHandshaking _notHandshaking} and {@link #_needWrap _needWrap}
+ * are dead-on-arrival guards, not recovery gaps — do not "fix" them by adding
+ * drain-and-retry logic without first changing the buffer-sizing contract.
  *
  * @see SSLSessionConfig
  * @see javax.net.ssl.SSLEngine

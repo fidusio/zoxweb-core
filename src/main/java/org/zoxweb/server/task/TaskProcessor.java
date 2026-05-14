@@ -55,9 +55,12 @@ public class TaskProcessor
      */
     private final boolean executorNotify;
     private final SimpleQueueInterface<ExecutorThread> workersQueue;
-
+    /******************************************************************/
+    // DO NOT Change to volatile or Atomig they simple and 100% correct
     private int executorsCounter = 0;
     private boolean innerLive = true;
+    /******************************************************************/
+
     private final ThreadGroup threadGroup;
     private static final AtomicLong TP_COUNTER = new AtomicLong(0);
     private final AtomicLong tasksExecutedCounter = new AtomicLong();
@@ -69,7 +72,7 @@ public class TaskProcessor
     protected class ExecutorThread
             implements Runnable {
 
-        protected TaskEvent event = null;
+        protected volatile TaskEvent event = null;
         protected final int counter = ++executorsCounter;
         protected long totalExecutionTime = 0;
         protected long callCounter = 0;
