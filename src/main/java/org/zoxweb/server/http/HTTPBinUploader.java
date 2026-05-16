@@ -139,27 +139,16 @@ public class HTTPBinUploader {
             String username = params.stringValue("user");
             String password = params.stringValue("password");
             String[] files = ParamUtil.parseWithSep(",", params.stringValue("files"));
-            boolean parallel = params.booleanValue("parallel", false);
+
+            boolean parallel = params.booleanValue("parallel", true);
             boolean cmp = params.booleanValue("cmp", true);
 
             System.out.println(params);
 
+
             long ts = System.currentTimeMillis();
             for (String filepath : files) {
-                if(parallel) {
-                    TaskUtil.defaultTaskProcessor().submit(()-> {
-                        log.getLogger().info("Trying to upload: " + filepath + " to: " + url);
-                        try {
-                            NVGenericMap resp = uploadFile(url, username, password, filepath, cmp);
-                            log.getLogger().info(GSONUtil.toJSONDefault(resp, true));
-                        } catch (Exception e) {
-                            System.err.println(filepath + " failed to upload");
-                            e.printStackTrace();
-                        }
-                        completionCounter.incrementAndGet();
-                    });
-                }
-                else {
+                Runnable toRun = ()-> {
                     log.getLogger().info("Trying to upload: " + filepath + " to: " + url);
                     try {
                         NVGenericMap resp = uploadFile(url, username, password, filepath, cmp);
@@ -169,7 +158,14 @@ public class HTTPBinUploader {
                         e.printStackTrace();
                     }
                     completionCounter.incrementAndGet();
-                }
+                };
+
+
+                if(parallel)
+                    TaskUtil.defaultTaskProcessor().submit(toRun);
+                else
+                    toRun.run();
+
             }
             TaskUtil.waitIfBusyThenClose(250, ()-> completionCounter.get() == files.length);
             ts = System.currentTimeMillis() - ts;
