@@ -102,7 +102,7 @@ public class HTTPHasher {
                 httpurlCallback.setID(UUID.randomUUID().toString());
 
 
-                httpNIOSocket.send(httpurlCallback);
+                httpNIOSocket.asyncSend(httpurlCallback);
 
 
             }

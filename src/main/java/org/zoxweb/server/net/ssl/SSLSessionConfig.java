@@ -30,6 +30,37 @@ public class SSLSessionConfig
     // the encrypted channel
     public volatile SocketChannel sslChannel = null;
     public volatile BaseChannelOutputStream sslOutputStream = null;
+    /**
+     * Reference to the selector controller, kept solely so {@link #close()} can call
+     * {@code cancelSelectionKey(sslChannel)} / {@code cancelSelectionKey(remoteChannel)}.
+     *
+     * @deprecated Redundant and scheduled for removal. Per the NIO contract, closing a
+     * {@code SelectableChannel} already cancels every key registered for it, and calling
+     * {@code cancel()} on an already-cancelled key is a documented no-op. In {@link #close()}
+     * the channels are closed <em>before</em> these calls, so the explicit cancellation does
+     * nothing. The only residual effect is the {@code selector.wakeup()} performed inside
+     * {@code SelectorController.cancelSelectionKey(...)}, which forces the selector to flush
+     * its cancelled-key set promptly instead of on the next natural select cycle.
+     *
+     * <p>Impact of the planned removal (field + both {@code cancelSelectionKey} calls):</p>
+     * <ul>
+     *   <li><b>No correctness or fd-leak impact</b> — {@code channel.close()} releases the
+     *       OS file descriptor immediately and cancels the keys regardless of the selector.</li>
+     *   <li><b>Only observable effect</b> — on an otherwise idle selector, the dead
+     *       {@link java.nio.channels.SelectionKey} objects may linger in {@code selector.keys()}
+     *       until the next select wakeup. If prompt reaping is still wanted, route a single
+     *       {@code wakeup()} through {@link #sslConnectionHelper} &rarr; the handler's
+     *       {@code getSelectorController()} instead of holding this per-session field.</li>
+     *   <li><b>Removes</b> the cross-thread visibility concern that currently forces this
+     *       field to be {@code volatile} (written on the setup thread, read from {@link #close()}
+     *       on worker / idle-timeout-scheduler threads with no other happens-before edge).</li>
+     * </ul>
+     *
+     * Marking it {@code @Deprecated} now so all use sites
+     * ({@code SSLNIOSocketHandler} writes, {@link #close()} reads) raise a compiler warning
+     * and the removal can be done deliberately in a future change.
+     */
+    @Deprecated
     volatile SelectorController selectorController = null;
 
     volatile SocketChannel remoteChannel = null;
@@ -59,13 +90,6 @@ public class SSLSessionConfig
 
 
         if (!isClosed.getAndSet(true)) {
-//            log.getLogger().info("SSLSessionConfig-NOT-CLOSED-YET " +Thread.currentThread() + " " + sslChannel);
-//            try
-//            {
-//                connectionRemoteAddress = sslChannel.getRemoteAddress();
-//            }
-//            catch (Exception e){}
-
             if (sslEngine != null) {
 
                 try {
@@ -75,10 +99,7 @@ public class SSLSessionConfig
                         switch (hs) {
                             case NEED_WRAP:
                             case NEED_UNWRAP:
-                                //stateMachine.publishSync(new Trigger<SSLSessionCallback>(this, hs,null,null));
                                 sslConnectionHelper.publish(hs, null);
-                                //stateMachine.publishSync(null, hs, null);
-                                //staticSSLStateMachine.dispatch(hs, null);
                                 break;
                             default:
                                 SharedIOUtil.close(sslChannel);
@@ -164,15 +185,12 @@ public class SSLSessionConfig
             if (!hasBegan.getAndSet(true)) {
                 // set the ssl engine mode client or sever
                 sslEngine.setUseClientMode(clientMode);
-//                inSSLNetData = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, getPacketBufferSize());
-//                outSSLNetData = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, getPacketBufferSize());
-//                inAppData = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, getApplicationBufferSize());
-                // start the handshake
-                sslEngine.beginHandshake();
                 // create the necessary byte buffer with the proper length
                 inSSLNetData = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, getPacketBufferSize());
                 outSSLNetData = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, getPacketBufferSize());
                 inAppData = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, getApplicationBufferSize());
+                // start the handshake
+                sslEngine.beginHandshake();
             }
         }
     }

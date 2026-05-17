@@ -120,7 +120,7 @@ public class NIOSSLClientConnectionTest {
 //                        successCount.incrementAndGet();
 //                    });
 
-                    httpNIOSocket.send(huc);
+                    httpNIOSocket.asyncSend(huc);
 
 //                    huc.send(nioSocket, (r)->{
 //                        System.out.println(r.getStatus() + " " + Const.TimeInMillis.toString(r.getDuration()));

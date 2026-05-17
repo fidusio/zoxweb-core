@@ -16,11 +16,11 @@ public class HTTPNIOSocket
 
 
 
-    public void send(HTTPURLCallback huc, ConsumerCallback<HTTPResponse> callback) throws IOException {
-        send(huc.setCallback(callback));
+    public void asyncSend(HTTPURLCallback huc, ConsumerCallback<HTTPResponse> callback) throws IOException {
+        asyncSend(huc.setCallback(callback));
     }
 
-    public void send(HTTPURLCallback huc) throws IOException {
+    public void asyncSend(HTTPURLCallback huc) throws IOException {
         huc.updateTimeStamp();
         nioSocket.addClientSocket(huc);
     }
