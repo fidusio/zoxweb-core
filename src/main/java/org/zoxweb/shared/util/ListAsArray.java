@@ -13,17 +13,23 @@ public class ListAsArray<T> {
         this.vals = list.toArray(empty);
     }
 
-    public boolean add(T t) {
+    public boolean add(T... t) {
         synchronized (this) {
-            boolean ret = list.add(t);
+            boolean ret = false;
+            for (int i = 0; i < t.length; i++) {
+                ret = list.add(t[i]);
+            }
             this.vals = list.toArray(empty);
             return ret;
         }
     }
 
-    public boolean remove(T t) {
+    public boolean remove(T... t) {
         synchronized (this) {
-            boolean ret = list.remove(t);
+            boolean ret = false;
+            for (int i = 0; i < t.length; i++) {
+                ret = list.remove(t[i]);
+            }
             this.vals = list.toArray(empty);
             return ret;
         }

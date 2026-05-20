@@ -226,7 +226,9 @@ public final class HTTPCallTool {
                 //httpCall.asyncRequest(cc);
 
             }
-            TaskUtil.waitIfBusy(25);
+
+            long lengths = hmcis.length;
+            TaskUtil.waitIfBusy(25, ()-> totalCount() == repeat*lengths);
             rc.stop(totalCount());
 
 
