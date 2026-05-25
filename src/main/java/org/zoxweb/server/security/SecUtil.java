@@ -327,7 +327,7 @@ public final class SecUtil {
         if (securityProfile != null && securityProp != null) {
             String[] roles = SUS.isEmpty(securityProp.roles()) ? null : SharedStringUtil.parseString(securityProp.roles(), ",", " ", "\t");
             String[] permissions = SUS.isEmpty(securityProp.permissions()) ? null : SharedStringUtil.parseString(securityProp.permissions(), ",", " ", "\t");
-            CryptoConst.AuthenticationType[] authTypes = securityProp.authentications();
+            SecConst.AuthenticationType[] authTypes = securityProp.authentications();
             String[] restrictions = securityProp.restrictions().length > 0 ? securityProp.restrictions() : null;
             securityProfile.setPermissions(permissions);
             securityProfile.setRoles(roles);

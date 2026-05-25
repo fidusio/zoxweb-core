@@ -15,7 +15,7 @@
  */
 package org.zoxweb.shared.http;
 
-import org.zoxweb.shared.crypto.CryptoConst;
+import org.zoxweb.shared.security.SecConst;
 import org.zoxweb.shared.util.*;
 
 /**
@@ -33,7 +33,7 @@ import org.zoxweb.shared.util.*;
 public enum HTTPAuthScheme
         implements GetName {
 
-    BASIC(CryptoConst.AuthenticationType.BASIC.getName()) {
+    BASIC(SecConst.AuthenticationType.BASIC.getName()) {
         public GetNameValue<String> toHTTPHeader(String... args) {
             int index = 0;
             String usernameAndMaybePassword = args.length > index ? args[index++] : null;
@@ -95,7 +95,7 @@ public enum HTTPAuthScheme
             return new HTTPAuthorizationBasic(SUS.trimOrNull(user), SUS.trimOrNull(password));
         }
     },
-    BEARER(CryptoConst.AuthenticationType.BEARER.getName()) {
+    BEARER(SecConst.AuthenticationType.BEARER.getName()) {
         @Override
         public GetNameValue<String> toHTTPHeader(String... args) {
             if (args.length == 1) {

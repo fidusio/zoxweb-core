@@ -149,8 +149,8 @@ public class CIPassword
      * @return
      */
     @Override
-    public CredentialType getCredentialType() {
-        return CredentialType.PASSWORD;
+    public Type getCredentialType() {
+        return Type.PASSWORD;
     }
 
 }

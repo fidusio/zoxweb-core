@@ -1,6 +1,6 @@
 package org.zoxweb.shared.annotation;
 
-import org.zoxweb.shared.crypto.CryptoConst.AuthenticationType;
+import org.zoxweb.shared.security.SecConst.AuthenticationType;
 import org.zoxweb.shared.http.URIScheme;
 import org.zoxweb.shared.util.Const;
 

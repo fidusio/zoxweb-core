@@ -75,8 +75,8 @@ public class JWTToken
      * @return
      */
     @Override
-    public CredentialType getCredentialType() {
-        return CredentialType.TOKEN;
+    public Type getCredentialType() {
+        return Type.TOKEN;
     }
 
 }

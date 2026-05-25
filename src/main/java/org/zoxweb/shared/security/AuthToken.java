@@ -1,13 +1,11 @@
 package org.zoxweb.shared.security;
 
-import org.zoxweb.shared.crypto.CryptoConst;
-
 public class AuthToken<T> {
     private String url;
     private T token;
-    private CryptoConst.AuthenticationType type;
+    private SecConst.AuthenticationType type;
 
-    public AuthToken(String url, CryptoConst.AuthenticationType type, T token)
+    public AuthToken(String url, SecConst.AuthenticationType type, T token)
     {
         this.url = url;
         this.type = type;
@@ -18,7 +16,7 @@ public class AuthToken<T> {
 
     public T getToken(){return token;}
 
-    public CryptoConst.AuthenticationType getType()
+    public SecConst.AuthenticationType getType()
     {
         return type;
     }

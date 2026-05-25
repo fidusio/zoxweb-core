@@ -1,8 +1,7 @@
 package org.zoxweb.shared.security;
 
 
-import org.zoxweb.shared.crypto.CryptoConst;
-import org.zoxweb.shared.crypto.CryptoConst.AuthenticationType;
+import org.zoxweb.shared.security.SecConst.AuthenticationType;
 import org.zoxweb.shared.data.PropertyDAO;
 import org.zoxweb.shared.http.URIScheme;
 import org.zoxweb.shared.util.*;
@@ -20,7 +19,7 @@ implements ResourceSecurity
     public enum Param
             implements GetNVConfig
     {
-        AUTHENTICATIONS(NVConfigManager.createNVConfig("authentications", "Authentication types", "Authentications", false, true, CryptoConst.AuthenticationType[].class)),
+        AUTHENTICATIONS(NVConfigManager.createNVConfig("authentications", "Authentication types", "Authentications", false, true, AuthenticationType[].class)),
         PERMISSIONS(NVConfigManager.createNVConfig("permissions", "Permission tokens", "Permissions", false, true, NVStringSet.class)),
         ROLES(NVConfigManager.createNVConfig("roles", "Role tokens", "Roles", false, true, NVStringSet.class)),
         RESTRICTIONS(NVConfigManager.createNVConfig("restrictions", "Restrictions", "Restrictions", false, true, NVStringSet.class)),
@@ -113,7 +112,7 @@ implements ResourceSecurity
         return ((List<Enum>)lookupValue(Param.AUTHENTICATIONS)).toArray(new AuthenticationType[0]);
     }
 
-    public void setAuthenticationTypes(CryptoConst.AuthenticationType...authTypes)
+    public void setAuthenticationTypes(AuthenticationType...authTypes)
     {
         this.authenticationTypes = null;
         NVEnumList el = (NVEnumList) lookup(Param.AUTHENTICATIONS);

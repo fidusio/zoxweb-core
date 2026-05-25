@@ -59,7 +59,7 @@ extends AuthorizationInfoLookup<O,I>
      * @return the subject credential
      * @param <C> of instance CredentialInfo
      */
-    <C> C lookupCredential(String subjectID, CredentialInfo.CredentialType credentialType);
+    <C> C lookupCredential(String subjectID, CredentialInfo.Type credentialType);
 
     /**
      * Add a credential object for the specified subject

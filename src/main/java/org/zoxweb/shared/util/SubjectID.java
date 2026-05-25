@@ -18,6 +18,7 @@ package org.zoxweb.shared.util;
 /**
  * The subject ID interface.
  * Created by mnael on 4/8/2017.
+ * Updated 5/25/2026
  */
 public interface SubjectID<T>
     extends BaseSubjectID<T>

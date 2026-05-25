@@ -6,7 +6,7 @@ public interface CredentialInfo
     extends GetNVProperties
 {
 
-    enum CredentialType
+    enum Type
     {
         PASSWORD,
         PUBLIC_KEY,
@@ -15,5 +15,5 @@ public interface CredentialInfo
         TOKEN
     }
 
-    CredentialType getCredentialType();
+    Type getCredentialType();
 }

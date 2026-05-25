@@ -21,111 +21,95 @@ import org.zoxweb.shared.crypto.CryptoConst.JWTAlgo;
 
 
 public class JWTHeader
-implements GetNVProperties
-//    extends SetNameDescriptionDAO
-{
-	public enum Param
-	    implements GetNVConfig, GetName
-	{
-		ALG(NVConfigManager.createNVConfig("alg", "Algorithm", "Alg", true, true, JWTAlgo.class)),
-		CTY(NVConfigManager.createNVConfig("cty", "Content Type", "ContentType", false, false, String.class)),
-		TYP(NVConfigManager.createNVConfig("typ", "Token type", "TokenType",false, false, String.class)),
-		KID(NVConfigManager.createNVConfig("kid", "Key ID", "KeyID",false, false, String.class)),
-		;
-		
-		private final NVConfig nvc;
-		
-		Param(NVConfig nvc)
-		{
-	        this.nvc = nvc;
-		}
-		
-		public NVConfig getNVConfig() 
-		{
-			return nvc;
-		}
-		
-		public String getName()
-		{
-			return nvc.getName();
-		}
-	}
-	
-	public static final NVConfigEntity NVC_JWT_HEADER = new NVConfigEntityPortable(
-																					"jwt_header", 
-																					null , 
-																					"JWTHeader", 
-																					true, 
-																					false, 
-																					false, 
-																					false, 
-																					JWTHeader.class, 
-																					SharedUtil.extractNVConfigs(Param.values()), 
-																					null, 
-																					false, 
-																					SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO
-																				);
+        implements GetNVProperties {
+    public enum Param
+            implements GetNVConfig, GetName {
+        ALG(NVConfigManager.createNVConfig("alg", "Algorithm", "Alg", true, true, JWTAlgo.class)),
+        CTY(NVConfigManager.createNVConfig("cty", "Content Type", "ContentType", false, false, String.class)),
+        TYP(NVConfigManager.createNVConfig("typ", "Token type", "TokenType", false, false, String.class)),
+        KID(NVConfigManager.createNVConfig("kid", "Key ID", "KeyID", false, false, String.class)),
+        ;
 
-	private NVGenericMap nvgm;
-	public JWTHeader(NVGenericMap nvgm)
-	{
-		//super(NVC_JWT_HEADER);
-		this.nvgm = nvgm;
-		
-	}
-	
-	public JWTAlgo getJWTAlgorithm()
-	{
-		return JWTAlgo.valueOf((String)nvgm.getValue((GetName)Param.ALG));
-	}
-	
-	public void setJWTAlgorithm(JWTAlgo type)
-	{
-		nvgm.add(Param.ALG, type.name());
-		
-	}
-	
-	public String getTokenType()
-	{
-		return nvgm.getValue((GetName)Param.TYP);
-	}
-	
-	public void setTokenType(String type)
-	{
-		nvgm.add(Param.TYP, type);
-	}
-	
-	
-	public String getContentType()
-	{
-		return nvgm.getValue((GetName)Param.CTY);
-	}
-	
-	public void setContentType(String contentType)
-	{
-		nvgm.add(Param.CTY, contentType);
-	}
+        private final NVConfig nvc;
+
+        Param(NVConfig nvc) {
+            this.nvc = nvc;
+        }
+
+        public NVConfig getNVConfig() {
+            return nvc;
+        }
+
+        public String getName() {
+            return nvc.getName();
+        }
+    }
+
+    public static final NVConfigEntity NVC_JWT_HEADER = new NVConfigEntityPortable(
+            "jwt_header",
+            null,
+            "JWTHeader",
+            true,
+            false,
+            false,
+            false,
+            JWTHeader.class,
+            SharedUtil.extractNVConfigs(Param.values()),
+            null,
+            false,
+            SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO
+    );
+
+    private NVGenericMap nvgm;
+
+    public JWTHeader(NVGenericMap nvgm) {
+        //super(NVC_JWT_HEADER);
+        this.nvgm = nvgm;
+
+    }
+
+    public JWTAlgo getJWTAlgorithm() {
+        return JWTAlgo.valueOf((String) nvgm.getValue((GetName) Param.ALG));
+    }
+
+    public void setJWTAlgorithm(JWTAlgo type) {
+        nvgm.add(Param.ALG, type.name());
+
+    }
+
+    public String getTokenType() {
+        return nvgm.getValue((GetName) Param.TYP);
+    }
+
+    public void setTokenType(String type) {
+        nvgm.add(Param.TYP, type);
+    }
 
 
-	public String getKeyID()
-	{
-		return nvgm.getValue((GetName)Param.KID);
-	}
+    public String getContentType() {
+        return nvgm.getValue((GetName) Param.CTY);
+    }
 
-	public void setKeyID(String keyID)
-	{
-		nvgm.add(Param.KID, keyID);
-	}
-	
-	public NVGenericMap getProperties()
-	{
-	  return nvgm;
-	}
-	
-	public void setProperties(NVGenericMap nvgm)
-	{
-		this.nvgm.clear();
-		SUS.updateGetNVProperties(this, nvgm);
-	}
+    public void setContentType(String contentType) {
+        nvgm.add(Param.CTY, contentType);
+    }
+
+
+    public String getKeyID() {
+        return nvgm.getValue((GetName) Param.KID);
+    }
+
+    public void setKeyID(String keyID) {
+        nvgm.add(Param.KID, keyID);
+    }
+
+    public NVGenericMap getProperties() {
+        return nvgm;
+    }
+
+    public void setProperties(NVGenericMap nvgm) {
+        this.nvgm.clear();
+        SUS.updateGetNVProperties(this, nvgm);
+    }
 
 }

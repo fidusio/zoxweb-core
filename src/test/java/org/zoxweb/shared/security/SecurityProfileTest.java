@@ -2,7 +2,6 @@ package org.zoxweb.shared.security;
 
 import org.junit.jupiter.api.Test;
 import org.zoxweb.server.util.GSONUtil;
-import org.zoxweb.shared.crypto.CryptoConst;
 import org.zoxweb.shared.security.model.SecurityModel;
 import org.zoxweb.shared.util.NVStringSet;
 
@@ -14,7 +13,7 @@ public class SecurityProfileTest {
     @Test
     public void securityProp() throws IOException {
         SecurityProfile sc = new SecurityProfile();
-        sc.setAuthenticationTypes(CryptoConst.AuthenticationType.values());
+        sc.setAuthenticationTypes(SecConst.AuthenticationType.values());
         sc.setPermissions("perm1", "perm2", "perm1");
         sc.setRoles("role1", "role2");
         String json = GSONUtil.toJSON(sc, false, false, false);

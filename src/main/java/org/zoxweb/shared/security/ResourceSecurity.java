@@ -1,6 +1,5 @@
 package org.zoxweb.shared.security;
 
-import org.zoxweb.shared.crypto.CryptoConst;
 import org.zoxweb.shared.util.GlobalIDBase;
 
 import java.util.Set;
@@ -14,5 +13,5 @@ public interface ResourceSecurity
     Set<String> getPermissions();
     Set<String> getRoles();
 
-    CryptoConst.AuthenticationType[] authenticationTypes();
+    SecConst.AuthenticationType[] authenticationTypes();
 }
