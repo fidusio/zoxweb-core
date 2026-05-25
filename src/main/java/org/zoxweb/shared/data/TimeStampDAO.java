@@ -15,10 +15,9 @@
  */
 package org.zoxweb.shared.data;
 
-import java.util.Date;
-
 import org.zoxweb.shared.util.*;
-import org.zoxweb.shared.util.TimeStampInterface;
+
+import java.util.Date;
 
 /**
  *
@@ -35,7 +34,6 @@ public abstract class TimeStampDAO
 		CREATION_TS(NVConfigManager.createNVConfig("creation_ts", "Creation timestamp (in millis).", "CreationTS", true, false, false, true, Date.class, null)),
 		LAST_UPDATE_TS(NVConfigManager.createNVConfig("last_update_ts", "Last update timestamp (in millis).", "LastUpdateTS", true, false, false, true, Date.class, null)),
 		LAST_READ_TS(NVConfigManager.createNVConfig("last_read_ts", "Last read timestamp (in millis).", "LastReadTS", true, false, false, true, Date.class, null)),
-		
 		;
 	
 		private final NVConfig nvc;
