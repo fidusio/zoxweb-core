@@ -16,8 +16,8 @@ public class ParamUtil {
 //    }
 
     public static class ParamInfoList {
-        private Map<String, ParamInfo> byName = new LinkedHashMap<String, ParamInfo>();
-        private Map<String, ParamInfo> byParam = new LinkedHashMap<String, ParamInfo>();
+        private final Map<String, ParamInfo> byName = new LinkedHashMap<String, ParamInfo>();
+        private final Map<String, ParamInfo> byParam = new LinkedHashMap<String, ParamInfo>();
 
 
         public ParamInfoList add(String name, ParamInfo.ValueType valueType, String param, boolean mandatory, boolean caseSensitive) {
@@ -58,10 +58,10 @@ public class ParamUtil {
     }
 
     public static class ParamMap {
-        private Map<String, List<String>> map = new LinkedHashMap<String, List<String>>();
+        private final Map<String, List<String>> map;
         private boolean ignoreCase = false;
         private final int counter;
-        private Set<String> hidden = new HashSet<>();
+        private final Set<String> hidden = new HashSet<>();
 
         private ParamMap(boolean ignoreCase, Map<String, List<String>> map, int length) {
             this.map = map;
@@ -364,6 +364,12 @@ public class ParamUtil {
                     ", map=" + toExpose +
 
                     '}';
+        }
+
+        public synchronized ParamMap add(String name, String value) {
+            List<String> vals = map.computeIfAbsent(name, k -> new ArrayList<>());
+            vals.add(value);
+            return this;
         }
     }
 

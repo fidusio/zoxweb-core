@@ -101,6 +101,24 @@ public class NVGenericMap
         return getValueAsLong(name.getName(), defaultValue);
     }
 
+    public boolean getValueAsBoolean(GetName name, boolean defaultValue) {
+        Object value = getValue(name);
+        if (value instanceof Boolean)
+            return ((Boolean) value).booleanValue();
+        if(value instanceof String)
+            return Const.Bool.lookupValue((String)value);
+        return defaultValue;
+    }
+
+    public boolean getValueAsBoolean(String name, boolean defaultValue) {
+        Object value = getValue(name);
+        if (value instanceof Boolean)
+            return ((Boolean) value).booleanValue();
+        if(value instanceof String)
+            return Const.Bool.lookupValue((String)value);
+        return defaultValue;
+    }
+
     /**
      * This method can throw exception ClassCastException or number formating exception
      *

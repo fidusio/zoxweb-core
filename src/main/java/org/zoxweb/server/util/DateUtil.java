@@ -74,6 +74,7 @@ public class DateUtil {
     public static final ExtendedDTF DEFAULT_ZULU_MILLIS = createDTF("yyyy-MM-dd'T'HH:mm:ss.SSSZ", "UTC");
     public static final ExtendedDTF ISO_8601 = createDTF("yyyy-MM-dd'T'HH:mm:ssXXX");
     public static final ExtendedDTF DEFAULT_GMT = createDTF("yyyy-MM-dd'T'HH:mm:ssX", "UTC");
+    public static final ExtendedDTF REDIRECT_FORMAT = createDTF("EEE, dd MMM yyyy HH:mm:ss 'GMT'", "GMT");
     /**
      * Today Local TimeZone format 'yyyy-MM-dd'
      */
