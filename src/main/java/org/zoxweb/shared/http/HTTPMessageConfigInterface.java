@@ -253,12 +253,21 @@ public interface HTTPMessageConfigInterface
     long getTimeout();
 
     /**
+     * @return connection timeout is millis
+     */
+    long getTimeoutInMillis();
+
+    /**
      * Set the connection timeout in seconds
      *
      * @param connectTimeout in seconds
      */
     void setTimeout(long connectTimeout);
 
+    /**
+     *
+     * @return true if ssl connection
+     */
     boolean isSSL();
 
 

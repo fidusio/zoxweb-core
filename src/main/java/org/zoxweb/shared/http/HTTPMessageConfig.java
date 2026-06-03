@@ -451,16 +451,28 @@ public class HTTPMessageConfig
      *
      * @return connection timeout
      */
+    @Override
     public long getTimeout() {
         return lookupValue(Params.TIMEOUT);
     }
 
-    public void setTimeout(long timeout) {
-        if (timeout < 0) {
-            timeout = 0;
+    @Override
+    public long getTimeoutInMillis() {
+        return Const.TimeInMillis.SECOND.mult(getTimeout());
+    }
+
+    /**
+     * Set the connection timeout in seconds
+     *
+     * @param connectTimeout in seconds
+     */
+    @Override
+    public void setTimeout(long connectTimeout) {
+        if (connectTimeout < 0) {
+            connectTimeout = 0;
         }
 
-        setValue(Params.TIMEOUT, timeout);
+        setValue(Params.TIMEOUT, connectTimeout);
 
     }
 
