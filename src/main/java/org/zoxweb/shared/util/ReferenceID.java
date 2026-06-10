@@ -15,30 +15,28 @@
  */
 package org.zoxweb.shared.util;
 
-import java.io.Serializable;
-
 /**
- * The reference ID is a unique object identifier with a object set, it could be in different contexts:
+ * The reference ID is a unique object identifier with an object set, it could be used  in different contexts:
  * <ol>
  * <li> As database object primary key
  * <li> As a unique identifier within a set
- * <li> As a cross platform object identifier as processes or systems
+ * <li> As a cross-platform object identifier as processes or systems
  * </ol>
  * @author mnael
  *
  */
 public interface ReferenceID<T>
-        extends Serializable {
+        extends GlobalID<T> {
     /**
      * Get reference unique ID.
      * @return the object reference unique identifier
      */
-    T getReferenceID();
+    default T getReferenceID(){return getGUID();};
 
     /**
      * Set reference unique ID.
      * @param id
      */
-    void setReferenceID(T id);
+    default void setReferenceID(T id){setGUID(id);};
 
 }

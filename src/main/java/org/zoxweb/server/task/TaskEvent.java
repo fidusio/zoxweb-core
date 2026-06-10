@@ -35,7 +35,7 @@ public class TaskEvent
     private final Object[] params;
     private Object executionResult = null;
     private Exception executionException = null;
-    private String refID = null;
+    private String guid = null;
     private final AtomicLong execCount = new AtomicLong();
     private final boolean exceptionStackTrace;
 
@@ -111,8 +111,8 @@ public class TaskEvent
      *
      * @return string id
      */
-    public String getReferenceID() {
-        return refID;
+    public String getGUID() {
+        return guid;
     }
 
     /**
@@ -120,8 +120,8 @@ public class TaskEvent
      *
      * @param customRef reference identifier
      */
-    public void setReferenceID(String customRef) {
-        this.refID = customRef;
+    public void setGUID(String customRef) {
+        this.guid = customRef;
     }
 
     public long execCount() {

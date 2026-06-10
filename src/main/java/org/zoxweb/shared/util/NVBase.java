@@ -30,7 +30,7 @@ import java.io.Serializable;
 public abstract class NVBase<V>
         implements Serializable, SetNameValue<V>, ReferenceID<String> {
 
-    protected String referenceId;
+    protected String guid;
     protected String name;
     protected V value;
 
@@ -76,12 +76,7 @@ public abstract class NVBase<V>
         SharedMetaUtil.SINGLETON.incCreationCount();
     }
 
-    /**
-     * Returns the reference ID.
-     */
-    public String getReferenceID() {
-        return referenceId;
-    }
+
 
     /**
      * Returns the name.
@@ -97,14 +92,19 @@ public abstract class NVBase<V>
         return value;
     }
 
-    /**
-     * Sets the reference ID.
-     *
-     * @param referenceId of the object
-     */
-    public void setReferenceID(String referenceId) {
-        this.referenceId = referenceId;
+
+
+    @Override
+    public void setGUID(String guid) {
+        this.guid = guid;
     }
+
+    @Override
+    public String getGUID() {
+        return guid;
+    }
+
+
 
     /**
      * Sets the name.
@@ -128,7 +128,7 @@ public abstract class NVBase<V>
      * Returns a string containing reference ID, name and value.
      */
     public String toString() {
-        return "{" + (referenceId != null ? referenceId + "," : "") + name + ":" + value + "}";
+        return "{" + (guid != null ? guid + "," : "") + name + ":" + value + "}";
     }
 
 }

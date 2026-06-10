@@ -196,7 +196,7 @@ public class APIAppManagerProvider
             // if we have an email
             query = new QueryMatch<String>(RelationalOperator.EQUAL, subjectID, UserIDDAO.Param.PRIMARY_EMAIL.getNVConfig());
         } else {
-            query = new QueryMatch<String>(RelationalOperator.EQUAL, subjectID, MetaToken.REFERENCE_ID);//"_id", new BasicDBObject("$in", listOfObjectID)
+            query = new QueryMatch<String>(RelationalOperator.EQUAL, subjectID, MetaToken.GUID);//"_id", new BasicDBObject("$in", listOfObjectID)
         }
 
         ArrayList<String> listParams = null;
@@ -539,7 +539,7 @@ public class APIAppManagerProvider
         // make the user is logged in
         String userID = getAPISecurityManager().currentUserID();
 
-        List<UserIDCredentialsDAO> ret = getAPIDataStore().search(UserIDCredentialsDAO.NVC_USER_ID_CREDENTIALS_DAO, null, new QueryMatchString(RelationalOperator.EQUAL, userID, UserIDCredentialsDAO.NVC_REFERENCE_ID));
+        List<UserIDCredentialsDAO> ret = getAPIDataStore().search(UserIDCredentialsDAO.NVC_USER_ID_CREDENTIALS_DAO, null, new QueryMatchString(RelationalOperator.EQUAL, userID, UserIDCredentialsDAO.NVC_GUID));
         if (ret == null || ret.size() != 1) {
             throw new AccessException("User not found");
         }
@@ -633,7 +633,7 @@ public class APIAppManagerProvider
 
         AppIDDAO appIDDAO = lookupAppIDDAO(domainID, appID);
 
-        List<AppConfigDAO> result = search(AppConfigDAO.NVC_APP_CONFIG_DAO, new QueryMatchString(Const.RelationalOperator.EQUAL, appIDDAO.getReferenceID(), AppConfigDAO.Param.APP_ID.getNVConfig().getName(), MetaToken.REFERENCE_ID.getName()));
+        List<AppConfigDAO> result = search(AppConfigDAO.NVC_APP_CONFIG_DAO, new QueryMatchString(Const.RelationalOperator.EQUAL, appIDDAO.getReferenceID(), AppConfigDAO.Param.APP_ID.getNVConfig().getName(), MetaToken.GUID.getName()));
 
         if (result == null || result.size() != 1) {
             throw new APIException("AppConfigDAO not found", Reason.NOT_FOUND);

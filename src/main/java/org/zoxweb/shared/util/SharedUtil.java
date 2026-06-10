@@ -1901,7 +1901,7 @@ public class SharedUtil {
 
         for (NVConfig nvc : nvce.getAttributes()) {
             //Logic needs to be changed, NVEntiy must have reference ID implementation.
-            if (nvc != ReferenceIDDAO.NVC_REFERENCE_ID && nvc != ReferenceIDDAO.NVC_SUBJECT_GUID) {
+            if (nvc != ReferenceIDDAO.NVC_GUID && nvc != ReferenceIDDAO.NVC_SUBJECT_GUID) {
 
                 if (validateRecursive && nvc instanceof NVConfigEntity) {
                     NVConfigEntity nvcetemp = (NVConfigEntity) nvc;

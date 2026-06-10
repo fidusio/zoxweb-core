@@ -525,21 +525,7 @@ public class NVConfigEntityPortable
         return getName();
     }
 
-    /**
-     * @see org.zoxweb.shared.util.ReferenceID#getReferenceID()
-     */
-    @Override
-    public String getReferenceID() {
-        return guid;
-    }
 
-    /**
-     * @see org.zoxweb.shared.util.ReferenceID#setReferenceID(java.lang.Object)
-     */
-    @Override
-    public void setReferenceID(String id) {
-        guid = id;
-    }
 
     /**
      * @see org.zoxweb.shared.util.NVConfigEntity#getArrayType()
@@ -571,11 +557,12 @@ public class NVConfigEntityPortable
 
 
     /**
-     * @param gid the global identifier of the object uuid is string format.
+     * @param guid the global identifier of the object uuid is string format.
      */
     @Override
-    public void setGUID(String gid) {
-        setReferenceID(gid);
+    public void setGUID(String guid) {
+        this.guid = guid;
+
     }
 
     /**
@@ -583,6 +570,6 @@ public class NVConfigEntityPortable
      */
     @Override
     public String getGUID() {
-        return getReferenceID();
+        return guid;
     }
 }

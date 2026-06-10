@@ -69,8 +69,8 @@ public class ReferenceIDKey
      * @return
      */
     @Override
-    public String getReferenceID() {
-        return refID.getReferenceID();
+    public String getGUID() {
+        return refID.getGUID();
     }
 
     /**
@@ -78,8 +78,8 @@ public class ReferenceIDKey
      * @param id
      */
     @Override
-    public void setReferenceID(String id) {
-        refID.setReferenceID(id);
+    public void setGUID(String id) {
+        refID.setGUID(id);
     }
 
 

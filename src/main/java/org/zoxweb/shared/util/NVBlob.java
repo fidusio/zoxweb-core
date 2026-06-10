@@ -53,6 +53,6 @@ public class NVBlob
 	
 	public String toString()
     {
-		return "{" + (referenceId != null ? referenceId + "," : "") + name + ":" + SharedBase64.encodeAsString(Base64Type.URL,value) + "}";
+		return "{" + (guid != null ? guid + "," : "") + name + ":" + SharedBase64.encodeAsString(Base64Type.URL,value) + "}";
 	}
 }

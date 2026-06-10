@@ -28,24 +28,22 @@ public class ReferenceIDPortable<T>
     }
 
     public ReferenceIDPortable(T val) {
-        setReferenceID(val);
+        setGUID(val);
     }
 
     /**
-     * @see org.zoxweb.shared.util.ReferenceID#getReferenceID()
-     * @return
+     * @return the GUID
      */
     @Override
-    public T getReferenceID() {
+    public T getGUID() {
         return type;
     }
 
     /**
-     * @see org.zoxweb.shared.util.ReferenceID#setReferenceID(java.lang.Object)
-     * @param id
+     * @param id as GUID
      */
     @Override
-    public void setReferenceID(T id) {
+    public void setGUID(T id) {
         type = id;
     }
 

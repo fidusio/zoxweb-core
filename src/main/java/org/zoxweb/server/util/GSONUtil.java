@@ -1473,7 +1473,7 @@ public final class GSONUtil {
                 writer.beginObject();
 
                 if (referenceID != null) {
-                    writer.name(MetaToken.REFERENCE_ID.getName()).value(referenceID);
+                    writer.name(MetaToken.GUID.getName()).value(referenceID);
                 }
 
                 if (nvp.getName() == null) {
@@ -1719,8 +1719,8 @@ public final class GSONUtil {
             throw new AccessException(ie.getMessage(), Reason.ACCESS_DENIED);
         }
 
-        if (jo.get(MetaToken.REFERENCE_ID.getName()) != null && !jo.get(MetaToken.REFERENCE_ID.getName()).isJsonNull()) {
-            nve.setReferenceID(jo.get(MetaToken.REFERENCE_ID.getName()).getAsString());
+        if (jo.get(MetaToken.GUID.getName()) != null && !jo.get(MetaToken.GUID.getName()).isJsonNull()) {
+            nve.setReferenceID(jo.get(MetaToken.GUID.getName()).getAsString());
         }
 
         NVConfigEntity mcEntity = (NVConfigEntity) nve.getNVConfig();
@@ -2011,8 +2011,8 @@ public final class GSONUtil {
             nvp.setValue(jo.get(MetaToken.VALUE.getName()).getAsString());
         }
 
-        if (jo.get(MetaToken.REFERENCE_ID.getName()) != null) {
-            nvp.setReferenceID(jo.get(MetaToken.REFERENCE_ID.getName()).getAsString());
+        if (jo.get(MetaToken.GUID.getName()) != null) {
+            nvp.setReferenceID(jo.get(MetaToken.GUID.getName()).getAsString());
         }
 
         if (jo.get(MetaToken.VALUE_FILTER.getName()) != null) {
@@ -2034,7 +2034,7 @@ public final class GSONUtil {
                 Entry<String, JsonElement> nv = it.next();
                 String name = nv.getKey();
 
-                if (!MetaToken.REFERENCE_ID.getName().equals(name) && !MetaToken.VALUE_FILTER.getName().equals(name)) {
+                if (!MetaToken.GUID.getName().equals(name) && !MetaToken.VALUE_FILTER.getName().equals(name)) {
                     nvp.setName(name);
 
                     if (!nv.getValue().isJsonNull()) {
@@ -2141,9 +2141,9 @@ public final class GSONUtil {
         if (je instanceof JsonObject) {
             JsonObject jo = (JsonObject) je;
 
-            if (jo.get(MetaToken.REFERENCE_ID.getName()) != null
-                    && !jo.get(MetaToken.REFERENCE_ID.getName()).isJsonNull()) {
-                ret.setReferenceID(jo.get(MetaToken.REFERENCE_ID.getName()).getAsString());
+            if (jo.get(MetaToken.GUID.getName()) != null
+                    && !jo.get(MetaToken.GUID.getName()).isJsonNull()) {
+                ret.setReferenceID(jo.get(MetaToken.GUID.getName()).getAsString());
             }
 
             if (jo.get(MetaToken.SUBJECT_GUID.getName()) != null
@@ -2216,7 +2216,7 @@ public final class GSONUtil {
         writer.beginObject();
 
         if (dem != null) {
-            writer.name(MetaToken.REFERENCE_ID.getName()).value(dem.getReferenceID());
+            writer.name(MetaToken.GUID.getName()).value(dem.getReferenceID());
             writer.name(MetaToken.SUBJECT_GUID.getName()).value(dem.getSubjectGUID());
             writer.name(MetaToken.ACCOUNT_ID.getName()).value(dem.getAccountID());
             writer.name(MetaToken.NAME.getName()).value(dem.getName());

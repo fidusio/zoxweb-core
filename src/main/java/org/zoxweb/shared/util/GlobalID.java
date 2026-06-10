@@ -15,13 +15,15 @@
  */
 package org.zoxweb.shared.util;
 
+import java.io.Serializable;
+
 /**
  * Created by mnael on 3/31/2017.
  * This interface is mainly used to associate a global id like a uuid with an object.
  * The global id is unique globally across APPS and systems it can be used as a uniqueexchange identifier
  */
 public interface GlobalID<T>
-    extends GlobalIDBase<T>
+    extends GlobalIDBase<T>, Serializable
 {
     /**
      * @param gid the global identifier of the object uuid is string format.

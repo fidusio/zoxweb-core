@@ -643,7 +643,7 @@ public class SharedDataUtil
 		
 		for (NVConfig nvc : nvce.getAttributes())
 		{
-			if (nvc.getName().equals(MetaToken.REFERENCE_ID.getName()) && omitRefID)
+			if (nvc.getName().equals(MetaToken.GUID.getName()) && omitRefID)
 			{
 				//	If reference ID should be omitted, ref ID is left null.
 				//ret.setReferenceID(nveToCopy.getReferenceID());			
