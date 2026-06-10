@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author mzebib
  */
-public class Const {
+public final class Const {
 
     // public static final String LOGGER_NAME = "zoxweb-core";
     public static final String TOKEN_TAG = "$$TAG$$";
@@ -37,6 +37,9 @@ public class Const {
     public static final String TAG_ENVELOPE = "$$";
     public static final String[] EMPTY_STRING_ARRAY = new String[0];
     public static final String[] COMMENT_TAGS = {"#", "//"};
+
+    private Const() {
+    }
 
     //public static final String UTF8 = "UTF-8";
 

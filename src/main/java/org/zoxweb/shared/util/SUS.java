@@ -8,7 +8,7 @@ import java.util.Map;
 /**
  * Sus(Shared Util Shortcut) basically to minimize typing
  */
-public class SUS {
+public final class SUS {
     private SUS() {
     }
 
