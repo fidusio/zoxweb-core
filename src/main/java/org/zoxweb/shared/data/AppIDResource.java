@@ -62,11 +62,15 @@ public class AppIDResource
     }
 
     /**
-     * @param domainID not to be used call #setDomainAppID
+     * @param domainID to be set. If domain is set to
+     *                 null app id will also be set to null.
      */
-    @Deprecated
-    public void setDomainID(String domainID) {
-        throw new UnsupportedOperationException("Method not supported use setDomainAppID method.");
+    public synchronized void setDomainID(String domainID) {
+        if (domainID == null) {
+            setAppID(null);
+        }
+
+        setValue(Param.DOMAIN_ID, domainID);
     }
 
 
@@ -75,11 +79,15 @@ public class AppIDResource
     }
 
     /**
-     * @param appID not to be used call #setDomainAppID
+     * @param appID to be set
+     * @throws IllegalArgumentException if app id is set when no domain exists
      */
-    @Deprecated
-    public void setAppID(String appID) {
-        throw new UnsupportedOperationException("Method not supported use setDomainAppID method.");
+    public synchronized void setAppID(String appID) {
+        if (getDomainID() != null) {
+            setValue(Param.APP_ID, appID);
+        } else {
+            throw new IllegalArgumentException(appID + " can not be set when no domain exists");
+        }
     }
 
 

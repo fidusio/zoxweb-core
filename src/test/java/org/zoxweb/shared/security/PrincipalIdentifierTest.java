@@ -24,11 +24,11 @@ class PrincipalIdentifierTest {
 
     @Test
     void testThreeArgConstructor() {
-        PrincipalIdentifier principalIdentifier = new PrincipalIdentifier("test", "test1", "test2");
+        PrincipalIdentifier principalIdentifier = new PrincipalIdentifier("test", "test1.com", "test2");
 
         assertNotNull(principalIdentifier);
         assertEquals("test", principalIdentifier.getPrincipalID());
-        assertEquals("test1", principalIdentifier.getDomainID());
+        assertEquals("test1.com", principalIdentifier.getDomainID());
         assertEquals("test2", principalIdentifier.getAppID());
     }
 
@@ -47,22 +47,39 @@ class PrincipalIdentifierTest {
     }
 
     @Test
+    void setDomainAppID() {
+        PrincipalIdentifier principalIdentifier = new PrincipalIdentifier();
+        principalIdentifier.setDomainAppID("test.com", "test");
+        assertEquals("test.com", principalIdentifier.getDomainID());
+        assertEquals("test", principalIdentifier.getAppID());
+    }
+
+    @Test
     void getDomainID() {
-        PrincipalIdentifier principalIdentifier = new PrincipalIdentifier("test", "test1", "test2");
+        PrincipalIdentifier principalIdentifier = new PrincipalIdentifier("test", "test1.com", "test2");
         String getPID = principalIdentifier.getDomainID();
-        assertEquals("test1", getPID);
+        assertEquals("test1.com", getPID);
     }
 
     @Test
     void setDomainID() {
         PrincipalIdentifier principalIdentifier = new PrincipalIdentifier();
-        principalIdentifier.setDomainID("test");
-        assertEquals("test", principalIdentifier.getDomainID());
+        principalIdentifier.setDomainID("test.com");
+        assertEquals("test.com", principalIdentifier.getDomainID());
+    }
+
+    @Test
+    void negativeSetDomainID() {
+        PrincipalIdentifier principalIdentifier = new PrincipalIdentifier();
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> principalIdentifier.setDomainID("test"));
+        assertEquals("Invalid input: test", exception.getMessage());
+
     }
 
     @Test
     void getAppID() {
-        PrincipalIdentifier principalIdentifier = new PrincipalIdentifier("test", "test1", "test2");
+        PrincipalIdentifier principalIdentifier = new PrincipalIdentifier("test", "test1.com", "test2");
         String getPID = principalIdentifier.getAppID();
         assertEquals("test2", getPID);
     }
@@ -70,8 +87,37 @@ class PrincipalIdentifierTest {
     @Test
     void setAppID() {
         PrincipalIdentifier principalIdentifier = new PrincipalIdentifier();
-        principalIdentifier.setAppID("test");
-        assertEquals("test", principalIdentifier.getAppID());
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> principalIdentifier.setAppID("test"));
+        assertEquals("test can not be set when no domain exists", exception.getMessage());
+
+        principalIdentifier.setDomainID("test1.com");
+        principalIdentifier.setAppID("test1");
+
+        assertEquals("test1", principalIdentifier.getAppID());
+
+    }
+
+    @Test
+    void equalsTest() {
+        PrincipalIdentifier principalIdentifier = new PrincipalIdentifier("test");
+        PrincipalIdentifier principalIdentifier1 = new PrincipalIdentifier("test");
+        PrincipalIdentifier principalIdentifier2 = new PrincipalIdentifier("test2");
+
+        assertEquals(principalIdentifier, principalIdentifier);
+        assertNotEquals(principalIdentifier, principalIdentifier2);
+        assertEquals(principalIdentifier, principalIdentifier1);
+        assertNotEquals(null, principalIdentifier);
+        assertNotEquals("string", principalIdentifier);
+    }
+
+    @Test
+    void hashTest() {
+        PrincipalIdentifier principalIdentifier = new PrincipalIdentifier("test");
+        PrincipalIdentifier empty = new PrincipalIdentifier();
+
+        assertEquals("test".hashCode(), principalIdentifier.hashCode());
+        assertEquals(empty.hashCode(), empty.hashCode());
     }
 
 }

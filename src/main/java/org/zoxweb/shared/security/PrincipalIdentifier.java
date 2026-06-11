@@ -1,6 +1,6 @@
 package org.zoxweb.shared.security;
 
-import org.zoxweb.shared.data.PropertyDAO;
+import org.zoxweb.shared.data.AppIDDAO;
 import org.zoxweb.shared.util.*;
 
 /**
@@ -10,14 +10,14 @@ import org.zoxweb.shared.util.*;
  */
 @SuppressWarnings("serial")
 public class PrincipalIdentifier
-        extends PropertyDAO
+        extends AppIDDAO
         implements PrincipalID<String>, DomainID<String>, AppID<String> {
 
     public enum Param
             implements GetNVConfig {
         PRINCIPAL_ID(NVConfigManager.createNVConfig("principal_id", "the unique identifier", "PrincipalID", true, false, true, String.class, null)),
-        DOMAIN_ID(NVConfigManager.createNVConfig("domain_id", "the domain id", "DomainID", false, false, false, String.class, null)),
-        APP_ID(NVConfigManager.createNVConfig("app_id", "the app id", "AppID", false, false, false, String.class, null)),
+//        DOMAIN_ID(NVConfigManager.createNVConfig("domain_id", "the domain id", "DomainID", false, false, false, String.class, null)),
+//        APP_ID(NVConfigManager.createNVConfig("app_id", "the app id", "AppID", false, false, false, String.class, null)),
         ;
 
         private final NVConfig nvc;
@@ -43,7 +43,7 @@ public class PrincipalIdentifier
             SharedUtil.extractNVConfigs(Param.values()),
             null,
             false,
-            PropertyDAO.NVC_PROPERTY_DAO);
+            AppIDDAO.NVC_APP_ID_DAO);
 
     /**
      * The default constructor of the Principal id class
@@ -72,8 +72,7 @@ public class PrincipalIdentifier
     public PrincipalIdentifier(String principalID, String domainID, String appID) {
         this();
         setPrincipalID(principalID);
-        setDomainID(domainID);
-        setAppID(appID);
+        setDomainAppID(domainID, appID);
     }
 
 //    /**
@@ -102,39 +101,62 @@ public class PrincipalIdentifier
         return lookupValue(Param.PRINCIPAL_ID);
     }
 
-    /**
-     *
-     * @return string app id
-     */
     @Override
-    public String getAppID() {
-        return lookupValue(Param.APP_ID);
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+
+        if (obj instanceof PrincipalIdentifier) {
+            PrincipalIdentifier principalIdentifier = (PrincipalIdentifier) obj;
+
+            return SharedStringUtil.equals(getPrincipalID(), principalIdentifier.getPrincipalID(), true);
+        }
+        return false;
     }
 
-    /**
-     *
-     * @param appID string app id
-     */
     @Override
-    public void setAppID(String appID) {
-        setValue(Param.APP_ID, appID);
+    public int hashCode() {
+
+        if (getPrincipalID() != null) {
+            return getPrincipalID().hashCode();
+        }
+        return super.hashCode();
     }
 
-    /**
-     *
-     * @return string domain id
-     */
-    @Override
-    public String getDomainID() {
-        return lookupValue(Param.DOMAIN_ID);
-    }
-
-    /**
-     *
-     * @param domainID string domain id
-     */
-    @Override
-    public void setDomainID(String domainID) {
-        setValue(Param.DOMAIN_ID, domainID);
-    }
+//    /**
+//     *
+//     * @return string app id
+//     */
+//    @Override
+//    public String getAppID() {
+//        return lookupValue(Param.APP_ID);
+//    }
+//
+//    /**
+//     *
+//     * @param appID string app id
+//     */
+//    @Override
+//    public void setAppID(String appID) {
+//        setValue(Param.APP_ID, appID);
+//    }
+//
+//    /**
+//     *
+//     * @return string domain id
+//     */
+//    @Override
+//    public String getDomainID() {
+//        return lookupValue(Param.DOMAIN_ID);
+//    }
+//
+//    /**
+//     *
+//     * @param domainID string domain id
+//     */
+//    @Override
+//    public void setDomainID(String domainID) {
+//        setValue(Param.DOMAIN_ID, domainID);
+//    }
 }
