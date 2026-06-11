@@ -3,6 +3,8 @@ package org.zoxweb.shared.security;
 import org.zoxweb.shared.data.AppIDDAO;
 import org.zoxweb.shared.util.*;
 
+import java.util.Objects;
+
 /**
  * This class is used to define a unique Principal Identifier e.g. username or email. It
  * requires a unique principal id, with two fields domain id and app id that are neither
@@ -117,11 +119,7 @@ public class PrincipalIdentifier
 
     @Override
     public int hashCode() {
-
-        if (getPrincipalID() != null) {
-            return getPrincipalID().hashCode();
-        }
-        return super.hashCode();
+        return Objects.hashCode(getPrincipalID());
     }
 
 //    /**

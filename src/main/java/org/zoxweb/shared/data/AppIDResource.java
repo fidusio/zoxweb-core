@@ -5,6 +5,8 @@ import org.zoxweb.shared.filters.FilterType;
 import org.zoxweb.shared.security.shiro.ShiroBase;
 import org.zoxweb.shared.util.*;
 
+import java.util.Objects;
+
 public class AppIDResource
         extends PropertyDAO
         implements AppID<String>,
@@ -135,21 +137,23 @@ public class AppIDResource
     @Override
     public int hashCode() {
 
+        return Objects.hash(getDomainID(), getAppID());
 
-        if (getDomainID() != null && getAppID() != null) {
-            return 31 * getDomainID().hashCode() + getAppID().hashCode() + (getName() != null ? getName().hashCode() : 0);
-        }
-
-        if (getDomainID() != null) {
-            return getDomainID().hashCode();
-        }
-
-        if (getAppID() != null) {
-            return getAppID().hashCode();
-        }
-
-        return super.hashCode();
+//        if (getDomainID() != null && getAppID() != null) {
+//            return 31 * getDomainID().hashCode() + getAppID().hashCode() + (getName() != null ? getName().hashCode() : 0);
+//        }
+//
+//        if (getDomainID() != null) {
+//            return getDomainID().hashCode();
+//        }
+//
+//        if (getAppID() != null) {
+//            return getAppID().hashCode();
+//        }
+//
+//        return super.hashCode();
     }
+
 
 
     public static AppIDResource toAppID(String gid) {

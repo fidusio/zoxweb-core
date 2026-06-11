@@ -120,4 +120,17 @@ class PrincipalIdentifierTest {
         assertEquals(empty.hashCode(), empty.hashCode());
     }
 
+    @Test
+    void hashCodeOverridesTest() {
+        PrincipalIdentifier principal = new PrincipalIdentifier();
+        System.out.println(principal.hashCode());
+        String principalID = "test@gmail.com";
+        principal.setPrincipalID(principalID);
+        System.out.println(principal.hashCode());
+        assertEquals(principalID.hashCode(), principal.hashCode());
+        principal.setPrincipalID(null);
+        System.out.println(principal.hashCode());
+
+    }
+
 }
