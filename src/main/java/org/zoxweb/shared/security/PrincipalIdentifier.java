@@ -1,17 +1,140 @@
 package org.zoxweb.shared.security;
 
+import org.zoxweb.shared.data.PropertyDAO;
+import org.zoxweb.shared.util.*;
+
+/**
+ * This class is used to define a unique Principal Identifier e.g. username or email. It
+ * requires a unique principal id, with two fields domain id and app id that are neither
+ * unique nor required.
+ */
+@SuppressWarnings("serial")
 public class PrincipalIdentifier
-implements PrincipalID<String>{
+        extends PropertyDAO
+        implements PrincipalID<String>, DomainID<String>, AppID<String> {
 
+    public enum Param
+            implements GetNVConfig {
+        PRINCIPAL_ID(NVConfigManager.createNVConfig("principal_id", "the unique identifier", "PrincipalID", true, false, true, String.class, null)),
+        DOMAIN_ID(NVConfigManager.createNVConfig("domain_id", "the domain id", "DomainID", false, false, false, String.class, null)),
+        APP_ID(NVConfigManager.createNVConfig("app_id", "the app id", "AppID", false, false, false, String.class, null)),
+        ;
 
+        private final NVConfig nvc;
 
-    @Override
-    public void setPrincipalID(String id) {
+        Param(NVConfig nvc) {
+            this.nvc = nvc;
+        }
 
+        public NVConfig getNVConfig() {
+            return nvc;
+        }
     }
 
+    public static final NVConfigEntity NVC_PRINCIPAL_IDENTIFIER = new NVConfigEntityPortable(
+            "principal_identifier",
+            null,
+            "PrincipalIdentifier",
+            true,
+            false,
+            true,
+            false,
+            PrincipalIdentifier.class,
+            SharedUtil.extractNVConfigs(Param.values()),
+            null,
+            false,
+            PropertyDAO.NVC_PROPERTY_DAO);
+
+    /**
+     * The default constructor of the Principal id class
+     */
+    public PrincipalIdentifier() {
+        super(NVC_PRINCIPAL_IDENTIFIER);
+    }
+
+    /**
+     * Constructor that only sets principal id
+     *
+     * @param principalID string to set the principal id
+     */
+    public PrincipalIdentifier(String principalID) {
+        this();
+        setPrincipalID(principalID);
+    }
+
+    /**
+     * Constructor that sets principal id, domain id, and app id
+     *
+     * @param principalID string to set the principal id
+     * @param domainID    string to set the domain id
+     * @param appID       string to set the app id
+     */
+    public PrincipalIdentifier(String principalID, String domainID, String appID) {
+        this();
+        setPrincipalID(principalID);
+        setDomainID(domainID);
+        setAppID(appID);
+    }
+
+//    /**
+//     *
+//     * @param nvce NVConfigEntity to pass through
+//     */
+//    protected PrincipalIdentifier(NVConfigEntity nvce) {
+//        super(nvce);
+//    }
+
+    /**
+     *
+     * @param id string principal id
+     */
+    @Override
+    public void setPrincipalID(String id) {
+        setValue(Param.PRINCIPAL_ID, id);
+    }
+
+    /**
+     *
+     * @return string principal id
+     */
     @Override
     public String getPrincipalID() {
-        return "";
+        return lookupValue(Param.PRINCIPAL_ID);
+    }
+
+    /**
+     *
+     * @return string app id
+     */
+    @Override
+    public String getAppID() {
+        return lookupValue(Param.APP_ID);
+    }
+
+    /**
+     *
+     * @param appID string app id
+     */
+    @Override
+    public void setAppID(String appID) {
+        setValue(Param.APP_ID, appID);
+    }
+
+    /**
+     *
+     * @return string domain id
+     */
+    @Override
+    public String getDomainID() {
+        return lookupValue(Param.DOMAIN_ID);
+    }
+
+    /**
+     *
+     * @param domainID string domain id
+     */
+    @Override
+    public void setDomainID(String domainID) {
+        setValue(Param.DOMAIN_ID, domainID);
     }
 }
