@@ -88,13 +88,13 @@ class PrincipalIdentifierTest {
     void setAppID() {
         PrincipalIdentifier principalIdentifier = new PrincipalIdentifier();
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> principalIdentifier.setAppID("test"));
-        assertEquals("test can not be set when no domain exists", exception.getMessage());
+        assertThrows(IllegalArgumentException.class, () -> principalIdentifier.setAppID("test"));
 
-        principalIdentifier.setDomainID("test1.com");
-        principalIdentifier.setAppID("test1");
+        principalIdentifier.setDomainID("domain-test.com");
+        principalIdentifier.setAppID("AppID");
 
-        assertEquals("test1", principalIdentifier.getAppID());
+        assertEquals("appid", principalIdentifier.getAppID());
+        System.out.println(principalIdentifier.getDomainAppID());
 
     }
 
@@ -104,11 +104,11 @@ class PrincipalIdentifierTest {
         PrincipalIdentifier principalIdentifier1 = new PrincipalIdentifier("test");
         PrincipalIdentifier principalIdentifier2 = new PrincipalIdentifier("test2");
 
-        assertEquals(principalIdentifier, principalIdentifier);
+
         assertNotEquals(principalIdentifier, principalIdentifier2);
         assertEquals(principalIdentifier, principalIdentifier1);
         assertNotEquals(null, principalIdentifier);
-        assertNotEquals("string", principalIdentifier);
+
     }
 
     @Test

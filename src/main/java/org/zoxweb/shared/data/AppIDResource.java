@@ -15,7 +15,7 @@ public class AppIDResource
             implements GetNVConfig {
         APP_ID(NVConfigManager.createNVConfig("app_id", "App ID", "AppID", true, false, false, String.class, AppIDNameFilter.SINGLETON)),
         DOMAIN_ID(NVConfigManager.createNVConfig("domain_id", "Domain ID", "Domain ID", true, true, false, String.class, FilterType.DOMAIN)),
-        DOMAIN_APP_ID(NVConfigManager.createNVConfig("domain_app_id", "Domain APP ID", "DomainAppID", true, false, true, String.class, null)),
+        //DOMAIN_APP_ID(NVConfigManager.createNVConfig("domain_app_id", "Domain APP ID", "DomainAppID", true, false, true, String.class, null)),
         ;
 
         private final NVConfig nvc;
@@ -49,7 +49,7 @@ public class AppIDResource
     }
 
     public AppIDResource(String domainID, String appID) {
-        super(NVC_APP_ID_RESOURCE);
+        this(NVC_APP_ID_RESOURCE);
         setDomainAppID(domainID, appID);
     }
 
@@ -85,10 +85,10 @@ public class AppIDResource
      * @throws IllegalArgumentException if app id is set when no domain exists
      */
     public synchronized void setAppID(String appID) {
-        if (getDomainID() != null) {
+        if (SUS.isNotEmpty(getDomainID())) {
             setValue(Param.APP_ID, appID);
         } else {
-            throw new IllegalArgumentException(appID + " can not be set when no domain exists");
+            throw new IllegalArgumentException(appID + " can not be set if domain null");
         }
     }
 
@@ -99,14 +99,17 @@ public class AppIDResource
      * @throws IllegalArgumentException if the domain value or app value are invalid
      */
     public synchronized void setDomainAppID(String domainID, String appID) {
-        setValue(Param.DOMAIN_APP_ID, toDomainAppID(domainID, appID));
-        setValue(Param.APP_ID, AppIDNameFilter.SINGLETON.validate(appID));
-        setValue(Param.DOMAIN_ID, FilterType.DOMAIN.validate(domainID));
+       // setValue(Param.DOMAIN_APP_ID, toDomainAppID(domainID, appID));
+        setDomainID(domainID);
+        setAppID(appID);
+//        setValue(Param.DOMAIN_ID, domainID);
+//        setValue(Param.APP_ID, AppIDNameFilter.SINGLETON.validate(appID));
+
     }
 
 
     public String getDomainAppID() {
-        return lookupValue(Param.DOMAIN_APP_ID);
+        return toDomainAppID(getDomainID(), getAppID());
     }
 
     public String toCanonicalID() {
@@ -126,9 +129,8 @@ public class AppIDResource
         if (obj instanceof AppIDResource) {
             AppIDResource appIDResource = (AppIDResource) obj;
 
-            if (SharedStringUtil.equals(getDomainID(), appIDResource.getDomainID(), true)
-                    && SharedStringUtil.equals(getAppID(), appIDResource.getAppID(), true))
-                return true;
+            return (SharedStringUtil.equals(getDomainID(), appIDResource.getDomainID(), true)
+                    && SharedStringUtil.equals(getAppID(), appIDResource.getAppID(), true));
 
         }
         return false;
@@ -156,20 +158,20 @@ public class AppIDResource
 
 
 
-    public static AppIDResource toAppID(String gid) {
-        gid = SUS.trimOrNull(gid);
-        SUS.checkIfNulls("Null app global ig", gid);
-        int sepIndex = gid.lastIndexOf(ShiroBase.CAN_ID_SEP);
-        if (sepIndex < 1 || sepIndex + 1 == gid.length())
-            throw new IllegalArgumentException("Illegal gid:" + gid);
-
-        String domainID = FilterType.DOMAIN.validate(gid.substring(0, sepIndex));
-        String appID = AppIDNameFilter.SINGLETON.validate(gid.substring(sepIndex + 1));
-
-
-        return new AppIDResource(domainID, appID);
-
-    }
+//    public static AppIDResource toAppID(String gid) {
+//        gid = SUS.trimOrNull(gid);
+//        SUS.checkIfNulls("Null app global ig", gid);
+//        int sepIndex = gid.lastIndexOf(ShiroBase.CAN_ID_SEP);
+//        if (sepIndex < 1 || sepIndex + 1 == gid.length())
+//            throw new IllegalArgumentException("Illegal gid:" + gid);
+//
+//        String domainID = FilterType.DOMAIN.validate(gid.substring(0, sepIndex));
+//        String appID = AppIDNameFilter.SINGLETON.validate(gid.substring(sepIndex + 1));
+//
+//
+//        return new AppIDResource(domainID, appID);
+//
+//    }
 
     public static AppIDResource toAppID(String domainID, String appID) {
         return new AppIDResource(domainID, appID);
