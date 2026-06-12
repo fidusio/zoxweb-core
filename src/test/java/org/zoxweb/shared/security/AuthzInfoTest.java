@@ -2,7 +2,6 @@ package org.zoxweb.shared.security;
 
 import org.junit.jupiter.api.Test;
 import org.zoxweb.shared.data.AppIDDAO;
-import org.zoxweb.shared.util.NVConfigEntity;
 
 import static org.junit.jupiter.api.Assertions.*;
 

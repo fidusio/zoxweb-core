@@ -177,8 +177,8 @@ class PermissionInfoTest {
     @Test
     void roleGroupInfo_setRoleGuidsOverwritesPrevious() {
         RoleGroupInfo g = new RoleGroupInfo(Arrays.asList("old-1", "old-2"));
-        g.setRoleGUIDS(Arrays.asList("new-1"));
-        assertEquals(Arrays.asList("new-1"), g.getRoleGUIDS());
+        g.setRoleGUIDS(Collections.singletonList("new-1"));
+        assertEquals(Collections.singletonList("new-1"), g.getRoleGUIDS());
     }
 
     @Test
@@ -195,14 +195,14 @@ class PermissionInfoTest {
         g.addRoleGUID("r1");
         g.addRoleGUID("r1");
         g.addRoleGUID("r1");
-        assertEquals(Arrays.asList("r1"), g.getRoleGUIDS());
+        assertEquals(Collections.singletonList("r1"), g.getRoleGUIDS());
     }
 
     @Test
     void roleGroupInfo_removeRoleGuid_returnsTrueWhenPresent() {
         RoleGroupInfo g = new RoleGroupInfo(new ArrayList<>(Arrays.asList("r1", "r2")));
         assertTrue(g.removeRoleGUID("r2"));
-        assertEquals(Arrays.asList("r1"), g.getRoleGUIDS());
+        assertEquals(Collections.singletonList("r1"), g.getRoleGUIDS());
     }
 
     @Test
@@ -210,7 +210,7 @@ class PermissionInfoTest {
         RoleGroupInfo g = new RoleGroupInfo();
         g.addRoleGUID("r1");
         assertFalse(g.removeRoleGUID("does-not-exist"));
-        assertEquals(Arrays.asList("r1"), g.getRoleGUIDS());
+        assertEquals(Collections.singletonList("r1"), g.getRoleGUIDS());
     }
 
     @Test
@@ -243,7 +243,7 @@ class PermissionInfoTest {
         assertEquals("broker-1", g.getBrokerGUID());
         assertEquals("group.engineers", g.getName());
         assertEquals("Engineering role group", g.getDescription());
-        assertEquals(Arrays.asList("role-1"), g.getRoleGUIDS());
+        assertEquals(Collections.singletonList("role-1"), g.getRoleGUIDS());
     }
 
     // ============================================================
