@@ -6,131 +6,246 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class PrincipalIdentifierTest {
 
+    // ---------- Construction ----------
 
     @Test
-    void testConstructor() {
-        PrincipalIdentifier principalIdentifier = new PrincipalIdentifier();
+    void defaultConstructorHasNullFields() {
+        PrincipalIdentifier pi = new PrincipalIdentifier();
 
-        assertNotNull(principalIdentifier);
+        assertNotNull(pi);
+        assertNull(pi.getPrincipalID());
+        assertNull(pi.getDomainID());
+        assertNull(pi.getAppID());
     }
 
     @Test
-    void testOneArgConstructor() {
-        PrincipalIdentifier principalIdentifier = new PrincipalIdentifier("test");
+    void oneArgConstructorSetsOnlyPrincipalID() {
+        PrincipalIdentifier pi = new PrincipalIdentifier("test");
 
-        assertNotNull(principalIdentifier);
-        assertEquals("test", principalIdentifier.getPrincipalID());
+        assertEquals("test", pi.getPrincipalID());
+        assertNull(pi.getDomainID());
+        assertNull(pi.getAppID());
     }
 
     @Test
-    void testThreeArgConstructor() {
-        PrincipalIdentifier principalIdentifier = new PrincipalIdentifier("test", "test1.com", "test2");
+    void threeArgConstructorSetsAllFields() {
+        PrincipalIdentifier pi = new PrincipalIdentifier("test", "test1.com", "test2");
 
-        assertNotNull(principalIdentifier);
-        assertEquals("test", principalIdentifier.getPrincipalID());
-        assertEquals("test1.com", principalIdentifier.getDomainID());
-        assertEquals("test2", principalIdentifier.getAppID());
+        assertEquals("test", pi.getPrincipalID());
+        assertEquals("test1.com", pi.getDomainID());
+        assertEquals("test2", pi.getAppID());
     }
 
     @Test
-    void setPrincipalID() {
-        PrincipalIdentifier principalIdentifier = new PrincipalIdentifier();
-        principalIdentifier.setPrincipalID("test");
-        assertEquals("test", principalIdentifier.getPrincipalID());
+    void threeArgConstructorRejectsInvalidDomain() {
+        assertThrows(IllegalArgumentException.class,
+                () -> new PrincipalIdentifier("test", "notADomain", "app"));
     }
 
     @Test
-    void getPrincipalID() {
-        PrincipalIdentifier principalIdentifier = new PrincipalIdentifier("test");
-        String getPID = principalIdentifier.getPrincipalID();
-        assertEquals("test", getPID);
+    void threeArgConstructorRejectsInvalidAppName() {
+        assertThrows(IllegalArgumentException.class,
+                () -> new PrincipalIdentifier("test", "test.com", "bad app!"));
+    }
+
+    // ---------- PrincipalID ----------
+
+    @Test
+    void setAndGetPrincipalID() {
+        PrincipalIdentifier pi = new PrincipalIdentifier();
+        pi.setPrincipalID("test");
+        assertEquals("test", pi.getPrincipalID());
     }
 
     @Test
-    void setDomainAppID() {
-        PrincipalIdentifier principalIdentifier = new PrincipalIdentifier();
-        principalIdentifier.setDomainAppID("test.com", "test");
-        assertEquals("test.com", principalIdentifier.getDomainID());
-        assertEquals("test", principalIdentifier.getAppID());
+    void setPrincipalIDOverwritesPreviousValue() {
+        PrincipalIdentifier pi = new PrincipalIdentifier("first");
+        pi.setPrincipalID("second");
+        assertEquals("second", pi.getPrincipalID());
     }
 
     @Test
-    void getDomainID() {
-        PrincipalIdentifier principalIdentifier = new PrincipalIdentifier("test", "test1.com", "test2");
-        String getPID = principalIdentifier.getDomainID();
-        assertEquals("test1.com", getPID);
+    void setPrincipalIDToNullClearsValue() {
+        PrincipalIdentifier pi = new PrincipalIdentifier("test");
+        pi.setPrincipalID(null);
+        assertNull(pi.getPrincipalID());
+    }
+
+    // ---------- DomainID ----------
+
+    @Test
+    void setAndGetDomainID() {
+        PrincipalIdentifier pi = new PrincipalIdentifier();
+        pi.setDomainID("test.com");
+        assertEquals("test.com", pi.getDomainID());
     }
 
     @Test
-    void setDomainID() {
-        PrincipalIdentifier principalIdentifier = new PrincipalIdentifier();
-        principalIdentifier.setDomainID("test.com");
-        assertEquals("test.com", principalIdentifier.getDomainID());
+    void setDomainIDRejectsInvalidValue() {
+        PrincipalIdentifier pi = new PrincipalIdentifier();
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> pi.setDomainID("test"));
+        assertEquals("Invalid input: test", ex.getMessage());
     }
 
     @Test
-    void negativeSetDomainID() {
-        PrincipalIdentifier principalIdentifier = new PrincipalIdentifier();
+    void setDomainIDIsIndependentOfPrincipalID() {
+        PrincipalIdentifier pi = new PrincipalIdentifier("principal");
+        pi.setDomainID("example.com");
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> principalIdentifier.setDomainID("test"));
-        assertEquals("Invalid input: test", exception.getMessage());
+        assertEquals("principal", pi.getPrincipalID());
+        assertEquals("example.com", pi.getDomainID());
+    }
 
+    // ---------- AppID ----------
+
+    @Test
+    void setAppIDWithoutDomainThrows() {
+        PrincipalIdentifier pi = new PrincipalIdentifier();
+        assertThrows(IllegalArgumentException.class, () -> pi.setAppID("test"));
     }
 
     @Test
-    void getAppID() {
-        PrincipalIdentifier principalIdentifier = new PrincipalIdentifier("test", "test1.com", "test2");
-        String getPID = principalIdentifier.getAppID();
-        assertEquals("test2", getPID);
+    void setAppIDLowercasesValue() {
+        PrincipalIdentifier pi = new PrincipalIdentifier();
+        pi.setDomainID("domain-test.com");
+        pi.setAppID("AppID");
+
+        assertEquals("appid", pi.getAppID());
     }
 
     @Test
-    void setAppID() {
-        PrincipalIdentifier principalIdentifier = new PrincipalIdentifier();
+    void setAppIDRejectsNonAlphanumeric() {
+        PrincipalIdentifier pi = new PrincipalIdentifier();
+        pi.setDomainID("test.com");
 
-        assertThrows(IllegalArgumentException.class, () -> principalIdentifier.setAppID("test"));
+        assertThrows(IllegalArgumentException.class, () -> pi.setAppID("app id"));
+        assertThrows(IllegalArgumentException.class, () -> pi.setAppID("app!"));
+    }
 
-        principalIdentifier.setDomainID("domain-test.com");
-        principalIdentifier.setAppID("AppID");
+    // ---------- Domain + App ----------
 
-        assertEquals("appid", principalIdentifier.getAppID());
-        System.out.println(principalIdentifier.getDomainAppID());
+    @Test
+    void setDomainAppIDSetsBothFields() {
+        PrincipalIdentifier pi = new PrincipalIdentifier();
+        pi.setDomainAppID("test.com", "test");
 
+        assertEquals("test.com", pi.getDomainID());
+        assertEquals("test", pi.getAppID());
     }
 
     @Test
-    void equalsTest() {
-        PrincipalIdentifier principalIdentifier = new PrincipalIdentifier("test");
-        PrincipalIdentifier principalIdentifier1 = new PrincipalIdentifier("test");
-        PrincipalIdentifier principalIdentifier2 = new PrincipalIdentifier("test2");
+    void getDomainAppIDReturnsCanonicalForm() {
+        PrincipalIdentifier pi = new PrincipalIdentifier("user", "test.com", "myApp");
+        String canonical = pi.getDomainAppID();
 
+        assertNotNull(canonical);
+        assertTrue(canonical.toLowerCase().contains("test.com"));
+        assertTrue(canonical.toLowerCase().contains("myapp"));
+    }
 
-        assertNotEquals(principalIdentifier, principalIdentifier2);
-        assertEquals(principalIdentifier, principalIdentifier1);
-        assertNotEquals(null, principalIdentifier);
+    // ---------- equals ----------
 
+    @Test
+    void equalsIsSymmetric() {
+        PrincipalIdentifier a = new PrincipalIdentifier("test");
+        PrincipalIdentifier b = new PrincipalIdentifier("test");
+
+        assertEquals(a, b);
+        assertEquals(b, a);
     }
 
     @Test
-    void hashTest() {
-        PrincipalIdentifier principalIdentifier = new PrincipalIdentifier("test");
-        PrincipalIdentifier empty = new PrincipalIdentifier();
+    void equalsReturnsFalseForDifferentPrincipalID() {
+        PrincipalIdentifier a = new PrincipalIdentifier("test");
+        PrincipalIdentifier b = new PrincipalIdentifier("other");
 
-        assertEquals("test".hashCode(), principalIdentifier.hashCode());
-        assertEquals(empty.hashCode(), empty.hashCode());
+        assertNotEquals(a, b);
     }
 
     @Test
-    void hashCodeOverridesTest() {
-        PrincipalIdentifier principal = new PrincipalIdentifier();
-        System.out.println(principal.hashCode());
-        String principalID = "test@gmail.com";
-        principal.setPrincipalID(principalID);
-        System.out.println(principal.hashCode());
-        assertEquals(principalID.hashCode(), principal.hashCode());
-        principal.setPrincipalID(null);
-        System.out.println(principal.hashCode());
+    void equalsIsCaseInsensitiveOnPrincipalID() {
+        PrincipalIdentifier lower = new PrincipalIdentifier("user@test.com");
+        PrincipalIdentifier upper = new PrincipalIdentifier("USER@TEST.COM");
 
+        assertEquals(lower, upper);
     }
 
+    @Test
+    void equalsIgnoresDomainAndApp() {
+        PrincipalIdentifier a = new PrincipalIdentifier("test", "a.com", "app1");
+        PrincipalIdentifier b = new PrincipalIdentifier("test", "b.com", "app2");
+
+        assertEquals(a, b);
+    }
+
+    @Test
+    void equalsReturnsTrueWhenBothPrincipalIDsNull() {
+        PrincipalIdentifier a = new PrincipalIdentifier();
+        PrincipalIdentifier b = new PrincipalIdentifier();
+
+        assertEquals(a, b);
+    }
+
+    @Test
+    @SuppressWarnings({"SimplifiableAssertion", "ConstantValue"})
+    void equalsReturnsFalseForNull() {
+        PrincipalIdentifier pi = new PrincipalIdentifier("test");
+        assertFalse(pi.equals(null));
+    }
+
+    @Test
+    @SuppressWarnings({"SimplifiableAssertion", "EqualsBetweenInconvertibleTypes"})
+    void equalsReturnsFalseForUnrelatedType() {
+        PrincipalIdentifier pi = new PrincipalIdentifier("test");
+        Object stringValue = "test";
+        Object intValue = 42;
+
+        assertFalse(pi.equals(stringValue));
+        assertFalse(pi.equals(intValue));
+    }
+
+    // ---------- hashCode ----------
+
+    @Test
+    void hashCodeMatchesPrincipalIDHash() {
+        PrincipalIdentifier pi = new PrincipalIdentifier("test@gmail.com");
+        assertEquals("test@gmail.com".hashCode(), pi.hashCode());
+    }
+
+    @Test
+    void hashCodeOfEmptyIsZero() {
+        PrincipalIdentifier pi = new PrincipalIdentifier();
+        assertEquals(0, pi.hashCode());
+    }
+
+    @Test
+    void hashCodeIsConsistentAcrossCalls() {
+        PrincipalIdentifier pi = new PrincipalIdentifier("test");
+        int first = pi.hashCode();
+        int second = pi.hashCode();
+        assertEquals(first, second);
+    }
+
+    @Test
+    void equalObjectsHaveEqualHashCodes() {
+        PrincipalIdentifier a = new PrincipalIdentifier("test");
+        PrincipalIdentifier b = new PrincipalIdentifier("test");
+
+        assertEquals(a, b);
+        assertEquals(a.hashCode(), b.hashCode());
+    }
+
+    @Test
+    void hashCodeChangesAfterPrincipalIDChange() {
+        PrincipalIdentifier pi = new PrincipalIdentifier();
+        int empty = pi.hashCode();
+
+        pi.setPrincipalID("test@gmail.com");
+        assertNotEquals(empty, pi.hashCode());
+
+        pi.setPrincipalID(null);
+        assertEquals(empty, pi.hashCode());
+    }
 }
