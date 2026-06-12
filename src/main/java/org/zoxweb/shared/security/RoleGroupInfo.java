@@ -2,16 +2,13 @@ package org.zoxweb.shared.security;
 
 import org.zoxweb.shared.util.*;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * A class used to define a set of Roles as a RoleGroup.
  */
 public class RoleGroupInfo extends AuthzInfo {
 
     public enum Param implements GetNVConfig {
-        ROLE_GUIDS(NVConfigManager.createNVConfig("role_guids", "a list of RoleInfo GUID references", "RoleGUIDS", false, false, NVStringList.class)),
+        ROLE_GUIDS(NVConfigManager.createNVConfigEntity("role_guids", "an array of RoleInfo GUID references", "RoleGUIDS", false, false, RoleInfo.NVC_ROLE_INFO, NVConfigEntity.ArrayType.GET_NAME_MAP)),
         ;
 
         private final NVConfig nvc;
@@ -44,59 +41,57 @@ public class RoleGroupInfo extends AuthzInfo {
      * The default constructor for the RoleGroupInfo class
      */
     public RoleGroupInfo() {
+
         super(NVC_ROLE_GROUP_INFO);
     }
 
     /**
      * Constructor that sets a Role Group
      *
-     * @param guids a list of Role GUIDS
+     * @param guids an array of Role GUIDS
      */
-    public RoleGroupInfo(List<String> guids) {
+    public RoleGroupInfo(RoleInfo... guids) {
         this();
         setRoleGUIDS(guids);
     }
 
     /**
      *
-     * @param guids a list of Role GUIDS
+     * @param guids an array of Role GUIDS
      */
-    public void setRoleGUIDS(List<String> guids) {
-        setValue(Param.ROLE_GUIDS, guids);
+    public void setRoleGUIDS(RoleInfo... guids) {
+        ArrayValues<NVEntity> list = lookup(Param.ROLE_GUIDS);
+
+        for (RoleInfo guid : guids) {
+            list.add(guid);
+        }
+
     }
 
     /**
      *
-     * @return a list of Role GUIDS
+     * @return an array of Role GUIDS
      */
-    public List<String> getRoleGUIDS() {
-        return lookupValue(Param.ROLE_GUIDS);
+    public RoleInfo[] getRoleGUIDS() {
+        return ((ArrayValues<NVEntity>) lookup(Param.ROLE_GUIDS)).valuesAs(new RoleInfo[0]);
     }
 
     /**
      * Adds a single GUID to the Role list
      *
-     * @param guid a string GUID
+     * @param guid a RoleInfo GUID
      */
-    public void addRoleGUID(String guid) {
-        List<String> list = getRoleGUIDS();
-        if (list == null) {
-            list = new ArrayList<>();
-            setRoleGUIDS(list);
-        }
-
-        if (!list.contains(guid)) {
-            list.add(guid);
-        }
+    public void addRoleGUID(RoleInfo guid) {
+        ((ArrayValues<NVEntity>) lookup(Param.ROLE_GUIDS)).add(guid);
     }
 
     /**
      * Removes a single GUID from the Role list
      *
-     * @param guid a string GUID
-     * @return true if remove is successful, false otherwise
+     * @param guid a RoleInfo GUID
+     * @return true if removal works, false otherwise
      */
-    public boolean removeRoleGUID(String guid) {
-        return getRoleGUIDS().remove(guid);
+    public boolean removeRoleGUID(RoleInfo guid) {
+        return ((ArrayValues<NVEntity>) lookup(Param.ROLE_GUIDS)).remove(guid) != null;
     }
 }
