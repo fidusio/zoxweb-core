@@ -8,7 +8,7 @@ import org.zoxweb.shared.util.*;
 public class RoleGroupInfo extends AuthzInfo {
 
     public enum Param implements GetNVConfig {
-        ROLE_GUIDS(NVConfigManager.createNVConfigEntity("role_guids", "an array of RoleInfo GUID references", "RoleGUIDS", false, false, RoleInfo.NVC_ROLE_INFO, NVConfigEntity.ArrayType.GET_NAME_MAP)),
+        ROLES(NVConfigManager.createNVConfigEntity("roles", "An array of RoleInfo references", "Roles", false, false, RoleInfo.NVC_ROLE_INFO, NVConfigEntity.ArrayType.GET_NAME_MAP)),
         ;
 
         private final NVConfig nvc;
@@ -52,15 +52,15 @@ public class RoleGroupInfo extends AuthzInfo {
      */
     public RoleGroupInfo(RoleInfo... guids) {
         this();
-        setRoleGUIDS(guids);
+        setRoles(guids);
     }
 
     /**
      *
      * @param guids an array of Role GUIDS
      */
-    public void setRoleGUIDS(RoleInfo... guids) {
-        ArrayValues<NVEntity> list = lookup(Param.ROLE_GUIDS);
+    public void setRoles(RoleInfo... guids) {
+        ArrayValues<NVEntity> list = lookup(Param.ROLES);
 
         for (RoleInfo guid : guids) {
             list.add(guid);
@@ -73,7 +73,7 @@ public class RoleGroupInfo extends AuthzInfo {
      * @return an array of Role GUIDS
      */
     public RoleInfo[] getRoleGUIDS() {
-        return ((ArrayValues<NVEntity>) lookup(Param.ROLE_GUIDS)).valuesAs(new RoleInfo[0]);
+        return ((ArrayValues<NVEntity>) lookup(Param.ROLES)).valuesAs(new RoleInfo[0]);
     }
 
     /**
@@ -82,7 +82,7 @@ public class RoleGroupInfo extends AuthzInfo {
      * @param guid a RoleInfo GUID
      */
     public void addRoleGUID(RoleInfo guid) {
-        ((ArrayValues<NVEntity>) lookup(Param.ROLE_GUIDS)).add(guid);
+        ((ArrayValues<NVEntity>) lookup(Param.ROLES)).add(guid);
     }
 
     /**
@@ -92,6 +92,6 @@ public class RoleGroupInfo extends AuthzInfo {
      * @return true if removal works, false otherwise
      */
     public boolean removeRoleGUID(RoleInfo guid) {
-        return ((ArrayValues<NVEntity>) lookup(Param.ROLE_GUIDS)).remove(guid) != null;
+        return ((ArrayValues<NVEntity>) lookup(Param.ROLES)).remove(guid) != null;
     }
 }

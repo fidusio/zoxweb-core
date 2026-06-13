@@ -1,6 +1,7 @@
 package org.zoxweb.shared.security;
 
 import org.zoxweb.shared.data.AppIDDAO;
+import org.zoxweb.shared.data.DataConst;
 import org.zoxweb.shared.data.PropertyDAO;
 import org.zoxweb.shared.util.*;
 
@@ -36,7 +37,7 @@ public abstract class AuthzInfo extends PropertyDAO {
             false,
             false,
             AuthzInfo.class,
-            SharedUtil.extractNVConfigs(Param.values()),
+            SharedUtil.extractNVConfigs(DataConst.DataParam.MANDATORY_NAME, Param.BROKER_GUID,Param.APP_ID_DAO),
             null,
             false,
             PropertyDAO.NVC_PROPERTY_DAO
@@ -90,5 +91,6 @@ public abstract class AuthzInfo extends PropertyDAO {
     public AppIDDAO getAppIdDAO() {
         return lookupValue(Param.APP_ID_DAO);
     }
+
 
 }

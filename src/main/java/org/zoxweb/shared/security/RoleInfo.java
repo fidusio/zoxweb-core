@@ -7,7 +7,7 @@ import org.zoxweb.shared.util.*;
  */
 public class RoleInfo extends AuthzInfo {
     public enum Param implements GetNVConfig {
-        PERMISSION_GUIDS(NVConfigManager.createNVConfigEntity("permission_guids", "an array of PermissionInfo GUID references", "PermissionGUIDS", false, false, PermissionInfo.NVC_PERMISSION_INFO, NVConfigEntity.ArrayType.GET_NAME_MAP)),
+        PERMISSIONS(NVConfigManager.createNVConfigEntity("permissions", "an array of PermissionInfo references", "PermissionS", false, false, PermissionInfo.NVC_PERMISSION_INFO, NVConfigEntity.ArrayType.GET_NAME_MAP)),
         ;
 
         private final NVConfig nvc;
@@ -46,49 +46,49 @@ public class RoleInfo extends AuthzInfo {
     /**
      * Constructor that sets a role
      *
-     * @param guids an array of permission GUIDS to pass in
+     * @param permisions an array of permission GUIDS to pass in
      */
-    public RoleInfo(PermissionInfo... guids) {
+    public RoleInfo(PermissionInfo... permisions) {
         this();
-        setPermissionGUIDS(guids);
+        setPermissions(permisions);
     }
 
     /**
      *
-     * @param guids an array of permission GUIDS
+     * @param permissions an array of PermissionInfo
      */
-    public void setPermissionGUIDS(PermissionInfo... guids) {
-        ArrayValues<NVEntity> values = lookup(Param.PERMISSION_GUIDS);
+    public void setPermissions(PermissionInfo... permissions) {
+        ArrayValues<NVEntity> values = lookup(Param.PERMISSIONS);
 
-        for (PermissionInfo guid : guids) {
-            values.add(guid);
+        for (PermissionInfo permission : permissions) {
+            values.add(permission);
         }
     }
 
     /**
      *
-     * @return an array of permission GUIDS
+     * @return an array of PermissionInfo
      */
-    public PermissionInfo[] getPermissionGUIDS() {
-        return ((ArrayValues<NVEntity>) lookup(Param.PERMISSION_GUIDS)).valuesAs(new PermissionInfo[0]);
+    public PermissionInfo[] getPermissions() {
+        return ((ArrayValues<NVEntity>) lookup(Param.PERMISSIONS)).valuesAs(new PermissionInfo[0]);
     }
 
     /**
      * Adds a single GUID to the permission list
      *
-     * @param guid a PermissionInfo GUID
+     * @param permission a PermissionInfo
      */
-    public void addPermissionGUID(PermissionInfo guid) {
-        ((ArrayValues<NVEntity>) lookup(Param.PERMISSION_GUIDS)).add(guid);
+    public void addPermission(PermissionInfo permission) {
+        ((ArrayValues<NVEntity>) lookup(Param.PERMISSIONS)).add(permission);
     }
 
     /**
      * Removes a single GUID from the permission list
      *
-     * @param guid a PermissionInfo GUID
+     * @param permission a PermissionInfo
      * @return true if removal works, false otherwise
      */
-    public boolean removePermissionGUID(PermissionInfo guid) {
-        return ((ArrayValues<NVEntity>) lookup(Param.PERMISSION_GUIDS)).remove(guid) != null;
+    public boolean removePermission(PermissionInfo permission) {
+        return ((ArrayValues<NVEntity>) lookup(Param.PERMISSIONS)).remove(permission) != null;
     }
 }

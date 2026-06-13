@@ -9,7 +9,7 @@ import org.zoxweb.shared.util.*;
 public class PermissionInfo extends AuthzInfo {
 
     public enum Param implements GetNVConfig {
-        PERMISSION_TOKEN(NVConfigManager.createNVConfig("permission_token", "the permission token", "PermissionToken", false, false, String.class)),
+        PERMISSION_TOKEN(NVConfigManager.createNVConfig("permission_token", "the permission token", "PermissionToken", true, false, String.class)),
         ;
 
         private final NVConfig nvc;
@@ -46,12 +46,14 @@ public class PermissionInfo extends AuthzInfo {
     }
 
     /**
-     * Constructor that sets a permission token
+     * Constructor that sets the mandatory name and a permission token
      *
+     * @param name the mandatory permission name
      * @param permissionToken string permission token
      */
-    public PermissionInfo(String permissionToken) {
+    public PermissionInfo(String name, String permissionToken) {
         this();
+        setName(name);
         setPermissionToken(permissionToken);
     }
 

@@ -215,7 +215,7 @@ class AuthzInfoTest {
 
     @Test
     void permissionInfoInheritsBrokerGUIDAndAppId() {
-        PermissionInfo p = new PermissionInfo("read:files");
+        PermissionInfo p = new PermissionInfo("perm.read", "read:files");
         p.setBrokerGUID("broker-p");
         p.setAppIdDAO(new AppIDDAO("acme.com", "billing"));
 
@@ -248,7 +248,7 @@ class AuthzInfoTest {
 
     @Test
     void inheritedSettersAreIndependentAcrossSubclasses() {
-        PermissionInfo p = new PermissionInfo("perm");
+        PermissionInfo p = new PermissionInfo("perm.name", "perm");
         RoleInfo r = new RoleInfo();
         RoleGroupInfo g = new RoleGroupInfo();
 

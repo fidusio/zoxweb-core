@@ -17,22 +17,15 @@ public final class SecurityModel {
 
 
     public final static String SEP = ":";
-    //
-    public static final String GUID = "guid";
-    public static final String SUBJECT_GUID = "subject_guid";
-    public static final String SUBJECT_ID = "subject_id";
-
-    public static final String REFERENCE_GUID = "reference_guid";
-    public static final String RESOURCE_GUID = "resource_guid";
 
 
     // token to be dynamically replaced
     public final static String TOK_APP_ID = "$$app_id$$";
 
     public final static String TOK_REFERENCE_ID = "$$reference_id$$";
-    public final static String TOK_RESOURCE_GUID = "$$" + RESOURCE_GUID + "$$";
-    public final static String TOK_SUBJECT_ID = "$$" + SUBJECT_ID + "$$";
-    public final static String TOK_SUBJECT_GUID = "$$" + SUBJECT_GUID + "$$";
+    public final static String TOK_RESOURCE_GUID = "$$" + Const.RESOURCE_GUID + "$$";
+    public final static String TOK_SUBJECT_ID = "$$" + Const.SUBJECT_ID + "$$";
+    public final static String TOK_SUBJECT_GUID = "$$" + Const.SUBJECT_GUID + "$$";
     public final static String TOK_CRUD = "$$crud$$";
 
 
@@ -133,8 +126,8 @@ public final class SecurityModel {
 
 
     // subject resource permission explicit permission "resource:subject_guid:*:subject_guid of the resource"
-    public static final String PERM_SUBJECT_GUID_RESOURCE_ACCESS = RESOURCE + SEP + SUBJECT_GUID + SEP + ALL + SEP + TOK_SUBJECT_GUID;
-    public static final String PERM_RESOURCE_ACCESS_VIA_SUBJECT_GUID = RESOURCE + SEP + SUBJECT_GUID + SEP + TOK_CRUD + SEP + TOK_SUBJECT_GUID;
+    public static final String PERM_SUBJECT_GUID_RESOURCE_ACCESS = RESOURCE + SEP + Const.SUBJECT_GUID + SEP + ALL + SEP + TOK_SUBJECT_GUID;
+    public static final String PERM_RESOURCE_ACCESS_VIA_SUBJECT_GUID = RESOURCE + SEP + Const.SUBJECT_GUID + SEP + TOK_CRUD + SEP + TOK_SUBJECT_GUID;
 
     // resource:R,U,D:resource_guid
     public static final String PERM_RESOURCE_ACCESS = RESOURCE + SEP + TOK_CRUD + SEP + TOK_RESOURCE_GUID;

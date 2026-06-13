@@ -15,8 +15,6 @@
  */
 package org.zoxweb.shared.util;
 
-import org.zoxweb.shared.security.model.SecurityModel;
-
 /**
  * This enum contains meta parameters.
  * @author mzebib
@@ -30,11 +28,14 @@ public enum MetaToken
     DESCRIPTION("description"),
     // 	Value of the attribute.
     VALUE("value"),
-    // 	Reference ID of the attribute.
+    // 	Reference ID of the attribute to be deprecated replaced by GUID.
     REFERENCE_ID("reference_id"),
+    // GUID of broker
+    BROKER_GUID("broker_guid"),
     // Global ID of the attributes
-    GUID(SecurityModel.GUID),
-    SUBJECT_GUID(SecurityModel.SUBJECT_GUID),
+    GUID(Const.GUID),
+    // Subject GUID
+    SUBJECT_GUID(Const.SUBJECT_GUID),
     // 	Value filter of the attribute.
     VALUE_FILTER("value_filter"),
     // 	Attributes list or collection.
@@ -70,7 +71,7 @@ public enum MetaToken
     //	Class ID
     CLASS_ID("class_id"),
     // SubjectID token
-    SUBJECT_ID(SecurityModel.SUBJECT_ID),
+    SUBJECT_ID(Const.SUBJECT_ID),
     //	Recursive
     RECURSIVE("recursive"),
     // meta type
@@ -79,9 +80,9 @@ public enum MetaToken
     ENUM_TYPE("enum_type"),
     UNIT("unit"),
     RESOURCE_TYPE("resource_type"),
-    RESOURCE_GUID(SecurityModel.RESOURCE_GUID),
+    RESOURCE_GUID(Const.RESOURCE_GUID),
     REFERENCE_TYPE("reference_type"),
-    REFERENCE_GUID(SecurityModel.REFERENCE_GUID),
+    REFERENCE_GUID(Const.REFERENCE_GUID),
     ;
 
     private final String name;

@@ -20,8 +20,9 @@ class PermissionInfoTest {
     }
 
     @Test
-    void permissionInfo_singleArgConstructor_setsToken() {
-        PermissionInfo p = new PermissionInfo("read:files");
+    void permissionInfo_twoArgConstructor_setsNameAndToken() {
+        PermissionInfo p = new PermissionInfo("perm.read", "read:files");
+        assertEquals("perm.read", p.getName());
         assertEquals("read:files", p.getPermissionToken());
     }
 
@@ -34,16 +35,22 @@ class PermissionInfoTest {
 
     @Test
     void permissionInfo_setTokenOverwritesPrevious() {
-        PermissionInfo p = new PermissionInfo("first");
+        PermissionInfo p = new PermissionInfo("perm.read", "first");
         p.setPermissionToken("second");
         assertEquals("second", p.getPermissionToken());
     }
 
     @Test
     void permissionInfo_setTokenToNullClears() {
-        PermissionInfo p = new PermissionInfo("read:files");
+        PermissionInfo p = new PermissionInfo("perm.read", "read:files");
         p.setPermissionToken(null);
         assertNull(p.getPermissionToken());
+    }
+
+    @Test
+    void permissionInfo_nullNameThrows() {
+        PermissionInfo p = new PermissionInfo("perm.read", "read:files");
+        assertThrows(NullPointerException.class, () -> p.setName(null));
     }
 
     @Test
@@ -53,7 +60,7 @@ class PermissionInfoTest {
 
     @Test
     void permissionInfo_inheritsAuthzInfoFields() {
-        PermissionInfo p = new PermissionInfo("read:files");
+        PermissionInfo p = new PermissionInfo("perm.read", "read:files");
         p.setBrokerGUID("broker-1");
         p.setName("perm.read");
         p.setDescription("Read permission");
@@ -71,7 +78,7 @@ class PermissionInfoTest {
     @Test
     void roleInfo_defaultConstructor_permissionsIsEmpty() {
         RoleInfo r = new RoleInfo();
-        PermissionInfo[] perms = r.getPermissionGUIDS();
+        PermissionInfo[] perms = r.getPermissions();
         assertNotNull(perms);
         assertEquals(0, perms.length);
     }
@@ -83,7 +90,7 @@ class PermissionInfoTest {
 
         RoleInfo r = new RoleInfo(p1, p2);
 
-        assertArrayEquals(new PermissionInfo[]{p1, p2}, r.getPermissionGUIDS());
+        assertArrayEquals(new PermissionInfo[]{p1, p2}, r.getPermissions());
     }
 
     @Test
@@ -93,9 +100,9 @@ class PermissionInfoTest {
         PermissionInfo p2 = permission("perm-2", "b:2");
         PermissionInfo p3 = permission("perm-3", "c:3");
 
-        r.setPermissionGUIDS(p1, p2, p3);
+        r.setPermissions(p1, p2, p3);
 
-        assertArrayEquals(new PermissionInfo[]{p1, p2, p3}, r.getPermissionGUIDS());
+        assertArrayEquals(new PermissionInfo[]{p1, p2, p3}, r.getPermissions());
     }
 
     @Test
@@ -107,9 +114,9 @@ class PermissionInfoTest {
         PermissionInfo p3 = permission("perm-3", "new:1");
 
         RoleInfo r = new RoleInfo(p1, p2);
-        r.setPermissionGUIDS(p3);
+        r.setPermissions(p3);
 
-        assertArrayEquals(new PermissionInfo[]{p1, p2, p3}, r.getPermissionGUIDS());
+        assertArrayEquals(new PermissionInfo[]{p1, p2, p3}, r.getPermissions());
     }
 
     @Test
@@ -118,10 +125,10 @@ class PermissionInfoTest {
         PermissionInfo p1 = permission("perm-1", "system:read");
         PermissionInfo p2 = permission("perm-2", "system:write");
 
-        r.addPermissionGUID(p1);
-        r.addPermissionGUID(p2);
+        r.addPermission(p1);
+        r.addPermission(p2);
 
-        assertArrayEquals(new PermissionInfo[]{p1, p2}, r.getPermissionGUIDS());
+        assertArrayEquals(new PermissionInfo[]{p1, p2}, r.getPermissions());
     }
 
     @Test
@@ -133,11 +140,11 @@ class PermissionInfoTest {
         PermissionInfo p1Dup = permission("perm-1-other-guid", "system:read");
         p1Dup.setName(p1.getName());
 
-        r.addPermissionGUID(p1);
-        r.addPermissionGUID(p1);
-        r.addPermissionGUID(p1Dup);
+        r.addPermission(p1);
+        r.addPermission(p1);
+        r.addPermission(p1Dup);
 
-        PermissionInfo[] perms = r.getPermissionGUIDS();
+        PermissionInfo[] perms = r.getPermissions();
         assertEquals(1, perms.length);
     }
 
@@ -147,9 +154,9 @@ class PermissionInfoTest {
         PermissionInfo p2 = permission("perm-2", "system:write");
         RoleInfo r = new RoleInfo(p1, p2);
 
-        r.removePermissionGUID(p1);
+        r.removePermission(p1);
 
-        assertArrayEquals(new PermissionInfo[]{p2}, r.getPermissionGUIDS());
+        assertArrayEquals(new PermissionInfo[]{p2}, r.getPermissions());
     }
 
     @Test
@@ -157,11 +164,11 @@ class PermissionInfoTest {
         PermissionInfo p1 = permission("perm-1", "system:read");
         PermissionInfo missing = permission("perm-missing", "does:not:exist");
         RoleInfo r = new RoleInfo();
-        r.addPermissionGUID(p1);
+        r.addPermission(p1);
 
-        r.removePermissionGUID(missing);
+        r.removePermission(missing);
 
-        assertArrayEquals(new PermissionInfo[]{p1}, r.getPermissionGUIDS());
+        assertArrayEquals(new PermissionInfo[]{p1}, r.getPermissions());
     }
 
     @Test
@@ -176,12 +183,12 @@ class PermissionInfoTest {
         r.setBrokerGUID("broker-1");
         r.setName("role.admin");
         r.setDescription("Administrator role");
-        r.addPermissionGUID(p1);
+        r.addPermission(p1);
 
         assertEquals("broker-1", r.getBrokerGUID());
         assertEquals("role.admin", r.getName());
         assertEquals("Administrator role", r.getDescription());
-        assertArrayEquals(new PermissionInfo[]{p1}, r.getPermissionGUIDS());
+        assertArrayEquals(new PermissionInfo[]{p1}, r.getPermissions());
     }
 
     // ============================================================
@@ -212,7 +219,7 @@ class PermissionInfoTest {
         RoleInfo r2 = role("role-2", "role.r2");
         RoleGroupInfo g = new RoleGroupInfo();
 
-        g.setRoleGUIDS(r1, r2);
+        g.setRoles(r1, r2);
 
         assertArrayEquals(new RoleInfo[]{r1, r2}, g.getRoleGUIDS());
     }
@@ -225,7 +232,7 @@ class PermissionInfoTest {
         RoleInfo r3 = role("role-3", "role.r3");
         RoleGroupInfo g = new RoleGroupInfo(r1, r2);
 
-        g.setRoleGUIDS(r3);
+        g.setRoles(r3);
 
         assertArrayEquals(new RoleInfo[]{r1, r2, r3}, g.getRoleGUIDS());
     }
@@ -324,9 +331,8 @@ class PermissionInfoTest {
     // graph composes end-to-end.
 
     private static PermissionInfo permission(String guid, String token) {
-        PermissionInfo p = new PermissionInfo(token);
+        PermissionInfo p = new PermissionInfo("perm." + token, token);
         p.setGUID(guid);
-        p.setName("perm." + token);
         return p;
     }
 
@@ -344,7 +350,7 @@ class PermissionInfoTest {
 
         RoleInfo admin = role("role-admin", "role.admin", sysRead, sysWrite);
 
-        assertArrayEquals(new PermissionInfo[]{sysRead, sysWrite}, admin.getPermissionGUIDS());
+        assertArrayEquals(new PermissionInfo[]{sysRead, sysWrite}, admin.getPermissions());
     }
 
     @Test
@@ -354,7 +360,7 @@ class PermissionInfoTest {
 
         RoleInfo sysAdmin = role("role-sys-admin", "role.sysAdmin", sysRead, sysWrite);
 
-        PermissionInfo[] perms = sysAdmin.getPermissionGUIDS();
+        PermissionInfo[] perms = sysAdmin.getPermissions();
         assertEquals(2, perms.length);
         assertEquals("system:read", perms[0].getPermissionToken());
         assertEquals("system:write", perms[1].getPermissionToken());
@@ -401,7 +407,7 @@ class PermissionInfoTest {
 
         Set<String> effectiveTokens = new LinkedHashSet<>();
         for (RoleInfo r : platformOps.getRoleGUIDS()) {
-            for (PermissionInfo p : r.getPermissionGUIDS()) {
+            for (PermissionInfo p : r.getPermissions()) {
                 effectiveTokens.add(p.getPermissionToken());
             }
         }
@@ -433,8 +439,8 @@ class PermissionInfoTest {
         // twice to a group must both dedupe (by NVEntity name).
         PermissionInfo sysRead = permission("perm-sys-read", "system:read");
         RoleInfo admin = role("role-admin", "role.admin", sysRead);
-        admin.addPermissionGUID(sysRead);
-        assertEquals(1, admin.getPermissionGUIDS().length);
+        admin.addPermission(sysRead);
+        assertEquals(1, admin.getPermissions().length);
 
         RoleGroupInfo group = new RoleGroupInfo();
         group.addRoleGUID(admin);
@@ -453,12 +459,12 @@ class PermissionInfoTest {
         RoleGroupInfo group = new RoleGroupInfo();
         group.addRoleGUID(admin);
 
-        admin.removePermissionGUID(sysWrite);
-        assertArrayEquals(new PermissionInfo[]{sysRead}, admin.getPermissionGUIDS());
+        admin.removePermission(sysWrite);
+        assertArrayEquals(new PermissionInfo[]{sysRead}, admin.getPermissions());
         assertArrayEquals(new RoleInfo[]{admin}, group.getRoleGUIDS());
 
         group.removeRoleGUID(admin);
         assertEquals(0, group.getRoleGUIDS().length);
-        assertArrayEquals(new PermissionInfo[]{sysRead}, admin.getPermissionGUIDS());
+        assertArrayEquals(new PermissionInfo[]{sysRead}, admin.getPermissions());
     }
 }

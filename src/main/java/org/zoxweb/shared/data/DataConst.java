@@ -16,6 +16,7 @@
 package org.zoxweb.shared.data;
 
 
+import org.zoxweb.shared.filters.FilterType;
 import org.zoxweb.shared.util.DynamicEnumMap;
 import org.zoxweb.shared.util.GetNVConfig;
 import org.zoxweb.shared.util.GetName;
@@ -122,6 +123,8 @@ public class DataConst
 		DOMAIN_ID(NVConfigManager.createNVConfig("domain_id", "Domain ID", "DomainID", true, false, String.class)),
 		NAME(NVConfigManager.createNVConfig("name", null,"Name", false, true, String.class)),
 		UNIQUE_NAME(NVConfigManager.createNVConfig("name", null,"Name", true, true, true, String.class, null)),
+		MANDATORY_NAME(NVConfigManager.createNVConfig("name", null,"Name", true, true, false, String.class, FilterType.TEXT_NOT_EMPTY)),
+
 		;
 		
 		private NVConfig nvc;
