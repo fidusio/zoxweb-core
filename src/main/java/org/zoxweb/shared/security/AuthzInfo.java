@@ -13,8 +13,8 @@ import org.zoxweb.shared.util.*;
 public abstract class AuthzInfo extends PropertyDAO {
 
     public enum Param implements GetNVConfig {
-        BROKER_GUID(NVConfigManager.createNVConfig("broker_guid", "the broker GUID, used for audit", "BROKERGUID", false, false, String.class)),
-        APP_ID_DAO(NVConfigManager.createNVConfigEntity("app_id", "the app id object, representing the domain and app ids", "APPID", false, false, AppIDDAO.NVC_APP_ID_DAO)),
+        BROKER_GUID(NVConfigManager.createNVConfig("broker_guid", "the broker GUID, used for audit", "BrokerGUID", false, false, String.class)),
+        APP_ID_DAO(NVConfigManager.createNVConfigEntity("app_id", "the app id object, representing the domain and app ids", "AppID", false, false, AppIDDAO.NVC_APP_ID_DAO)),
         ;
 
         private final NVConfig nvc;

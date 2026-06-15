@@ -7,7 +7,7 @@ import org.zoxweb.shared.util.*;
  */
 public class RoleInfo extends AuthzInfo {
     public enum Param implements GetNVConfig {
-        PERMISSIONS(NVConfigManager.createNVConfigEntity("permissions", "an array of PermissionInfo references", "PermissionS", false, false, PermissionInfo.NVC_PERMISSION_INFO, NVConfigEntity.ArrayType.GET_NAME_MAP)),
+        PERMISSIONS(NVConfigManager.createNVConfigEntity("permissions", "an array of PermissionInfo references", "Permissions", false, false, PermissionInfo.NVC_PERMISSION_INFO, NVConfigEntity.ArrayType.GET_NAME_MAP)),
         ;
 
         private final NVConfig nvc;
