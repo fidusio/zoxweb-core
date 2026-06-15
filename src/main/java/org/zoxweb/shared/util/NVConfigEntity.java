@@ -25,7 +25,7 @@ import java.util.List;
  *
  * @author mzebib
  */
-public interface NVConfigEntity
+    public interface NVConfigEntity
         extends NVConfig, ReferenceID<String>, DomainID<String>, GlobalID<String>, CanonicalID {
 
     enum ArrayType {
@@ -127,6 +127,10 @@ public interface NVConfigEntity
 
     void setArrayType(ArrayType at);
 
+//    maybe not a good idea
+//    NVConfigEntity addAttribute(NVConfig nvc);
+//
+//    NVConfigEntity remoteAttribute(NVConfig nvc);
 
 
     //void setEmbedded(boolean embedded);
