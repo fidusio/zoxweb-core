@@ -16,6 +16,7 @@ public class ResourceMap extends GrantBase {
 
     public enum Param implements GetNVConfig {
         TYPE(NVConfigManager.createNVConfig("type", "The type of resource", "ResourceType", false, false, ResourceType.class)),
+        RESOURCE_GUID(NVConfigManager.createNVConfig("resource_guid", "The resource GUID", "ResourceGUID", false, false, String.class)),
         ;
 
         private final NVConfig nvc;
@@ -61,6 +62,11 @@ public class ResourceMap extends GrantBase {
         setResourceType(type);
     }
 
+    public ResourceMap(ResourceType type, String resourceGUID) {
+        this(type);
+        setResourceGUID(resourceGUID);
+    }
+
     /**
      *
      * @param type the resource type
@@ -75,5 +81,21 @@ public class ResourceMap extends GrantBase {
      */
     public ResourceType getResourceType() {
         return lookupValue(Param.TYPE);
+    }
+
+    /**
+     *
+     * @param resourceGUID the resource reference
+     */
+    public void setResourceGUID(String resourceGUID) {
+        setValue(Param.RESOURCE_GUID, resourceGUID);
+    }
+
+    /**
+     *
+     * @return the resource reference
+     */
+    public String getResourceGUID() {
+        return lookupValue(Param.RESOURCE_GUID);
     }
 }

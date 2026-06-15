@@ -22,9 +22,23 @@ class PermissionGrantTest {
     }
 
     @Test
+    void resourceMap_defaultConstructor_resourceGUIDIsNull() {
+        ResourceMap rm = new ResourceMap();
+        assertNull(rm.getResourceGUID());
+    }
+
+    @Test
     void resourceMap_constructorWithType_setsType() {
         ResourceMap rm = new ResourceMap(ResourceMap.ResourceType.URI);
         assertEquals(ResourceMap.ResourceType.URI, rm.getResourceType());
+        assertNull(rm.getResourceGUID());
+    }
+
+    @Test
+    void resourceMap_twoArgConstructor_setsTypeAndResourceGUID() {
+        ResourceMap rm = new ResourceMap(ResourceMap.ResourceType.URI, "underlying-1");
+        assertEquals(ResourceMap.ResourceType.URI, rm.getResourceType());
+        assertEquals("underlying-1", rm.getResourceGUID());
     }
 
     @Test
@@ -39,6 +53,40 @@ class PermissionGrantTest {
         ResourceMap rm = new ResourceMap(ResourceMap.ResourceType.OBJECT);
         rm.setResourceType(ResourceMap.ResourceType.METHOD);
         assertEquals(ResourceMap.ResourceType.METHOD, rm.getResourceType());
+    }
+
+    @Test
+    void resourceMap_setAndGetResourceGUID() {
+        ResourceMap rm = new ResourceMap();
+        rm.setResourceGUID("underlying-2");
+        assertEquals("underlying-2", rm.getResourceGUID());
+    }
+
+    @Test
+    void resourceMap_setResourceGUIDOverwritesPrevious() {
+        ResourceMap rm = new ResourceMap(ResourceMap.ResourceType.OBJECT, "underlying-1");
+        rm.setResourceGUID("underlying-2");
+        assertEquals("underlying-2", rm.getResourceGUID());
+    }
+
+    @Test
+    void resourceMap_setResourceGUIDToNullClears() {
+        ResourceMap rm = new ResourceMap(ResourceMap.ResourceType.OBJECT, "underlying-1");
+        rm.setResourceGUID(null);
+        assertNull(rm.getResourceGUID());
+    }
+
+    @Test
+    void resourceMap_ownEntityGUIDIsIndependentOfResourceGUIDField() {
+        // ResourceMap has TWO distinct GUIDs:
+        //   - its own entity GUID (the identity other entities point at)
+        //   - the resourceGUID field (the underlying domain object it maps)
+        // They must be settable independently and not bleed into one another.
+        ResourceMap rm = new ResourceMap(ResourceMap.ResourceType.OBJECT, "underlying-1");
+        rm.setGUID("rm-entity-1");
+        assertEquals("rm-entity-1", rm.getGUID());
+        assertEquals("underlying-1", rm.getResourceGUID());
+        assertNotEquals(rm.getGUID(), rm.getResourceGUID());
     }
 
     @Test
@@ -61,7 +109,7 @@ class PermissionGrantTest {
 
     @Test
     void resourceMap_inheritsAuthzInfoFields() {
-        ResourceMap rm = new ResourceMap(ResourceMap.ResourceType.OBJECT);
+        ResourceMap rm = new ResourceMap(ResourceMap.ResourceType.OBJECT, "invoice-42");
         rm.setBrokerGUID("broker-1");
         rm.setName("resource.invoice42");
         rm.setDescription("Invoice #42 record");
@@ -70,6 +118,7 @@ class PermissionGrantTest {
         assertEquals("resource.invoice42", rm.getName());
         assertEquals("Invoice #42 record", rm.getDescription());
         assertEquals(ResourceMap.ResourceType.OBJECT, rm.getResourceType());
+        assertEquals("invoice-42", rm.getResourceGUID());
     }
 
     // ============================================================
