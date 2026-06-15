@@ -48,50 +48,50 @@ public class RoleGroupInfo extends AuthzInfo {
     /**
      * Constructor that sets a Role Group
      *
-     * @param guids an array of Role GUIDS
+     * @param roles an array of RoleInfo
      */
-    public RoleGroupInfo(RoleInfo... guids) {
+    public RoleGroupInfo(RoleInfo... roles) {
         this();
-        setRoles(guids);
+        setRoles(roles);
     }
 
     /**
      *
-     * @param guids an array of Role GUIDS
+     * @param roles an array of RoleInfo
      */
-    public void setRoles(RoleInfo... guids) {
+    public void setRoles(RoleInfo... roles) {
         ArrayValues<NVEntity> list = lookup(Param.ROLES);
 
-        for (RoleInfo guid : guids) {
-            list.add(guid);
+        for (RoleInfo role : roles) {
+            list.add(role);
         }
 
     }
 
     /**
      *
-     * @return an array of Role GUIDS
+     * @return an array of RoleInfo
      */
-    public RoleInfo[] getRoleGUIDS() {
+    public RoleInfo[] getRoles() {
         return ((ArrayValues<NVEntity>) lookup(Param.ROLES)).valuesAs(new RoleInfo[0]);
     }
 
     /**
-     * Adds a single GUID to the Role list
+     * Adds a single Role to the Role list
      *
-     * @param guid a RoleInfo GUID
+     * @param role a RoleInfo
      */
-    public void addRoleGUID(RoleInfo guid) {
-        ((ArrayValues<NVEntity>) lookup(Param.ROLES)).add(guid);
+    public void addRole(RoleInfo role) {
+        ((ArrayValues<NVEntity>) lookup(Param.ROLES)).add(role);
     }
 
     /**
-     * Removes a single GUID from the Role list
+     * Removes a single Role from the Role list
      *
-     * @param guid a RoleInfo GUID
+     * @param role a RoleInfo
      * @return true if removal works, false otherwise
      */
-    public boolean removeRoleGUID(RoleInfo guid) {
-        return ((ArrayValues<NVEntity>) lookup(Param.ROLES)).remove(guid) != null;
+    public boolean removeRole(RoleInfo role) {
+        return ((ArrayValues<NVEntity>) lookup(Param.ROLES)).remove(role) != null;
     }
 }

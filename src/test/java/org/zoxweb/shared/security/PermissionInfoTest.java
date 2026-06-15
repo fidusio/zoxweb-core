@@ -198,7 +198,7 @@ class PermissionInfoTest {
     @Test
     void roleGroupInfo_defaultConstructor_rolesIsEmpty() {
         RoleGroupInfo g = new RoleGroupInfo();
-        RoleInfo[] roles = g.getRoleGUIDS();
+        RoleInfo[] roles = g.getRoles();
         assertNotNull(roles);
         assertEquals(0, roles.length);
     }
@@ -210,7 +210,7 @@ class PermissionInfoTest {
 
         RoleGroupInfo g = new RoleGroupInfo(r1, r2);
 
-        assertArrayEquals(new RoleInfo[]{r1, r2}, g.getRoleGUIDS());
+        assertArrayEquals(new RoleInfo[]{r1, r2}, g.getRoles());
     }
 
     @Test
@@ -221,7 +221,7 @@ class PermissionInfoTest {
 
         g.setRoles(r1, r2);
 
-        assertArrayEquals(new RoleInfo[]{r1, r2}, g.getRoleGUIDS());
+        assertArrayEquals(new RoleInfo[]{r1, r2}, g.getRoles());
     }
 
     @Test
@@ -234,7 +234,7 @@ class PermissionInfoTest {
 
         g.setRoles(r3);
 
-        assertArrayEquals(new RoleInfo[]{r1, r2, r3}, g.getRoleGUIDS());
+        assertArrayEquals(new RoleInfo[]{r1, r2, r3}, g.getRoles());
     }
 
     @Test
@@ -243,10 +243,10 @@ class PermissionInfoTest {
         RoleInfo r2 = role("role-2", "role.r2");
         RoleGroupInfo g = new RoleGroupInfo();
 
-        g.addRoleGUID(r1);
-        g.addRoleGUID(r2);
+        g.addRole(r1);
+        g.addRole(r2);
 
-        assertArrayEquals(new RoleInfo[]{r1, r2}, g.getRoleGUIDS());
+        assertArrayEquals(new RoleInfo[]{r1, r2}, g.getRoles());
     }
 
     @Test
@@ -255,11 +255,11 @@ class PermissionInfoTest {
         RoleInfo r1Dup = role("role-1-other-guid", "role.r1");
         RoleGroupInfo g = new RoleGroupInfo();
 
-        g.addRoleGUID(r1);
-        g.addRoleGUID(r1);
-        g.addRoleGUID(r1Dup);
+        g.addRole(r1);
+        g.addRole(r1);
+        g.addRole(r1Dup);
 
-        assertEquals(1, g.getRoleGUIDS().length);
+        assertEquals(1, g.getRoles().length);
     }
 
     @Test
@@ -268,9 +268,9 @@ class PermissionInfoTest {
         RoleInfo r2 = role("role-2", "role.r2");
         RoleGroupInfo g = new RoleGroupInfo(r1, r2);
 
-        g.removeRoleGUID(r2);
+        g.removeRole(r2);
 
-        assertArrayEquals(new RoleInfo[]{r1}, g.getRoleGUIDS());
+        assertArrayEquals(new RoleInfo[]{r1}, g.getRoles());
     }
 
     @Test
@@ -278,11 +278,11 @@ class PermissionInfoTest {
         RoleInfo r1 = role("role-1", "role.r1");
         RoleInfo missing = role("role-missing", "role.missing");
         RoleGroupInfo g = new RoleGroupInfo();
-        g.addRoleGUID(r1);
+        g.addRole(r1);
 
-        g.removeRoleGUID(missing);
+        g.removeRole(missing);
 
-        assertArrayEquals(new RoleInfo[]{r1}, g.getRoleGUIDS());
+        assertArrayEquals(new RoleInfo[]{r1}, g.getRoles());
     }
 
     @Test
@@ -297,11 +297,11 @@ class PermissionInfoTest {
         RoleInfo b = role("role-b", "role.b");
         RoleInfo c = role("role-c", "role.c");
         RoleGroupInfo g = new RoleGroupInfo();
-        g.addRoleGUID(a);
-        g.addRoleGUID(b);
-        g.addRoleGUID(c);
+        g.addRole(a);
+        g.addRole(b);
+        g.addRole(c);
 
-        RoleInfo[] roles = g.getRoleGUIDS();
+        RoleInfo[] roles = g.getRoles();
         assertEquals(3, roles.length);
         assertArrayEquals(new RoleInfo[]{a, b, c}, roles);
     }
@@ -313,12 +313,12 @@ class PermissionInfoTest {
         g.setBrokerGUID("broker-1");
         g.setName("group.engineers");
         g.setDescription("Engineering role group");
-        g.addRoleGUID(r1);
+        g.addRole(r1);
 
         assertEquals("broker-1", g.getBrokerGUID());
         assertEquals("group.engineers", g.getName());
         assertEquals("Engineering role group", g.getDescription());
-        assertArrayEquals(new RoleInfo[]{r1}, g.getRoleGUIDS());
+        assertArrayEquals(new RoleInfo[]{r1}, g.getRoles());
     }
 
     // ============================================================
@@ -378,10 +378,10 @@ class PermissionInfoTest {
         RoleGroupInfo platformOps = new RoleGroupInfo();
         platformOps.setGUID("group-platform-ops");
         platformOps.setName("group.platformOps");
-        platformOps.addRoleGUID(sysAdmin);
-        platformOps.addRoleGUID(userViewer);
+        platformOps.addRole(sysAdmin);
+        platformOps.addRole(userViewer);
 
-        assertArrayEquals(new RoleInfo[]{sysAdmin, userViewer}, platformOps.getRoleGUIDS());
+        assertArrayEquals(new RoleInfo[]{sysAdmin, userViewer}, platformOps.getRoles());
     }
 
     @Test
@@ -401,12 +401,12 @@ class PermissionInfoTest {
         RoleGroupInfo platformOps = new RoleGroupInfo();
         platformOps.setGUID("group-platform-ops");
         platformOps.setName("group.platformOps");
-        platformOps.addRoleGUID(sysAdmin);
-        platformOps.addRoleGUID(userEditor);
-        platformOps.addRoleGUID(userViewer);
+        platformOps.addRole(sysAdmin);
+        platformOps.addRole(userEditor);
+        platformOps.addRole(userViewer);
 
         Set<String> effectiveTokens = new LinkedHashSet<>();
-        for (RoleInfo r : platformOps.getRoleGUIDS()) {
+        for (RoleInfo r : platformOps.getRoles()) {
             for (PermissionInfo p : r.getPermissions()) {
                 effectiveTokens.add(p.getPermissionToken());
             }
@@ -430,7 +430,7 @@ class PermissionInfoTest {
 
         RoleGroupInfo platformOps = new RoleGroupInfo(sysAdmin, userViewer);
 
-        assertArrayEquals(new RoleInfo[]{sysAdmin, userViewer}, platformOps.getRoleGUIDS());
+        assertArrayEquals(new RoleInfo[]{sysAdmin, userViewer}, platformOps.getRoles());
     }
 
     @Test
@@ -443,9 +443,9 @@ class PermissionInfoTest {
         assertEquals(1, admin.getPermissions().length);
 
         RoleGroupInfo group = new RoleGroupInfo();
-        group.addRoleGUID(admin);
-        group.addRoleGUID(admin);
-        assertEquals(1, group.getRoleGUIDS().length);
+        group.addRole(admin);
+        group.addRole(admin);
+        assertEquals(1, group.getRoles().length);
     }
 
     @Test
@@ -457,14 +457,14 @@ class PermissionInfoTest {
         RoleInfo admin = role("role-admin", "role.admin", sysRead, sysWrite);
 
         RoleGroupInfo group = new RoleGroupInfo();
-        group.addRoleGUID(admin);
+        group.addRole(admin);
 
         admin.removePermission(sysWrite);
         assertArrayEquals(new PermissionInfo[]{sysRead}, admin.getPermissions());
-        assertArrayEquals(new RoleInfo[]{admin}, group.getRoleGUIDS());
+        assertArrayEquals(new RoleInfo[]{admin}, group.getRoles());
 
-        group.removeRoleGUID(admin);
-        assertEquals(0, group.getRoleGUIDS().length);
+        group.removeRole(admin);
+        assertEquals(0, group.getRoles().length);
         assertArrayEquals(new PermissionInfo[]{sysRead}, admin.getPermissions());
     }
 }
