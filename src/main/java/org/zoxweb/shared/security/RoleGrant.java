@@ -5,7 +5,7 @@ import org.zoxweb.shared.util.*;
 /**
  * A class that defines a direct grant of a specific role to a subject.
  */
-public class RoleGrant extends AuthzInfo {
+public class RoleGrant extends GrantBase {
 
     public enum Param implements GetNVConfig {
         ROLE_GUID(NVConfigManager.createNVConfig("role_guid", "A reference to a role", "RoleGUID", true, false, String.class)),
@@ -34,7 +34,7 @@ public class RoleGrant extends AuthzInfo {
             SharedUtil.extractNVConfigs(Param.values()),
             null,
             false,
-            AuthzInfo.NVC_AUTHZ_INFO
+            GrantBase.NVC_GRANT_BASE
     );
 
     /**

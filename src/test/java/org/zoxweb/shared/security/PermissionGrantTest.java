@@ -55,6 +55,11 @@ class PermissionGrantTest {
     }
 
     @Test
+    void resourceMap_isGrantBase() {
+        assertInstanceOf(GrantBase.class, new ResourceMap());
+    }
+
+    @Test
     void resourceMap_inheritsAuthzInfoFields() {
         ResourceMap rm = new ResourceMap(ResourceMap.ResourceType.OBJECT);
         rm.setBrokerGUID("broker-1");
@@ -129,6 +134,11 @@ class PermissionGrantTest {
     }
 
     @Test
+    void permissionGrant_isGrantBase() {
+        assertInstanceOf(GrantBase.class, new PermissionGrant());
+    }
+
+    @Test
     void permissionGrant_inheritsAuthzInfoFields() {
         PermissionGrant pg = new PermissionGrant("perm-1");
         pg.setBrokerGUID("broker-1");
@@ -184,6 +194,11 @@ class PermissionGrantTest {
     }
 
     @Test
+    void roleGrant_isGrantBase() {
+        assertInstanceOf(GrantBase.class, new RoleGrant());
+    }
+
+    @Test
     void roleGrant_inheritsAuthzInfoFields() {
         RoleGrant rg = new RoleGrant("role-1");
         rg.setBrokerGUID("broker-1");
@@ -236,6 +251,25 @@ class PermissionGrantTest {
     @Test
     void roleGroupGrant_isAuthzInfo() {
         assertInstanceOf(AuthzInfo.class, new RoleGroupGrant());
+    }
+
+    @Test
+    void roleGroupGrant_isGrantBase() {
+        assertInstanceOf(GrantBase.class, new RoleGroupGrant());
+    }
+
+    // ============================================================
+    //                   GrantBase shared behavior
+    // ============================================================
+
+    @Test
+    void grantBase_nameNotMandatory_allSubclassesAllowNullName() {
+        // GrantBase relaxes AuthzInfo's mandatory-name requirement.
+        // A default-constructed grant must be usable with no name set.
+        assertNull(new ResourceMap().getName());
+        assertNull(new PermissionGrant().getName());
+        assertNull(new RoleGrant().getName());
+        assertNull(new RoleGroupGrant().getName());
     }
 
     @Test

@@ -6,7 +6,7 @@ import org.zoxweb.shared.util.*;
  * A class that defines a canonical handle for any securable thing - a domain object,
  * a method in a class, a URI, etc. Objects reference it through the ResourceMapGUID.
  */
-public class ResourceMap extends AuthzInfo {
+public class ResourceMap extends GrantBase {
     public enum ResourceType {
         OBJECT,
         PRINTER,
@@ -41,7 +41,7 @@ public class ResourceMap extends AuthzInfo {
             SharedUtil.extractNVConfigs(Param.values()),
             null,
             false,
-            AuthzInfo.NVC_AUTHZ_INFO
+            GrantBase.NVC_GRANT_BASE
     );
 
     /**

@@ -6,7 +6,7 @@ import org.zoxweb.shared.util.*;
  * A class that defines a direct grant of a specific permission to a subject.
  * Optional ResourceMapGUID binds the grant to a single resource instance (ReBAC).
  */
-public class PermissionGrant extends AuthzInfo {
+public class PermissionGrant extends GrantBase {
 
     public enum Param implements GetNVConfig {
         PERMISSION_GUID(NVConfigManager.createNVConfig("permission_guid", "A reference to a permission", "PermissionGUID", true, false, String.class)),
@@ -36,7 +36,7 @@ public class PermissionGrant extends AuthzInfo {
             SharedUtil.extractNVConfigs(Param.values()),
             null,
             false,
-            AuthzInfo.NVC_AUTHZ_INFO
+            GrantBase.NVC_GRANT_BASE
     );
 
     /**

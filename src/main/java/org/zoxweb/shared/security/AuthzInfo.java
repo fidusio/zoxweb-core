@@ -6,9 +6,10 @@ import org.zoxweb.shared.data.PropertyDAO;
 import org.zoxweb.shared.util.*;
 
 /**
- * This class is a common base for authentication entities. It provides GUID,
+ * This class is a common base for authorization entities. It provides GUID,
  * Subject GUID, Broker GUID, name, description, DomainID and AppID - through
- * an AppIdDao object - and properties metadata.
+ * an AppIdDao object - and properties metadata. Note: this class forces child
+ * classes to have mandatory naming.
  */
 public abstract class AuthzInfo extends PropertyDAO {
 
@@ -37,7 +38,7 @@ public abstract class AuthzInfo extends PropertyDAO {
             false,
             false,
             AuthzInfo.class,
-            SharedUtil.extractNVConfigs(DataConst.DataParam.MANDATORY_NAME, Param.BROKER_GUID,Param.APP_ID_DAO),
+            SharedUtil.extractNVConfigs(DataConst.DataParam.MANDATORY_NAME, Param.BROKER_GUID, Param.APP_ID_DAO),
             null,
             false,
             PropertyDAO.NVC_PROPERTY_DAO
