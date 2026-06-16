@@ -74,7 +74,7 @@
         <angus.mail.version>2.0.5</angus.mail.version>
         <jsoup.version>1.22.1</jsoup.version>
         <junit.version>6.0.1</junit.version>
-        <okhttp.version>5.3.2</okhttp.version>
+        <okhttp.version>5.4.0</okhttp.version>
         <uuid.gen.version>RELEASE</uuid.gen.version>
     </properties>
 

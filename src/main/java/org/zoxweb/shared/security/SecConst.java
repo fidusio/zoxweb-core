@@ -1,5 +1,6 @@
 package org.zoxweb.shared.security;
 
+import org.zoxweb.shared.filters.ValueFilter;
 import org.zoxweb.shared.util.Const;
 import org.zoxweb.shared.util.GetName;
 import org.zoxweb.shared.util.GetValue;
@@ -71,5 +72,47 @@ public final class SecConst {
         ALLOW,
         DENY,
         REJECT
+    }
+
+    public final static class SubjectIDFilter
+            implements ValueFilter<String, String> {
+        public static final SubjectIDFilter SINGLETON = new SubjectIDFilter();
+
+        private SubjectIDFilter() {
+        }
+
+        /**
+         * Validate the object
+         *
+         * @param in value to be validated
+         * @return validated acceptable value
+         * @throws NullPointerException     if in is null
+         * @throws IllegalArgumentException if in is invalid
+         */
+        @Override
+        public String validate(String in) throws NullPointerException, IllegalArgumentException {
+            return in;
+        }
+
+        /**
+         * Check if the value is valid
+         *
+         * @param in value to be checked
+         * @return true if valid false  not
+         */
+        @Override
+        public boolean isValid(String in) {
+            return true;
+        }
+
+        /**
+         * Converts the implementing object in its canonical form.
+         *
+         * @return text identification of the object
+         */
+        @Override
+        public String toCanonicalID() {
+            return "SUBJECT_ID_FILTER";
+        }
     }
 }
