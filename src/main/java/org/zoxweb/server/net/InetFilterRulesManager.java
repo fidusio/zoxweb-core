@@ -19,7 +19,7 @@ import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.shared.data.SetNameDAO;
 import org.zoxweb.shared.net.InetFilterDAO;
 import org.zoxweb.shared.net.SharedNetUtil;
-import org.zoxweb.shared.security.SecurityStatus;
+import org.zoxweb.shared.security.SecConst;
 import org.zoxweb.shared.util.*;
 
 import java.io.IOException;
@@ -43,7 +43,7 @@ public class InetFilterRulesManager {
         public enum Params
                 implements GetNVConfig {
             IP_FILTER(NVConfigManager.createNVConfigEntity("inet_filter_dao", null, "InetFilterDAO", false, true, InetFilterDAO.NVC_INET_FILTER_DAO)),
-            STATUS(NVConfigManager.createNVConfig("security_status", null, "SecurityStatus", false, true, SecurityStatus.class));
+            STATUS(NVConfigManager.createNVConfig("security_status", null, "SecurityStatus", false, true, SecConst.SecAction.class));
 
             private final NVConfig cType;
 
@@ -66,7 +66,7 @@ public class InetFilterRulesManager {
             super(NVC_INET_FILTER_RULE);
         }
 
-        public InetFilterRule(InetFilterDAO filter, SecurityStatus ss) throws IOException {
+        public InetFilterRule(InetFilterDAO filter, SecConst.SecAction ss) throws IOException {
             super(NVC_INET_FILTER_RULE);
             setInetFilterDAO(filter);
             setSecurityStatus(ss);
@@ -127,14 +127,14 @@ public class InetFilterRulesManager {
         /**
          * @return the filterType
          */
-        public SecurityStatus getSecurityStatus() {
+        public SecConst.SecAction getSecurityStatus() {
             return lookupValue(Params.STATUS);
         }
 
         /**
          * @param filterType the filterType to set
          */
-        public void setSecurityStatus(SecurityStatus filterType) {
+        public void setSecurityStatus(SecConst.SecAction filterType) {
             setValue(Params.STATUS, filterType);
         }
 
@@ -168,7 +168,7 @@ public class InetFilterRulesManager {
             throw new IllegalArgumentException("Invalid rule " + rule + "\n format ip-netmask-[deny|allow]");
         }
         int index = rules.length;
-        SecurityStatus ss = (SecurityStatus) SharedUtil.lookupEnum(rules[--index], SecurityStatus.values());
+        SecConst.SecAction ss = (SecConst.SecAction) SharedUtil.lookupEnum(rules[--index], SecConst.SecAction.values());
         if (ss == null) {
             throw new IllegalArgumentException("Invalid rule " + rule + "\n format ip-netmask-[deny|allow]");
         }
@@ -188,7 +188,7 @@ public class InetFilterRulesManager {
     }
 
 
-    public void addInetFilterProp(InetFilterDAO ifd, SecurityStatus ss) throws IOException {
+    public void addInetFilterProp(InetFilterDAO ifd, SecConst.SecAction ss) throws IOException {
         addInetFilterProp(new InetFilterRule(ifd, ss));
     }
 
@@ -244,10 +244,10 @@ public class InetFilterRulesManager {
     }
 
 
-    public SecurityStatus lookupSecurityStatus(InetAddress address) {
+    public SecConst.SecAction lookupSecurityStatus(InetAddress address) {
         if (log.isEnabled()) log.getLogger().info("address " + address);
         if (address.isLoopbackAddress()) {
-            return SecurityStatus.ALLOW;
+            return SecConst.SecAction.ALLOW;
         }
 
 
@@ -264,30 +264,30 @@ public class InetFilterRulesManager {
 
         if (log.isEnabled()) log.getLogger().info("we have ip v6 deny access:" + address);
         // we ip v6
-        return SecurityStatus.DENY;
+        return SecConst.SecAction.DENY;
 
     }
 
 
-    public SecurityStatus lookupSecurityStatus(SocketAddress address) {
+    public SecConst.SecAction lookupSecurityStatus(SocketAddress address) {
         if (address instanceof InetSocketAddress) {
             return lookupSecurityStatus(((InetSocketAddress) address).getAddress());
         }
         if (log.isEnabled()) log.getLogger().info("we have ip v6 deny access:" + address);
         // we ip v6
-        return SecurityStatus.DENY;
+        return SecConst.SecAction.DENY;
 
     }
 
 
-    public SecurityStatus lookupSecurityStatus(String ipAddress) throws IOException {
+    public SecConst.SecAction lookupSecurityStatus(String ipAddress) throws IOException {
         return lookupSecurityStatus(InetAddress.getByName(ipAddress));
     }
 
 
-    public synchronized SecurityStatus checkIPSecurityStatus(byte[] ipAddress) {
+    public synchronized SecConst.SecAction checkIPSecurityStatus(byte[] ipAddress) {
 
-        SecurityStatus ret = null;
+        SecConst.SecAction ret = null;
 
         for (InetFilterRule ipfp : set) {
 
@@ -296,9 +296,9 @@ public class InetFilterRulesManager {
                     try {
 
                         //.info(""+ipfp);
-                        ret = SecurityStatus.DENY;
+                        ret = SecConst.SecAction.DENY;
                         if (SharedNetUtil.belongsToNetwork(ipAddress, ipfp.getNetMaskBytes(), ipfp.getNetworkBytes())) {
-                            return SecurityStatus.ALLOW;
+                            return SecConst.SecAction.ALLOW;
                         }
                     } catch (IOException e) {
                         // TODO Auto-generated catch block
@@ -309,10 +309,10 @@ public class InetFilterRulesManager {
                 case DENY:
                     try {
                         if (log.isEnabled()) log.getLogger().info("" + ipfp);
-                        ret = SecurityStatus.ALLOW;
+                        ret = SecConst.SecAction.ALLOW;
                         if (SharedNetUtil.belongsToNetwork(ipAddress, ipfp.getNetMaskBytes(), ipfp.getNetworkBytes())) {
                             if (log.isEnabled()) log.getLogger().info("deny:" + ipfp);
-                            return SecurityStatus.DENY;
+                            return SecConst.SecAction.DENY;
                         }
                     } catch (IOException e) {
                         // TODO Auto-generated catch block
@@ -325,7 +325,7 @@ public class InetFilterRulesManager {
         // we had an empty list
         if (ret == null) {
             // default allow
-            ret = SecurityStatus.ALLOW;
+            ret = SecConst.SecAction.ALLOW;
         }
 
         return ret;

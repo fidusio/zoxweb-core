@@ -21,7 +21,7 @@ import java.util.List;
 import org.zoxweb.server.net.InetFilterRulesManager.InetFilterRule;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.net.InetFilterDAO;
-import org.zoxweb.shared.security.SecurityStatus;
+import org.zoxweb.shared.security.SecConst;
 import org.zoxweb.shared.util.SharedBase64.Base64Type;
 
 public class IPFilterTest {
@@ -56,21 +56,21 @@ public class IPFilterTest {
 			
 			checkTest( ipfm, ipArray);
 			
-			ipfm.addInetFilterProp(new InetFilterDAO("44.44.34.44", "255.255.255.255"), SecurityStatus.DENY);
+			ipfm.addInetFilterProp(new InetFilterDAO("44.44.34.44", "255.255.255.255"), SecConst.SecAction.DENY);
 			
 			System.out.println();
 			checkTest( ipfm, ipArray);
 			
-			ipfm.addInetFilterProp(new InetFilterDAO("10.0.0.1", "255.255.0.0"), SecurityStatus.ALLOW);
+			ipfm.addInetFilterProp(new InetFilterDAO("10.0.0.1", "255.255.0.0"), SecConst.SecAction.ALLOW);
 			System.out.println();
 			checkTest( ipfm, ipArray);
 		 	
-			ipfm.addInetFilterProp(new InetFilterDAO("localhost", "255.255.255.255"), SecurityStatus.ALLOW);
+			ipfm.addInetFilterProp(new InetFilterDAO("localhost", "255.255.255.255"), SecConst.SecAction.ALLOW);
 			System.out.println();
 			checkTest( ipfm, ipArray);
 			
 			ipfm = new InetFilterRulesManager();
-			ipfm.addInetFilterProp(new InetFilterDAO("localhost", "255.255.255.255"),  SecurityStatus.ALLOW);
+			ipfm.addInetFilterProp(new InetFilterDAO("localhost", "255.255.255.255"),  SecConst.SecAction.ALLOW);
 			//ipfm.addIPFilterProp(new InetFilterDAO("10.0.0.1", "255.255.0.0"),  SecurityStatus.ALLOW);
 			//ipfm.addIPFilterProp(new InetFilterDAO("192.168.0.1", "255.255.0.0"),  SecurityStatus.ALLOW);
 
@@ -79,8 +79,8 @@ public class IPFilterTest {
 
 			// this example demonstrate all 
 		
-			ipfm.addInetFilterProp(new InetFilterDAO("44.44.34.44", null), SecurityStatus.ALLOW);
-			ipfm.addInetFilterProp(new InetFilterDAO("10.0.1.1", "255.255.255.0"), SecurityStatus.ALLOW);
+			ipfm.addInetFilterProp(new InetFilterDAO("44.44.34.44", null), SecConst.SecAction.ALLOW);
+			ipfm.addInetFilterProp(new InetFilterDAO("10.0.1.1", "255.255.255.0"), SecConst.SecAction.ALLOW);
 			//ifr = new InetFilterRule(new InetFilterDAO("0.0.0.0", "0.0.0.0"),  SecurityStatus.DENY);
 			//ifr.getInetFilterDAO().setName("Deny All");
 			ipfm.addInetFilterProp(ifr);
@@ -117,7 +117,7 @@ public class IPFilterTest {
 				InetAddress inet = InetAddress.getByName(ip);
 				byte[] address = inet.getAddress();
 				long ts = System.nanoTime();
-				SecurityStatus status = ipfm.checkIPSecurityStatus(address);
+				SecConst.SecAction status = ipfm.checkIPSecurityStatus(address);
 				ts = System.nanoTime() - ts;
 				System.out.println("ip " + ip + " status " + status + ":" + ts + " nanos");
 			} catch(Exception e) {

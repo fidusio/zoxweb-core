@@ -5,7 +5,7 @@ import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.net.InetProp.IPVersion;
 import org.zoxweb.shared.net.ProxyType;
 import org.zoxweb.shared.net.InetAddressDAO;
-import org.zoxweb.shared.security.SecurityStatus;
+import org.zoxweb.shared.security.SecConst;
 
 import java.io.IOException;
 import java.net.*;
@@ -18,22 +18,22 @@ public class NetUtilTest {
 
     @Test
     public void testCheckSecurityStatusWithNullManager() throws IOException {
-        SecurityStatus status = NetUtil.checkSecurityStatus(null, "192.168.1.1", null);
-        assertEquals(SecurityStatus.ALLOW, status);
+        SecConst.SecAction status = NetUtil.checkSecurityStatus(null, "192.168.1.1", null);
+        assertEquals(SecConst.SecAction.ALLOW, status);
     }
 
     @Test
     public void testCheckSecurityStatusSocketAddressWithNullManager() {
         SocketAddress addr = new InetSocketAddress("localhost", 8080);
-        SecurityStatus status = NetUtil.checkSecurityStatus(null, addr, null);
-        assertEquals(SecurityStatus.ALLOW, status);
+        SecConst.SecAction status = NetUtil.checkSecurityStatus(null, addr, null);
+        assertEquals(SecConst.SecAction.ALLOW, status);
     }
 
     @Test
     public void testCheckSecurityStatusInetAddressWithNullManager() throws UnknownHostException {
         InetAddress addr = InetAddress.getByName("127.0.0.1");
-        SecurityStatus status = NetUtil.checkSecurityStatus(null, addr, null);
-        assertEquals(SecurityStatus.ALLOW, status);
+        SecConst.SecAction status = NetUtil.checkSecurityStatus(null, addr, null);
+        assertEquals(SecConst.SecAction.ALLOW, status);
     }
 
     // ==================== lookup (ProxyType) Tests ====================

@@ -30,7 +30,7 @@ import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.net.DNSResolverInt;
 import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.net.SharedNetUtil;
-import org.zoxweb.shared.security.SecurityStatus;
+import org.zoxweb.shared.security.SecConst;
 import org.zoxweb.shared.task.ConsumerCallback;
 import org.zoxweb.shared.task.ScheduledAttachment;
 import org.zoxweb.shared.util.*;
@@ -529,7 +529,7 @@ public class NIOSocket
                                     // check if the incoming connection is allowed
 
 
-                                    if (NetUtil.checkSecurityStatus(protocolFactory.getIncomingInetFilterRulesManager(), sc, null) != SecurityStatus.ALLOW) {
+                                    if (NetUtil.checkSecurityStatus(protocolFactory.getIncomingInetFilterRulesManager(), sc, null) != SecConst.SecAction.ALLOW) {
                                         try {
                                             long currentAttackCount = ++attackTotalCount;
                                             if (attackTimestamp == 0) {

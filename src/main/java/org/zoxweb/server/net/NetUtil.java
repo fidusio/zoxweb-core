@@ -19,7 +19,7 @@ import org.zoxweb.server.util.ServerUtil;
 import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.net.*;
 import org.zoxweb.shared.net.InetProp.*;
-import org.zoxweb.shared.security.SecurityStatus;
+import org.zoxweb.shared.security.SecConst;
 import org.zoxweb.shared.util.Const;
 import org.zoxweb.shared.util.SUS;
 
@@ -65,13 +65,13 @@ public class NetUtil {
         return ipv6 ? INET_V6_ZERO : INET_V4_ZERO;
     }
 
-    public static SecurityStatus checkSecurityStatus(InetFilterRulesManager ifrm, String host, Closeable sc) throws IOException {
+    public static SecConst.SecAction checkSecurityStatus(InetFilterRulesManager ifrm, String host, Closeable sc) throws IOException {
 
-        SecurityStatus ret = SecurityStatus.ALLOW;
+        SecConst.SecAction ret = SecConst.SecAction.ALLOW;
         if (ifrm != null) {
             ret = ifrm.lookupSecurityStatus(host);
 
-            if (ret != SecurityStatus.ALLOW) {
+            if (ret != SecConst.SecAction.ALLOW) {
                 SharedIOUtil.close(sc);
             }
         }
@@ -81,11 +81,11 @@ public class NetUtil {
     }
 
 
-    public static SecurityStatus checkSecurityStatus(InetFilterRulesManager ifrm, SocketAddress host, Closeable sc) {
-        SecurityStatus ret = SecurityStatus.ALLOW;
+    public static SecConst.SecAction checkSecurityStatus(InetFilterRulesManager ifrm, SocketAddress host, Closeable sc) {
+        SecConst.SecAction ret = SecConst.SecAction.ALLOW;
         if (ifrm != null) {
             ret = ifrm.lookupSecurityStatus(host);
-            if (sc != null && ret != SecurityStatus.ALLOW) {
+            if (sc != null && ret != SecConst.SecAction.ALLOW) {
                 SharedIOUtil.close(sc);
             }
         }
@@ -93,11 +93,11 @@ public class NetUtil {
         return ret;
     }
 
-    public static SecurityStatus checkSecurityStatus(InetFilterRulesManager ifrm, SocketChannel channel, Closeable sc) throws IOException {
-        SecurityStatus ret = SecurityStatus.ALLOW;
+    public static SecConst.SecAction checkSecurityStatus(InetFilterRulesManager ifrm, SocketChannel channel, Closeable sc) throws IOException {
+        SecConst.SecAction ret = SecConst.SecAction.ALLOW;
         if (ifrm != null) {
             ret = ifrm.lookupSecurityStatus(channel.getRemoteAddress());
-            if (sc != null && ret != SecurityStatus.ALLOW) {
+            if (sc != null && ret != SecConst.SecAction.ALLOW) {
                 SharedIOUtil.close(sc);
             }
         }
@@ -105,11 +105,11 @@ public class NetUtil {
         return ret;
     }
 
-    public static SecurityStatus checkSecurityStatus(InetFilterRulesManager ifrm, InetAddress host, Closeable sc) {
-        SecurityStatus ret = SecurityStatus.ALLOW;
+    public static SecConst.SecAction checkSecurityStatus(InetFilterRulesManager ifrm, InetAddress host, Closeable sc) {
+        SecConst.SecAction ret = SecConst.SecAction.ALLOW;
         if (ifrm != null) {
             ret = ifrm.lookupSecurityStatus(host);
-            if (sc != null && ret != SecurityStatus.ALLOW) {
+            if (sc != null && ret != SecConst.SecAction.ALLOW) {
                 SharedIOUtil.close(sc);
             }
         }

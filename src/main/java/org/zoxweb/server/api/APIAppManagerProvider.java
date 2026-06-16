@@ -226,7 +226,7 @@ public class APIAppManagerProvider
         return lookupUserIDDAO(subjectID.getValue(), params);
     }
 
-    public synchronized UserIDDAO createUserIDDAO(UserIDDAO userID, CryptoConst.SubjectStatus userIDStatus, String password)
+    public synchronized UserIDDAO createUserIDDAO(UserIDDAO userID, SecConst.SecStatus userIDStatus, String password)
             throws NullPointerException, IllegalArgumentException, AccessException, APIException {
         SUS.checkIfNulls("UserIDDAO object is null.", userID, userIDStatus);
 
@@ -442,7 +442,7 @@ public class APIAppManagerProvider
     }
 
 
-    public UserIDDAO createUserIDDAO(String subjectID, CryptoConst.SubjectStatus userIDstatus, String password)
+    public UserIDDAO createUserIDDAO(String subjectID, SecConst.SecStatus userIDstatus, String password)
             throws NullPointerException, IllegalArgumentException, AccessException, APIException {
 
         UserIDDAO uid = new UserIDDAO();
@@ -680,7 +680,7 @@ public class APIAppManagerProvider
             userIDDAO.setSubjectID(subjectID);
 
 
-            userIDDAO = createUserIDDAO(userIDDAO, CryptoConst.SubjectStatus.ACTIVE, password);
+            userIDDAO = createUserIDDAO(userIDDAO, SecConst.SecStatus.ACTIVE, password);
         }
 
         getAPISecurityManager().login(subjectID, password, appIDDAO.getDomainID(), appIDDAO.getAppID(), false);
@@ -720,7 +720,7 @@ public class APIAppManagerProvider
             // 2.
             userIDDAO.setSubjectID(subjectID);
 
-            userIDDAO = createUserIDDAO(userIDDAO, CryptoConst.SubjectStatus.ACTIVE, password);
+            userIDDAO = createUserIDDAO(userIDDAO, SecConst.SecStatus.ACTIVE, password);
             return userIDDAO.getUserInfo();
         }
 

@@ -27,7 +27,7 @@ import org.zoxweb.shared.http.*;
 import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.protocol.Delimiter;
-import org.zoxweb.shared.security.SecurityStatus;
+import org.zoxweb.shared.security.SecConst;
 import org.zoxweb.shared.util.NVBoolean;
 import org.zoxweb.shared.util.NVPair;
 import org.zoxweb.shared.util.ResourceManager;
@@ -337,7 +337,7 @@ public class NIOProxyProtocol
             if (requestMCCI.getMethod() == HTTPMethod.CONNECT) {
 
                 relayConnection = true;
-                if (NetUtil.checkSecurityStatus(getOutgoingInetFilterRulesManager(), requestInfo.remoteAddress.getInetAddress(), remoteChannel) != SecurityStatus.ALLOW) {
+                if (NetUtil.checkSecurityStatus(getOutgoingInetFilterRulesManager(), requestInfo.remoteAddress.getInetAddress(), remoteChannel) != SecConst.SecAction.ALLOW) {
                     HTTPMessageConfigInterface hccError = createErrorMSG(403, "Access Denied", requestMCCI.getURI());
 
                     ByteBufferUtil.write(phSChannel, HTTPUtil.formatResponse(hccError, requestRawBuffer));
@@ -401,7 +401,7 @@ public class NIOProxyProtocol
                     log.getLogger().info(new String(requestRawBuffer.toByteArray()));
 
 
-                if (NetUtil.checkSecurityStatus(getOutgoingInetFilterRulesManager(), requestInfo.remoteAddress.getInetAddress(), remoteChannel) != SecurityStatus.ALLOW) {
+                if (NetUtil.checkSecurityStatus(getOutgoingInetFilterRulesManager(), requestInfo.remoteAddress.getInetAddress(), remoteChannel) != SecConst.SecAction.ALLOW) {
                     HTTPMessageConfigInterface hccError = createErrorMSG(403, "Access Denied", requestMCCI.getURI());
 
                     ByteBufferUtil.write(phSChannel, HTTPUtil.formatResponse(hccError, requestRawBuffer));

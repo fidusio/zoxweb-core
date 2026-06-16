@@ -485,33 +485,6 @@ public final class CryptoConst {
 
     }
 
-    /**
-     * This enum contains user status with a specified status
-     * expiration time.
-     */
-    public enum SubjectStatus
-            implements GetValue<Long> {
-        // Note:
-        //	0 = no expiration time
-        // -1 = expiration time is irrelevant
-        ACTIVE(0),
-        DEACTIVATED(0),
-        INACTIVE(-1),
-        PENDING_RESET_PASSWORD(Const.TimeInMillis.DAY.MILLIS * 2),
-        PENDING_ACCOUNT_ACTIVATION(Const.TimeInMillis.DAY.MILLIS * 2);
-
-        private final long EXPIRATION_TIME;
-
-        SubjectStatus(long time) {
-            EXPIRATION_TIME = time;
-        }
-
-        @Override
-        public Long getValue() {
-            return EXPIRATION_TIME;
-        }
-    }
-
     public static String applyPemFilters(String pemToken) {
         /* Regex pieces the split() will REMOVE:
          *   1)  -----BEGIN …-----      (header)

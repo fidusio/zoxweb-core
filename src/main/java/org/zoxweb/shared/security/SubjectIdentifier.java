@@ -40,7 +40,7 @@ public class SubjectIdentifier
         SUBJECT_GUID(NVConfigManager.createNVConfig(MetaToken.SUBJECT_GUID.getName(), "The subject global identifier.", "SubjectGUID", true, false, true, String.class, null)),
         SUBJECT_ID(NVConfigManager.createNVConfig(MetaToken.SUBJECT_ID.getName(), "Subject identifier", "SubjectID", true, true, true, String.class, CryptoConst.SubjectIDFilter.SINGLETON)),
         SUBJECT_TYPE(NVConfigManager.createNVConfig("subject_type", "Subject Type", "SubjectType", true, true, SubjectType.class)),
-        SUBJECT_STATUS(NVConfigManager.createNVConfig("subject_status", "Subject status", "SubjectStatus", true, true, CryptoConst.SubjectStatus.class)),
+        SUBJECT_STATUS(NVConfigManager.createNVConfig("subject_status", "Subject status", "SubjectStatus", true, true, SecConst.SecStatus.class)),
         ;
 
         private final NVConfig nvc;
@@ -94,12 +94,12 @@ public class SubjectIdentifier
         setValue(Param.SUBJECT_ID, id);
     }
 
-    public CryptoConst.SubjectStatus getSubjectStatus() {
+    public SecConst.SecStatus getSubjectStatus() {
         return lookupValue(Param.SUBJECT_STATUS);
     }
 
-    public void setSubjectStatus(CryptoConst.SubjectStatus subjectStatus) {
-        setValue(Param.SUBJECT_STATUS, subjectStatus);
+    public void setSubjectStatus(SecConst.SecStatus secStatus) {
+        setValue(Param.SUBJECT_STATUS, secStatus);
     }
 
     public SubjectType getSubjectType() {

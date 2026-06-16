@@ -3,9 +3,9 @@ package org.zoxweb.shared.util;
 
 import org.junit.jupiter.api.Test;
 import org.zoxweb.server.util.GSONUtil;
-import org.zoxweb.shared.crypto.CryptoConst;
 import org.zoxweb.shared.data.PropertyDAO;
 import org.zoxweb.shared.filters.FilterType;
+import org.zoxweb.shared.security.SecConst;
 import org.zoxweb.shared.security.SubjectInfo;
 import org.zoxweb.shared.util.Const.TimeInMillis;
 
@@ -20,7 +20,7 @@ public class EnumTypeTest {
             SUBJECT_GUID(NVConfigManager.createNVConfig(MetaToken.SUBJECT_GUID.getName(), "The subject global identifier.", "SubjectGUID", true, false, true, String.class, null)),
             EMAIL(NVConfigManager.createNVConfig("email", "Primary email address", "Email", true, true, false, String.class, FilterType.EMAIL)),
             SUBJECT_TYPE(NVConfigManager.createNVConfig("subject_type", "Subject Type", "SubjectType", true, true, BaseSubjectID.SubjectType.class)),
-            SUBJECT_STATUS(NVConfigManager.createNVConfig("subject_status", "Subject status", "SubjectStatus", true, true, CryptoConst.SubjectStatus[].class));
+            SUBJECT_STATUS(NVConfigManager.createNVConfig("subject_status", "Subject status", "SubjectStatus", true, true, SecConst.SecStatus[].class));
             private final NVConfig nvc;
 
             Param(NVConfig nvc) {
@@ -71,9 +71,9 @@ public class EnumTypeTest {
     void meta() {
         EnumTester et = new EnumTester();
         et.setSubjectType(BaseSubjectID.SubjectType.USER);
-        List<CryptoConst.SubjectStatus> statusList = et.lookupValue(EnumTester.Param.SUBJECT_STATUS);
-        statusList.add(CryptoConst.SubjectStatus.ACTIVE);
-        statusList.add(CryptoConst.SubjectStatus.PENDING_ACCOUNT_ACTIVATION);
+        List<SecConst.SecStatus> statusList = et.lookupValue(EnumTester.Param.SUBJECT_STATUS);
+        statusList.add(SecConst.SecStatus.ACTIVE);
+        statusList.add(SecConst.SecStatus.PENDING_ACCOUNT_ACTIVATION);
         String json = GSONUtil.toJSONDefault(et, true);
         System.out.println(json);
         NVConfigEntity nvce = (NVConfigEntity) et.getNVConfig();
