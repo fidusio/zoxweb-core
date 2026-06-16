@@ -45,13 +45,6 @@ public abstract class AuthzInfo extends PropertyDAO {
     );
 
     /**
-     * The default constructor for the AuthzInfo class
-     */
-    public AuthzInfo() {
-        super(NVC_AUTHZ_INFO);
-    }
-
-    /**
      * Constructor allowing the class to be extended
      *
      * @param nvce NVConfigEntity to pass down

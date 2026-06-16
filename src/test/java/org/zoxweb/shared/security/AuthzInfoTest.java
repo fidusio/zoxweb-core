@@ -12,7 +12,7 @@ class AuthzInfoTest {
      */
     static class TestAuthzInfo extends AuthzInfo {
         public TestAuthzInfo() {
-            super();
+            super(NVC_AUTHZ_INFO);
         }
     }
 
@@ -203,14 +203,14 @@ class AuthzInfoTest {
     void roleInfoNVCEMergesAuthzInfoAttributes() {
         assertNotNull(RoleInfo.NVC_ROLE_INFO.lookup("broker_guid"));
         assertNotNull(RoleInfo.NVC_ROLE_INFO.lookup("app_id"));
-        assertNotNull(RoleInfo.NVC_ROLE_INFO.lookup("permission_guids"));
+        assertNotNull(RoleInfo.NVC_ROLE_INFO.lookup("permissions"));
     }
 
     @Test
     void roleGroupInfoNVCEMergesAuthzInfoAttributes() {
         assertNotNull(RoleGroupInfo.NVC_ROLE_GROUP_INFO.lookup("broker_guid"));
         assertNotNull(RoleGroupInfo.NVC_ROLE_GROUP_INFO.lookup("app_id"));
-        assertNotNull(RoleGroupInfo.NVC_ROLE_GROUP_INFO.lookup("role_guids"));
+        assertNotNull(RoleGroupInfo.NVC_ROLE_GROUP_INFO.lookup("roles"));
     }
 
     @Test

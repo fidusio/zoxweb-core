@@ -27,13 +27,6 @@ public abstract class GrantBase extends AuthzInfo {
     );
 
     /**
-     * The default constructor for the GrantBase class
-     */
-    public GrantBase() {
-        super(NVC_GRANT_BASE);
-    }
-
-    /**
      * Constructor allowing the class to be extended
      *
      * @param nvce NVConfigEntity to pass down
