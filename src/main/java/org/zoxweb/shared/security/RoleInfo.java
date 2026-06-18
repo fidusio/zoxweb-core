@@ -46,11 +46,11 @@ public class RoleInfo extends AuthzInfo {
     /**
      * Constructor that sets a role
      *
-     * @param permisions an array of permission GUIDS to pass in
+     * @param permissions an array of permission GUIDS to pass in
      */
-    public RoleInfo(PermissionInfo... permisions) {
+    public RoleInfo(PermissionInfo... permissions) {
         this();
-        setPermissions(permisions);
+        setPermissions(permissions);
     }
 
     /**
