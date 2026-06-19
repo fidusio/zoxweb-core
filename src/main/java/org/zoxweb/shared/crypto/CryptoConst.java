@@ -16,14 +16,17 @@
 package org.zoxweb.shared.crypto;
 
 import org.zoxweb.shared.filters.FilterType;
-import org.zoxweb.shared.http.HTTPMethod;
 import org.zoxweb.shared.util.*;
+
+import java.util.*;
 
 public final class CryptoConst {
     private CryptoConst() {
 
     }
 
+
+    public static final String CERT_TYPE = "cert_type";
     /**
      * AES 256 bits key size in bytes(32)
      */
@@ -258,7 +261,7 @@ public final class CryptoConst {
         }
 
         public static HashType toMDType(String name) {
-            return toMDType((DataMDType) SharedUtil.lookupEnum(name, DataMDType.values()));
+            return toMDType(SharedUtil.lookupEnum(name, DataMDType.values()));
         }
 
         public static HashType toMDType(DataMDType dmdt) {
@@ -387,36 +390,6 @@ public final class CryptoConst {
         }
     }
 
-    public enum SystemURI
-            implements GetValue<String> {
-        REGISTER(HTTPMethod.POST, "register"),
-        DEREGISTER(HTTPMethod.POST, "deregister"),
-        VALIDATE_ACCESS_CODE(HTTPMethod.POST, "validate-access-code"),
-        GENERATE_ACCESS_CODE(HTTPMethod.POST, "generate-access-code"),
-        ;
-
-        private final HTTPMethod method;
-        private final String value;
-
-        SystemURI(HTTPMethod method, String value) {
-            this.method = method;
-            this.value = value;
-        }
-
-        /* (non-Javadoc)
-         * @see org.zoxweb.shared.util.GetValue#getValue()
-         */
-        @Override
-        public String getValue() {
-            return value;
-        }
-
-        public final HTTPMethod getHTTPMethod() {
-            return method;
-        }
-
-    }
-
     public enum JWTAlgo
             implements GetName {
 
@@ -431,8 +404,8 @@ public final class CryptoConst {
         PS384(SignatureAlgo.SHA384_RSA_MGF1, null),
         PS512(SignatureAlgo.SHA512_RSA_MGF1, null),
         ES256(SignatureAlgo.SHA256_EC, "P-256"),
-        ES384(SignatureAlgo.SHA384_EC,  "P-384"),
-        ES512(SignatureAlgo.SHA512_EC,  "P-521"),
+        ES384(SignatureAlgo.SHA384_EC, "P-384"),
+        ES512(SignatureAlgo.SHA512_EC, "P-521"),
         ES256K(SignatureAlgo.SHA256_EC, null),
 
         ;
@@ -442,7 +415,7 @@ public final class CryptoConst {
         private final String altName;
 
         //JWTAlgo(SignatureAlgo signatureAlgo, String paramSpec) {
-          //  this(signatureAlgo, paramSpec, null);
+        //  this(signatureAlgo, paramSpec, null);
         //}
 
         JWTAlgo(SignatureAlgo signatureAlgo, String altName) {
@@ -526,6 +499,74 @@ public final class CryptoConst {
         @Override
         public String getName() {
             return name;
+        }
+    }
+
+    /**
+     * X.509 Certificate source, java keystore or pem files
+     */
+    public enum CertSource implements GetName {
+        // the certificate source is a java keystore
+        KEYSTORE("ks", "keystore_file", "keystore_type", "keystore_password", "alias", "alias_password"),
+        // the certificate source is a set of pem file
+        PEM("pem", "key_file", "key_password", "cert_file", "chain_file"),
+        ;
+
+        private final String name;
+        private final Set<String> paramNames;
+
+        CertSource(String name, String... paramNames) {
+            this.name = name;
+            this.paramNames = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(paramNames)));
+        }
+
+        /**
+         * @return the name of the object
+         */
+        @Override
+        public String getName() {
+            return name;
+        }
+
+        public String[] getParameterNames() {
+            return paramNames.toArray(new String[0]);
+        }
+
+
+        public static NVGenericMap[] parseCertConfig(NVGenericMap certConfig) {
+
+            List<NVGenericMap> ret = new ArrayList<>();
+
+            // key words "certs"
+            // if it exists  we have an array
+            // i not we have one
+            NVGenericMapList certs = certConfig.getNV("certs");
+
+            if (certs != null) {
+                // have a set of certs
+                for (NVGenericMap cert : certs.getValue()) {
+                    NVGenericMap toAdd = new NVGenericMap();
+                    if (cert != null) {
+                        CertSource certType = SharedUtil.lookupEnum(cert.getValue(CERT_TYPE), CertSource.values());
+                        if (certType == null)
+                            certType = CertSource.KEYSTORE;
+
+                        toAdd.add(new NVEnum(CERT_TYPE, certType));
+                        ret.add(NVGenericMap.copy(cert, toAdd, certType.getParameterNames()));
+                    }
+                }
+            } else {
+                NVGenericMap toAdd = new NVGenericMap();
+                CertSource certType = SharedUtil.lookupEnum(certConfig.getValue(CERT_TYPE), CertSource.values());
+                if (certType == null)
+                    certType = CertSource.KEYSTORE;
+
+                toAdd.add(new NVEnum(CERT_TYPE, certType));
+                ret.add(NVGenericMap.copy(certConfig, toAdd, certType.getParameterNames()));
+            }
+
+
+            return ret.toArray(new NVGenericMap[0]);
         }
     }
 

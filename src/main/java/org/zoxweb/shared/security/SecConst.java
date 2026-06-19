@@ -1,6 +1,7 @@
 package org.zoxweb.shared.security;
 
 import org.zoxweb.shared.filters.ValueFilter;
+import org.zoxweb.shared.http.HTTPMethod;
 import org.zoxweb.shared.util.Const;
 import org.zoxweb.shared.util.GetName;
 import org.zoxweb.shared.util.GetValue;
@@ -72,6 +73,36 @@ public final class SecConst {
         ALLOW,
         DENY,
         REJECT
+    }
+
+    public enum SystemURI
+            implements GetValue<String> {
+        REGISTER(HTTPMethod.POST, "register"),
+        DEREGISTER(HTTPMethod.POST, "deregister"),
+        VALIDATE_ACCESS_CODE(HTTPMethod.POST, "validate-access-code"),
+        GENERATE_ACCESS_CODE(HTTPMethod.POST, "generate-access-code"),
+        ;
+
+        private final HTTPMethod method;
+        private final String value;
+
+        SystemURI(HTTPMethod method, String value) {
+            this.method = method;
+            this.value = value;
+        }
+
+        /* (non-Javadoc)
+         * @see org.zoxweb.shared.util.GetValue#getValue()
+         */
+        @Override
+        public String getValue() {
+            return value;
+        }
+
+        public final HTTPMethod getHTTPMethod() {
+            return method;
+        }
+
     }
 
     public final static class SubjectIDFilter

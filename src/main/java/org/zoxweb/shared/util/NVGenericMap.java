@@ -341,6 +341,17 @@ public class NVGenericMap
     }
 
 
+    public static NVGenericMap copy(NVGenericMap from, NVGenericMap to, String ... paramNamesToCopy) {
+        for(String  paramName : paramNamesToCopy) {
+            GetNameValue<?> gnv = from.get(paramName);
+            if (gnv != null) {
+                to.add(gnv);
+            }
+        }
+        return to;
+    }
+
+
     public <V> V lookupValue(GetName gn) {
         if (gn != null)
             return lookupValue(gn.getName());

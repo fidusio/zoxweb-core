@@ -136,6 +136,12 @@ public class IOUtil {
     }
 
 
+
+    public static Path locatePath(String filename) {
+        return locateFile(filename).toPath();
+    }
+
+
     public static File locateFile(ClassLoader cl, String filename) {
         File ret = new File(filename);
         if (!ret.exists() || !ret.isFile()) {
