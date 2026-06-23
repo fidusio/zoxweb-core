@@ -27,6 +27,9 @@ import org.zoxweb.shared.data.AddressDAO;
 import org.zoxweb.shared.data.PhoneDAO;
 import org.zoxweb.shared.util.NVEntity;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 public class ServerUtilTest {
 
 	@Test
@@ -67,4 +70,8 @@ public class ServerUtilTest {
 		Assertions.assertFalse(ServerUtil.areAllInstancesMatchingType(list4, PhoneDAO.class));
 	}
 
+    @Test
+    void isMacOS() {
+		System.out.println("Is mac: " + ServerUtil.isMacOS());
+    }
 }

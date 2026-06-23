@@ -28,10 +28,13 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.security.SecureRandom;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public final class ServerUtil {
+
+    private static AtomicBoolean isMac = null;
 
     private ServerUtil() {
 
@@ -356,6 +359,26 @@ public final class ServerUtil {
     public static void unlock(Lock lock) {
         if (lock != null)
             lock.unlock();
+    }
+
+    public static boolean isMacOS() {
+
+        if (isMac == null) {
+            LOCK.lock();
+
+            try {
+                if (isMac == null) {
+                    isMac = new AtomicBoolean();
+                    isMac.set(System.getProperty("os.name")
+                            .toLowerCase()
+                            .contains("mac"));
+                }
+            } finally {
+                LOCK.unlock();
+            }
+        }
+
+        return isMac.get();
     }
 
 }
