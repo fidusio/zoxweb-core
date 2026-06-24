@@ -10,6 +10,9 @@ import org.zoxweb.shared.api.APIDataStore;
 public interface SubjectSecurityManager {
 
 
+
+    void login(String subjectID, String credential) throws SecurityException;
+
     // Subject Identifier
 
     /**
