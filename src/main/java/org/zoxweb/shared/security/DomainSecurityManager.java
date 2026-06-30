@@ -7,11 +7,17 @@ import org.zoxweb.shared.api.APIDataStore;
  * bindings. Persistence is delegated to an {@link APIDataStore} provided via
  * {@link #setDataStore(APIDataStore)}.
  */
-public interface SubjectSecurityManager {
+public interface DomainSecurityManager {
 
 
-
-    void login(String subjectID, String credential) throws SecurityException;
+    /**
+     * Perform a Principal Login and the return the subject identifier
+     * @param principalID to login with
+     * @param credential like password
+     * @return upon success the SubjectIdentifier
+     * @throws SecurityException in case of login failure
+     */
+    SubjectIdentifier login(String principalID, String credential) throws SecurityException;
 
     // Subject Identifier
 
