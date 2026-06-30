@@ -138,7 +138,8 @@ public class IOUtil {
 
 
     public static Path locatePath(String filename) {
-        return locateFile(filename).toPath();
+        File ret = locateFile(filename);
+        return ret != null ? ret.toPath() : null;
     }
 
 
