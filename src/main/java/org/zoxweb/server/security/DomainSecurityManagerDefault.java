@@ -1,6 +1,7 @@
 package org.zoxweb.server.security;
 
 import org.zoxweb.server.util.MockAPIDataStore;
+import org.zoxweb.server.util.UUID7;
 import org.zoxweb.shared.api.APIDataStore;
 import org.zoxweb.shared.crypto.CIPassword;
 import org.zoxweb.shared.db.QueryMatch;
@@ -43,7 +44,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * with {@link SecUtil#isPasswordValid(CIPassword, String)} - so the stored credential
  * must be a hashed {@link CIPassword}, exactly as in production.</p>
  */
-public class MockDomainSecurityManager
+public class DomainSecurityManagerDefault
         implements DomainSecurityManager {
 
     private static final String FIELD_SUBJECT_GUID = "subject_guid";
@@ -52,15 +53,11 @@ public class MockDomainSecurityManager
     // NVConfigEntity collections, by name, that currently hold credentials
     private final Map<String, NVConfigEntity> credentialCollections = new ConcurrentHashMap<>();
 
-    private APIDataStore<?, ?> dataStore;
+    private volatile APIDataStore<?, ?> dataStore;
 
-    public MockDomainSecurityManager() {
-        this(new MockAPIDataStore());
+    public DomainSecurityManagerDefault() {
     }
 
-    public MockDomainSecurityManager(APIDataStore<?, ?> dataStore) {
-        this.dataStore = dataStore;
-    }
 
     // ------------------------------------------------------------------
     // helpers
@@ -120,9 +117,14 @@ public class MockDomainSecurityManager
     // ------------------------------------------------------------------
 
     @Override
-    public SubjectIdentifier createSubjectID(String principalID, CredentialInfo credentialInfo) {
+    public synchronized SubjectIdentifier createSubjectID(String principalID, CredentialInfo credentialInfo) {
+        PrincipalIdentifier principal = resolvePrincipal(principalID);
+        if (principal != null) {
+            throw new SecurityException("principal already exists");
+        }
+
         SubjectIdentifier subject = new SubjectIdentifier();
-        subject.setSubjectID(principalID);
+        subject.setGUID(UUID7.randomUUID().toString());
         subject.setSubjectStatus(SecConst.SecStatus.ACTIVE);
         subject = ds().insert(subject); // assigns the GUID (and subject_guid)
 
@@ -491,8 +493,9 @@ public class MockDomainSecurityManager
     // ------------------------------------------------------------------
 
     @Override
-    public void setDataStore(APIDataStore<?, ?> dataStore) {
+    public DomainSecurityManager setDataStore(APIDataStore<?, ?> dataStore) {
         this.dataStore = dataStore;
+        return this;
     }
 
     @Override

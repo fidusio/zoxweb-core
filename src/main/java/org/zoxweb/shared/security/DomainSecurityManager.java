@@ -368,7 +368,7 @@ public interface DomainSecurityManager {
      *
      * @param dataStore the data store to back this manager
      */
-    void setDataStore(APIDataStore<?, ?> dataStore);
+    DomainSecurityManager setDataStore(APIDataStore<?, ?> dataStore);
 
     /**
      * Returns the data store currently backing this manager, or {@code null}.

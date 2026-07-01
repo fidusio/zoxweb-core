@@ -16,7 +16,6 @@
 package org.zoxweb.shared.security;
 
 import org.zoxweb.shared.data.PropertyDAO;
-import org.zoxweb.shared.filters.FilterType;
 import org.zoxweb.shared.util.*;
 
 /**
@@ -37,7 +36,7 @@ public class SubjectIdentifier
     public enum Param
             implements GetNVConfig {
         SUBJECT_GUID(NVConfigManager.createNVConfig(MetaToken.SUBJECT_GUID.getName(), "The subject global identifier.", "SubjectGUID", true, false, true, String.class, null)),
-        SUBJECT_ID(NVConfigManager.createNVConfig(MetaToken.SUBJECT_ID.getName(), "Subject identifier", "SubjectID", true, true, true, String.class, SecConst.SubjectIDFilter.SINGLETON)),
+//        SUBJECT_ID(NVConfigManager.createNVConfig(MetaToken.SUBJECT_ID.getName(), "Subject identifier", "SubjectID", true, true, true, String.class, SecConst.SubjectIDFilter.SINGLETON)),
         SUBJECT_TYPE(NVConfigManager.createNVConfig("subject_type", "Subject Type", "SubjectType", true, true, SubjectType.class)),
         SUBJECT_STATUS(NVConfigManager.createNVConfig("subject_status", "Subject status", "SubjectStatus", true, true, SecConst.SecStatus.class)),
         ;
@@ -81,16 +80,13 @@ public class SubjectIdentifier
     @Override
     public String getSubjectID() {
         // TODO Auto-generated method stub
-        return lookupValue(Param.SUBJECT_ID);
+        return getSubjectGUID();
     }
 
 
     @Override
     public void setSubjectID(String id) {
-        if (FilterType.EMAIL.isValid(id)) {
-            id = FilterType.EMAIL.validate(id);
-        }
-        setValue(Param.SUBJECT_ID, id);
+        setSubjectGUID(id);
     }
 
     public SecConst.SecStatus getSubjectStatus() {
@@ -113,6 +109,7 @@ public class SubjectIdentifier
 //    public NVGenericMap getCredential() {
 //        return getProperties();
 //    }
+
 
 
     public void setSubjectGUID(String subjectGUID) {

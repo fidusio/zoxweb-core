@@ -3,30 +3,27 @@ package org.zoxweb.server.security;
 import org.junit.jupiter.api.Test;
 import org.zoxweb.server.util.MockAPIDataStore;
 import org.zoxweb.shared.crypto.CIPassword;
-import org.zoxweb.shared.security.CredentialInfo;
-import org.zoxweb.shared.security.PermissionGrant;
-import org.zoxweb.shared.security.PermissionInfo;
-import org.zoxweb.shared.security.SubjectIdentifier;
+import org.zoxweb.shared.security.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class MockDomainSecurityManagerTest {
+class DomainSecurityManagerDefaultTest {
 
     private static final String PRINCIPAL = "alice@example.com";
     private static final String PASSWORD = "Secret123!";
 
-    private MockDomainSecurityManager newManager() {
-        return new MockDomainSecurityManager();
+    private DomainSecurityManager newManager() {
+        return new DomainSecurityManagerDefault().setDataStore(new MockAPIDataStore());
     }
 
     @Test
-    void usesMockDataStoreByDefault() {
+    void getDataStore_returnsConfiguredStore() {
         assertInstanceOf(MockAPIDataStore.class, newManager().getDataStore());
     }
 
     @Test
     void createSubject_assignsGUID_andIsLookupable() {
-        MockDomainSecurityManager mgr = newManager();
+        DomainSecurityManager mgr = newManager();
         SubjectIdentifier subject = mgr.createSubjectID(PRINCIPAL, HashUtil.toBCryptPassword(PASSWORD));
 
         assertNotNull(subject.getGUID());
@@ -37,7 +34,7 @@ class MockDomainSecurityManagerTest {
 
     @Test
     void login_succeedsWithCorrectPassword_failsOtherwise() {
-        MockDomainSecurityManager mgr = newManager();
+        DomainSecurityManager mgr = newManager();
         SubjectIdentifier subject = mgr.createSubjectID(PRINCIPAL, HashUtil.toBCryptPassword(PASSWORD));
 
         SubjectIdentifier loggedIn = mgr.login(PRINCIPAL, PASSWORD);
@@ -52,7 +49,7 @@ class MockDomainSecurityManagerTest {
 
     @Test
     void lookupCredential_returnsStoredPassword() {
-        MockDomainSecurityManager mgr = newManager();
+        DomainSecurityManager mgr = newManager();
         mgr.createSubjectID(PRINCIPAL, HashUtil.toBCryptPassword(PASSWORD));
 
         CredentialInfo ci = mgr.lookupCredential(PRINCIPAL, CredentialInfo.Type.PASSWORD);
@@ -62,7 +59,7 @@ class MockDomainSecurityManagerTest {
 
     @Test
     void permissionGrant_roundTripsThroughDataStore() {
-        MockDomainSecurityManager mgr = newManager();
+        DomainSecurityManager mgr = newManager();
         SubjectIdentifier subject = mgr.createSubjectID(PRINCIPAL, HashUtil.toBCryptPassword(PASSWORD));
 
         PermissionInfo perm = mgr.createPermission(new PermissionInfo("perm.read", "system:read"));
@@ -82,7 +79,7 @@ class MockDomainSecurityManagerTest {
 
     @Test
     void deleteSubject_cascadesPrincipalsCredentialsAndGrants() {
-        MockDomainSecurityManager mgr = newManager();
+        DomainSecurityManager mgr = newManager();
         SubjectIdentifier subject = mgr.createSubjectID(PRINCIPAL, HashUtil.toBCryptPassword(PASSWORD));
         PermissionInfo perm = mgr.createPermission(new PermissionInfo("perm.read", "system:read"));
         mgr.addPermissionGrant(subject, perm);
