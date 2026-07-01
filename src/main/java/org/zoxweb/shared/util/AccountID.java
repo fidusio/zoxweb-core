@@ -20,18 +20,23 @@ package org.zoxweb.shared.util;
  * @author mzebib
  * @param <T>
  */
-public interface AccountID<T> {
+public interface AccountID<T>
+        extends SubjectGUID<T> {
 
     /**
      * Returns the account ID.
      * @return the typed account id
      */
-    T getAccountID();
+    default T getAccountID() {
+        return getSubjectGUID();
+    }
 
     /**
      * Sets the account ID.
      * @param accountID
      */
-    void setAccountID(T accountID);
+    default void setAccountID(T accountID) {
+        setSubjectGUID(accountID);
+    }
 
 }

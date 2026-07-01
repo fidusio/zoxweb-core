@@ -15,7 +15,6 @@
  */
 package org.zoxweb.shared.api;
 
-import org.zoxweb.shared.data.MerchantDAO;
 import org.zoxweb.shared.data.SetNameDescriptionDAO;
 import org.zoxweb.shared.util.*;
 
@@ -41,7 +40,7 @@ public class APINotificationMessageDAO
      */
     public enum Params
             implements GetNVConfig {
-        ACCOUNT_ID(NVConfigManager.createNVConfig(MetaToken.ACCOUNT_ID.getName(), "The account id", "AccountID", true, false, false, true, true, String.class, null)),
+//        ACCOUNT_ID(NVConfigManager.createNVConfig(MetaToken.ACCOUNT_ID.getName(), "The account id", "AccountID", true, false, false, true, true, String.class, null)),
         SENDER_ID(NVConfigManager.createNVConfig("sender_id", "The id of the sender.", "SenderID", false, true, String.class)),
         RECIPIENT_IDS(NVConfigManager.createNVConfig("recipient_ids", "The ids of the recipients.", "RecipientIDs", true, true, String[].class)),
         TITLE(NVConfigManager.createNVConfig("title", "The title or subject of the email.", "Title", false, true, String.class)),
@@ -312,19 +311,19 @@ public class APINotificationMessageDAO
         setValue(Params.POST_TOKEN_TAG, postTokenTag);
     }
 
-    @Override
-    public String getAccountID() {
-        return lookupValue(MerchantDAO.Param.ACCOUNT_ID);
-    }
-
-    /**
-     * Sets the account ID.
-     *
-     * @param accountID
-     */
-    @Override
-    public void setAccountID(String accountID) {
-        setValue(MerchantDAO.Param.ACCOUNT_ID, accountID);
-    }
+//    @Override
+//    public String getAccountID() {
+//        return lookupValue(MerchantDAO.Param.ACCOUNT_ID);
+//    }
+//
+//    /**
+//     * Sets the account ID.
+//     *
+//     * @param accountID
+//     */
+//    @Override
+//    public void setAccountID(String accountID) {
+//        setValue(MerchantDAO.Param.ACCOUNT_ID, accountID);
+//    }
 
 }

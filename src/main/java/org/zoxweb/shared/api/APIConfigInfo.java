@@ -28,7 +28,7 @@ import org.zoxweb.shared.util.*;
 public interface APIConfigInfo
         extends ReferenceID<String>,
         AccountID<String>,
-        SubjectGUID<String>,
+//        SubjectGUID<String>,
         SetName,
         SetDescription,
         TimeStampInterface,

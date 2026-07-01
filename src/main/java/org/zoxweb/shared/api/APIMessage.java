@@ -17,7 +17,6 @@ package org.zoxweb.shared.api;
 
 import org.zoxweb.shared.util.AccountID;
 import org.zoxweb.shared.util.ReferenceID;
-import org.zoxweb.shared.util.SubjectGUID;
 
 /**
  * The API message interface.
@@ -26,13 +25,13 @@ import org.zoxweb.shared.util.SubjectGUID;
  *
  */
 public interface APIMessage
-        extends ReferenceID<String>, AccountID<String>, SubjectGUID<String> {
+        extends ReferenceID<String>, AccountID<String> {
     /**
      * This method returns the message type.
      *
      * @return APIServiceType
      */
-    public APIServiceType getMessageType();
+    APIServiceType getMessageType();
 
     /**
      * This method sets the message type.
@@ -41,7 +40,7 @@ public interface APIMessage
      * @throws NullPointerException
      * @throws IllegalArgumentException
      */
-    public void setMessageType(APIServiceType type)
+    void setMessageType(APIServiceType type)
             throws NullPointerException, IllegalArgumentException;
 
 }

@@ -31,13 +31,13 @@ public class DynamicEnumMap
         extends NVPairList
         implements ValueFilter<String, String>,
         AccountID<String>,
-        SubjectGUID<String>,
+        //SubjectGUID<String>, // replaced by AccountID which extends SubjectGUID
         SetDescription {
 
     private boolean ignoreCase = true;
     private boolean staticEnum = false;
     public static final String NAME_PREFIX = "dynamic_enum_map";
-    private String accountID;
+    //private String accountID;
     private String subjectGUID;
     private String description;
 
@@ -295,19 +295,19 @@ public class DynamicEnumMap
      * Returns the account ID.
      * @return account id
      */
-    @Override
-    public String getAccountID() {
-        return accountID;
-    }
-
-    /**
-     * Sets the account ID.
-     * @param accountID
-     */
-    @Override
-    public void setAccountID(String accountID) {
-        this.accountID = accountID;
-    }
+//    @Override
+//    public String getAccountID() {
+//        return accountID;
+//    }
+//
+//    /**
+//     * Sets the account ID.
+//     * @param accountID
+//     */
+//    @Override
+//    public void setAccountID(String accountID) {
+//        this.accountID = accountID;
+//    }
 
     /**
      * Returns the description.

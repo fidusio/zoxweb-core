@@ -28,7 +28,7 @@ public class JSONDemTest {
 		DynamicEnumMap dem = new DynamicEnumMap();
 		dem.setReferenceID("123456798");
 		dem.setSubjectGUID("48654561");
-		dem.setAccountID("564654");
+		//dem.setAccountID("564654");
 		dem.setName("My Dem");
 		dem.setDescription("This is my dem.");
 		dem.setFixed(false);
@@ -62,7 +62,7 @@ public class JSONDemTest {
 		DynamicEnumMap dem2 = new DynamicEnumMap();
 		dem2.setReferenceID("123456798");
 		dem2.setSubjectGUID("48654561");
-		dem2.setAccountID("564654");
+//		dem2.setAccountID("564654");
 		dem2.setName("My Dem");
 		dem2.setDescription("This is my dem.");
 		dem2.setFixed(true);

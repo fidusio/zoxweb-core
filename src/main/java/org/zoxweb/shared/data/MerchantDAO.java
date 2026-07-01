@@ -35,7 +35,7 @@ public class MerchantDAO
 	public enum Param
 		implements GetNVConfig
 	{
-		ACCOUNT_ID(NVConfigManager.createNVConfig(MetaToken.ACCOUNT_ID.getName(), "The account id","AccountID", true, false, false, true, true, String.class, null)),
+//		ACCOUNT_ID(NVConfigManager.createNVConfig(MetaToken.ACCOUNT_ID.getName(), "The account id","AccountID", true, false, false, true, true, String.class, null)),
 		LIST_OF_DOMAIN_IDS(NVConfigManager.createNVConfigEntity("domain_ids", "Domain ID", "DomainIDs", true, true, DomainInfoDAO.NVC_DOMAIN_INFO_DAO, ArrayType.LIST)),
 		COMPANY_TYPE(NVConfigManager.createNVConfig("company_type", "Type of company", "CompanyType", false, true, String.class)),
 		LIST_OF_ADDRESSES(NVConfigManager.createNVConfigEntity("addresses", "List of addresses", "Addresses", false, true, AddressDAO.NVC_ADDRESS_DAO, ArrayType.LIST)),
@@ -220,19 +220,19 @@ public class MerchantDAO
 	}
 
 
-	@Override
-	public String getAccountID()
-	{
-		return lookupValue(Param.ACCOUNT_ID);
-	}
-
-	/**
-	 * Sets the account ID.
-	 * @param accountID
-	 */
-	@Override
-	public void setAccountID(String accountID)
-	{
-		setValue(Param.ACCOUNT_ID, accountID);
-	}
+//	@Override
+//	public String getAccountID()
+//	{
+//		return lookupValue(Param.ACCOUNT_ID);
+//	}
+//
+//	/**
+//	 * Sets the account ID.
+//	 * @param accountID
+//	 */
+//	@Override
+//	public void setAccountID(String accountID)
+//	{
+//		setValue(Param.ACCOUNT_ID, accountID);
+//	}
 }

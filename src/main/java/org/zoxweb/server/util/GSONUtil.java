@@ -2151,10 +2151,10 @@ public final class GSONUtil {
                 ret.setSubjectGUID(jo.get(MetaToken.SUBJECT_GUID.getName()).getAsString());
             }
 
-            if (jo.get(MetaToken.ACCOUNT_ID.getName()) != null
-                    && !jo.get(MetaToken.ACCOUNT_ID.getName()).isJsonNull()) {
-                ret.setAccountID(jo.get(MetaToken.ACCOUNT_ID.getName()).getAsString());
-            }
+//            if (jo.get(MetaToken.ACCOUNT_ID.getName()) != null
+//                    && !jo.get(MetaToken.ACCOUNT_ID.getName()).isJsonNull()) {
+//                ret.setAccountID(jo.get(MetaToken.ACCOUNT_ID.getName()).getAsString());
+//            }
 
             if (jo.get(MetaToken.NAME.getName()) != null
                     && !jo.get(MetaToken.NAME.getName()).isJsonNull()) {
@@ -2218,7 +2218,7 @@ public final class GSONUtil {
         if (dem != null) {
             writer.name(MetaToken.GUID.getName()).value(dem.getReferenceID());
             writer.name(MetaToken.SUBJECT_GUID.getName()).value(dem.getSubjectGUID());
-            writer.name(MetaToken.ACCOUNT_ID.getName()).value(dem.getAccountID());
+            //writer.name(MetaToken.ACCOUNT_ID.getName()).value(dem.getAccountID());
             writer.name(MetaToken.NAME.getName()).value(dem.getName());
             writer.name(MetaToken.DESCRIPTION.getName()).value(dem.getDescription());
             writer.name(MetaToken.IS_FIXED.getName()).value(dem.isFixed());

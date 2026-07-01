@@ -49,7 +49,8 @@ public class MerchantDAOTest {
 	@Test
 	public void testGetDomainName() {
 		merchant.setName("Google");
-		Assertions.assertEquals("Name check: ", "Google", merchant.getName());
+		System.out.println(merchant.getName());
+		Assertions.assertEquals("Google", merchant.getName(), "Name check: ");
 	}
 
 
@@ -60,13 +61,13 @@ public class MerchantDAOTest {
 
 	@Test
 	public void testGetDomainID() {
-		merchant.setAccountID("www.google.com");
-		Assertions.assertEquals("Domain ID: ", "www.google.com", merchant.getAccountID());
+		merchant.setSubjectGUID("www.google.com");
+		Assertions.assertEquals( "www.google.com", merchant.getSubjectGUID(), "Domain ID: ");
 	}
 
 	@Test
 	public void testSetDomainID() {
-		merchant.setAccountID("www.yahoo.com");
+		merchant.setSubjectGUID("www.yahoo.com");
 	}
 
 	@Test
