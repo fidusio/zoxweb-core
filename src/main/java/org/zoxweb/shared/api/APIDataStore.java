@@ -55,6 +55,10 @@ public interface APIDataStore<P, S>
         return (ret == null || ret.isEmpty()) ? null : ret.get(0);
     }
 
+    default <T> T beginTransaction(){return null;}
+    default void endTransaction(){}
+    default void abortTransaction(){}
+
     /**
      * This method searches for documents.
      *

@@ -112,9 +112,9 @@ public class APIAppManagerProvider
             throws NullPointerException, IllegalArgumentException, AccessException, APIException {
         SUS.checkIfNulls("Null SubjectAPIKey", subjectAPIKey);
 
-        if (subjectAPIKey.getSubjectID() == null) {
-            subjectAPIKey.setSubjectID(IDGs.SHA256Base64.genID());
-        }
+//        if (subjectAPIKey.getSubjectID() == null) {
+//            subjectAPIKey.setSubjectID(IDGs.SHA256Base64.genID());
+//        }
 
         if (subjectAPIKey.getAPIKey() == null) {
             try {
@@ -126,7 +126,7 @@ public class APIAppManagerProvider
 
         //if (subjectAPIKey.getStatus() == null) {
         subjectAPIKey.setStatus(status);
-        subjectAPIKey.setTimeStampRquired(true);
+        subjectAPIKey.setTimeStampRequired(true);
         //}
         if (ttl > 0)
             subjectAPIKey.setExpiryDate(System.currentTimeMillis() + ttl);
@@ -351,7 +351,7 @@ public class APIAppManagerProvider
     public synchronized void deleteSubjectAPIKey(SubjectAPIKey subjectAPIKey)
             throws NullPointerException, IllegalArgumentException, AccessException, APIException {
         if (subjectAPIKey != null) {
-            getAPISecurityManager().invalidateResource(subjectAPIKey.getSubjectID());
+//            getAPISecurityManager().invalidateResource(subjectAPIKey.getSubjectID());
             if (log.isEnabled()) log.getLogger().info("" + subjectAPIKey.getClass().getName());
             delete(subjectAPIKey, subjectAPIKey instanceof AppDeviceDAO);
         }

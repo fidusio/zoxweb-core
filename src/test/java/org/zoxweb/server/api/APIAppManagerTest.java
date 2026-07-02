@@ -21,7 +21,7 @@ public class APIAppManagerTest {
 		AppDeviceDAO add = new AppDeviceDAO();
 		add.setSubjectGUID(aid.getGUID());
 		add.setDevice(dd);
-		add.setSubjectID(subjectID);
+		//add.setSubjectID(subjectID);
 		aam.createAppDeviceDAO(add);
 		
 		

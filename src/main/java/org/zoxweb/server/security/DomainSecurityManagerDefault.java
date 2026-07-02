@@ -118,23 +118,35 @@ public class DomainSecurityManagerDefault
 
     @Override
     public synchronized SubjectIdentifier createSubjectID(String principalID, CredentialInfo credentialInfo) {
-        PrincipalIdentifier principal = resolvePrincipal(principalID);
-        if (principal != null) {
-            throw new SecurityException("principal already exists");
+        APIDataStore<?, ?> dataStore = ds();
+        dataStore.beginTransaction();
+        try {
+
+            PrincipalIdentifier principal = resolvePrincipal(principalID);
+            if (principal != null) {
+                throw new SecurityException("principal already exists");
+            }
+
+            SubjectIdentifier subject = new SubjectIdentifier();
+            subject.setGUID(UUID7.randomUUID().toString());
+            subject.setSubjectStatus(SecConst.SecStatus.ACTIVE);
+            subject = dataStore.insert(subject); // assigns the GUID (and subject_guid)
+
+            // register the initial principal and bind it to the subject
+            addPrincipalID(subject, principalID);
+
+            if (credentialInfo != null) {
+                createCredential(principalID, credentialInfo);
+            }
+            return subject;
         }
-
-        SubjectIdentifier subject = new SubjectIdentifier();
-        subject.setGUID(UUID7.randomUUID().toString());
-        subject.setSubjectStatus(SecConst.SecStatus.ACTIVE);
-        subject = ds().insert(subject); // assigns the GUID (and subject_guid)
-
-        // register the initial principal and bind it to the subject
-        addPrincipalID(subject, principalID);
-
-        if (credentialInfo != null) {
-            createCredential(principalID, credentialInfo);
+        catch (Exception e) {
+            dataStore.abortTransaction();
+            throw new SecurityException(e);
         }
-        return subject;
+        finally {
+            dataStore.endTransaction();
+        }
     }
 
     @Override
