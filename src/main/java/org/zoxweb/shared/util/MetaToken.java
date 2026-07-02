@@ -22,67 +22,96 @@ package org.zoxweb.shared.util;
  */
 public enum MetaToken
         implements GetName {
-    // 	Name of the attribute.
-    NAME("name"),
-    //	Description of the attribute.
-    DESCRIPTION("description"),
-    // 	Value of the attribute.
-    VALUE("value"),
-    // 	Reference ID of the attribute to be deprecated replaced by GUID.
-    REFERENCE_ID("reference_id"),
-    // GUID of broker
-    BROKER_GUID("broker_guid"),
-    // Global ID of the attributes
-    GUID(Const.GUID),
-    // Subject GUID
-    SUBJECT_GUID(Const.SUBJECT_GUID),
-    // 	Value filter of the attribute.
-    VALUE_FILTER("value_filter"),
-    // 	Attributes list or collection.
-    ATTRIBUTES("attributes"),
-    // 	Class type of the attribute.
-    CLASS_TYPE("class_type"),
-    // 	Fixed property of the attribute.
-    IS_FIXED("is_fixed"),
-    // 	The collection name can be table name for SQL databases or collection name for NoSQL databases.
-    COLLECTION_NAME("collection_name"),
-    // Json content to wrap a json object
-    JSON_CONTENT("json_content"),
-    // Canonical ID
-    CANONICAL_ID("canonical_id"),
-    // Domain ID
-    DOMAIN_ID("domain_id"),
-    // Account ID
-    ACCOUNT_ID("account_id"),
-    //	Array property of the attribute.
-    IS_ARRAY("is_array"),
-    // RelationOperator
-    RELATIONAL_OPERATOR("relational_operator"),
-    // LogicalOperator
-    LOGICAL_OPERATOR("logical_operator"),
-    //Values
-    VALUES("values"),
-    // Enums
-    ENUMS("enums"),
-    // Ignore case
-    IGNORE_CASE("ignore_case"),
-    // is static
-    STATIC("static"),
-    //	Class ID
-    CLASS_ID("class_id"),
-    // SubjectID token
-    SUBJECT_ID(Const.SUBJECT_ID),
-    //	Recursive
-    RECURSIVE("recursive"),
-    // meta type
-    META_TYPE("meta_type"),
-    // enum type (enum class name)
-    ENUM_TYPE("enum_type"),
-    UNIT("unit"),
-    RESOURCE_TYPE("resource_type"),
-    RESOURCE_GUID(Const.RESOURCE_GUID),
-    REFERENCE_TYPE("reference_type"),
+
+    ATTRIBUTES("attributes") // 	Attributes list or collection.
+    ,
+
+    BROKER_GUID("broker_guid") // GUID of broker
+    ,
+
+    CANONICAL_ID("canonical_id") // Canonical ID
+    ,
+
+    CLASS_ID("class_id") //	Class ID
+    ,
+
+    CLASS_TYPE("class_type") // 	Class type of the attribute.
+    ,
+
+    COLLECTION_NAME("collection_name") // 	The collection name can be table name for SQL databases or collection name for NoSQL databases.
+    ,
+
+    DESCRIPTION("description") //	Description of the attribute.
+    ,
+
+    DOMAIN_ID("domain_id") // Domain ID
+    ,
+
+    ENUMS("enums") // Enums
+    ,
+
+    ENUM_TYPE("enum_type") // enum type (enum class name)
+    ,
+
+    GUID(Const.GUID) // Global ID of the attributes
+    ,
+
+    IGNORE_CASE("ignore_case") // Ignore case
+    ,
+
+    IS_ARRAY("is_array") //	Array property of the attribute.
+    ,
+
+    IS_FIXED("is_fixed") // 	Fixed property of the attribute.
+    ,
+
+    JSON_CONTENT("json_content") // Json content to wrap a json object
+    ,
+
+    LOGICAL_OPERATOR("logical_operator") // LogicalOperator
+    ,
+
+    META_TYPE("meta_type") // meta type
+    ,
+
+    NAME("name") // 	Name of the attribute.
+    ,
+
+    PERMISSION_GUID("permission_guid"),
+
+    RECURSIVE("recursive") //	Recursive
+    ,
     REFERENCE_GUID(Const.REFERENCE_GUID),
+
+    REFERENCE_ID("reference_id") // 	Reference ID of the attribute to be deprecated replaced by GUID.
+    ,
+    REFERENCE_TYPE("reference_type"),
+
+    RELATIONAL_OPERATOR("relational_operator") // RelationOperator
+    ,
+    RESOURCE_GUID(Const.RESOURCE_GUID),
+    RESOURCE_TYPE("resource_type"),
+
+    ROLE_GROUP_GUID("role_group_guid"),
+
+    ROLE_GUID("role_guid"),
+
+    STATIC("static") // is static
+    ,
+    SUBJECT_GUID(Const.SUBJECT_GUID) // Subject GUID
+    ,
+
+    SUBJECT_ID(Const.SUBJECT_ID), // SubjectID token
+
+    UNIT("unit"),
+
+    VALUE("value") // 	Value of the attribute.
+    ,
+    VALUES("values") //Values
+    ,
+    VALUE_FILTER("value_filter") // 	Value filter of the attribute.
+    ,
+
     ;
 
     private final String name;
