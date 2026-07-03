@@ -19,6 +19,8 @@ public interface DomainSecurityManager {
      */
     SubjectIdentifier login(String principalID, String credential) throws SecurityException;
 
+    SubjectIdentifier loginApiKey(String key) throws SecurityException;
+
     // Subject Identifier
 
     /**
@@ -376,4 +378,6 @@ public interface DomainSecurityManager {
      * @return the backing data store, or {@code null} if none is set
      */
     APIDataStore<?, ?> getDataStore();
+
+     DomainSecurityManager addCredentialType(Class<? extends CredentialInfo> clazz);
 }

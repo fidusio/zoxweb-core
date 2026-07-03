@@ -67,7 +67,7 @@ public class SubjectAPIKey
             implements GetNVConfig {
         PRINCIPAL_ID(NVConfigManager.createNVConfig("principal_id", "Principal ID", "PrincipalID", false, false, String.class)),
         SYSTEM_ID(NVConfigManager.createNVConfig("system_id", "System ID", "SystemID", true, false, String.class)),
-        API_KEY(NVConfigManager.createNVConfig("api_key", "API Key", "APIKey", true, false, false, String.class, FilterType.ENCRYPT)),
+        API_KEY(NVConfigManager.createNVConfig("api_key", "API Key", "APIKey", true, false, true, String.class, FilterType.ENCRYPT)),
         STATUS(NVConfigManager.createNVConfig("status", "Status", "Status", true, false, Status.class)),
         TS_REQUIRED(NVConfigManager.createNVConfig("ts_required", "The timestamp is required", "TimeStampRequired", false, false, Boolean.class)),
         EXPIRY_DATE(NVConfigManager.createNVConfig("expiry_date", "The expiry timestamp", "Expired", false, false, false, true, Date.class, null)),

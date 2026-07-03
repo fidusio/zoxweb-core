@@ -5,28 +5,14 @@ import org.zoxweb.server.util.UUID7;
 import org.zoxweb.shared.api.APIDataStore;
 import org.zoxweb.shared.crypto.CIPassword;
 import org.zoxweb.shared.db.QueryMatch;
-import org.zoxweb.shared.security.AuthzInfo;
-import org.zoxweb.shared.security.CredentialInfo;
-import org.zoxweb.shared.security.DomainSecurityManager;
-import org.zoxweb.shared.security.PermissionGrant;
-import org.zoxweb.shared.security.PermissionInfo;
-import org.zoxweb.shared.security.PrincipalIdentifier;
-import org.zoxweb.shared.security.RoleGrant;
-import org.zoxweb.shared.security.RoleGroupGrant;
-import org.zoxweb.shared.security.RoleGroupInfo;
-import org.zoxweb.shared.security.RoleInfo;
-import org.zoxweb.shared.security.SecConst;
-import org.zoxweb.shared.security.SubjectIdentifier;
+import org.zoxweb.shared.security.*;
 import org.zoxweb.shared.util.Const.RelationalOperator;
 import org.zoxweb.shared.util.NVConfigEntity;
 import org.zoxweb.shared.util.NVEntity;
 import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedStringUtil;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.*;
 
 /**
  * An in-memory {@link DomainSecurityManager} for unit tests that delegates all
@@ -51,7 +37,7 @@ public class DomainSecurityManagerDefault
     private static final String FIELD_NAME = "name";
 
     // NVConfigEntity collections, by name, that currently hold credentials
-    private final Map<String, NVConfigEntity> credentialCollections = new ConcurrentHashMap<>();
+    private final Set<Class<?>> credentialCollections = new HashSet<>();
 
     private volatile APIDataStore<?, ?> dataStore;
 
@@ -112,6 +98,25 @@ public class DomainSecurityManagerDefault
         return subject;
     }
 
+    @Override
+    public SubjectIdentifier loginApiKey(String key) throws SecurityException {
+        if (key == null) {
+            throw new SecurityException("Invalid key");
+        }
+
+        SubjectAPIKey sak = first(ds().search(SubjectAPIKey.NVC_SUBJECT_API_KEY, null, eq(SubjectAPIKey.Param.API_KEY.getNVConfig().getName(), key)));
+        if (sak == null) {
+            throw new SecurityException("Invalid key");
+        }
+
+        SubjectIdentifier subject = lookupSubjectID(sak.getSubjectID());
+        if (subject == null) {
+            throw new SecurityException("Invalid key");
+        }
+
+        return subject;
+    }
+
     // ------------------------------------------------------------------
     // subject identifier
     // ------------------------------------------------------------------
@@ -139,12 +144,10 @@ public class DomainSecurityManagerDefault
                 createCredential(principalID, credentialInfo);
             }
             return subject;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             dataStore.abortTransaction();
             throw new SecurityException(e);
-        }
-        finally {
+        } finally {
             dataStore.endTransaction();
         }
     }
@@ -176,8 +179,8 @@ public class DomainSecurityManagerDefault
         for (PrincipalIdentifier p : lookupAllPrincipalIdentifiers(subjectGUID)) {
             ds().delete(p, false);
         }
-        for (NVConfigEntity credColl : credentialCollections.values()) {
-            for (NVEntity ci : ds().search(credColl, null, eq(FIELD_SUBJECT_GUID, subjectGUID))) {
+        for (Class<?> credColl : credentialCollections.toArray(new Class[0])) {
+            for (NVEntity ci : ds().search(credColl.getName(), null, eq(FIELD_SUBJECT_GUID, subjectGUID))) {
                 ds().delete(ci, false);
             }
         }
@@ -209,7 +212,6 @@ public class DomainSecurityManagerDefault
         }
         NVEntity nve = (NVEntity) credential;
         nve.setSubjectGUID(subjectGUID);
-        credentialCollections.putIfAbsent(nve.getNVConfig().getName(), (NVConfigEntity) nve.getNVConfig());
         ds().insert(nve);
         return credential;
     }
@@ -253,8 +255,8 @@ public class DomainSecurityManagerDefault
         if (subjectGUID == null) {
             return ret;
         }
-        for (NVConfigEntity credColl : credentialCollections.values()) {
-            for (NVEntity nve : ds().search(credColl, null, eq(FIELD_SUBJECT_GUID, subjectGUID))) {
+        for (Class<?> credColl : credentialCollections.toArray(new Class[0])) {
+            for (NVEntity nve : ds().search(credColl.getName(), null, eq(FIELD_SUBJECT_GUID, subjectGUID))) {
                 if (nve instanceof CredentialInfo) {
                     ret.add((CredentialInfo) nve);
                 }
@@ -514,4 +516,12 @@ public class DomainSecurityManagerDefault
     public APIDataStore<?, ?> getDataStore() {
         return dataStore;
     }
+
+    @Override
+    public DomainSecurityManager addCredentialType(Class<? extends CredentialInfo> clazz) {
+        credentialCollections.add(clazz);
+
+        return this;
+    }
+
 }
