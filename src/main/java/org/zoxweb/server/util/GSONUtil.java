@@ -2216,7 +2216,7 @@ public final class GSONUtil {
         writer.beginObject();
 
         if (dem != null) {
-            writer.name(MetaToken.GUID.getName()).value(dem.getReferenceID());
+            writer.name(MetaToken.GUID.getName()).value(dem.getGUID());
             writer.name(MetaToken.SUBJECT_GUID.getName()).value(dem.getSubjectGUID());
             //writer.name(MetaToken.ACCOUNT_ID.getName()).value(dem.getAccountID());
             writer.name(MetaToken.NAME.getName()).value(dem.getName());
