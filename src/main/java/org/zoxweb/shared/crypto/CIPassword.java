@@ -18,6 +18,7 @@ package org.zoxweb.shared.crypto;
 import org.zoxweb.shared.crypto.CryptoConst.HashType;
 import org.zoxweb.shared.data.PropertyDAO;
 import org.zoxweb.shared.security.CredentialInfo;
+import org.zoxweb.shared.security.SecConst;
 import org.zoxweb.shared.util.*;
 
 /**
@@ -59,7 +60,7 @@ public class CIPassword
         ROUNDS(NVConfigManager.createNVConfig(CIProp.ROUNDS.getName(), "Hash algorithm rounds or iterations", "HashRounds", false, true, Integer.class)),
         SALT(NVConfigManager.createNVConfig(CIProp.SALT.getName(), "The password salt", "Salt", false, true, byte[].class)),
         HASH(NVConfigManager.createNVConfig(CIProp.HASH.getName(), "The password hash", "Hash", false, true, byte[].class)),
-
+        CI_STATUS(NVConfigManager.createNVConfig("subject_status", "Subject status", "SubjectStatus", true, true, SecConst.SecStatus.class)),
 
         ;
 
@@ -151,6 +152,17 @@ public class CIPassword
     @Override
     public Type getCredentialType() {
         return Type.PASSWORD;
+    }
+
+    @Override
+    public SecConst.SecStatus getCredentialStatus() {
+        return lookupValue(Param.CI_STATUS);
+    }
+
+    @Override
+    public void setCredentialStatus(SecConst.SecStatus status) {
+        setValue(Param.CI_STATUS, status);
+
     }
 
 }

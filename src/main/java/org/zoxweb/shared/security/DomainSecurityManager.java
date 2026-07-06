@@ -1,6 +1,7 @@
 package org.zoxweb.shared.security;
 
 import org.zoxweb.shared.api.APIDataStore;
+import org.zoxweb.shared.crypto.CryptoConst;
 
 /**
  * Manages security subjects: their principals, credentials, permissions, and permission grant
@@ -11,14 +12,22 @@ public interface DomainSecurityManager {
 
 
     /**
-     * Perform a Principal Login and the return the subject identifier
-     * @param principalID to login with
-     * @param credential like password
-     * @return upon success the SubjectIdentifier
-     * @throws SecurityException in case of login failure
+     * Authenticates a principal with its credential.
+     *
+     * @param principalID the principal identifier to log in with
+     * @param credential  the credential proving the principal's identity, such as a password
+     * @return the subject that owns the principal upon successful authentication
+     * @throws SecurityException if authentication fails
      */
     SubjectIdentifier login(String principalID, String credential) throws SecurityException;
 
+    /**
+     * Authenticates with an API key.
+     *
+     * @param key the API key to log in with
+     * @return the subject that owns the API key upon successful authentication
+     * @throws SecurityException if authentication fails
+     */
     SubjectIdentifier loginApiKey(String key) throws SecurityException;
 
     // Subject Identifier
@@ -31,6 +40,19 @@ public interface DomainSecurityManager {
      * @return the subject object
      */
     SubjectIdentifier createSubjectID(String principalID, CredentialInfo credentialInfo);
+
+
+    /**
+     * Creates a new subject with an initial principal and a password credential
+     * hashed with the given algorithm.
+     *
+     * @param principalID the initial principal identifier for the subject
+     * @param password    the initial password for the subject
+     * @param hashType    the hash algorithm used to store the password
+     * @return the subject object
+     * @throws SecurityException if the subject cannot be created
+     */
+    SubjectIdentifier createSubjectID(String principalID, String password, CryptoConst.HashType hashType) throws SecurityException;
 
     /**
      * Returns a subject by one of its principal identifiers.
@@ -80,9 +102,11 @@ public interface DomainSecurityManager {
     /**
      * Changes an existing credential.
      *
+     * @param subjectIdentifier to update credentials
      * @param update the credential to update
+     *
      */
-    void updateCredential(CredentialInfo update);
+    void updateCredential(SubjectIdentifier subjectIdentifier, CredentialInfo update);
 
     /**
      * Removes a credential from its owning subject.
@@ -183,7 +207,9 @@ public interface DomainSecurityManager {
     boolean deletePermission(PermissionInfo permission);
 
     /**
-     * @return an array of all permissions
+     * Returns every permission definition across all applications.
+     *
+     * @return all defined permissions
      */
     PermissionInfo[] getPermissions();
 
@@ -229,7 +255,9 @@ public interface DomainSecurityManager {
     boolean deleteRole(RoleInfo role);
 
     /**
-     * @return an array of all roles
+     * Returns every role definition across all applications.
+     *
+     * @return all defined roles
      */
     RoleInfo[] getRoles();
 
@@ -274,7 +302,9 @@ public interface DomainSecurityManager {
     boolean deleteRoleGroup(RoleGroupInfo roleGroup);
 
     /**
-     * @return an array of all role groups
+     * Returns every role group definition across all applications.
+     *
+     * @return all defined role groups
      */
     RoleGroupInfo[] getRoleGroups();
 
@@ -369,6 +399,7 @@ public interface DomainSecurityManager {
      * Injects the persistence layer.
      *
      * @param dataStore the data store to back this manager
+     * @return this manager, for call chaining
      */
     DomainSecurityManager setDataStore(APIDataStore<?, ?> dataStore);
 
@@ -379,5 +410,12 @@ public interface DomainSecurityManager {
      */
     APIDataStore<?, ?> getDataStore();
 
-     DomainSecurityManager addCredentialType(Class<? extends CredentialInfo> clazz);
+    /**
+     * Registers a {@link CredentialInfo} implementation so the manager can
+     * recognize and persist credentials of that type.
+     *
+     * @param clazz the credential implementation class to register
+     * @return this manager, for call chaining
+     */
+    DomainSecurityManager addCredentialType(Class<? extends CredentialInfo> clazz);
 }

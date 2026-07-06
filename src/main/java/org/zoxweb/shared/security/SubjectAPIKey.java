@@ -17,6 +17,7 @@
 package org.zoxweb.shared.security;
 
 
+import org.zoxweb.shared.crypto.CIPassword;
 import org.zoxweb.shared.data.PropertyDAO;
 import org.zoxweb.shared.filters.FilterType;
 import org.zoxweb.shared.util.Const.Status;
@@ -71,6 +72,7 @@ public class SubjectAPIKey
         STATUS(NVConfigManager.createNVConfig("status", "Status", "Status", true, false, Status.class)),
         TS_REQUIRED(NVConfigManager.createNVConfig("ts_required", "The timestamp is required", "TimeStampRequired", false, false, Boolean.class)),
         EXPIRY_DATE(NVConfigManager.createNVConfig("expiry_date", "The expiry timestamp", "Expired", false, false, false, true, Date.class, null)),
+        CI_STATUS(NVConfigManager.createNVConfig("subject_status", "Subject status", "SubjectStatus", true, true, SecConst.SecStatus.class)),
         ;
 
         private final NVConfig nvc;
@@ -104,6 +106,7 @@ public class SubjectAPIKey
     /** Creates an empty API key backed by {@link #NVC_SUBJECT_API_KEY}. */
     public SubjectAPIKey() {
         super(NVC_SUBJECT_API_KEY);
+        setCredentialStatus(SecConst.SecStatus.ACTIVE);
     }
 
     /**
@@ -280,5 +283,16 @@ public class SubjectAPIKey
     @Override
     public void setSystemID(String systemID) {
         setValue(Param.SYSTEM_ID, systemID);
+    }
+
+    @Override
+    public SecConst.SecStatus getCredentialStatus() {
+        return lookupValue(CIPassword.Param.CI_STATUS);
+    }
+
+    @Override
+    public void setCredentialStatus(SecConst.SecStatus status) {
+        setValue(CIPassword.Param.CI_STATUS, status);
+
     }
 }

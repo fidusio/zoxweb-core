@@ -79,4 +79,14 @@ public class JWTToken
         return Type.TOKEN;
     }
 
+    @Override
+    public SecConst.SecStatus getCredentialStatus() {
+        return SecConst.SecStatus.ACTIVE;
+    }
+
+    @Override
+    public void setCredentialStatus(SecConst.SecStatus status) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
 }

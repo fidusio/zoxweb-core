@@ -255,6 +255,15 @@ public class ParamUtil {
             return null;
         }
 
+
+        public <E extends Enum<?>> E enumValue(GetName name, Enum<?>... enums) {
+            List<String> ret = lookup(name.getName());
+            if (ret != null && ret.size() == 1) {
+                return SharedUtil.lookupEnum(ret.get(0), enums);
+            }
+            return null;
+        }
+
         public boolean parameterExists(String name) {
             List<String> ret = lookup(name);
             return (ret != null && ret.size() == 1);
@@ -289,6 +298,13 @@ public class ParamUtil {
             return stringValue("" + index);
         }
 
+        public String stringValue(GetName name) {
+            return stringValue(name.getName());
+        }
+
+        public String stringValue(GetName name, String defaultValue) {
+            return stringValue(name.getName(), defaultValue);
+        }
         public String stringValue(String name) {
             return stringValue(name, null, false);
         }

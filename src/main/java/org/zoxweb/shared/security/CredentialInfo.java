@@ -16,4 +16,7 @@ public interface CredentialInfo
     }
 
     Type getCredentialType();
+
+    SecConst.SecStatus getCredentialStatus();
+    void setCredentialStatus(SecConst.SecStatus status);
 }
