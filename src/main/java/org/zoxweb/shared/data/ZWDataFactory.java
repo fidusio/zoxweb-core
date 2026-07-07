@@ -17,6 +17,7 @@ package org.zoxweb.shared.data;
 
 import org.zoxweb.shared.accounting.*;
 import org.zoxweb.shared.api.*;
+import org.zoxweb.shared.app.AppIDDefault;
 import org.zoxweb.shared.app.AppVersionDAO;
 import org.zoxweb.shared.data.ticket.TicketContainerDAO;
 import org.zoxweb.shared.data.ticket.TicketIssuerDAO;
@@ -195,16 +196,16 @@ public class ZWDataFactory
                 return AppDeviceDAO.NVC_APP_DEVICE_DAO;
             }
         },
-        APP_ID_DAO(AppIDDAO.class.getName()) {
+        APP_ID_DAO(AppIDDefault.class.getName()) {
             @SuppressWarnings("unchecked")
             @Override
-            public AppIDDAO newInstance() {
-                return new AppIDDAO();
+            public AppIDDefault newInstance() {
+                return new AppIDDefault();
             }
 
             @Override
             public NVConfigEntity getNVConfigEntity() {
-                return AppIDDAO.NVC_APP_ID_DAO;
+                return AppIDDefault.NVC_APP_ID_DEFAULT;
             }
         },
         ASSOCIATION_DAO(AssociationDAO.class.getName()) {

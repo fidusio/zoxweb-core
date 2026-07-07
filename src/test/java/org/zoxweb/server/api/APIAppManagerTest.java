@@ -3,7 +3,7 @@ package org.zoxweb.server.api;
 import org.junit.jupiter.api.BeforeAll;
 import org.zoxweb.shared.api.APIAppManager;
 import org.zoxweb.shared.data.AppDeviceDAO;
-import org.zoxweb.shared.data.AppIDDAO;
+import org.zoxweb.shared.app.AppIDDefault;
 import org.zoxweb.shared.data.DeviceDAO;
 
 public class APIAppManagerTest {
@@ -16,7 +16,7 @@ public class APIAppManagerTest {
 	public static void init()
 	{
 		DeviceDAO dd = new DeviceDAO();
-		AppIDDAO aid = new AppIDDAO();
+		AppIDDefault aid = new AppIDDefault();
 		aid.setDomainAppID(domainID, appID);
 		AppDeviceDAO add = new AppDeviceDAO();
 		add.setSubjectGUID(aid.getGUID());

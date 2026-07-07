@@ -13,24 +13,24 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.zoxweb.shared.data;
+package org.zoxweb.shared.app;
 
+import org.zoxweb.shared.data.AppIDResource;
 import org.zoxweb.shared.util.*;
 
 /**
  * Created on 7/3/17
  */
 @SuppressWarnings("serial")
-public class AppIDDAO
-    extends AppIDResource
-{
-    public static final NVConfigEntity NVC_APP_ID_DAO = new NVConfigEntityPortable(
-            "app_id_dao",
-            "AppIDDAO" ,
-            AppIDDAO.class.getSimpleName(),
+public class AppIDDefault
+        extends AppIDResource {
+    public static final NVConfigEntity NVC_APP_ID_DEFAULT = new NVConfigEntityPortable(
+            "app_id_default",
+            "AppIDDefault",
+            AppIDDefault.class.getSimpleName(),
             true, false,
             false, false,
-            AppIDDAO.class,
+            AppIDDefault.class,
             SharedUtil.extractNVConfigs(Param.values()),
             null,
             false,
@@ -40,18 +40,15 @@ public class AppIDDAO
     /**
      * The default constructor.
      */
-    public AppIDDAO()
-    {
-        super(NVC_APP_ID_DAO);
-    }
-    
-    protected AppIDDAO(NVConfigEntity nvce)
-    {
-    	 super(nvce);
+    public AppIDDefault() {
+        super(NVC_APP_ID_DEFAULT);
     }
 
-    public AppIDDAO(String domainID, String appID)
-    {
+    protected AppIDDefault(NVConfigEntity nvce) {
+        super(nvce);
+    }
+
+    public AppIDDefault(String domainID, String appID) {
         this();
         setDomainAppID(domainID, appID);
     }

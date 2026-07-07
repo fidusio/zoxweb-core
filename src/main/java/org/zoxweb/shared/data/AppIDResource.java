@@ -13,7 +13,7 @@ public class AppIDResource
         CanonicalID {
     public enum Param
             implements GetNVConfig {
-        APP_ID(NVConfigManager.createNVConfig("app_id", "App ID", "AppID", true, false, false, String.class, AppIDNameFilter.SINGLETON)),
+        APP_ID(NVConfigManager.createNVConfig("app_id", "App ID", "AppID", false, false, false, String.class, AppIDNameFilter.SINGLETON)),
         DOMAIN_ID(NVConfigManager.createNVConfig("domain_id", "Domain ID", "Domain ID", true, true, false, String.class, FilterType.DOMAIN)),
         //DOMAIN_APP_ID(NVConfigManager.createNVConfig("domain_app_id", "Domain APP ID", "DomainAppID", true, false, true, String.class, null)),
         ;

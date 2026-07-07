@@ -1,5 +1,6 @@
 package org.zoxweb.shared.security;
 
+import org.zoxweb.shared.util.AppID;
 import org.zoxweb.shared.util.SetDescription;
 import org.zoxweb.shared.util.SetName;
 
@@ -29,4 +30,7 @@ public interface APIKey<V>
      * @return the key material, or {@code null} if unset
      */
     V getAPIKey();
+
+    void setAppID(AppID<String> appID);
+    AppID<String> getAppID();
 }

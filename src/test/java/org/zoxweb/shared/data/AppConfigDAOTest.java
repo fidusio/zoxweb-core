@@ -4,6 +4,7 @@ package org.zoxweb.shared.data;
 
 import org.junit.jupiter.api.Test;
 import org.zoxweb.server.util.GSONUtil;
+import org.zoxweb.shared.app.AppIDDefault;
 import org.zoxweb.shared.http.HTTPMessageConfig;
 import org.zoxweb.shared.http.HTTPMethod;
 import org.zoxweb.shared.http.HTTPEncoder;
@@ -25,7 +26,7 @@ public class AppConfigDAOTest {
 
     @Test
     public void testCreateAppConfigDAO() throws IOException {
-        AppIDDAO appIDDAO = new AppIDDAO("zoxweb.org", "zoxweb");
+        AppIDDefault appIDDAO = new AppIDDefault("zoxweb.org", "zoxweb");
 
         AppConfigDAO appConfigDAO = new AppConfigDAO(appIDDAO);
 

@@ -15,7 +15,7 @@
  */
 package org.zoxweb.shared.accounting;
 
-import org.zoxweb.shared.data.AppIDDAO;
+import org.zoxweb.shared.app.AppIDDefault;
 import org.zoxweb.shared.data.TimeStampDAO;
 import org.zoxweb.shared.util.*;
 import org.zoxweb.shared.util.NVConfigEntity.ArrayType;
@@ -38,7 +38,7 @@ public class FinancialTransactionDAO
 
     public enum Params
             implements GetNVConfig {
-        APP_ID(NVConfigManager.createNVConfigEntity("app_id", "App ID", "AppID", true, false, AppIDDAO.NVC_APP_ID_DAO, NVConfigEntity.ArrayType.NOT_ARRAY)),
+        APP_ID(NVConfigManager.createNVConfigEntity("app_id", "App ID", "AppID", true, false, AppIDDefault.NVC_APP_ID_DEFAULT, NVConfigEntity.ArrayType.NOT_ARRAY)),
         CREATION_TS(NVConfigManager.createNVConfig("creation_ts", "Time in millis when the transaction was created", "CreationTS", true, false, false, false, Date.class, null)),
         EXTERNAL_REFERENCE(NVConfigManager.createNVConfig("external_reference", "External reference", "ExternalReference", false, true, String.class)),
         REFERENCED_NVE(NVConfigManager.createNVConfigEntity("referenced_nve", "Referenced NVEntity", "ReferencedNVEntity", false, false, NVEntity.class, ArrayType.NOT_ARRAY)),
@@ -122,7 +122,7 @@ public class FinancialTransactionDAO
      *
      * @return
      */
-    public AppIDDAO getAppIDDAO() {
+    public AppIDDefault getAppIDDAO() {
         return lookupValue(Params.APP_ID);
     }
 
@@ -131,7 +131,7 @@ public class FinancialTransactionDAO
      *
      * @param appID
      */
-    public void setAppIDDAO(AppIDDAO appID) {
+    public void setAppIDDAO(AppIDDefault appID) {
         setValue(Params.APP_ID, appID);
     }
 

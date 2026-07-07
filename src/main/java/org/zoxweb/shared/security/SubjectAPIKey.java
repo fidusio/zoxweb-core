@@ -17,6 +17,7 @@
 package org.zoxweb.shared.security;
 
 
+import org.zoxweb.shared.app.AppIDDefault;
 import org.zoxweb.shared.data.PropertyDAO;
 import org.zoxweb.shared.filters.FilterType;
 import org.zoxweb.shared.util.Const.Status;
@@ -72,6 +73,7 @@ public class SubjectAPIKey
         TS_REQUIRED(NVConfigManager.createNVConfig("ts_required", "The timestamp is required", "TimeStampRequired", false, false, Boolean.class)),
         EXPIRY_DATE(NVConfigManager.createNVConfig("expiry_date", "The expiry timestamp", "Expired", false, false, false, true, Date.class, null)),
         CI_STATUS(NVConfigManager.createNVConfig("api_key_status", "API key status", "APIKeyStatus", true, true, SecConst.SecStatus.class)),
+        APP_ID(NVConfigManager.createNVConfigEntity("app_id", "App ID", "AppID", true, false, AppIDDefault.NVC_APP_ID_DEFAULT, NVConfigEntity.ArrayType.NOT_ARRAY)),
         ;
 
         private final NVConfig nvc;
@@ -190,6 +192,16 @@ public class SubjectAPIKey
      */
     public String getAPIKey() {
         return lookupValue(Param.API_KEY);
+    }
+
+    @Override
+    public void setAppID(AppID<String> appID) {
+        setValue(Param.APP_ID, appID);
+    }
+
+    @Override
+    public AppID<String> getAppID() {
+        return lookupValue(Param.APP_ID);
     }
 
     /**

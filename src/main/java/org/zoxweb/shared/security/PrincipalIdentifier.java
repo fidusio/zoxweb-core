@@ -1,6 +1,6 @@
 package org.zoxweb.shared.security;
 
-import org.zoxweb.shared.data.AppIDDAO;
+import org.zoxweb.shared.app.AppIDDefault;
 import org.zoxweb.shared.util.*;
 
 import java.util.Objects;
@@ -12,7 +12,7 @@ import java.util.Objects;
  */
 @SuppressWarnings("serial")
 public class PrincipalIdentifier
-        extends AppIDDAO
+        extends AppIDDefault
         implements PrincipalID<String>, DomainID<String>, AppID<String> {
 
     public enum Param
@@ -45,7 +45,7 @@ public class PrincipalIdentifier
             SharedUtil.extractNVConfigs(Param.values()),
             null,
             false,
-            AppIDDAO.NVC_APP_ID_DAO);
+            AppIDDefault.NVC_APP_ID_DEFAULT);
 
     /**
      * The default constructor of the Principal id class

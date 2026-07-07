@@ -16,6 +16,7 @@
 package org.zoxweb.shared.data;
 
 
+import org.zoxweb.shared.app.AppIDDefault;
 import org.zoxweb.shared.util.GetNVConfig;
 import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
@@ -35,7 +36,7 @@ public class AppConfigDAO
     public enum Param
         implements GetNVConfig
     {
-        APP_ID(NVConfigManager.createNVConfigEntity("app_id", "App ID", "AppID", true, false, AppIDDAO.NVC_APP_ID_DAO, NVConfigEntity.ArrayType.NOT_ARRAY)),
+        APP_ID(NVConfigManager.createNVConfigEntity("app_id", "App ID", "AppID", true, false, AppIDDefault.NVC_APP_ID_DEFAULT, NVConfigEntity.ArrayType.NOT_ARRAY)),
         ;
 
         private final NVConfig nvc;
@@ -71,17 +72,17 @@ public class AppConfigDAO
         super(NVC_APP_CONFIG_DAO);
     }
 
-    public AppConfigDAO(AppIDDAO appIDDAO)
+    public AppConfigDAO(AppIDDefault appIDDAO)
     {
         this();
         setAppIDDAO(appIDDAO);
     }
 
-    public AppIDDAO getAppIDDAO() {
+    public AppIDDefault getAppIDDAO() {
         return lookupValue(Param.APP_ID);
     }
 
-    public void setAppIDDAO(AppIDDAO appID) {
+    public void setAppIDDAO(AppIDDefault appID) {
         setValue(Param.APP_ID, appID);
     }
 }

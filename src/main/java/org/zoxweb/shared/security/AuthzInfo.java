@@ -1,6 +1,6 @@
 package org.zoxweb.shared.security;
 
-import org.zoxweb.shared.data.AppIDDAO;
+import org.zoxweb.shared.app.AppIDDefault;
 import org.zoxweb.shared.data.DataConst;
 import org.zoxweb.shared.data.PropertyDAO;
 import org.zoxweb.shared.util.*;
@@ -15,7 +15,7 @@ public abstract class AuthzInfo extends PropertyDAO {
 
     public enum Param implements GetNVConfig {
         BROKER_GUID(NVConfigManager.createNVConfig("broker_guid", "the broker GUID, used for audit", "BrokerGUID", false, false, String.class)),
-        APP_ID_DAO(NVConfigManager.createNVConfigEntity("app_id", "the app id object, representing the domain and app ids", "AppID", false, false, AppIDDAO.NVC_APP_ID_DAO)),
+        APP_ID_DAO(NVConfigManager.createNVConfigEntity("app_id", "the app id object, representing the domain and app ids", "AppID", false, false, AppIDDefault.NVC_APP_ID_DEFAULT)),
         ;
 
         private final NVConfig nvc;
@@ -74,7 +74,7 @@ public abstract class AuthzInfo extends PropertyDAO {
      *
      * @param id an AppIdDao object
      */
-    public void setAppIdDAO(AppIDDAO id) {
+    public void setAppIdDAO(AppIDDefault id) {
         setValue(Param.APP_ID_DAO, id);
     }
 
@@ -82,7 +82,7 @@ public abstract class AuthzInfo extends PropertyDAO {
      *
      * @return an AppIdDao object
      */
-    public AppIDDAO getAppIdDAO() {
+    public AppIDDefault getAppIdDAO() {
         return lookupValue(Param.APP_ID_DAO);
     }
 

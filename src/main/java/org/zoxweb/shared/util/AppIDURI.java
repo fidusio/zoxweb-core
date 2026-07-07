@@ -1,17 +1,17 @@
 package org.zoxweb.shared.util;
 
 
-import org.zoxweb.shared.data.AppIDDAO;
+import org.zoxweb.shared.app.AppIDDefault;
 
 public class AppIDURI {
-    private AppIDDAO appID;
+    private AppIDDefault appID;
     private String[] rest;
 
     private AppIDURI() {
 
     }
 
-    public AppIDDAO getAppIDDAO() {
+    public AppIDDefault getAppIDDAO() {
         return appID;
     }
 
@@ -32,7 +32,7 @@ public class AppIDURI {
 
         AppIDURI ret = new AppIDURI();
         int index = 0;
-        ret.appID = new AppIDDAO(tokens[index++], tokens[index++]);
+        ret.appID = new AppIDDefault(tokens[index++], tokens[index++]);
 
         if (tokens.length > index) {
             ret.rest = new String[tokens.length - index];

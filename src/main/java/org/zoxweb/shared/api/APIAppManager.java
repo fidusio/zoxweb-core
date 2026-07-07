@@ -2,7 +2,7 @@ package org.zoxweb.shared.api;
 
 import org.zoxweb.shared.data.AppConfigDAO;
 import org.zoxweb.shared.data.AppDeviceDAO;
-import org.zoxweb.shared.data.AppIDDAO;
+import org.zoxweb.shared.app.AppIDDefault;
 import org.zoxweb.shared.data.UserIDDAO;
 import org.zoxweb.shared.data.UserInfoDAO;
 import org.zoxweb.shared.security.*;
@@ -145,11 +145,11 @@ public interface APIAppManager {
      * @throws AccessException
      * @throws APIException
      */
-    SubjectPreference lookupUserPreferenceDAO(AppIDDAO appIDDAO, String subjectID)
+    SubjectPreference lookupUserPreferenceDAO(AppIDDefault appIDDAO, String subjectID)
             throws NullPointerException, IllegalArgumentException, AccessException, APIException;
 
 
-    SubjectPreference lookupUserPreferenceDAO(AppIDDAO appIDDAO, UserIDDAO userIDDAO)
+    SubjectPreference lookupUserPreferenceDAO(AppIDDefault appIDDAO, UserIDDAO userIDDAO)
             throws NullPointerException, IllegalArgumentException, AccessException, APIException;
 
     /**
@@ -260,7 +260,7 @@ public interface APIAppManager {
      * @throws AccessException
      * @throws APIException
      */
-    AppIDDAO lookupAppIDDAO(String domainID, String appID)
+    AppIDDefault lookupAppIDDAO(String domainID, String appID)
             throws NullPointerException, IllegalArgumentException, AccessException, APIException;
 
     /**
@@ -275,7 +275,7 @@ public interface APIAppManager {
      * @throws AccessException
      * @throws APIException
      */
-    AppIDDAO lookupAppIDDAO(String domainID, String appID, boolean exceptionIfNotFound)
+    AppIDDefault lookupAppIDDAO(String domainID, String appID, boolean exceptionIfNotFound)
             throws NullPointerException, IllegalArgumentException, AccessException, APIException;
 
 
@@ -403,9 +403,9 @@ public interface APIAppManager {
             throws NullPointerException, IllegalArgumentException, AccessException, APIException;
 
 
-    AppIDDAO createAppIDDAO(String domainID, String appID);
+    AppIDDefault createAppIDDAO(String domainID, String appID);
 
-    AppIDDAO deleteAppIDDAO(String domainID, String appID);
+    AppIDDefault deleteAppIDDAO(String domainID, String appID);
 
 
     <V extends NVEntity> List<V> search(NVConfigEntity nvce, QueryMarker... queryCriteria)
@@ -415,9 +415,9 @@ public interface APIAppManager {
             throws NullPointerException, IllegalArgumentException, AccessException, APIException;
 
 
-    void updateSubjectRole(String subjectID, AppIDDAO appID, String roleName, CRUD crud)
+    void updateSubjectRole(String subjectID, AppIDDefault appID, String roleName, CRUD crud)
             throws NullPointerException, IllegalArgumentException, AccessException;
 
-    void updateSubjectPermission(String subjectID, AppIDDAO appID, String permssionName, CRUD crud)
+    void updateSubjectPermission(String subjectID, AppIDDefault appID, String permssionName, CRUD crud)
             throws NullPointerException, IllegalArgumentException, AccessException;
 }

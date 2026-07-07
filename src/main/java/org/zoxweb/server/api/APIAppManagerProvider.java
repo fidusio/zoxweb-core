@@ -7,6 +7,7 @@ import org.zoxweb.shared.api.APIAppManager;
 import org.zoxweb.shared.api.APIDataStore;
 import org.zoxweb.shared.api.APIException;
 import org.zoxweb.shared.api.APISecurityManager;
+import org.zoxweb.shared.app.AppIDDefault;
 import org.zoxweb.shared.crypto.CryptoConst;
 import org.zoxweb.shared.crypto.CryptoConst.HashType;
 import org.zoxweb.shared.crypto.EncapsulatedKey;
@@ -141,18 +142,18 @@ public class APIAppManagerProvider
                 temp.getDevice().setGUID(device.getGUID());
             }
 
-            AppIDDAO appIDDAO = lookupAppIDDAO(temp.getDomainID(), temp.getAppID());
+            AppIDDefault appIDDAO = lookupAppIDDAO(temp.getDomainID(), temp.getAppID().getAppID());
 
             if (appIDDAO != null) {
                 temp.setSubjectGUID(appIDDAO.getGUID());
             } else {
-                throw new APIException("APP " + new AppIDDAO(temp.getDomainID(), temp.getAppID()).toCanonicalID() + " do not exists");
+                throw new APIException("APP " + new AppIDDefault(temp.getDomainID(), temp.getAppID().getAppID()).toCanonicalID() + " do not exists");
             }
 
 
             ShiroAssociationRule sard = new ShiroAssociationRule();
             sard.setAssociatedTo(getAPISecurityManager().currentUserID());
-            sard.setAssociate(SecurityModel.toSubjectID(temp.getDomainID(), temp.getAppID(), Role.APP_USER));
+            sard.setAssociate(SecurityModel.toSubjectID(temp.getAppID().getDomainID(), temp.getAppID().getAppID(), Role.APP_USER));
             sard.setAssociationType(ShiroAssociationType.ROLE_TO_SUBJECT);
             sard.setName("AppUserRule");
             ///sard.setExpiration(null);
@@ -503,7 +504,7 @@ public class APIAppManagerProvider
 //    }
 
 
-    public SubjectPreference lookupUserPreferenceDAO(AppIDDAO appIDDAO, String subjectID)
+    public SubjectPreference lookupUserPreferenceDAO(AppIDDefault appIDDAO, String subjectID)
             throws NullPointerException, IllegalArgumentException, AccessException, APIException {
         UserIDDAO userIDDAO = lookupUserIDDAO(subjectID);
 
@@ -511,7 +512,7 @@ public class APIAppManagerProvider
     }
 
 
-    public SubjectPreference lookupUserPreferenceDAO(AppIDDAO appIDDAO, UserIDDAO userIDDAO)
+    public SubjectPreference lookupUserPreferenceDAO(AppIDDefault appIDDAO, UserIDDAO userIDDAO)
             throws NullPointerException, IllegalArgumentException, AccessException, APIException {
         SUS.checkIfNulls("AppIDDAO is null", appIDDAO);
         SUS.checkIfNulls("UserIDDAO is null", userIDDAO);
@@ -595,13 +596,13 @@ public class APIAppManagerProvider
     }
 
 
-    public AppIDDAO lookupAppIDDAO(String domainID, String appID)
+    public AppIDDefault lookupAppIDDAO(String domainID, String appID)
             throws NullPointerException, IllegalArgumentException, AccessException, APIException {
         return lookupAppIDDAO(domainID, appID, true);
     }
 
 
-    public AppIDDAO lookupAppIDDAO(String domainID, String appID, boolean exceptionIfNotFound)
+    public AppIDDefault lookupAppIDDAO(String domainID, String appID, boolean exceptionIfNotFound)
             throws NullPointerException, IllegalArgumentException, AccessException, APIException {
 //        SUS.checkIfNulls("Domain ID is null", domainID);
 //        SUS.checkIfNulls("App ID is null", appID);
@@ -609,15 +610,15 @@ public class APIAppManagerProvider
         appID = AppIDNameFilter.SINGLETON.validate(appID);
 
 
-        List<AppIDDAO> result = getAPIDataStore().search(AppIDDAO.NVC_APP_ID_DAO, null,
-                new QueryMatchString(RelationalOperator.EQUAL, domainID, AppIDDAO.Param.DOMAIN_ID),
+        List<AppIDDefault> result = getAPIDataStore().search(AppIDDefault.NVC_APP_ID_DEFAULT, null,
+                new QueryMatchString(RelationalOperator.EQUAL, domainID, AppIDDefault.Param.DOMAIN_ID),
                 LogicalOperator.AND,
-                new QueryMatchString(RelationalOperator.EQUAL, appID, AppIDDAO.Param.APP_ID));
+                new QueryMatchString(RelationalOperator.EQUAL, appID, AppIDDefault.Param.APP_ID));
 
 
         if (result == null || result.isEmpty()) {
             if (exceptionIfNotFound)
-                throw new APIException("AppID " + new AppIDDAO(domainID, appID) + " not found", Reason.NOT_FOUND);
+                throw new APIException("AppID " + new AppIDDefault(domainID, appID) + " not found", Reason.NOT_FOUND);
             else
                 return null;
         }
@@ -631,7 +632,7 @@ public class APIAppManagerProvider
         appID = AppIDNameFilter.SINGLETON.validate(appID);
 
 
-        AppIDDAO appIDDAO = lookupAppIDDAO(domainID, appID);
+        AppIDDefault appIDDAO = lookupAppIDDAO(domainID, appID);
 
         List<AppConfigDAO> result = search(AppConfigDAO.NVC_APP_CONFIG_DAO, new QueryMatchString(Const.RelationalOperator.EQUAL, appIDDAO.getReferenceID(), AppConfigDAO.Param.APP_ID.getNVConfig().getName(), MetaToken.GUID.getName()));
 
@@ -663,10 +664,10 @@ public class APIAppManagerProvider
         }
 
         String domainID = appDeviceDAO.getDomainID();
-        String appID = appDeviceDAO.getAppID();
+        String appID = appDeviceDAO.getAppID().getAppID();
 
         // check and confirm that app already exist
-        AppIDDAO appIDDAO = lookupAppIDDAO(domainID, appID);
+        AppIDDefault appIDDAO = lookupAppIDDAO(domainID, appID);
 
 
         appDeviceDAO.setSubjectGUID(appIDDAO.getGUID());
@@ -728,14 +729,14 @@ public class APIAppManagerProvider
     }
 
 
-    public synchronized AppIDDAO createAppIDDAO(String domainID, String appID)
+    public synchronized AppIDDefault createAppIDDAO(String domainID, String appID)
             throws NullPointerException, IllegalArgumentException, AccessException, APIException {
 
         getAPISecurityManager().checkPermissions(SecurityModel.Permission.APP_ID_CREATE.getValue());
         // permission super admin only
-        AppIDDAO ret = lookupAppIDDAO(domainID, appID, false);
+        AppIDDefault ret = lookupAppIDDAO(domainID, appID, false);
         if (ret == null) {
-            ret = new AppIDDAO(domainID, appID);
+            ret = new AppIDDefault(domainID, appID);
 
             ret = getAPIDataStore().insert(ret);
             NVPair appIDNVP = new NVPair(SecurityModel.TOK_APP_ID, ret.toCanonicalID());
@@ -821,11 +822,11 @@ public class APIAppManagerProvider
     }
 
 
-    public synchronized AppIDDAO deleteAppIDDAO(String domainID, String appID)
+    public synchronized AppIDDefault deleteAppIDDAO(String domainID, String appID)
             throws NullPointerException, IllegalArgumentException, AccessException, APIException {
         SUS.checkIfNulls("Null domain or app id", domainID, appID);
         getAPISecurityManager().checkPermissions(SecurityModel.Permission.APP_ID_DELETE.getValue());
-        AppIDDAO ret = lookupAppIDDAO(domainID, appID, true);
+        AppIDDefault ret = lookupAppIDDAO(domainID, appID, true);
 //
 //        List<AppConfigDAO> list = search(AppConfigDAO.NVC_APP_CONFIG_DAO, new QueryMatchString(Const.RelationalOperator.EQUAL, ret.getReferenceID(), AppConfigDAO.Param.APP_ID.getNVConfig().getName(), MetaToken.REFERENCE_ID.getName()));
 //
@@ -839,13 +840,13 @@ public class APIAppManagerProvider
 
             // delete the APP-PERMISSIONS
             getAPIDataStore().delete(ShiroPermission.NVC_SHIRO_PERMISSION,
-                    new QueryMatch<String>(RelationalOperator.EQUAL, ret.getDomainID(), AppIDDAO.Param.DOMAIN_ID),
-                    LogicalOperator.AND, new QueryMatch<String>(RelationalOperator.EQUAL, ret.getAppID(), AppIDDAO.Param.APP_ID));
+                    new QueryMatch<String>(RelationalOperator.EQUAL, ret.getDomainID(), AppIDDefault.Param.DOMAIN_ID),
+                    LogicalOperator.AND, new QueryMatch<String>(RelationalOperator.EQUAL, ret.getAppID(), AppIDDefault.Param.APP_ID));
 
             // delete the APP-ROLES
             getAPIDataStore().delete(ShiroRole.NVC_SHIRO_ROLE,
-                    new QueryMatch<String>(RelationalOperator.EQUAL, ret.getDomainID(), AppIDDAO.Param.DOMAIN_ID),
-                    LogicalOperator.AND, new QueryMatch<String>(RelationalOperator.EQUAL, ret.getAppID(), AppIDDAO.Param.APP_ID));
+                    new QueryMatch<String>(RelationalOperator.EQUAL, ret.getDomainID(), AppIDDefault.Param.DOMAIN_ID),
+                    LogicalOperator.AND, new QueryMatch<String>(RelationalOperator.EQUAL, ret.getAppID(), AppIDDefault.Param.APP_ID));
 
             // Delelte the APP-DEVICES
             getAPIDataStore().delete(AppDeviceDAO.NVC_APP_DEVICE_DAO, new QueryMatch<String>(RelationalOperator.EQUAL, ret.getReferenceID(), "app_id", "reference_id"));
@@ -865,7 +866,7 @@ public class APIAppManagerProvider
         return getAPIDataStore().search(nvce, fieldNames, queryCriteria);
     }
 
-    public void updateSubjectRole(String subjectID, AppIDDAO appID, String roleName, CRUD crud)
+    public void updateSubjectRole(String subjectID, AppIDDefault appID, String roleName, CRUD crud)
             throws NullPointerException, IllegalArgumentException, AccessException {
         String permission = PPEncoder.SINGLETON.encode(SecurityModel.PERM_ADD_ROLE, appID.getGUID());
         if (log.isEnabled()) log.getLogger().info("permision to check:" + permission);
@@ -907,7 +908,7 @@ public class APIAppManagerProvider
 
     }
 
-    public void updateSubjectPermission(String subjectID, AppIDDAO appID, String permssionName, CRUD crud)
+    public void updateSubjectPermission(String subjectID, AppIDDefault appID, String permssionName, CRUD crud)
             throws NullPointerException, IllegalArgumentException, AccessException {
 
     }

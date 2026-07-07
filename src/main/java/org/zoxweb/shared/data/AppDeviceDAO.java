@@ -22,8 +22,7 @@ import org.zoxweb.shared.util.*;
 @SuppressWarnings("serial")
 public class AppDeviceDAO
         extends SubjectAPIKey
-        implements AppID<String>,
-        CanonicalID {
+        implements CanonicalID {
 
     /**
      * Converts the implementing object in its canonical form.
@@ -32,14 +31,13 @@ public class AppDeviceDAO
      */
     @Override
     public String toCanonicalID() {
-        return SUS.toCanonicalID('-', getDomainID(), getAppID());
+        return SUS.toCanonicalID('-', getAppID().getDomainID(), getAppID().getAppID());
     }
 
     public enum Param
             implements GetNVConfig {
 
-        APP_ID(NVConfigManager.createNVConfig("app_id", "App ID", "AppID", true, false, String.class)),
-        DOMAIN_ID(NVConfigManager.createNVConfig("domain_id", "Domain ID", "DomainID", true, false, String.class)),
+
         DEVICE(NVConfigManager.createNVConfigEntity("device", "Device information", "Device", true, false, DeviceDAO.NVC_DEVICE_DAO, NVConfigEntity.ArrayType.NOT_ARRAY)),
         ;
 
@@ -74,41 +72,6 @@ public class AppDeviceDAO
         super(NVC_APP_DEVICE_DAO);
     }
 
-    /**
-     * Returns the domain ID.
-     * @return
-     */
-    public String getDomainID() {
-        return lookupValue(Param.DOMAIN_ID);
-    }
-
-    /**
-     * Sets the domain ID.
-     *
-     * @param domainID
-     */
-    @Override
-    public void setDomainID(String domainID) {
-        setValue(Param.DOMAIN_ID, domainID);
-    }
-
-    /**
-     * Returns the app ID.
-     * @return
-     */
-    public String getAppID() {
-        return lookupValue(Param.APP_ID);
-    }
-
-    /**
-     * Sets the app ID.
-     *
-     * @param appID
-     */
-    @Override
-    public void setAppID(String appID) {
-        setValue(Param.APP_ID, appID);
-    }
 
 
     /**
@@ -127,5 +90,8 @@ public class AppDeviceDAO
         setValue(Param.DEVICE, device);
     }
 
-
+    public String getDomainID()
+    {
+        return getAppID().getDomainID();
+    }
 }
