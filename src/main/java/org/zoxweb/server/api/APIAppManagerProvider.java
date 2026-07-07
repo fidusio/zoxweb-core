@@ -118,7 +118,7 @@ public class APIAppManagerProvider
 
         if (subjectAPIKey.getAPIKey() == null) {
             try {
-                subjectAPIKey.setAPIKey(CryptoUtil.generateKey(CryptoConst.CryptoAlgo.AES, 256).getEncoded());
+                subjectAPIKey.setAPIKeyAsBytes(CryptoUtil.generateKey(CryptoConst.CryptoAlgo.AES, 256).getEncoded());
             } catch (NoSuchAlgorithmException e) {
                 e.printStackTrace();
             }

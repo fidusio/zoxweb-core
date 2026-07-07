@@ -37,7 +37,7 @@ import java.util.Date;
  *
  * <p>The {@code api_key} attribute is declared with {@link FilterType#ENCRYPT}, so the
  * secret is encrypted at rest by the persistence layer. In memory the key is held as a
- * URL-safe Base64 string; use {@link #setAPIKey(byte[])} / {@link #getAPIKeyAsBytes()}
+ * URL-safe Base64 string; use {@link #setAPIKeyAsBytes(byte[])} / {@link #getAPIKeyAsBytes()}
  * to write and read the raw bytes.</p>
  *
  * <p>It is a {@link CredentialInfo} of type {@link CredentialInfo.Type#API_KEY}, so it
@@ -55,7 +55,7 @@ import java.util.Date;
 @SuppressWarnings("serial")
 public class SubjectAPIKey
         extends PropertyDAO
-        implements SubjectID<String>,
+        implements SubjectID<String>, APIKey<String>,
         SystemID<String>, PrincipalID<String>, CredentialInfo {
 
 
@@ -171,8 +171,18 @@ public class SubjectAPIKey
      *
      * @param secret the raw key bytes
      */
-    public void setAPIKey(byte[] secret) {
-        setValue(Param.API_KEY, SharedBase64.encodeAsString(Base64Type.URL, secret));
+    public void setAPIKeyAsBytes(byte[] secret) {
+        setAPIKey(SharedBase64.encodeAsString(Base64Type.URL, secret));
+    }
+
+    /**
+     * Sets the key material in its string form, as stored (URL-safe Base64 by
+     * convention; encrypted at rest).
+     *
+     * @param apiKey the key material as a string
+     */
+    public void setAPIKey(String apiKey) {
+        setValue(Param.API_KEY, apiKey);
     }
 
     /**
@@ -226,7 +236,7 @@ public class SubjectAPIKey
 
         SubjectAPIKey ret = new SubjectAPIKey();
         //ret.setSubjectID(subjectAPIKey.getSubjectID());
-        ret.setAPIKey(subjectAPIKey.getAPIKeyAsBytes());
+        ret.setAPIKeyAsBytes(subjectAPIKey.getAPIKeyAsBytes());
 
         return ret;
     }
@@ -285,11 +295,22 @@ public class SubjectAPIKey
         setValue(Param.SYSTEM_ID, systemID);
     }
 
+    /**
+     * Returns the credential lifecycle status ({@code subject_status} attribute),
+     * set to {@link SecConst.SecStatus#ACTIVE} on construction.
+     *
+     * @return the credential status, or {@code null} if unset
+     */
     @Override
     public SecConst.SecStatus getCredentialStatus() {
         return lookupValue(CIPassword.Param.CI_STATUS);
     }
 
+    /**
+     * Sets the credential lifecycle status.
+     *
+     * @param status the status to apply
+     */
     @Override
     public void setCredentialStatus(SecConst.SecStatus status) {
         setValue(CIPassword.Param.CI_STATUS, status);

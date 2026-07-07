@@ -60,7 +60,7 @@ public class CIPassword
         ROUNDS(NVConfigManager.createNVConfig(CIProp.ROUNDS.getName(), "Hash algorithm rounds or iterations", "HashRounds", false, true, Integer.class)),
         SALT(NVConfigManager.createNVConfig(CIProp.SALT.getName(), "The password salt", "Salt", false, true, byte[].class)),
         HASH(NVConfigManager.createNVConfig(CIProp.HASH.getName(), "The password hash", "Hash", false, true, byte[].class)),
-        CI_STATUS(NVConfigManager.createNVConfig("subject_status", "Subject status", "SubjectStatus", true, true, SecConst.SecStatus.class)),
+        CI_STATUS(NVConfigManager.createNVConfig("ci_status", "Credential info status", "CIStatus", true, true, SecConst.SecStatus.class)),
 
         ;
 
