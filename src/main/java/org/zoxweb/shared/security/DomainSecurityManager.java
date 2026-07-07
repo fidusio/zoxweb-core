@@ -90,6 +90,15 @@ public interface DomainSecurityManager {
     CredentialInfo createCredential(String principalID, CredentialInfo credential);
 
     /**
+     * Attaches a credential to the subject that owns the given principal.
+     *
+     * @param subjectIdentifier the subject identifying the owning subject
+     * @param credential  the credential to attach
+     * @return the credential object
+     */
+    CredentialInfo createCredential(SubjectIdentifier subjectIdentifier, CredentialInfo credential);
+
+    /**
      * Reads a single credential of the given type for the subject that owns
      * the given principal.
      *

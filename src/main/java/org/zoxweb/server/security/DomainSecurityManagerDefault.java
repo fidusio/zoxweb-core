@@ -344,6 +344,28 @@ public class DomainSecurityManagerDefault
         return credential;
     }
 
+
+    /**
+     * Attaches a credential to the subject that owns the given principal.
+     *
+     * @param subjectIdentifier the subject identifying the owning subject
+     * @param credential  the credential to attach
+     * @return the credential object
+     */
+    public CredentialInfo createCredential(SubjectIdentifier subjectIdentifier, CredentialInfo credential){
+        String subjectGUID = subjectIdentifier.getSubjectGUID();
+        if (subjectGUID == null) {
+            throw new SecurityException("Unknown subject");
+        }
+        if (!(credential instanceof NVEntity)) {
+            throw new IllegalArgumentException("Credential must be an NVEntity to be persisted");
+        }
+        NVEntity nve = (NVEntity) credential;
+        nve.setSubjectGUID(subjectGUID);
+        ds().insert(nve);
+        return credential;
+    }
+
     /**
      * Returns the first credential of the given type stored for the subject
      * that owns the given principal, scanning all registered credential
