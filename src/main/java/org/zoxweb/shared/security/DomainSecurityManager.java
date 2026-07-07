@@ -133,6 +133,8 @@ public interface DomainSecurityManager {
      */
     CredentialInfo[] lookupAllPrincipalCredentials(String principalID);
 
+    CredentialInfo[] lookupCredentialsBySubjectGUID(String subjectGUID, CredentialInfo.Type type);
+
 
     // Principal Identifier
 

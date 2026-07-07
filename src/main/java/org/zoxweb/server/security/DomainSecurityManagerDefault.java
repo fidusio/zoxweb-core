@@ -169,7 +169,8 @@ public class DomainSecurityManagerDefault
             throw new SecurityException("Invalid key");
         }
 
-        SubjectIdentifier subject = lookupSubjectID(sak.getSubjectID());
+        SubjectIdentifier subject =
+                first(ds().searchByID(SubjectIdentifier.NVC_SUBJECT_IDENTIFIER, sak.getSubjectGUID()));
         if (subject == null) {
             throw new SecurityException("Invalid key");
         }
@@ -382,8 +383,8 @@ public class DomainSecurityManagerDefault
         if (subjectGUID == null) {
             return null;
         }
-        List<CredentialInfo> ret = lookupCredentialsBySubjectGUID(subjectGUID, type);
-        return ret.isEmpty() ? null : ret.get(0);
+        CredentialInfo[] ret = lookupCredentialsBySubjectGUID(subjectGUID, type);
+        return ret.length > 0 ? ret[0] : null;
     }
 
     /**
@@ -415,9 +416,9 @@ public class DomainSecurityManagerDefault
             if (update instanceof CIPassword) {
                 CIPassword newPassword = (CIPassword) update;
                 newPassword.setSubjectGUID(subjectIdentifier.getGUID());
-                List<CredentialInfo> oldPassword = lookupCredentialsBySubjectGUID(subjectIdentifier.getSubjectGUID(), CredentialInfo.Type.PASSWORD);
-                if (!oldPassword.isEmpty()) {
-                    dataStore.delete((CIPassword) oldPassword.get(0), false);
+                CredentialInfo[] oldPassword = lookupCredentialsBySubjectGUID(subjectIdentifier.getSubjectGUID(), CredentialInfo.Type.PASSWORD);
+                if (oldPassword.length > 0) {
+                    dataStore.delete((CIPassword) oldPassword[0], false);
                 }
                 dataStore.insert(newPassword);
                 status = true;
@@ -454,18 +455,18 @@ public class DomainSecurityManagerDefault
      */
     @Override
     public CredentialInfo[] lookupAllPrincipalCredentials(String principalID) {
-        return lookupCredentialsBySubjectGUID(resolveSubjectGUID(principalID), null)
-                .toArray(new CredentialInfo[0]);
+        return lookupCredentialsBySubjectGUID(resolveSubjectGUID(principalID), null);
     }
 
     /**
      * Collects every {@link CredentialInfo} stored for the given subject GUID
      * by querying each registered credential collection on {@code subject_guid}.
      */
-    private List<CredentialInfo> lookupCredentialsBySubjectGUID(String subjectGUID, CredentialInfo.Type type) {
+    @Override
+    public CredentialInfo[] lookupCredentialsBySubjectGUID(String subjectGUID, CredentialInfo.Type type) {
         List<CredentialInfo> ret = new ArrayList<>();
         if (subjectGUID == null) {
-            return ret;
+            return ret.toArray(new CredentialInfo[0]);
         }
         for (Class<?> credColl : credentialCollections.toArray(new Class[0])) {
             for (NVEntity nve : ds().search(credColl.getName(), null, eq(FIELD_SUBJECT_GUID, subjectGUID))) {
@@ -478,7 +479,7 @@ public class DomainSecurityManagerDefault
                 }
             }
         }
-        return ret;
+        return ret.toArray(new CredentialInfo[0]);
     }
 
     // ------------------------------------------------------------------
