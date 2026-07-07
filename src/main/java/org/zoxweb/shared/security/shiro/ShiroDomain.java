@@ -62,7 +62,7 @@ public abstract class ShiroDomain
     }
 
     public String toCanonicalID() {
-        return SUS.toCanonicalID(ShiroBase.CAN_ID_SEP, getDomainID(), getAppID(), getName());
+        return SUS.toCanonicalID(AppID.CAN_ID_SEP, getDomainID(), getAppID(), getName());
     }
 
 

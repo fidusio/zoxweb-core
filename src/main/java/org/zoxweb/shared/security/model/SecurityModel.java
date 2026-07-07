@@ -1,6 +1,5 @@
 package org.zoxweb.shared.security.model;
 
-import org.zoxweb.shared.security.shiro.ShiroBase;
 import org.zoxweb.shared.security.shiro.ShiroPermission;
 import org.zoxweb.shared.security.shiro.ShiroRole;
 import org.zoxweb.shared.util.*;
@@ -305,7 +304,7 @@ public final class SecurityModel {
 
 
     public static String toSubjectID(String domainID, String appID, String name) {
-        return SUS.toCanonicalID(ShiroBase.CAN_ID_SEP, domainID, appID, name);
+        return SUS.toCanonicalID(AppID.CAN_ID_SEP, domainID, appID, name);
     }
 
     public enum AppPermission

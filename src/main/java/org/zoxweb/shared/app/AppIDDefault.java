@@ -53,4 +53,20 @@ public class AppIDDefault
         setDomainAppID(domainID, appID);
     }
 
+
+    public static AppIDDefault create(String domainID, String appID) {
+        return new AppIDDefault(domainID, appID);
+    }
+
+
+    public static AppIDDefault create(String domainAppID) {
+        int index = domainAppID.indexOf(AppID.CAN_ID_SEP);
+        if (index == -1) {
+            throw new IllegalArgumentException(AppID.CAN_ID_SEP + " separator " + domainAppID + " missing");
+        }
+        return new AppIDDefault(domainAppID.substring(0, index), domainAppID.substring(index + 1));
+
+    }
+
+
 }

@@ -2,7 +2,6 @@ package org.zoxweb.shared.data;
 
 import org.zoxweb.shared.filters.AppIDNameFilter;
 import org.zoxweb.shared.filters.FilterType;
-import org.zoxweb.shared.security.shiro.ShiroBase;
 import org.zoxweb.shared.util.*;
 
 import java.util.Objects;
@@ -109,17 +108,13 @@ public class AppIDResource
 
 
     public String getDomainAppID() {
-        return toDomainAppID(getDomainID(), getAppID());
+        return AppID.toDomainAppID(getDomainID(), getAppID());
     }
 
     public String toCanonicalID() {
-        return toDomainAppID(getDomainID(), getAppID());
+        return AppID.toDomainAppID(getDomainID(), getAppID());
     }
 
-
-    public static String toDomainAppID(String domainID, String appIDName) {
-        return SUS.toCanonicalID(ShiroBase.CAN_ID_SEP, FilterType.DOMAIN.validate(domainID), AppIDNameFilter.SINGLETON.validate(appIDName));
-    }
 
     public boolean equals(Object obj) {
         if (obj == this) {

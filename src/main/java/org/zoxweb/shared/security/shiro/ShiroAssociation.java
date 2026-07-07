@@ -74,7 +74,7 @@ public abstract class ShiroAssociation
 
     @Override
     public String toCanonicalID() {
-        return SUS.toCanonicalID(CAN_ID_SEP, getAssociatedTo().getDomainID(), getAssociatedTo().getName(), getAssociation().getName());
+        return SUS.toCanonicalID(AppID.CAN_ID_SEP, getAssociatedTo().getDomainID(), getAssociatedTo().getName(), getAssociation().getName());
     }
 
 
