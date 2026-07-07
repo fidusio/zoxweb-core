@@ -105,6 +105,18 @@ public class ParamUtil {
         }
 
         /**
+         * Hide parameters from being exposed via toString()
+         *
+         * @param params to be hidden
+         * @return this
+         */
+        public ParamMap hide(GetName... params) {
+            for (GetName param : params)
+                hidden.add(param.getName());
+            return this;
+        }
+
+        /**
          * Expose hidden parameters
          *
          * @param params to be re-exposed
@@ -113,6 +125,18 @@ public class ParamUtil {
         public ParamMap expose(String... params) {
             for (String param : params)
                 hidden.remove(param);
+            return this;
+        }
+
+        /**
+         * Expose hidden parameters
+         *
+         * @param params to be re-exposed
+         * @return this
+         */
+        public ParamMap expose(GetName... params) {
+            for (GetName param : params)
+                hidden.remove(param.getName());
             return this;
         }
 
@@ -305,6 +329,7 @@ public class ParamUtil {
         public String stringValue(GetName name, String defaultValue) {
             return stringValue(name.getName(), defaultValue);
         }
+
         public String stringValue(String name) {
             return stringValue(name, null, false);
         }

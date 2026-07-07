@@ -17,7 +17,6 @@
 package org.zoxweb.shared.security;
 
 
-import org.zoxweb.shared.crypto.CIPassword;
 import org.zoxweb.shared.data.PropertyDAO;
 import org.zoxweb.shared.filters.FilterType;
 import org.zoxweb.shared.util.Const.Status;
@@ -68,11 +67,11 @@ public class SubjectAPIKey
             implements GetNVConfig {
         PRINCIPAL_ID(NVConfigManager.createNVConfig("principal_id", "Principal ID", "PrincipalID", false, false, String.class)),
         SYSTEM_ID(NVConfigManager.createNVConfig("system_id", "System ID", "SystemID", true, false, String.class)),
-        API_KEY(NVConfigManager.createNVConfig("api_key", "API Key", "APIKey", true, false, true, String.class, FilterType.ENCRYPT)),
+        API_KEY(NVConfigManager.createNVConfig("api_key", "API Key", "APIKey", true, false, false, String.class, FilterType.ENCRYPT)),
         STATUS(NVConfigManager.createNVConfig("status", "Status", "Status", true, false, Status.class)),
         TS_REQUIRED(NVConfigManager.createNVConfig("ts_required", "The timestamp is required", "TimeStampRequired", false, false, Boolean.class)),
         EXPIRY_DATE(NVConfigManager.createNVConfig("expiry_date", "The expiry timestamp", "Expired", false, false, false, true, Date.class, null)),
-        CI_STATUS(NVConfigManager.createNVConfig("subject_status", "Subject status", "SubjectStatus", true, true, SecConst.SecStatus.class)),
+        CI_STATUS(NVConfigManager.createNVConfig("api_key_status", "API key status", "APIKeyStatus", true, true, SecConst.SecStatus.class)),
         ;
 
         private final NVConfig nvc;
@@ -303,7 +302,7 @@ public class SubjectAPIKey
      */
     @Override
     public SecConst.SecStatus getCredentialStatus() {
-        return lookupValue(CIPassword.Param.CI_STATUS);
+        return lookupValue(Param.CI_STATUS);
     }
 
     /**
@@ -313,7 +312,6 @@ public class SubjectAPIKey
      */
     @Override
     public void setCredentialStatus(SecConst.SecStatus status) {
-        setValue(CIPassword.Param.CI_STATUS, status);
-
+        setValue(Param.CI_STATUS, status);
     }
 }
