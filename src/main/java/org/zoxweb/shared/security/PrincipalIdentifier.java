@@ -18,6 +18,7 @@ public class PrincipalIdentifier
     public enum Param
             implements GetNVConfig {
         PRINCIPAL_ID(NVConfigManager.createNVConfig("principal_id", "the unique identifier", "PrincipalID", true, false, true, String.class, null)),
+        PRINCIPAL_STATUS(NVConfigManager.createNVConfig("principal_status", "Principal status", "PrincipalStatus", true, true, SecConst.SecStatus.class)),
 //        DOMAIN_ID(NVConfigManager.createNVConfig("domain_id", "the domain id", "DomainID", false, false, false, String.class, null)),
 //        APP_ID(NVConfigManager.createNVConfig("app_id", "the app id", "AppID", false, false, false, String.class, null)),
         ;
@@ -120,6 +121,14 @@ public class PrincipalIdentifier
     @Override
     public int hashCode() {
         return Objects.hashCode(getPrincipalID());
+    }
+
+    public void setStatus(SecConst.SecStatus status) {
+        setValue(Param.PRINCIPAL_STATUS, status);
+    }
+
+    public SecConst.SecStatus getStatus() {
+        return lookupValue(Param.PRINCIPAL_STATUS);
     }
 
 //    /**
