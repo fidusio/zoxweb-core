@@ -18,11 +18,10 @@ package org.zoxweb.shared.api;
 import org.zoxweb.shared.data.LongSequence;
 import org.zoxweb.shared.db.QueryMarker;
 import org.zoxweb.shared.security.AccessException;
-import org.zoxweb.shared.util.DynamicEnumMap;
-import org.zoxweb.shared.util.IDGenerator;
-import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVEntity;
+import org.zoxweb.shared.util.*;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -55,9 +54,15 @@ public interface APIDataStore<P, S>
         return (ret == null || ret.isEmpty()) ? null : ret.get(0);
     }
 
-    default <T> T beginTransaction(){return null;}
-    default void endTransaction(){}
-    default void abortTransaction(){}
+    default <T> T beginTransaction() {
+        return null;
+    }
+
+    default void endTransaction() {
+    }
+
+    default void abortTransaction() {
+    }
 
     /**
      * This method searches for documents.
@@ -124,6 +129,20 @@ public interface APIDataStore<P, S>
      */
     <T> APISearchResult<T> batchSearch(String className, QueryMarker... queryCriteria)
             throws NullPointerException, IllegalArgumentException, AccessException, APIException;
+
+
+    default List<String> fieldNames(String... names) {
+        return new ArrayList<String>(Arrays.asList(names));
+    }
+
+    default List<String> fieldNames(GetName... names) {
+        List<String> ret = new ArrayList<>();
+        for (GetName name : names) {
+            if (name != null && name.getName() != null)
+                ret.add(name.getName());
+        }
+        return ret;
+    }
 
     /**
      * Batch result retrieval

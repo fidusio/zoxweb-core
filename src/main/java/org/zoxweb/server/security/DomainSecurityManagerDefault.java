@@ -8,11 +8,8 @@ import org.zoxweb.shared.crypto.CredentialHasher;
 import org.zoxweb.shared.crypto.CryptoConst;
 import org.zoxweb.shared.db.QueryMatch;
 import org.zoxweb.shared.security.*;
+import org.zoxweb.shared.util.*;
 import org.zoxweb.shared.util.Const.RelationalOperator;
-import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVEntity;
-import org.zoxweb.shared.util.SUS;
-import org.zoxweb.shared.util.SharedStringUtil;
 
 import java.util.*;
 
@@ -38,8 +35,8 @@ import java.util.*;
 public class DomainSecurityManagerDefault
         implements DomainSecurityManager {
 
-    private static final String FIELD_SUBJECT_GUID = "subject_guid";
-    private static final String FIELD_NAME = "name";
+
+
 
     // NVConfigEntity collections, by name, that currently hold credentials
     private final Set<Class<?>> credentialCollections = new HashSet<>();
@@ -84,6 +81,14 @@ public class DomainSecurityManagerDefault
      */
     private static QueryMatch<String> eq(String field, String value) {
         return new QueryMatch<>(field, value, RelationalOperator.EQUAL);
+    }
+
+
+    /**
+     * Builds an equality query criterion for the given field and value.
+     */
+    private static QueryMatch<String> eq(GetName field, String value) {
+        return new QueryMatch<>(field.getName(), value, RelationalOperator.EQUAL);
     }
 
     /**
@@ -297,7 +302,7 @@ public class DomainSecurityManagerDefault
             ds().delete(p, false);
         }
         for (Class<?> credColl : credentialCollections.toArray(new Class[0])) {
-            for (NVEntity ci : ds().search(credColl.getName(), null, eq(FIELD_SUBJECT_GUID, subjectGUID))) {
+            for (NVEntity ci : ds().search(credColl.getName(), null, eq(MetaToken.SUBJECT_GUID, subjectGUID))) {
                 ds().delete(ci, false);
             }
         }
@@ -353,7 +358,7 @@ public class DomainSecurityManagerDefault
      * @param credential  the credential to attach
      * @return the credential object
      */
-    public CredentialInfo createCredential(SubjectIdentifier subjectIdentifier, CredentialInfo credential){
+    public CredentialInfo createCredential(SubjectIdentifier subjectIdentifier, CredentialInfo credential) {
         String subjectGUID = subjectIdentifier.getSubjectGUID();
         if (subjectGUID == null) {
             throw new SecurityException("Unknown subject");
@@ -469,7 +474,7 @@ public class DomainSecurityManagerDefault
             return ret.toArray(new CredentialInfo[0]);
         }
         for (Class<?> credColl : credentialCollections.toArray(new Class[0])) {
-            for (NVEntity nve : ds().search(credColl.getName(), null, eq(FIELD_SUBJECT_GUID, subjectGUID))) {
+            for (NVEntity nve : ds().search(credColl.getName(), null, eq(MetaToken.SUBJECT_GUID, subjectGUID))) {
                 if (nve instanceof CredentialInfo) {
                     if (type != null) {
                         if (((CredentialInfo) nve).getCredentialType() == type)
@@ -523,7 +528,30 @@ public class DomainSecurityManagerDefault
      */
     @Override
     public boolean deletePrincipalID(PrincipalIdentifier principal) {
-        return principal != null && ds().delete(principal, false);
+
+        if (principal != null){
+            if((countMatches(PrincipalIdentifier.class, principal.getSubjectGUID()) > 1)){
+                ds().beginTransaction();
+                try
+                {
+                    boolean status = ds().delete(principal, false);
+                    if(countMatches(PrincipalIdentifier.class, principal.getSubjectGUID()) > 0)
+                        return status;
+                    else
+                        ds().abortTransaction();
+
+                }
+                finally
+                {
+                    ds().endTransaction();
+                }
+            }
+        }
+        return false;
+    }
+
+    private int countMatches(Class<?> clazz, String subjectGUID) {
+        return ds().search(clazz.getName(), ds().fieldNames(MetaToken.GUID), eq(MetaToken.SUBJECT_GUID, subjectGUID)).size();
     }
 
     /**
@@ -536,7 +564,7 @@ public class DomainSecurityManagerDefault
     @Override
     public PrincipalIdentifier[] lookupAllPrincipalIdentifiers(String subjectGUID) {
         List<PrincipalIdentifier> list = ds().search(PrincipalIdentifier.NVC_PRINCIPAL_IDENTIFIER, null,
-                eq(FIELD_SUBJECT_GUID, subjectGUID));
+                eq(MetaToken.SUBJECT_GUID, subjectGUID));
         return list.toArray(new PrincipalIdentifier[0]);
     }
 
@@ -809,7 +837,7 @@ public class DomainSecurityManagerDefault
      * given name.
      */
     private <V extends NVEntity> List<V> byName(NVConfigEntity nvce, String name) {
-        return ds().search(nvce, null, eq(FIELD_NAME, name));
+        return ds().search(nvce, null, eq(MetaToken.NAME, name));
     }
 
     // ------------------------------------------------------------------
@@ -853,7 +881,7 @@ public class DomainSecurityManagerDefault
     @Override
     public PermissionGrant[] getPermissionGrants(String subjectGUID) {
         List<PermissionGrant> list = ds().search(PermissionGrant.NVC_PERMISSION_GRANT, null,
-                eq(FIELD_SUBJECT_GUID, subjectGUID));
+                eq(MetaToken.SUBJECT_GUID, subjectGUID));
         return list.toArray(new PermissionGrant[0]);
     }
 
@@ -893,7 +921,7 @@ public class DomainSecurityManagerDefault
     @Override
     public RoleGrant[] getRoleGrants(String subjectGUID) {
         List<RoleGrant> list = ds().search(RoleGrant.NVC_ROLE_GRANT, null,
-                eq(FIELD_SUBJECT_GUID, subjectGUID));
+                eq(MetaToken.SUBJECT_GUID, subjectGUID));
         return list.toArray(new RoleGrant[0]);
     }
 
@@ -934,7 +962,7 @@ public class DomainSecurityManagerDefault
     @Override
     public RoleGroupGrant[] getRoleGroupGrants(String subjectGUID) {
         List<RoleGroupGrant> list = ds().search(RoleGroupGrant.NVC_ROLE_GROUP_GRANT, null,
-                eq(FIELD_SUBJECT_GUID, subjectGUID));
+                eq(MetaToken.SUBJECT_GUID, subjectGUID));
         return list.toArray(new RoleGroupGrant[0]);
     }
 

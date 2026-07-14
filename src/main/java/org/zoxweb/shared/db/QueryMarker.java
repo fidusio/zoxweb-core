@@ -22,7 +22,5 @@ import java.io.Serializable;
  * @author mzebib
  */
 public interface QueryMarker
-    extends Serializable
-{
-	
+        extends Serializable {
 }

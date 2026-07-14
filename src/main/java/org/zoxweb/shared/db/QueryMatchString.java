@@ -20,58 +20,47 @@ import org.zoxweb.shared.util.Const.RelationalOperator;
 
 @SuppressWarnings("serial")
 public class QueryMatchString
-    extends QueryMatch<String>
-{
+        extends QueryMatch<String> {
 
-	public QueryMatchString()
-    {
-		
-	}
-	
-	public QueryMatchString(String name, String value, RelationalOperator operator)
-    {
-		super(name, value, operator);
-	}
-	
-	public QueryMatchString(GetName gc, String value, RelationalOperator operator)
-    {
-		super(operator, value, gc);
-	}
-	
-	public QueryMatchString(GetNameValue<String> gnv, RelationalOperator operator)
-    {
-		//super(gnv.getName(), gnv.getValue(), operator);
-		super(operator, gnv.getValue(), gnv);
-	}
+    public QueryMatchString() {
 
-	public QueryMatchString(RelationalOperator operator, String value, String... names)
-    {
-		super(operator, value, names);
-	}
-	
-	public QueryMatchString(RelationalOperator operator, String value, GetName... names)
-    {
-		super(operator, value, names);
-	}
-	
-	public QueryMatchString(RelationalOperator operator, String value, GetNVConfig... gnvs)
-    {
-		super(operator, value, gnvs);
-	}
+    }
+
+    public QueryMatchString(String name, String value, RelationalOperator operator) {
+        super(name, value, operator);
+    }
+
+    public QueryMatchString(GetName gc, String value, RelationalOperator operator) {
+        super(operator, value, gc);
+    }
+
+    public QueryMatchString(GetNameValue<String> gnv, RelationalOperator operator) {
+        //super(gnv.getName(), gnv.getValue(), operator);
+        super(operator, gnv.getValue(), gnv);
+    }
+
+    public QueryMatchString(RelationalOperator operator, String value, String... names) {
+        super(operator, value, names);
+    }
+
+    public QueryMatchString(RelationalOperator operator, String value, GetName... names) {
+        super(operator, value, names);
+    }
+
+    public QueryMatchString(RelationalOperator operator, String value, GetNVConfig... gnvs) {
+        super(operator, value, gnvs);
+    }
 
 
-	public static QueryMatchString toQueryMatch(String query)
-	{
-		for(RelationalOperator ro : RelationalOperator.values())
-		{
-			NVPair nameValue = SharedUtil.toNVPair(query, ro.getValue(), false);
-			if (nameValue != null && nameValue.getName() != null && nameValue.getValue() != null)
-			{
-				return new QueryMatchString(nameValue, ro);
-			}
-		}
+    public static QueryMatchString toQueryMatch(String query) {
+        for (RelationalOperator ro : RelationalOperator.values()) {
+            NVPair nameValue = SharedUtil.toNVPair(query, ro.getValue(), false);
+            if (nameValue != null && nameValue.getName() != null && nameValue.getValue() != null) {
+                return new QueryMatchString(nameValue, ro);
+            }
+        }
 
-		return null;
-	}
+        return null;
+    }
 
 }
