@@ -36,8 +36,6 @@ public class DomainSecurityManagerDefault
         implements DomainSecurityManager {
 
 
-
-
     // NVConfigEntity collections, by name, that currently hold credentials
     private final Set<Class<?>> credentialCollections = new HashSet<>();
 
@@ -352,11 +350,15 @@ public class DomainSecurityManagerDefault
 
 
     /**
-     * Attaches a credential to the subject that owns the given principal.
+     * Attaches a credential directly to the given subject. The credential must
+     * also be an {@link NVEntity} so it can be persisted; its
+     * {@code subject_guid} is stamped with the subject's GUID before insertion.
      *
-     * @param subjectIdentifier the subject identifying the owning subject
-     * @param credential  the credential to attach
-     * @return the credential object
+     * @param subjectIdentifier the subject owning the credential
+     * @param credential        the credential to attach
+     * @return the attached credential
+     * @throws SecurityException        if the subject has no GUID
+     * @throws IllegalArgumentException if the credential is not an {@link NVEntity}
      */
     public CredentialInfo createCredential(SubjectIdentifier subjectIdentifier, CredentialInfo credential) {
         String subjectGUID = subjectIdentifier.getSubjectGUID();
@@ -393,11 +395,16 @@ public class DomainSecurityManagerDefault
     }
 
     /**
-     * Changes an existing credential.
+     * Changes an existing credential. If the update is an {@link NVEntity} that
+     * already has a GUID it is updated in place. Otherwise, only
+     * {@link CIPassword} replacement is supported: inside a transaction the
+     * subject's old password credential (if any) is deleted and the new one is
+     * inserted; any other credential type aborts the transaction and is
+     * silently ignored.
      *
-     * @param subjectIdentifier to update credentials
-     * @param update the credential to update
-     *
+     * @param subjectIdentifier the subject whose credential is updated
+     * @param update            the replacement credential
+     * @throws NullPointerException if subjectIdentifier or update is {@code null}
      */
     @Override
     public void updateCredential(SubjectIdentifier subjectIdentifier, CredentialInfo update) {
@@ -494,18 +501,28 @@ public class DomainSecurityManagerDefault
     /**
      * Associates an additional principal identifier with an existing subject by
      * inserting a new {@link PrincipalIdentifier} bound to the subject's GUID.
-     * No duplicate check is performed here; callers such as
-     * {@link #createSubjectID(String, CredentialInfo)} enforce uniqueness.
+     * Uniqueness is enforced by the data store; an insert failure (duplicate
+     * principal ID) is rethrown as a {@link SecurityException}.
      *
      * @param subject     the subject to extend
      * @param principalID the additional principal identifier to associate
      * @return the persisted principal identifier
+     * @throws NullPointerException if subject is {@code null}
+     * @throws SecurityException    if principalID is empty or already exists
      */
     @Override
     public PrincipalIdentifier addPrincipalID(SubjectIdentifier subject, String principalID) {
+        SUS.checkIfNulls("subject can't be null", subject);
+        if (SUS.isEmpty(principalID))
+            throw new SecurityException("Principal ID can't be empty");
         PrincipalIdentifier principal = new PrincipalIdentifier(principalID);
         principal.setSubjectGUID(subject.getGUID());
-        return ds().insert(principal);
+        try {
+            return ds().insert(principal);
+        } catch (Exception e) {
+            throw new SecurityException("Principal ID already exists: " + principalID, e);
+        }
+
     }
 
     /**
@@ -521,28 +538,29 @@ public class DomainSecurityManagerDefault
 
     /**
      * Removes a single principal identifier row; the owning subject and its
-     * other principals are preserved.
+     * other principals are preserved. A subject's last principal can never be
+     * removed: the delete only proceeds if the subject owns more than one
+     * principal, and it runs inside a transaction that is aborted if the
+     * subject would be left with none.
      *
      * @param principal the principal identifier to remove
-     * @return {@code true} if the principal was found and removed
+     * @return {@code true} if the principal was removed, {@code false} if it is
+     *         {@code null}, unknown, or the subject's last principal
      */
     @Override
     public boolean deletePrincipalID(PrincipalIdentifier principal) {
 
-        if (principal != null){
-            if((countMatches(PrincipalIdentifier.class, principal.getSubjectGUID()) > 1)){
+        if (principal != null) {
+            if ((countMatches(PrincipalIdentifier.class, principal.getSubjectGUID()) > 1)) {
                 ds().beginTransaction();
-                try
-                {
+                try {
                     boolean status = ds().delete(principal, false);
-                    if(countMatches(PrincipalIdentifier.class, principal.getSubjectGUID()) > 0)
+                    if (countMatches(PrincipalIdentifier.class, principal.getSubjectGUID()) > 0)
                         return status;
                     else
                         ds().abortTransaction();
 
-                }
-                finally
-                {
+                } finally {
                     ds().endTransaction();
                 }
             }
@@ -550,8 +568,12 @@ public class DomainSecurityManagerDefault
         return false;
     }
 
+    /**
+     * Counts the rows of the given collection whose {@code subject_guid}
+     * matches the given subject GUID, fetching only the GUID field.
+     */
     private int countMatches(Class<?> clazz, String subjectGUID) {
-        return ds().search(clazz.getName(), ds().fieldNames(MetaToken.GUID), eq(MetaToken.SUBJECT_GUID, subjectGUID)).size();
+        return ds().search(clazz.getName(), APIDataStore.fieldNames(MetaToken.GUID), eq(MetaToken.SUBJECT_GUID, subjectGUID)).size();
     }
 
     /**
