@@ -40,7 +40,7 @@ public class APIException
      */
     public enum Category {
         CONNECTION,
-        INITIALIZATON,
+        INITIALIZATION,
         OPERATION,
         GENERIC
     }
@@ -128,6 +128,10 @@ public class APIException
         super(reason);
     }
 
+
+    public APIException(Exception e) {
+        super(e);
+    }
 
     public APIException(String message, int statusCode) {
         super(message);
