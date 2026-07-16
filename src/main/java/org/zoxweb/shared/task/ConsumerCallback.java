@@ -4,6 +4,5 @@ package org.zoxweb.shared.task;
 import java.util.function.Consumer;
 
 public interface ConsumerCallback<C>
-    extends Consumer<C>, ExceptionCallback
-{
+        extends Consumer<C>, ExceptionCallback {
 }

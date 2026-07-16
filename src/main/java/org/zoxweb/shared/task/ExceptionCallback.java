@@ -1,9 +1,10 @@
 package org.zoxweb.shared.task;
 
-public interface ExceptionCallback
-{
+public interface ExceptionCallback {
 
     void exception(Throwable e);
 
-    default boolean isStackTraceEnabled(){return false;}
+    default boolean isStackTraceEnabled() {
+        return false;
+    }
 }

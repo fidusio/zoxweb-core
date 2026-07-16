@@ -38,7 +38,7 @@ public class HTTPAuthorization
 
     public static final NVConfig NVC_AUTH_SCHEME = NVConfigManager.createNVConfig("auth_scheme", null, "HTTPAuthScheme", false, true, HTTPAuthScheme.class);
     public static final NVConfig NVC_TOKEN = NVConfigManager.createNVConfig("token", null, "Token", false, true, NamedValue.class);
-    public static final NVConfig NVC_TYPE_IS_HEADER = NVConfigManager.createNVConfig("name_is_header", null, "TypeIsHeader", false, true, boolean.class);
+    public static final NVConfig NVC_TYPE_IS_HEADER = NVConfigManager.createNVConfig("type_is_header", null, "TypeIsHeader", false, true, boolean.class);
     public static final NVConfigEntity NVC_HTTP_AUTHORIZATION = new NVConfigEntityPortable("http_authorization", null, null, true, false, false, false, HTTPAuthorization.class, SharedUtil.toNVConfigList(NVC_AUTH_SCHEME, NVC_TOKEN, NVC_TYPE_IS_HEADER), null, false, SetNameDAO.NVC_NAME_DAO);
 
 
