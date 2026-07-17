@@ -18,6 +18,7 @@ package org.zoxweb.shared.http;
 import org.zoxweb.shared.security.SecConst;
 import org.zoxweb.shared.util.*;
 
+
 /**
  * Enumeration of HTTP authentication schemes as defined in RFC 7235.
  * Supports Basic, Bearer, and Generic authentication types.
@@ -28,7 +29,7 @@ import org.zoxweb.shared.util.*;
  *
  * @author mnael
  * @see HTTPAuthorization
- * @see HTTPAuthorizationBasic
+
  */
 public enum HTTPAuthScheme
         implements GetName {
@@ -41,7 +42,7 @@ public enum HTTPAuthScheme
 
             if (SUS.isNotEmpty(usernameAndMaybePassword) && SUS.isNotEmpty(password)) {
 
-                return new NVPair(HTTPHeader.AUTHORIZATION,
+                return GetNameValue.create(HTTPHeader.AUTHORIZATION,
                         BASIC.getName() + " " + new String(SharedBase64.encode(SharedStringUtil.getBytes(SUS.toCanonicalID(':', usernameAndMaybePassword, password)))));
             }
 
@@ -54,17 +55,19 @@ public enum HTTPAuthScheme
                     authToken = usernameAndMaybePassword + ":";
                 }
 
-                return new NVPair(HTTPHeader.AUTHORIZATION,
+                return GetNameValue.create(HTTPHeader.AUTHORIZATION,
                         BASIC.getName() + " " + new String(SharedBase64.encode(SharedStringUtil.getBytes(authToken))));
             }
 
             if (SUS.isNotEmpty(password)) {
-                return new NVPair(HTTPHeader.AUTHORIZATION,
+                return GetNameValue.create(HTTPHeader.AUTHORIZATION,
                         BASIC.getName() + " " + new String(SharedBase64.encode(SharedStringUtil.getBytes(":" + password))));
             }
 
             return null;
         }
+
+
 
         @Override
         public HTTPAuthorization toHTTPAuthentication(String value) {
@@ -92,7 +95,9 @@ public enum HTTPAuthScheme
 
 
             // TODO Auto-generated method stub
-            return new HTTPAuthorizationBasic(SUS.trimOrNull(user), SUS.trimOrNull(password));
+            HTTPAuthorization ret =  HTTPAuthorization.createBasic(SUS.trimOrNull(user), SUS.trimOrNull(password));
+            ret.getTokenProperties().build("user", user).build("password", password);
+            return ret;
         }
     },
     BEARER(SecConst.AuthenticationType.BEARER.getName()) {
@@ -108,9 +113,9 @@ public enum HTTPAuthScheme
 
                     token = tokens[1];
                 }
-                return new NVPair(HTTPHeader.AUTHORIZATION, BEARER.getName() + " " + token);
+                return GetNameValue.create(HTTPHeader.AUTHORIZATION, BEARER.getName() + " " + token);
             } else if (args.length > 1)
-                return new NVPair(HTTPHeader.AUTHORIZATION, args[0] + " " + args[1]);
+                return GetNameValue.create(HTTPHeader.AUTHORIZATION, args[0] + " " + args[1]);
 
             return null;
         }
@@ -118,7 +123,7 @@ public enum HTTPAuthScheme
         @Override
         public HTTPAuthorization toHTTPAuthentication(String value) {
             // TODO Auto-generated method stub
-            return new HTTPAuthorization(HTTPAuthScheme.BEARER, value);
+            return  HTTPAuthorization.createBearer(value);
         }
 
     },
@@ -137,7 +142,7 @@ public enum HTTPAuthScheme
                 }
             }
             if (value.length() > 0)
-                return new NVPair(HTTPHeader.AUTHORIZATION, value.toString());
+                return GetNameValue.create(HTTPHeader.AUTHORIZATION, value.toString());
 
             return null;
         }
@@ -222,7 +227,8 @@ public enum HTTPAuthScheme
         String typeStr = tokens[index++];
         HTTPAuthScheme type = SharedUtil.lookupEnum(typeStr, HTTPAuthScheme.values());
         if (type == null) {
-            return new HTTPAuthorization(typeStr, tokens[index++]);
+            throw new IllegalArgumentException("Invalid authentication type " + typeStr);
+//            return new HTTPAuthorization(typeStr, tokens[index++]);
         }
 
         return type.toHTTPAuthentication(tokens[index++]);

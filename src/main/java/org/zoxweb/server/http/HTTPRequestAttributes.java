@@ -108,8 +108,9 @@ public class HTTPRequestAttributes {
 
         if (headers != null) {
             HTTPAuthorization temp = HTTPAuthScheme.parse((GetNameValue<String>) SharedUtil.lookup(headers, HTTPHeader.AUTHORIZATION));
+            HTTPAuthScheme authScheme = temp != null ? SharedUtil.lookupEnum(temp.getAuthScheme(), HTTPAuthScheme.BASIC, HTTPAuthScheme.BEARER) : null;
 
-            if (temp != null && temp.getAuthScheme() == HTTPAuthScheme.BEARER) {
+            if (authScheme == HTTPAuthScheme.BEARER) {
                 try {
                     JWT jwt = SecUtil.parseJWT(temp.getToken());
                     jwtToken = new JWTToken();
@@ -119,8 +120,8 @@ public class HTTPRequestAttributes {
                 } catch (Exception e) {
 
                 }
-            } else if (temp != null && temp instanceof HTTPAuthorizationBasic) {
-                subjectID = ((HTTPAuthorizationBasic) temp).getUser();
+            } else if (authScheme == HTTPAuthScheme.BASIC) {
+                subjectID = temp.getTokenProperties().getValue("user");
             }
 
             httpAuthentication = temp;//HTTPAuthorizationType.parse((GetNameValue<String>) SharedUtil.lookup(headers, HTTPHeaderName.AUTHORIZATION));

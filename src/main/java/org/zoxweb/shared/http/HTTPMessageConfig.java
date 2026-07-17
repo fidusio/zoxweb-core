@@ -579,7 +579,7 @@ public class HTTPMessageConfig
 
     @Override
     public void setBasicAuthorization(String user, String password) {
-        setAuthorization(new HTTPAuthorizationBasic(user, password));
+        setAuthorization(HTTPAuthorization.createBasic(user, password));
     }
 
 

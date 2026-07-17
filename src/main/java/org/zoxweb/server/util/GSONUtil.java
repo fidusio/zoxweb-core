@@ -1991,6 +1991,7 @@ public final class GSONUtil {
 
             if (namedValue.getProperties().size() > 0) {
                 // write nvgeneric map
+                writer.name(namedValue.getProperties().getName());
                 toJSONGenericMap(writer, namedValue.getProperties(), false, false);
             }
 

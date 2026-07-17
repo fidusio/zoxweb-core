@@ -14,7 +14,7 @@ public class HTTPAuthorizationTest {
 
     @Test
     public void basic() {
-        HTTPAuthorization authToken = new HTTPAuthorizationBasic("user", "password");
+        HTTPAuthorization authToken =  HTTPAuthorization.createBasic("user", "password");
         GetNameValue<String> nvs = authToken.toHTTPHeader();
         System.out.println(nvs);
 
@@ -35,8 +35,8 @@ public class HTTPAuthorizationTest {
 
     @Test
     public void bearer() {
-        HTTPAuthorization authToken = new HTTPAuthorization(HTTPAuthScheme.BEARER);
-        authToken.setToken("dskjfdljfdksajgfhdsgjhjkhgfd");
+        HTTPAuthorization authToken = HTTPAuthorization.createBearer("dskjfdljfdksajgfhdsgjhjkhgfd");
+
 
         GetNameValue<String> nvs = authToken.toHTTPHeader();
         System.out.println(nvs);
@@ -56,7 +56,7 @@ public class HTTPAuthorizationTest {
 
     @Test
     public void generic() {
-        HTTPAuthorization authToken = new HTTPAuthorization("xlogistx-key", "key1232ljkwerjew3lr5jk342j5243");
+        HTTPAuthorization authToken = HTTPAuthorization.createGeneric("xlogistx-key", null,"key1232ljkwerjew3lr5jk342j5243");
         GetNameValue<String> nvs = authToken.toHTTPHeader();
         System.out.println(nvs);
         System.out.println(authToken.getNVConfig());
@@ -108,7 +108,7 @@ public class HTTPAuthorizationTest {
 
     @Test
     public void genericNotAuthorizationHeader() {
-        HTTPAuthorization authToken = new HTTPAuthorization("x-xlogistx-key", "key1232ljkwerjew3lr5jk342j5243", true);
+        HTTPAuthorization authToken = HTTPAuthorization.createGeneric("x-xlogistx-key", null, "key1232ljkwerjew3lr5jk342j5243");
 
         GetNameValue<String> nvs = authToken.toHTTPHeader();
         System.out.println(nvs);

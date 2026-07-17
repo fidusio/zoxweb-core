@@ -120,7 +120,7 @@ public class GSONUtilTest {
         hmci.setContentType(HTTPMediaType.APPLICATION_JSON);
 
         hmci.getHeaders().add("revision", "2023-07-15");
-        HTTPAuthorization authorization = new HTTPAuthorization("XlogistX-KEY", "ABB-CC-DDSFS-664554");
+        HTTPAuthorization authorization = HTTPAuthorization.createAuthorization("XlogistX-KEY", "ABB-CC-DDSFS-664554");
         //dataStore.insert(authorization);
 
 
@@ -153,6 +153,14 @@ public class GSONUtilTest {
         //dataStore.delete(httpMessageConfig, true);
 
         System.out.println("Authorization meta: " + ((NVConfigEntity)authorization.getNVConfig()).getAttributes());
+    }
+
+    @Test
+    public void httpAuthorizationTest()
+    {
+        HTTPAuthorization authorization = HTTPAuthorization.createBasic("mario", "password");
+        //authorization =  mongoDataStore.insert(authorization);
+        System.out.println("authentication " + GSONUtil.toJSONDefault(authorization, true));
     }
 
 }

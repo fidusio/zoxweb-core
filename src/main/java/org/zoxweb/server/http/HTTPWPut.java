@@ -179,7 +179,7 @@ public class HTTPWPut {
 //                System.out.println(OkHTTPCall.send(hmci));
                 HTTPResponseData hrd = uploadFile(url,
                         method,
-                        user != null && password != null ? new HTTPAuthorizationBasic(user, password) : null,
+                        user != null && password != null ?  HTTPAuthorization.createBasic(user, password) : null,
                         !disableSSL,
                         fileToData,
                         fileLocation,

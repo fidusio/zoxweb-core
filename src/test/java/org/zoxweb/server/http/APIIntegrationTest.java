@@ -7,11 +7,9 @@ import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.http.*;
 import org.zoxweb.shared.util.*;
 
-public class APIIntegrationTest
-{
+public class APIIntegrationTest {
 
-    public static void createXlogistXLoginEndPoint()
-    {
+    public static void createXlogistXLoginEndPoint() {
         // configuring the base http message object
         // the URL https://api.xlogistx.io
         // the URI /login
@@ -19,13 +17,12 @@ public class APIIntegrationTest
         hmci.setName("login");
         HTTPAPIEndPoint<NVGenericMap, NVGenericMap> loginEP = HTTPAPIManager.SINGLETON.buildEndPoint(hmci, null, null);
         loginEP.setDomain("api.xlogistx.io")
-        .setRateController(new RateController(loginEP.toCanonicalID(), "500/s"))
-        .setScheduler(TaskUtil.defaultTaskScheduler());
+                .setRateController(new RateController(loginEP.toCanonicalID(), "500/s"))
+                .setScheduler(TaskUtil.defaultTaskScheduler());
         HTTPAPIManager.SINGLETON.register(loginEP);
     }
 
-    public static void main(String ...args)
-    {
+    public static void main(String... args) {
         try {
 
             HTTPNVGMBiEncoder.log.setEnabled(true);
@@ -38,10 +35,7 @@ public class APIIntegrationTest
             String domain = null;
             HTTPAPIEndPoint<NVGenericMap, NVGenericMap> userAPI = null;
 
-            if (params.nameExists("config"))
-            {
-
-
+            if (params.nameExists("config")) {
 
 
                 NVGenericMap nvgm = GSONUtil.fromJSONDefault(IOUtil.inputStreamToString(params.stringValue("config")), NVGenericMap.class, true);
@@ -68,9 +62,7 @@ public class APIIntegrationTest
 //                        .setScheduler(TaskUtil.getDefaultTaskScheduler())
 //                        .setDomain(domain);
 
-            }
-            else
-            {
+            } else {
                 String apiKeyID = params.stringValue("api-key-id");
                 String apiKey = params.stringValue("api-key");
                 String apiURL = params.stringValue("url");
@@ -82,11 +74,10 @@ public class APIIntegrationTest
                 config.setAccept(HTTPMediaType.APPLICATION_JSON);
                 config.setContentType(HTTPMediaType.APPLICATION_JSON);
                 config.getHeaders().add("revision", "2023-09-15");
-                config.setAuthorization(new HTTPAuthorization(apiKeyID, apiKey));
+                config.setAuthorization(HTTPAuthorization.createAuthorization(apiKeyID, apiKey));
                 config.setName("klaviyo.profile");
                 config.setDescription("Profile API configuration");
             }
-
 
 
 //            System.out.println(GSONUtil.toJSONDefault(config, true ));
@@ -99,17 +90,13 @@ public class APIIntegrationTest
 //            System.out.println(GSONUtil.toJSONDefault(contentConfig));
 
 
-
-
-
             NVGenericMap parameters = new NVGenericMap("Parameters");
 
             parameters.build(params.asNVPair("email"))
                     .build(params.asNVPair("name"))
                     .build("bogus", "noval");
 
-            if (params.nameExists("last_name"))
-            {
+            if (params.nameExists("last_name")) {
                 NVPair lastName = params.asNVPair("last_name");
                 lastName.setName("data.attributes." + lastName.getName());
                 System.out.println(lastName.getName());
@@ -127,37 +114,32 @@ public class APIIntegrationTest
 
             if (userAPI == null)
                 userAPI = HTTPAPIManager.SINGLETON.buildEndPoint(config, encoder, decoder)
-                    .setRateController(new RateController("klaviyo", "75/min"))
-                    .setScheduler(TaskUtil.defaultTaskScheduler())
-                    .setDomain(domain);
-           // System.out.println(GSONUtil.toJSONDefault(new RateController("klavio", "75/min")));
+                        .setRateController(new RateController("klaviyo", "75/min"))
+                        .setScheduler(TaskUtil.defaultTaskScheduler())
+                        .setDomain(domain);
+            // System.out.println(GSONUtil.toJSONDefault(new RateController("klavio", "75/min")));
             HTTPCallback<NVGenericMap, NVGenericMap> callback = new HTTPCallback<NVGenericMap, NVGenericMap>(parameters) {
-                
+
                 @Override
-                public void exception(Throwable e)
-                {
-                    if (e instanceof HTTPCallException)
-                    {
+                public void exception(Throwable e) {
+                    if (e instanceof HTTPCallException) {
                         HTTPCallException exception = (HTTPCallException) e;
 
 
-                        if (getEndpoint().lookupPositiveResult(exception.getStatusCode().CODE) != null)
-                        {
+                        if (getEndpoint().lookupPositiveResult(exception.getStatusCode().CODE) != null) {
 
                             System.out.println("Duplicate user " + get());
                             System.out.println("Error Code:" + exception.getStatusCode());
                             e.printStackTrace();
 
-                        }
-                        else
-                        {
+                        } else {
                             e.printStackTrace();
                         }
                     }
                 }
+
                 @Override
-                public void accept(HTTPAPIResult<NVGenericMap> apiResult)
-                {
+                public void accept(HTTPAPIResult<NVGenericMap> apiResult) {
                     System.out.println(apiResult);
                 }
             };
@@ -168,12 +150,10 @@ public class APIIntegrationTest
             //System.out.println(userAPI.syncCall(parameters));
 
 
-
             String username = params.stringValue("user", true);
             String password = params.stringValue("password", true);
 
-            if(username != null && password != null)
-            {
+            if (username != null && password != null) {
 
                 HTTPCallback<NVGenericMap, NVGenericMap> loginCallback = new HTTPCallback<NVGenericMap, NVGenericMap>() {
 
@@ -183,14 +163,13 @@ public class APIIntegrationTest
                     }
 
                     @Override
-                    public void accept(HTTPAPIResult<NVGenericMap> apiResult)
-                    {
+                    public void accept(HTTPAPIResult<NVGenericMap> apiResult) {
                         System.out.println(apiResult);
                     }
                 };
 
                 System.out.println("Try to login for " + username);
-                HTTPAuthorizationBasic basicAuth = new HTTPAuthorizationBasic(username, password);
+                HTTPAuthorization basicAuth = HTTPAuthorization.createBasic(username, password);
                 HTTPAPIEndPoint loginEP = HTTPAPIManager.SINGLETON.lookup("api.xlogistx.io.login");
                 callback.setEndpoint(loginEP);
                 loginEP.syncCall(loginCallback, basicAuth);
@@ -198,20 +177,14 @@ public class APIIntegrationTest
             }
 
 
-
-
             //hmci.getHeaders().add("revision", "2023-07-15");
-
 
 
 //            System.out.println(config.getAuthorization().toHTTPHeader());
 //            System.out.println(HTTPCall.send(config));
 
 
-
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         TaskUtil.waitIfBusyThenClose(50);

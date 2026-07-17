@@ -134,4 +134,11 @@ public class JWT
         jwtPayload.setNonce(LongIDGenerator.DEFAULT.nextID());
         return jwt;
     }
+
+
+    public String hash(byte[] key, JWTEncoder encoder) {
+        String hash = encoder.encode(key, this);
+        setHash(hash);
+        return getHash();
+    }
 }
