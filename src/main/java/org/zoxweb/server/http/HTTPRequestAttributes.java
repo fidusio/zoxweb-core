@@ -23,7 +23,7 @@ import org.zoxweb.shared.security.JWTToken;
 import org.zoxweb.shared.util.*;
 
 import java.util.List;
-
+@Deprecated
 public class HTTPRequestAttributes {
 
     public static final String HRA = "HRA";

@@ -220,7 +220,7 @@ public class HTTPHeaderParser {
             }
 
         } else if (headerName.equalsIgnoreCase("Authorization")) {
-            HTTPAuthorization httpAuthorization = new HTTPAuthorization(headerValue);
+            HTTPAuthorization httpAuthorization =  HTTPAuthorization.parse(GetNameValue.create(HTTPHeader.AUTHORIZATION, headerValue));
             ret = new NamedValue<>(headerName, headerValue);
             NamedValue<String> internalToken = httpAuthorization.lookup(HTTPAuthorization.NVC_TOKEN);
             if (internalToken.getProperties().size() > 0) {
@@ -228,7 +228,7 @@ public class HTTPHeaderParser {
 
             }
 
-            ret.getProperties().build("auth_scheme", httpAuthorization.getName());
+            ret.getProperties().build("auth_scheme", httpAuthorization.getAuthScheme());
             ret.getProperties().build("auth_token", httpAuthorization.getToken());
         } else {
             // Generic header: split values by commas, params by semicolons

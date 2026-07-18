@@ -58,24 +58,23 @@ public class HTTPAuthorization
     }
 
 
-
     public static HTTPAuthorization createBasic(String user, String password) {
-        HTTPAuthorization ret =  new HTTPAuthorization(HTTPAuthScheme.BASIC.getName());
+        HTTPAuthorization ret = new HTTPAuthorization(HTTPAuthScheme.BASIC.getName());
         ret.setName(HTTPHeader.AUTHORIZATION.getName());
-        ret.setToken(HTTPAuthScheme.BASIC.getName() + " " + new String(SharedBase64.encode(SharedStringUtil.getBytes(SUS.toCanonicalID(':', user, password)))));
+        ret.setToken(new String(SharedBase64.encode(SharedStringUtil.getBytes(SUS.toCanonicalID(':', user, password)))));
         ret.getTokenProperties().build("user", user).build("password", password);
         return ret;
     }
 
     public static HTTPAuthorization createBearer(String token) {
-        HTTPAuthorization ret =  new HTTPAuthorization(HTTPAuthScheme.BEARER.getName());
+        HTTPAuthorization ret = new HTTPAuthorization(HTTPAuthScheme.BEARER.getName());
         ret.setName(HTTPHeader.AUTHORIZATION.getName());
-        ret.setToken(HTTPAuthScheme.BEARER.getName() + " " + token);
+        ret.setToken(token);
         return ret;
     }
 
     public static HTTPAuthorization createAuthorization(String authScheme, String token) {
-        HTTPAuthorization ret =  new HTTPAuthorization(authScheme);
+        HTTPAuthorization ret = new HTTPAuthorization(authScheme);
         ret.setName(HTTPHeader.AUTHORIZATION.getName());
         ret.setToken(token);
         return ret;
@@ -83,47 +82,52 @@ public class HTTPAuthorization
 
 
     public static HTTPAuthorization createGeneric(String authzName, String authScheme, String token) {
-        HTTPAuthorization ret =  new HTTPAuthorization(authScheme);
+        HTTPAuthorization ret = new HTTPAuthorization(authScheme);
         ret.setName(authzName);
-        ret.setToken(ret.getAuthScheme() != null ? ret.getAuthScheme() + " " + token : token);
+        ret.setToken(token);
         return ret;
     }
 
-//    public static HTTPAuthorization2 create(String typePlusToken) {
-//
-//
-//
-//        typePlusToken = typePlusToken.trim();
-//        String scheme;
-//        int index = typePlusToken.indexOf(" ");
-//        if (index == -1)
-//            throw new IllegalArgumentException("Invalid token: " + typePlusToken);
-//
-//        scheme = typePlusToken.substring(0, index);
-//
-//        String tokenVal = typePlusToken.substring(index).trim();
-//        if (SUS.isEmpty(tokenVal))
-//            throw new IllegalArgumentException("Empty token value: " + tokenVal);
-//
-//
-//        setName(scheme);
-//        setToken(tokenVal);
-//
-//        String[] pairs = tokenVal.split(",\\s*");
-//        NamedValue<?> token = lookup(NVC_TOKEN);
-//        for (String pair : pairs) {
-//            if (pair.isEmpty()) continue;
-//            String[] nv = pair.split("=", 2);
-//            String key = nv[0].trim();
-//            if (nv.length > 1) {
-//                String val = nv[1].trim();
-//                if (val.startsWith("\"") && val.endsWith("\"")) {
-//                    val = val.substring(1, val.length() - 1);
-//                }
-//                token.getProperties().build(key, val);
-//            }
-//        }
-//    }
+    public static HTTPAuthorization parse(GetNameValue<String> header) {
+
+
+
+        String schemePlusToken = header.getValue().trim();
+        String scheme;
+        String tokenVal;
+        int index = schemePlusToken.indexOf(" ");
+        if (index == -1) {
+            // No scheme prefix (e.g. a bare API-key header value): treat the whole value as the token.
+            scheme = null;
+            tokenVal = schemePlusToken;
+        } else {
+            scheme = schemePlusToken.substring(0, index);
+            tokenVal = schemePlusToken.substring(index).trim();
+        }
+        if (SUS.isEmpty(tokenVal))
+            throw new IllegalArgumentException("Empty token value: " + tokenVal);
+
+        HTTPAuthorization ret = new HTTPAuthorization(scheme);
+        ret.setName(header.getName());
+
+        ret.setToken(tokenVal);
+
+        String[] pairs = tokenVal.split(",\\s*");
+        NamedValue<?> token = ret.lookup(NVC_TOKEN);
+        for (String pair : pairs) {
+            if (pair.isEmpty()) continue;
+            String[] nv = pair.split("=", 2);
+            String key = nv[0].trim();
+            if (nv.length > 1) {
+                String val = nv[1].trim();
+                if (val.startsWith("\"") && val.endsWith("\"")) {
+                    val = val.substring(1, val.length() - 1);
+                }
+                token.getProperties().build(key, val);
+            }
+        }
+        return ret;
+    }
 
 
     /**
@@ -134,8 +138,6 @@ public class HTTPAuthorization
     public String getType() {
         return getName();
     }
-
-
 
 
     /**
@@ -158,7 +160,6 @@ public class HTTPAuthorization
     }
 
 
-
     /**
      * @param token the token to set
      */
@@ -167,7 +168,7 @@ public class HTTPAuthorization
     }
 
     public NVGenericMap getTokenProperties() {
-        return ((NamedValue<String>)lookup(NVC_TOKEN)).getProperties();
+        return ((NamedValue<String>) lookup(NVC_TOKEN)).getProperties();
     }
 
     public HTTPAuthScheme authSchemeAsEnum() {
@@ -190,21 +191,7 @@ public class HTTPAuthorization
      * @return the Authorization header as a name-value pair
      */
     public GetNameValue<String> toHTTPHeader() {
-//        NVPair ret;
-//
-//        HTTPAuthScheme authScheme = SharedUtil.lookupEnum(getAuthScheme(), HTTPAuthScheme.values());
-//        if (authScheme != null) {
-//            if (isTypeHeader()) {
-//                ret = (NVPair) authScheme.toHTTPHeader(getToken());
-//                ret.setName(getName());
-//            } else
-//                ret = (NVPair) authScheme.toHTTPHeader(getName(), getToken());
-//
-//            return ret;
-//        }
-//
-//        throw new IllegalArgumentException("Invalid HTTPAuthScheme: " + getAuthScheme());
-        return GetNameValue.create(getName(), getToken());
+        return GetNameValue.create(getName(), getAuthScheme() != null ? getAuthScheme() + " " + getToken() : getToken());
     }
 
 
@@ -215,8 +202,6 @@ public class HTTPAuthorization
      */
     protected void setAuthScheme(HTTPAuthScheme type) {
         setValue(NVC_AUTH_SCHEME, type != null ? type.getName() : null);
-        if (type != HTTPAuthScheme.GENERIC)
-            setName(type.getName());
     }
 
     public void setAuthScheme(String authScheme) {

@@ -31,5 +31,9 @@ package org.zoxweb.shared.util;
  * @see DataEncoder
  * @see DataDecoder
  */
-public interface Codec {
+public interface Codec extends GetName {
+    @Override
+    default String getName() {
+        return null;
+    }
 }

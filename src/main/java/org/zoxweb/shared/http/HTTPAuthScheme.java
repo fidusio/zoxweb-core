@@ -21,7 +21,7 @@ import org.zoxweb.shared.util.*;
 
 /**
  * Enumeration of HTTP authentication schemes as defined in RFC 7235.
- * Supports Basic, Bearer, and Generic authentication types.
+ * Supports Basic and Bearer authentication types.
  * <p>
  * Each scheme provides methods to convert credentials to HTTP Authorization headers
  * and to parse Authorization header values back into HTTPAuthorization objects.
@@ -122,35 +122,17 @@ public enum HTTPAuthScheme
 
         @Override
         public HTTPAuthorization toHTTPAuthentication(String value) {
-            // TODO Auto-generated method stub
+
+            String[] tokens = SharedStringUtil.parseString(value, " ", true);
+            if (tokens.length > 1) {
+                if (!BEARER.name().equalsIgnoreCase(tokens[0]))
+                    throw new IllegalArgumentException("Not a bearer authentication type " + tokens[0]);
+
+                value = tokens[1];
+            }
             return  HTTPAuthorization.createBearer(value);
         }
 
-    },
-    GENERIC("GENERIC") {
-        @Override
-        public GetNameValue<String> toHTTPHeader(String... args) {
-
-            StringBuilder value = new StringBuilder();
-            for (String t : args) {
-                t = SUS.trimOrNull(t);
-                if (t != null) {
-                    if (value.length() > 0) {
-                        value.append(" ");
-                    }
-                    value.append(t);
-                }
-            }
-            if (value.length() > 0)
-                return GetNameValue.create(HTTPHeader.AUTHORIZATION, value.toString());
-
-            return null;
-        }
-
-        @Override
-        public HTTPAuthorization toHTTPAuthentication(String token) {
-            return new HTTPAuthorization(token);
-        }
     },
 
     ;
