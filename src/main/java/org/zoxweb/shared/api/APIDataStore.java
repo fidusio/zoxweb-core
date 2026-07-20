@@ -36,6 +36,19 @@ import java.util.Set;
 public interface APIDataStore<P, S>
         extends APIServiceProvider<P, S> {
 
+    enum DSType {
+        MONGODB,
+        POSTGRES,
+        H2,
+        DERBY_DB,
+        MYSQL,
+        UNKNOWN;
+    }
+
+    default DSType getDSType() {
+        return DSType.UNKNOWN;
+    }
+
     /**
      * Returns the data store name.
      *
