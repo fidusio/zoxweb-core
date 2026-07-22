@@ -180,13 +180,13 @@ public final class HTTPAPIManager
 
     public HTTPAPIEndPoint<?,?>[] getAll()
     {
-        return getMapCache().values().toArray(new HTTPAPIEndPoint[0]);
+        return getCacheMap().values().toArray(new HTTPAPIEndPoint[0]);
     }
 
 
     public String[] getAllIDs()
     {
-        return getMapCache().keySet().toArray(new String[0]);
+        return getCacheMap().keySet().toArray(new String[0]);
     }
 
 

@@ -1,5 +1,8 @@
 package org.zoxweb.shared.util;
 
+import java.util.Map;
+import java.util.function.Function;
+
 public class ResourceManager
         implements Registrar<Object, Object, ResourceManager> {
 
@@ -70,6 +73,16 @@ public class ResourceManager
     public ResourceManager setNamedDescription(NamedDescription nd) {
         resources.setNamedDescription(nd);
         return this;
+    }
+
+    @Override
+    public Map<Object, Object> getCacheMap() {
+        return resources.getCacheMap();
+    }
+
+    @Override
+    public <VAL> VAL lookup(Object key, Function<? super Object, ?> mappingFunction) {
+        return resources.lookup(key, mappingFunction);
     }
 
     @Override

@@ -43,16 +43,17 @@ public class KVMapStoreDefault<K, V>
      * @param key to be converted
      * @return converted key
      */
-    private K toKey(K key) {
+    public K toKey(K key) {
         return keyFilter != null ? keyFilter.encode(key) : key;
     }
 
 
-    protected Map<K, V> getMapCache() {
+    public Map<K, V> getCacheMap() {
         return mapCache;
     }
 
-    @Override
+
+
     public final synchronized boolean put(K key, V value) {
         if (key != null && value != null) {
             key = toKey(key);
