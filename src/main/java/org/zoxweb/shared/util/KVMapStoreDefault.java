@@ -258,8 +258,31 @@ public class KVMapStoreDefault<K, V>
      * @param exclusion the key to be excluded, filtered by the key filter if set
      */
     @Override
-    public synchronized void addExclusion(K exclusion) {
+    public synchronized <VAL extends KVMapStore<K, V>> VAL exclude(K exclusion) {
         exclusionFilter.add(toKey(exclusion));
+        return (VAL)this;
+    }
+
+    /**
+     * Check in the key is in the exclusion set
+     *
+     * @param key to be checked
+     * @return true if the key belongs to the exclusion set
+     */
+    @Override
+    public boolean isExcluded(K key) {
+        return exclusionFilter.contains(toKey(key));
+    }
+
+    /**
+     * Remove a key, from the exclusion set.
+     *
+     * @param exclusionToRemove the key to be removed from the exclusion set, filtered by the key filter if set
+     */
+    @Override
+    public synchronized <VAL extends KVMapStore<K, V>> VAL include(K exclusionToRemove) {
+        exclusionFilter.remove(toKey(exclusionToRemove));
+        return (VAL)this;
     }
 
     /**

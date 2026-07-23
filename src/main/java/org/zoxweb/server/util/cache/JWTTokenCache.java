@@ -193,8 +193,31 @@ public class JWTTokenCache
     }
 
     @Override
-    public void addExclusion(String exclusion) {
-        cache.addExclusion(exclusion);
+    public <VAL extends  KVMapStore<String, JWT>> VAL exclude(String exclusion) {
+        cache.exclude(exclusion);
+        return (VAL)this;
+    }
+
+    /**
+     * Check in the key is in the exclusion set
+     *
+     * @param key to be checked
+     * @return true if the key belongs to the exclusion set
+     */
+    @Override
+    public boolean isExcluded(String key) {
+        return cache.isExcluded(key);
+    }
+
+    /**
+     * Remove a key, from the exclusion set.
+     *
+     * @param exclusionToRemove the key to be removed from the exclusion set, filtered by the key filter if set
+     */
+    @Override
+    public <VAL extends  KVMapStore<String, JWT>> VAL include(String exclusionToRemove) {
+        cache.include(exclusionToRemove);
+        return (VAL)this;
     }
 
     /**

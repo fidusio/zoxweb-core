@@ -16,6 +16,7 @@
 package org.zoxweb.shared.net;
 
 
+import org.zoxweb.shared.util.KVMapStore;
 import org.zoxweb.shared.util.KVMapStoreDefault;
 import org.zoxweb.shared.util.SUS;
 
@@ -56,8 +57,7 @@ public class IPMapCache
         macAddress = SUS.toTrimmedLowerCase(macAddress);
         if (ipAddress != null && macAddress != null) {
             if (!exclusionFilter.contains(ipAddress) && !exclusionFilter.contains(macAddress)) {
-                put(ipAddress, macAddress);
-                return true;
+                return put(ipAddress, macAddress);
             }
         }
 
@@ -70,8 +70,9 @@ public class IPMapCache
      *
      * @param exclusion the address to exclude (IP or MAC)
      */
-    public void addExclusion(String exclusion) {
-        super.addExclusion(SUS.toTrimmedLowerCase(exclusion));
+    public <VAL extends KVMapStore<String, String>> VAL exclude(String exclusion) {
+        super.exclude(SUS.toTrimmedLowerCase(exclusion));
+        return (VAL)this;
     }
 
 

@@ -23,8 +23,7 @@ import java.util.Set;
  * A key to value store contract, it behaves like a map with 3 additional features:
  * <ol>
  * <li>an exclusion filter, an excluded key can never be stored</li>
- * <li>an optional key filter that normalizes every key before it is used, ie: case
- * insensitive keys</li>
+ * <li>an optional key filter that normalizes every key before it is used, ie: case-insensitive keys</li>
  * <li>optional data size accounting in bytes of the stored values</li>
  * </ol>
  *
@@ -101,8 +100,24 @@ extends GetName,GetDescription{
      * stored are not affected
      *
      * @param exclusion the key to be excluded, filtered by the key filter if set
+     * @return the store itself for ease of use
      */
-    void addExclusion(K exclusion);
+    <VAL extends KVMapStore<K, V>> VAL exclude(K exclusion);
+
+    /**
+     * Check in the key is in the exclusion set
+     * @param key to be checked
+     * @return true if the key belongs to the exclusion set
+     */
+    boolean isExcluded(K key);
+
+    /**
+     * Remove a key, from the exclusion set.
+     *
+     * @param exclusionToRemove the key to be removed from the exclusion set, filtered by the key filter if set
+     * @return the store itself for ease of use
+     */
+    <VAL extends KVMapStore<K, V>> VAL include(K exclusionToRemove);
 
     /**
      * Check if a key is currently stored
@@ -114,7 +129,7 @@ extends GetName,GetDescription{
 
     /**
      * Set the key filter, once set every key is converted by the filter prior to any usage,
-     * ie: a lower case encoder makes the store case insensitive
+     * ie: a lower case encoder makes the store case-insensitive
      *
      * @param filter to be applied to the keys, null to disable filtering
      * @param <VAL>  the implementing store type
