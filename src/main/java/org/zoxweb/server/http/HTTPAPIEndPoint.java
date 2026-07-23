@@ -27,7 +27,7 @@ import java.util.concurrent.atomic.AtomicLong;
  *   <li>a {@link DataDecoder} that converts the raw {@link HTTPResponseData} into the typed output
  *       {@code O} (when absent, the raw response bytes are passed through);</li>
  *   <li>an authorization encoder that applies an {@link HTTPAuthorization} to the outgoing call,
- *       defaulting to {@code HTTPMessageConfigInterface.setAuthorization(...)}.</li>
+ *       defaulting to {@link #DEFAULT_AUTHORIZATION_ENCODER}.</li>
  * </ul>
  * The template config is never mutated by a call: {@code createHMCI(...)} deep-copies it for every
  * invocation, so one endpoint instance can be shared by concurrent callers.
@@ -52,6 +52,16 @@ public class HTTPAPIEndPoint<I, O>
         implements CanonicalID, GetNVProperties {
 
     public static final LogWrapper log = new LogWrapper(HTTPAPIEndPoint.class).setEnabled(false);
+
+    /**
+     * The default authorization encoder: applies the {@link HTTPAuthorization} via
+     * {@code HTTPMessageConfigInterface.setAuthorization(...)}. Every endpoint starts with it;
+     * pass it to {@link #setAuthorizationEncoder} to restore the default after a custom encoder.
+     */
+    public static final BiDataEncoder<HTTPMessageConfigInterface, HTTPAuthorization, HTTPMessageConfigInterface> DEFAULT_AUTHORIZATION_ENCODER = (h, a) -> {
+        h.setAuthorization(a);
+        return h;
+    };
     // final variables
     private final NamedDescription namedDescription = new NamedDescription();
     private final Map<Integer, HTTPStatusCode> positiveResults;
@@ -70,10 +80,7 @@ public class HTTPAPIEndPoint<I, O>
     private volatile String domain;
     private volatile OkHttpClient okHttpClient = null;
     private volatile NVGenericMap properties = new NVGenericMap();
-    private volatile BiDataEncoder<HTTPMessageConfigInterface, HTTPAuthorization, HTTPMessageConfigInterface> authorizationEncoder = (h, a) -> {
-        h.setAuthorization(a);
-        return h;
-    };
+    private volatile BiDataEncoder<HTTPMessageConfigInterface, HTTPAuthorization, HTTPMessageConfigInterface> authorizationEncoder = DEFAULT_AUTHORIZATION_ENCODER;
 
 
     /**
@@ -273,14 +280,13 @@ public class HTTPAPIEndPoint<I, O>
 
     /**
      * Sets the encoder that applies an {@link HTTPAuthorization} to the per-call message config,
-     * replacing the default which simply calls {@code setAuthorization(...)}; useful for apis that
-     * carry credentials in custom headers or parameters. A null argument is ignored.
+     * replacing {@link #DEFAULT_AUTHORIZATION_ENCODER}; useful for apis that carry credentials in
+     * custom headers or parameters. A null argument is ignored.
      *
      * @param authorizationEncoder the authorization encoder
      * @return this endpoint
      */
     public HTTPAPIEndPoint<I, O> setAuthorizationEncoder(BiDataEncoder<HTTPMessageConfigInterface, HTTPAuthorization, HTTPMessageConfigInterface> authorizationEncoder) {
-//        System.out.println("setAuthorizationEncoder: " + authorizationEncoder);
         if (authorizationEncoder != null) {
             this.authorizationEncoder = authorizationEncoder;
             if (log.isEnabled()) log.getLogger().info("*****setAuthorizationEncoder: " + authorizationEncoder);
