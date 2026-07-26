@@ -143,6 +143,11 @@ public class SSLSessionConfig
     }
 
 
+    /** The JSSE session (negotiated protocol/cipher available after the handshake). */
+    public SSLSession getSSLSession() {
+        return sslEngine != null ? sslEngine.getSession() : null;
+    }
+
     public String getSNIHostName() {
         if (sniHostName == null) {
             synchronized (this) {

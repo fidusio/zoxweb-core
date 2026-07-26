@@ -302,6 +302,34 @@ public class NIOSocket
 
 
     /**
+     * Abort a client connection created by {@link #addClientSocket}, promptly releasing its
+     * resources: cancel the pending connect-timeout appointment (still attached while the connect
+     * is in flight — it is otherwise cancelled only on a successful connect), cancel the selection
+     * key, and close the channel. Idempotent and null-safe.
+     * <p>
+     * Use this to tear down a connection that is being discarded before it completed — e.g. a
+     * superseded probe in a parallel match-first sweep — so its scheduled connect-timeout does not
+     * linger in the scheduler for the full timeout (which would keep the processor "busy").
+     *
+     * @param key the {@link SelectionKey} returned by {@code addClientSocket}
+     */
+    public void abortClientSocket(SelectionKey key) {
+        if (key == null) {
+            return;
+        }
+        // While the connect is still pending, the key's attachment is the ScheduledAttachment
+        // holding the NIOChannelMonitor connect-timeout appointment (it is swapped for the callback
+        // only on a successful connect). Cancel it: closing the socket alone does NOT release this
+        // scheduled appointment, so it would otherwise sit in the scheduler for the full timeout.
+        Object att = key.attachment();
+        if (att instanceof ScheduledAttachment) {
+            SharedIOUtil.close(((ScheduledAttachment<?>) att).getAppointment());
+        }
+        // Close the socket; the selector then cancels the key and the run loop cleans it up.
+        SharedIOUtil.close(key.channel());
+    }
+
+    /**
      * Creates and registers a UDP datagram socket on the specified address.
      *
      * <p>This method opens a new {@link DatagramChannel}, binds it to the specified
@@ -603,7 +631,6 @@ public class NIOSocket
 
 
                             } catch (Exception e) {
-                                logger.getLogger().info("DFDSAFGDSAGTRWETGREWTRETGREGREFDGERAGREATGRETGRETg");
                                 if (!(e instanceof CancelledKeyException || e instanceof ConnectException)) {
                                     e.printStackTrace();
                                 }
