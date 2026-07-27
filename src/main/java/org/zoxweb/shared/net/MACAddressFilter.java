@@ -32,7 +32,7 @@ public class MACAddressFilter
         implements ValueFilter<String, byte[]> {
 
     /** Supported MAC address separator characters */
-    public static final String MAC_ADDRESS_SEPS[] = {
+    public static final String[] MAC_ADDRESS_SEPS = {
             "-", ":", "."
     };
 

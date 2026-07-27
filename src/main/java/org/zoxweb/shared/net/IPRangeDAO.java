@@ -32,143 +32,133 @@ import org.zoxweb.shared.util.SharedUtil;
  */
 @SuppressWarnings("serial")
 public class IPRangeDAO
-extends SetNameDescriptionDAO
-{
+        extends SetNameDescriptionDAO {
 
-	/**
-	 * Configuration parameters for IPRangeDAO.
-	 */
-	public enum Params
-		implements GetNVConfig
-	{
-		/** The system network interface name */
-		IFACE(NVConfigManager.createNVConfig("interface", "The system interface name", "Interface", true, true, String.class)),
-		/** The starting IP address of the range */
-		NET_ADDRESS(NVConfigManager.createNVConfig("address", "Thge ip address", "InetAddress", true, true, String.class)),
-		/** The network mask for the IP range */
-		NET_MASK(NVConfigManager.createNVConfig("netmask", "The network mask", "NetorkMask", true, true, String.class)),
-		/** The count of IP addresses in the range */
-		COUNT(NVConfigManager.createNVConfig("count", "Count", "count", false, true, Integer.class)),
+    /**
+     * Configuration parameters for IPRangeDAO.
+     */
+    public enum Params
+            implements GetNVConfig {
+        /** The system network interface name */
+        IFACE(NVConfigManager.createNVConfig("interface", "The system interface name", "Interface", true, true, String.class)),
+        /** The starting IP address of the range */
+        NET_ADDRESS(NVConfigManager.createNVConfig("address", "Thge ip address", "InetAddress", true, true, String.class)),
+        /** The network mask for the IP range */
+        NET_MASK(NVConfigManager.createNVConfig("netmask", "The network mask", "NetworkMask", true, true, String.class)),
+        /** The count of IP addresses in the range */
+        COUNT(NVConfigManager.createNVConfig("count", "Count", "count", false, true, Integer.class)),
 
-		;
+        ;
 
-		private final NVConfig cType;
+        private final NVConfig cType;
 
-		Params (NVConfig c)
-		{
-			cType = c;
-		}
+        Params(NVConfig c) {
+            cType = c;
+        }
 
-		public NVConfig getNVConfig()
-		{
-			return cType;
-		}
+        public NVConfig getNVConfig() {
+            return cType;
+        }
 
-	}
+    }
 
-	/** NVConfigEntity definition for IPRangeDAO */
-	public static final NVConfigEntity IP_RANGE_DAO = new NVConfigEntityPortable("ip_range_dao", null , "IPRangeDAO", true, false, false, false, IPRangeDAO.class, SharedUtil.extractNVConfigs(Params.values()), null, false, SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO);
+    /** NVConfigEntity definition for IPRangeDAO */
+    public static final NVConfigEntity IP_RANGE_DAO = new NVConfigEntityPortable("ip_range_dao", null, "IPRangeDAO", true, false, false, false, IPRangeDAO.class, SharedUtil.extractNVConfigs(Params.values()), null, false, SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO);
 
-	/**
-	 * Default constructor.
-	 */
-	public IPRangeDAO()
-	{
-		super(IP_RANGE_DAO);
-	}
+    /**
+     * Default constructor.
+     */
+    public IPRangeDAO() {
+        super(IP_RANGE_DAO);
+    }
 
-	/**
-	 * Constructor with all parameters.
-	 *
-	 * @param inet the network interface name
-	 * @param startIP the starting IP address
-	 * @param mask the network mask
-	 * @param count the number of IP addresses in the range
-	 */
-	public IPRangeDAO(String inet, String startIP, String mask, int count)
-	{
-		this();
-		setNetworkInterface(inet);
-		setStartingIP(startIP);
-		setNetworkMask(mask);
-		setIPCount(count);
-	}
+    /**
+     * Constructor with all parameters.
+     *
+     * @param inet the network interface name
+     * @param startIP the starting IP address
+     * @param mask the network mask
+     * @param count the number of IP addresses in the range
+     */
+    public IPRangeDAO(String inet, String startIP, String mask, int count) {
+        this();
+        setNetworkInterface(inet);
+        setStartingIP(startIP);
+        setNetworkMask(mask);
+        setIPCount(count);
+    }
 
-	/**
-	 * Returns the network interface name.
-	 *
-	 * @return the network interface name
-	 */
-	public String getNetworkInterface()
-	{
-		return lookupValue(Params.IFACE);
-	}
+    /**
+     * Returns the network interface name.
+     *
+     * @return the network interface name
+     */
+    public String getNetworkInterface() {
+        return lookupValue(Params.IFACE);
+    }
 
-	/**
-	 * Sets the network interface name.
-	 *
-	 * @param iface the network interface name to set
-	 */
-	public void setNetworkInterface(String iface) {
-		setValue(Params.IFACE, iface);
-	}
+    /**
+     * Sets the network interface name.
+     *
+     * @param iface the network interface name to set
+     */
+    public void setNetworkInterface(String iface) {
+        setValue(Params.IFACE, iface);
+    }
 
-	/**
-	 * Returns the starting IP address of the range.
-	 *
-	 * @return the starting IP address
-	 */
-	public String getStartingIP()
-	{
-		return lookupValue(Params.NET_ADDRESS);
-	}
+    /**
+     * Returns the starting IP address of the range.
+     *
+     * @return the starting IP address
+     */
+    public String getStartingIP() {
+        return lookupValue(Params.NET_ADDRESS);
+    }
 
-	/**
-	 * Sets the starting IP address of the range.
-	 *
-	 * @param ip the starting IP address to set
-	 */
-	public void setStartingIP(String ip) {
-		setValue(Params.NET_ADDRESS, ip);
-	}
+    /**
+     * Sets the starting IP address of the range.
+     *
+     * @param ip the starting IP address to set
+     */
+    public void setStartingIP(String ip) {
+        setValue(Params.NET_ADDRESS, ip);
+    }
 
-	/**
-	 * Returns the network mask.
-	 *
-	 * @return the network mask string
-	 */
-	public String getNetworkMask() {
-		return lookupValue(Params.NET_MASK);
-	}
+    /**
+     * Returns the network mask.
+     *
+     * @return the network mask string
+     */
+    public String getNetworkMask() {
+        return lookupValue(Params.NET_MASK);
+    }
 
-	/**
-	 * Sets the network mask.
-	 *
-	 * @param mask the network mask to set
-	 */
-	public void setNetworkMask(String mask) {
-		setValue(Params.NET_MASK, mask);
-	}
+    /**
+     * Sets the network mask.
+     *
+     * @param mask the network mask to set
+     */
+    public void setNetworkMask(String mask) {
+        setValue(Params.NET_MASK, mask);
+    }
 
-	/**
-	 * Returns the IP address count.
-	 *
-	 * @return the number of IP addresses in the range
-	 */
-	public int getIPCount()
-	{
-		return lookupValue(Params.COUNT);
-	}
+    /**
+     * Returns the IP address count.
+     *
+     * @return the number of IP addresses in the range
+     */
+    public int getIPCount() {
+        return lookupValue(Params.COUNT);
+    }
 
-	/**
-	 * Sets the IP address count.
-	 *
-	 * @param count the number of IP addresses in the range
-	 */
-	public void setIPCount(int count)
-	{
-		setValue(Params.COUNT, count);
-	}
+    /**
+     * Sets the IP address count.
+     *
+     * @param count the number of IP addresses in the range
+     */
+    public void setIPCount(int count) {
+        setValue(Params.COUNT, count);
+    }
 
 //	public String toString() {
 //		return "Interface " + netInterface + " IP " + startingIP + " mask "

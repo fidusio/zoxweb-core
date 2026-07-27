@@ -45,6 +45,10 @@ public final class SecUtil {
     }
 
 
+    /**
+     * Parses a token into its JWT structure without verifying the signature, the returned JWT
+     * is untrusted. Use {@link #decodeJWT(byte[], String)} to obtain a verified JWT.
+     */
     public static JWT parseJWT(String token)
             throws InstantiationException, IllegalAccessException, ClassNotFoundException, NullPointerException, IllegalArgumentException {
         SUS.checkIfNulls("Null token", token);
@@ -79,23 +83,17 @@ public final class SecUtil {
         //		JWT ret = new JWT();
         //ret.setHeader(jwtHeader);
         //ret.setPayload(jwtPayload);
-        switch (jwtHeader.getJWTAlgorithm()) {
-            case HS256:
-            case HS512:
-            case RS256:
-            case RS512:
-            case ES256:
-            case ES512:
-                if (tokens.length != JWT.JWTField.values().length) {
-                    throw new IllegalArgumentException("Invalid token JWT token length expected 3");
-                }
-                ret.setHash(tokens[JWT.JWTField.HASH.ordinal()]);
-                break;
-            case none:
-                if (tokens.length != JWT.JWTField.values().length - 1) {
-                    throw new IllegalArgumentException("Invalid token JWT token length expected 2");
-                }
-                break;
+        // none is the only algorithm carrying no signature segment, keying off it rather than
+        // enumerating the signed algorithms keeps this correct as JWTAlgo grows
+        if (jwtHeader.getJWTAlgorithm() == CryptoConst.JWTAlgo.none) {
+            if (tokens.length != JWT.JWTField.values().length - 1) {
+                throw new IllegalArgumentException("Invalid token JWT token length expected 2");
+            }
+        } else {
+            if (tokens.length != JWT.JWTField.values().length) {
+                throw new IllegalArgumentException("Invalid token JWT token length expected 3");
+            }
+            ret.setHash(tokens[JWT.JWTField.HASH.ordinal()]);
         }
 
         return ret;
@@ -145,13 +143,15 @@ public final class SecUtil {
                 break;
 
             case none:
-                if (tokens.length != JWT.JWTField.values().length - 1) {
-                    throw new SecurityException("Invalid token");
-                }
-                break;
+                // an unsecured token carries no signature, accepting it would let a forged
+                // header bypass verification entirely
+                throw new SecurityException("none JWT Algo not supported");
             case RS256:
             case RS384:
             case RS512:
+            case PS256:
+            case PS384:
+            case PS512:
             case ES256:
             case ES384:
             case ES512:
@@ -169,6 +169,10 @@ public final class SecUtil {
                 }
                 break;
 
+            default:
+                // never fall through to an accept, an algorithm with no verification branch
+                // above would otherwise be trusted without any signature check
+                throw new SecurityException(jwtAlgo.getName() + " JWT Algo not supported");
         }
 
         return jwt;

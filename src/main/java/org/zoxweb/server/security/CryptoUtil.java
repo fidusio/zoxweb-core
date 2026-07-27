@@ -54,12 +54,14 @@ public class CryptoUtil {
 
     private static final Lock LOCK = new ReentrantLock();
     //private static final Logger  log = Logger.getLogger(CryptoUtil.class.getName());
-    private static final Map cacheMap =  new HashMap();
+    private static final Map cacheMap = new HashMap();
 
+
+    private static final String RSASSA_PSS = "RSASSA-PSS";
 
     public static final int MIN_KEY_BYTES = 6;
 
-    public static final int DEFAULT_ITERATION = 8196;
+    public static final int DEFAULT_ITERATION = 8192;
 
 
     public static String base64URLHmacSHA256(String secret, String data)
@@ -298,7 +300,7 @@ public class CryptoUtil {
         hmac.update(ekd.getEncryptedData());
 
         if (!SUS.slowEquals(ekd.getHMAC(), hmac.doFinal())) {
-            throw new SignatureException("Data tempered with");
+            throw new SignatureException("Data tampered with");
         }
 
         byte[] decryptedData = cipher.doFinal(ekd.getEncryptedData());
@@ -490,9 +492,12 @@ public class CryptoUtil {
                                           String keyStorePass)
             throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
         KeyStore ret = KeyStore.getInstance(keyStoreType);
+        char[] password = keyStorePass.toCharArray();
 
         try {
-            ret.store(keyStoreOS, keyStorePass.toCharArray());
+            // a KeyStore must be initialized before it can be stored, null stream creates an empty one
+            ret.load(null, password);
+            ret.store(keyStoreOS, password);
         } finally {
             SharedIOUtil.close(keyStoreOS);
         }
@@ -692,7 +697,7 @@ public class CryptoUtil {
                 GSONUtil.toJSONGenericMap(jwt.getHeader().getProperties(), false, false, false));
         String payloadJSON = GSONUtil
                 .toJSONGenericMap(jwt.getPayload().getProperties(), false, false, false);
-        //System.out.println(payloadJSON);
+
         byte[] b64Payload = SharedBase64.encode(Base64Type.URL, payloadJSON);
         sb.append(SharedStringUtil.toString(b64Header));
         sb.append(".");
@@ -713,10 +718,13 @@ public class CryptoUtil {
                         hmac.doFinal(SharedStringUtil.getBytes(sb.toString())));
                 break;
             case none:
-                break;
+                throw new SecurityException("none JWT Algo not supported");
             case RS256:
             case RS384:
             case RS512:
+            case PS256:
+            case PS384:
+            case PS512:
             case ES256:
             case ES384:
             case ES512:
@@ -727,6 +735,10 @@ public class CryptoUtil {
                                 privateKey,
                                 SharedStringUtil.getBytes(sb.toString())));
                 break;
+            default:
+                // without a signing branch above the token would be emitted with an empty
+                // signature, which reads as signed but is not
+                throw new SecurityException(jwtAlgo.getName() + " JWT Algo not supported");
         }
 
         sb.append(".");
@@ -761,8 +773,7 @@ public class CryptoUtil {
             }
 
             return kg.generateKey();
-        }
-        finally {
+        } finally {
             LOCK.unlock();
         }
     }
@@ -862,20 +873,50 @@ public class CryptoUtil {
     }
 
 
+    /**
+     * RSASSA-PSS parameters per RFC 7518: MGF1 seeded with the same digest and a salt length
+     * equal to the digest length. Returns null for algorithms that are not PSS based.
+     */
+    private static PSSParameterSpec toPSSParameterSpec(CryptoConst.SignatureAlgo sa) {
+        switch (sa) {
+            case SHA256_RSA_MGF1:
+                return new PSSParameterSpec("SHA-256", "MGF1", MGF1ParameterSpec.SHA256, 32, 1);
+            case SHA384_RSA_MGF1:
+                return new PSSParameterSpec("SHA-384", "MGF1", MGF1ParameterSpec.SHA384, 48, 1);
+            case SHA512_RSA_MGF1:
+                return new PSSParameterSpec("SHA-512", "MGF1", MGF1ParameterSpec.SHA512, 64, 1);
+            default:
+                return null;
+        }
+    }
+
+    /**
+     * The PSS algorithms must be requested as RSASSA-PSS with explicit parameters, their
+     * SignatureAlgo name is a BouncyCastle alias that the stock JCE providers do not resolve.
+     */
+    private static Signature toSignature(CryptoConst.SignatureAlgo sa)
+            throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
+        PSSParameterSpec pssSpec = toPSSParameterSpec(sa);
+
+        if (pssSpec == null)
+            return Signature.getInstance(sa.getName());
+
+        Signature ret = Signature.getInstance(RSASSA_PSS);
+        ret.setParameter(pssSpec);
+        return ret;
+    }
+
     public static byte[] sign(CryptoConst.SignatureAlgo sa, PrivateKey pk, byte[] data)
             throws GeneralSecurityException {
-        SecureRandom secureRandom = new SecureRandom();
-        Signature signature = Signature.getInstance(sa.getName());
-        signature.initSign(pk, secureRandom);
+        Signature signature = toSignature(sa);
+        signature.initSign(pk, SecUtil.defaultSecureRandom());
         signature.update(data);
         return signature.sign();
     }
 
     public static boolean verify(CryptoConst.SignatureAlgo sa, PublicKey pk, byte[] data, byte[] signedData)
-            throws NoSuchAlgorithmException,
-            InvalidKeyException,
-            SignatureException {
-        Signature signature = Signature.getInstance(sa.getName());
+            throws GeneralSecurityException {
+        Signature signature = toSignature(sa);
         signature.initVerify(pk);
         signature.update(data);
         return signature.verify(signedData);
@@ -929,7 +970,6 @@ public class CryptoUtil {
     public static NVGenericMap publicKeyToNVGM(PublicKey pk) {
 
         NVGenericMap ret = new NVGenericMap();
-        System.out.println(pk);
         ret.add("algorithm", pk.getAlgorithm());
         ret.add("format", pk.getFormat());
 
