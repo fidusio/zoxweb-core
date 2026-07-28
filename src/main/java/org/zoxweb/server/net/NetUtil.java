@@ -15,6 +15,7 @@
  */
 package org.zoxweb.server.net;
 
+import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.util.ServerUtil;
 import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.net.*;
@@ -33,6 +34,8 @@ import java.nio.channels.SocketChannel;
 import java.util.*;
 
 public class NetUtil {
+
+    public final static LogWrapper log = new LogWrapper(NetUtil.class).setEnabled(true);
     private NetUtil() {
     }
 
@@ -78,6 +81,14 @@ public class NetUtil {
 
 
         return ret;
+    }
+
+    public static NetworkInterface[] allInterfaces() throws SocketException {
+        List<NetworkInterface> ret = new ArrayList<>();
+        for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements(); ) {
+            ret.add(en.nextElement());
+        }
+        return ret.toArray(new NetworkInterface[0]);
     }
 
 
@@ -430,9 +441,9 @@ public class NetUtil {
         if (logToOS) {
             delta = System.currentTimeMillis() - delta;
             if (ret)
-                System.out.println("it took " + Const.TimeInMillis.toString(delta) + " ping: " + addr.getHostName());
+                if(log.isEnabled()) log.getLogger().info("it took " + Const.TimeInMillis.toString(delta) + " ping: " + addr.getHostName());
             else
-                System.out.println("ping timed out after " + timeout + " millis to ping: " + addr.getHostName());
+                if(log.isEnabled()) log.getLogger().info("ping timed out after " + timeout + " millis to ping: " + addr.getHostName());
         }
 
         return ret;

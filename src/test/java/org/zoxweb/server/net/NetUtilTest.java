@@ -2,9 +2,9 @@ package org.zoxweb.server.net;
 
 import org.junit.jupiter.api.Test;
 import org.zoxweb.shared.net.IPAddress;
+import org.zoxweb.shared.net.InetAddressDAO;
 import org.zoxweb.shared.net.InetProp.IPVersion;
 import org.zoxweb.shared.net.ProxyType;
-import org.zoxweb.shared.net.InetAddressDAO;
 import org.zoxweb.shared.security.SecConst;
 
 import java.io.IOException;
@@ -58,6 +58,14 @@ public class NetUtilTest {
         assertEquals(Proxy.Type.DIRECT, NetUtil.lookup(null));
     }
 
+
+    @Test void testAllInterface() throws SocketException {
+        NetworkInterface[] all = NetUtil.allInterfaces();
+        for (NetworkInterface ni : all) {
+            System.out.println(ni);
+        }
+
+    }
     // ==================== parse Tests ====================
 
     @Test
@@ -422,13 +430,13 @@ public class NetUtilTest {
     @Test
     public void testPingHosts() throws IOException {
         String[] hosts = new String[]{"127.0.0.1",
-        "10.0.0.1","google.com"};
+        "10.0.0.1","google.com", "10.0.0.17"};
 
         for (String host : hosts) {
 
             boolean result = NetUtil.ping(InetAddress.getByName(host), null, 255, 1000, true);
             // Note: This may fail on some systems depending on ICMP configuration
-            System.out.println("Ping localhost result: " + result);
+            System.out.println(host + " Ping result: " + result);
         }
     }
 
