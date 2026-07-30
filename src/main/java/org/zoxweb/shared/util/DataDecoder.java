@@ -28,4 +28,9 @@ public interface DataDecoder<DI, DO>
      * @return object of DO class type
      */
     DO decode(DI input);
+
+    /**
+     * If the object is a String it will return it as String otherwise return null.
+     */
+    DataDecoder<Object, String> AsString = (o)-> o instanceof String ? (String)o : null;
 }
