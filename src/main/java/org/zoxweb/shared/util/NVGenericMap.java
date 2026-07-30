@@ -253,7 +253,7 @@ public class NVGenericMap
      * @param <V> the decoded result type
      * @return the decoded value
      */
-    public <V> V decodeValue(GetName getName, DataDecoder<?, ?> decoder) {
+    public <V> V decodedValue(GetName getName, DataDecoder<?, ?> decoder) {
         return (V)decoder.decode(getValue(getName));
     }
 
@@ -265,7 +265,7 @@ public class NVGenericMap
      * @param <V> the decoded result type
      * @return the decoded value
      */
-    public <V> V decodeValue(String name, DataDecoder<?, ?> decoder) {
+    public <V> V decodedValue(String name, DataDecoder<?, ?> decoder) {
         return (V)decoder.decode(getValue(name));
     }
 
