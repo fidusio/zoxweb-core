@@ -16,6 +16,7 @@
 package org.zoxweb.shared.api;
 
 import org.zoxweb.shared.security.AccessException;
+import org.zoxweb.shared.util.NVGenericMap;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -46,7 +47,7 @@ public interface APIDocumentStore<P, S>
      * @throws AccessException
      * @throws APIException
      */
-    public APIFileInfoMap createFile(String folderID, APIFileInfoMap file, InputStream is, boolean closeStream)
+    APIFileInfoMap createFile(String folderID, APIFileInfoMap file, InputStream is, boolean closeStream)
             throws NullPointerException, IllegalArgumentException, IOException, AccessException, APIException;
 
     /**
@@ -61,7 +62,7 @@ public interface APIDocumentStore<P, S>
      * @throws AccessException
      * @throws APIException
      */
-    public APIFileInfoMap createFolder(String folderFullPath)
+    APIFileInfoMap createFolder(String folderFullPath)
             throws NullPointerException, IllegalArgumentException, IOException, AccessException, APIException;
 
     /**
@@ -77,7 +78,7 @@ public interface APIDocumentStore<P, S>
      * @throws AccessException
      * @throws APIException
      */
-    public APIFileInfoMap readFile(APIFileInfoMap map, OutputStream os, boolean closeStream)
+    APIFileInfoMap readFile(APIFileInfoMap map, OutputStream os, boolean closeStream)
             throws NullPointerException, IllegalArgumentException, IOException, AccessException, APIException;
 
     /**
@@ -93,7 +94,7 @@ public interface APIDocumentStore<P, S>
      * @throws AccessException
      * @throws APIException
      */
-    public APIFileInfoMap updateFile(APIFileInfoMap map, InputStream is, boolean closeStream)
+    APIFileInfoMap updateFile(APIFileInfoMap map, InputStream is, boolean closeStream)
             throws NullPointerException, IllegalArgumentException, IOException, AccessException, APIException;
 
     /**
@@ -106,7 +107,7 @@ public interface APIDocumentStore<P, S>
      * @throws AccessException
      * @throws APIException
      */
-    public void deleteFile(APIFileInfoMap map)
+    void deleteFile(APIFileInfoMap map)
             throws NullPointerException, IllegalArgumentException, IOException, AccessException, APIException;
 
     /**
@@ -117,7 +118,7 @@ public interface APIDocumentStore<P, S>
      * @throws AccessException
      * @throws APIException
      */
-    public Map<String, APIFileInfoMap> discover()
+    Map<String, APIFileInfoMap> discover()
             throws IOException, AccessException, APIException;
 
 
@@ -132,7 +133,64 @@ public interface APIDocumentStore<P, S>
      * @throws AccessException if access is denied
      * @throws APIException if an API error occurs
      */
-    public List<APIFileInfoMap> search(String... args)
+    List<APIFileInfoMap> search(String... args)
             throws NullPointerException, IllegalArgumentException, IOException, AccessException, APIException;
+
+    /**
+     * Lists the stored versions of a file, newest first. Optional capability — implementations
+     * with version control override this; others throw {@link UnsupportedOperationException}.
+     *
+     * @param map the file whose versions to list
+     * @return one NVGenericMap per stored version (version number, length, creation time,
+     *         and whether it is the current version)
+     * @throws NullPointerException if map is null
+     * @throws IllegalArgumentException if the file is unknown
+     * @throws IOException if an I/O error occurs
+     * @throws AccessException if access is denied
+     * @throws APIException if an API error occurs
+     */
+    default List<NVGenericMap> fileVersions(APIFileInfoMap map)
+            throws NullPointerException, IllegalArgumentException, IOException, AccessException, APIException {
+        throw new UnsupportedOperationException("file versioning not supported");
+    }
+
+    /**
+     * Reads a specific stored version of a file. Optional capability — implementations
+     * with version control override this; others throw {@link UnsupportedOperationException}.
+     *
+     * @param map the file to read
+     * @param version the version to read
+     * @param os the destination stream
+     * @param closeStream if true os is closed when done
+     * @return APIFileInfoMap
+     * @throws NullPointerException if map or os is null
+     * @throws IllegalArgumentException if the file or version is unknown
+     * @throws IOException if an I/O error occurs
+     * @throws AccessException if access is denied
+     * @throws APIException if an API error occurs
+     */
+    default APIFileInfoMap readFile(APIFileInfoMap map, long version, OutputStream os, boolean closeStream)
+            throws NullPointerException, IllegalArgumentException, IOException, AccessException, APIException {
+        throw new UnsupportedOperationException("file versioning not supported");
+    }
+
+    /**
+     * Rolls a file back so the given stored version becomes its current content. Optional
+     * capability — implementations with version control override this; others throw
+     * {@link UnsupportedOperationException}.
+     *
+     * @param map the file to roll back
+     * @param version the version to restore as current
+     * @return APIFileInfoMap
+     * @throws NullPointerException if map is null
+     * @throws IllegalArgumentException if the file or version is unknown
+     * @throws IOException if an I/O error occurs
+     * @throws AccessException if access is denied
+     * @throws APIException if an API error occurs
+     */
+    default APIFileInfoMap rollbackFile(APIFileInfoMap map, long version)
+            throws NullPointerException, IllegalArgumentException, IOException, AccessException, APIException {
+        throw new UnsupportedOperationException("file versioning not supported");
+    }
 
 }
