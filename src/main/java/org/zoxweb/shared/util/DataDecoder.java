@@ -16,21 +16,52 @@
 package org.zoxweb.shared.util;
 
 /**
- * Define a value getter interface based on input and output type
- * @param <DI> input data type
- * @param <DO> output data type
+ * A functional interface for decoding/parsing data from one type to another.
+ * <p>
+ * This interface is the decoding counterpart to {@link DataEncoder}. While encoders
+ * typically transform or serialize data into a target format, decoders parse or
+ * convert raw input into a usable type.
+ * </p>
+ *
+ * <h2>Usage Examples</h2>
+ * <pre>{@code
+ * // Using the built-in string decoder
+ * String s = DataDecoder.AsStringOrNull.decode(someObject);  // null if not a String
+ *
+ * // Custom decoder using lambda
+ * DataDecoder<String, Integer> hexToInt = (s) -> Integer.parseInt(s, 16);
+ * int value = hexToInt.decode("ff");  // 255
+ *
+ * // Applied to a container value via NVGenericMap
+ * String url = nvgm.decodeValue("url", DataDecoder.AsStringOrNull);
+ * }</pre>
+ *
+ * <h2>Built-in Decoders</h2>
+ * <ul>
+ *     <li>{@link #AsStringOrNull} - Returns the input as a String if it is one, null otherwise</li>
+ * </ul>
+ *
+ * @param <DI> the input type to decode
+ * @param <DO> the output type after decoding
+ * @see DataEncoder
+ * @see Codec
  */
 public interface DataDecoder<DI, DO>
         extends Codec {
     /**
-     * Decode the input and covert it to an output object
-     * @param input object
-     * @return object of DO class type
+     * Decodes the input and converts it to an output object.
+     *
+     * @param input the object to decode
+     * @return the decoded result of type DO
      */
     DO decode(DI input);
 
     /**
-     * If the object is a String it will return it as String otherwise return null.
+     * Decoder that returns the input as a String if it is a String instance.
+     * <p>
+     * Returns null for null input or any non-String object (no toString conversion
+     * is performed).
+     * </p>
      */
-    DataDecoder<Object, String> AsString = (o)-> o instanceof String ? (String)o : null;
+    DataDecoder<Object, String> AsStringOrNull = (o)-> o instanceof String ? (String)o : null;
 }
