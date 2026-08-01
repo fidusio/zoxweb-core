@@ -89,6 +89,50 @@ public class StateMachine<C>
         return this;
     }
 
+    @Override
+    public boolean deregister(StateInt<?> state) {
+        if (state != null && SUS.enumName(StateInt.States.INIT).equals(state.getName()))
+            throw new IllegalArgumentException("INIT state cannot be deregistered");
+        if (state == null || states.get(state.getName()) != state)
+            return false;
+
+        // detach first: stops State.register(tc) forwarding into tcMap,
+        // so no new consumer can slip into the routing index past the snapshot below
+        state.setStateMachine(null);
+        // State monitor only — never nested with the machine monitor (lock discipline)
+        TriggerConsumerInt<?>[] triggers = state.triggers();
+        // Machine monitor only
+        synchronized (this) {
+            if (triggers != null) {
+                for (TriggerConsumerInt<?> tc : triggers) {
+                    for (String canID : tc.canonicalIDs()) {
+                        Set<TriggerConsumerInt<?>> tcSet = tcMap.get(canID);
+                        if (tcSet != null) {
+                            tcSet.remove(tc);
+                            if (tcSet.isEmpty())
+                                tcMap.remove(canID);
+                        }
+                    }
+                }
+            }
+            // value-checked: only remove if the mapping still points at this state
+            states.remove(state.getName(), state);
+        }
+        // clear the current-state marker only if it is the deregistered state
+        currentState.compareAndSet(state, null);
+        return true;
+    }
+
+//    @Override
+//    public boolean deregister(String name) {
+//        return deregister(lookupState(name));
+//    }
+//
+//    @Override
+//    public boolean deregister(Enum<?> name) {
+//        return deregister(lookupState(name));
+//    }
+
     synchronized void mapTriggerConsumer(TriggerConsumerInt<?> tc) {
         String[] canonicalIDs = tc.canonicalIDs();
         for (String canID : canonicalIDs) {
@@ -263,10 +307,10 @@ public class StateMachine<C>
         return states.get(name);
     }
 
-    @Override
-    public StateInt<?> lookupState(Enum<?> name) {
-        return lookupState(SUS.enumName(name));
-    }
+//    @Override
+//    public StateInt<?> lookupState(Enum<?> name) {
+//        return lookupState(SUS.enumName(name));
+//    }
 
     @Override
     public StateInt<?> getCurrentState() {

@@ -49,7 +49,9 @@
  * already-registered {@link org.zoxweb.server.fsm.State} are forwarded to the machine
  * automatically and become visible to subsequent publishes. Registration (writers) and
  * dispatch lookup (readers) synchronize on the machine, so every publish sees a consistent
- * before-or-after view of any concurrent registration.
+ * before-or-after view of any concurrent registration. States may also be deregistered at
+ * runtime ({@link org.zoxweb.server.fsm.StateMachineInt#deregister(StateInt)} — suspend/resume
+ * model; the INIT state is permanent and cannot be deregistered).
  *
  * <h2>Execution modes</h2>
  * Chosen at construction of {@link org.zoxweb.server.fsm.StateMachine}:

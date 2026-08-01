@@ -51,6 +51,14 @@ not declared anywhere.
     dispatched last. `publishToCurrentState(trigger)` is a relevance-gated publish: pre-init
     (no current state) → broadcast; current state has a consumer for the ID → broadcast;
     otherwise → drop.
+11. **States can be deregistered — except INIT.** `sm.deregister(state | name | enum)`
+    removes a state's consumers from routing (consumers of other states sharing the same
+    canonical IDs are unaffected). Deregistration affects only publishes that start
+    afterward — already-snapshotted triggers still deliver. The state object stays intact
+    (suspend/resume): a later `register` fully restores it. Deregistering the current
+    state clears the current-state marker (pre-init delivery policy applies).
+    Deregistering the INIT state throws `IllegalArgumentException` — the bootstrap anchor
+    is permanent. Unknown/null states return `false`.
 
 ## Build recipe
 
@@ -180,6 +188,10 @@ When translating a described process:
    available as a conventional terminal ID; nothing enforces reaching it.
 8. **External stimuli** (network events, timers, user actions) → whatever thread observes
    them calls `sm.publish(...)`; no marshalling needed.
+9. **Phases that come and go** (feature toggles, mode switches, plugin lifecycles) →
+   suspend/resume with `sm.deregister(state)` / `sm.register(state)` at runtime; the
+   state keeps its consumers and properties while detached. INIT can never be
+   deregistered.
 
 ## Type discipline (important)
 

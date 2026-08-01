@@ -3,6 +3,7 @@ package org.zoxweb.server.fsm;
 import org.zoxweb.server.task.TaskSchedulerProcessor;
 import org.zoxweb.shared.util.GetConfig;
 import org.zoxweb.shared.util.GetName;
+import org.zoxweb.shared.util.SUS;
 
 import java.util.concurrent.Executor;
 
@@ -64,8 +65,59 @@ public interface StateMachineInt<C>
      *
      * @param state the state to register
      * @return this state machine for method chaining
+     * @see #deregister(StateInt)
      */
     StateMachineInt<C> register(StateInt<?> state);
+
+    /**
+     * Deregisters a state from this state machine (the inverse of {@link #register(StateInt)}).
+     * <p>
+     * The state's consumers are removed from the machine's routing index; consumers from
+     * other states sharing the same canonical IDs are unaffected. Deregistration is
+     * effective for publishes that start after it completes — triggers already snapshotted
+     * or queued still deliver (same policy as {@link #close()}: gate the future, never
+     * cancel in-flight work).
+     * </p>
+     * <p>
+     * The state object itself is kept intact (suspend/resume model): it retains its
+     * consumers and properties, and a later {@link #register(StateInt)} fully restores it.
+     * If the deregistered state is the current state, the current-state marker is cleared
+     * (the machine reverts to pre-init delivery semantics). Registering the same consumer
+     * instance in multiple states is unsupported; deregistration removes instances from
+     * shared canonical-ID sets.
+     * </p>
+     *
+     * @param state the state to deregister
+     * @return true if the state was registered with this machine and has been removed,
+     *         false if it was null or not registered
+     * @throws IllegalArgumentException if the state is the INIT state — the machine's
+     *                                  bootstrap anchor cannot be deregistered
+     */
+    boolean deregister(StateInt<?> state);
+
+    /**
+     * Deregisters a registered state by name.
+     *
+     * @param name the state name
+     * @return true if a state with that name was registered and has been removed
+     * @throws IllegalArgumentException if the name resolves to the INIT state
+     * @see #deregister(StateInt)
+     */
+    default boolean deregister(String name){
+        return deregister(lookupState(name));
+    }
+
+    /**
+     * Deregisters a registered state by enum name.
+     *
+     * @param name the state name as an enum
+     * @return true if a state with that name was registered and has been removed
+     * @throws IllegalArgumentException if the name resolves to the INIT state
+     * @see #deregister(StateInt)
+     */
+    default boolean deregister(Enum<?> name){
+        return deregister(lookupState(name));
+    }
 
     /**
      * Publishes a trigger asynchronously to all registered consumers.
@@ -219,7 +271,9 @@ public interface StateMachineInt<C>
      * @param name the state name as an enum
      * @return the state, or null if not found
      */
-    StateInt<?> lookupState(Enum<?> name);
+    default StateInt<?> lookupState(Enum<?> name){
+        return lookupState(SUS.enumName(name));
+    }
 
     /**
      * @return the current state of this state machine
