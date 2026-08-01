@@ -54,6 +54,13 @@ public interface StateMachineInt<C>
      * Registration also indexes all TriggerConsumers associated with the state
      * for efficient lookup during trigger dispatch.
      * </p>
+     * <p>
+     * States may be registered at any time, including while the machine is operational.
+     * A publish that starts after registration completes is guaranteed to reach the new
+     * state's consumers; triggers already snapshotted before registration will not include
+     * them. Consumers added to a state after it has been registered are forwarded to the
+     * machine automatically.
+     * </p>
      *
      * @param state the state to register
      * @return this state machine for method chaining
@@ -66,9 +73,15 @@ public interface StateMachineInt<C>
      * The trigger is dispatched to all TriggerConsumers registered for the trigger's
      * canonical ID. Execution mode depends on configuration (TaskScheduler, Executor, or sync fallback).
      * </p>
+     * <p>
+     * The consumer set is snapshotted at publish time: consumers registered afterwards do not
+     * receive this trigger. Publishing a canonical ID with no registered consumer is a silent
+     * no-op.
+     * </p>
      *
      * @param trigger the trigger to publish
      * @return this state machine for method chaining
+     * @throws IllegalStateException if the machine is closed
      */
     StateMachineInt<C> publish(TriggerInt<?> trigger);
 
@@ -128,11 +141,18 @@ public interface StateMachineInt<C>
     <D> StateMachineInt<C> publishSync(StateInt<?> state, Enum<?> canID, D data);
 
     /**
-     * Publishes a trigger only to the current state's consumer for that trigger.
+     * Publishes a trigger only if it is relevant to the machine's current position.
      * <p>
-     * Unlike {@link #publish(TriggerInt)} which broadcasts to all registered consumers,
-     * this method targets only the consumer registered in the current state.
+     * This is a relevance-gated {@link #publish(TriggerInt)}:
      * </p>
+     * <ul>
+     *   <li>If the machine is not yet initialized (no current state — INIT has not fired),
+     *       the trigger is delivered via normal broadcast so early events are not lost.</li>
+     *   <li>If the current state has a consumer registered for the trigger's canonical ID,
+     *       the trigger is broadcast — reaching <b>all</b> consumers registered for that ID,
+     *       in any state, per the shared-ID design.</li>
+     *   <li>If the current state has no consumer for the ID, the trigger is dropped.</li>
+     * </ul>
      *
      * @param trigger the trigger to publish
      * @return this state machine for method chaining
@@ -161,7 +181,12 @@ public interface StateMachineInt<C>
     void start(boolean sync);
 
     /**
-     * Closes this state machine and releases any resources.
+     * Closes this state machine: all subsequent publish calls throw {@link IllegalStateException}.
+     * <p>
+     * Closing is a gate on future publishes only — triggers already queued to the scheduler
+     * or executor still execute. Owners tearing down shared resources should guard their
+     * consumers accordingly.
+     * </p>
      */
     void close();
 

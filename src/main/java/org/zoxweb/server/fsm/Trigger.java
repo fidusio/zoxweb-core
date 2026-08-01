@@ -6,6 +6,17 @@ import org.zoxweb.shared.util.SUS;
 import java.util.EventObject;
 import java.util.concurrent.atomic.AtomicLong;
 
+/**
+ * Default {@link TriggerInt} implementation: an immutable event carrying a canonical ID
+ * (the routing key), an optional typed data payload, the issuing state, a JVM-global
+ * monotonically increasing ID, and a creation timestamp.
+ * <p>
+ * Consumers receive the payload — {@link #get()} — not the Trigger object itself; the
+ * canonical ID, unique ID, and timestamp are routing and diagnostics metadata.
+ * </p>
+ *
+ * @param <D> the type of the data payload ({@code Void} for data-less triggers)
+ */
 public class Trigger<D>
         extends EventObject
         implements TriggerInt<D> {

@@ -162,7 +162,7 @@ public class SSLStateMachine extends StateMachine<SSLSessionConfig>
 //        };
 
         sslSessionSM.setConfig(config)
-                .register(new State(StateInt.States.INIT).register(init))
+                .register(new State<>(StateInt.States.INIT).register(init))
                 .register(new SSLHandshakingState())
                 .register(new SSLDataReadyState())
         //.register(new State(SessionState.CLOSE).register(closed))

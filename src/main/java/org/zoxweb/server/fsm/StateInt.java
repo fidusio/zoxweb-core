@@ -129,6 +129,10 @@ public interface StateInt<P>
      * The consumer will be invoked when a trigger matching any of its
      * {@link TriggerConsumerInt#canonicalIDs()} is published.
      * </p>
+     * <p>
+     * If this state is already registered with a state machine, the consumer is forwarded
+     * to the machine immediately and becomes visible to subsequent publishes.
+     * </p>
      *
      * @param tc the TriggerConsumer to register
      * @return this state for method chaining
@@ -138,14 +142,18 @@ public interface StateInt<P>
     /**
      * Registers a raw Consumer for one or more canonical IDs.
      * <p>
-     * This is a convenience method for simple handlers that don't need the full
-     * TriggerConsumer functionality. The consumer will be invoked when a trigger
-     * matching any of the specified canonical IDs is published.
+     * This is a convenience method for simple handlers (e.g. lambdas) that don't need the
+     * full TriggerConsumer functionality. The consumer is adapted into a
+     * {@link TriggerConsumer} bound to the given canonical IDs and registered through
+     * {@link #register(TriggerConsumerInt)}, so it is indexed and dispatched exactly like
+     * a typed consumer.
      * </p>
      *
      * @param consumer the Consumer to register
      * @param canIDs   one or more canonical IDs this consumer handles
      * @return this state for method chaining
+     * @throws NullPointerException     if consumer is null
+     * @throws IllegalArgumentException if canIDs is empty
      */
     StateInt<?> register(Consumer<?> consumer, String... canIDs);
 

@@ -8,6 +8,18 @@ import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 
+/**
+ * Base {@link TriggerConsumerInt} implementation. Subclasses implement
+ * {@link #accept(Object)} with the processing logic; the base class holds the canonical IDs,
+ * the owning-state back-reference, an execution counter, and the publish helpers that
+ * delegate to the owning state's machine.
+ * <p>
+ * The String-varargs constructor rejects an empty canonical ID list — a consumer with no
+ * IDs could never be dispatched.
+ * </p>
+ *
+ * @param <T> the type of trigger data this consumer accepts
+ */
 public abstract class TriggerConsumer<T>
         extends NVGMProperties
         implements TriggerConsumerInt<T> {
@@ -31,6 +43,9 @@ public abstract class TriggerConsumer<T>
 
     public TriggerConsumer(String... canonicalIDs) {
         super(false);
+        if (SUS.isEmpty(canonicalIDs)) {
+            throw new IllegalArgumentException("Argument 'canonicalIDs' must not be empty.");
+        }
         this.canonicalIDs = canonicalIDs;
     }
 
@@ -50,7 +65,7 @@ public abstract class TriggerConsumer<T>
     }
 
     @Override
-    public void setSate(StateInt<?> state) {
+    public void setState(StateInt<?> state) {
         this.state = state;
     }
 

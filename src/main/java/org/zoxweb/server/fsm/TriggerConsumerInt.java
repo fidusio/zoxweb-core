@@ -85,7 +85,7 @@ public interface TriggerConsumerInt<T>
      *
      * @param state the owning state
      */
-    void setSate(StateInt<?> state);
+    void setState(StateInt<?> state);
 
     /**
      * Sets an optional transformation function to apply during processing.

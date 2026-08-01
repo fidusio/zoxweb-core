@@ -6,15 +6,36 @@ import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.shared.task.SupplierConsumerTask;
 import org.zoxweb.shared.util.SUS;
 
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
+/**
+ * Default {@link StateMachineInt} implementation: the single dispatch funnel for all triggers.
+ * <p>
+ * Routing is by canonical ID via an internal {@code canonicalID -> Set<TriggerConsumerInt>}
+ * index built at registration. All publishing paths funnel through {@link #publish(TriggerInt)}
+ * or {@link #publishSync(TriggerInt)}, which snapshot the consumer set for the trigger's
+ * canonical ID and dispatch each consumer wrapped in a {@link TriggerConsumerHolder} (which
+ * maintains the exec counter and the current-state marker).
+ * </p>
+ * <h2>Concurrency</h2>
+ * Registration writers ({@code register}, {@code mapTriggerConsumer}) and the dispatch reader
+ * ({@code lookupTriggerConsumers}) synchronize on this machine, so states and consumers may be
+ * registered while the machine is operational: every publish sees a consistent before-or-after
+ * view of any concurrent registration, and the snapshot array is dispatched outside the lock.
+ * <h2>Execution mode</h2>
+ * Chosen by constructor: TaskScheduler mode ({@link TaskSchedulerProcessor}), Executor mode,
+ * or — with a null executor — synchronous inline execution. {@link #publishSync(TriggerInt)}
+ * always runs inline regardless of mode.
+ *
+ * @param <C> the configuration type shared with all consumers via {@link #getConfig()}
+ */
 public class StateMachine<C>
         implements StateMachineInt<C> {
 
@@ -22,8 +43,8 @@ public class StateMachine<C>
 
     private final String name;
     private final TaskSchedulerProcessor tsp;
-    private final Map<String, Set<TriggerConsumerInt<?>>> tcMap = new LinkedHashMap<String, Set<TriggerConsumerInt<?>>>();
-    private final Map<String, StateInt<?>> states = new LinkedHashMap<String, StateInt<?>>();
+    private final Map<String, Set<TriggerConsumerInt<?>>> tcMap = new ConcurrentHashMap<String, Set<TriggerConsumerInt<?>>>();
+    private final Map<String, StateInt<?>> states = new ConcurrentHashMap<String, StateInt<?>>();
     private C config;
     private final Executor executor;
     protected final AtomicBoolean isClosed = new AtomicBoolean(false);
@@ -68,8 +89,8 @@ public class StateMachine<C>
         return this;
     }
 
-    private synchronized void mapTriggerConsumer(TriggerConsumerInt<?> tc) {
-        String canonicalIDs[] = tc.canonicalIDs();
+    synchronized void mapTriggerConsumer(TriggerConsumerInt<?> tc) {
+        String[] canonicalIDs = tc.canonicalIDs();
         for (String canID : canonicalIDs) {
 
             Set<TriggerConsumerInt<?>> tcSet = tcMap.get(canID);
@@ -87,34 +108,49 @@ public class StateMachine<C>
         if (isClosed())
             throw new IllegalStateException("State machine closed");
 
-        Set<TriggerConsumerInt<?>> set = tcMap.get(trigger.getCanonicalID());
-        if (set != null) {
-            if (log.isEnabled()) log.getLogger().info("" + trigger);
-            if (isScheduledTaskEnabled())
-                set.forEach(c -> tsp.queue(0, new SupplierConsumerTask(trigger, new TriggerConsumerHolder<>(c))));
-            else
-                set.forEach(c -> {
-                    SupplierConsumerTask sct = new SupplierConsumerTask(trigger, new TriggerConsumerHolder<>(c));
-                    if (executor != null)
-                        executor.execute(sct);
-                    else
-                        sct.run();
-                });
-        }
+        if (log.isEnabled()) log.getLogger().info("" + trigger);
+        if (isScheduledTaskEnabled()) {
+            TriggerConsumerInt<?>[] tcis = lookupTriggerConsumers(trigger);
+            if (tcis != null) {
+                for (TriggerConsumerInt<?> c : tcis) {
+                    tsp.queue(0, new SupplierConsumerTask<>(trigger, new TriggerConsumerHolder<>(c)));
+                }
+            }
+
+        } else if (executor != null) {
+            TriggerConsumerInt<?>[] tcis = lookupTriggerConsumers(trigger);
+            if (tcis != null) {
+                for (TriggerConsumerInt<?> c : tcis) {
+                    executor.execute(new SupplierConsumerTask<>(trigger, new TriggerConsumerHolder<>(c)));
+                }
+            }
+        } else
+            return publishSync(trigger);
+
         return this;
+    }
+
+
+    private synchronized TriggerConsumerInt<?>[] lookupTriggerConsumers(TriggerInt<?> tc) {
+        if (tc != null) {
+            Set<TriggerConsumerInt<?>> set = tcMap.get(tc.getCanonicalID());
+            if (set != null)
+                return set.toArray(new TriggerConsumerInt[0]);
+        }
+        return null;
     }
 
     @Override
     public <D> StateMachineInt<C> publish(StateInt<?> state, String canID, D data) {
         if (canID != null)
-            publish(new Trigger(this, canID, state, data));
+            return publish(new Trigger<>(this, canID, state, data));
         return this;
     }
 
     @Override
     public <D> StateMachineInt<C> publish(StateInt<?> state, Enum<?> canID, D data) {
         if (canID != null)
-            publish(new Trigger(this, canID, state, data));
+            return publish(new Trigger<>(this, canID, state, data));
         return this;
     }
 
@@ -124,29 +160,31 @@ public class StateMachine<C>
         if (isClosed())
             throw new IllegalStateException("State machine closed");
 
-        Set<TriggerConsumerInt<?>> set = tcMap.get(trigger.getCanonicalID());
-        if (set != null) {
-            if (log.isEnabled()) log.getLogger().info("" + trigger);
+        TriggerConsumerInt<?>[] tcis = lookupTriggerConsumers(trigger);
 
-            set.forEach(c -> {
-                SupplierConsumerTask sct = new SupplierConsumerTask(trigger, new TriggerConsumerHolder<>(c));
+        if (log.isEnabled()) log.getLogger().info("" + trigger);
+
+        if (tcis != null) {
+            for (TriggerConsumerInt<?> c : tcis) {
+                SupplierConsumerTask<?> sct = new SupplierConsumerTask<>(trigger, new TriggerConsumerHolder<>(c));
                 sct.run();
-            });
+            }
         }
+
         return this;
     }
 
     @Override
     public <D> StateMachineInt<C> publishSync(StateInt<?> state, String canID, D data) {
         if (canID != null)
-            publishSync(new Trigger(this, canID, state, data));
+            return publishSync(new Trigger<>(this, canID, state, data));
         return this;
     }
 
     @Override
     public <D> StateMachineInt<C> publishSync(StateInt<?> state, Enum<?> canID, D data) {
         if (canID != null)
-            publishSync(new Trigger(this, canID, state, data));
+            return publishSync(new Trigger<>(this, canID, state, data));
         return this;
     }
 
@@ -155,19 +193,20 @@ public class StateMachine<C>
         if (isClosed())
             throw new IllegalStateException("State machine closed");
 
-        StateInt current = getCurrentState();
+        StateInt<?> current = getCurrentState();
         if (current == null) {
             return publish(trigger);
         } else {
             Consumer<?> tci = current.lookupTriggerConsumer(trigger.getCanonicalID());
             if (tci != null) {
-                SupplierConsumerTask<?> sct = new SupplierConsumerTask(trigger, new TriggerConsumerHolder<>(tci));
-                if (isScheduledTaskEnabled())
-                    tsp.queue(0, sct);
-                else if (executor != null)
-                    executor.execute(sct);
-                else
-                    sct.run();
+                return publish(trigger);
+//                SupplierConsumerTask<?> sct = new SupplierConsumerTask(trigger, new TriggerConsumerHolder<>(tci));
+//                if (isScheduledTaskEnabled())
+//                    tsp.queue(0, sct);
+//                else if (executor != null)
+//                    executor.execute(sct);
+//                else
+//                    sct.run();
 
             }
         }

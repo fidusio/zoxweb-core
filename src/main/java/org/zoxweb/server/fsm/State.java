@@ -1,13 +1,33 @@
 package org.zoxweb.server.fsm;
 
 import org.zoxweb.server.logging.LogWrapper;
-import org.zoxweb.shared.util.*;
+import org.zoxweb.shared.util.GetName;
+import org.zoxweb.shared.util.NVBase;
+import org.zoxweb.shared.util.NVGMProperties;
+import org.zoxweb.shared.util.SUS;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 
+/**
+ * Default {@link StateInt} implementation: a named identifier with a mutable property bag
+ * that acts as a registry of TriggerConsumers.
+ * <p>
+ * Typed consumers register via {@link #register(TriggerConsumerInt)}; raw
+ * {@link java.util.function.Consumer}s (e.g. lambdas) register via
+ * {@link #register(java.util.function.Consumer, String...)} and are adapted into an anonymous
+ * {@link TriggerConsumer} bound to the given canonical IDs, so both kinds are indexed and
+ * dispatched identically.
+ * </p>
+ * <p>
+ * If this state is already attached to a {@link StateMachine}, consumers registered afterwards
+ * are forwarded to the machine immediately and become visible to subsequent publishes.
+ * </p>
+ *
+ * @param <P> the type of properties associated with this state
+ */
 public class State<P>
         extends NVGMProperties
         implements StateInt<P> {
@@ -17,7 +37,7 @@ public class State<P>
     //    private final NVGenericMap data = new NVGenericMap();
     private volatile StateMachineInt<?> stateMachine;
 
-    private final Map<String, Consumer<?>> triggerConsumers = new LinkedHashMap<String, Consumer<?>>();
+    private final Map<String, Consumer<?>> triggerConsumers = new ConcurrentHashMap<String, Consumer<?>>();
 
     public State(String name, NVBase<?>... props) {
         super(true);
@@ -60,7 +80,7 @@ public class State<P>
 
     @Override
     public TriggerConsumerInt<?> lookupTriggerConsumer(Enum<?> canonicalID) {
-        return lookupTriggerConsumer(canonicalID.name());
+        return lookupTriggerConsumer(SUS.enumName(canonicalID));
     }
 
     @Override
@@ -71,15 +91,33 @@ public class State<P>
     public synchronized StateInt<?> register(TriggerConsumerInt<?> tc) {
         for (String canID : tc.canonicalIDs())
             triggerConsumers.put(canID, tc);
-        tc.setSate(this);
+        tc.setState(this);
+        if (getStateMachine() != null) {
+            ((StateMachine<?>) getStateMachine()).mapTriggerConsumer(tc);
+        }
         return this;
     }
 
     public synchronized StateInt<?> register(Consumer<?> consumer, String... canIDs) {
-        Consumer<?> tch = consumer instanceof TriggerConsumerHolder ? consumer : new TriggerConsumerHolder<>(consumer);
-        for (String canID : canIDs)
-            triggerConsumers.put(canID, tch);
-        return this;
+//        Consumer<Object> tch = consumer instanceof TriggerConsumerHolder ? (Consumer<Object>) consumer : new TriggerConsumerHolder<>(consumer);
+//
+//        TriggerConsumer<Object> tc = new TriggerConsumer<Object>(canIDs) {
+//            @Override
+//            public void accept(Object o) {
+//                tch.accept(o);
+//            }
+//        };
+//       return register(tc);
+        SUS.checkIfNull("consumer null", consumer);
+        Consumer<Object> target = (Consumer<Object>) consumer;
+        TriggerConsumer<Object> tc = new TriggerConsumer<Object>(canIDs) {
+            @Override
+            public void accept(Object o) {
+                target.accept(o);
+            }
+        };
+        return register(tc);
+
     }
 
     /**
