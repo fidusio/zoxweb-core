@@ -292,7 +292,7 @@ public class NIOSocket
             return selectionKey;
         } catch (IOException e) {
             SharedIOUtil.close(channel);
-            if(scheduledAttachment.attachment() != null)
+            if (scheduledAttachment.attachment() != null)
                 scheduledAttachment.attachment().exception(e);
             if (scheduledAttachment.getAppointment() != null)
                 scheduledAttachment.getAppointment().cancel();
@@ -608,14 +608,20 @@ public class NIOSocket
                                                 try {
                                                     protocolHandler.setupConnection(sc, protocolFactory.isBlocking());
                                                     connectionCount.incrementAndGet();
-                                                } catch (IOException e) {
+                                                } catch (Exception e) {
                                                     e.printStackTrace();
                                                     SharedIOUtil.close(protocolHandler);
                                                 }
                                             });
                                         } else {
-                                            protocolHandler.setupConnection(sc, protocolFactory.isBlocking());
-                                            connectionCount.incrementAndGet();
+                                            try {
+                                                protocolHandler.setupConnection(sc, protocolFactory.isBlocking());
+                                                connectionCount.incrementAndGet();
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                                SharedIOUtil.close(protocolHandler);   // closes phSChannel (= sc) via close_internal
+                                            }
+
                                         }
 
 
