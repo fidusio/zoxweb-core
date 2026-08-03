@@ -44,15 +44,15 @@ public class StateMachine<C>
 
     private final String name;
     private final TaskSchedulerProcessor tsp;
-    private final Map<String, Set<TriggerConsumerInt<?>>> tcMap = new ConcurrentHashMap<String, Set<TriggerConsumerInt<?>>>();
-    private final Map<String, StateInt<?>> states = new ConcurrentHashMap<String, StateInt<?>>();
+    private final Map<String, Set<TriggerConsumerInt<?>>> tcMap = new ConcurrentHashMap<>();
+    private final Map<String, StateInt<?>> states = new ConcurrentHashMap<>();
     private C config;
     private final Executor executor;
     protected final AtomicBoolean isClosed = new AtomicBoolean(false);
     private final AtomicBoolean isEventLogEnabled = new AtomicBoolean(true);
 
-    private final AtomicReference<StateInt> currentState = new AtomicReference<>();
-    private final Set<StateMachineListener> listeners = new CopyOnWriteArraySet<StateMachineListener>();
+    private final AtomicReference<StateInt<?>> currentState = new AtomicReference<>();
+    private final Set<StateMachineListener> listeners = new CopyOnWriteArraySet<>();
 
 
     public StateMachine(String name) {
@@ -186,26 +186,11 @@ public class StateMachine<C>
         return true;
     }
 
-//    @Override
-//    public boolean deregister(String name) {
-//        return deregister(lookupState(name));
-//    }
-//
-//    @Override
-//    public boolean deregister(Enum<?> name) {
-//        return deregister(lookupState(name));
-//    }
 
     synchronized void mapTriggerConsumer(TriggerConsumerInt<?> tc) {
         String[] canonicalIDs = tc.canonicalIDs();
         for (String canID : canonicalIDs) {
-
-            Set<TriggerConsumerInt<?>> tcSet = tcMap.get(canID);
-            if (tcSet == null) {
-                tcSet = new LinkedHashSet<TriggerConsumerInt<?>>();
-                tcMap.put(canID, tcSet);
-            }
-            tcSet.add(tc);
+            tcMap.computeIfAbsent(canID, k -> new LinkedHashSet<>()).add(tc);
         }
     }
 
@@ -226,10 +211,10 @@ public class StateMachine<C>
             }
 
         } else if (executor != null) {
-            TriggerConsumerInt<?>[] tcis = lookupTriggerConsumers(trigger);
-            fire(StateMachineEvent.Type.TRIGGER_PUBLISHED, trigger, null, null, null, tcis != null ? tcis.length : 0);
-            if (tcis != null) {
-                for (TriggerConsumerInt<?> c : tcis) {
+            TriggerConsumerInt<?>[] triggerConsumerInts = lookupTriggerConsumers(trigger);
+            fire(StateMachineEvent.Type.TRIGGER_PUBLISHED, trigger, null, null, null, triggerConsumerInts != null ? triggerConsumerInts.length : 0);
+            if (triggerConsumerInts != null) {
+                for (TriggerConsumerInt<?> c : triggerConsumerInts) {
                     executor.execute(new SupplierConsumerTask<>(trigger, new TriggerConsumerHolder<>(trigger, c)));
                 }
             }
@@ -269,13 +254,13 @@ public class StateMachine<C>
         if (isClosed())
             throw new IllegalStateException("State machine closed");
 
-        TriggerConsumerInt<?>[] tcis = lookupTriggerConsumers(trigger);
-        fire(StateMachineEvent.Type.TRIGGER_PUBLISHED, trigger, null, null, null, tcis != null ? tcis.length : 0);
+        TriggerConsumerInt<?>[] triggerConsumerInts = lookupTriggerConsumers(trigger);
+        fire(StateMachineEvent.Type.TRIGGER_PUBLISHED, trigger, null, null, null, triggerConsumerInts != null ? triggerConsumerInts.length : 0);
 
         if (log.isEnabled()) log.getLogger().info("" + trigger);
 
-        if (tcis != null) {
-            for (TriggerConsumerInt<?> c : tcis) {
+        if (triggerConsumerInts != null) {
+            for (TriggerConsumerInt<?> c : triggerConsumerInts) {
                 SupplierConsumerTask<?> sct = new SupplierConsumerTask<>(trigger, new TriggerConsumerHolder<>(trigger, c));
                 sct.run();
             }
@@ -310,14 +295,6 @@ public class StateMachine<C>
             Consumer<?> tci = current.lookupTriggerConsumer(trigger.getCanonicalID());
             if (tci != null) {
                 return publish(trigger);
-//                SupplierConsumerTask<?> sct = new SupplierConsumerTask(trigger, new TriggerConsumerHolder<>(tci));
-//                if (isScheduledTaskEnabled())
-//                    tsp.queue(0, sct);
-//                else if (executor != null)
-//                    executor.execute(sct);
-//                else
-//                    sct.run();
-
             }
         }
         return this;
@@ -375,10 +352,6 @@ public class StateMachine<C>
         return states.get(name);
     }
 
-//    @Override
-//    public StateInt<?> lookupState(Enum<?> name) {
-//        return lookupState(SUS.enumName(name));
-//    }
 
     @Override
     public StateInt<?> getCurrentState() {

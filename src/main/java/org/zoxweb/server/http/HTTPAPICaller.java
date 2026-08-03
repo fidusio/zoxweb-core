@@ -169,15 +169,15 @@ public class HTTPAPICaller
     }
 
 
-    public <I, O> HTTPCallback<I, O> asyncCall(GetName endpointName, I input, ConsumerCallback<O> consumerCallback) {
-        return asyncCall(endpointName.getName(), input, consumerCallback, 0);
+    public <I, O> HTTPCallback<I, O> asyncCall(GetName endpointName, HTTPAuthorization authorizationOverride, I input, ConsumerCallback<O> consumerCallback) {
+        return asyncCall(endpointName.getName(), authorizationOverride, input, consumerCallback, 0);
     }
 
-    public <I, O> HTTPCallback<I, O> asyncCall(String endpointName, I input, ConsumerCallback<O> consumerCallback) {
-        return asyncCall(endpointName, input, consumerCallback, 0);
+    public <I, O> HTTPCallback<I, O> asyncCall(String endpointName, HTTPAuthorization authorizationOverride, I input, ConsumerCallback<O> consumerCallback) {
+        return asyncCall(endpointName, authorizationOverride, input, consumerCallback, 0);
     }
 
-    public <I, O> HTTPCallback<I, O> asyncCall(String endpointName, I input, ConsumerCallback<O> consumerCallback, long delayInMillis) {
+    public <I, O> HTTPCallback<I, O> asyncCall(String endpointName, HTTPAuthorization authorizationOverride, I input, ConsumerCallback<O> consumerCallback, long delayInMillis) {
         HTTPAPIEndPoint<I, O> endPoint = (HTTPAPIEndPoint<I, O>) endPoints.get(SUS.toCanonicalID('.', domain, endpointName));
         if (endPoint == null)
             throw new IllegalArgumentException("endpoint " + endpointName + " not found");
@@ -185,7 +185,7 @@ public class HTTPAPICaller
         // is different wait the delay then invoke
         if (delayInMillis > 0) {
             ScheduledExecutorService tsp = endPoint.getScheduler() != null ? endPoint.getScheduler() : TaskUtil.defaultTaskScheduler();
-            tsp.schedule(() -> endPoint.asyncCall(callback, httpAuthorization), delayInMillis, TimeUnit.MILLISECONDS);
+            tsp.schedule(() -> endPoint.asyncCall(callback, authorizationOverride != null ? authorizationOverride :  httpAuthorization), delayInMillis, TimeUnit.MILLISECONDS);
         } else
             endPoint.asyncCall(callback, httpAuthorization);
 
@@ -198,15 +198,27 @@ public class HTTPAPICaller
         return endPoints.values().toArray(new HTTPAPIEndPoint[0]);
     }
 
-    public <I, O> O syncCall(GetName endpointName, I input) throws IOException {
-        return syncCall(endpointName.getName(), input);
-    }
+//    public <I, O> O syncCall(GetName endpointName, I input) throws IOException {
+//        return syncCall(endpointName.getName(), input);
+//    }
 
 
-    public <I, O> O syncCall(String endpointName, I input) throws IOException {
+    public <I, O> O syncCall(String endpointName, HTTPAuthorization authorizationOverride, I input) throws IOException {
         HTTPAPIEndPoint<I, O> endPoint = (HTTPAPIEndPoint<I, O>) endPoints.get(SUS.toCanonicalID('.', domain, endpointName));
-        return endPoint.syncCall(input, httpAuthorization).getData();
+        return endPoint.syncCall(input, authorizationOverride != null ? authorizationOverride : httpAuthorization).getData();
     }
+
+
+    public <I, O> O syncCall(GetName endpointName, HTTPAuthorization authorizationOverride, I input) throws IOException {
+        return syncCall(endpointName.getName(), authorizationOverride, input);
+    }
+
+
+//    public <I, O> O syncCall(String endpointName, I input) throws IOException {
+//        HTTPAPIEndPoint<I, O> endPoint = (HTTPAPIEndPoint<I, O>) endPoints.get(SUS.toCanonicalID('.', domain, endpointName));
+//        System.out.println("httpAuthorization: " + httpAuthorization);
+//        return endPoint.syncCall(input, httpAuthorization).getData();
+//    }
 
     public <I, O> HTTPAPIEndPoint<I, O> lookupEndPoint(String endpointName) {
         return (HTTPAPIEndPoint<I, O>) endPoints.get(SUS.toCanonicalID('.', domain, endpointName));

@@ -559,7 +559,7 @@ public class BCrypt {
     private static String hashpw(byte passwordb[], String salt, boolean for_check) {
         BCrypt B;
         String real_salt;
-        byte saltb[], hashed[];
+        byte[] saltb, hashed;
         char minor = (char) 0;
         int rounds, off;
         StringBuilder rs = new StringBuilder();
