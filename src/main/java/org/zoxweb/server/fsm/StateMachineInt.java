@@ -69,6 +69,9 @@ public interface StateMachineInt<C>
      */
     StateMachineInt<C> register(StateInt<?> state);
 
+    StateMachineInt<C> setEventLogEnabled(boolean enabled);
+    boolean isEventLogEnabled();
+
     /**
      * Deregisters a state from this state machine (the inverse of {@link #register(StateInt)}).
      * <p>
@@ -118,6 +121,30 @@ public interface StateMachineInt<C>
     default boolean deregister(Enum<?> name){
         return deregister(lookupState(name));
     }
+
+    /**
+     * Adds an observability listener to this machine.
+     * <p>
+     * Listeners are fully optional — a machine without listeners allocates no events and
+     * behaves exactly as before. Callbacks run inline on the thread where the event
+     * occurred and are exception-isolated; the delivered {@link StateMachineEvent} is
+     * valid only for the duration of the callback and must not be retained
+     * (see {@link StateMachineListener} for the full contract).
+     * </p>
+     *
+     * @param listener the listener to add; null is a no-op; adding the same instance
+     *                 twice registers it once
+     * @return this state machine for method chaining
+     */
+    StateMachineInt<C> addListener(StateMachineListener listener);
+
+    /**
+     * Removes a previously added observability listener.
+     *
+     * @param listener the listener to remove
+     * @return true if the listener was registered and has been removed
+     */
+    boolean removeListener(StateMachineListener listener);
 
     /**
      * Publishes a trigger asynchronously to all registered consumers.

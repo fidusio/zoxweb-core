@@ -53,6 +53,14 @@
  * runtime ({@link org.zoxweb.server.fsm.StateMachineInt#deregister(StateInt)} — suspend/resume
  * model; the INIT state is permanent and cannot be deregistered).
  *
+ * <h2>Observability</h2>
+ * Optional {@link org.zoxweb.server.fsm.StateMachineListener}s receive
+ * {@link org.zoxweb.server.fsm.StateMachineEvent}s (timestamped, sequence-ordered) for state
+ * changes, trigger publish/consumption, registration lifecycle, and start/close — inline,
+ * exception-isolated, zero allocation when no listener is attached. Events are valid only
+ * during the callback; {@link org.zoxweb.server.fsm.StateMachineEventHistory} keeps a bounded
+ * string-only history for traceability.
+ *
  * <h2>Execution modes</h2>
  * Chosen at construction of {@link org.zoxweb.server.fsm.StateMachine}:
  * <ol>

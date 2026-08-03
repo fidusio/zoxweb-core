@@ -24,7 +24,7 @@ public class Trigger<D>
 
     private final String canonicalID;
     private final D data;
-    private final StateInt lastState;
+    private final StateInt<?> lastState;
     private final long id = counter.getAndIncrement();
     private final long timestamp = System.currentTimeMillis();
 
@@ -35,14 +35,14 @@ public class Trigger<D>
      * @param lastState last state
      * @param data event data
      */
-    public Trigger(Object source, String canonicalID, StateInt lastState, D data) {
+    public Trigger(Object source, String canonicalID, StateInt<?> lastState, D data) {
         super(source);
         this.lastState = lastState;
         this.data = data;
         this.canonicalID = canonicalID;
     }
 
-    public Trigger(Object source, Enum<?> canonicalID, StateInt lastState, D data) {
+    public Trigger(Object source, Enum<?> canonicalID, StateInt<?> lastState, D data) {
         this(source, SUS.enumName(canonicalID), lastState, data);
     }
 
@@ -56,7 +56,7 @@ public class Trigger<D>
     }
 
     @Override
-    public StateInt lastState() {
+    public StateInt<?> lastState() {
         return lastState;
     }
 

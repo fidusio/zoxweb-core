@@ -10,6 +10,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -48,8 +49,10 @@ public class StateMachine<C>
     private C config;
     private final Executor executor;
     protected final AtomicBoolean isClosed = new AtomicBoolean(false);
+    private final AtomicBoolean isEventLogEnabled = new AtomicBoolean(true);
 
     private final AtomicReference<StateInt> currentState = new AtomicReference<>();
+    private final Set<StateMachineListener> listeners = new CopyOnWriteArraySet<StateMachineListener>();
 
 
     public StateMachine(String name) {
@@ -75,18 +78,75 @@ public class StateMachine<C>
     }
 
     @Override
-    public synchronized StateMachineInt<C> register(StateInt<?> state) {
+    public StateMachineInt<C> register(StateInt<?> state) {
         if (state != null) {
-            TriggerConsumerInt<?>[] triggers = state.triggers();
-            if (triggers != null) {
-                for (TriggerConsumerInt<?> tc : triggers) {
-                    mapTriggerConsumer(tc);
+            synchronized (this) {
+                TriggerConsumerInt<?>[] triggers = state.triggers();
+                if (triggers != null) {
+                    for (TriggerConsumerInt<?> tc : triggers) {
+                        mapTriggerConsumer(tc);
+                    }
                 }
+                state.setStateMachine(this);
+                states.put(state.getName(), state);
             }
-            state.setStateMachine(this);
-            states.put(state.getName(), state);
+            // fired outside the monitor — a listener must never hold the machine lock
+            fire(StateMachineEvent.Type.STATE_REGISTERED, null, null, null, state, 0);
         }
         return this;
+    }
+
+    @Override
+    public StateMachineInt<C> setEventLogEnabled(boolean enabled) {
+        isEventLogEnabled.set(enabled);
+        return this;
+    }
+
+    @Override
+    public boolean isEventLogEnabled() {
+        return isEventLogEnabled.get();
+    }
+
+    @Override
+    public StateMachineInt<C> addListener(StateMachineListener listener) {
+        if (listener != null)
+            listeners.add(listener);
+        return this;
+    }
+
+    @Override
+    public boolean removeListener(StateMachineListener listener) {
+        return listener != null && listeners.remove(listener);
+    }
+
+    /**
+     * Notifies all listeners of an event; the event is constructed only if listeners
+     * exist (zero-allocation fast path) and each listener is exception-isolated.
+     */
+    private void fire(StateMachineEvent.Type type,
+                      TriggerInt<?> trigger,
+                      TriggerConsumerInt<?> consumer,
+                      StateInt<?> oldState,
+                      StateInt<?> newState,
+                      int consumerCount) {
+        if (isEventLogEnabled.get() && !listeners.isEmpty()) {
+            StateMachineEvent event = new StateMachineEvent(this, type, trigger, consumer, oldState, newState, consumerCount);
+            for (StateMachineListener l : listeners) {
+                try {
+                    l.handleEvent(event);
+                } catch (Exception e) {
+                    if (log.isEnabled()) log.getLogger().info("listener failed: " + e);
+                }
+            }
+        }
+    }
+
+    /**
+     * Package-private: invoked by {@link TriggerConsumerHolder} after a consumer has
+     * successfully processed a trigger.
+     */
+    void fireTriggerConsumed(TriggerInt<?> trigger, TriggerConsumerInt<?> consumer) {
+        fire(StateMachineEvent.Type.TRIGGER_CONSUMED, trigger, consumer, null, null, 0);
     }
 
     @Override
@@ -119,7 +179,10 @@ public class StateMachine<C>
             states.remove(state.getName(), state);
         }
         // clear the current-state marker only if it is the deregistered state
-        currentState.compareAndSet(state, null);
+        if (currentState.compareAndSet(state, null))
+            fire(StateMachineEvent.Type.STATE_CHANGED, null, null, state, null, 0);
+        // completion event, fired last
+        fire(StateMachineEvent.Type.STATE_DEREGISTERED, null, null, null, state, 0);
         return true;
     }
 
@@ -155,17 +218,19 @@ public class StateMachine<C>
         if (log.isEnabled()) log.getLogger().info("" + trigger);
         if (isScheduledTaskEnabled()) {
             TriggerConsumerInt<?>[] tcis = lookupTriggerConsumers(trigger);
+            fire(StateMachineEvent.Type.TRIGGER_PUBLISHED, trigger, null, null, null, tcis != null ? tcis.length : 0);
             if (tcis != null) {
                 for (TriggerConsumerInt<?> c : tcis) {
-                    tsp.queue(0, new SupplierConsumerTask<>(trigger, new TriggerConsumerHolder<>(c)));
+                    tsp.queue(0, new SupplierConsumerTask<>(trigger, new TriggerConsumerHolder<>(trigger, c)));
                 }
             }
 
         } else if (executor != null) {
             TriggerConsumerInt<?>[] tcis = lookupTriggerConsumers(trigger);
+            fire(StateMachineEvent.Type.TRIGGER_PUBLISHED, trigger, null, null, null, tcis != null ? tcis.length : 0);
             if (tcis != null) {
                 for (TriggerConsumerInt<?> c : tcis) {
-                    executor.execute(new SupplierConsumerTask<>(trigger, new TriggerConsumerHolder<>(c)));
+                    executor.execute(new SupplierConsumerTask<>(trigger, new TriggerConsumerHolder<>(trigger, c)));
                 }
             }
         } else
@@ -205,12 +270,13 @@ public class StateMachine<C>
             throw new IllegalStateException("State machine closed");
 
         TriggerConsumerInt<?>[] tcis = lookupTriggerConsumers(trigger);
+        fire(StateMachineEvent.Type.TRIGGER_PUBLISHED, trigger, null, null, null, tcis != null ? tcis.length : 0);
 
         if (log.isEnabled()) log.getLogger().info("" + trigger);
 
         if (tcis != null) {
             for (TriggerConsumerInt<?> c : tcis) {
-                SupplierConsumerTask<?> sct = new SupplierConsumerTask<>(trigger, new TriggerConsumerHolder<>(c));
+                SupplierConsumerTask<?> sct = new SupplierConsumerTask<>(trigger, new TriggerConsumerHolder<>(trigger, c));
                 sct.run();
             }
         }
@@ -275,6 +341,8 @@ public class StateMachine<C>
 
     public void start(boolean sync) {
         if (tcMap.get(StateInt.States.INIT.getName()) != null) {
+            // listeners see the start before the INIT consumer runs
+            fire(StateMachineEvent.Type.MACHINE_STARTED, null, null, null, null, 0);
             if (sync)
                 publishSync(new Trigger<Void>(this, StateInt.States.INIT, null, null));
             else
@@ -319,14 +387,17 @@ public class StateMachine<C>
 
     @Override
     public void setCurrentState(StateInt<?> stateInt) {
-        currentState.set(stateInt);
+        StateInt<?> old = currentState.getAndSet(stateInt);
+        // fire only on an actual change; same-state dispatches are silent
+        if (old != stateInt)
+            fire(StateMachineEvent.Type.STATE_CHANGED, null, null, old, stateInt, 0);
     }
 
 
     @Override
     public void close() {
-        isClosed.getAndSet(true);
-
+        if (!isClosed.getAndSet(true))
+            fire(StateMachineEvent.Type.MACHINE_CLOSED, null, null, null, null, 0);
     }
 
     public boolean isClosed() {

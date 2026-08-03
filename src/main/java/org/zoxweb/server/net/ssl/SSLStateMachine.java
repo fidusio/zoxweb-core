@@ -141,14 +141,14 @@ public class SSLStateMachine extends StateMachine<SSLSessionConfig>
         sslSessionSM.setConfig(config);
         config.sslConnectionHelper = sslSessionSM;
 
-        TriggerConsumerInt<Void> init = new TriggerConsumer<Void>(StateInt.States.INIT) {
-            @Override
-            public void accept(Void o) {
-                if (log.isEnabled()) log.getLogger().info(getState().getStateMachine().getName() + " CREATED");
-                //SSLSessionConfig config = (SSLSessionConfig) getStateMachine().getConfig();
-                //publish(new Trigger<SelectableChannel>(getState(), null, SessionState.WAIT_FOR_HANDSHAKING));
-            }
-        };
+//        TriggerConsumerInt<Void> init = new TriggerConsumer<Void>(StateInt.States.INIT) {
+//            @Override
+//            public void accept(Void o) {
+//                if (log.isEnabled()) log.getLogger().info(getState().getStateMachine().getName() + " CREATED");
+//                //SSLSessionConfig config = (SSLSessionConfig) getStateMachine().getConfig();
+//                //publish(new Trigger<SelectableChannel>(getState(), null, SessionState.WAIT_FOR_HANDSHAKING));
+//            }
+//        };
 
 //    TriggerConsumerInt<SSLSessionCallback> closed =
 //        new TriggerConsumer<SSLSessionCallback>(SessionState.CLOSE) {
@@ -162,7 +162,8 @@ public class SSLStateMachine extends StateMachine<SSLSessionConfig>
 //        };
 
         sslSessionSM.setConfig(config)
-                .register(new State<>(StateInt.States.INIT).register(init))
+                .setEventLogEnabled(false)
+                .register(new State<>(StateInt.States.INIT).register((a)->{if (log.isEnabled()) log.getLogger().info(sslSessionSM.getName() + " CREATED");}, StateInt.States.INIT))
                 .register(new SSLHandshakingState())
                 .register(new SSLDataReadyState())
         //.register(new State(SessionState.CLOSE).register(closed))

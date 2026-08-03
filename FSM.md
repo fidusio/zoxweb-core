@@ -59,6 +59,17 @@ not declared anywhere.
     state clears the current-state marker (pre-init delivery policy applies).
     Deregistering the INIT state throws `IllegalArgumentException` — the bootstrap anchor
     is permanent. Unknown/null states return `false`.
+12. **Observability via optional listeners.** `sm.addListener(StateMachineListener)`
+    delivers `StateMachineEvent`s (sequence id + timestamp + type + details) for:
+    state changes, trigger published (with consumer count; 0 = unrouted), trigger
+    consumed (per consumer — where the logic lives), state registered/deregistered, and
+    machine start/close. Callbacks run inline on the emitting thread and are
+    exception-isolated; with no listeners nothing is allocated.
+    `sm.setEventLogEnabled(false)` is a master kill switch (default on) that mutes all
+    event delivery without removing listeners. **The event is valid only
+    during the callback — never retain it** (it pins states/consumers/triggers/payloads
+    against GC); keep `event.toLog()` strings for durable history, as the bundled
+    `StateMachineEventHistory` (bounded, string-only ring buffer) does.
 
 ## Build recipe
 
@@ -155,6 +166,20 @@ sm.setConfig(myConfig);          // shared object visible to every consumer
 sm.register(init);
 sm.register(processing);
 sm.start(true);                  // true = publish INIT synchronously, false = async
+```
+
+### Optional — observe the machine (tracing/metrics/audit)
+
+```java
+StateMachineEventHistory history = new StateMachineEventHistory(256);  // bounded log-line history
+sm.addListener(history);
+sm.addListener(event -> {                                              // or any custom listener
+    if (event.getType() == StateMachineEvent.Type.TRIGGER_CONSUMED)
+        metrics.count(event.getCanonicalID());
+    // do NOT retain 'event' — valid only inside this callback; keep event.toLog() if needed
+});
+...
+System.out.println(history.toLog("\n"));   // full traceability report
 ```
 
 ### Step 6 — Feed it events

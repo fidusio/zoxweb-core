@@ -16,16 +16,18 @@ import java.util.function.Consumer;
  */
 public class TriggerConsumerHolder<T>
         implements Consumer<T> {
-    private volatile Consumer<T> inner;
+    private final Consumer<T> inner;
+    private final TriggerInt<?> trigger;
 
 
-    TriggerConsumerHolder(Consumer<?> inner) {
+    TriggerConsumerHolder(TriggerInt<?> trigger, Consumer<?> inner) {
+        this.trigger = trigger;
         this.inner = (Consumer<T>) inner;
     }
 
     public void accept(T t) {
         if (inner instanceof TriggerConsumer) {
-            TriggerConsumer temp = (TriggerConsumer) inner;
+            TriggerConsumer<?> temp = (TriggerConsumer<?>) inner;
             temp.execCounter.incrementAndGet();
             temp.getState().getStateMachine().setCurrentState(temp.getState());
         }
@@ -34,5 +36,13 @@ public class TriggerConsumerHolder<T>
             TriggerConsumer.log.getLogger().info("" + inner);
 
         inner.accept(t);
+
+        // per-consumer execution record, fired only after successful processing
+        if (inner instanceof TriggerConsumerInt) {
+            TriggerConsumerInt<?> tci = (TriggerConsumerInt<?>) inner;
+            StateInt<?> state = tci.getState();
+            if (state != null && state.getStateMachine() instanceof StateMachine)
+                ((StateMachine<?>) state.getStateMachine()).fireTriggerConsumed(trigger, tci);
+        }
     }
 }
