@@ -16,7 +16,7 @@
 package org.zoxweb.shared.filters;
 
 import org.zoxweb.shared.util.DataEncoder;
-import org.zoxweb.shared.util.ListAsArray;
+import org.zoxweb.shared.util.CollectionAsArray;
 import org.zoxweb.shared.util.NamedDescription;
 import org.zoxweb.shared.util.SUS;
 
@@ -96,10 +96,10 @@ public class TokenMatcher
     private final TrieNode suffixTrie = new TrieNode();
     // CONTAINS / GLOB tiers — small lists scanned linearly. ListAsArray gives readers a
     // lock-free snapshot via asArray() while writers mutate under their own monitor.
-    private final ListAsArray<RuleEntry> containsRules =
-            new ListAsArray<RuleEntry>(new ArrayList<RuleEntry>(), new RuleEntry[0]);
-    private final ListAsArray<RuleEntry> globRules =
-            new ListAsArray<RuleEntry>(new ArrayList<RuleEntry>(), new RuleEntry[0]);
+    private final CollectionAsArray<RuleEntry> containsRules =
+            new CollectionAsArray<RuleEntry>(new ArrayList<RuleEntry>(), new RuleEntry[0]);
+    private final CollectionAsArray<RuleEntry> globRules =
+            new CollectionAsArray<RuleEntry>(new ArrayList<RuleEntry>(), new RuleEntry[0]);
 
     public TokenMatcher() {
         this(false);

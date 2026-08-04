@@ -281,6 +281,7 @@ public class NIOSocket
         cc.setChannel(channel);
         try {
             scheduledAttachment.setAppointment(taskSchedulerProcessor.queue(TimeInMillis.SECOND.mult(timeoutInSec), new NIOChannelMonitor(channel, selectorController, cc)));
+            //
             if (channel.connect(sa)) {
                 // we connected ULTRA fast connection (loopback)
                 SelectionKey selectionKey = selectorController.register(channel, 0, scheduledAttachment, false);
@@ -288,12 +289,11 @@ public class NIOSocket
                 return selectionKey;
             }
             // connection is pending, register for OP_CONNECT
-            SelectionKey selectionKey = selectorController.register(channel, SelectionKey.OP_CONNECT, scheduledAttachment, false);
-            return selectionKey;
+            return selectorController.register(channel, SelectionKey.OP_CONNECT, scheduledAttachment, false);
         } catch (IOException e) {
             SharedIOUtil.close(channel);
-            if (scheduledAttachment.attachment() != null)
-                scheduledAttachment.attachment().exception(e);
+            //if (scheduledAttachment.attachment() != null)
+            scheduledAttachment.attachment().exception(e);
             if (scheduledAttachment.getAppointment() != null)
                 scheduledAttachment.getAppointment().cancel();
             throw e;
@@ -317,7 +317,7 @@ public class NIOSocket
         if (key == null) {
             return;
         }
-        // While the connect is still pending, the key's attachment is the ScheduledAttachment
+        // While the connection is still pending, the key's attachment is the ScheduledAttachment
         // holding the NIOChannelMonitor connect-timeout appointment (it is swapped for the callback
         // only on a successful connect). Cancel it: closing the socket alone does NOT release this
         // scheduled appointment, so it would otherwise sit in the scheduler for the full timeout.
@@ -755,6 +755,8 @@ public class NIOSocket
                 if (executor != null)
                     executor.execute(() -> {
                         try {
+
+                            // threaded client ssl handshake
                             int keysOps = connectData.connected(key);
                             if (keysOps >= 0 && key.isValid()) {
                                 key.interestOps(keysOps);
