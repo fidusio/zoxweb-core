@@ -1,13 +1,14 @@
 package org.zoxweb.shared.util;
 
 import org.junit.jupiter.api.Test;
+import org.zoxweb.server.io.ByteBufferUtil;
 
 import java.nio.ByteBuffer;
 
 public class ByteBufferTest {
     @Test
     public void bufferCompact() {
-        ByteBuffer bb = ByteBuffer.allocate(10);
+        ByteBuffer bb = ByteBufferUtil.allocateByteBuffer(10);
         System.out.println(bb);
         System.out.println("buffer.put: " + bb.put((byte) 1));
         System.out.println("buffer.put: " + bb.put((byte) 2));

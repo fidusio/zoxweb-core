@@ -5,13 +5,12 @@ import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.net.BaseChannelOutputStream;
 import org.zoxweb.server.net.SelectorController;
+import org.zoxweb.shared.io.CloseableType;
 import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.net.IPAddress;
-import org.zoxweb.shared.io.CloseableType;
 import org.zoxweb.shared.util.SUS;
 
 import javax.net.ssl.*;
-import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -132,8 +131,7 @@ public class SSLSessionConfig
     }
 
 
-    public boolean isClientMode()
-    {
+    public boolean isClientMode() {
         return clientMode;
     }
 
@@ -168,31 +166,32 @@ public class SSLSessionConfig
     }
 
 
-    public synchronized SSLEngineResult smartWrap(ByteBuffer source, ByteBuffer destination, boolean flip)
-            throws SSLException {
-        if(flip)
-            ((Buffer) source).flip();
-        SSLEngineResult ret = sslEngine.wrap(source, destination);
-        source.compact();
-        return ret;
-    }
+//    public synchronized SSLEngineResult smartWrap(ByteBuffer source, ByteBuffer destination, boolean flip)
+//            throws SSLException {
+//        if(flip)
+//            ((Buffer) source).flip();
+//        SSLEngineResult ret = sslEngine.wrap(source, destination);
+//        source.compact();
+//        return ret;
+//    }
+//
+//    public synchronized SSLEngineResult smartUnwrap(ByteBuffer source, ByteBuffer destination, boolean flipSource) throws SSLException {
+//        if(flipSource)
+//            ((Buffer) source).flip();
+//        SSLEngineResult ret = sslEngine.unwrap(source, destination);
+//        source.compact();
+//        return ret;
+//    }
 
-    public synchronized SSLEngineResult smartUnwrap(ByteBuffer source, ByteBuffer destination) throws SSLException {
-        ((Buffer) source).flip();
-        SSLEngineResult ret = sslEngine.unwrap(source, destination);
-        source.compact();
-        return ret;
-    }
 
-
-    public void beginHandshake() throws SSLException {
+    public void beginHandshake(ByteBuffer inRawBuffer, ByteBuffer outRawBuffer) throws SSLException {
         if (!hasBegan.get()) {
             if (!hasBegan.getAndSet(true)) {
                 // set the ssl engine mode client or sever
                 sslEngine.setUseClientMode(clientMode);
                 // create the necessary byte buffer with the proper length
-                inSSLNetData = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, getPacketBufferSize());
-                outSSLNetData = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, getPacketBufferSize());
+                inSSLNetData = inRawBuffer != null ? inRawBuffer : ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, getPacketBufferSize());
+                outSSLNetData = outRawBuffer != null ? outRawBuffer : ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, getPacketBufferSize());
                 inAppData = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, getApplicationBufferSize());
                 // start the handshake
                 sslEngine.beginHandshake();

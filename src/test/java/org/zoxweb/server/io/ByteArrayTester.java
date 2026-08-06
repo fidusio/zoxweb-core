@@ -180,13 +180,13 @@ public class ByteArrayTester
 
 			
 			int intArray[] = {0, 1, 2, 3, 100000, 100000001, 1304434343};
-			ByteBuffer.allocate(4).putInt(0).array();
+			ByteBufferUtil.allocateByteBuffer(4).putInt(0).array();
 			TypeInBytes.intToBytes(0);
 			//long delta, delta1 = System.nanoTime();
 
 			for (int val : intArray) {
 				long delta = System.nanoTime();
-				byte[] buffer = ByteBuffer.allocate(4).putInt(val).array();
+				byte[] buffer = ByteBufferUtil.allocateByteBuffer(4).putInt(val).array();
 				delta = System.nanoTime() - delta;
 				
 				long delta1 = System.nanoTime();

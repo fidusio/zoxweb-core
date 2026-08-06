@@ -8,9 +8,11 @@ import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.UsageTracker;
 
+import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLEngineResult;
 import javax.net.ssl.SSLException;
 import java.io.IOException;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.channels.ByteChannel;
 
@@ -47,7 +49,7 @@ import static javax.net.ssl.SSLEngineResult.HandshakeStatus.*;
  * </p>
  * <ol>
  *     <li>read encrypted bytes from the channel</li>
- *     <li>decrypt via {@link SSLSessionConfig#smartUnwrap smartUnwrap}</li>
+ *     <li>decrypt via {@link SSLUtil#smartUnwrap smartUnwrap}</li>
  *     <li>deliver decrypted app data to the callback</li>
  *     <li>write any response back through the channel (synchronous — see invariant 2)</li>
  *     <li><b>try again</b> — re-read in case more ciphertext arrived during processing
@@ -59,7 +61,7 @@ import static javax.net.ssl.SSLEngineResult.HandshakeStatus.*;
  * <p>
  * Different sessions process fully in parallel on different workers; a single
  * session is strictly single-thread per dispatch window. The {@code synchronized}
- * keyword on {@link SSLSessionConfig#smartWrap smartWrite}/{@link SSLSessionConfig#smartUnwrap smartUnwrap}
+ * keyword on {@link SSLUtil#smartWrap smartWrite}/{@link SSLUtil#smartUnwrap smartUnwrap}
  * is belt-and-suspenders, not the actual serialization mechanism — the key gate is.
  * </p>
  *
@@ -98,7 +100,7 @@ public final class SSLUtil {
      * read ciphertext from the channel and decrypt app-data records.
      * <p>
      * Reads into {@link SSLSessionConfig#inSSLNetData}, then loops calling
-     * {@link SSLSessionConfig#smartUnwrap} until either the net buffer is fully
+     * {@link SSLUtil#smartUnwrap} until either the net buffer is fully
      * drained or a {@code BUFFER_UNDERFLOW} signals more wire bytes are needed.
      * Each decrypted record is delivered to {@code callback}. A read of -1 or
      * {@code CLOSED} unwrap status closes the session.
@@ -125,7 +127,7 @@ public final class SSLUtil {
                         // even if we have read zero it will trigger BUFFER_UNDERFLOW then we wait for incoming
                         // data
                         do {
-                            result = config.smartUnwrap(config.inSSLNetData, config.inAppData);
+                            result = smartUnwrap(config.sslEngine, config.inSSLNetData, config.inAppData, true, true);
                             if (log.isEnabled())
                                 log.getLogger().info("AFTER-NOT_HANDSHAKING-PROCESSING: " + result + " bytesRead: " + bytesRead + " callback: " + callback);
                             switch (result.getStatus()) {
@@ -298,7 +300,7 @@ public final class SSLUtil {
                     // data
                     if (log.isEnabled())
                         log.getLogger().info("BEFORE-UNWRAP: " + config.inSSLNetData + " bytes read " + bytesRead);
-                    SSLEngineResult result = config.smartUnwrap(config.inSSLNetData, ByteBufferUtil.EMPTY);
+                    SSLEngineResult result = smartUnwrap(config.sslEngine, config.inSSLNetData, ByteBufferUtil.EMPTY, true, true );
 
 
                     if (log.isEnabled()) {
@@ -338,6 +340,31 @@ public final class SSLUtil {
     }
 
 
+
+    public static  SSLEngineResult smartWrap(SSLEngine sslEngine, ByteBuffer source, ByteBuffer destination, boolean flipSource, boolean compactSource)
+            throws SSLException {
+        if(flipSource)
+            ((Buffer) source).flip();
+        SSLEngineResult ret = sslEngine.wrap(source, destination);
+        if (compactSource)
+            source.compact();
+        return ret;
+    }
+
+
+    public static SSLEngineResult smartUnwrap(SSLEngine sslEngine, ByteBuffer source, ByteBuffer destination, boolean flipSource, boolean compactSource) throws SSLException {
+        if(flipSource)
+            ((Buffer) source).flip();
+        SSLEngineResult ret = sslEngine.unwrap(source, destination);
+        if (compactSource)
+            source.compact();
+        return ret;
+    }
+
+
+
+
+
     /**
      * Handler for {@link javax.net.ssl.SSLEngineResult.HandshakeStatus#NEED_WRAP}:
      * generate outbound handshake bytes and send them on the channel.
@@ -360,7 +387,7 @@ public final class SSLUtil {
 
         if (config.getHandshakeStatus() == NEED_WRAP) {
             try {
-                SSLEngineResult result = config.smartWrap(ByteBufferUtil.EMPTY, config.outSSLNetData, true);
+                SSLEngineResult result = smartWrap(config.sslEngine,ByteBufferUtil.EMPTY, config.outSSLNetData, true, true);
                 // at handshake stage, data in appOut won't be
                 // processed hence dummy buffer
                 if (log.isEnabled())
@@ -402,12 +429,12 @@ public final class SSLUtil {
      * <ul>
      *     <li>{@code flip=true} — {@code bb} is in write-mode
      *         (position = end of plaintext, limit = capacity);
-     *         {@link SSLSessionConfig#smartWrap} will flip it before wrap.</li>
+     *         {@link SSLUtil#smartWrap} will flip it before wrap.</li>
      *     <li>{@code flip=false} — {@code bb} is already in read-mode
      *         (position = start of plaintext, limit = end); no flip performed.</li>
      * </ul>
      * <p>
-     * After wrap, {@link SSLSessionConfig#smartWrap} compacts {@code bb}.
+     * After wrap, {@link SSLUtil#smartWrap} compacts {@code bb}.
      * The destination {@code outSSLNetData} is always in write-mode after wrap,
      * so the subsequent {@link ByteBufferUtil#smartWrite} is invoked with
      * {@code flip=true} unconditionally.
@@ -434,7 +461,7 @@ public final class SSLUtil {
 
 
 
-            SSLEngineResult result = sslConfig.smartWrap(bb, sslConfig.outSSLNetData, flip);
+            SSLEngineResult result = smartWrap(sslConfig.sslEngine, bb, sslConfig.outSSLNetData, flip, true);
             if (log.isEnabled())
                 log.getLogger().info("AFTER-NEED_WRAP-PROCESSING: " + result);
             switch (result.getStatus()) {

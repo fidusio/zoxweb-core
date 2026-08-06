@@ -2,6 +2,7 @@ package org.zoxweb.server.fsm;
 
 import org.zoxweb.server.task.TaskSchedulerProcessor;
 import org.zoxweb.shared.util.GetConfig;
+import org.zoxweb.shared.util.GetNVProperties;
 import org.zoxweb.shared.util.GetName;
 import org.zoxweb.shared.util.SUS;
 
@@ -47,7 +48,7 @@ import java.util.concurrent.Executor;
  * @see TriggerConsumerInt
  */
 public interface StateMachineInt<C>
-        extends GetName, AutoCloseable, GetConfig<C> {
+        extends GetName, AutoCloseable, GetConfig<C>, GetNVProperties {
 
     /**
      * Registers a state with this state machine.
@@ -196,6 +197,9 @@ public interface StateMachineInt<C>
      * @return this state machine for method chaining
      */
     StateMachineInt<C> publishSync(TriggerInt<?> trigger);
+
+    <D> StateMachineInt<C> publishSync(String canID, D data);
+    <D> StateMachineInt<C> publishSync(Enum<?> canID, D data);
 
     /**
      * Convenience method to create and publish a trigger synchronously.

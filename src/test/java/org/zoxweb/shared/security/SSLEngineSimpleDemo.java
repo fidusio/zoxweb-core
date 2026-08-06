@@ -71,6 +71,7 @@ package org.zoxweb.shared.security;
  *      unwrap()        ...             Finished
  */
 
+import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.server.security.SecUtil;
 import org.zoxweb.shared.crypto.CryptoConst;
 
@@ -165,7 +166,7 @@ public class SSLEngineSimpleDemo {
 //        sslCtx.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
 //
 //        sslc = sslCtx;
-        sslc = SecUtil.initSSLContext(keyStoreFile, CryptoConst.PKCS12, passwd.toCharArray(), null, null,null);
+        sslc = SecUtil.initSSLContext(keyStoreFile, CryptoConst.PKCS12, passwd.toCharArray(), null, null, null);
     }
 
     /*
@@ -302,11 +303,11 @@ public class SSLEngineSimpleDemo {
          * tutorial purposes only.  In reality, only use direct
          * ByteBuffers when they give a clear performance enhancement.
          */
-        clientIn = ByteBuffer.allocate(appBufferMax + 50);
-        serverIn = ByteBuffer.allocate(appBufferMax + 50);
+        clientIn = ByteBufferUtil.allocateByteBuffer(appBufferMax + 50);
+        serverIn = ByteBufferUtil.allocateByteBuffer(appBufferMax + 50);
 
-        cTOs = ByteBuffer.allocateDirect(netBufferMax);
-        sTOc = ByteBuffer.allocateDirect(netBufferMax);
+        cTOs = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.DIRECT, netBufferMax);
+        sTOc = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.DIRECT, netBufferMax);
 
         clientOut = ByteBuffer.wrap("Hi Server, I'm Client".getBytes());
         serverOut = ByteBuffer.wrap("Hello Client, I'm Server".getBytes());
@@ -317,7 +318,7 @@ public class SSLEngineSimpleDemo {
      * go ahead and run them in this thread.
      */
     private static void runDelegatedTasks(SSLEngineResult result,
-            SSLEngine engine) throws Exception {
+                                          SSLEngine engine) throws Exception {
 
         if (result.getHandshakeStatus() == HandshakeStatus.NEED_TASK) {
             Runnable runnable;
@@ -328,7 +329,7 @@ public class SSLEngineSimpleDemo {
             HandshakeStatus hsStatus = engine.getHandshakeStatus();
             if (hsStatus == HandshakeStatus.NEED_TASK) {
                 throw new Exception(
-                    "handshake shouldn't need additional tasks");
+                        "handshake shouldn't need additional tasks");
             }
             log("\tnew HandshakeStatus: " + hsStatus);
         }
@@ -370,14 +371,14 @@ public class SSLEngineSimpleDemo {
         if (resultOnce) {
             resultOnce = false;
             System.out.println("The format of the SSLEngineResult is: \n" +
-                "\t\"getStatus() / getHandshakeStatus()\" +\n" +
-                "\t\"bytesConsumed() / bytesProduced()\"\n");
+                    "\t\"getStatus() / getHandshakeStatus()\" +\n" +
+                    "\t\"bytesConsumed() / bytesProduced()\"\n");
         }
         HandshakeStatus hsStatus = result.getHandshakeStatus();
         log(str +
-            result.getStatus() + "/" + hsStatus + ", " +
-            result.bytesConsumed() + "/" + result.bytesProduced() +
-            " bytes");
+                result.getStatus() + "/" + hsStatus + ", " +
+                result.bytesConsumed() + "/" + result.bytesProduced() +
+                " bytes");
         if (hsStatus == HandshakeStatus.FINISHED) {
             log("\t...ready for application data");
         }

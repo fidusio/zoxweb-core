@@ -4,6 +4,7 @@ import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.task.TaskSchedulerProcessor;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.shared.task.SupplierConsumerTask;
+import org.zoxweb.shared.util.NVGenericMap;
 import org.zoxweb.shared.util.SUS;
 
 import java.util.LinkedHashSet;
@@ -50,6 +51,7 @@ public class StateMachine<C>
     private final Executor executor;
     protected final AtomicBoolean isClosed = new AtomicBoolean(false);
     private final AtomicBoolean isEventLogEnabled = new AtomicBoolean(true);
+    private final NVGenericMap properties = new NVGenericMap("sm_properties");
 
     private final AtomicReference<StateInt<?>> currentState = new AtomicReference<>();
     private final Set<StateMachineListener> listeners = new CopyOnWriteArraySet<>();
@@ -194,7 +196,10 @@ public class StateMachine<C>
         }
     }
 
-
+    @Override
+    public NVGenericMap getProperties() {
+        return properties;
+    }
     @Override
     public StateMachineInt<C> publish(TriggerInt<?> trigger) {
         if (isClosed())
@@ -267,6 +272,16 @@ public class StateMachine<C>
         }
 
         return this;
+    }
+
+    @Override
+    public <D> StateMachineInt<C> publishSync(String canID, D data) {
+        return publishSync(new Trigger<>(this, canID, getCurrentState(), data));
+    }
+
+    @Override
+    public <D> StateMachineInt<C> publishSync(Enum<?> canID, D data) {
+        return publishSync(new Trigger<>(this, canID, getCurrentState(), data));
     }
 
     @Override

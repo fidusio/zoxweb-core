@@ -1,7 +1,7 @@
 package org.zoxweb.shared.util;
 
 import org.junit.jupiter.api.Test;
-
+import org.zoxweb.server.io.ByteBufferUtil;
 
 
 import java.nio.ByteBuffer;
@@ -16,7 +16,7 @@ public class ByteValueTest
     {
         byte[] result = BytesValue.SHORT.toBytes((short) 25999);
 
-        ByteBuffer bb = ByteBuffer.allocate(4);
+        ByteBuffer bb =  ByteBufferUtil.allocateByteBuffer(4);
         bb.putShort((short) 25999);
         System.out.println(result.length + " " + Arrays.toString(result) + " " + BytesValue.SHORT.toValue(result) + " " + Arrays.toString(bb.array()));
         result = BytesValue.INT.toBytes(4000000);

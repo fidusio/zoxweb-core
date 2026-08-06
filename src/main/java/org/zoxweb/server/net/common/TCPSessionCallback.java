@@ -172,7 +172,7 @@ public abstract class TCPSessionCallback
             setOutputStream(sslConfig.sslOutputStream);
 
 
-            sslConfig.beginHandshake();
+            sslConfig.beginHandshake(null, null);
             sslConfig.sslConnectionHelper = new CustomSSLStateMachine(this);
             // trigger the handshake process as client
             getConfig().sslConnectionHelper.publish(getConfig().getHandshakeStatus(), this);

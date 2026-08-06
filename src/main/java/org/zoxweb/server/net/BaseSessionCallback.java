@@ -19,11 +19,8 @@ public abstract class BaseSessionCallback<CF>
     private InetSocketAddress remoteAddress;
     private volatile BaseChannelOutputStream bcos;
     private volatile ByteChannel channel;
-    protected final CloseableTypeDelegate closeableDelegate= new CloseableTypeDelegate(null, false);
+    protected final CloseableTypeDelegate closeableDelegate = new CloseableTypeDelegate(null, false);
     protected String instanceID = null;
-
-
-
 
 
     public InetSocketAddress getRemoteAddress() {
@@ -35,12 +32,12 @@ public abstract class BaseSessionCallback<CF>
     }
 
     public void setRemoteAddress(IPAddress ipAddress) {
-        this.remoteAddress = new InetSocketAddress(ipAddress.getInetAddress(),  ipAddress.getPort());
+        this.remoteAddress = new InetSocketAddress(ipAddress.getInetAddress(), ipAddress.getPort());
     }
 
 
     public int connected(SelectionKey key) throws IOException {
-        return protocolHandler !=null ? protocolHandler.interestOps() : SelectionKey.OP_READ ;
+        return protocolHandler != null ? protocolHandler.interestOps() : SelectionKey.OP_READ;
     }
 
     @Override

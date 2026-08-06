@@ -81,6 +81,7 @@ public final class HTTPCallTool {
 
 
             ParamUtil.ParamMap params = ParamUtil.parse("-", args);
+            params.hide("-password");
             //int index = 0;
             int repeat = params.intValue("-r", 1);
             List<String> urls = params.lookup("-url");
@@ -110,8 +111,7 @@ public final class HTTPCallTool {
                 HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit(url, null, httpMethod);
                 hmcis[index++] = hmci;
                 hmci.setProxyAddress(proxyAddress);
-                if (user != null && password != null)
-                    hmci.setBasicAuthorization(user, password);
+
                 hmci.setHTTPErrorAsException(errorAsException);
 
 
@@ -128,6 +128,8 @@ public final class HTTPCallTool {
                 if (content != null)
                     hmci.setContent(content);
                 log.getLogger().info("HMCI: " + GSONUtil.toJSONDefault(hmci, true));
+                if (user != null && password != null)
+                    hmci.setBasicAuthorization(user, password);
                 HTTPAPIEndPoint<Void, byte[]> endpoint = new HTTPAPIEndPoint<Void, byte[]>(hmci)
                         .setExecutor(TaskUtil.defaultTaskProcessor());
 
@@ -195,6 +197,7 @@ public final class HTTPCallTool {
                     " rate: " + rc.rate(Const.TimeInMillis.SECOND.MILLIS) + " per/second" + " average call duration: " + rc.average() + " millis");
             log.getLogger().info("" + rc);
 
+            TaskUtil.sleep(2000);
             rc.reset().start();
             successCounter.set(0);
             failCounter.set(0);

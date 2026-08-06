@@ -260,7 +260,7 @@ public class SSLNIOSocketHandler
             if (log.isEnabled()) log.getLogger().info("SSLStateMachine");
         }
         sessionCallback.setRemoteAddress((InetSocketAddress) ((SocketChannel) asc).getRemoteAddress());
-        sslConfig.beginHandshake();
+        sslConfig.beginHandshake(null, null);
         // not sure about
         //config.beginHandshake(false);
         int ops = SelectionKey.OP_READ;

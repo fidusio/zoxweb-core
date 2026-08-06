@@ -16,11 +16,10 @@
 package org.zoxweb;
 
 import org.junit.jupiter.api.Test;
+import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.shared.util.BytesValue;
 import org.zoxweb.shared.util.Const;
 import org.zoxweb.shared.util.SharedBase64;
-
-import java.nio.ByteBuffer;
 
 public class PrimitiveTest {
 
@@ -59,7 +58,7 @@ public class PrimitiveTest {
         for (long v : longVals) {
             Long value = v;
             long delta = System.nanoTime();
-            byte[] bytesJ = ByteBuffer.allocate(Long.SIZE / Byte.SIZE).putLong(value).array();
+            byte[] bytesJ = ByteBufferUtil.allocateByteBuffer(Long.SIZE / Byte.SIZE).putLong(value).array();
             delta = System.nanoTime() - delta;
 
             long deltaZW = System.nanoTime();
@@ -91,7 +90,7 @@ public class PrimitiveTest {
         for (float v : floatVals) {
             Float value = Float.valueOf(v);
             long delta = System.nanoTime();
-            byte[] bytesJ = ByteBuffer.allocate(Float.SIZE / Byte.SIZE).putFloat(value).array();
+            byte[] bytesJ =  ByteBufferUtil.allocateByteBuffer(Float.SIZE / Byte.SIZE).putFloat(value).array();
             delta = System.nanoTime() - delta;
 
             long deltaZW = System.nanoTime();
