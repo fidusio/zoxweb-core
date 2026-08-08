@@ -522,4 +522,105 @@ public final class SUS {
 
         return null;
     }
+
+
+
+    /**
+     * Return the index of the first occurrence of match[] in buffer[]
+     *
+     * @param buffer
+     * @param match
+     * @return index of the match, -1 if no match found
+     */
+    public static int indexOf(byte[] buffer, byte[] match) {
+        return indexOf(buffer, 0, buffer.length, match, 0, match.length);
+    }
+
+    /**
+     * @param buffer      to look into
+     * @param fromIndex   start index of buffer
+     * @param toIndex     end index of buffer
+     * @param match       array to look for
+     * @param matchOffset offset in match buffer
+     * @param matchLen    length of data from matchOffset
+     * @return matching index inside buffer
+     */
+    public static int indexOf(byte[] buffer, int fromIndex, int toIndex, byte[] match, int matchOffset, int matchLen) {
+        return indexOf(buffer.length, buffer, fromIndex, toIndex, match, matchOffset, matchLen);
+    }
+
+
+    public static int indexOf(int bufferLimit, byte[] buffer, int fromIndex, int toIndex, byte[] match, int matchOffset, int matchLen) {
+        if (matchOffset < 0 || matchLen < 1 || (matchOffset + matchLen) > match.length || toIndex > bufferLimit || bufferLimit > buffer.length) {
+            throw new IndexOutOfBoundsException();
+        }
+
+        for (int i = fromIndex; i < toIndex; i++) {
+            int j = 0;
+
+            for (; j < matchLen && j + i < toIndex; j++) {
+                if (buffer[i + j] != match[matchOffset + j]) {
+                    break;
+                }
+            }
+
+            if (j == matchLen) {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    /**
+     * @param buffer
+     * @param bufferStartIndex
+     * @param bufferEndIndex
+     * @param cs
+     * @param csOffset
+     * @param csLen
+     * @param ignoreCase
+     * @return matching index
+     */
+    public static int indexOf(byte[] buffer, int bufferStartIndex, int bufferEndIndex, CharSequence cs, int csOffset, int csLen, boolean ignoreCase) {
+        if (csOffset < 0 || csLen < 1 || (csOffset + csLen) > cs.length() || bufferEndIndex > buffer.length) {
+            throw new IndexOutOfBoundsException();
+        }
+
+        for (int i = bufferStartIndex; i < bufferEndIndex; i++) {
+            int j = 0;
+
+            for (; j < csLen && j + i < bufferEndIndex; j++) {
+                if (ignoreCase) {
+                    if ((buffer[i + j] != Character.toUpperCase(cs.charAt(csOffset + j)) && buffer[i + j] != Character.toLowerCase(cs.charAt(csOffset + j)))) {
+                        break;
+                    }
+                } else if (buffer[i + j] != cs.charAt(csOffset + j)) {
+                    break;
+                }
+            }
+
+            if (j == csLen) {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+    /**
+     * @param buffer
+     * @param str
+     * @return matching index
+     */
+    public static int indexOf(byte[] buffer, String str) {
+        return indexOf(buffer, 0, buffer.length, str, 0, str.length(), false);
+    }
+    /**
+     * @param buffer
+     * @param str
+     * @return matching index
+     */
+    public static int indexOfIgnoreCase(byte[] buffer, String str) {
+        return indexOf(buffer, 0, buffer.length, str, 0, str.length(), true);
+    }
 }

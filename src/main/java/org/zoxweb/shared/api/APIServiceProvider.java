@@ -128,6 +128,4 @@ public interface APIServiceProvider<P, S>
         throw new APIException("Not supported");
     }
 
-    ;
-
 }

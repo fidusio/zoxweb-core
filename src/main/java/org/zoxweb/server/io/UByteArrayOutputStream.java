@@ -17,6 +17,7 @@ package org.zoxweb.server.io;
 
 import org.zoxweb.shared.io.BytesArray;
 import org.zoxweb.shared.io.DataBufferController;
+import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedStringUtil;
 import org.zoxweb.shared.util.SharedUtil;
 
@@ -166,7 +167,7 @@ public class UByteArrayOutputStream
      * @return index of the match, -1 no match found
      */
     public int indexOf(byte[] match) {
-        return SharedUtil.indexOf(getInternalBuffer(), 0, size(), match, 0, match.length);
+        return SUS.indexOf(getInternalBuffer(), 0, size(), match, 0, match.length);
     }
 
     /**
@@ -177,29 +178,29 @@ public class UByteArrayOutputStream
      * @return index -1 not found or index of the first match
      */
     public int indexOf(int startAt, byte[] match, int matchOffset, int matchLength) {
-        return SharedUtil.indexOf(getInternalBuffer(), startAt, size(), match, matchOffset, matchLength);
+        return SUS.indexOf(getInternalBuffer(), startAt, size(), match, matchOffset, matchLength);
     }
 
     public int indexOf(int startAt, byte[] match) {
-        return SharedUtil.indexOf(getInternalBuffer(), startAt, size(), match, 0, match.length);
+        return SUS.indexOf(getInternalBuffer(), startAt, size(), match, 0, match.length);
     }
 
     public int indexOf(int startAt, String str) {
         byte[] match = SharedStringUtil.getBytes(str);
-        return SharedUtil.indexOf(getInternalBuffer(), startAt, size(), match, 0, match.length);
+        return SUS.indexOf(getInternalBuffer(), startAt, size(), match, 0, match.length);
     }
 
     public int indexOf(int fromIndex, int toIndex, byte[] toMatch) {
-        return SharedUtil.indexOf(size(), getInternalBuffer(), fromIndex, toIndex, toMatch, 0, toMatch.length);
+        return SUS.indexOf(size(), getInternalBuffer(), fromIndex, toIndex, toMatch, 0, toMatch.length);
     }
 
 
     public int indexOf(String str) {
-        return SharedUtil.indexOf(getInternalBuffer(), 0, size(), str, 0, str.length(), false);
+        return SUS.indexOf(getInternalBuffer(), 0, size(), str, 0, str.length(), false);
     }
 
     public int indexOfIgnoreCase(String str) {
-        return SharedUtil.indexOf(getInternalBuffer(), 0, size(), str, 0, str.length(), true);
+        return SUS.indexOf(getInternalBuffer(), 0, size(), str, 0, str.length(), true);
     }
 
     /**
@@ -345,18 +346,13 @@ public class UByteArrayOutputStream
             throw new IndexOutOfBoundsException("Invalid index " + index + " or offset " + offset + " or length " + length);
         }
 
-        if (index > size() || offset > length) {
-            throw new IndexOutOfBoundsException("Index " + index + "bigger than size " + size() + " or offset > length " + (length - offset));
+        if (index > size() || length > array.length - offset) {
+            throw new IndexOutOfBoundsException("Index " + index + " bigger than size " + size() + " or offset " + offset + " + length " + length + " exceeds array length " + array.length);
         }
 
 
-        if (array.length == 0)
-            return;
-
-
-        int toCopyCount = length - offset;
         // set the new size
-        int newCount = count + toCopyCount;
+        int newCount = count + length;
         if (newCount == count)
             return;
 
@@ -377,11 +373,11 @@ public class UByteArrayOutputStream
         }
 
         // copy the array
-        System.arraycopy(array, offset, buf, index, toCopyCount);
+        System.arraycopy(array, offset, buf, index, length);
 
         // copy remainder;
         if (remainderLength > 0) {
-            System.arraycopy(remainderBuf, 0, buf, index + toCopyCount, remainderBuf.length);
+            System.arraycopy(remainderBuf, 0, buf, index + length, remainderBuf.length);
         }
 
         count = newCount;

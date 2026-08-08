@@ -21,7 +21,6 @@ import org.zoxweb.shared.util.Const;
 import org.zoxweb.shared.util.Const.TypeInBytes;
 import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedStringUtil;
-import org.zoxweb.shared.util.SharedUtil;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -149,10 +148,10 @@ public class ByteArrayTester
 			
 			for ( String str: matches)
 			{
-				System.out.println( str + " index " +SharedUtil.indexOf(os.getInternalBuffer(), 0, os.size(), str.getBytes(), 0, str.length()));
+				System.out.println( str + " index " +SUS.indexOf(os.getInternalBuffer(), 0, os.size(), str.getBytes(), 0, str.length()));
 				try
 				{
-					System.out.println( str + " index details " + SharedUtil.indexOf(os.getInternalBuffer(), 0, os.size(), str, 0, str.length(), true));
+					System.out.println( str + " index details " + SUS.indexOf(os.getInternalBuffer(), 0, os.size(), str, 0, str.length(), true));
 				}
 				catch( Exception e)
 				{
@@ -285,6 +284,37 @@ public class ByteArrayTester
 
 		}
 
+	}
+
+
+	@Test
+	public void testInsertAtOffsetLength()
+	{
+		UByteArrayOutputStream baos = new UByteArrayOutputStream();
+		baos.write("HeWorld");
+
+		// insert length bytes starting at offset: "llo" out of "XlloY"
+		byte[] src = SharedStringUtil.getBytes("XlloY");
+		baos.insertAt(2, src, 1, 3);
+		assert "HelloWorld".equals(baos.getString(0));
+
+		// offset > length is a valid range under the (offset, length) contract
+		byte[] tail = SharedStringUtil.getBytes("ABC!?");
+		baos.insertAt(baos.size(), tail, 3, 2);
+		assert "HelloWorld!?".equals(baos.getString(0));
+
+		// zero length is a no-op
+		baos.insertAt(0, tail, 5, 0);
+		assert "HelloWorld!?".equals(baos.getString(0));
+
+		// offset + length beyond the source array must throw
+		try {
+			baos.insertAt(0, tail, 4, 2);
+			assert false : "expected IndexOutOfBoundsException";
+		} catch (IndexOutOfBoundsException e) {
+			// expected
+		}
+		assert "HelloWorld!?".equals(baos.getString(0));
 	}
 
 

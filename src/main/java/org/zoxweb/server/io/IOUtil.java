@@ -20,18 +20,14 @@ import org.zoxweb.shared.crypto.HashResult;
 import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.net.ProxyType;
-import org.zoxweb.shared.util.Const;
 import org.zoxweb.shared.util.RegistrarMapDefault;
 import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedStringUtil;
 
 import java.io.*;
 import java.net.*;
-import java.nio.file.DirectoryStream;
+import java.nio.file.*;
 import java.nio.file.FileSystem;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -309,21 +305,22 @@ public class IOUtil {
     public static String inputStreamToString(InputStream is, boolean close)
             throws IOException {
         byte[] buffer = ByteBufferUtil.allocateByteArray(SharedIOUtil.K_8);
-        StringBuilder sb = new StringBuilder();
+        UByteArrayOutputStream ubaos = ByteBufferUtil.allocateUBAOS(256);
         int read;
+
         try {
             while ((read = is.read(buffer, 0, buffer.length)) > 0) {
-                sb.append(new String(buffer, 0, read, Const.UTF_8));
+               ubaos.write(buffer, 0, read);
             }
+            return ubaos.getString(0, ubaos.size());
 
         } finally {
+            ByteBufferUtil.cache(ubaos);
             ByteBufferUtil.cache(buffer);
             if (close) {
                 SharedIOUtil.close(is);
             }
         }
-
-        return sb.toString();
     }
 
     /**

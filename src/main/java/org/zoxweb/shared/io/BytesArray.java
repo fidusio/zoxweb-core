@@ -155,7 +155,7 @@ public final class BytesArray
      */
     public int indexOf(byte[] match) {
         checkValidity();
-        return SharedUtil.indexOf(array, offset, offset + length, match, 0, match.length);
+        return SUS.indexOf(array, offset, offset + length, match, 0, match.length);
     }
 
 
@@ -171,7 +171,7 @@ public final class BytesArray
         if (startAt < 0)
             throw new IllegalArgumentException("Negative start index " + startAt);
 
-        int ret = SharedUtil.indexOf(array, offset + startAt, offset + length, match, matchOffset, matchLength);
+        int ret = SUS.indexOf(array, offset + startAt, offset + length, match, matchOffset, matchLength);
         return ret != -1 ? ret - offset : -1;
     }
 
@@ -179,7 +179,7 @@ public final class BytesArray
         checkValidity();
         if (startAt < 0)
             throw new IllegalArgumentException("Negative start index " + startAt);
-        int ret = SharedUtil.indexOf(array, offset + startAt, offset + length, match, 0, match.length);
+        int ret = SUS.indexOf(array, offset + startAt, offset + length, match, 0, match.length);
         return ret != -1 ? ret - offset : -1;
     }
 
@@ -188,20 +188,20 @@ public final class BytesArray
         if (startAt < 0)
             throw new IllegalArgumentException("Negative start index " + startAt);
         byte[] match = SharedStringUtil.getBytes(str);
-        int ret = SharedUtil.indexOf(array, offset + startAt, offset + length, match, 0, match.length);
+        int ret = SUS.indexOf(array, offset + startAt, offset + length, match, 0, match.length);
         return ret != -1 ? ret - offset : -1;
     }
 
 
     public int indexOf(String str) {
         checkValidity();
-        int ret = SharedUtil.indexOf(array, offset, offset + length, str, 0, str.length(), false);
+        int ret = SUS.indexOf(array, offset, offset + length, str, 0, str.length(), false);
         return ret != -1 ? ret - offset : -1;
     }
 
     public int indexOfIgnoreCase(String str) {
         checkValidity();
-        int ret = SharedUtil.indexOf(array, offset, offset + length, str, 0, str.length(), true);
+        int ret = SUS.indexOf(array, offset, offset + length, str, 0, str.length(), true);
         return ret != -1 ? ret - offset : -1;
     }
 

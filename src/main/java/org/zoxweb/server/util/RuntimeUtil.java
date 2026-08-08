@@ -162,27 +162,76 @@ public class RuntimeUtil {
     public static String getRuntimeResponse(Process p, ResultAttribute ra)
             throws IOException, InterruptedException {
 
+//        if (p == null) {
+//            return "";
+//        }
+//
+//        InputStream is = null;
+//
+//        switch (ra) {
+//            case OUTPUT:
+//                is = p.getInputStream();
+//                break;
+//            case ERROR:
+//                is = p.getErrorStream();
+//                break;
+//            case EXIT_CODE:
+//                p.waitFor();
+//                return "" + p.exitValue();
+//        }
+//
+//        p.waitFor();
+//
+//        return IOUtil.inputStreamToString(is, false);
         if (p == null) {
             return "";
         }
 
-        InputStream is = null;
+        InputStream toCapture;
+        InputStream toDiscard;
 
         switch (ra) {
             case OUTPUT:
-                is = p.getInputStream();
+                toCapture = p.getInputStream();
+                toDiscard = p.getErrorStream();
                 break;
             case ERROR:
-                is = p.getErrorStream();
+                toCapture = p.getErrorStream();
+                toDiscard = p.getInputStream();
                 break;
-            case EXIT_CODE:
-                p.waitFor();
-                return "" + p.exitValue();
+            default: // EXIT_CODE: capture nothing, drain everything
+                toCapture = null;
+                toDiscard = p.getErrorStream();
+                break;
+        }
+
+        // both pipes must be drained to EOF before waitFor, otherwise a child
+        // writing more than the pipe buffer blocks forever and so does waitFor
+        Thread drainer = new Thread(() -> {
+            try {
+                IOUtil.countInputStreamBytes(toDiscard, false);
+            } catch (IOException e) {
+                // pipe closed, nothing to do
+            }
+        });
+        drainer.setDaemon(true);
+        drainer.start();
+
+        String ret = "";
+        if (toCapture != null) {
+            ret = IOUtil.inputStreamToString(toCapture, false);
+        } else {
+            IOUtil.countInputStreamBytes(p.getInputStream(), false);
         }
 
         p.waitFor();
+        drainer.join();
 
-        return IOUtil.inputStreamToString(is, false);
+        if (ra == ResultAttribute.EXIT_CODE) {
+            return "" + p.exitValue();
+        }
+
+        return ret;
     }
 
 
@@ -284,28 +333,25 @@ public class RuntimeUtil {
 
     public static JavaClassVersion checkClassVersion(String filename)
             throws IOException {
-        FileInputStream fis = null;
 
-        try {
-            File file = new File(filename);
-            if (!file.exists()) {
-                file = new File(filename + ".class");
-            }
 
-            if (!file.exists()) {
-                throw new FileNotFoundException("File:" + filename);
-            }
-
-            fis = new FileInputStream(file);
-
-            return checkClassVersion(fis);
-        } finally {
-            SharedIOUtil.close(fis);
+        File file = new File(filename);
+        if (!file.exists()) {
+            file = new File(filename + ".class");
         }
+
+        if (!file.exists()) {
+            throw new FileNotFoundException("File:" + filename);
+        }
+
+
+        return checkClassVersion(new FileInputStream(file), true);
+
     }
 
-    public static JavaClassVersion checkClassVersion(InputStream fis)
+    public static JavaClassVersion checkClassVersion(InputStream fis, boolean autoClose)
             throws IOException {
+        SUS.checkIfNull("fis null", fis);
         DataInputStream in = null;
 
         try {
@@ -320,9 +366,8 @@ public class RuntimeUtil {
             int major = in.readUnsignedShort();
             return JavaClassVersion.lookup(major, minor);
         } finally {
-            SharedIOUtil.close(fis);
-            SharedIOUtil.close(in);
-
+            if (autoClose)
+                SharedIOUtil.close(in);
         }
     }
 
@@ -417,6 +462,11 @@ public class RuntimeUtil {
             throw new IOException("Failed to run ipset command", e);
         }
 
+    }
+
+
+    public static void invokeGC() {
+        Runtime.getRuntime().gc();
     }
 
 
