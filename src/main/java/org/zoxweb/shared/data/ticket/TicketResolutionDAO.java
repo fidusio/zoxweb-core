@@ -26,8 +26,8 @@ import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.SharedUtil;
 
 /**
- *
- *
+ * The TicketResolutionDAO class represents a single resolution entry for a support ticket, tracking the resolution
+ * status, the time spent, and a detailed description of the resolution.
  */
 @SuppressWarnings("serial")
 public class TicketResolutionDAO

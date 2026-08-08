@@ -27,7 +27,8 @@ import org.zoxweb.shared.util.SharedUtil;
 import org.zoxweb.shared.util.NVConfigEntity.ArrayType;
 
 /**
- *
+ * The TicketContainerDAO class represents a support ticket that groups the ticket status, the ticket issuer information,
+ * an optional billing items container, and the ticket resolutions added to its content.
  */
 @SuppressWarnings("serial")
 public class TicketContainerDAO

@@ -21,7 +21,9 @@ import org.zoxweb.shared.util.NVConfigEntity.ArrayType;
 import java.util.List;
 
 /**
- *
+ * The NVEntityContainerDAO class defines a canonical-ID entity that holds a list
+ * of NVEntity objects as its content and supports lookup of contained entities
+ * by reference ID.
  */
 @SuppressWarnings("serial")
 public class NVEntityContainerDAO

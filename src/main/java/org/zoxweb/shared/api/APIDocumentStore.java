@@ -27,8 +27,8 @@ import java.util.Map;
 /**
  * The API document store interface which extends API service provider interface.
  *
- * @param <P>
- * @param <S>
+ * @param <P> Protocol specific connection
+ * @param <S> System specific connection
  */
 public interface APIDocumentStore<P, S>
         extends APIServiceProvider<P, S> {

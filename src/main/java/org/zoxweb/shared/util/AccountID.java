@@ -18,7 +18,7 @@ package org.zoxweb.shared.util;
 /**
  * The account ID interface.
  * @author mzebib
- * @param <T>
+ * @param <T> the account identifier type, backed by the subject GUID
  */
 public interface AccountID<T>
         extends SubjectGUID<T> {

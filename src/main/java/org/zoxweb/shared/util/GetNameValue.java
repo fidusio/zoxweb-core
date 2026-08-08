@@ -20,7 +20,7 @@ import java.util.Objects;
 /**
  * The name value pair getter definition interface.
  *
- * @param <V>
+ * @param <V> the value type of the name value pair
  * @author mnael
  */
 public interface GetNameValue<V>

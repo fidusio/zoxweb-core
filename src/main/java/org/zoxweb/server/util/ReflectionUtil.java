@@ -27,6 +27,12 @@ import java.util.*;
 
 
 /**
+ * Static reflection helpers: annotation scanning and matching on classes,
+ * methods, and parameters; field lookup by type and modifiers; method
+ * signature matching and parameter-compatibility checks; annotation-driven and
+ * positional method invocation with automatic argument arrangement; and bean
+ * instantiation supporting singleton factory methods and fields.
+ *
  * @author javaconsigliere
  */
 public class ReflectionUtil {

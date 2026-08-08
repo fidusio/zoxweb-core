@@ -23,7 +23,9 @@ import org.zoxweb.shared.util.Const.Bidi;
 import org.zoxweb.shared.util.NVConfigEntity.ArrayType;
 
 /**
- *
+ * Display mapping for an NVConfigEntity: associates an NVConfigEntity with a
+ * list of {@link NVCMap} attribute mappings, along with the display language
+ * and its direction (bidi).
  */
 @SuppressWarnings("serial")
 public class NVCEMap

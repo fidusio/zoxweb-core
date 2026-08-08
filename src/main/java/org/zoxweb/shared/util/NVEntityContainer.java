@@ -16,7 +16,9 @@
 package org.zoxweb.shared.util;
 
 /**
- *
+ * Contract for objects that contain NVEntity instances and can be queried
+ * for containment by reference ID or by entity, returning the matching
+ * contained NVEntity or null if not found.
  */
 public interface NVEntityContainer {
 

@@ -19,7 +19,7 @@ package org.zoxweb.shared.util;
  * The setter part of the value interface.
  * @author mnael
  *
- * @param <V>
+ * @param <V> the type of the value to set
  */
 public interface SetValue<V>
         extends GetValue<V> {

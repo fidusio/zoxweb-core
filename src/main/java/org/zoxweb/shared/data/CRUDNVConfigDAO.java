@@ -20,10 +20,11 @@ import org.zoxweb.shared.util.CRUDNVConfig;
 import org.zoxweb.shared.util.NVConfig;
 
 /**
- *
+ * The CRUDNVConfigDAO class is a CRUD event that pairs a CRUD operation
+ * with the NVConfig meta definition it applies to.
  */
 @SuppressWarnings("serial")
-public class CRUDNVConfigDAO 
+public class CRUDNVConfigDAO
 	extends CRUDEventDAO 
 	implements CRUDNVConfig
 {

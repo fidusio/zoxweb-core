@@ -21,6 +21,8 @@ import org.zoxweb.shared.util.*;
 import java.math.BigDecimal;
 
 /**
+ * This class represents a monetary amount composed of a currency and a BigDecimal value,
+ * with the currency defaulting to USD.
  * @author javaconsigliere@gmail.com
  *
  */

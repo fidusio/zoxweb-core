@@ -24,7 +24,8 @@ import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.SharedUtil;
 
 /**
- * 
+ * The SimpleDocumentDAO class defines a simple note document with a plain text
+ * content property, serving as the base class for document type entities.
  * @author mzebib
  *
  */

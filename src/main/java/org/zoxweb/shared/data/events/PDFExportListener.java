@@ -17,7 +17,7 @@ package org.zoxweb.shared.data.events;
 
 /**
  * The PDF export listener interface.
- * @param <V>
+ * @param <V> the type of the value passed to the PDF export action
  */
 public interface PDFExportListener<V>
 	extends ActionBaseListener<V>

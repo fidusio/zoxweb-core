@@ -20,7 +20,8 @@ import org.zoxweb.shared.util.*;
 import java.util.Date;
 
 /**
- *
+ * The TimeStampDAO class is the abstract base class for time-stamped entities,
+ * tracking the creation, last update, and last read timestamps in millis.
  */
 @SuppressWarnings("serial")
 public abstract class TimeStampDAO

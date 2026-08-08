@@ -22,11 +22,13 @@ import org.zoxweb.shared.filters.FilterType;
 import org.zoxweb.shared.util.*;
 
 /**
+ * This class represents an access code with a usage count and quota, case sensitivity
+ * matching option, and an associated session duration in milliseconds.
  * @author mnael
  *
  */
 @SuppressWarnings("serial")
-public class AccessCodeDAO 
+public class AccessCodeDAO
     extends SetNameDescriptionDAO
     implements SetCanonicalID
 {

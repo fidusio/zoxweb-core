@@ -23,7 +23,10 @@ import org.zoxweb.shared.api.APIException.Category;
 import org.zoxweb.shared.api.APIException.Code;
 
 /**
- *
+ * Singleton {@link APIExceptionHandler} for the SMTP notification provider.
+ * It maps SMTP transport exceptions to {@link APIException}s (see the
+ * {@link SMTPError} catalog of error name/value/category/code entries) and
+ * rethrows them via {@link #throwException(Exception)}.
  */
 public class SMTPExceptionHandler
         implements APIExceptionHandler {

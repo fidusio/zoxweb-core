@@ -16,40 +16,62 @@
 package org.zoxweb.shared.util;
 
 /**
+ * Bidirectional converter between a value type and its byte array
+ * representation. Numeric conversions are big-endian (network byte order);
+ * strings use UTF-8. Ready-to-use singletons are provided for the common
+ * types: {@link #SHORT}, {@link #INT}, {@link #LONG}, {@link #FLOAT},
+ * {@link #DOUBLE} and {@link #STRING}.
  *
- * @param <V>
+ * @param <V> the value type being converted to and from bytes
  */
 public interface BytesValue<V> {
     /**
-     *
-     * @param v to be converted
-     * @return byte array
+     * Converts a single value to a newly allocated byte array.
+     * @param v value to be converted
+     * @return byte array representation of v
      */
     byte[] toBytes(V v);
 
     //byte[] toBytes(V v, byte[] retBuffer, int retStartIndex);
 
+    /**
+     * Converts one or more values into a byte buffer, writing them back to back.
+     * @param retBuffer buffer to write into, if null a new buffer of the exact size is allocated
+     * @param retStartIndex index in retBuffer where writing starts, ignored if retBuffer is null
+     * @param v values to be converted
+     * @return retBuffer, or the newly allocated buffer if retBuffer was null
+     */
     byte[] toBytes(byte[] retBuffer, int retStartIndex, @SuppressWarnings("unchecked") V... v);
 
     /**
-     *
-     * @param bytes
-     * @return
+     * Converts a whole byte array back to a value.
+     * @param bytes byte array to convert
+     * @return the decoded value
      */
     V toValue(byte[] bytes);
 
     /**
-     *
-     * @param bytes
-     * @param offset
-     * @param length
-     * @return
+     * Converts a byte array subrange back to a value.
+     * @param bytes byte array to convert
+     * @param offset index of the first byte to read
+     * @param length number of bytes to read
+     * @return the decoded value
      */
     V toValue(byte[] bytes, int offset, int length);
 
+    /**
+     * Converts a byte array back to a value starting at offset, reading the
+     * value type's natural size (e.g. 4 bytes for {@link #INT}).
+     * @param bytes byte array to convert
+     * @param offset index of the first byte to read
+     * @return the decoded value
+     */
     V toValue(byte[] bytes, int offset);
 
 
+    /**
+     * Short converter, 2 bytes per value, big-endian.
+     */
     BytesValue<Short> SHORT = new BytesValue<Short>() {
         public byte[] toBytes(Short in) {
 
@@ -93,6 +115,9 @@ public interface BytesValue<V> {
     };
 
 
+    /**
+     * Integer converter, 4 bytes per value, big-endian.
+     */
     BytesValue<Integer> INT = new BytesValue<Integer>() {
         public byte[] toBytes(Integer in) {
             return toBytes(null, 0, in);
@@ -135,6 +160,9 @@ public interface BytesValue<V> {
         }
     };
 
+    /**
+     * Long converter, 8 bytes per value, big-endian.
+     */
     BytesValue<Long> LONG = new BytesValue<Long>() {
         public byte[] toBytes(Long in) {
             return toBytes(null, 0, in);
@@ -199,6 +227,9 @@ public interface BytesValue<V> {
     };
 
 
+    /**
+     * Float converter, 4 bytes per value, big-endian IEEE 754 bits.
+     */
     BytesValue<Float> FLOAT = new BytesValue<Float>() {
         public byte[] toBytes(Float in) {
             return toBytes(null, 0, in);
@@ -254,6 +285,9 @@ public interface BytesValue<V> {
 
     };
 
+    /**
+     * Double converter, 8 bytes per value, big-endian IEEE 754 bits.
+     */
     BytesValue<Double> DOUBLE = new BytesValue<Double>() {
         public byte[] toBytes(Double in) {
             return toBytes(null, 0, in);
@@ -304,6 +338,10 @@ public interface BytesValue<V> {
 
     };
 
+    /**
+     * String converter, UTF-8 encoded, variable length; toValue(bytes, offset)
+     * is not supported since the length can't be inferred.
+     */
     BytesValue<String> STRING = new BytesValue<String>() {
 
 

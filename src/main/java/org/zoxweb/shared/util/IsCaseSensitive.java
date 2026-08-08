@@ -16,14 +16,15 @@
 package org.zoxweb.shared.util;
 
 /**
- *
+ * Read-only view of the case sensitivity of an object, typically one that is
+ * matched or looked up by name (keys, tokens, filters). The mutable counterpart
+ * is {@link SetCaseSensitive}.
  */
-public interface IsCaseSensitive
-{
+public interface IsCaseSensitive {
 
-	/**
-	 * Checks if case insensitive.
-	 * @return true if case sensitive
-	 */
-	public boolean isCaseInsensitive();
+    /**
+     * Checks if name matching ignores character case.
+     * @return true if matching is case insensitive, false if case sensitive
+     */
+    boolean isCaseInsensitive();
 }

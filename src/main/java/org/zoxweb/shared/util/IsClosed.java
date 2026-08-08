@@ -16,7 +16,7 @@
 package org.zoxweb.shared.util;
 
 /**
- *
+ * Capability interface to check whether a resource has been closed.
  */
 public interface IsClosed {
 

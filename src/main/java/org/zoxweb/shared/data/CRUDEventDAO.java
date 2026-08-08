@@ -19,7 +19,8 @@ import org.zoxweb.shared.util.CRUD;
 import org.zoxweb.shared.util.CRUDEvent;
 
 /**
- *
+ * The CRUDEventDAO class is the abstract base implementation of CRUDEvent,
+ * holding the CRUD operation (create, read, update, or delete) associated with an event.
  */
 @SuppressWarnings("serial")
 public abstract class CRUDEventDAO

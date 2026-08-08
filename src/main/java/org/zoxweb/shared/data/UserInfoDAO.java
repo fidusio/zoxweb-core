@@ -29,10 +29,11 @@ import org.zoxweb.shared.util.SharedUtil;
 import org.zoxweb.shared.util.NVConfigEntity.ArrayType;
 
 /**
- *
+ * The UserInfoDAO class extends the base user information with a list of
+ * aliases and a list of credit cards associated with the user.
  */
 @SuppressWarnings("serial")
-public class UserInfoDAO 
+public class UserInfoDAO
 	extends UserInfoBaseDAO
 {
 	

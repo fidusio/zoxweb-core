@@ -10,6 +10,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ * This annotation declares the security constraints of a method or class: the accepted
+ * authentication types, the required permissions and roles with their logical operators,
+ * custom restrictions, and the allowed URI schemes.
  * @author javaconsigliere@gmail.com
  */
 @Target({ElementType.METHOD, ElementType.TYPE})

@@ -18,7 +18,7 @@ package org.zoxweb.shared.util;
 /**
  * The CRUD operation interface.
  * @author mzebib
- * @param <V>
+ * @param <V> the type of value the CRUD operation is applied to
  */
 public interface CRUDOperation<V> {
     /**

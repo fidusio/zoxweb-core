@@ -19,8 +19,9 @@ import org.zoxweb.shared.util.Const.RelationalOperator;
 import org.zoxweb.shared.util.*;
 
 /**
- * This class declares query criteria including: name, value, and 
+ * This class declares query criteria including: name, value, and
  * relational operator.
+ * @param <V> Type of the value to match
  * @author mzebib
  */
 @SuppressWarnings("serial")

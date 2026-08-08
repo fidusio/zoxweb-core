@@ -22,7 +22,10 @@ import java.io.Writer;
 import java.security.MessageDigest;
 
 /**
- *
+ * PrintWriter that feeds every chunk of characters written through a
+ * {@link MultiDigest}, updating the associated message digests and byte count
+ * as a side effect of writing. The accumulated digest statistics are logged
+ * when the writer is closed.
  */
 public class FilteredPrintWriter
         extends PrintWriter {

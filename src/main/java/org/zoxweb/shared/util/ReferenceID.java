@@ -24,6 +24,7 @@ package org.zoxweb.shared.util;
  * </ol>
  * @author mnael
  *
+ * @param <T> the reference identifier type, backed by the global ID
  */
 public interface ReferenceID<T>
         extends GlobalID<T> {

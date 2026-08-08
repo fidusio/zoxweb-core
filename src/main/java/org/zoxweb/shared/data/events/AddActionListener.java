@@ -17,7 +17,7 @@ package org.zoxweb.shared.data.events;
 
 /**
  * The add action listener interface.
- * @param <V>
+ * @param <V> the type of the value passed to the add action
  */
 public interface AddActionListener<V>
 	extends ActionBaseListener<V>

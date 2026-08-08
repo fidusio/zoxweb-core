@@ -17,7 +17,7 @@ package org.zoxweb.shared.data.events;
 
 /**
  * The update action listener interface.
- * @param <V>
+ * @param <V> the type of the value passed to the update action
  */
 public interface UpdateActionListener<V>
 	extends ActionBaseListener<V>

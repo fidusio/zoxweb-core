@@ -17,6 +17,7 @@ package org.zoxweb.shared.data.events;
 
 /**
  * The preview action listener interface.
+ * @param <V> the type of the value passed to the preview action
  */
 public interface PreviewActionListener<V>
 	extends ActionBaseListener<V>

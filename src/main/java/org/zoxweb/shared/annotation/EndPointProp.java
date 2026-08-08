@@ -25,9 +25,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * @author javaconsigliere@gmail.com
  * This annotation is a generic binding between Servlet or WebService handler and a class defition
  * The implementing class be a bean and published via the EndPointsConfig.json file
+ * @author javaconsigliere@gmail.com
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)

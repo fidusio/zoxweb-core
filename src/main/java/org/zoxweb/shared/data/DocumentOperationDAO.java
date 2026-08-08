@@ -25,7 +25,9 @@ import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.SharedUtil;
 
 /**
- *
+ * The DocumentOperationDAO class defines an operation request on a document:
+ * the CRUD action to perform, the drop coordinates (x, y with display unit),
+ * and the reference IDs of the target folder and API configuration.
  * @author mzebib
  *
  */

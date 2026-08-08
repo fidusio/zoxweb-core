@@ -22,7 +22,12 @@ import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- *
+ * Updates multiple MessageDigest instances in one pass while counting the total
+ * bytes processed; the digest function can be switched on and off via
+ * {@link #on(boolean)}. Accepts byte, char, and String input (characters are
+ * converted to bytes before digesting). Serves as the shared delegate behind
+ * {@link MultiDigestInputStream}, {@link MultiDigestWriter}, and
+ * {@link FilteredPrintWriter}.
  */
 public class MultiDigest
         implements MultiDigestInterface {

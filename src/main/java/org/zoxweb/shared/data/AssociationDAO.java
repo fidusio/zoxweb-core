@@ -26,7 +26,8 @@ import org.zoxweb.shared.util.SharedUtil;
 import org.zoxweb.shared.util.NVConfigEntity.ArrayType;
 
 /**
- * 
+ * The AssociationDAO class defines a typed mapping between two NVEntity references,
+ * linking an associated entity to a mapped-to entity qualified by an association type.
  * @author mzebib
  *
  */

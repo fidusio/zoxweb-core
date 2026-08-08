@@ -24,10 +24,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
+ * The MerchantDAO class defines a merchant account including its domain IDs,
+ * company type, addresses, phones, domain emails, payment information, and
+ * additional information entries.
  */
 @SuppressWarnings("serial")
-public class MerchantDAO 
+public class MerchantDAO
 	extends SetNameDescriptionDAO
 	implements AccountID<String>
 {

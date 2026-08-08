@@ -20,7 +20,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- *
+ * NVBase holder that stores GetNameValue&lt;String&gt; pairs in a map keyed by
+ * their names (case-insensitive {@link GetNameKey} keys) while exposing them
+ * through the ArrayValues interface.
  */
 @SuppressWarnings("serial")
 public class NVPairGetNameMap

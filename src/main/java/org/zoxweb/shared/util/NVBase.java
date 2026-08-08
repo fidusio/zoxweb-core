@@ -18,12 +18,13 @@ package org.zoxweb.shared.util;
 import java.io.Serializable;
 
 /**
- * This is the base name value (NVBase) class that is the used by
- * subclasses within the package. This class contains methods that
- * set and retrieve the following variables: reference ID, name, and
- * value (of any data type based on NVBase).
+ * This is the base name value (NVBase) class that is used by
+ * subclasses within the package. It holds a name, a value of the
+ * generic type, and a GUID, with getters and setters for each.
+ * NVBase instances are the typed field holders that back the
+ * NVEntity meta-model.
  *
- * @param <V>
+ * @param <V> the value type held by this name value pair
  * @author mzebib
  */
 @SuppressWarnings("serial")
@@ -77,9 +78,9 @@ public abstract class NVBase<V>
     }
 
 
-
     /**
      * Returns the name.
+     * @return the name of the pair
      */
     public String getName() {
         return name;
@@ -87,23 +88,30 @@ public abstract class NVBase<V>
 
     /**
      * Returns the value.
+     * @return the value of the pair
      */
     public V getValue() {
         return value;
     }
 
 
-
+    /**
+     * Sets the global identifier.
+     * @param guid to be set
+     */
     @Override
     public void setGUID(String guid) {
         this.guid = guid;
     }
 
+    /**
+     * Returns the global identifier.
+     * @return the guid, null if never set
+     */
     @Override
     public String getGUID() {
         return guid;
     }
-
 
 
     /**
@@ -118,14 +126,15 @@ public abstract class NVBase<V>
     /**
      * Sets the value.
      *
-     * @param value top be set
+     * @param value to be set
      */
     public void setValue(V value) {
         this.value = value;
     }
 
     /**
-     * Returns a string containing reference ID, name and value.
+     * Returns a string containing the GUID (if set), name and value
+     * as {guid,name:value}.
      */
     public String toString() {
         return "{" + (guid != null ? guid + "," : "") + name + ":" + value + "}";

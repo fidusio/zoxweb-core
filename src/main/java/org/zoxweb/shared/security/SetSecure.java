@@ -16,14 +16,15 @@
 package org.zoxweb.shared.security;
 
 /**
- *
+ * Mutable extension of {@link IsSecure} for objects whose secure status
+ * can be changed after creation.
  */
-public interface SetSecure 
+public interface SetSecure
     extends IsSecure
 {
 	/**
-	 * Set the security context.
-	 * @param secStatus
+	 * Sets the secure status of the object.
+	 * @param secStatus true to mark the object secure
 	 */
 	void setSecure(boolean secStatus);
 

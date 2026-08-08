@@ -17,7 +17,7 @@ package org.zoxweb.shared.data.events;
 
 /**
  * The clear action listener interface.
- * @param <V>
+ * @param <V> the type of the value passed to the clear action
  */
 public interface ClearActionListener<V>
 	extends ActionBaseListener<V>

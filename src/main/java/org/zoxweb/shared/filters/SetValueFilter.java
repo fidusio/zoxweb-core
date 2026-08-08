@@ -17,6 +17,8 @@ package org.zoxweb.shared.filters;
 
 /**
  * The setter of value filter interface
+ * @param <I> Input value
+ * @param <O> Output filtered value
  */
 public interface SetValueFilter<I, O>
         extends GetValueFilter<I, O> {

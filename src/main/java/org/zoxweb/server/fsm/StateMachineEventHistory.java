@@ -41,7 +41,7 @@ public class StateMachineEventHistory
 
     /**
      * @param capacity maximum number of log lines retained; oldest evicted beyond it
-     * @throws IllegalArgumentException if capacity < 1
+     * @throws IllegalArgumentException if capacity less than 1
      */
     public StateMachineEventHistory(int capacity) {
         if (capacity < 1)

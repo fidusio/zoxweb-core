@@ -23,7 +23,9 @@ import org.zoxweb.shared.util.NVConfigEntity.ArrayType;
 import java.util.Date;
 
 /**
- *
+ * This class defines a Shiro association rule that links an associate object to an
+ * associated-to target with an association type, CRUD access, status, optional
+ * expiration date, and a Shiro compatible pattern.
  */
 @SuppressWarnings("serial")
 public class ShiroAssociationRule

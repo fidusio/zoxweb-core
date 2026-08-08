@@ -17,6 +17,7 @@ package org.zoxweb.shared.util;
 
 /**
  * The system ID interface.
+ * @param <T> the system identifier type
  */
 public interface SystemID<T> {
     /**

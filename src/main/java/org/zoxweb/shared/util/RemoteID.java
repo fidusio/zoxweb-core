@@ -17,6 +17,7 @@ package org.zoxweb.shared.util;
 
 /**
  * The remote ID interface.
+ * @param <T> the remote identifier type
  */
 public interface RemoteID<T> {
 

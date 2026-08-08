@@ -17,7 +17,7 @@ package org.zoxweb.shared.control;
 
 /**
  * The content controller setter interface.
- * @param <T>
+ * @param <T> Type of the content managed by the controller
  */
 public interface ContentControllerSetter<T>
 {

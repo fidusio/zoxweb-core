@@ -21,8 +21,8 @@ import org.zoxweb.shared.util.ReferenceID;
  * This dynamic value filter is to declare the validation pattern.
  * @author mzebib
  *
- * @param <I>
- * @param <O>
+ * @param <I> Input value
+ * @param <O> Output filtered value
  */
 public interface DynamicValueFilter<I, O>
     extends ValueFilter<I, O>, ReferenceID<String>

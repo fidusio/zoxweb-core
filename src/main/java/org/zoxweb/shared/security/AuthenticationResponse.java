@@ -23,6 +23,8 @@ import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.SharedUtil;
 
 /**
+ * This class represents the response to an authentication request; it carries
+ * the granted session duration in milliseconds.
  * @author mnael
  *
  */

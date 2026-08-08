@@ -21,7 +21,8 @@ import org.zoxweb.shared.util.NVConfigEntity.ArrayType;
 import java.util.List;
 
 /**
- *
+ * The FolderInfoDAO class defines a folder document that contains other NVEntity
+ * objects as its content and supports lookup of contained entities by reference ID.
  */
 @SuppressWarnings("serial")
 public class FolderInfoDAO

@@ -22,7 +22,8 @@ import org.zoxweb.shared.util.NVConfigEntity.ArrayType;
 import java.math.BigDecimal;
 
 /**
- *
+ * This class represents a billing item defined by a unit cost, a quantity, and a waived flag,
+ * with an optional NVEntity reference to the billed object.
  */
 @SuppressWarnings("serial")
 public class BillingItemDAO

@@ -22,7 +22,8 @@ import org.zoxweb.shared.util.*;
 import java.util.List;
 
 /**
- *
+ * This class represents API access credentials composed of an API key and an encrypted
+ * API secret, with optional extra configuration parameters.
  */
 @SuppressWarnings("serial")
 public class APICredentialsDAO

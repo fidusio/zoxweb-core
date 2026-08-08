@@ -25,10 +25,12 @@ import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.SharedUtil;
 
 /**
- *
+ * The VMInfoDAO class defines a snapshot of the Java virtual machine runtime
+ * status: core count, free, total, used, and maximum memory, and the time stamp
+ * when the snapshot was taken.
  */
 @SuppressWarnings("serial")
-public class VMInfoDAO 
+public class VMInfoDAO
     extends SetNameDescriptionDAO
 {
 

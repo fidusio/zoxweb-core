@@ -23,8 +23,8 @@ import java.util.List;
 /**
  * The API search interface.
  *
- * @param <I>
- * @param <O>
+ * @param <I> Search input criteria type
+ * @param <O> Search result output type
  * @author mzebib
  */
 public interface APISearch<I, O> {

@@ -17,7 +17,7 @@ package org.zoxweb.shared.data.events;
 
 /**
  * The edit action listener interface.
- * @param <V>
+ * @param <V> the type of the value passed to the edit action
  */
 public interface EditActionListener<V>
 	extends ActionBaseListener<V>

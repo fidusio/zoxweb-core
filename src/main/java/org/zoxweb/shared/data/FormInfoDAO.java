@@ -26,7 +26,8 @@ import org.zoxweb.shared.util.SharedUtil;
 import org.zoxweb.shared.util.NVConfigEntity.ArrayType;
 
 /**
- *
+ * The FormInfoDAO class defines a form document that wraps a referenced NVEntity
+ * holding the form data; setting the form name is propagated to the referenced entity.
  */
 @SuppressWarnings("serial")
 public class FormInfoDAO

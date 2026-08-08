@@ -17,7 +17,7 @@ package org.zoxweb.shared.control;
 
 /**
  * The content container interface.
- * @param <T>
+ * @param <T> Type of the contained content
  */
 public interface ContentContainer<T>
 {

@@ -29,10 +29,12 @@ import org.zoxweb.shared.util.NVEntity;
 import org.zoxweb.shared.util.SharedUtil;
 
 /**
- *
+ * The UUIDInfoDAO class defines a UUID-based access token to a resource,
+ * binding the UUID and session ID to the resource identifiers, type, permitted
+ * CRUD operation, and optional content, with an access counter and expiration time.
  */
 @SuppressWarnings("serial")
-public class UUIDInfoDAO 
+public class UUIDInfoDAO
 	extends TimeStampDAO 
 {
 	

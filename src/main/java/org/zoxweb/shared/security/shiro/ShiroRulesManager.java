@@ -21,9 +21,10 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- *
+ * This interface defines the management contract for Shiro association rules:
+ * add, delete, update, and search by query criteria.
  */
-public interface ShiroRulesManager 
+public interface ShiroRulesManager
 {
 	void addShiroRule(ShiroAssociationRule sard);
 	

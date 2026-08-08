@@ -18,7 +18,8 @@ package org.zoxweb.shared.util;
 import java.util.List;
 
 /**
- *
+ * NVBase holder for a list of GetNameValue&lt;String&gt; pairs exposed through
+ * the ArrayValues interface, supporting lookup, addition, and removal by name.
  */
 @SuppressWarnings("serial")
 public class NVGetNameValueList

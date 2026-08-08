@@ -18,7 +18,7 @@ package org.zoxweb.shared.api;
 /**
  * The API notification interface which extends API service provider interface.
  *
- * @param <V>
+ * @param <V> Connection type used as both the protocol and system specific connection
  * @author mzebib
  */
 public interface APINotification<V>

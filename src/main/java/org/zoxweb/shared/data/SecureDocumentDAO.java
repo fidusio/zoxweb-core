@@ -24,7 +24,8 @@ import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.SharedUtil;
 
 /**
- *
+ * The SecureDocumentDAO class defines a secure note document whose content
+ * is stored encrypted (FilterType.ENCRYPT).
  */
 @SuppressWarnings("serial")
 public class SecureDocumentDAO

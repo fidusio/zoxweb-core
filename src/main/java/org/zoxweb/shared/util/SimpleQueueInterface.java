@@ -18,7 +18,7 @@ package org.zoxweb.shared.util;
 /**
  * The SimpleQueueInterface is a FIFO queue interface. It is used to store non null Objects only.
  *
- * @param <O>
+ * @param <O> the type of objects held in the queue
  */
 public interface SimpleQueueInterface<O> {
 

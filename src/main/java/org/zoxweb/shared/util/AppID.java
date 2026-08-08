@@ -5,6 +5,7 @@ import org.zoxweb.shared.filters.FilterType;
 
 /**
  * Created on 7/22/17
+ * @param <T> the app identifier type
  */
 public interface AppID<T>
         extends DomainID<T> {

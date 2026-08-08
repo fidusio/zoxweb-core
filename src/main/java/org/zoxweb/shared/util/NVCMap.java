@@ -21,6 +21,10 @@ import java.util.List;
 import org.zoxweb.shared.data.SetNameDescriptionDAO;
 
 /**
+ * Display mapping for a single NVConfig attribute: holds the associated
+ * NVConfig, its display name, an optional list of attributes to display,
+ * a value separator, and a read-only flag, and can render the mapped value
+ * of an NVEntity as a string.
  * @author mzebib
  *
  */

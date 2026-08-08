@@ -19,7 +19,7 @@ package org.zoxweb.shared.util;
  * The get value interface.
  * @author mnael
  *
- * @param <V>
+ * @param <V> the type of the value returned by {@link #getValue()}
  */
 public interface GetValue<V>
 {

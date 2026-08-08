@@ -24,7 +24,9 @@ import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.SharedUtil;
 
 /**
- * 
+ * The SimpleMessage class defines a generic message with a message body,
+ * optional error message, category, type, status code, and extra properties;
+ * typically used as a service response or notification payload.
  * @author mnael
  *
  */

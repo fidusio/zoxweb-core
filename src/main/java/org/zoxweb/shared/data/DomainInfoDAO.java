@@ -24,7 +24,8 @@ import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.SharedUtil;
 
 /**
- *
+ * The DomainInfoDAO class defines a domain identified by its URL identifier
+ * (domain/account ID), serving as the base class for domain-scoped entities.
  * @author mzebib
  *
  */

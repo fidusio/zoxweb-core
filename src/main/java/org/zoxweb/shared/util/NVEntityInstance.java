@@ -16,7 +16,8 @@
 package org.zoxweb.shared.util;
 
 /**
- *
+ * Factory contract to create new NVEntity instances and expose the
+ * NVConfigEntity meta definition they are based on.
  */
 public interface NVEntityInstance {
     <V extends NVEntity> V newInstance();

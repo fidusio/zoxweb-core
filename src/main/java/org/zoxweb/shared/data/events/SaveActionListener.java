@@ -17,7 +17,7 @@ package org.zoxweb.shared.data.events;
 
 /**
  * The save action listener interface.
- * @param <V>
+ * @param <V> the type of the value passed to the save action
  */
 public interface SaveActionListener<V>
 	extends ActionBaseListener<V>

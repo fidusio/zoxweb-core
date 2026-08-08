@@ -17,7 +17,7 @@ package org.zoxweb.shared.data.events;
 
 /**
  * The delete action listener interface.
- * @param <V>
+ * @param <V> the type of the value passed to the delete action
  */
 public interface DeleteActionListener<V>
 	extends ActionBaseListener<V>

@@ -21,7 +21,10 @@ import java.io.Writer;
 import java.security.MessageDigest;
 
 /**
- *
+ * FilterWriter that transparently updates a set of message digests with every
+ * chunk of characters written — the character-stream counterpart of
+ * {@link MultiDigestInputStream}, delegating digest updates and byte counting
+ * to a backing {@link MultiDigest}.
  */
 public class MultiDigestWriter
         extends FilterWriter

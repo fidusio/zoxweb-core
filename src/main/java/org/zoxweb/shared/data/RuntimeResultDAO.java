@@ -23,7 +23,8 @@ import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.SharedUtil;
 
 /**
- *
+ * The RuntimeResultDAO class captures the result of an executed process:
+ * its exit code, output and error stream data, and execution duration in millis.
  */
 @SuppressWarnings("serial")
 public class RuntimeResultDAO

@@ -20,7 +20,7 @@ package org.zoxweb.shared.util;
  * domain ID.
  * @author mzebib
  *
- * @param <T>
+ * @param <T> the domain identifier type
  */
 public interface DomainID<T> {
     /**

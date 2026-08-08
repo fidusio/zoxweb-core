@@ -21,8 +21,10 @@ import java.io.InputStream;
 import java.security.MessageDigest;
 
 /**
- *
- *
+ * FilterInputStream that transparently updates a set of message digests with
+ * every byte read — a multi-digest variant of
+ * {@link java.security.DigestInputStream} that also tracks the total number of
+ * bytes read via the backing {@link MultiDigest}.
  */
 public class MultiDigestInputStream
         extends FilterInputStream

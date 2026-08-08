@@ -25,7 +25,8 @@ import org.zoxweb.shared.util.SharedUtil;
 import org.zoxweb.shared.util.NVConfigEntity.ArrayType;
 
 /**
- *
+ * The MessageDAO class defines a time-stamped message whose payload is
+ * an arbitrary NVEntity carried as the message content.
  */
 @SuppressWarnings("serial")
 public class MessageDAO

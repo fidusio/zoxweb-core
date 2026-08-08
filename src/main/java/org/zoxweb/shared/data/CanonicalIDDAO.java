@@ -22,12 +22,13 @@ import org.zoxweb.shared.util.SetCanonicalID;
 import org.zoxweb.shared.util.SharedUtil;
 
 /**
- * 
+ * The CanonicalIDDAO class extends TimeStampDAO with a canonical ID property,
+ * serving as the base class for entities identified by a canonical ID.
  * @author mzebib
  *
  */
 @SuppressWarnings("serial")
-public class CanonicalIDDAO 
+public class CanonicalIDDAO
 	extends TimeStampDAO
 	implements SetCanonicalID
 {

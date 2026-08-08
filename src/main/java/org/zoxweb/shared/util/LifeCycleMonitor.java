@@ -16,21 +16,22 @@
 package org.zoxweb.shared.util;
 
 /**
- *
- * @param <T>
+ * Callback contract to monitor the lifecycle of objects: implementations are
+ * notified when an object is created and when it is terminated.
+ * @param <T> the type of object being monitored
  */
 public interface LifeCycleMonitor<T> {
     /**
-     *
-     * @param t
-     * @return
+     * Invoked when the object is created.
+     * @param t the created object
+     * @return true if the creation notification was accepted
      */
     boolean created(T t);
 
     /**
-     *
-     * @param t
-     * @return
+     * Invoked when the object is terminated.
+     * @param t the terminated object
+     * @return true if the termination notification was accepted
      */
     boolean terminated(T t);
 

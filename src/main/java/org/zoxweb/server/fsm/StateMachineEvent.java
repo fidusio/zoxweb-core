@@ -18,8 +18,8 @@ import java.util.concurrent.atomic.AtomicLong;
  * that processed it, the old/new states, and the consumer count of a publish snapshot.
  * </p>
  * <p>
- * <b>Lifetime contract:</b> an event is valid only for the duration of
- * {@link StateMachineListener#handleEvent(StateMachineEvent)}. Listeners MUST NOT retain
+ * <b>Lifetime contract:</b> an event is valid only for the duration of the
+ * {@link StateMachineListener} callback {@code handleEvent(StateMachineEvent)}. Listeners MUST NOT retain
  * it — a retained event pins its states, consumer, trigger, and the trigger's payload,
  * preventing garbage collection (e.g. of deregistered states). For durable history keep
  * the {@link #toLog()} string instead (see {@link StateMachineEventHistory}).

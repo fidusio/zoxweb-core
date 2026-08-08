@@ -27,7 +27,13 @@ import org.zoxweb.shared.util.SUS;
 import java.io.*;
 
 /**
- *
+ * Tails a file or a device in the manner of {@code tail -f}: starts at the end
+ * of the file and continuously reads newly appended lines, dispatching each
+ * line as a {@link StringTokenEvent} through the configured
+ * {@link EventListenerManager} (or printing it to stdout when no manager is
+ * set). For regular files it detects rotation by watching the file creation
+ * time and reopens the file when it changes. Runs until {@link #close()} is
+ * called.
  */
 public class FileMonitor
         implements DaemonController, Runnable {

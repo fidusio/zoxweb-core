@@ -20,7 +20,9 @@ import org.zoxweb.shared.data.FileInfoDAO;
 import java.io.InputStream;
 
 /**
- *
+ * Value holder that pairs a {@link FileInfoDAO} (the file's metadata) with the
+ * InputStream supplying the file's content, so both can be handed around as a
+ * single source object.
  */
 public class FileInfoStreamSource {
 

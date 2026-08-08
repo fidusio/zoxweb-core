@@ -17,8 +17,8 @@ package org.zoxweb.shared.data.events;
 
 /**
  * The call back listener interface.
- * @param <F>
- * @param <T>
+ * @param <F> the type of the failure object passed to onFailure
+ * @param <T> the type of the result passed to onSuccess
  */
 public interface CallbackListener<F, T>
 {

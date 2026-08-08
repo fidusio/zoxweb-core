@@ -29,6 +29,8 @@ import org.zoxweb.shared.util.SUS;
  * <code>dequeuing</code> thread must be running continuously otherwise the
  * <code>dequeuing</code> will be pending till the Dequeuing  process starts
  * again.
+ *
+ * @param <O> the type of the objects held in the queue
  */
 public class ThresholdQueue<O>
         extends ArrayQueue<O> {

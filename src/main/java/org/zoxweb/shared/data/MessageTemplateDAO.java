@@ -28,11 +28,12 @@ import org.zoxweb.shared.util.NVPair;
 import org.zoxweb.shared.util.SharedUtil;
 
 /**
- * 
+ * The MessageTemplateDAO class defines a message template with a title, body content,
+ * and body tags, where token substitution is delimited by pre and post token tags.
  * @author mzebib
  */
 @SuppressWarnings("serial")
-public class MessageTemplateDAO 
+public class MessageTemplateDAO
 	extends SimpleDocumentDAO
 {
 	

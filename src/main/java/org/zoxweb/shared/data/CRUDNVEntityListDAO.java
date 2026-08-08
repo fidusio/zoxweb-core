@@ -21,7 +21,8 @@ import org.zoxweb.shared.util.NVConfigEntity.ArrayType;
 import java.util.List;
 
 /**
- *
+ * The CRUDNVEntityListDAO class is a CRUD event entity that pairs a CRUD operation
+ * with the list of NVEntity objects it applies to.
  * @author mzebib
  *
  */

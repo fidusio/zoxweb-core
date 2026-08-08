@@ -20,10 +20,11 @@ import org.zoxweb.shared.util.CRUDNVBase;
 import org.zoxweb.shared.util.NVBase;
 
 /**
- *
+ * The CRUDNVBaseDAO class is a CRUD event that pairs a CRUD operation
+ * with the NVBase value it applies to.
  */
 @SuppressWarnings("serial")
-public class CRUDNVBaseDAO 
+public class CRUDNVBaseDAO
 	extends CRUDEventDAO 
 	implements CRUDNVBase 
 {

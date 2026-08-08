@@ -19,7 +19,7 @@ package org.zoxweb.shared.util;
  * Setter of name value pair interface.
  * @author mnael
  *
- * @param <V>
+ * @param <V> the value type of the name value pair
  */
 public interface SetNameValue<V>
         extends GetNameValue<V>, SetName, SetValue<V> {

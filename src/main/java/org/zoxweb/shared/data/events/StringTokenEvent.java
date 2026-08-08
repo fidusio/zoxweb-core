@@ -17,10 +17,10 @@ package org.zoxweb.shared.data.events;
 
 
 /**
- *
+ * Event object that carries a string token as its data payload along with the source object that fired it.
  */
 @SuppressWarnings("serial")
-public class StringTokenEvent 
+public class StringTokenEvent
     extends BaseEventObject<String>
 {
 	

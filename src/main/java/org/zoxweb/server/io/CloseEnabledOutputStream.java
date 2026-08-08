@@ -20,7 +20,11 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- *
+ * FilterOutputStream wrapper with a controllable close behavior: when close is
+ * enabled (the default) {@link #close()} closes the underlying stream, when
+ * disabled the call is silently ignored and the wrapped stream stays open.
+ * Useful for passing a stream to code that closes it unconditionally while the
+ * caller still needs it.
  */
 public class CloseEnabledOutputStream
         extends FilterOutputStream {

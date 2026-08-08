@@ -27,7 +27,9 @@ import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.SharedUtil;
 
 /**
- *
+ * The NVEntityAccessInfo class defines access control information for an NVEntity:
+ * the reference ID of the associated entity, the permitted CRUD operations,
+ * and an optional expiration date.
  */
 @SuppressWarnings("serial")
 public class NVEntityAccessInfo

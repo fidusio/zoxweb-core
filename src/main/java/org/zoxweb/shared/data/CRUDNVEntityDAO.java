@@ -27,7 +27,8 @@ import org.zoxweb.shared.util.SharedUtil;
 import org.zoxweb.shared.util.NVConfigEntity.ArrayType;
 
 /**
- * 
+ * The CRUDNVEntityDAO class is a CRUD event entity that pairs a CRUD operation
+ * with the NVEntity it applies to, along with a revision tracking flag.
  * @author mzebib
  *
  */

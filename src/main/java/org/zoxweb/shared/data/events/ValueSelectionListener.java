@@ -17,7 +17,7 @@ package org.zoxweb.shared.data.events;
 
 /**
  * The value selection listener interface.
- * @param <V>
+ * @param <V> the type of the selected value passed to the listener
  */
 public interface ValueSelectionListener<V>
 {
