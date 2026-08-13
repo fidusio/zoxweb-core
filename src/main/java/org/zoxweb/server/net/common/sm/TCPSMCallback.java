@@ -1,4 +1,4 @@
-package org.zoxweb.server.net.common;
+package org.zoxweb.server.net.common.sm;
 
 import org.zoxweb.server.fsm.StateMachineInt;
 import org.zoxweb.server.io.ByteBufferUtil;
@@ -6,6 +6,8 @@ import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.net.BaseChannelOutputStream;
 import org.zoxweb.server.net.DataPacket;
 import org.zoxweb.server.net.SessionCallback;
+import org.zoxweb.server.net.common.CommonChannelOutputStream;
+import org.zoxweb.server.net.common.ConnectionCallback;
 import org.zoxweb.server.net.ssl.SSLConfigInt;
 import org.zoxweb.server.util.UUID7;
 import org.zoxweb.shared.io.CloseableType;
@@ -112,6 +114,10 @@ public class TCPSMCallback
 
     // 16k is a bit too big but it will be cached + plus it will support SSL
     private final ByteBuffer rawReadBuffer = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, SharedIOUtil.K_16);
+    // guards rawReadBuffer handoff between the read loop and the close delegate's recache:
+    // without it an external close() (or an inline close from a RAW_IN_DATA consumer) could
+    // return the buffer to the pool while the read loop is still using it
+    private final Object readLock = new Object();
 
 
     /**
@@ -145,7 +151,14 @@ public class TCPSMCallback
         {
             NamedValue<CollectionAsArray<AutoCloseable>> autoCloseables = getConfig().getProperties().getNV(SUS.enumName(Params.AUTO_CLOSEABLE));
             SharedIOUtil.close(autoCloseables.getValue().asArray());
-            ByteBufferUtil.cache(rawReadBuffer);
+            // synchronized: an external close must not recache the buffer while a read
+            // dispatch still owns it — the socket is already closed above, so the in-flight
+            // read loop exits promptly and releases the lock; an inline close (from a
+            // RAW_IN_DATA consumer) re-enters the lock on the same thread and the read loop's
+            // isClosed() check keeps it from touching the buffer afterwards
+            synchronized (readLock) {
+                ByteBufferUtil.cache(rawReadBuffer);
+            }
             NamedValue<Throwable> exception = getConfig().getProperties().getNV(SUS.enumName(Params.EXCEPTION));
             getConfig().publishSync(BasicEvent.CLOSED, exception != null ? exception.getValue() : null);
             // last act: a closed machine rejects publishes, so CLOSED must go out first
@@ -165,27 +178,34 @@ public class TCPSMCallback
     @Override
     public void accept(SelectionKey key) {
         int read = 0;
-        try {
+        synchronized (readLock) {
+            try {
 
-            do {
-                rawReadBuffer.clear();
-                read = socket.isConnected() ? socket.read(rawReadBuffer) : -1;
-                if (read > 0) {
+                do {
+                    // a publish below may close the session inline (close_notify, injection
+                    // failure); the delegate has recached rawReadBuffer at that point — it
+                    // must not be touched again
+                    if (isClosed())
+                        return;
+                    rawReadBuffer.clear();
+                    read = socket.isConnected() ? socket.read(rawReadBuffer) : -1;
+                    if (read > 0) {
 
-                    rawReadBuffer.flip();
+                        rawReadBuffer.flip();
 
-                    // the packet buffer is a detached copy owned by the consumer, safe for async handling,
-                    // the consumer may ByteBufferUtil.cache() it when done processing
-                    ByteBuffer packetBuffer = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, rawReadBuffer.array(), 0, rawReadBuffer.remaining(), true);
-                    accept(new DataPacket<>(packetsCounter.incrementAndGet(), remoteAddress,  packetBuffer));
+                        // the packet buffer is a detached copy owned by the consumer, safe for async handling,
+                        // the consumer may ByteBufferUtil.cache() it when done processing
+                        ByteBuffer packetBuffer = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, rawReadBuffer.array(), 0, rawReadBuffer.remaining(), true);
+                        accept(new DataPacket<>(packetsCounter.incrementAndGet(), remoteAddress,  packetBuffer));
 
-                }
-            } while (read > 0);
+                    }
+                } while (read > 0);
 
 
-        } catch (IOException e) {
-            read = -1;
-            if (log.isEnabled()) log.getLogger().info("" + e);
+            } catch (IOException e) {
+                read = -1;
+                if (log.isEnabled()) log.getLogger().info("" + e);
+            }
         }
 
         if (read == -1)
@@ -214,9 +234,25 @@ public class TCPSMCallback
     public int connected(SelectionKey key) throws IOException {
         setChannel(key.channel());
         bcos = new CommonChannelOutputStream(getChannel());
-        ((CollectionAsArray<AutoCloseable>) getConfig().getProperties().getNV(SUS.enumName(Params.AUTO_CLOSEABLE)).getValue()).add(bcos);
+        registerAutoCloseable(bcos);
         getConfig().publishSync(BasicEvent.CONNECTED, key);
         return interestOps();
+    }
+
+    /**
+     * Registers a per-session resource in the {@link Params#AUTO_CLOSEABLE} collection; session
+     * teardown closes the registered resources in registration order, before {@link
+     * BasicEvent#CLOSED} is published. Used by the transport itself (socket channel, session
+     * output stream) and by phases owning session-scoped resources (e.g. the SSL session state,
+     * whose pooled buffers must be recached even when the session dies mid-handshake).
+     *
+     * @param closeable the resource to close during session teardown
+     * @return this
+     */
+    @SuppressWarnings("unchecked")
+    public TCPSMCallback registerAutoCloseable(AutoCloseable closeable) {
+        ((CollectionAsArray<AutoCloseable>) getConfig().getProperties().getNV(SUS.enumName(Params.AUTO_CLOSEABLE)).getValue()).add(closeable);
+        return this;
     }
 
     /**
@@ -236,11 +272,10 @@ public class TCPSMCallback
      * @param channel the session's SocketChannel
      * @throws IOException in case of error
      */
-    @SuppressWarnings("unchecked")
     @Override
     public void setChannel(Channel channel) throws IOException{
         socket = (SocketChannel) channel;
-        ((CollectionAsArray<AutoCloseable> )getConfig().getProperties().getNV(SUS.enumName(Params.AUTO_CLOSEABLE)).getValue()).add(socket);
+        registerAutoCloseable(socket);
         remoteAddress = ((InetSocketAddress) socket.getRemoteAddress());
 
     }

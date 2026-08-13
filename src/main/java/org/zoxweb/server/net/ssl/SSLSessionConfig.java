@@ -235,4 +235,9 @@ public class SSLSessionConfig
     public ByteBuffer getSSLOutboundBuffer() {
         return outSSLNetData;
     }
+
+    @Override
+    public ByteBuffer getSSLApplicationBuffer() {
+        return inAppData;
+    }
 }

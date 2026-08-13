@@ -13,7 +13,7 @@ sections has been changed in the codebase; those sections are assessment only.
 New design, driven by `org.zoxweb.server.fsm`. The existing `TCPSessionCallback` path stays as-is
 and keeps working; this is not a port.
 
-**Files:** `server/net/common/TCPSMCallback.java`,
+**Files:** `server/net/common/sm/TCPSMCallback.java` (moved into the sm package 2026-08-13),
 `src/test/java/org/zoxweb/server/net/common/TCPSMCallbackTest.java`
 
 ### Decided contracts (2026-08-12, maintainer)
@@ -50,32 +50,66 @@ and keeps working; this is not a port.
 - Session output stream (`CommonChannelOutputStream`) registered in `AUTO_CLOSEABLE`.
 - Read-error path logs via the class `LogWrapper` instead of `printStackTrace()`.
 
+### Resolved 2026-08-13 (delivered by `org.zoxweb.server.net.common.sm`, see §2)
+
+- **`CF` type parameter / SSL participation — resolved by design.** TCPSMCallback stays outside
+  the `BaseSessionCallback` hierarchy permanently; the sm package's `SSLClientBridge`
+  (`extends BaseSessionCallback<SSLSessionConfig> implements ConnectionCallback<ByteBuffer>`) is
+  the handler-facing SSL participant. `sslHandshakeSuccessful(SSLConfigInt)` is no longer a no-op:
+  it flips the session's `CommonChannelOutputStream` to encrypted writes. The promised
+  handshake-done event landed as `ClientEvent.SECURE` (plus `READY` as the app's write gate).
+- **Event ID namespacing — decided: bare enum names stay.** Reserved vocabulary (14 IDs):
+  `BasicEvent` {CONNECTED, RAW_IN_DATA, CLOSED} + `HandshakeStatus` names {NEED_WRAP, NEED_UNWRAP,
+  NEED_UNWRAP_AGAIN, NEED_TASK, FINISHED, NOT_HANDSHAKING} + `ClientEvent` {IN_DATA, SECURE,
+  READY, START_TLS, BANNER_RECEIVED}. One machine per session (ctor-enforced) confines collisions
+  to a session's own vocabulary choices; `ClientEvent` javadoc is the authority.
+
 ### Still open
 
-- **`CF` type parameter / SSL participation.** `CF = StateMachineInt<?>`; the SSL layer requires a
-  `BaseSessionCallback<SSLSessionConfig>` (`SSLNIOSocketHandler:237`, all `SSLUtil` handshake
-  handlers) and `setConfig` is final, so TCPSMCallback cannot join the SSL path as-is.
-  `accept(ByteBuffer)` is the intended decrypted-data entry. Resolve together with
-  SSLStateMachineV2 (§2); `sslHandshakeSuccessful()` is a documented no-op until then — add a
-  `SECURE` / handshake-done event ID when it lands so consumers can gate their first write.
 - **Sync-machine guard.** The default `StateMachine(String)` constructor is async
   (`TaskUtil.defaultTaskScheduler()`); `publishSync` is inline regardless of mode, so the callback
   works either way — but consumers publishing async escape NIOSocket's per-session read
   serialization ordering. Constructor validation
   (`getExecutor() == null && !isScheduledTaskEnabled()`) deliberately not added; documented only.
-- **Event ID namespacing.** `BasicEvent` routes as bare strings (`"CONNECTED"`, `"CLOSED"`) via
-  `SUS.enumName` — collision-prone with any other vocabulary sharing the machine. Decide before
-  consumers exist (e.g. make `BasicEvent` implement `GetName`); a rename later breaks every
-  registered consumer silently (unknown IDs are no-ops).
+  Mitigated in practice: `ClientConnectionSM` (the intended machine) is always synchronous.
 
 ---
 
-## 2. Planned — `SSLStateMachineV2`
+## 2. Delivered 2026-08-13 — SSLStateMachineV2 = `org.zoxweb.server.net.common.sm`
 
-Motivation: model STARTTLS probing and related protocol-phase logic, which the current machine
-cannot express because its canonical IDs *are* the `SSLEngineResult.HandshakeStatus` values — no
-room for `PROBING` / `PLAINTEXT` / `UPGRADE_REQUESTED` / `UPGRADING` / `SECURE` / `DOWNGRADED`.
-That is a vocabulary change, not a logic change.
+The client-connection state machine framework (`ClientConnectionSM` + `SSLClientPhase`) is the
+V2: protocol phases (plain / SSH banner / STARTTLS-ready TLS) and TLS handshake orchestration in
+one machine, configured programmatically (`ClientConnectionSMBuilder`) or from JSON
+(`ClientSMFactory`). Delivered contracts:
+
+- **Orchestration-only discipline honored**: the handshake states call the same five `SSLUtil`
+  handlers; zero edits to `net.ssl` (`SSLStateMachine`/`CustomSSLStateMachine` untouched).
+- **`ClientSSLHelper`'s no-op `close()` is the load-bearing answer** to the
+  `SSLSessionConfig.close()` → helper-close → machine-close trap: config close runs during
+  teardown BEFORE the `CLOSED` publish, so a helper that closed the machine would silently lose
+  `CLOSED`. Pinned by `ClientSSLHelperTest`. Keep this invariant.
+- **STARTTLS residue-fatal rule** enforced at the negotiator's go-ahead edge (see
+  `StartTLSUpgradeSeamTest`), with `beginHandshake(null, null)` guaranteeing fresh pooled
+  buffers — `rawReadBuffer` never becomes `inSSLNetData`, closing the buffer-ownership question
+  below (distinct owners; table in the sm package javadoc).
+- Decrypted-data delivery: `SSLClientBridge.accept` copies the write-mode `inAppData` into a
+  detached pooled buffer (`ClientEvent.IN_DATA`) and clears the source — the
+  "BUFFER_OVERFLOW unreachable" drain contract now has a named implementor.
+- Secure-mode inbound data: `SSLClientDataState` unwraps the router-buffered ciphertext via the
+  public `SSLUtil.smartSSLUnwrap` primitive **without a channel read** — `_notHandshaking`'s own
+  read would return -1 when a peer's final data and FIN arrive in the same dispatch window and
+  close the session with the last records still buffered (caught live by
+  `StartTLSUpgradeSeamTest` in a shared-JVM run). EOF belongs to TCPSMCallback's read loop
+  (data-before-EOF ordered); close_notify (`CLOSED` unwrap status) tears the session down; the
+  router's post-dispatch liveness check stays as backstop. Required exposing the application
+  buffer on the `SSLConfigInt` seam (`getSSLApplicationBuffer()`, accessor only).
+
+**Remaining (follow-ups):** the actual SMTP negotiator phase (EHLO/STARTTLS/redo-EHLO per RFC
+3207) and its `DOWNGRADED` / `tls_required` policy; the inherited close_notify defect (§3.3,
+unchanged by design); server-side mid-stream upgrade (the current phase is client-mode — the
+`_finished` notification gates on `isClientMode()`).
+
+Original design notes kept below for reference.
 
 Additive by design — keep `SSLStateMachine` and `CustomSSLStateMachine` untouched (load-proven,
 fragile).

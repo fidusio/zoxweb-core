@@ -12,6 +12,7 @@ extends CloseableType {
     ByteChannel getChannel();
     ByteBuffer getSSLInboundBuffer();
     ByteBuffer getSSLOutboundBuffer();
+    ByteBuffer getSSLApplicationBuffer();
 
     default int getApplicationBufferSize() {
         return getSSLEngine().getSession().getApplicationBufferSize();
