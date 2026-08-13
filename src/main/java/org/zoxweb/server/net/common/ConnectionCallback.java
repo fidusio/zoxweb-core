@@ -1,5 +1,6 @@
 package org.zoxweb.server.net.common;
 
+import org.zoxweb.server.net.ssl.SSLConfigInt;
 import org.zoxweb.shared.task.ExceptionCallback;
 import org.zoxweb.shared.io.CloseableType;
 
@@ -72,8 +73,11 @@ public interface ConnectionCallback<D>
      * Invoked when the SSL handshake completed, gives the callback a chance to switch its
      * delivery path or output stream to the secured channel.
      *
+     * @param sci the session's SSL config seam (engine, channel, net buffers); pass it to
+     *            {@code CommonChannelOutputStream.setSSLSessionConfig} to flip the session
+     *            output stream to encrypted writes
      * @throws IOException in case of error
      */
-    void sslHandshakeSuccessful() throws IOException;
+    void sslHandshakeSuccessful(SSLConfigInt sci) throws IOException;
 
 }

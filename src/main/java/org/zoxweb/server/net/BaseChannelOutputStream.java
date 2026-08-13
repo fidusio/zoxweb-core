@@ -19,6 +19,7 @@ import org.zoxweb.server.io.UByteArrayOutputStream;
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.shared.io.CloseableType;
 import org.zoxweb.shared.util.SUS;
+import org.zoxweb.shared.util.SharedStringUtil;
 import org.zoxweb.shared.util.UsageTracker;
 
 import java.io.IOException;
@@ -129,6 +130,25 @@ public abstract class BaseChannelOutputStream extends OutputStream
             if (reset)
                 byteArrayOutputStream.reset();
         }
+    }
+
+
+
+    /**
+     * Writes a string to the channel as its UTF-8 encoding.
+     * <p>
+     * Converts {@code str} via {@link SharedStringUtil#getBytes(String)} and
+     * delegates to {@link #write(byte[])}, which follows the read-mode
+     * ({@code flip=false}) path of {@link #write(byte[], int, int)}. No line
+     * terminator or length prefix is added; framing is the caller's job.
+     * </p>
+     *
+     * @param str the string to write
+     * @throws IOException          if an I/O error occurs during writing
+     * @throws NullPointerException if {@code str} is {@code null}
+     */
+    public void write(String str) throws IOException {
+        write(SharedStringUtil.getBytes(str));
     }
 
     /**

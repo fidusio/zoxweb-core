@@ -191,7 +191,7 @@ public final class SSLUtil {
      * </p>
      *
      * @param config   current SSL session state
-     * @param callback notified via {@link ConnectionCallback#sslHandshakeSuccessful()} in client mode; may be {@code null}
+     * @param callback notified via {@link ConnectionCallback#sslHandshakeSuccessful(SSLConfigInt)} in client mode; may be {@code null}
      * @return elapsed processing time in milliseconds
      */
     public static long _finished(SSLSessionConfig config, BaseSessionCallback<SSLSessionConfig> callback) {
@@ -210,7 +210,7 @@ public final class SSLUtil {
              * special case if the connection is a client connection
              */
             try {
-                ((ConnectionCallback) callback).sslHandshakeSuccessful();
+                ((ConnectionCallback) callback).sslHandshakeSuccessful(config);
             } catch (Exception e) {
                 SharedIOUtil.close(config, callback);
                 callback.exception(e);
@@ -451,22 +451,22 @@ public final class SSLUtil {
      * @throws SSLException if the session is still handshaking
      * @throws IOException  on {@code BUFFER_*}, {@code CLOSED}, or channel error
      */
-    private static int _sslWrite(SSLSessionConfig sslConfig, ByteChannel dataChannel, ByteBuffer bb, UsageTracker usageTracker, AutoCloseable closeable, boolean flip) throws IOException {
+    private static int _sslWrite(SSLConfigInt sslConfig, ByteChannel dataChannel, ByteBuffer bb, UsageTracker usageTracker, AutoCloseable closeable, boolean flip) throws IOException {
         int written = -1;
-        if (sslConfig.getHandshakeStatus() == NOT_HANDSHAKING) {
+        if (sslConfig.getSSLEngine().getHandshakeStatus() == NOT_HANDSHAKING) {
 
 
-            SSLEngineResult result = smartSSLWrap(sslConfig.sslEngine, bb, sslConfig.outSSLNetData, flip, true);
+            SSLEngineResult result = smartSSLWrap(sslConfig.getSSLEngine(), bb, sslConfig.getSSLOutboundBuffer(), flip, true);
             if (log.isEnabled())
                 log.getLogger().info("AFTER-NEED_WRAP-PROCESSING: " + result);
             switch (result.getStatus()) {
                 case BUFFER_UNDERFLOW:
                 case BUFFER_OVERFLOW:
                     throw new IOException(result.getStatus() + " invalid state context buffer size " +
-                            SUS.toCanonicalID(',', sslConfig.outSSLNetData.capacity(), sslConfig.outSSLNetData.limit(), sslConfig.outSSLNetData.position()));
+                            SUS.toCanonicalID(',', sslConfig.getSSLOutboundBuffer().capacity(), sslConfig.getSSLOutboundBuffer().limit(), sslConfig.getSSLOutboundBuffer().position()));
                 case OK:
                     try {
-                        written = ByteBufferUtil.smartWrite(null, dataChannel, sslConfig.outSSLNetData, true);
+                        written = ByteBufferUtil.smartWrite(null, dataChannel, sslConfig.getSSLOutboundBuffer(), true);
                         if (usageTracker != null) usageTracker.updateUsage();
                     } catch (IOException e) {
                         SharedIOUtil.close(closeable);
@@ -538,7 +538,7 @@ public final class SSLUtil {
      * @throws SSLException if the session is still handshaking
      * @throws IOException  on channel error
      */
-    public static int sslChunkedWrite(SSLSessionConfig sslConfig, ByteChannel dataChannel, ByteBuffer src, UsageTracker usageTracker, AutoCloseable closeable, boolean flip) throws IOException {
+    public static int sslChunkedWrite(SSLConfigInt sslConfig, ByteChannel dataChannel, ByteBuffer src, UsageTracker usageTracker, AutoCloseable closeable, boolean flip) throws IOException {
         // dataSize semantics depend on caller's buffer mode:
         //   flip=true  → src is write-mode, data is [0..position), size = position()
         //   flip=false → src is read-mode,  data is [position..limit), size = remaining()

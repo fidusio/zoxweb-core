@@ -4,6 +4,7 @@ import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.net.BaseSessionCallback;
 import org.zoxweb.server.net.ssl.CustomSSLStateMachine;
+import org.zoxweb.server.net.ssl.SSLConfigInt;
 import org.zoxweb.server.net.ssl.SSLContextInfo;
 import org.zoxweb.server.net.ssl.SSLSessionConfig;
 import org.zoxweb.server.task.TaskUtil;
@@ -210,7 +211,7 @@ public abstract class TCPSessionCallback
     /**
      * will be called in one condition when the connection is secure and finished the ssl handshake
      */
-    public void sslHandshakeSuccessful() throws IOException {
+    public void sslHandshakeSuccessful(SSLConfigInt sci) throws IOException {
         connectedFinished();
     }
 

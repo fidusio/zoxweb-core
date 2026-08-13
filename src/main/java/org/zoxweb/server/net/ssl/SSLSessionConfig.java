@@ -5,19 +5,19 @@ import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.net.BaseChannelOutputStream;
 import org.zoxweb.server.net.SelectorController;
-import org.zoxweb.shared.io.CloseableType;
 import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.util.SUS;
 
 import javax.net.ssl.*;
 import java.nio.ByteBuffer;
+import java.nio.channels.ByteChannel;
 import java.nio.channels.SocketChannel;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 
 public class SSLSessionConfig
-        implements CloseableType {
+        implements SSLConfigInt {
     public final static LogWrapper log = new LogWrapper(SSLSessionConfig.class.getName()).setEnabled(false);
 
     // Incoming encrypted data
@@ -216,4 +216,23 @@ public class SSLSessionConfig
         return sslEngine.getDelegatedTask();
     }
 
+    @Override
+    public SSLEngine getSSLEngine() {
+        return sslEngine;
+    }
+
+    @Override
+    public ByteChannel getChannel() {
+        return sslChannel;
+    }
+
+    @Override
+    public ByteBuffer getSSLInboundBuffer() {
+        return inSSLNetData;
+    }
+
+    @Override
+    public ByteBuffer getSSLOutboundBuffer() {
+        return outSSLNetData;
+    }
 }

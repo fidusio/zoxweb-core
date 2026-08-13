@@ -2,9 +2,9 @@
 
 Open work items and deferred findings for zoxweb-core.
 
-Line numbers are as of 2026-08-05 (§5 added 2026-08-06) and drift with edits — treat them as hints,
-re-locate by symbol. Nothing in the "Deferred findings" sections has been changed in the codebase;
-those sections are assessment only.
+Line numbers are as of 2026-08-05 (§5 added 2026-08-06, §1 rewritten 2026-08-12 after phase two)
+and drift with edits — treat them as hints, re-locate by symbol. Nothing in the "Deferred findings"
+sections has been changed in the codebase; those sections are assessment only.
 
 ---
 
@@ -13,74 +13,60 @@ those sections are assessment only.
 New design, driven by `org.zoxweb.server.fsm`. The existing `TCPSessionCallback` path stays as-is
 and keeps working; this is not a port.
 
-**Files:** `server/net/common/TCPSMCallback.java`
+**Files:** `server/net/common/TCPSMCallback.java`,
+`src/test/java/org/zoxweb/server/net/common/TCPSMCallbackTest.java`
 
-### Design decisions still open
+### Decided contracts (2026-08-12, maintainer)
 
-- **`CF` type parameter.** Currently `BaseSessionCallback<StateMachineInt<?>>`. Two consequences:
-  the wildcard prevents consumers from getting a typed config out of
-  `getStateMachine().getConfig()`, and it structurally blocks the SSL layer, which requires a
-  `BaseSessionCallback<SSLSessionConfig>` (see §2). Candidate: hold the protocol machine in its own
-  field and leave `CF` for the session config.
-- **One machine per connection vs. one shared machine per protocol.** Currently implied
-  per-connection by the `auto_closeable` property write (see below). Per-connection gives each
-  session its own current-state marker and property bag; shared is far cheaper at 19K conn/sec but
-  then per-connection data may never live in state properties (the property bag is shared mutable
-  context — see FSM.md). This decision dictates what consumers are allowed to touch.
-- **Event vocabulary / payload types.** FSM.md rule: one canonical ID = one payload type, forever.
-  - `CLOSED` currently carries a `Throwable` (published from `exception()`). A real close event with
-    any other payload will give every consumer a runtime `ClassCastException`. Split into `ERROR`
-    (`Throwable`) and `CLOSED` before consumers exist.
-  - Decide whether clean peer EOF is its own ID or folded into close.
-  - Add `SECURE` / handshake-done ID (see `sslHandshakeSuccessful()` below).
+- **One state machine per TCPSMCallback.** The machine is per-connection, owned by the session,
+  and closed by session teardown. The constructor fails fast (`IllegalArgumentException`) if the
+  machine already carries an `AUTO_CLOSEABLE` binding (`NVGenericMap.add` silently replaces
+  same-name entries, so a second binding would hijack the first session's resources). Session
+  state living in `stateMachine.getProperties()` is therefore correct by contract.
+- **Event vocabulary:** `CONNECTED` (payload `SelectionKey`), `RAW_IN_DATA` (payload `ByteBuffer`),
+  `CLOSED` (payload `Throwable` or null). No ERROR/CLOSED split: clean EOF is folded into `CLOSED`
+  with a null payload; the error path relays its cause via `Params.EXCEPTION`. One ID = one payload
+  type holds (`Throwable`, nullable).
+- **Packet ownership:** each read publishes a **detached copy** owned by the consumer (recache via
+  `ByteBufferUtil.cache` when done). The earlier flip/compact partial-consumption framing model is
+  gone; framing across packets is the consumer's job (including its own memory bounds for frames
+  larger than the 16K read buffer). The `accept(ByteBuffer)` overload is the no-copy entry for
+  buffer-based delivery (e.g. decrypted SSL data) — caller keeps ownership there.
+- **Teardown order** (close delegate, one-shot): close `AUTO_CLOSEABLE` resources
+  (`LinkedHashSet`, registration order) → recache the read buffer → publish `CLOSED` → close the
+  machine **last**. A closed machine rejects publishes (`IllegalStateException`, silently
+  swallowed by `CloseableTypeDelegate`), so any other order loses `CLOSED` invisibly — this
+  exact defect shipped twice during development; `TCPSMCallbackTest` pins the order.
 
-### Bugs to fix
+### Fixed (phase one `643fbcb2` + phase two 2026-08-12)
 
-- **`accept(SelectionKey)` exception path leaks and can hot-spin.** `read` is declared outside the
-  loop, so when `read()` throws it retains its previous value (`0` on the first iteration, or the
-  prior positive count). `read == -1` is therefore false: nothing closes, nothing is published to
-  the machine, and `NIOSocket` re-arms `OP_READ` on a channel that throws again immediately — a
-  stack-trace loop burning a worker. Highest priority item in this section.
-- **Clean EOF publishes no event.** `SharedIOUtil.close(this)` now releases resources correctly
-  (delegate is wired), but the machine is never told. FSM sees `CONNECTED` → `RAW_IN_DATA`… →
-  permanent silence. Publishing `CLOSED` from the close delegate covers this and the item above.
-- **`flipMode == false` branch corrupts the buffer.** `compact()` is unconditional, so whichever
-  side owns `flip` must also own `compact`. With the flag false the buffer reaches the consumer in
-  write mode and `compact()` copies the unwritten range `[N, cap)` over the payload. Currently
-  unreachable (flag is `true`, no setter) but becomes live the moment STARTTLS flips it per phase
-  (§2). Do **not** make the flag `final` — mode ownership legitimately changes at the upgrade
-  boundary.
-- **`auto_closeable` stored in `stateMachine.getProperties()`** pins the design to one machine per
-  connection: a second `TCPSMCallback` against the same machine collides on that key and one
-  session's teardown reaches the other's resources. Also `HashSet` → nondeterministic close order,
-  which matters once the SSL engine must be torn down before the channel; prefer `LinkedHashSet`.
-- **`sslHandshakeSuccessful()` is empty** — no event, so consumers cannot gate their first write on
-  handshake completion.
-- **`connected(SelectionKey)` does not call `setChannel(key.channel())` or `setRemoteAddress(...)`.**
-  `getChannel()` returns null and consumers have no remote address for logging/SNI. Compare
-  `TCPSessionCallback.connected` lines 190-191.
+- `accept(SelectionKey)` exception path (`read` kept its stale value → hot-spin/fd leak): the
+  catch now sets `read = -1` and the session closes.
+- Clean EOF publishes `CLOSED` from the close delegate (all termination paths covered).
+- `flipMode == false` buffer corruption: eliminated by the detached-copy redesign.
+- `connected()` now calls `setChannel(key.channel())`; remote address resolved there.
+- Close delegate wired in the constructor (`close()` was a silent no-op, see §3.4).
+- Machine-close vs `CLOSED`-publish ordering (see teardown order above).
+- Session output stream (`CommonChannelOutputStream`) registered in `AUTO_CLOSEABLE`.
+- Read-error path logs via the class `LogWrapper` instead of `printStackTrace()`.
 
-### Invariant to enforce, not just document
+### Still open
 
-`NIOSocket` sets `interestOps(0)` on the key before dispatch and re-arms only after `accept()`
-returns; that gate is what serializes reads per connection. A consumer calling async `publish(...)`
-escapes the gate → concurrent reads on the same channel and buffer. Because `publishSync` runs
-inline regardless of machine mode, a scheduler-mode machine looks fine until a consumer publishes
-async. Consider validating in the constructor (`getExecutor() == null && !isScheduledTaskEnabled()`)
-so it fails at startup instead of under load.
-
-### Consumer contract to write down
-
-- `RAW_IN_DATA` payload arrives in **read** mode (already flipped). A consumer must **not** call
-  `flip()` on it — that sets `lim=0` and discards everything. Given the field name `flipMode`, this
-  is a plausible first mistake.
-- The buffer is pool-owned and valid only for the duration of the consumer call. Anything retaining
-  data must copy.
-- Partial consumption is supported and is the framing mechanism: leave the remainder, `compact()`
-  slides it forward, the next read appends. Consuming nothing is safe (data preserved) but a
-  consumer that never makes progress eventually fills the buffer → `read()` returns 0 → connection
-  stalls silently with no error. Decide whether that is a documented consumer obligation or
-  something the callback detects (matters for protocols with frames > 16K).
+- **`CF` type parameter / SSL participation.** `CF = StateMachineInt<?>`; the SSL layer requires a
+  `BaseSessionCallback<SSLSessionConfig>` (`SSLNIOSocketHandler:237`, all `SSLUtil` handshake
+  handlers) and `setConfig` is final, so TCPSMCallback cannot join the SSL path as-is.
+  `accept(ByteBuffer)` is the intended decrypted-data entry. Resolve together with
+  SSLStateMachineV2 (§2); `sslHandshakeSuccessful()` is a documented no-op until then — add a
+  `SECURE` / handshake-done event ID when it lands so consumers can gate their first write.
+- **Sync-machine guard.** The default `StateMachine(String)` constructor is async
+  (`TaskUtil.defaultTaskScheduler()`); `publishSync` is inline regardless of mode, so the callback
+  works either way — but consumers publishing async escape NIOSocket's per-session read
+  serialization ordering. Constructor validation
+  (`getExecutor() == null && !isScheduledTaskEnabled()`) deliberately not added; documented only.
+- **Event ID namespacing.** `BasicEvent` routes as bare strings (`"CONNECTED"`, `"CLOSED"`) via
+  `SUS.enumName` — collision-prone with any other vocabulary sharing the machine. Decide before
+  consumers exist (e.g. make `BasicEvent` implement `GetName`); a rename later breaks every
+  registered consumer silently (unknown IDs are no-ops).
 
 ---
 
@@ -106,6 +92,12 @@ SSLSessionConfig getConfig();
 
 `SSLSessionConfig.sslConnectionHelper` is typed to that interface, so a V2 is selectable per session
 with zero edits to `SSLSessionConfig`, `SSLUtil`, or the existing machines.
+
+A second seam is in place (2026-08-12) on the **write path**: `SSLConfigInt` (engine, channel,
+in/out net buffers, default `getApplicationBufferSize()` derived from the engine session),
+implemented by `SSLSessionConfig`. `SSLUtil._sslWrite`/`sslChunkedWrite` and
+`CommonChannelOutputStream` are typed against the interface, so a V2 session config can reuse the
+tuned encrypt-and-write path without touching `SSLSessionConfig`.
 
 ### Scope discipline
 
@@ -321,8 +313,8 @@ implementors will see it.
   (masked mod 64) → garbage netmask for any IPv6 input.
 - `NetworkTunnel.java:40`, `:76`, `:106` — `closedStat` flags are non-volatile but read/written
   across relay threads.
-- `TCPSMCallback` (old revision) / `TCPSessionCallback` contrast: the latter correctly sets its close
-  delegate in every constructor.
+- ~~`TCPSMCallback` (old revision) / `TCPSessionCallback` contrast~~ — resolved: TCPSMCallback wires
+  its close delegate in the constructor since phase one (§1).
 - `NIOConfig.java:225` inner retry catch prints `e` instead of `e1`, hiding the retry's real failure;
   `:234` logs "Adding Incoming rule" inside the **outgoing** loop; `:195-198` SSL context init
   failures are swallowed so a TLS listener can be silently absent at runtime.

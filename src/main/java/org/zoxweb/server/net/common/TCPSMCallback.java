@@ -6,6 +6,7 @@ import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.net.BaseChannelOutputStream;
 import org.zoxweb.server.net.DataPacket;
 import org.zoxweb.server.net.SessionCallback;
+import org.zoxweb.server.net.ssl.SSLConfigInt;
 import org.zoxweb.server.util.UUID7;
 import org.zoxweb.shared.io.CloseableType;
 import org.zoxweb.shared.io.SharedIOUtil;
@@ -21,7 +22,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.Channel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -40,8 +41,14 @@ import java.util.concurrent.atomic.AtomicLong;
  * null otherwise.</li>
  * </ul>
  * The state machine can register per-session resources in its {@link Params#AUTO_CLOSEABLE}
- * property collection, they are closed during session teardown; the socket channel itself is
- * registered there by {@link #setChannel(Channel)}.
+ * property collection, they are closed during session teardown in registration order; the socket
+ * channel itself is registered there by {@link #setChannel(Channel)} and the session output
+ * stream by {@link #connected(SelectionKey)}.
+ * <p>
+ * Ownership contract: <b>one state machine per TCPSMCallback</b> — the machine is per-connection,
+ * owned by the session, and closed by session teardown as the last act after {@link
+ * BasicEvent#CLOSED} is delivered (a closed machine rejects publishes, so the order matters).
+ * The constructor fails fast if the machine is already bound to another session callback.
  */
 public class TCPSMCallback
         extends SessionCallback<StateMachineInt<?>, DataPacket<Long>, OutputStream>
@@ -49,15 +56,16 @@ public class TCPSMCallback
 
     public static final LogWrapper log = new LogWrapper(TCPSMCallback.class).setEnabled(false);
     private final AtomicLong packetsCounter = new AtomicLong(0);
-    private volatile BaseChannelOutputStream bcos;
+    private volatile CommonChannelOutputStream bcos;
     private volatile SocketChannel socket;
     private volatile InetSocketAddress remoteAddress;
     private final String id;
 
     /**
      * Closes the session exactly once via the closeable delegate: closes the state machine's
-     * {@link Params#AUTO_CLOSEABLE} resources, recaches the read buffer and publishes the
-     * {@link BasicEvent#CLOSED} event, subsequent calls are no-ops.
+     * {@link Params#AUTO_CLOSEABLE} resources, recaches the read buffer, publishes the
+     * {@link BasicEvent#CLOSED} event and finally closes the state machine itself, subsequent
+     * calls are no-ops.
      *
      * @throws Exception in case of error
      */
@@ -118,15 +126,21 @@ public class TCPSMCallback
     /**
      * Creates a session callback; registers the {@link Params#AUTO_CLOSEABLE} collection in the
      * state machine's properties and arms the close delegate that performs the one-time session
-     * teardown, see {@link #close()}.
+     * teardown, see {@link #close()}. One state machine per session callback: the machine is
+     * owned by the session and closed by teardown after {@link BasicEvent#CLOSED} is delivered.
      *
      * @param id           the session id
      * @param stateMachine the state machine that consumes the session events
+     * @throws IllegalArgumentException if the state machine is already bound to a session callback
      */
     public TCPSMCallback(String id, StateMachineInt<?> stateMachine) {
         SUS.checkIfNull("stateMachine can't be null", stateMachine);
+        if (stateMachine.getProperties().getNV(SUS.enumName(Params.AUTO_CLOSEABLE)) != null)
+            throw new IllegalArgumentException("state machine already bound to a session callback");
         setConfig(stateMachine);
-        stateMachine.getProperties().add(new NamedValue<CollectionAsArray<AutoCloseable>>(Params.AUTO_CLOSEABLE, new CollectionAsArray<AutoCloseable>(new HashSet<AutoCloseable>(), new AutoCloseable[0])));
+        NamedValue<CollectionAsArray<AutoCloseable>> ncClosable = new NamedValue<CollectionAsArray<AutoCloseable>>(Params.AUTO_CLOSEABLE, new CollectionAsArray<AutoCloseable>(new LinkedHashSet<>( ), new AutoCloseable[0]));
+        stateMachine.getProperties().add(ncClosable);
+
         closeableDelegate.setDelegate(() ->
         {
             NamedValue<CollectionAsArray<AutoCloseable>> autoCloseables = getConfig().getProperties().getNV(SUS.enumName(Params.AUTO_CLOSEABLE));
@@ -134,6 +148,8 @@ public class TCPSMCallback
             ByteBufferUtil.cache(rawReadBuffer);
             NamedValue<Throwable> exception = getConfig().getProperties().getNV(SUS.enumName(Params.EXCEPTION));
             getConfig().publishSync(BasicEvent.CLOSED, exception != null ? exception.getValue() : null);
+            // last act: a closed machine rejects publishes, so CLOSED must go out first
+            getConfig().close();
         });
         this.id = id;
     }
@@ -169,7 +185,7 @@ public class TCPSMCallback
 
         } catch (IOException e) {
             read = -1;
-            e.printStackTrace();
+            if (log.isEnabled()) log.getLogger().info("" + e);
         }
 
         if (read == -1)
@@ -198,6 +214,7 @@ public class TCPSMCallback
     public int connected(SelectionKey key) throws IOException {
         setChannel(key.channel());
         bcos = new CommonChannelOutputStream(getChannel());
+        ((CollectionAsArray<AutoCloseable>) getConfig().getProperties().getNV(SUS.enumName(Params.AUTO_CLOSEABLE)).getValue()).add(bcos);
         getConfig().publishSync(BasicEvent.CONNECTED, key);
         return interestOps();
     }
@@ -254,8 +271,9 @@ public class TCPSMCallback
     }
 
     @Override
-    public void sslHandshakeSuccessful() throws IOException {
-        // switch ba
+    public void sslHandshakeSuccessful(SSLConfigInt sci) throws IOException {
+        // flips the session output stream to encrypted writes; requires connected() to have run (bcos set)
+        bcos.setSSLSessionConfig(sci);
     }
 
     /**

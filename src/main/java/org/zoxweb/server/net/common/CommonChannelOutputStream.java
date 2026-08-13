@@ -3,6 +3,7 @@ package org.zoxweb.server.net.common;
 import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.server.net.BaseChannelOutputStream;
 import org.zoxweb.server.net.ProtocolHandler;
+import org.zoxweb.server.net.ssl.SSLConfigInt;
 import org.zoxweb.server.net.ssl.SSLSessionConfig;
 import org.zoxweb.server.net.ssl.SSLUtil;
 import org.zoxweb.shared.io.SharedIOUtil;
@@ -19,7 +20,7 @@ public class CommonChannelOutputStream
         extends BaseChannelOutputStream {
 
 
-    private transient SSLSessionConfig sslConfig;
+    private transient SSLConfigInt sslConfig;
     private final AtomicBoolean sslMode = new AtomicBoolean(false);
 
 
@@ -33,7 +34,7 @@ public class CommonChannelOutputStream
     }
 
 
-    public synchronized CommonChannelOutputStream setSSLSessionConfig(SSLSessionConfig sslConfig) {
+    public synchronized CommonChannelOutputStream setSSLSessionConfig(SSLConfigInt sslConfig) {
         SUS.checkIfNull("sslConfig", sslConfig);
         this.sslConfig = sslConfig;
         this.sslMode.set(true);
@@ -44,7 +45,7 @@ public class CommonChannelOutputStream
         return sslMode.get();
     }
 
-    public SSLSessionConfig getSSLSessionConfig() {
+    public SSLConfigInt getSSLSessionConfig() {
         return sslConfig;
     }
 
