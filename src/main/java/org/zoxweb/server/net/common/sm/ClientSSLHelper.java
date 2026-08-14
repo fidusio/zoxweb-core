@@ -21,9 +21,9 @@ import java.io.Closeable;
  */
 class ClientSSLHelper implements SSLConnectionHelper, Closeable {
 
-    private final ClientConnectionSM sm;
+    private final ClientConSM sm;
 
-    ClientSSLHelper(ClientConnectionSM sm) {
+    ClientSSLHelper(ClientConSM sm) {
         this.sm = sm;
     }
 

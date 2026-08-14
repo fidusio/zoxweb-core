@@ -13,7 +13,7 @@ public class ClientSMFactoryTest {
 
     @Test
     public void tlsImmediateShape() {
-        ClientConnectionSM sm = ClientSMFactory.fromJSON(
+        ClientConSM sm = ClientSMFactory.fromJSON(
                 "{ \"name\": \"smtps-client\", \"port\": 465,"
                         + " \"protocol\": \"tls\", \"tls\": {\"mode\": \"immediate\", \"cert_validation\": false},"
                         + " \"timeout_sec\": 7 }");
@@ -31,7 +31,7 @@ public class ClientSMFactoryTest {
 
     @Test
     public void sshShape() {
-        ClientConnectionSM sm = ClientSMFactory.fromJSON(
+        ClientConSM sm = ClientSMFactory.fromJSON(
                 "{ \"name\": \"ssh-fingerprint\", \"port\": 22,"
                         + " \"protocol\": \"ssh\", \"ssh\": {\"banner_prefix\": \"SSH-2.0-\", \"banner_contains\": \"OpenSSH\"} }");
 
@@ -43,7 +43,7 @@ public class ClientSMFactoryTest {
 
     @Test
     public void starttlsReadyShape() {
-        ClientConnectionSM sm = ClientSMFactory.fromJSON(
+        ClientConSM sm = ClientSMFactory.fromJSON(
                 "{ \"name\": \"smtp-starttls\", \"port\": 587,"
                         + " \"protocol\": \"plain\", \"tls\": {\"mode\": \"on_demand\", \"cert_validation\": false} }");
 
@@ -55,7 +55,7 @@ public class ClientSMFactoryTest {
     @Test
     public void noEndpointInConfig() {
         // a fully endpoint-free config still builds — the caller provides the InetSocketAddress
-        ClientConnectionSM sm = ClientSMFactory.fromJSON(
+        ClientConSM sm = ClientSMFactory.fromJSON(
                 "{ \"name\": \"no-endpoint\", \"protocol\": \"tls\", \"tls\": {\"cert_validation\": false} }");
         assertNotNull(sm.lookupState(SSLClientHandshakeState.NAME));
         // no port hint -> caller's fallback is returned
@@ -64,7 +64,7 @@ public class ClientSMFactoryTest {
 
     @Test
     public void settingsBagIsTheParsedConfig() {
-        ClientConnectionSM sm = ClientSMFactory.fromJSON(
+        ClientConSM sm = ClientSMFactory.fromJSON(
                 "{ \"name\": \"bag-check\", \"protocol\": \"plain\", \"custom_knob\": \"42\" }");
 
         assertEquals("42", sm.getContext().getSettings().getValue("custom_knob"),

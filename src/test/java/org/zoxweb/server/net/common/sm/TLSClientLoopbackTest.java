@@ -34,7 +34,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * The self-handshake integration test: the existing SSL server stack
  * ({@code SSLNIOSocketHandlerFactory} + echo callback, test keystore
  * {@code src/test/resources/test.zoxweb.org.jks}, PKCS12, password "password") terminates TLS
- * on the loopback; the client is a factory-built IMMEDIATE-mode {@link ClientConnectionSM}
+ * on the loopback; the client is a factory-built IMMEDIATE-mode {@link ClientConSM}
  * with certificate validation disabled (self-signed cert).
  * <p>
  * Asserts SECURE → READY ordering, that the first application write after READY round-trips
@@ -90,7 +90,7 @@ public class TLSClientLoopbackTest {
             InetSocketAddress remote = new InetSocketAddress(InetAddress.getLoopbackAddress(), port);
 
             // client: IMMEDIATE TLS machine, cert validation off (self-signed server cert)
-            ClientConnectionSM sm = ClientConnectionSMBuilder.create("tls-loopback")
+            ClientConSM sm = ClientConSMBuilder.create("tls-loopback")
                     .phase(new SSLClientPhase(new SSLContextInfo(remote, false), SSLClientPhase.TLSMode.IMMEDIATE))
                     .build();
             final ClientSessionContext ctx = sm.getContext();
@@ -121,7 +121,7 @@ public class TLSClientLoopbackTest {
             app.register((Consumer<Throwable>) t -> {
                 order.add("CLOSED");
                 closedLatch.countDown();
-            }, TCPSMCallback.BasicEvent.CLOSED);
+            }, SMProtoUtil.BasicEvent.CLOSED);
             sm.register(app);
 
             callback = sm.newSessionCallback();
@@ -171,7 +171,7 @@ public class TLSClientLoopbackTest {
             int port = ((ServerSocketChannel) serverKey.channel()).socket().getLocalPort();
 
             // config carries NO remote — only the protocol/tls behavior + a port hint
-            ClientConnectionSM sm = ClientSMFactory.fromJSON(
+            ClientConSM sm = ClientSMFactory.fromJSON(
                     "{ \"name\": \"tls-deferred\", \"port\": " + port + ","
                             + " \"protocol\": \"tls\", \"tls\": {\"mode\": \"immediate\", \"cert_validation\": false} }");
             final ClientSessionContext ctx = sm.getContext();

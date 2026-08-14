@@ -34,9 +34,9 @@ import java.nio.channels.SelectionKey;
 class SSLClientBridge extends BaseSessionCallback<SSLSessionConfig>
         implements ConnectionCallback<ByteBuffer> {
 
-    private final ClientConnectionSM sm;
+    private final ClientConSM sm;
 
-    SSLClientBridge(ClientConnectionSM sm) {
+    SSLClientBridge(ClientConSM sm) {
         this.sm = sm;
         closeableDelegate.setDelegate(() -> SharedIOUtil.close(sm.getContext().getSession()));
     }

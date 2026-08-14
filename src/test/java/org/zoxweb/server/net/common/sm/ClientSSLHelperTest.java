@@ -15,7 +15,7 @@ public class ClientSSLHelperTest {
 
     @Test
     public void helperCloseNeverClosesTheMachine() {
-        ClientConnectionSM sm = ClientConnectionSMBuilder.create("helper-close").build();
+        ClientConSM sm = ClientConSMBuilder.create("helper-close").build();
         ClientSSLHelper helper = new ClientSSLHelper(sm);
 
         helper.close();
@@ -26,7 +26,7 @@ public class ClientSSLHelperTest {
 
     @Test
     public void publishAfterMachineCloseIsSilentNoOp() {
-        ClientConnectionSM sm = ClientConnectionSMBuilder.create("helper-publish").build();
+        ClientConSM sm = ClientConSMBuilder.create("helper-publish").build();
         ClientSSLHelper helper = new ClientSSLHelper(sm);
 
         sm.close();
@@ -38,7 +38,7 @@ public class ClientSSLHelperTest {
 
     @Test
     public void configIsNullBeforeUpgrade() {
-        ClientConnectionSM sm = ClientConnectionSMBuilder.create("helper-config").build();
+        ClientConSM sm = ClientConSMBuilder.create("helper-config").build();
         ClientSSLHelper helper = new ClientSSLHelper(sm);
 
         assertNull(helper.getConfig(), "no SSL session before the upgrade ran");

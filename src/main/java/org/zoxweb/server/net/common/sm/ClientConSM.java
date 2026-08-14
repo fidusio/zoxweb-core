@@ -8,7 +8,7 @@ import java.util.concurrent.Executor;
  * Per-connection client state machine, set as the config of a
  * {@link TCPSMCallback}: it dictates what happens after socket
  * connect — TLS handshake, protocol banner validation, STARTTLS-style upgrade — based on the
- * phases it was built with ({@link ClientConnectionSMBuilder}).
+ * phases it was built with ({@link ClientConSMBuilder}).
  * <p>
  * <b>Always synchronous.</b> Constructed with a null executor so every publish runs inline on
  * the calling thread: NIOSocket serializes dispatches per session by zeroing the key's interest
@@ -20,9 +20,10 @@ import java.util.concurrent.Executor;
  * ({@code CONNECTED}, {@code RAW_IN_DATA}, {@code CLOSED}) plus internal republication — and it
  * is session-owned: TCPSMCallback teardown closes it last, after {@code CLOSED} is delivered.
  */
-public class ClientConnectionSM extends StateMachine<ClientSessionContext> {
+public class ClientConSM extends StateMachine<ClientSessionContext> {
 
-    ClientConnectionSM(String name) {
+
+    ClientConSM(String name) {
         super(name, (Executor) null);
     }
 

@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Programmatic configuration of a {@link ClientConnectionSM}: compose {@link ConnectionPhase}s,
+ * Programmatic configuration of a {@link ClientConSM}: compose {@link ConnectionPhase}s,
  * then {@link #build()}.
  * <pre>
  * ClientConnectionSM sm = ClientConnectionSMBuilder.create("ssh-fingerprint")
@@ -23,26 +23,26 @@ import java.util.Set;
  * transport plus every phase whose {@link ConnectionPhase#gatesReady()} is true — the last of
  * them to complete publishes the single {@link ClientEvent#READY}.
  */
-public class ClientConnectionSMBuilder {
+public class ClientConSMBuilder {
 
     private final String name;
     private final List<ConnectionPhase> phases = new ArrayList<ConnectionPhase>();
     private NVGenericMap settings;
 
-    private ClientConnectionSMBuilder(String name) {
+    private ClientConSMBuilder(String name) {
         this.name = name;
     }
 
-    public static ClientConnectionSMBuilder create(String name) {
+    public static ClientConSMBuilder create(String name) {
         SUS.checkIfNull("name null", name);
-        return new ClientConnectionSMBuilder(name);
+        return new ClientConSMBuilder(name);
     }
 
     /**
      * Attaches the declarative settings bag, exposed to phases via
      * {@link ClientSessionContext#getSettings()}.
      */
-    public ClientConnectionSMBuilder settings(NVGenericMap settings) {
+    public ClientConSMBuilder settings(NVGenericMap settings) {
         this.settings = settings;
         return this;
     }
@@ -55,7 +55,7 @@ public class ClientConnectionSMBuilder {
      *                                  collapse to one entry in the READY gate (premature READY)
      *                                  and their consumers would double-consume shared events
      */
-    public ClientConnectionSMBuilder phase(ConnectionPhase phase) {
+    public ClientConSMBuilder phase(ConnectionPhase phase) {
         SUS.checkIfNull("phase null", phase);
         for (ConnectionPhase p : phases) {
             if (phase instanceof SSLClientPhase && p instanceof SSLClientPhase)
@@ -71,14 +71,14 @@ public class ClientConnectionSMBuilder {
      * Builds the synchronous machine: context wired, transport state registered first, phases
      * contributed in order.
      */
-    public ClientConnectionSM build() {
+    public ClientConSM build() {
         Set<String> gating = new LinkedHashSet<String>();
         gating.add(ClientTransportState.NAME);
         for (ConnectionPhase p : phases) {
             if (p.gatesReady())
                 gating.add(p.getName());
         }
-        ClientConnectionSM sm = new ClientConnectionSM(name);
+        ClientConSM sm = new ClientConSM(name);
         ClientSessionContext ctx = new ClientSessionContext(sm, settings, gating);
         sm.setConfig(ctx);
         sm.register(new ClientTransportState());

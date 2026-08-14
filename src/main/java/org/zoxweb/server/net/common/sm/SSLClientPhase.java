@@ -134,7 +134,7 @@ public class SSLClientPhase implements ConnectionPhase {
     }
 
     @Override
-    public void contribute(ClientConnectionSM sm) {
+    public void contribute(ClientConSM sm) {
         sm.register(new SSLClientHandshakeState());
         sm.register(new SSLClientDataState());
         State<Object> control = new State<Object>("ssl-control");
@@ -148,7 +148,7 @@ public class SSLClientPhase implements ConnectionPhase {
      * The upgrade sequence (idempotent): builds the SSL session state, wires the helper and the
      * bridge, flips the router to TLS mode and kicks the client handshake flight inline.
      */
-    void upgrade(ClientConnectionSM sm) {
+    void upgrade(ClientConSM sm) {
         ClientSessionContext ctx = sm.getContext();
         if (ctx.getSSLConfig() != null || ctx.getMode() != ClientSessionContext.Mode.PLAIN)
             return;
@@ -207,13 +207,13 @@ public class SSLClientPhase implements ConnectionPhase {
 
         @Override
         public void accept(Object ignored) {
-            upgrade((ClientConnectionSM) getStateMachine());
+            upgrade((ClientConSM) getStateMachine());
         }
     }
 
     private class AutoStart extends TriggerConsumer<SelectionKey> {
         AutoStart() {
-            super(TCPSMCallback.BasicEvent.CONNECTED);
+            super(SMProtoUtil.BasicEvent.CONNECTED);
         }
 
         @Override

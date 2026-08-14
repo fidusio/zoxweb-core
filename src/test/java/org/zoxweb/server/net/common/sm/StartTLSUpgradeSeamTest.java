@@ -66,7 +66,7 @@ public class StartTLSUpgradeSeamTest {
         }
 
         @Override
-        public void contribute(ClientConnectionSM sm) {
+        public void contribute(ClientConSM sm) {
             State<Object> state = new State<Object>(NAME);
             state.register(new GoAhead());
             state.register(new Secured());
@@ -125,8 +125,8 @@ public class StartTLSUpgradeSeamTest {
         }
     }
 
-    private ClientConnectionSM buildMachine(InetSocketAddress remote) throws Exception {
-        return ClientConnectionSMBuilder.create("starttls-seam")
+    private ClientConSM buildMachine(InetSocketAddress remote) throws Exception {
+        return ClientConSMBuilder.create("starttls-seam")
                 .phase(new GoAheadPhase())
                 .phase(new SSLClientPhase(new SSLContextInfo(remote, false), SSLClientPhase.TLSMode.ON_DEMAND))
                 .build();
@@ -169,7 +169,7 @@ public class StartTLSUpgradeSeamTest {
             }, "starttls-test-server");
             serverThread.start();
 
-            ClientConnectionSM sm = buildMachine(remote);
+            ClientConSM sm = buildMachine(remote);
             final ClientSessionContext ctx = sm.getContext();
             State<Object> app = new State<Object>("app");
             app.register((Consumer<Object>) o -> {
@@ -231,13 +231,13 @@ public class StartTLSUpgradeSeamTest {
             }, "starttls-injection-server");
             serverThread.start();
 
-            ClientConnectionSM sm = buildMachine(remote);
+            ClientConSM sm = buildMachine(remote);
             State<Object> app = new State<Object>("app");
             app.register((Consumer<Object>) o -> secureFired.set(true), ClientEvent.SECURE);
             app.register((Consumer<Throwable>) t -> {
                 closedPayload.set(t);
                 closedLatch.countDown();
-            }, TCPSMCallback.BasicEvent.CLOSED);
+            }, SMProtoUtil.BasicEvent.CLOSED);
             sm.register(app);
 
             callback = sm.newSessionCallback();

@@ -77,7 +77,7 @@ public class SSHBannerPhase implements ConnectionPhase {
     }
 
     @Override
-    public void contribute(ClientConnectionSM sm) {
+    public void contribute(ClientConSM sm) {
         State<Object> state = new State<Object>(NAME);
         state.register(new BannerConsumer());
         sm.register(state);

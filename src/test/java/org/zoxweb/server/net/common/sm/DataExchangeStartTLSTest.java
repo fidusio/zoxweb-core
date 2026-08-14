@@ -103,7 +103,7 @@ public class DataExchangeStartTLSTest {
                     + "   {\"expect\":    \"txt:\\r\\n\"},"
                     + "   {\"start_tls\": true}"
                     + " ] }";
-            ClientConnectionSM sm = ClientSMFactory.fromJSON(json);
+            ClientConSM sm = ClientSMFactory.fromJSON(json);
             final ClientSessionContext ctx = sm.getContext();
 
             State<Object> app = new State<Object>("app");

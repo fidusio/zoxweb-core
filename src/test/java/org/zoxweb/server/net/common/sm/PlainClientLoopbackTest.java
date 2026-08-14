@@ -42,7 +42,7 @@ public class PlainClientLoopbackTest {
         final ByteArrayOutputStream received = new ByteArrayOutputStream();
         final AtomicReference<Throwable> closedPayload = new AtomicReference<Throwable>(new Exception("sentinel"));
 
-        ClientConnectionSM sm = ClientConnectionSMBuilder.create("plain-loopback").build();
+        ClientConSM sm = ClientConSMBuilder.create("plain-loopback").build();
         State<Object> app = new State<Object>("app");
         app.register((Consumer<Object>) payload -> {
             order.add("READY");
@@ -60,7 +60,7 @@ public class PlainClientLoopbackTest {
             order.add("CLOSED");
             closedPayload.set(t);
             closedLatch.countDown();
-        }, TCPSMCallback.BasicEvent.CLOSED);
+        }, SMProtoUtil.BasicEvent.CLOSED);
         sm.register(app);
 
         TCPSMCallback callback = sm.newSessionCallback();

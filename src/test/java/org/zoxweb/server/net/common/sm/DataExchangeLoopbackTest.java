@@ -68,7 +68,7 @@ public class DataExchangeLoopbackTest {
                     + "   {\"send\":   \"txt:EHLO client.test\\r\\n\"},"
                     + "   {\"expect\": \"txt:250 \"}"
                     + " ] }";
-            ClientConnectionSM sm = ClientSMFactory.fromJSON(json);
+            ClientConSM sm = ClientSMFactory.fromJSON(json);
             assertNotNull(sm.lookupState(DataExchangePhase.NAME), "exchange phase must be registered");
 
             State<Object> app = new State<Object>("app");
@@ -133,7 +133,7 @@ public class DataExchangeLoopbackTest {
                     + "   {\"send\":   \"txt:EHLO ${helo}\\r\\n\"},"
                     + "   {\"expect\": \"txt:250 \"}"
                     + " ] }";
-            ClientConnectionSM sm = ClientSMFactory.fromJSON(json);
+            ClientConSM sm = ClientSMFactory.fromJSON(json);
             // the caller injects the environment-specific value at connection time
             sm.getContext().setVar("helo", "probe.example.org");
 

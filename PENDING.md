@@ -71,15 +71,15 @@ and keeps working; this is not a port.
   works either way — but consumers publishing async escape NIOSocket's per-session read
   serialization ordering. Constructor validation
   (`getExecutor() == null && !isScheduledTaskEnabled()`) deliberately not added; documented only.
-  Mitigated in practice: `ClientConnectionSM` (the intended machine) is always synchronous.
+  Mitigated in practice: `ClientConSM` (the intended machine) is always synchronous.
 
 ---
 
 ## 2. Delivered 2026-08-13 — SSLStateMachineV2 = `org.zoxweb.server.net.common.sm`
 
-The client-connection state machine framework (`ClientConnectionSM` + `SSLClientPhase`) is the
+The client-connection state machine framework (`ClientConSM` + `SSLClientPhase`) is the
 V2: protocol phases (plain / SSH banner / STARTTLS-ready TLS) and TLS handshake orchestration in
-one machine, configured programmatically (`ClientConnectionSMBuilder`) or from JSON
+one machine, configured programmatically (`ClientConSMBuilder`) or from JSON
 (`ClientSMFactory`). Delivered contracts:
 
 - **Orchestration-only discipline honored**: the handshake states call the same five `SSLUtil`

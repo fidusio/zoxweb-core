@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class SSHBannerPhaseTest {
 
     private static class Harness {
-        final ClientConnectionSM sm;
+        final ClientConSM sm;
         final TCPSMCallback callback;
         final AtomicReference<String> banner = new AtomicReference<String>();
         final AtomicInteger readyCount = new AtomicInteger();
@@ -30,7 +30,7 @@ public class SSHBannerPhaseTest {
         final StringBuilder postReadyData = new StringBuilder();
 
         Harness(SSHBannerPhase phase) {
-            sm = ClientConnectionSMBuilder.create("ssh-test").phase(phase).build();
+            sm = ClientConSMBuilder.create("ssh-test").phase(phase).build();
             State<Object> app = new State<Object>("app");
             app.register((Consumer<String>) banner::set, ClientEvent.BANNER_RECEIVED);
             app.register((Consumer<Object>) o -> {
@@ -46,15 +46,15 @@ public class SSHBannerPhaseTest {
             app.register((Consumer<Throwable>) t -> {
                 closedPayload.set(t);
                 closedCount.incrementAndGet();
-            }, TCPSMCallback.BasicEvent.CLOSED);
+            }, SMProtoUtil.BasicEvent.CLOSED);
             sm.register(app);
             callback = sm.newSessionCallback();
-            sm.publishSync(TCPSMCallback.BasicEvent.CONNECTED, null);
+            sm.publishSync(SMProtoUtil.BasicEvent.CONNECTED, null);
         }
 
         void feed(String wire) {
             byte[] bytes = SharedStringUtil.getBytes(wire);
-            sm.publishSync(TCPSMCallback.BasicEvent.RAW_IN_DATA,
+            sm.publishSync(SMProtoUtil.BasicEvent.RAW_IN_DATA,
                     ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, bytes, 0, bytes.length, true));
         }
     }

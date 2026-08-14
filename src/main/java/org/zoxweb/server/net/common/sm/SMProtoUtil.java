@@ -122,4 +122,11 @@ public final class SMProtoUtil {
     public static boolean hasVars(String literal) {
         return literal != null && VAR_PATTERN.matcher(literal).find();
     }
+
+    public enum BasicEvent {
+        CONNECTED,
+        DATAGRAM,
+        CLOSED,
+        RAW_IN_DATA,
+    }
 }

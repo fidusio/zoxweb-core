@@ -4,7 +4,7 @@ package org.zoxweb.server.net.common.sm;
  * Event vocabulary of the client-connection state machine, published as bare enum names
  * (canonical ID = {@code name()}).
  * <p>
- * Reserved canonical IDs on a {@link ClientConnectionSM} — application vocabularies sharing the
+ * Reserved canonical IDs on a {@link ClientConSM} — application vocabularies sharing the
  * machine must avoid all of them (one machine per session, enforced by the TCPSMCallback
  * constructor, keeps this a per-session concern):
  * <ul>

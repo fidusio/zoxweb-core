@@ -1,10 +1,10 @@
 /**
- * Pluggable client-connection state machine framework: a {@link org.zoxweb.server.net.common.sm.ClientConnectionSM}
+ * Pluggable client-connection state machine framework: a {@link ClientConSM}
  * set as the config of a {@link TCPSMCallback} dictates what
  * happens after socket connect — immediate TLS handshake, SSH banner validation, or a
  * STARTTLS-style plaintext-negotiate-then-upgrade — composed from
  * {@link org.zoxweb.server.net.common.sm.ConnectionPhase}s programmatically
- * ({@link org.zoxweb.server.net.common.sm.ClientConnectionSMBuilder}) or from a JSON config
+ * ({@link ClientConSMBuilder}) or from a JSON config
  * ({@link org.zoxweb.server.net.common.sm.ClientSMFactory}).
  *
  * <h2>TLS orchestration (SSLStateMachineV2)</h2>

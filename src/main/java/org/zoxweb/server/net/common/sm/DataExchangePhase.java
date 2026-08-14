@@ -136,7 +136,7 @@ public class DataExchangePhase implements ConnectionPhase {
     }
 
     @Override
-    public void contribute(ClientConnectionSM sm) {
+    public void contribute(ClientConSM sm) {
         State<Object> state = new State<Object>(NAME);
         Driver driver = new Driver();
         state.register(driver.connected);
@@ -154,7 +154,7 @@ public class DataExchangePhase implements ConnectionPhase {
         private boolean waitingForSecure = false;
         private final ByteArrayOutputStream acc = new ByteArrayOutputStream(64);
 
-        final TriggerConsumer<SelectionKey> connected = new TriggerConsumer<SelectionKey>(TCPSMCallback.BasicEvent.CONNECTED) {
+        final TriggerConsumer<SelectionKey> connected = new TriggerConsumer<SelectionKey>(SMProtoUtil.BasicEvent.CONNECTED) {
             @Override
             public void accept(SelectionKey key) {
                 ClientSessionContext ctx = ctx();

@@ -37,7 +37,7 @@ public class SSHBannerLoopbackTest {
         final AtomicReference<String> banner = new AtomicReference<String>();
         final AtomicReference<Throwable> closedPayload = new AtomicReference<Throwable>(new Exception("sentinel"));
 
-        ClientConnectionSM sm = ClientConnectionSMBuilder.create("ssh-loopback")
+        ClientConSM sm = ClientConSMBuilder.create("ssh-loopback")
                 .phase(new SSHBannerPhase("SSH-2.0-", "OpenSSH"))
                 .build();
         State<Object> app = new State<Object>("app");
@@ -53,7 +53,7 @@ public class SSHBannerLoopbackTest {
             order.add("CLOSED");
             closedPayload.set(t);
             closedLatch.countDown();
-        }, TCPSMCallback.BasicEvent.CLOSED);
+        }, SMProtoUtil.BasicEvent.CLOSED);
         sm.register(app);
 
         TCPSMCallback callback = sm.newSessionCallback();

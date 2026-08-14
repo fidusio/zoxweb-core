@@ -12,7 +12,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 
 /**
- * The base state every {@link ClientConnectionSM} registers first: initializes the transport on
+ * The base state every {@link ClientConSM} registers first: initializes the transport on
  * {@code CONNECTED} and routes every {@code RAW_IN_DATA} packet by {@link ClientSessionContext.Mode}.
  * <p>
  * The router owns {@code RAW_IN_DATA} exclusively (see {@link ConnectionPhase} contract):
@@ -42,7 +42,7 @@ public class ClientTransportState extends State<Object> {
 
     private class Connected extends TriggerConsumer<SelectionKey> {
         Connected() {
-            super(TCPSMCallback.BasicEvent.CONNECTED);
+            super(SMProtoUtil.BasicEvent.CONNECTED);
         }
 
         @Override
@@ -55,7 +55,7 @@ public class ClientTransportState extends State<Object> {
 
     private class RawInData extends TriggerConsumer<ByteBuffer> {
         RawInData() {
-            super(TCPSMCallback.BasicEvent.RAW_IN_DATA);
+            super(SMProtoUtil.BasicEvent.RAW_IN_DATA);
         }
 
         @Override
@@ -104,7 +104,7 @@ public class ClientTransportState extends State<Object> {
 
     private class Closed extends TriggerConsumer<Throwable> {
         Closed() {
-            super(TCPSMCallback.BasicEvent.CLOSED);
+            super(SMProtoUtil.BasicEvent.CLOSED);
         }
 
         @Override

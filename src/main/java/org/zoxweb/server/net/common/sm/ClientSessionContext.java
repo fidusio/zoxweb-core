@@ -12,7 +12,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Per-session mutable state of a {@link ClientConnectionSM}, set as the machine's config so every
+ * Per-session mutable state of a {@link ClientConSM}, set as the machine's config so every
  * trigger consumer reaches it via {@code getStateMachine().getConfig()}.
  * <p>
  * Holds the session callback binding, the transport {@link Mode}, the SSL session state once an
@@ -33,7 +33,7 @@ public class ClientSessionContext {
         TLS_SECURE,
     }
 
-    private final ClientConnectionSM sm;
+    private final ClientConSM sm;
     private final NVGenericMap settings;
     private final NVGenericMap vars = new NVGenericMap("vars");
     private final Set<String> pendingPhases = new LinkedHashSet<String>();
@@ -44,7 +44,7 @@ public class ClientSessionContext {
     private volatile SSLSessionConfig sslConfig;
     private volatile BaseSessionCallback<SSLSessionConfig> sslBridge;
 
-    ClientSessionContext(ClientConnectionSM sm, NVGenericMap settings, Set<String> gatingPhases) {
+    ClientSessionContext(ClientConSM sm, NVGenericMap settings, Set<String> gatingPhases) {
         this.sm = sm;
         this.settings = settings != null ? settings : new NVGenericMap();
         this.pendingPhases.addAll(gatingPhases);
@@ -73,7 +73,7 @@ public class ClientSessionContext {
         return session;
     }
 
-    public ClientConnectionSM getStateMachine() {
+    public ClientConSM getStateMachine() {
         return sm;
     }
 

@@ -6,7 +6,7 @@ import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedBase64.Base64Type;
 
 /**
- * Declarative configuration of a {@link ClientConnectionSM} from a JSON object (via
+ * Declarative configuration of a {@link ClientConSM} from a JSON object (via
  * {@link GSONUtil#fromJSONGenericMap}) or an {@link NVGenericMap} directly; the parsed map is
  * stored as {@link ClientSessionContext#getSettings()} so phases and future negotiators read
  * their knobs from one bag.
@@ -37,17 +37,17 @@ public final class ClientSMFactory {
     private ClientSMFactory() {
     }
 
-    public static ClientConnectionSM fromJSON(String json) {
+    public static ClientConSM fromJSON(String json) {
         SUS.checkIfNull("json null", json);
         return fromConfig(GSONUtil.fromJSONGenericMap(json, null, Base64Type.DEFAULT));
     }
 
-    public static ClientConnectionSM fromConfig(NVGenericMap cfg) {
+    public static ClientConSM fromConfig(NVGenericMap cfg) {
         SUS.checkIfNull("config null", cfg);
         String name = stringValue(cfg, "name", "client-sm");
         String protocol = stringValue(cfg, "protocol", "plain").toLowerCase();
 
-        ClientConnectionSMBuilder builder = ClientConnectionSMBuilder.create(name).settings(cfg);
+        ClientConSMBuilder builder = ClientConSMBuilder.create(name).settings(cfg);
 
         if ("ssh".equals(protocol)) {
             NVGenericMap ssh = subMap(cfg, "ssh");
@@ -97,7 +97,7 @@ public final class ClientSMFactory {
             builder.phase(exchange);
         }
 
-        ClientConnectionSM sm = builder.build();
+        ClientConSM sm = builder.build();
         // seed default exchange variables from a config "vars" block; the caller may add/override
         // via ctx.setVar before connecting (the endpoint-specific / environment values stay out of
         // the generic protocol description)

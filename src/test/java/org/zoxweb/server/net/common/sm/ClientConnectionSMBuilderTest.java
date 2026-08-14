@@ -12,7 +12,7 @@ public class ClientConnectionSMBuilderTest {
 
     @Test
     public void builtMachineIsSynchronousWithTransportState() {
-        ClientConnectionSM sm = ClientConnectionSMBuilder.create("plain-client").build();
+        ClientConSM sm = ClientConSMBuilder.create("plain-client").build();
 
         assertNull(sm.getExecutor(), "machine must be synchronous (null executor)");
         assertFalse(sm.isScheduledTaskEnabled(), "machine must not be scheduler-driven");
@@ -24,7 +24,7 @@ public class ClientConnectionSMBuilderTest {
 
     @Test
     public void newSessionCallbackBindsContext() {
-        ClientConnectionSM sm = ClientConnectionSMBuilder.create("bind-client").build();
+        ClientConSM sm = ClientConSMBuilder.create("bind-client").build();
         TCPSMCallback cb = sm.newSessionCallback();
 
         assertSame(cb, sm.getContext().getSession(), "callback must be bound to the context");
@@ -39,15 +39,15 @@ public class ClientConnectionSMBuilderTest {
     public void duplicatePhaseNameRejected() {
         // same-named gating phases would collapse to one READY-gate entry (premature READY)
         // and both would consume IN_DATA (double ownership)
-        ClientConnectionSMBuilder builder = ClientConnectionSMBuilder.create("dup")
+        ClientConSMBuilder builder = ClientConSMBuilder.create("dup")
                 .phase(new SSHBannerPhase());
         assertThrows(IllegalArgumentException.class, () -> builder.phase(new SSHBannerPhase()));
     }
 
     @Test
     public void bindRejectsForeignCallback() {
-        ClientConnectionSM smA = ClientConnectionSMBuilder.create("client-a").build();
-        ClientConnectionSM smB = ClientConnectionSMBuilder.create("client-b").build();
+        ClientConSM smA = ClientConSMBuilder.create("client-a").build();
+        ClientConSM smB = ClientConSMBuilder.create("client-b").build();
         TCPSMCallback cbB = smB.newSessionCallback();
 
         assertThrows(IllegalArgumentException.class, () -> smA.getContext().bind(cbB),

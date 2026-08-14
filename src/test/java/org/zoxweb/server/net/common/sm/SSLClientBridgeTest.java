@@ -21,7 +21,7 @@ public class SSLClientBridgeTest {
 
     @Test
     public void writeModeAppDataPublishedAsDetachedReadModeCopy() {
-        ClientConnectionSM sm = ClientConnectionSMBuilder.create("bridge-data").build();
+        ClientConSM sm = ClientConSMBuilder.create("bridge-data").build();
         final AtomicReference<String> data = new AtomicReference<String>();
         State<Object> app = new State<Object>("app");
         app.register((Consumer<ByteBuffer>) bb -> {
@@ -46,7 +46,7 @@ public class SSLClientBridgeTest {
 
     @Test
     public void emptyAppDataPublishesNothing() {
-        ClientConnectionSM sm = ClientConnectionSMBuilder.create("bridge-empty").build();
+        ClientConSM sm = ClientConSMBuilder.create("bridge-empty").build();
         final AtomicInteger count = new AtomicInteger();
         State<Object> app = new State<Object>("app");
         app.register((Consumer<ByteBuffer>) bb -> count.incrementAndGet(), ClientEvent.IN_DATA);

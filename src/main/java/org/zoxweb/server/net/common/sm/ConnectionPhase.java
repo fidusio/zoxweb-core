@@ -4,7 +4,7 @@ import org.zoxweb.shared.util.GetName;
 
 /**
  * A pluggable connection-initialization phase: contributes its state(s) and trigger consumers
- * to a {@link ClientConnectionSM} at build time.
+ * to a {@link ClientConSM} at build time.
  * <p>
  * Contract:
  * <ul>
@@ -27,7 +27,7 @@ public interface ConnectionPhase extends GetName {
      *
      * @param sm the machine under construction
      */
-    void contribute(ClientConnectionSM sm);
+    void contribute(ClientConSM sm);
 
     /**
      * @return true if this phase gates {@link ClientEvent#READY} — the pipeline is not complete
