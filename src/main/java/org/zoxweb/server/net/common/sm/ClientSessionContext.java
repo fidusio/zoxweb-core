@@ -35,6 +35,7 @@ public class ClientSessionContext {
 
     private final ClientConnectionSM sm;
     private final NVGenericMap settings;
+    private final NVGenericMap vars = new NVGenericMap("vars");
     private final Set<String> pendingPhases = new LinkedHashSet<String>();
     private final AtomicBoolean readyPublished = new AtomicBoolean(false);
 
@@ -82,6 +83,31 @@ public class ClientSessionContext {
      */
     public NVGenericMap getSettings() {
         return settings;
+    }
+
+    /**
+     * The caller-supplied variable bag resolving {@code ${name}} placeholders in {@code exchange}
+     * {@code send}/{@code expect} literals — the mechanism that keeps a protocol config generic: it
+     * declares <i>that</i> a value is injected (e.g. the client HELO name), the caller provides the
+     * value here before the connection is created. Seeded from a config {@code vars} block, if any.
+     *
+     * @return the variable bag (never null)
+     */
+    public NVGenericMap getVars() {
+        return vars;
+    }
+
+    /**
+     * Sets an {@code exchange} variable used to resolve {@code ${name}} placeholders. Must be called
+     * before the connection is created (i.e. before the dialogue runs).
+     *
+     * @param name  the variable name (matches {@code ${name}} in a literal)
+     * @param value the value substituted in
+     * @return this context, for chaining
+     */
+    public ClientSessionContext setVar(String name, String value) {
+        vars.build(name, value);
+        return this;
     }
 
     public Mode getMode() {

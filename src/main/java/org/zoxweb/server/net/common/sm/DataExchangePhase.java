@@ -51,16 +51,22 @@ public class DataExchangePhase implements ConnectionPhase {
     static final String OP_EXPECT = "expect";
     static final String OP_START_TLS = "start_tls";
 
+    private static final byte[] EMPTY = new byte[0];
+
     /**
-     * One validated step: the op plus its literal decoded once at build time.
+     * One validated step. A static literal is decoded once at build time ({@code data} set); a
+     * literal carrying {@code ${var}} placeholders keeps its raw form ({@code literal} set) and is
+     * resolved + decoded at send/expect time against the session's variable bag.
      */
     private static final class Step {
         final String op;
-        final byte[] data;
+        final byte[] data;     // non-null for a static (build-time decoded) literal
+        final String literal;  // non-null for a dynamic ${var}-bearing literal
 
-        Step(String op, byte[] data) {
+        Step(String op, byte[] data, String literal) {
             this.op = op;
             this.data = data;
+            this.literal = literal;
         }
     }
 
@@ -94,10 +100,15 @@ public class DataExchangePhase implements ConnectionPhase {
             String op = step.getName();
             if (!OP_SEND.equals(op) && !OP_EXPECT.equals(op) && !OP_START_TLS.equals(op))
                 throw new IllegalArgumentException("unknown exchange step: " + op);
-            byte[] data = OP_START_TLS.equals(op)
-                    ? new byte[0]
-                    : SMProtoUtil.STRING_TO_DATA.decode(step.getValue());
-            ret.add(new Step(op, data));
+            if (OP_START_TLS.equals(op)) {
+                ret.add(new Step(op, EMPTY, null));
+            } else if (SMProtoUtil.hasVars(step.getValue())) {
+                // dynamic: bytes depend on the caller's variable bag — decode deferred to run time
+                ret.add(new Step(op, null, step.getValue()));
+            } else {
+                // static: decode once now (fail-fast on a malformed literal)
+                ret.add(new Step(op, SMProtoUtil.STRING_TO_DATA.decode(step.getValue()), null));
+            }
         }
         return ret;
     }
@@ -190,6 +201,16 @@ public class DataExchangePhase implements ConnectionPhase {
         }
 
         /**
+         * Bytes for a step: the build-time decode for a static literal, or a run-time
+         * variable-resolved decode for a {@code ${var}}-bearing one.
+         *
+         * @throws IllegalArgumentException on an unresolved variable or a body that fails to decode
+         */
+        private byte[] data(Step step, ClientSessionContext ctx) {
+            return step.data != null ? step.data : SMProtoUtil.STRING_VARS_TO_DATA.decode(step.literal, ctx.getVars());
+        }
+
+        /**
          * Runs forward through {@code send} / {@code start_tls} steps until it must wait (an
          * {@code expect}, or a {@code start_tls} handshake) or the script completes.
          */
@@ -200,8 +221,8 @@ public class DataExchangePhase implements ConnectionPhase {
                     return; // wait for IN_DATA
                 } else if (OP_SEND.equals(step.op)) {
                     try {
-                        ctx.write(ByteBuffer.wrap(step.data));
-                    } catch (IOException e) {
+                        ctx.write(ByteBuffer.wrap(data(step, ctx)));
+                    } catch (IOException | IllegalArgumentException e) {
                         ctx.fail(e);
                         return;
                     }
@@ -236,7 +257,13 @@ public class DataExchangePhase implements ConnectionPhase {
          */
         private void matchAndPump(ClientSessionContext ctx) {
             while (!done && index < steps.size() && OP_EXPECT.equals(steps.get(index).op)) {
-                byte[] want = steps.get(index).data;
+                byte[] want;
+                try {
+                    want = data(steps.get(index), ctx);
+                } catch (IllegalArgumentException e) {
+                    ctx.fail(e);
+                    return;
+                }
                 byte[] have = acc.toByteArray();
                 int at = indexOf(have, want);
                 if (at < 0)

@@ -1,6 +1,7 @@
 package org.zoxweb.server.net.common.sm;
 
 import org.junit.jupiter.api.Test;
+import org.zoxweb.shared.util.NVGenericMap;
 
 import java.nio.charset.StandardCharsets;
 
@@ -24,11 +25,11 @@ public class ProtoDataTest {
     }
 
     @Test
-    public void binDecodesBase64() {
+    public void base64DecodesBase64() {
         byte[] raw = {0, 1, 2, 'h', 'e', 'l', 'l', 'o'};
         String b64 = org.zoxweb.shared.util.SharedBase64.encodeAsString(
                 org.zoxweb.shared.util.SharedBase64.Base64Type.DEFAULT, raw);
-        assertArrayEquals(raw, SMProtoUtil.STRING_TO_DATA.decode("bin:" + b64));
+        assertArrayEquals(raw, SMProtoUtil.STRING_TO_DATA.decode("base64:" + b64));
     }
 
     @Test
@@ -48,5 +49,46 @@ public class ProtoDataTest {
         assertEquals(11, DataExchangePhase.indexOf(hay, "250 ".getBytes(StandardCharsets.UTF_8)));
         assertEquals(-1, DataExchangePhase.indexOf(hay, "999".getBytes(StandardCharsets.UTF_8)));
         assertEquals(0, DataExchangePhase.indexOf(hay, new byte[0]));
+    }
+
+    @Test
+    public void hasVarsDetectsPlaceholders() {
+        assertTrue(SMProtoUtil.hasVars("txt:EHLO ${helo}\r\n"));
+        assertFalse(SMProtoUtil.hasVars("txt:EHLO static.local\r\n"));
+        assertFalse(SMProtoUtil.hasVars(null));
+    }
+
+    @Test
+    public void decodeResolvesVarsInBodyOnly() {
+        NVGenericMap vars = new NVGenericMap();
+        vars.build("helo", "probe.example");
+        assertArrayEquals("EHLO probe.example\r\n".getBytes(StandardCharsets.UTF_8),
+                SMProtoUtil.STRING_VARS_TO_DATA.decode("txt:EHLO ${helo}\r\n", vars));
+        // a var value containing a colon must not be mistaken for the encoding prefix
+        vars.build("addr", "a:b");
+        assertArrayEquals("x a:b".getBytes(StandardCharsets.UTF_8),
+                SMProtoUtil.STRING_VARS_TO_DATA.decode("txt:x ${addr}", vars));
+    }
+
+    @Test
+    public void substituteEncoderResolvesTemplate() {
+        NVGenericMap vars = new NVGenericMap();
+        vars.build("helo", "probe.example");
+        assertEquals("EHLO probe.example", SMProtoUtil.STRING_VARS_TO_STRING.encode("EHLO ${helo}", vars));
+        assertEquals("no placeholders", SMProtoUtil.STRING_VARS_TO_STRING.encode("no placeholders", null));
+    }
+
+    @Test
+    public void unresolvedVarIsFatal() {
+        NVGenericMap empty = new NVGenericMap();
+        assertThrows(IllegalArgumentException.class, () -> SMProtoUtil.STRING_VARS_TO_DATA.decode("txt:EHLO ${missing}\r\n", empty));
+        assertThrows(IllegalArgumentException.class, () -> SMProtoUtil.STRING_VARS_TO_DATA.decode("txt:${x}", null));
+        assertThrows(IllegalArgumentException.class, () -> SMProtoUtil.STRING_VARS_TO_STRING.encode("${x}", empty));
+    }
+
+    @Test
+    public void staticLiteralsUnaffectedBySubstitution() {
+        assertArrayEquals("EHLO static.local".getBytes(StandardCharsets.UTF_8),
+                SMProtoUtil.STRING_VARS_TO_DATA.decode("txt:EHLO static.local", null));
     }
 }

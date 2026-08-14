@@ -146,4 +146,67 @@ public class TLSClientLoopbackTest {
             SharedIOUtil.close(callback, nioSocket);
         }
     }
+
+    /**
+     * The endpoint-free JSON path: a config carrying NO remote is built by the factory, and the
+     * deferred TLS phase binds its SSLContextInfo to the address the caller hands
+     * {@code addClientSocket} at connect time. Proves the handshake completes against that
+     * connected endpoint (SNI/context resolved from the socket, not the config).
+     */
+    @Test
+    public void deferredTlsFromEndpointFreeJson() throws Exception {
+        final CountDownLatch secureLatch = new CountDownLatch(1);
+        final CountDownLatch echoLatch = new CountDownLatch(1);
+        final AtomicReference<String> echoed = new AtomicReference<String>();
+        final AtomicReference<Throwable> failure = new AtomicReference<Throwable>();
+
+        NIOSocket nioSocket = new NIOSocket(TaskUtil.defaultTaskProcessor(), TaskUtil.defaultTaskScheduler());
+        TCPSMCallback callback = null;
+        try {
+            SSLContextInfo serverCtx = new SSLContextInfo(SecUtil.initSSLContext(
+                    KEYSTORE, CryptoConst.PKCS12, KEYSTORE_PASSWORD.toCharArray(), null, null, null));
+            SelectionKey serverKey = nioSocket.addServerSocket(
+                    new InetSocketAddress(InetAddress.getLoopbackAddress(), 0), 16,
+                    new SSLNIOSocketHandlerFactory(serverCtx, EchoSSLCallback::new));
+            int port = ((ServerSocketChannel) serverKey.channel()).socket().getLocalPort();
+
+            // config carries NO remote — only the protocol/tls behavior + a port hint
+            ClientConnectionSM sm = ClientSMFactory.fromJSON(
+                    "{ \"name\": \"tls-deferred\", \"port\": " + port + ","
+                            + " \"protocol\": \"tls\", \"tls\": {\"mode\": \"immediate\", \"cert_validation\": false} }");
+            final ClientSessionContext ctx = sm.getContext();
+
+            State<Object> app = new State<Object>("app");
+            app.register((Consumer<Object>) sci -> secureLatch.countDown(), ClientEvent.SECURE);
+            app.register((Consumer<Object>) o -> {
+                app.register((Consumer<ByteBuffer>) bb -> {
+                    byte[] chunk = new byte[bb.remaining()];
+                    bb.get(chunk);
+                    echoed.set(new String(chunk));
+                    ByteBufferUtil.cache(bb);
+                    echoLatch.countDown();
+                }, ClientEvent.IN_DATA);
+                try {
+                    ctx.write(ByteBuffer.wrap(SharedStringUtil.getBytes("deferred-ping")));
+                } catch (IOException e) {
+                    failure.set(e);
+                }
+            }, ClientEvent.READY);
+            sm.register(app);
+
+            // the caller supplies the InetSocketAddress; the config never did
+            InetSocketAddress remote = new InetSocketAddress(InetAddress.getLoopbackAddress(),
+                    ClientSMFactory.port(ctx.getSettings(), 443));
+            callback = sm.newSessionCallback();
+            nioSocket.addClientSocket(remote, callback, ClientSMFactory.timeoutSec(ctx.getSettings()), null);
+
+            assertTrue(secureLatch.await(WAIT_SEC, TimeUnit.SECONDS), "SECURE not published — deferred handshake failed");
+            assertTrue(echoLatch.await(WAIT_SEC, TimeUnit.SECONDS), "echo not received over the deferred-TLS session");
+            assertNull(failure.get(), "post-READY write must succeed: " + failure.get());
+            assertEquals("deferred-ping", echoed.get());
+            assertTrue(ctx.isSecure());
+        } finally {
+            SharedIOUtil.close(callback, nioSocket);
+        }
+    }
 }

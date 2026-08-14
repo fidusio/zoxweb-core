@@ -31,7 +31,7 @@ import java.util.function.Consumer;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * The full SMProto story in one test: a JSON config with an {@code exchange} script negotiates a
+ * The full PROTO-CONFIG story in one test: a JSON config with an {@code exchange} script negotiates a
  * plaintext STARTTLS-style dialogue, {@code start_tls} upgrades the same connection to TLS against
  * a server-mode SSLSocket, and the post-READY application traffic round-trips encrypted.
  */
@@ -93,7 +93,6 @@ public class DataExchangeStartTLSTest {
 
             String json = "{ \"name\": \"smtp-starttls\","
                     + " \"protocol\": \"plain\","
-                    + " \"remote\": {\"host\": \"" + remote.getHostString() + "\", \"port\": " + remote.getPort() + "},"
                     + " \"tls\": {\"mode\": \"on_demand\", \"cert_validation\": false},"
                     + " \"exchange\": ["
                     + "   {\"expect\":    \"txt:220 \"},"

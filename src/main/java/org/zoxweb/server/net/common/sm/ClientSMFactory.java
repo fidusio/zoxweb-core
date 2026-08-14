@@ -1,13 +1,9 @@
 package org.zoxweb.server.net.common.sm;
 
-import org.zoxweb.server.net.ssl.SSLContextInfo;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.util.NVGenericMap;
 import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedBase64.Base64Type;
-
-import java.net.InetSocketAddress;
-import java.security.GeneralSecurityException;
 
 /**
  * Declarative configuration of a {@link ClientConnectionSM} from a JSON object (via
@@ -15,20 +11,26 @@ import java.security.GeneralSecurityException;
  * stored as {@link ClientSessionContext#getSettings()} so phases and future negotiators read
  * their knobs from one bag.
  * <p>
+ * The config describes a <b>protocol</b>, never an endpoint: it carries no remote host — the caller
+ * supplies the {@code InetSocketAddress} when the connection is created
+ * ({@code NIOSocket.addClientSocket}). A TLS phase binds SNI and hostname verification to that
+ * connected address at upgrade time. An optional top-level {@code port} is only a default-port hint
+ * the caller may read via {@link #port(NVGenericMap, int)}.
+ * <p>
  * Schema — {@code protocol} picks the phase set ({@code tls} / {@code ssh} / {@code plain},
  * default {@code plain}); a {@code tls} block may accompany any protocol (STARTTLS-ready):
  * <pre>
- * { "name": "smtps-client", "remote": {"host": "mail.example.com", "port": 465},
+ * { "name": "smtps-client", "port": 465,
  *   "protocol": "tls", "tls": {"mode": "immediate", "cert_validation": true}, "timeout_sec": 5 }
  *
- * { "name": "ssh-fingerprint", "remote": {"host": "git.example.com", "port": 22},
+ * { "name": "ssh-fingerprint", "port": 22,
  *   "protocol": "ssh", "ssh": {"banner_prefix": "SSH-2.0-", "banner_contains": "OpenSSH"} }
  *
- * { "name": "smtp-starttls", "remote": {"host": "mx.example.com", "port": 587},
+ * { "name": "smtp-starttls", "port": 587,
  *   "protocol": "plain", "tls": {"mode": "on_demand", "cert_validation": true} }
  * </pre>
- * Unknown keys are ignored; a missing {@code remote} with a non-plain protocol or a
- * {@code tls} block fails fast ({@link IllegalArgumentException}).
+ * Unknown keys are ignored; a contradictory or unsafe combination fails fast
+ * ({@link IllegalArgumentException}).
  */
 public final class ClientSMFactory {
 
@@ -63,9 +65,6 @@ public final class ClientSMFactory {
         boolean tlsProtocol = "tls".equals(protocol);
         SSLClientPhase.TLSMode tlsMode = null;
         if (tlsProtocol || tls != null) {
-            InetSocketAddress remote = remoteAddress(cfg);
-            if (remote == null)
-                throw new IllegalArgumentException("'remote' {host, port} is required for TLS");
             boolean certValidation = booleanValue(tls, "cert_validation", true);
             String modeName = stringValue(tls, "mode", tlsProtocol ? "immediate" : "on_demand");
             if ("immediate".equalsIgnoreCase(modeName))
@@ -78,15 +77,10 @@ public final class ClientSMFactory {
                 throw new IllegalArgumentException(
                         "protocol 'tls' means the link is secured before READY — tls mode 'on_demand' would" +
                         " silently leave it plaintext; use protocol 'plain' with an on_demand tls block for STARTTLS");
-            try {
-                // endpoint identification rides cert validation: chain validation without
-                // hostname verification accepts any CA-valid cert for any host (MITM)
-                builder.phase(new SSLClientPhase(new SSLContextInfo(remote, certValidation), tlsMode, certValidation));
-            } catch (GeneralSecurityException e) {
-                throw new IllegalArgumentException("TLS context initialization failed", e);
-            }
-        } else if (remoteAddress(cfg) == null && !"plain".equals(protocol)) {
-            throw new IllegalArgumentException("'remote' {host, port} is required for protocol " + protocol);
+            // deferred: the TLS context binds to the endpoint the session actually connects to
+            // (no remote in the protocol config). Endpoint identification rides cert validation:
+            // chain validation without hostname verification accepts any CA-valid cert for any host
+            builder.phase(new SSLClientPhase(tlsMode, certValidation));
         }
 
         java.util.List<org.zoxweb.shared.util.NVPair> steps = DataExchangePhase.stepsFrom(cfg);
@@ -103,22 +97,32 @@ public final class ClientSMFactory {
             builder.phase(exchange);
         }
 
-        return builder.build();
+        ClientConnectionSM sm = builder.build();
+        // seed default exchange variables from a config "vars" block; the caller may add/override
+        // via ctx.setVar before connecting (the endpoint-specific / environment values stay out of
+        // the generic protocol description)
+        NVGenericMap vars = subMap(cfg, "vars");
+        if (vars != null) {
+            for (org.zoxweb.shared.util.GetNameValue<?> nv : vars.values()) {
+                Object v = nv.getValue();
+                if (v != null)
+                    sm.getContext().setVar(nv.getName(), v.toString());
+            }
+        }
+        return sm;
     }
 
     /**
-     * @return the configured remote address for {@code NIOSocket.addClientSocket}, null when
-     * the config has no {@code remote} block
+     * The optional default-port hint. The protocol config carries no endpoint; a top-level
+     * {@code port} is only a suggested default (e.g. the protocol's well-known port) the caller may
+     * fold into the {@code InetSocketAddress} it supplies to {@code NIOSocket.addClientSocket}. The
+     * host always comes from the caller.
+     *
+     * @param fallback returned when the config has no {@code port}
+     * @return the configured {@code port}, or {@code fallback}
      */
-    public static InetSocketAddress remoteAddress(NVGenericMap cfg) {
-        NVGenericMap remote = subMap(cfg, "remote");
-        if (remote == null)
-            return null;
-        String host = stringValue(remote, "host", null);
-        int port = intValue(remote, "port", -1);
-        if (host == null || port < 0)
-            throw new IllegalArgumentException("'remote' requires host and port");
-        return new InetSocketAddress(host, port);
+    public static int port(NVGenericMap cfg, int fallback) {
+        return intValue(cfg, "port", fallback);
     }
 
     /**
