@@ -2,7 +2,6 @@ package org.zoxweb.server.fsm;
 
 import org.zoxweb.shared.util.GetNVProperties;
 import org.zoxweb.shared.util.GetName;
-import org.zoxweb.shared.util.NVGenericMap;
 
 import java.util.function.Consumer;
 
@@ -183,15 +182,5 @@ public interface StateInt<P>
      */
     void setStateMachine(StateMachineInt<?> smi);
 
-    /**
-     * Returns the mutable properties map for this state.
-     * <p>
-     * TriggerConsumers can use this to store and retrieve shared context
-     * during processing. Properties are mutable and can be modified at any time.
-     * </p>
-     *
-     * @return the properties map
-     */
-    NVGenericMap getProperties();
 
 }

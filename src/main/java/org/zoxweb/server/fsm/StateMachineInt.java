@@ -1,12 +1,12 @@
 package org.zoxweb.server.fsm;
 
-import org.zoxweb.server.task.TaskSchedulerProcessor;
 import org.zoxweb.shared.util.GetConfig;
 import org.zoxweb.shared.util.GetNVProperties;
 import org.zoxweb.shared.util.GetName;
 import org.zoxweb.shared.util.SUS;
 
 import java.util.concurrent.Executor;
+import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * StateMachineInt defines the contract for a trigger-driven event processing system.
@@ -276,7 +276,7 @@ public interface StateMachineInt<C>
     /**
      * @return the task scheduler processor if configured, null otherwise
      */
-    TaskSchedulerProcessor getScheduler();
+    ScheduledExecutorService getScheduler();
 
     /**
      * @return the executor for async trigger dispatch if configured, null otherwise

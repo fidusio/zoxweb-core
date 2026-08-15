@@ -4,15 +4,13 @@ import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.task.TaskSchedulerProcessor;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.shared.task.SupplierConsumerTask;
-import org.zoxweb.shared.util.NVGenericMap;
+import org.zoxweb.shared.util.NVGMProperties;
 import org.zoxweb.shared.util.SUS;
 
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.Executor;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -39,19 +37,20 @@ import java.util.function.Consumer;
  * @param <C> the configuration type shared with all consumers via {@link #getConfig()}
  */
 public class StateMachine<C>
+        extends NVGMProperties
         implements StateMachineInt<C> {
 
     public final static LogWrapper log = new LogWrapper(StateMachine.class).setEnabled(false);
 
     private final String name;
-    private final TaskSchedulerProcessor tsp;
+    private final ScheduledExecutorService tsp;
     private final Map<String, Set<TriggerConsumerInt<?>>> tcMap = new ConcurrentHashMap<>();
     private final Map<String, StateInt<?>> states = new ConcurrentHashMap<>();
     private C config;
     private final Executor executor;
     protected final AtomicBoolean isClosed = new AtomicBoolean(false);
     private final AtomicBoolean isEventLogEnabled = new AtomicBoolean(true);
-    private final NVGenericMap properties = new NVGenericMap("sm_properties");
+    //private final NVGenericMap properties = new NVGenericMap("sm_properties");
 
     private final AtomicReference<StateInt<?>> currentState = new AtomicReference<>();
     private final Set<StateMachineListener> listeners = new CopyOnWriteArraySet<>();
@@ -61,17 +60,19 @@ public class StateMachine<C>
         this(name, TaskUtil.defaultTaskScheduler());
     }
 
-    public StateMachine(String name, TaskSchedulerProcessor taskSchedulerProcessor)
+    public StateMachine(String name, ScheduledExecutorService taskSchedulerProcessor)
             throws NullPointerException {
+        super(true, "sm-properties");
         SUS.checkIfNulls("Name or TaskScheduler can't be null.", name, taskSchedulerProcessor);
         this.name = name;
         this.tsp = taskSchedulerProcessor;
         //this.schedulerOnly = schedulerOnly;
-        executor = tsp.getExecutor();
+        executor = (taskSchedulerProcessor instanceof TaskSchedulerProcessor)  ? ((TaskSchedulerProcessor)taskSchedulerProcessor).getExecutor() : null;
     }
 
     public StateMachine(String name, Executor executor)
             throws NullPointerException {
+        super(true, "sm-properties");
         if (log.isEnabled()) log.getLogger().info(name + ":" + executor);
         SUS.checkIfNulls("Name or Executor can't be null.", name);
         this.name = name;
@@ -197,10 +198,6 @@ public class StateMachine<C>
     }
 
     @Override
-    public NVGenericMap getProperties() {
-        return properties;
-    }
-    @Override
     public StateMachineInt<C> publish(TriggerInt<?> trigger) {
         if (isClosed())
             throw new IllegalStateException("State machine closed");
@@ -211,7 +208,7 @@ public class StateMachine<C>
             fire(StateMachineEvent.Type.TRIGGER_PUBLISHED, trigger, null, null, null, tcis != null ? tcis.length : 0);
             if (tcis != null) {
                 for (TriggerConsumerInt<?> c : tcis) {
-                    tsp.queue(0, new SupplierConsumerTask<>(trigger, new TriggerConsumerHolder<>(trigger, c)));
+                    tsp.schedule(new SupplierConsumerTask<>(trigger, new TriggerConsumerHolder<>(trigger, c)), 0, TimeUnit.MILLISECONDS);
                 }
             }
 
@@ -348,7 +345,7 @@ public class StateMachine<C>
         return getName();
     }
 
-    public TaskSchedulerProcessor getScheduler() {
+    public ScheduledExecutorService getScheduler() {
         return tsp;
     }
 

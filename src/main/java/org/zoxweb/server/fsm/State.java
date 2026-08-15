@@ -1,10 +1,7 @@
 package org.zoxweb.server.fsm;
 
 import org.zoxweb.server.logging.LogWrapper;
-import org.zoxweb.shared.util.GetName;
-import org.zoxweb.shared.util.NVBase;
-import org.zoxweb.shared.util.NVGMProperties;
-import org.zoxweb.shared.util.SUS;
+import org.zoxweb.shared.util.*;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -40,7 +37,7 @@ public class State<P>
     private final Map<String, Consumer<?>> triggerConsumers = new ConcurrentHashMap<String, Consumer<?>>();
 
     public State(String name, NVBase<?>... props) {
-        super(true);
+        super(true, "state-properties");
         this.name = name;
         if (props != null) {
             for (NVBase<?> nvb : props) {
@@ -146,4 +143,5 @@ public class State<P>
     public String toString() {
         return getName();
     }
+
 }
