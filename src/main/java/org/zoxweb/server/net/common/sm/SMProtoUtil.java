@@ -1,9 +1,11 @@
 package org.zoxweb.server.net.common.sm;
 
+import org.zoxweb.server.fsm.StateMachineInt;
 import org.zoxweb.shared.util.BiDataDecoder;
 import org.zoxweb.shared.util.BiDataEncoder;
 import org.zoxweb.shared.util.DataDecoder;
 import org.zoxweb.shared.util.NVGenericMap;
+import org.zoxweb.shared.util.NamedValue;
 import org.zoxweb.shared.util.SharedBase64;
 import org.zoxweb.shared.util.SharedStringUtil;
 
@@ -109,7 +111,10 @@ public final class SMProtoUtil {
             return new byte[0];
         int c = encoded.indexOf(':');
         if (c <= 0)
-            return STRING_TO_DATA.decode(STRING_VARS_TO_STRING.encode(encoded, vars));
+            // prefix-less literal = UTF-8 text; the resolved string is taken verbatim, never
+            // re-scanned for a prefix — a var value starting "hex:"/"base64:"/"txt:" is data,
+            // not an encoding directive
+            return SharedStringUtil.getBytes(STRING_VARS_TO_STRING.encode(encoded, vars));
         String prefix = encoded.substring(0, c);
         String body = STRING_VARS_TO_STRING.encode(encoded.substring(c + 1), vars);
         return STRING_TO_DATA.decode(prefix + ":" + body);
@@ -123,10 +128,39 @@ public final class SMProtoUtil {
         return literal != null && VAR_PATTERN.matcher(literal).find();
     }
 
+    /**
+     * Name of the machine-wide results bag in the state machine's properties, see
+     * {@link #results(StateMachineInt)}.
+     */
+    public static final String RESULTS = "results";
+
+    /**
+     * The machine's shared result-accumulation bag: an {@link NVGenericMap} stored in the state
+     * machine's properties as a {@code NamedValue<NVGenericMap>} under {@link #RESULTS} — every
+     * state and TriggerConsumer reaches it via {@code getStateMachine().getProperties()}, and the
+     * caller reads the accumulated outcome (banner, negotiated TLS, ready flag, ...) after the
+     * session closes. Lazily registered on first access; {@code ClientConSMBuilder} pre-registers
+     * it at build time.
+     *
+     * @param smi the state machine
+     * @return the machine's results bag (never null)
+     */
+    public static NVGenericMap results(StateMachineInt<?> smi) {
+        NVGenericMap properties = smi.getProperties();
+        synchronized (properties) {
+            NamedValue<NVGenericMap> nv = properties.getNV(RESULTS);
+            if (nv == null) {
+                nv = new NamedValue<NVGenericMap>(RESULTS, new NVGenericMap(RESULTS));
+                properties.add(nv);
+            }
+            return nv.getValue();
+        }
+    }
+
     public enum BasicEvent {
         CONNECTED,
         DATAGRAM,
         CLOSED,
-        RAW_IN_DATA,
+        IN_RAW_DATA,
     }
 }

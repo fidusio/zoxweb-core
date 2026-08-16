@@ -150,6 +150,7 @@ public class SSHBannerPhase implements ConnectionPhase {
                     return false;
                 }
                 done = true;
+                SMProtoUtil.results(ctx.getStateMachine()).build("banner", text);
                 publishSync(ClientEvent.BANNER_RECEIVED, text);
                 ctx.phaseComplete(NAME);
                 // a BANNER_RECEIVED/READY consumer may have failed the session inline —

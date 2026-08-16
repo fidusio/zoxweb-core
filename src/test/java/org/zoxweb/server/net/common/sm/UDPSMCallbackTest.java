@@ -3,6 +3,7 @@ package org.zoxweb.server.net.common.sm;
 import org.junit.jupiter.api.Test;
 import org.zoxweb.server.fsm.State;
 import org.zoxweb.server.fsm.StateMachine;
+import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.server.net.DataPacket;
 import org.zoxweb.server.net.NIOSocket;
 import org.zoxweb.server.task.TaskUtil;
@@ -74,6 +75,8 @@ public class UDPSMCallbackTest {
                 ByteBuffer bb = dp.getBuffer();
                 byte[] chunk = new byte[bb.remaining()];
                 bb.get(chunk);
+                // the packet buffer is a detached consumer-owned copy — recache when done
+                ByteBufferUtil.cache(bb);
                 echoed.set(new String(chunk));
                 dataLatch.countDown();
             }, SMProtoUtil.BasicEvent.DATAGRAM);
@@ -83,7 +86,8 @@ public class UDPSMCallbackTest {
             }, SMProtoUtil.BasicEvent.CLOSED);
             machine.register(app);
 
-            // ephemeral local bind; setChannel connects to the remote and fires CONNECTED
+            // ephemeral local bind; NIOSocket invokes connected(SK) after registration — the
+            // machine kickoff that publishes CONNECTED and sends the first datagram
             nioSocket.addDatagramSocket(new InetSocketAddress(InetAddress.getLoopbackAddress(), 0), cb);
 
             assertTrue(dataLatch.await(WAIT_SEC, TimeUnit.SECONDS), "echo datagram not received as DATAGRAM");

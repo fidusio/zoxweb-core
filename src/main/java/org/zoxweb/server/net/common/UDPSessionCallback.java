@@ -189,6 +189,7 @@ public abstract class UDPSessionCallback
 
     @Override
     public int connected(SelectionKey key) {
+        setChannel(key.channel());
         return interestOps();
     }
 

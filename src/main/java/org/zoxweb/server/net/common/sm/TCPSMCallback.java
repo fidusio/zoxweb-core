@@ -35,7 +35,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * <ul>
  * <li>{@link SMProtoUtil.BasicEvent#CONNECTED} once, published from {@link #connected(SelectionKey)} with the
  * SelectionKey as payload, always before any read dispatch (NIOSocket ordering guarantee).</li>
- * <li>{@link SMProtoUtil.BasicEvent#RAW_IN_DATA} per read, the payload buffer is a detached copy owned by the
+ * <li>{@link SMProtoUtil.BasicEvent#IN_RAW_DATA} per read, the payload buffer is a detached copy owned by the
  * consumer, safe for async handling; the consumer may recache it via ByteBufferUtil when done.</li>
  * <li>{@link SMProtoUtil.BasicEvent#CLOSED} exactly once per session from the close delegate, whatever the
  * termination path (EOF, read error, {@link #exception(Throwable)}, external close); the payload
@@ -162,7 +162,7 @@ public class TCPSMCallback
 
 
     /**
-     * Read dispatch: drains the socket, publishing one {@link SMProtoUtil.BasicEvent#RAW_IN_DATA} packet per
+     * Read dispatch: drains the socket, publishing one {@link SMProtoUtil.BasicEvent#IN_RAW_DATA} packet per
      * read via {@link #accept(DataPacket)}; on EOF or read error the session is closed. Never
      * invoked before {@link #connected(SelectionKey)}, and serialized per session by NIOSocket.
      *
@@ -282,7 +282,7 @@ public class TCPSMCallback
      */
     public void accept(DataPacket<Long> t) {
 
-        getConfig().publishSync(SMProtoUtil.BasicEvent.RAW_IN_DATA, t.getBuffer());
+        getConfig().publishSync(SMProtoUtil.BasicEvent.IN_RAW_DATA, t.getBuffer());
 
     }
 
@@ -294,7 +294,7 @@ public class TCPSMCallback
      */
     public void accept(ByteBuffer t) {
 
-        getConfig().publishSync(SMProtoUtil.BasicEvent.RAW_IN_DATA, t);
+        getConfig().publishSync(SMProtoUtil.BasicEvent.IN_RAW_DATA, t);
 
     }
 

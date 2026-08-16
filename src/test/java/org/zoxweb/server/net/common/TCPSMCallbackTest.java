@@ -128,7 +128,7 @@ public class TCPSMCallbackTest {
             // the buffer is a consumer-owned detached copy, recache it when done
             ByteBufferUtil.cache(bb);
             dataLatch.countDown();
-        }, SMProtoUtil.BasicEvent.RAW_IN_DATA);
+        }, SMProtoUtil.BasicEvent.IN_RAW_DATA);
         session.register((Consumer<Throwable>) t -> {
             order.add("CLOSED");
             closedPayload.set(t);

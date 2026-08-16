@@ -1,13 +1,15 @@
 package org.zoxweb.server.net.common.sm;
 
 import org.zoxweb.server.util.GSONUtil;
+import org.zoxweb.shared.util.GetNameValue;
 import org.zoxweb.shared.util.NVGenericMap;
 import org.zoxweb.shared.util.SUS;
-import org.zoxweb.shared.util.SharedBase64.Base64Type;
+
+import java.util.List;
 
 /**
  * Declarative configuration of a {@link ClientConSM} from a JSON object (via
- * {@link GSONUtil#fromJSONGenericMap}) or an {@link NVGenericMap} directly; the parsed map is
+ * {@link GSONUtil#fromJSONDefault}) or an {@link NVGenericMap} directly; the parsed map is
  * stored as {@link ClientSessionContext#getSettings()} so phases and future negotiators read
  * their knobs from one bag.
  * <p>
@@ -17,8 +19,11 @@ import org.zoxweb.shared.util.SharedBase64.Base64Type;
  * connected address at upgrade time. An optional top-level {@code port} is only a default-port hint
  * the caller may read via {@link #port(NVGenericMap, int)}.
  * <p>
- * Schema — {@code protocol} picks the phase set ({@code tls} / {@code ssh} / {@code plain},
- * default {@code plain}); a {@code tls} block may accompany any protocol (STARTTLS-ready):
+ * Schema — {@code transport} picks the link type ({@code tcp} / {@code udp}, default {@code tcp});
+ * {@code protocol} picks the phase set ({@code tls} / {@code ssh} / {@code plain}, default
+ * {@code plain}); a {@code tls} block may accompany any TCP protocol (STARTTLS-ready). Transport
+ * {@code udp} is always plaintext (no DTLS): only protocol {@code plain} — optionally with an
+ * {@code exchange} script — is accepted over it.
  * <pre>
  * { "name": "smtps-client", "port": 465,
  *   "protocol": "tls", "tls": {"mode": "immediate", "cert_validation": true}, "timeout_sec": 5 }
@@ -28,6 +33,9 @@ import org.zoxweb.shared.util.SharedBase64.Base64Type;
  *
  * { "name": "smtp-starttls", "port": 587,
  *   "protocol": "plain", "tls": {"mode": "on_demand", "cert_validation": true} }
+ *
+ * { "name": "dns-probe", "transport": "udp", "port": 53,
+ *   "exchange": [ {"send": "hex:1234 0100 ..."}, {"expect": "hex:1234"} ] }
  * </pre>
  * Unknown keys are ignored; a contradictory or unsafe combination fails fast
  * ({@link IllegalArgumentException}).
@@ -39,15 +47,34 @@ public final class ClientSMFactory {
 
     public static ClientConSM fromJSON(String json) {
         SUS.checkIfNull("json null", json);
-        return fromConfig(GSONUtil.fromJSONGenericMap(json, null, Base64Type.DEFAULT));
+        return fromConfig(GSONUtil.fromJSONDefault(json, NVGenericMap.class));
     }
 
     public static ClientConSM fromConfig(NVGenericMap cfg) {
         SUS.checkIfNull("config null", cfg);
         String name = stringValue(cfg, "name", "client-sm");
         String protocol = stringValue(cfg, "protocol", "plain").toLowerCase();
+        String transportName = stringValue(cfg, "transport", "tcp").toLowerCase();
 
-        ClientConSMBuilder builder = ClientConSMBuilder.create(name).settings(cfg);
+        ClientSessionContext.Transport transport;
+        if ("tcp".equals(transportName))
+            transport = ClientSessionContext.Transport.TCP;
+        else if ("udp".equals(transportName))
+            transport = ClientSessionContext.Transport.UDP;
+        else
+            throw new IllegalArgumentException("unknown transport: " + transportName);
+
+        if (transport == ClientSessionContext.Transport.UDP) {
+            // UDP is always plaintext (no DTLS) and datagram-based: only protocol 'plain'
+            // (optionally with an exchange script) makes sense over it
+            if (!"plain".equals(protocol))
+                throw new IllegalArgumentException(
+                        "protocol '" + protocol + "' requires a TCP stream; transport 'udp' supports protocol 'plain'");
+            if (subMap(cfg, "tls") != null)
+                throw new IllegalArgumentException("tls block over transport 'udp': no DTLS in this stack");
+        }
+
+        ClientConSMBuilder builder = ClientConSMBuilder.create(name).settings(cfg).transport(transport);
 
         if ("ssh".equals(protocol)) {
             NVGenericMap ssh = subMap(cfg, "ssh");
@@ -83,7 +110,7 @@ public final class ClientSMFactory {
             builder.phase(new SSLClientPhase(tlsMode, certValidation));
         }
 
-        java.util.List<org.zoxweb.shared.util.NVPair> steps = DataExchangePhase.stepsFrom(cfg);
+        List<GetNameValue<String>> steps = DataExchangePhase.stepsFrom(cfg);
         if (steps != null) {
             if ("ssh".equals(protocol))
                 throw new IllegalArgumentException(
@@ -96,6 +123,12 @@ public final class ClientSMFactory {
                         (tlsMode == null ? " (no tls block configured)" : " (mode is immediate)"));
             builder.phase(exchange);
         }
+
+        // machine-dictated session end: a UDP config with a dialogue is a probe — the pipeline
+        // completing IS the session (UDP has no EOF), so the machine closes it on READY unless
+        // the config says otherwise; TCP and open-ended UDP sessions default to staying open
+        boolean closeOnReadyDefault = transport == ClientSessionContext.Transport.UDP && steps != null;
+        builder.closeOnReady(booleanValue(cfg, "close_on_ready", closeOnReadyDefault));
 
         ClientConSM sm = builder.build();
         // seed default exchange variables from a config "vars" block; the caller may add/override

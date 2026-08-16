@@ -10,7 +10,6 @@ import org.zoxweb.shared.io.SharedIOUtil;
 import javax.net.ssl.SSLSession;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
-import java.nio.channels.SelectionKey;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -20,7 +19,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 /**
- * Command-line runner for a PROTO-CONFIG protocol description: connects to a remote endpoint and
+ * Command-line runner for a protocol description: connects to a remote endpoint and
  * drives the {@link ClientConSM} the config declares, printing the connection lifecycle to
  * stdout.
  * <p>
@@ -32,14 +31,18 @@ import java.util.function.Consumer;
  * <li>{@code host:port} — the endpoint to dial. The config never names it (it describes the
  * protocol, not the endpoint); the port may be omitted if the config carries a {@code port}
  * default-port hint.</li>
- * <li>{@code path/to/proto-config.json} — the protocol description (see {@code PROTO-CONFIG.md}).</li>
+ * <li>{@code path/to/proto-config.json} — the protocol description (schema:
+ * {@code META-SM-PROTO-DESIGN.md}).</li>
  * <li>{@code var=value} — optional {@code exchange} variables injected into the session (resolve
  * {@code ${var}} placeholders in send/expect literals).</li>
  * </ul>
  * The run prints {@code CONNECTED}, {@code BANNER_RECEIVED}, {@code SECURE} (with the negotiated
  * TLS protocol/cipher), {@code IN_DATA}, {@code READY}, and {@code CLOSED} events as they fire, then
- * exits when the session closes. Exit code: {@code 0} clean close, {@code 1} closed with a cause
- * (failed check), {@code 2} timed out without closing, {@code 64} usage error.
+ * exits when the session closes. A {@code "transport": "udp"} config dials a connected datagram
+ * socket instead; a probe config's machine closes the session itself once the pipeline completes
+ * ({@code close_on_ready}) — this runner never drives the session, it only observes. Exit code:
+ * {@code 0} clean close, {@code 1} closed with a cause (failed check), {@code 2} timed out without
+ * closing, {@code 64} usage error.
  */
 public final class ProtoConnect {
 
@@ -102,9 +105,12 @@ public final class ProtoConnect {
                    int timeoutSec, long maxWaitSec) throws java.io.IOException, InterruptedException {
         final CountDownLatch closedLatch = new CountDownLatch(1);
         final AtomicReference<Throwable> closeCause = new AtomicReference<Throwable>();
+        final boolean udp = sm.getContext().getTransport() == ClientSessionContext.Transport.UDP;
+        final AtomicReference<AutoCloseable> sessionRef = new AtomicReference<AutoCloseable>();
 
         State<Object> app = new State<Object>("proto-connect");
-        app.register((Consumer<SelectionKey>) key -> System.out.println("CONNECTED " + remote),
+        // payload-agnostic: CONNECTED carries a SelectionKey over TCP, the remote address over UDP
+        app.register((Consumer<Object>) o -> System.out.println("CONNECTED " + remote),
                 SMProtoUtil.BasicEvent.CONNECTED);
         app.register((Consumer<String>) banner -> System.out.println("BANNER_RECEIVED " + banner),
                 ClientEvent.BANNER_RECEIVED);
@@ -129,17 +135,25 @@ public final class ProtoConnect {
         }, SMProtoUtil.BasicEvent.CLOSED);
         sm.register(app);
 
-        TCPSMCallback callback = sm.newSessionCallback();
-        System.out.println("connecting to " + remote + " (timeout " + timeoutSec + "s) ...");
         try {
-            nioSocket.addClientSocket(remote, callback, timeoutSec, null);
+            if (udp) {
+                UDPSMCallback callback = sm.newSessionCallback(remote);
+                sessionRef.set(callback);
+                System.out.println("connecting (udp) to " + remote + " ...");
+                nioSocket.addDatagramSocket(new InetSocketAddress(0), callback);
+            } else {
+                TCPSMCallback callback = sm.newSessionCallback();
+                sessionRef.set(callback);
+                System.out.println("connecting to " + remote + " (timeout " + timeoutSec + "s) ...");
+                nioSocket.addClientSocket(remote, callback, timeoutSec, null);
+            }
             if (!closedLatch.await(maxWaitSec, TimeUnit.SECONDS)) {
                 System.out.println("no completion within " + maxWaitSec + "s");
                 return 2;
             }
             return closeCause.get() != null ? 1 : 0;
         } finally {
-            SharedIOUtil.close(callback);
+            SharedIOUtil.close(sessionRef.get());
         }
     }
 

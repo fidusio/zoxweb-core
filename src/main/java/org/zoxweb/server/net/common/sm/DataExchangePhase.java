@@ -3,12 +3,14 @@ package org.zoxweb.server.net.common.sm;
 import org.zoxweb.server.fsm.State;
 import org.zoxweb.server.fsm.TriggerConsumer;
 import org.zoxweb.server.io.ByteBufferUtil;
+import org.zoxweb.shared.util.GetNameValue;
+import org.zoxweb.shared.util.NVGenericMap;
 import org.zoxweb.shared.util.NVPair;
+import org.zoxweb.shared.util.NVPairList;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.channels.SelectionKey;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -78,14 +80,14 @@ public class DataExchangePhase implements ConnectionPhase {
      *              {@code start_tls}, value = the {@link SMProtoUtil} literal for send/expect)
      * @throws IllegalArgumentException on an unknown op or a literal that fails to decode
      */
-    public DataExchangePhase(List<NVPair> steps) {
+    public DataExchangePhase(List<GetNameValue<String>> steps) {
         this(steps, DEFAULT_MAX_ACCUMULATION);
     }
 
     /**
      * @throws IllegalArgumentException on an unknown op or a literal that fails to decode
      */
-    public DataExchangePhase(List<NVPair> steps, int maxAccumulation) {
+    public DataExchangePhase(List<GetNameValue<String>> steps, int maxAccumulation) {
         this.steps = compile(steps);
         this.maxAccumulation = maxAccumulation;
     }
@@ -94,9 +96,9 @@ public class DataExchangePhase implements ConnectionPhase {
      * Validates ops and decodes every literal once — the fail-fast half of the factory contract:
      * a bad script must never surface as a mid-session wedge.
      */
-    private static List<Step> compile(List<NVPair> raw) {
+    private static List<Step> compile(List<GetNameValue<String>> raw) {
         List<Step> ret = new ArrayList<Step>(raw.size());
-        for (NVPair step : raw) {
+        for (GetNameValue<String> step : raw) {
             String op = step.getName();
             if (!OP_SEND.equals(op) && !OP_EXPECT.equals(op) && !OP_START_TLS.equals(op))
                 throw new IllegalArgumentException("unknown exchange step: " + op);
@@ -154,9 +156,11 @@ public class DataExchangePhase implements ConnectionPhase {
         private boolean waitingForSecure = false;
         private final ByteArrayOutputStream acc = new ByteArrayOutputStream(64);
 
-        final TriggerConsumer<SelectionKey> connected = new TriggerConsumer<SelectionKey>(SMProtoUtil.BasicEvent.CONNECTED) {
+        // payload-agnostic: CONNECTED carries a SelectionKey over TCP, the remote address over
+        // UDP — the dialogue only cares that the transport is up
+        final TriggerConsumer<Object> connected = new TriggerConsumer<Object>(SMProtoUtil.BasicEvent.CONNECTED) {
             @Override
-            public void accept(SelectionKey key) {
+            public void accept(Object payload) {
                 ClientSessionContext ctx = ctx();
                 if (ctx.getMode() == ClientSessionContext.Mode.TLS_HANDSHAKING) {
                     // IMMEDIATE TLS phase upgrading (its AutoStart ran earlier in this
@@ -310,11 +314,11 @@ public class DataExchangePhase implements ConnectionPhase {
     /**
      * Reads the {@code exchange} steps from the config's {@code NVPairList} (or null if absent/empty).
      */
-    static List<NVPair> stepsFrom(org.zoxweb.shared.util.NVGenericMap cfg) {
+    static List<GetNameValue<String>> stepsFrom(NVGenericMap cfg) {
         Object nv = cfg.getNV("exchange");
-        if (!(nv instanceof org.zoxweb.shared.util.NVPairList))
+        if (!(nv instanceof NVPairList))
             return null;
-        NVPair[] all = ((org.zoxweb.shared.util.NVPairList) nv).values();
+        NVPair[] all = ((NVPairList) nv).values();
         return all != null && all.length > 0 ? Arrays.asList(all) : null;
     }
 }

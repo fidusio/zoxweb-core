@@ -1,4 +1,4 @@
-# CLAUDE.md
+I # CLAUDE.md
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
@@ -50,6 +50,31 @@ That schema drives JSON round-tripping (`GSONUtil.toJSON/fromJSON`, meta-aware) 
 - TLS lives in `net.ssl`: `SSLNIOSocketHandlerFactory` + `SSLNIOSocketHandler` drive a non-blocking `SSLEngine` via an explicit state machine (`SSLStateMachine`, `SSLHandshakingState`, `SSLDataReadyState`).
 - Layering is strict: `NIOSocket` = pure transport, the SSL layer = pure crypto, session callbacks (`BaseSessionCallback` and friends) = protocol logic. One `NIOSocket` + one thread pool drives HTTPS serving, tunnels, proxies, and client TLS simultaneously.
 - **The SSL/TLS code paths are tuned and fragile. Do not refactor or "fix" them unprompted** — flag suspected issues and wait for an explicit ask. The handshake is serialized per session on one worker by design; `_needTask` does not block the selector.
+
+### Protocol validator state machines (`org.zoxweb.server.net.common.sm`)
+
+**Before touching anything in this package, read `META-SM-PROTO-DESIGN.md` (repo root) — it is
+mandatory and authoritative.** It is the single document for the subsystem: operational premise,
+the Iron Rules (each one exists because it was violated and had to be corrected), the FSM
+execution/composition model, both transport callbacks, the v2 target design, the JSON schema, the
+implementation breakdown, and the failure log.
+
+One-paragraph orientation: the package is a **meta-driven service-conformance checker** — the
+client side of uptime monitoring, deployment smoke tests, and TLS-posture/protocol regression
+checks against endpoints the operator runs or is authorized to query. A session opens **one**
+connection to **one** caller-supplied address, runs a short scripted request/response dialogue,
+records a pass/fail verdict, and closes; there is no host discovery, no port ranging, and the
+script deliberately cannot branch or compute (see §0 of the design doc for the scope statement and
+the safe-by-default TLS posture). A JSON
+definition composes a per-connection state machine (`ClientConSM`), which is then set as the
+config of a `TCPSMCallback` / `UDPSMCallback`; the caller only hands the endpoint + callback to
+`NIOSocket.addClientSocket` / `addDatagramSocket`. NIOSocket triggers `connected(SelectionKey)`,
+and from that instant **the machine performs the entire session** — send per configuration, wait
+for read triggers, assemble messages, validate the protocol, close itself — writing its verdict
+into the machine-properties results bag, pushed on `MACHINE_CLOSED`. Helpers, tests, and
+applications (`ProtoConnect` included) are **pure observers**; they never drive or close a session.
+The engine is `org.zoxweb.server.fsm` (`StateMachine`/`State`, both `NVGMProperties` holders —
+shared bags are the composition mechanism).
 
 ### Threading (`org.zoxweb.server.task`)
 

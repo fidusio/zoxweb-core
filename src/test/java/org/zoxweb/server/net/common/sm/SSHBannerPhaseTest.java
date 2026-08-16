@@ -54,7 +54,7 @@ public class SSHBannerPhaseTest {
 
         void feed(String wire) {
             byte[] bytes = SharedStringUtil.getBytes(wire);
-            sm.publishSync(SMProtoUtil.BasicEvent.RAW_IN_DATA,
+            sm.publishSync(SMProtoUtil.BasicEvent.IN_RAW_DATA,
                     ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, bytes, 0, bytes.length, true));
         }
     }

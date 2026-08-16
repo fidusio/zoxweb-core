@@ -9,7 +9,7 @@ package org.zoxweb.server.net.common.sm;
  * constructor, keeps this a per-session concern):
  * <ul>
  * <li>{@code CONNECTED}, {@code RAW_IN_DATA}, {@code CLOSED} —
- * {@link TCPSMCallback.BasicEvent}; {@code RAW_IN_DATA} is consumed
+ * {@link SMProtoUtil.BasicEvent}; {@code RAW_IN_DATA} is consumed
  * exclusively by the transport router ({@link ClientTransportState}), never by phases.</li>
  * <li>{@code NEED_WRAP}, {@code NEED_UNWRAP}, {@code NEED_UNWRAP_AGAIN}, {@code NEED_TASK},
  * {@code FINISHED}, {@code NOT_HANDSHAKING} — {@link javax.net.ssl.SSLEngineResult.HandshakeStatus}

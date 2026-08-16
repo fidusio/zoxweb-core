@@ -57,6 +57,14 @@ class SSLClientBridge extends BaseSessionCallback<SSLSessionConfig>
         ClientSessionContext ctx = sm.getContext();
         ctx.getSession().sslHandshakeSuccessful(sci);
         ctx.setMode(ClientSessionContext.Mode.TLS_SECURE);
+        try {
+            // accumulate the negotiated TLS outcome in the machine's results bag
+            SMProtoUtil.results(sm)
+                    .build("tls_protocol", sci.getSSLEngine().getSession().getProtocol())
+                    .build("tls_cipher", sci.getSSLEngine().getSession().getCipherSuite());
+        } catch (RuntimeException e) {
+            // session introspection is best-effort, never fails the handshake
+        }
         sm.publishSync(ClientEvent.SECURE, sci);
         ctx.phaseComplete(SSLClientPhase.NAME);
     }

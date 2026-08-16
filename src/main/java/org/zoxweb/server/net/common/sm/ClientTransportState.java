@@ -55,7 +55,7 @@ public class ClientTransportState extends State<Object> {
 
     private class RawInData extends TriggerConsumer<ByteBuffer> {
         RawInData() {
-            super(SMProtoUtil.BasicEvent.RAW_IN_DATA);
+            super(SMProtoUtil.BasicEvent.IN_RAW_DATA);
         }
 
         @Override

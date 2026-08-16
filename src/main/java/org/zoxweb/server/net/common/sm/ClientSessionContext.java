@@ -2,6 +2,7 @@ package org.zoxweb.server.net.common.sm;
 
 import org.zoxweb.server.net.BaseSessionCallback;
 import org.zoxweb.server.net.ssl.SSLSessionConfig;
+import org.zoxweb.shared.util.NVBoolean;
 import org.zoxweb.shared.util.NVGenericMap;
 import org.zoxweb.shared.util.SUS;
 
@@ -33,33 +34,56 @@ public class ClientSessionContext {
         TLS_SECURE,
     }
 
+    /**
+     * The machine's transport, fixed at build time ({@link ClientConSMBuilder#transport}); selects
+     * the transport router state and which session callback type the context accepts.
+     */
+    public enum Transport {
+        /** Stream session driven by a {@link TCPSMCallback}; supports TLS phases. */
+        TCP,
+        /** Datagram session driven by a {@link UDPSMCallback}; always plaintext (no DTLS). */
+        UDP,
+    }
+
     private final ClientConSM sm;
     private final NVGenericMap settings;
     private final NVGenericMap vars = new NVGenericMap("vars");
     private final Set<String> pendingPhases = new LinkedHashSet<String>();
     private final AtomicBoolean readyPublished = new AtomicBoolean(false);
+    private final Transport transport;
 
     private volatile TCPSMCallback session;
+    private volatile UDPSMCallback udpSession;
     private volatile Mode mode = Mode.PLAIN;
     private volatile SSLSessionConfig sslConfig;
     private volatile BaseSessionCallback<SSLSessionConfig> sslBridge;
 
-    ClientSessionContext(ClientConSM sm, NVGenericMap settings, Set<String> gatingPhases) {
+    ClientSessionContext(ClientConSM sm, NVGenericMap settings, Set<String> gatingPhases, Transport transport) {
         this.sm = sm;
         this.settings = settings != null ? settings : new NVGenericMap();
         this.pendingPhases.addAll(gatingPhases);
+        this.transport = transport;
     }
 
     /**
-     * Binds the session callback; must run before the callback is handed to NIOSocket.
+     * @return the machine's transport, fixed at build time
+     */
+    public Transport getTransport() {
+        return transport;
+    }
+
+    /**
+     * Binds the TCP session callback; must run before the callback is handed to NIOSocket.
      *
      * @param cb the session callback whose config is this context's machine
-     * @throws IllegalStateException    if already bound
+     * @throws IllegalStateException    if already bound, or the machine transport is not TCP
      * @throws IllegalArgumentException if the callback is bound to a different machine
      */
     public synchronized void bind(TCPSMCallback cb) {
         SUS.checkIfNull("session callback null", cb);
-        if (session != null)
+        if (transport != Transport.TCP)
+            throw new IllegalStateException("machine transport is " + transport + ": TCP session callback rejected");
+        if (session != null || udpSession != null)
             throw new IllegalStateException("context already bound to a session callback");
         if (cb.getConfig() != sm)
             throw new IllegalArgumentException("session callback belongs to a different state machine");
@@ -67,10 +91,37 @@ public class ClientSessionContext {
     }
 
     /**
-     * @return the bound session callback, null before {@link #bind(TCPSMCallback)}
+     * Binds the UDP session callback; must run before the callback is handed to NIOSocket.
+     *
+     * @param cb the session callback whose config is this context's machine
+     * @throws IllegalStateException    if already bound, or the machine transport is not UDP
+     * @throws IllegalArgumentException if the callback is bound to a different machine
+     */
+    public synchronized void bind(UDPSMCallback cb) {
+        SUS.checkIfNull("session callback null", cb);
+        if (transport != Transport.UDP)
+            throw new IllegalStateException("machine transport is " + transport + ": UDP session callback rejected");
+        if (session != null || udpSession != null)
+            throw new IllegalStateException("context already bound to a session callback");
+        if (cb.getConfig() != sm)
+            throw new IllegalArgumentException("session callback belongs to a different state machine");
+        udpSession = cb;
+    }
+
+    /**
+     * @return the bound TCP session callback, null before {@link #bind(TCPSMCallback)} (always
+     * null on a UDP-transport machine)
      */
     public TCPSMCallback getSession() {
         return session;
+    }
+
+    /**
+     * @return the bound UDP session callback, null before {@link #bind(UDPSMCallback)} (always
+     * null on a TCP-transport machine)
+     */
+    public UDPSMCallback getUDPSession() {
+        return udpSession;
     }
 
     public ClientConSM getStateMachine() {
@@ -145,8 +196,9 @@ public class ClientSessionContext {
     }
 
     /**
-     * One-shot complete write of the buffer through the session output stream — plaintext before
-     * the upgrade, encrypted after {@link ClientEvent#SECURE}.
+     * One-shot complete write of the buffer to the peer — over TCP through the session output
+     * stream (plaintext before the upgrade, encrypted after {@link ClientEvent#SECURE}), over UDP
+     * as one datagram to the connected remote.
      *
      * @param bb payload in read-mode (e.g. from {@link ByteBuffer#wrap(byte[])})
      * @return bytes transmitted to the channel
@@ -158,7 +210,8 @@ public class ClientSessionContext {
     public int write(ByteBuffer bb) throws IOException {
         if (mode == Mode.TLS_HANDSHAKING)
             throw new IOException("TLS handshake in progress: writes are gated until SECURE");
-        return session.get().write(bb, false);
+        UDPSMCallback udp = udpSession;
+        return udp != null ? udp.send(bb, false) : session.get().write(bb, false);
     }
 
     /**
@@ -169,8 +222,13 @@ public class ClientSessionContext {
      */
     public void fail(Throwable t) {
         TCPSMCallback s = session;
-        if (s != null)
+        if (s != null) {
             s.exception(t);
+            return;
+        }
+        UDPSMCallback u = udpSession;
+        if (u != null)
+            u.exception(t);
     }
 
     /**
@@ -188,7 +246,10 @@ public class ClientSessionContext {
             pendingPhases.remove(phaseName);
             empty = pendingPhases.isEmpty();
         }
-        if (empty && !readyPublished.getAndSet(true) && !sm.isClosed())
+        if (empty && !readyPublished.getAndSet(true) && !sm.isClosed()) {
+            // record the completed pipeline in the machine's results bag before the broadcast
+            SMProtoUtil.results(sm).build(new NVBoolean("ready", true));
             sm.publishSync(ClientEvent.READY, null);
+        }
     }
 }

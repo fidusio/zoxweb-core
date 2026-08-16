@@ -71,6 +71,20 @@ public class ProtoDataTest {
     }
 
     @Test
+    public void prefixLessLiteralNeverReinterpretsResolvedValueAsEncoding() {
+        // prefix-less literal: the resolved value is UTF-8 text verbatim, even when the injected
+        // value is shaped like an encoding prefix — data, not a directive
+        NVGenericMap vars = new NVGenericMap();
+        vars.build("motd", "base64:SGVsbG8=");
+        assertArrayEquals("base64:SGVsbG8=".getBytes(StandardCharsets.UTF_8),
+                SMProtoUtil.STRING_VARS_TO_DATA.decode("${motd}", vars));
+        // a colon-bearing value that would be a malformed hex body must not throw either
+        vars.build("note", "hex: call me at 5");
+        assertArrayEquals("hex: call me at 5".getBytes(StandardCharsets.UTF_8),
+                SMProtoUtil.STRING_VARS_TO_DATA.decode("${note}", vars));
+    }
+
+    @Test
     public void substituteEncoderResolvesTemplate() {
         NVGenericMap vars = new NVGenericMap();
         vars.build("helo", "probe.example");

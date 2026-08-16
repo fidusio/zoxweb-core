@@ -2,6 +2,7 @@ package org.zoxweb.server.net.common.sm;
 
 import org.zoxweb.server.fsm.StateMachine;
 
+import java.net.InetSocketAddress;
 import java.util.concurrent.Executor;
 
 /**
@@ -35,26 +36,54 @@ public class ClientConSM extends StateMachine<ClientSessionContext> {
     }
 
     /**
-     * Creates the session callback for this machine and binds it to the context; hand the
+     * Creates the TCP session callback for this machine and binds it to the context; hand the
      * result to {@code NIOSocket.addClientSocket}.
      *
      * @return the bound session callback
+     * @throws IllegalStateException if the machine transport is not TCP
      */
     public TCPSMCallback newSessionCallback() {
+        checkTransport(ClientSessionContext.Transport.TCP);
         TCPSMCallback cb = new TCPSMCallback(this);
         getContext().bind(cb);
         return cb;
     }
 
     /**
-     * Creates the session callback with a caller-supplied id and binds it to the context.
+     * Creates the TCP session callback with a caller-supplied id and binds it to the context.
      *
      * @param id the session id
      * @return the bound session callback
+     * @throws IllegalStateException if the machine transport is not TCP
      */
     public TCPSMCallback newSessionCallback(String id) {
+        checkTransport(ClientSessionContext.Transport.TCP);
         TCPSMCallback cb = new TCPSMCallback(id, this);
         getContext().bind(cb);
         return cb;
+    }
+
+    /**
+     * Creates the UDP session callback targeting {@code remote} and binds it to the context; hand
+     * the result to {@code NIOSocket.addDatagramSocket} with an ephemeral local bind (e.g.
+     * {@code new InetSocketAddress(0)}).
+     *
+     * @param remote the peer the datagram channel connects to
+     * @return the bound session callback
+     * @throws IllegalStateException if the machine transport is not UDP
+     */
+    public UDPSMCallback newSessionCallback(InetSocketAddress remote) {
+        checkTransport(ClientSessionContext.Transport.UDP);
+        UDPSMCallback cb = new UDPSMCallback(remote, this);
+        getContext().bind(cb);
+        return cb;
+    }
+
+    // before the callback constructor mutates the machine's properties, so a transport
+    // mismatch leaves no half-bound state behind
+    private void checkTransport(ClientSessionContext.Transport expected) {
+        if (getContext().getTransport() != expected)
+            throw new IllegalStateException("machine transport is " + getContext().getTransport()
+                    + ": " + expected + " session callback rejected");
     }
 }
