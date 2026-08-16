@@ -5,9 +5,10 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Declarative-config factory: the three schema shapes build the right phase sets, the config
- * carries no endpoint (only an optional default-port hint + timeout), and contradictory or
- * unsafe configs fail fast.
+ * Declarative-config factory: the state-catalog composition — explicit {@code states} and the
+ * sugar shapes (protocol / tls / exchange) — builds the right state sets, the config carries no
+ * endpoint (only an optional default-port hint + timeout), and contradictory or unsafe configs
+ * fail fast.
  */
 public class ClientSMFactoryTest {
 
@@ -20,9 +21,10 @@ public class ClientSMFactoryTest {
 
         assertEquals("smtps-client", sm.getName());
         assertNotNull(sm.lookupState(ClientTransportState.NAME));
-        assertNotNull(sm.lookupState(SSLClientHandshakeState.NAME), "TLS protocol must register handshake state");
+        assertNotNull(sm.lookupState(SSLClientState.NAME), "TLS protocol must compose the ssl state");
+        assertNotNull(sm.lookupState(SSLClientHandshakeState.NAME), "ssl state must bring the handshake state");
         assertNotNull(sm.lookupState(SSLClientDataState.NAME));
-        assertNull(sm.lookupState(SSHBannerPhase.NAME));
+        assertNull(sm.lookupState(MessageAssemblerState.NAME), "no script, no assembler");
 
         // the config carries no endpoint — only an optional default-port hint the caller may use
         assertEquals(465, ClientSMFactory.port(sm.getContext().getSettings(), -1));
@@ -30,13 +32,16 @@ public class ClientSMFactoryTest {
     }
 
     @Test
-    public void sshShape() {
+    public void sshShapeIsCatalogSugar() {
+        // protocol "ssh" is factory sugar: delimited assembler + validating controller
         ClientConSM sm = ClientSMFactory.fromJSON(
                 "{ \"name\": \"ssh-fingerprint\", \"port\": 22,"
                         + " \"protocol\": \"ssh\", \"ssh\": {\"banner_prefix\": \"SSH-2.0-\", \"banner_contains\": \"OpenSSH\"} }");
 
-        assertNotNull(sm.lookupState(SSHBannerPhase.NAME), "SSH protocol must register the banner state");
-        assertNull(sm.lookupState(SSLClientHandshakeState.NAME), "no TLS block, no SSL states");
+        assertNotNull(sm.lookupState(MessageAssemblerState.NAME), "SSH sugar must compose the assembler");
+        assertNotNull(sm.lookupState(ProtocolControllerState.NAME), "SSH sugar must compose the controller");
+        assertNotNull(sm.lookupState(ProtocolTypeValidatorState.NAME), "controller implies validator");
+        assertNull(sm.lookupState(SSLClientState.NAME), "no TLS block, no ssl state");
         assertEquals(5, ClientSMFactory.timeoutSec(sm.getContext().getSettings()), "default timeout");
         assertEquals(22, ClientSMFactory.port(sm.getContext().getSettings(), -1));
     }
@@ -47,9 +52,35 @@ public class ClientSMFactoryTest {
                 "{ \"name\": \"smtp-starttls\", \"port\": 587,"
                         + " \"protocol\": \"plain\", \"tls\": {\"mode\": \"on_demand\", \"cert_validation\": false} }");
 
-        assertNotNull(sm.lookupState(SSLClientHandshakeState.NAME),
-                "on_demand TLS must register the SSL states, upgrade-capable");
-        assertNull(sm.lookupState(SSHBannerPhase.NAME));
+        assertNotNull(sm.lookupState(SSLClientState.NAME),
+                "on_demand TLS must compose the ssl state, upgrade-capable");
+        assertNotNull(sm.lookupState(SSLClientHandshakeState.NAME));
+        assertNull(sm.lookupState(MessageAssemblerState.NAME));
+    }
+
+    @Test
+    public void explicitStatesShape() {
+        // the v2 shape: the JSON composes the machine state by state, each config block seeded
+        // into that state's properties bag (META-SM-PROTO-DESIGN.md §12)
+        ClientConSM sm = ClientSMFactory.fromJSON(
+                "{ \"name\": \"dns-probe\", \"transport\": \"udp\", \"port\": 53, \"timeout_sec\": 3,"
+                        + " \"states\": ["
+                        + "   { \"state\": \"assembler\", \"config\": { \"boundary\": \"datagram\", \"max_message\": 65536 } },"
+                        + "   { \"state\": \"controller\", \"config\": { \"exchange\": ["
+                        + "       {\"send\":     \"hex:1234 0100 0001 0000 0000 0000 07 6578616d706c65 03 636f6d 00 0001 0001\"},"
+                        + "       {\"validate\": { \"contains\": \"hex:1234\", \"report\": \"dns\" } }"
+                        + "   ] } }"
+                        + " ] }");
+
+        assertNotNull(sm.lookupState(MessageAssemblerState.NAME));
+        assertNotNull(sm.lookupState(ProtocolControllerState.NAME));
+        assertNotNull(sm.lookupState(ResponseControllerState.NAME), "controller implies responder");
+        assertNotNull(sm.lookupState(ProtocolTypeValidatorState.NAME), "controller implies validator");
+        assertEquals(ClientSessionContext.Transport.UDP, sm.getContext().getTransport());
+        assertEquals(53, ClientSMFactory.port(sm.getContext().getSettings(), -1));
+        // unknown catalog state fails fast
+        assertThrows(IllegalArgumentException.class, () -> ClientSMFactory.fromJSON(
+                "{ \"name\": \"x\", \"states\": [ { \"state\": \"transmogrifier\", \"config\": {} } ] }"));
     }
 
     @Test
@@ -57,7 +88,7 @@ public class ClientSMFactoryTest {
         // a fully endpoint-free config still builds — the caller provides the InetSocketAddress
         ClientConSM sm = ClientSMFactory.fromJSON(
                 "{ \"name\": \"no-endpoint\", \"protocol\": \"tls\", \"tls\": {\"cert_validation\": false} }");
-        assertNotNull(sm.lookupState(SSLClientHandshakeState.NAME));
+        assertNotNull(sm.lookupState(SSLClientState.NAME));
         // no port hint -> caller's fallback is returned
         assertEquals(443, ClientSMFactory.port(sm.getContext().getSettings(), 443));
     }
@@ -68,7 +99,7 @@ public class ClientSMFactoryTest {
                 "{ \"name\": \"bag-check\", \"protocol\": \"plain\", \"custom_knob\": \"42\" }");
 
         assertEquals("42", sm.getContext().getSettings().getValue("custom_knob"),
-                "phases must be able to read their knobs from the settings bag");
+                "states must be able to read their knobs from the settings bag");
     }
 
     @Test
@@ -86,14 +117,14 @@ public class ClientSMFactoryTest {
         // protocol 'tls' + on_demand would publish READY on a plaintext link with no negotiator
         assertThrows(IllegalArgumentException.class, () -> ClientSMFactory.fromJSON(
                 "{ \"name\": \"x\", \"protocol\": \"tls\", \"tls\": {\"mode\": \"on_demand\"} }"));
-        // ssh + exchange: two active IN_DATA owners (banner phase and exchange driver)
+        // ssh sugar + exchange: two scripts would drive one controller
         assertThrows(IllegalArgumentException.class, () -> ClientSMFactory.fromJSON(
                 "{ \"name\": \"x\", \"protocol\": \"ssh\", \"exchange\": [ {\"expect\": \"txt:x\"} ] }"));
         // start_tls step with no tls block: START_TLS would have no consumer (silent hang)
         assertThrows(IllegalArgumentException.class, () -> ClientSMFactory.fromJSON(
                 "{ \"name\": \"x\", \"protocol\": \"plain\", "
                         + "\"exchange\": [ {\"start_tls\": true} ] }"));
-        // start_tls step with an immediate tls phase: session already secure, SECURE never refires
+        // start_tls step with an immediate ssl state: session already secure, SECURE never refires
         assertThrows(IllegalArgumentException.class, () -> ClientSMFactory.fromJSON(
                 "{ \"name\": \"x\", \"protocol\": \"tls\", \"tls\": {\"mode\": \"immediate\", \"cert_validation\": false}, "
                         + "\"exchange\": [ {\"start_tls\": true} ] }"));

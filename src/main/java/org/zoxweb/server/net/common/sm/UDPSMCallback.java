@@ -39,18 +39,18 @@ import java.util.concurrent.locks.ReentrantLock;
  * <p>
  * Event contract:
  * <ul>
- * <li>{@link SMProtoUtil.BasicEvent#CONNECTED} once, published from {@link #connected(SelectionKey)} —
+ * <li>{@link ClientEvent#CONNECTED} once, published from {@link #connected(SelectionKey)} —
  * invoked by NIOSocket after selector registration, always before any read dispatch (same lifecycle
  * as the TCP path) — with the remote {@link InetSocketAddress} as payload. This is the machine
  * kickoff: the state machine's {@code CONNECTED} actions <b>send the first datagram</b>
  * ({@link #send(ByteBuffer, boolean)}); nothing happens on the machine before {@code connected()}
  * is invoked. {@link #setChannel(Channel)} is channel setup only (bind, connect, teardown
  * registration) and publishes no events.</li>
- * <li>{@link SMProtoUtil.BasicEvent#DATAGRAM} per received datagram, payload the {@link DataPacket}.
+ * <li>{@link ClientEvent#DATAGRAM} per received datagram, payload the {@link DataPacket}.
  * <b>The packet buffer is a detached copy owned by the consumer</b> — same ownership contract as the
  * TCP {@code RAW_IN_DATA} packets: safe for async handling, the consumer recaches it via
  * {@code ByteBufferUtil.cache} when done.</li>
- * <li>{@link SMProtoUtil.BasicEvent#CLOSED} exactly once per session from the close delegate, whatever the
+ * <li>{@link ClientEvent#CLOSED} exactly once per session from the close delegate, whatever the
  * termination path (receive error, {@link #exception(Throwable)}, external close); the payload is
  * the causing Throwable when the error path stashed one under {@link Params#EXCEPTION}, null
  * otherwise.</li>
@@ -63,7 +63,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * {@link Params#AUTO_CLOSEABLE} marker, fail-fast in the constructor), per-session resources
  * registered in the {@link Params#AUTO_CLOSEABLE} collection and closed by teardown in registration
  * order (the datagram channel is registered by {@link #setChannel(Channel)}), and the machine closed
- * by session teardown as the last act after {@link SMProtoUtil.BasicEvent#CLOSED} is delivered.
+ * by session teardown as the last act after {@link ClientEvent#CLOSED} is delivered.
  */
 public class UDPSMCallback
         extends SessionCallback<StateMachineInt<?>, DataPacket<Long>, DatagramChannel>
@@ -106,7 +106,7 @@ public class UDPSMCallback
      * Creates a UDP client callback; registers the {@link Params#AUTO_CLOSEABLE} collection in the
      * state machine's properties and arms the close delegate that performs the one-time session
      * teardown, see {@link #close()}. One state machine per callback: the machine is owned by the
-     * session and closed by teardown after {@link SMProtoUtil.BasicEvent#CLOSED} is delivered.
+     * session and closed by teardown after {@link ClientEvent#CLOSED} is delivered.
      *
      * @param id           the session id
      * @param remote       the peer to connect to
@@ -132,7 +132,7 @@ public class UDPSMCallback
                 ByteBufferUtil.cache(rawReadBuffer);
             }
             NamedValue<Throwable> exception = getConfig().getProperties().getNV(SUS.enumName(Params.EXCEPTION));
-            getConfig().publishSync(SMProtoUtil.BasicEvent.CLOSED, exception != null ? exception.getValue() : null);
+            getConfig().publishSync(ClientEvent.CLOSED, exception != null ? exception.getValue() : null);
             // last act: a closed machine rejects publishes, so CLOSED must go out first
             getConfig().close();
         });
@@ -143,7 +143,7 @@ public class UDPSMCallback
     /**
      * Closes the session exactly once via the closeable delegate: closes the state machine's
      * {@link Params#AUTO_CLOSEABLE} resources (the datagram channel), recaches the read buffer,
-     * publishes the {@link SMProtoUtil.BasicEvent#CLOSED} event and finally closes the state
+     * publishes the {@link ClientEvent#CLOSED} event and finally closes the state
      * machine itself; subsequent calls are no-ops.
      *
      * @throws Exception in case of error
@@ -215,7 +215,7 @@ public class UDPSMCallback
     /**
      * Registers a per-session resource in the {@link Params#AUTO_CLOSEABLE} collection; session
      * teardown closes the registered resources in registration order, before
-     * {@link SMProtoUtil.BasicEvent#CLOSED} is published.
+     * {@link ClientEvent#CLOSED} is published.
      *
      * @param closeable the resource to close during session teardown
      * @return this
@@ -227,7 +227,7 @@ public class UDPSMCallback
     }
 
     /**
-     * Read dispatch: drains the channel, publishing one {@link SMProtoUtil.BasicEvent#DATAGRAM}
+     * Read dispatch: drains the channel, publishing one {@link ClientEvent#DATAGRAM}
      * packet per received datagram via {@link #accept(DataPacket)}; a receive error terminates the
      * session with the cause. Serialized per session by NIOSocket.
      *
@@ -268,14 +268,14 @@ public class UDPSMCallback
 
     /**
      * Publishes one received datagram to the state machine as
-     * {@link SMProtoUtil.BasicEvent#DATAGRAM}; the packet holds a detached copy of the received
+     * {@link ClientEvent#DATAGRAM}; the packet holds a detached copy of the received
      * data, see {@link #accept(SelectionKey)}.
      *
      * @param dataPacket the received datagram (remote address + detached payload buffer)
      */
     @Override
     public void accept(DataPacket<Long> dataPacket) {
-        getConfig().publishSync(SMProtoUtil.BasicEvent.DATAGRAM, dataPacket);
+        getConfig().publishSync(ClientEvent.DATAGRAM, dataPacket);
     }
 
     /**
@@ -294,7 +294,7 @@ public class UDPSMCallback
      * The machine kickoff — the {@code ConnectionCallback} lifecycle point NIOSocket invokes
      * after selector registration, strictly before any read dispatch: ensures the channel is set
      * ({@link #setChannel(Channel)} is idempotent, its connect guarded by {@code isConnected()}),
-     * publishes {@link SMProtoUtil.BasicEvent#CONNECTED} exactly once with the remote address as
+     * publishes {@link ClientEvent#CONNECTED} exactly once with the remote address as
      * payload, and returns the interest ops to install. From that publish on, the state machine's
      * definition drives the session — its {@code CONNECTED} actions send the first datagram, the
      * read dispatches feed it the replies.
@@ -307,7 +307,7 @@ public class UDPSMCallback
     public int connected(SelectionKey key) throws IOException {
         setChannel(key.channel());
         if (connectedPublished.compareAndSet(false, true))
-            getConfig().publishSync(SMProtoUtil.BasicEvent.CONNECTED, remote);
+            getConfig().publishSync(ClientEvent.CONNECTED, remote);
         return interestOps();
     }
 
@@ -323,7 +323,7 @@ public class UDPSMCallback
 
     /**
      * Error termination: stashes the cause under {@link Params#EXCEPTION} so the close delegate
-     * publishes it as the {@link SMProtoUtil.BasicEvent#CLOSED} payload, then closes the session.
+     * publishes it as the {@link ClientEvent#CLOSED} payload, then closes the session.
      *
      * @param e the error that terminated the session
      */

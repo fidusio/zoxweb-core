@@ -17,8 +17,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * trigger consumer reaches it via {@code getStateMachine().getConfig()}.
  * <p>
  * Holds the session callback binding, the transport {@link Mode}, the SSL session state once an
- * upgrade ran, the declarative settings bag, and the phase chain that publishes the single
- * {@link ClientEvent#READY} when the last gating phase completes.
+ * upgrade ran, the declarative settings bag, and the READY gate that publishes the single
+ * {@link ClientEvent#READY} when the last gating state completes.
  */
 public class ClientSessionContext {
 
@@ -39,7 +39,7 @@ public class ClientSessionContext {
      * the transport router state and which session callback type the context accepts.
      */
     public enum Transport {
-        /** Stream session driven by a {@link TCPSMCallback}; supports TLS phases. */
+        /** Stream session driven by a {@link TCPSMCallback}; supports the ssl state. */
         TCP,
         /** Datagram session driven by a {@link UDPSMCallback}; always plaintext (no DTLS). */
         UDP,
@@ -48,7 +48,7 @@ public class ClientSessionContext {
     private final ClientConSM sm;
     private final NVGenericMap settings;
     private final NVGenericMap vars = new NVGenericMap("vars");
-    private final Set<String> pendingPhases = new LinkedHashSet<String>();
+    private final Set<String> pendingGates = new LinkedHashSet<String>();
     private final AtomicBoolean readyPublished = new AtomicBoolean(false);
     private final Transport transport;
 
@@ -58,10 +58,10 @@ public class ClientSessionContext {
     private volatile SSLSessionConfig sslConfig;
     private volatile BaseSessionCallback<SSLSessionConfig> sslBridge;
 
-    ClientSessionContext(ClientConSM sm, NVGenericMap settings, Set<String> gatingPhases, Transport transport) {
+    ClientSessionContext(ClientConSM sm, NVGenericMap settings, Set<String> readyGates, Transport transport) {
         this.sm = sm;
         this.settings = settings != null ? settings : new NVGenericMap();
-        this.pendingPhases.addAll(gatingPhases);
+        this.pendingGates.addAll(readyGates);
         this.transport = transport;
     }
 
@@ -232,19 +232,19 @@ public class ClientSessionContext {
     }
 
     /**
-     * Reports a gating phase as finished; when the last one completes, publishes the single
-     * {@link ClientEvent#READY}. Unknown or repeated names are no-ops, as is completion after
-     * the machine closed (a consumer may have failed the session inline during the completing
-     * dispatch — publishing READY on the closed machine would throw instead of tearing down
-     * cleanly).
+     * Reports a READY-gating state as finished; when the last gate completes, publishes the
+     * single {@link ClientEvent#READY}. Unknown or repeated names are no-ops, as is completion
+     * after the machine closed (a consumer may have failed the session inline during the
+     * completing dispatch — publishing READY on the closed machine would throw instead of
+     * tearing down cleanly).
      *
-     * @param phaseName the completed phase's name
+     * @param gateName the completed gating state's name
      */
-    public void phaseComplete(String phaseName) {
+    public void gateComplete(String gateName) {
         boolean empty;
         synchronized (this) {
-            pendingPhases.remove(phaseName);
-            empty = pendingPhases.isEmpty();
+            pendingGates.remove(gateName);
+            empty = pendingGates.isEmpty();
         }
         if (empty && !readyPublished.getAndSet(true) && !sm.isClosed()) {
             // record the completed pipeline in the machine's results bag before the broadcast

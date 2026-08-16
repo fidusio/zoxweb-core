@@ -36,7 +36,6 @@ public class UDPSMCallbackTest {
     @Test
     public void clientSendsOnConnectedAndReceivesEcho() throws Exception {
         final CountDownLatch dataLatch = new CountDownLatch(1);
-        final CountDownLatch closedLatch = new CountDownLatch(1);
         final AtomicReference<String> echoed = new AtomicReference<String>();
         final AtomicReference<Throwable> closedPayload = new AtomicReference<Throwable>(new Exception("sentinel"));
         final AtomicReference<Throwable> serverFailure = new AtomicReference<Throwable>();
@@ -69,7 +68,7 @@ public class UDPSMCallbackTest {
                 } catch (IOException e) {
                     cb.exception(e);
                 }
-            }, SMProtoUtil.BasicEvent.CONNECTED);
+            }, ClientEvent.CONNECTED);
             app.register((Consumer<Object>) o -> {
                 DataPacket<?> dp = (DataPacket<?>) o;
                 ByteBuffer bb = dp.getBuffer();
@@ -79,11 +78,8 @@ public class UDPSMCallbackTest {
                 ByteBufferUtil.cache(bb);
                 echoed.set(new String(chunk));
                 dataLatch.countDown();
-            }, SMProtoUtil.BasicEvent.DATAGRAM);
-            app.register((Consumer<Throwable>) t -> {
-                closedPayload.set(t);
-                closedLatch.countDown();
-            }, SMProtoUtil.BasicEvent.CLOSED);
+            }, ClientEvent.DATAGRAM);
+            app.register((Consumer<Throwable>) t -> closedPayload.set(t), ClientEvent.CLOSED);
             machine.register(app);
 
             // ephemeral local bind; NIOSocket invokes connected(SK) after registration — the
@@ -95,7 +91,9 @@ public class UDPSMCallbackTest {
             assertNull(serverFailure.get(), "server error: " + serverFailure.get());
 
             cb.close();
-            assertTrue(closedLatch.await(WAIT_SEC, TimeUnit.SECONDS), "CLOSED not published on close");
+            // teardown closes the machine last — CLOSED was delivered when this returns
+            assertTrue(SMProtoUtil.waitForClose(machine, TimeUnit.SECONDS.toMillis(WAIT_SEC)),
+                    "machine not closed by teardown");
             assertNull(closedPayload.get(), "clean close must deliver CLOSED with null payload");
             assertTrue(cb.isClosed());
             assertTrue(machine.isClosed(), "machine must be closed by teardown");

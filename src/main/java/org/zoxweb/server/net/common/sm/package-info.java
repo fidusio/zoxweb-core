@@ -1,11 +1,17 @@
 /**
- * Pluggable client-connection state machine framework: a {@link ClientConSM}
- * set as the config of a {@link TCPSMCallback} dictates what
- * happens after socket connect — immediate TLS handshake, SSH banner validation, or a
- * STARTTLS-style plaintext-negotiate-then-upgrade — composed from
- * {@link org.zoxweb.server.net.common.sm.ConnectionPhase}s programmatically
- * ({@link ClientConSMBuilder}) or from a JSON config
- * ({@link org.zoxweb.server.net.common.sm.ClientSMFactory}).
+ * Meta-driven client-connection state machine framework: a {@link ClientConSM}
+ * set as the config of a {@link TCPSMCallback} / {@link UDPSMCallback} dictates what
+ * happens after socket connect — scripted request/response dialogue, protocol validation,
+ * immediate TLS handshake, or a STARTTLS-style plaintext-negotiate-then-upgrade — <b>composed
+ * from predefined catalog states</b>, programmatically ({@link ClientConSMBuilder}) or from a
+ * JSON config ({@link org.zoxweb.server.net.common.sm.ClientSMFactory}'s state catalog). Each
+ * state is configured by its own properties bag and is a set of TriggerConsumers; states
+ * coordinate through the machine's shared bag (the blackboard), never through instance
+ * references. The catalog: {@link org.zoxweb.server.net.common.sm.MessageAssemblerState
+ * assembler} (boundary strategies), {@link org.zoxweb.server.net.common.sm.ProtocolControllerState
+ * controller} (the linear exchange script), {@link org.zoxweb.server.net.common.sm.ResponseControllerState
+ * responder}, {@link org.zoxweb.server.net.common.sm.ProtocolTypeValidatorState validator}
+ * (verdict → results bag), {@link org.zoxweb.server.net.common.sm.SSLClientState ssl}.
  *
  * <h2>TLS orchestration (SSLStateMachineV2)</h2>
  * The machine owns the handshake orchestration: {@link org.zoxweb.server.net.common.sm.SSLClientHandshakeState}
@@ -37,7 +43,7 @@
  * {@code inRemoteData}</td><td>{@code SSLSessionConfig.close()}, once (AtomicBoolean)</td></tr>
  * <tr><td>each {@code RAW_IN_DATA} packet</td><td>the transport router (TLS modes) or the one
  * active {@code IN_DATA} owner (plain pass-through)</td></tr>
- * <tr><td>each decrypted {@code IN_DATA} copy</td><td>the consuming phase or application</td></tr>
+ * <tr><td>each decrypted {@code IN_DATA} copy</td><td>the consuming state or application</td></tr>
  * </table>
  * Applications register their {@code IN_DATA} consumer from their {@code READY} handler (late
  * registration is supported while the machine is operational) — earlier registration would

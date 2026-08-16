@@ -69,7 +69,8 @@ public class DataExchangeLoopbackTest {
                     + "   {\"expect\": \"txt:250 \"}"
                     + " ] }";
             ClientConSM sm = ClientSMFactory.fromJSON(json);
-            assertNotNull(sm.lookupState(DataExchangePhase.NAME), "exchange phase must be registered");
+            assertNotNull(sm.lookupState(ProtocolControllerState.NAME), "the controller state must be composed");
+            assertNotNull(sm.lookupState(MessageAssemblerState.NAME), "the assembler state must be composed");
 
             State<Object> app = new State<Object>("app");
             app.register((Consumer<Object>) o -> readyLatch.countDown(), ClientEvent.READY);

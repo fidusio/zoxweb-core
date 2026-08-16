@@ -15,10 +15,12 @@ import java.nio.channels.SelectionKey;
  * The base state every {@link ClientConSM} registers first: initializes the transport on
  * {@code CONNECTED} and routes every {@code RAW_IN_DATA} packet by {@link ClientSessionContext.Mode}.
  * <p>
- * The router owns {@code RAW_IN_DATA} exclusively (see {@link ConnectionPhase} contract):
+ * The router owns {@code RAW_IN_DATA} exclusively — routing is broadcast pub/sub and a second
+ * consumer would double-consume wire bytes; catalog and application states consume
+ * {@link ClientEvent#IN_DATA} instead, each buffer having exactly one active owner:
  * <ul>
  * <li>{@code PLAIN} — the packet passes through as {@link ClientEvent#IN_DATA}; ownership
- * transfers to the consuming phase/application, which recaches it.</li>
+ * transfers to the consuming state, which recaches it.</li>
  * <li>{@code TLS_HANDSHAKING} / {@code TLS_SECURE} — the packet's ciphertext is copied into the
  * SSL engine's inbound net buffer chunk by chunk, publishing the current handshake status per
  * chunk; the packet is recached here. No consumer of these publishes reads the channel:
@@ -42,20 +44,20 @@ public class ClientTransportState extends State<Object> {
 
     private class Connected extends TriggerConsumer<SelectionKey> {
         Connected() {
-            super(SMProtoUtil.BasicEvent.CONNECTED);
+            super(ClientEvent.CONNECTED);
         }
 
         @Override
         public void accept(SelectionKey key) {
             ClientSessionContext ctx = (ClientSessionContext) getStateMachine().getConfig();
             ctx.setMode(ClientSessionContext.Mode.PLAIN);
-            ctx.phaseComplete(NAME);
+            ctx.gateComplete(NAME);
         }
     }
 
     private class RawInData extends TriggerConsumer<ByteBuffer> {
         RawInData() {
-            super(SMProtoUtil.BasicEvent.IN_RAW_DATA);
+            super(ClientEvent.RAW_IN_DATA);
         }
 
         @Override
@@ -104,7 +106,7 @@ public class ClientTransportState extends State<Object> {
 
     private class Closed extends TriggerConsumer<Throwable> {
         Closed() {
-            super(SMProtoUtil.BasicEvent.CLOSED);
+            super(ClientEvent.CLOSED);
         }
 
         @Override

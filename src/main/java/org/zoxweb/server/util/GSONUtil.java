@@ -2039,7 +2039,11 @@ public final class GSONUtil {
                     nvp.setName(name);
 
                     if (!nv.getValue().isJsonNull()) {
-                        nvp.setValue(nv.getValue().getAsString());
+                        // a primitive keeps its string form; an object/array value is carried
+                        // as its JSON text so single-entry objects with structured values
+                        // (e.g. {"validate": {...}}) survive the NVPairList mapping
+                        nvp.setValue(nv.getValue().isJsonPrimitive()
+                                ? nv.getValue().getAsString() : nv.getValue().toString());
                     }
 
                     break;

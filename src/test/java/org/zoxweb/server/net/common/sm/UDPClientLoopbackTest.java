@@ -6,6 +6,10 @@ import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.server.net.NIOSocket;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.shared.io.SharedIOUtil;
+import org.zoxweb.shared.util.GetNameValue;
+import org.zoxweb.shared.util.NVGenericMap;
+import org.zoxweb.shared.util.NVPair;
+import org.zoxweb.shared.util.NamedValue;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -13,6 +17,8 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -33,7 +39,6 @@ public class UDPClientLoopbackTest {
     @Test
     public void udpExchangeDialogueFiresReady() throws Exception {
         final CountDownLatch readyLatch = new CountDownLatch(1);
-        final CountDownLatch closedLatch = new CountDownLatch(1);
         final AtomicReference<Throwable> closeCause = new AtomicReference<Throwable>(new Exception("sentinel"));
         final AtomicReference<String> received = new AtomicReference<String>();
         final AtomicReference<Throwable> serverFailure = new AtomicReference<Throwable>();
@@ -62,10 +67,7 @@ public class UDPClientLoopbackTest {
 
         State<Object> app = new State<Object>("app");
         app.register((Consumer<Object>) o -> readyLatch.countDown(), ClientEvent.READY);
-        app.register((Consumer<Throwable>) t -> {
-            closeCause.set(t);
-            closedLatch.countDown();
-        }, SMProtoUtil.BasicEvent.CLOSED);
+        app.register((Consumer<Throwable>) t -> closeCause.set(t), ClientEvent.CLOSED);
         sm.register(app);
 
         InetSocketAddress remote = new InetSocketAddress(InetAddress.getLoopbackAddress(), server.getLocalPort());
@@ -79,9 +81,10 @@ public class UDPClientLoopbackTest {
             assertNull(serverFailure.get(), "server error: " + serverFailure.get());
 
             cb.close();
-            assertTrue(closedLatch.await(WAIT_SEC, TimeUnit.SECONDS), "CLOSED not published on close");
+            // teardown closes the machine last — CLOSED was delivered when this returns
+            assertTrue(SMProtoUtil.waitForClose(sm, TimeUnit.SECONDS.toMillis(WAIT_SEC)),
+                    "machine must be closed by teardown");
             assertNull(closeCause.get(), "clean close must deliver CLOSED with null payload");
-            assertTrue(sm.isClosed(), "machine must be closed by teardown");
         } finally {
             SharedIOUtil.close(cb, nioSocket);
             server.close();
@@ -119,7 +122,7 @@ public class UDPClientLoopbackTest {
             } catch (Exception e) {
                 sm.getContext().fail(e);
             }
-        }, SMProtoUtil.BasicEvent.CONNECTED);
+        }, ClientEvent.CONNECTED);
         app.register((Consumer<ByteBuffer>) bb -> {
             byte[] chunk = new byte[bb.remaining()];
             bb.get(chunk);
@@ -158,14 +161,20 @@ public class UDPClientLoopbackTest {
     }
 
     @Test
-    public void builderRejectsStreamOnlyPhasesOverUDP() {
+    public void builderRejectsStreamOnlyStatesOverUDP() {
         assertThrows(IllegalArgumentException.class, () -> ClientConSMBuilder.create("udp-tls")
                 .transport(ClientSessionContext.Transport.UDP)
-                .phase(new SSLClientPhase(SSLClientPhase.TLSMode.IMMEDIATE, true))
+                .state(new SSLClientState(SSLClientState.TLSMode.IMMEDIATE, true))
                 .build());
-        assertThrows(IllegalArgumentException.class, () -> ClientConSMBuilder.create("udp-ssh")
+        // a start_tls script step over UDP: no DTLS in this stack
+        List<GetNameValue<?>> steps = new ArrayList<GetNameValue<?>>();
+        steps.add(new NVPair(ProtocolControllerState.OP_START_TLS, "true"));
+        NVGenericMap controllerCfg = new NVGenericMap();
+        controllerCfg.add(new NamedValue<List<GetNameValue<?>>>("exchange", steps));
+        assertThrows(IllegalArgumentException.class, () -> ClientConSMBuilder.create("udp-starttls")
                 .transport(ClientSessionContext.Transport.UDP)
-                .phase(new SSHBannerPhase())
+                .state(new MessageAssemblerState())
+                .state(new ProtocolControllerState(controllerCfg))
                 .build());
     }
 

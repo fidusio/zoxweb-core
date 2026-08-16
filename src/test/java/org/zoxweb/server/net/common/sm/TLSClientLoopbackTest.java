@@ -73,7 +73,6 @@ public class TLSClientLoopbackTest {
         final CountDownLatch secureLatch = new CountDownLatch(1);
         final CountDownLatch readyLatch = new CountDownLatch(1);
         final CountDownLatch echoLatch = new CountDownLatch(1);
-        final CountDownLatch closedLatch = new CountDownLatch(1);
         final AtomicReference<String> echoed = new AtomicReference<String>();
         final AtomicReference<Throwable> failure = new AtomicReference<Throwable>();
 
@@ -91,7 +90,7 @@ public class TLSClientLoopbackTest {
 
             // client: IMMEDIATE TLS machine, cert validation off (self-signed server cert)
             ClientConSM sm = ClientConSMBuilder.create("tls-loopback")
-                    .phase(new SSLClientPhase(new SSLContextInfo(remote, false), SSLClientPhase.TLSMode.IMMEDIATE))
+                    .state(new SSLClientState(new SSLContextInfo(remote, false), SSLClientState.TLSMode.IMMEDIATE))
                     .build();
             final ClientSessionContext ctx = sm.getContext();
 
@@ -118,10 +117,7 @@ public class TLSClientLoopbackTest {
                     failure.set(e);
                 }
             }, ClientEvent.READY);
-            app.register((Consumer<Throwable>) t -> {
-                order.add("CLOSED");
-                closedLatch.countDown();
-            }, SMProtoUtil.BasicEvent.CLOSED);
+            app.register((Consumer<Throwable>) t -> order.add("CLOSED"), ClientEvent.CLOSED);
             sm.register(app);
 
             callback = sm.newSessionCallback();
@@ -135,8 +131,9 @@ public class TLSClientLoopbackTest {
             assertTrue(ctx.isSecure());
 
             callback.close();
-            assertTrue(closedLatch.await(WAIT_SEC, TimeUnit.SECONDS), "CLOSED not published on session close");
-            assertTrue(sm.isClosed(), "machine must be closed by session teardown");
+            // teardown closes the machine last — CLOSED was delivered when this returns
+            assertTrue(SMProtoUtil.waitForClose(sm, TimeUnit.SECONDS.toMillis(WAIT_SEC)),
+                    "machine must be closed by session teardown");
             synchronized (order) {
                 assertTrue(order.indexOf("SECURE") < order.indexOf("READY"), "SECURE must precede READY: " + order);
                 assertTrue(order.indexOf("READY") < order.indexOf("IN_DATA"), "READY must precede echo data: " + order);

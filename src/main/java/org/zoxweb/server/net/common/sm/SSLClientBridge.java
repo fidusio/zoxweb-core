@@ -16,7 +16,7 @@ import java.nio.channels.SelectionKey;
  * The handler-facing SSL callback of a client session: the SSLUtil handlers require a
  * {@code BaseSessionCallback<SSLSessionConfig>} that also implements {@code ConnectionCallback}
  * (for the {@code _finished} client notification), and TCPSMCallback is deliberately neither —
- * this bridge is. One bridge per session, created by {@link SSLClientPhase#upgrade}.
+ * this bridge is. One bridge per session, created by {@link SSLClientState#upgrade}.
  * <ul>
  * <li>{@link #accept(ByteBuffer)} — the single decrypted-data delivery point
  * ({@code _notHandshaking}): the engine's {@code inAppData} arrives in <b>write-mode and is
@@ -25,7 +25,7 @@ import java.nio.channels.SelectionKey;
  * "BUFFER_OVERFLOW unreachable" invariant depends on that.</li>
  * <li>{@link #sslHandshakeSuccessful(SSLConfigInt)} — flips the session output stream to
  * encrypted writes, marks the session secure, publishes {@link ClientEvent#SECURE} and
- * completes the SSL phase.</li>
+ * completes the ssl state's READY gate.</li>
  * <li>{@link #exception(Throwable)} — routes into the session's failure path.</li>
  * <li>The closeable delegate closes the session, so {@code _finished}'s error path
  * ({@code SharedIOUtil.close(config, callback)}) performs a real teardown.</li>
@@ -66,7 +66,7 @@ class SSLClientBridge extends BaseSessionCallback<SSLSessionConfig>
             // session introspection is best-effort, never fails the handshake
         }
         sm.publishSync(ClientEvent.SECURE, sci);
-        ctx.phaseComplete(SSLClientPhase.NAME);
+        ctx.gateComplete(SSLClientState.NAME);
     }
 
     @Override

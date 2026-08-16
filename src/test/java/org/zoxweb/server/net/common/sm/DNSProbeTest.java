@@ -6,13 +6,11 @@ import org.zoxweb.server.net.NIOSocket;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.util.NVGenericMap;
-import org.zoxweb.shared.util.NamedValue;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -24,9 +22,10 @@ import static org.junit.jupiter.api.Assertions.*;
  * whole session — on {@code connected(SK)} the machine sends the canned DNS query (txn id 0x1234,
  * A example.com), NIOSocket triggers feed it the reply, the {@code expect} validates the txn-id
  * echo, and {@code close_on_ready} (the UDP-probe default) makes the machine close the session
- * itself. The test is a pure observer: it hands the callback to NIOSocket, awaits {@code CLOSED},
- * and reads the outcome from the machine's properties — the {@code SMProtoUtil.results} bag and
- * the {@code Params.EXCEPTION} entry. Verified live against 8.8.8.8:53 on 2026-08-14; this test
+ * itself. The test is a pure observer: it hands the callback to NIOSocket, awaits completion via
+ * {@code SMProtoUtil.waitForClose} (the machine's native {@code MACHINE_CLOSED} signal), and reads
+ * the outcome from the machine's properties — the {@code SMProtoUtil.results} bag and
+ * {@code SMProtoUtil.closeCause}. Verified live against 8.8.8.8:53 on 2026-08-14; this test
  * pins the same flow hermetically.
  */
 public class DNSProbeTest {
@@ -61,15 +60,13 @@ public class DNSProbeTest {
                 : ClientSMFactory.port(sm.getContext().getSettings(), 53);
         InetSocketAddress remote = new InetSocketAddress(args[0], port);
 
-        final CountDownLatch closedLatch = new CountDownLatch(1);
         State<Object> observer = new State<Object>("observer");
         observer.register((Consumer<Object>) o -> System.out.println("CONNECTED " + remote),
-                SMProtoUtil.BasicEvent.CONNECTED);
+                ClientEvent.CONNECTED);
         observer.register((Consumer<Object>) o -> System.out.println("READY"), ClientEvent.READY);
-        observer.register((Consumer<Throwable>) t -> {
-            System.out.println("CLOSED" + (t != null ? " cause: " + t : " (clean)"));
-            closedLatch.countDown();
-        }, SMProtoUtil.BasicEvent.CLOSED);
+        observer.register((Consumer<Throwable>) t ->
+                System.out.println("CLOSED" + (t != null ? " cause: " + t : " (clean)")),
+                ClientEvent.CLOSED);
         sm.register(observer);
 
         NIOSocket nioSocket = new NIOSocket(TaskUtil.defaultTaskProcessor(), TaskUtil.defaultTaskScheduler());
@@ -77,10 +74,9 @@ public class DNSProbeTest {
         int exit;
         try {
             nioSocket.addDatagramSocket(new InetSocketAddress(0), cb);
-            if (closedLatch.await(WAIT_SEC + WAIT_SEC, TimeUnit.SECONDS)) {
-                NamedValue<Throwable> cause = sm.getProperties().getNV(UDPSMCallback.Params.EXCEPTION.name());
-                exit = cause != null && cause.getValue() != null ? 1 : 0;
-            } else
+            if (SMProtoUtil.waitForClose(sm, TimeUnit.SECONDS.toMillis(WAIT_SEC + WAIT_SEC)))
+                exit = SMProtoUtil.closeCause(sm) != null ? 1 : 0;
+            else
                 exit = 2;
         } finally {
             SharedIOUtil.close(cb, nioSocket);
@@ -124,20 +120,15 @@ public class DNSProbeTest {
         assertEquals(ClientSessionContext.Transport.UDP, sm.getContext().getTransport());
         assertEquals(53, ClientSMFactory.port(sm.getContext().getSettings(), -1), "recipe's default-port hint");
 
-        // pure observer: only awaits CLOSED — the machine performs the whole lifecycle
-        final CountDownLatch closedLatch = new CountDownLatch(1);
-        State<Object> observer = new State<Object>("observer");
-        observer.register((Consumer<Throwable>) t -> closedLatch.countDown(), SMProtoUtil.BasicEvent.CLOSED);
-        sm.register(observer);
-
         InetSocketAddress remote = new InetSocketAddress(InetAddress.getLoopbackAddress(), server.getLocalPort());
         NIOSocket nioSocket = new NIOSocket(TaskUtil.defaultTaskProcessor(), TaskUtil.defaultTaskScheduler());
         UDPSMCallback cb = sm.newSessionCallback(remote);
         try {
             nioSocket.addDatagramSocket(new InetSocketAddress(InetAddress.getLoopbackAddress(), 0), cb);
 
-            // the machine closes the session itself (close_on_ready, UDP-probe default)
-            assertTrue(closedLatch.await(WAIT_SEC, TimeUnit.SECONDS),
+            // the machine closes the session itself (close_on_ready, UDP-probe default);
+            // completion awaited on the machine's native MACHINE_CLOSED signal — no observer state
+            assertTrue(SMProtoUtil.waitForClose(sm, TimeUnit.SECONDS.toMillis(WAIT_SEC)),
                     "machine did not complete and close the session");
             assertTrue(cb.isClosed(), "session must be closed by the machine, not the test");
             assertTrue(sm.isClosed(), "machine must be closed by teardown");
@@ -145,9 +136,7 @@ public class DNSProbeTest {
             // outcome read from the machine's properties, as accumulated by the states
             NVGenericMap results = SMProtoUtil.results(sm);
             assertEquals(Boolean.TRUE, results.getValue("ready"), "results bag must record the completed pipeline");
-            NamedValue<Throwable> cause = sm.getProperties().getNV(UDPSMCallback.Params.EXCEPTION.name());
-            assertTrue(cause == null || cause.getValue() == null, "clean close expected, cause: "
-                    + (cause != null ? cause.getValue() : null));
+            assertNull(SMProtoUtil.closeCause(sm), "clean close expected, cause: " + SMProtoUtil.closeCause(sm));
 
             byte[] q = query.get();
             assertNotNull(q, "responder never received the probe");

@@ -1,7 +1,11 @@
 # META-SM-PROTO-DESIGN — the Composable Protocol Validator
 
 **Package:** `org.zoxweb.server.net.common.sm` · **Updated:** 2026-08-15
-**Status:** v1 implemented (uncommitted, 16 test classes green) · v2 design decision-complete, **not implemented**
+**Status:** **v2 implemented** (steps 1–6 of §13 done 2026-08-15, uncommitted, 16 test classes /
+92 tests green): the state catalog (`assembler`/`controller`/`responder`/`validator`/`ssl`) is
+live, the phase SPI (`ConnectionPhase`, `SSHBannerPhase`, `DataExchangePhase`, `SSLClientPhase`)
+is **deleted**, the factory composes machines from JSON (explicit `states` + sugar), and the
+READY gate is the controller's completion rule.
 
 ---
 
@@ -509,15 +513,34 @@ port-unreachable fails the session with a cause.
 ## 13. Implementation breakdown (order; behavior-preserving where possible)
 
 1. **Events** — add `IN_MESSAGE`, `OUT_MESSAGE`, `VALIDATE`; remove `BANNER_RECEIVED` from
-   `ClientEvent` and its `ProtoConnect` / test references.
+   `ClientEvent` and its `ProtoConnect` / test references. **DONE 2026-08-15** (also:
+   `SMProtoUtil.BasicEvent` merged into `ClientEvent` — one enum is the whole vocabulary — and
+   the wire event renamed `IN_RAW_DATA` → `RAW_IN_DATA` to match this document).
 2. **Report listener + `waitForClose`** — one `MACHINE_CLOSED`-based utility; migrate helpers and
-   tests off hand-rolled latches.
+   tests off hand-rolled latches. **DONE 2026-08-15**: `SMProtoUtil.waitForClose(sm, millis)`
+   (latch-arming `MACHINE_CLOSED` listener, already-closed race covered) +
+   `SMProtoUtil.closeCause(sm)` (the canonical `EXCEPTION` machine property, both transports);
+   `ProtoConnect` and all completion latches in the sm tests migrated.
 3. **`assembler` state + boundary registry** (`datagram` / `delimited` / `length_prefixed` /
-   `stream`), working memory in the state bag, `IN_MESSAGE` output.
+   `stream`), working memory in the state bag, `IN_MESSAGE` output. **DONE 2026-08-15**
+   (`MessageAssemblerState`; the accumulation holder `Assembly` lives in the machine bag under
+   `SMProtoUtil.ASSEMBLY` — the blackboard seam for stream consume-through and the residue
+   check; `delimited` gained `strip_cr` for the SSH CR-tolerance quirk).
 4. **`controller` / `responder` / `validator` states** — the `exchange` grammar re-expressed
-   against the message seams; the `validate` verdict → results.
-5. **Factory catalog rework** + `ssh` / `exchange` / `tls` sugar expansion.
-6. **Dissolve** `SSHBannerPhase` / `DataExchangePhase`; migrate their tests to the catalog states.
+   against the message seams; the `validate` verdict → results. **DONE 2026-08-15**
+   (`ProtocolControllerState` — working memory in the state bag, `ready_gate` bag flag, framed
+   skip bounded by `max_skip`; `ResponseControllerState`; `ProtocolTypeValidatorState` with the
+   `Validation` payload carrier).
+5. **Factory catalog rework** + `ssh` / `exchange` / `tls` sugar expansion. **DONE 2026-08-15**
+   (`ClientSMFactory.CATALOG` + `registerState`; explicit `states` shape parses via
+   `NVGenericMapList`; a `validate` step inside a JSON `exchange` survives the `NVPairList`
+   mapping via a `GSONUtil.toNVPair` fix — object values carried as JSON text, re-parsed at
+   compile; `responder`/`validator` auto-composed with any controller).
+6. **Dissolve** `SSHBannerPhase` / `DataExchangePhase`; migrate their tests to the catalog
+   states. **DONE 2026-08-15** — deleted outright along with `ConnectionPhase` (§14.10) and
+   `SSLClientPhase` (now the bag-configured `SSLClientState`; the builder registers the engine
+   states alongside it). `ClientSessionContext.phaseComplete` renamed `gateComplete`; the
+   builder composes with `state(State)` and derives the READY gate from `ready_gate` bag flags.
 7. **Docs** — fold the v2 schema into this document's §12 as implemented; move the status line
    from DESIGN to IMPLEMENTED as phases land.
 
@@ -619,16 +642,20 @@ is slated to dissolve in v2, that is noted — but it is live code today.
 | `UDPSMCallback` | Pure-SM UDP client bridge (§4); does **not** extend `UDPSessionCallback`. | kept |
 | `ClientTransportState` | TCP router: `CONNECTED` init + READY gate; `RAW_IN_DATA` → PLAIN pass-through as `IN_DATA`, or chunked feed into the SSL engine's inbound buffer in TLS modes. | kept (mandatory state) |
 | `UDPClientTransportState` | UDP router: `CONNECTED` init + READY gate; `DATAGRAM` → `IN_DATA` pass-through (UDP is always plaintext). **New 2026-08-14.** | kept (mandatory state) |
-| `SSLClientPhase` | TLS phase, `IMMEDIATE` / `ON_DEMAND`; deferred endpoint-bound `SSLContextInfo` (factory path) or an explicit context; endpoint identification tied to cert validation. | kept |
+| `SSLClientState` | Catalog `ssl` (was `SSLClientPhase`, converted 2026-08-15): bag-configured (`mode`, `cert_validation`, `endpoint_identification`, optional `ssl_context`), `IMMEDIATE` auto-start / `ON_DEMAND` upgrade, `ready_gate` when IMMEDIATE; the builder registers the engine states alongside it. | v2 |
 | `SSLClientHandshakeState` | One consumer per `HandshakeStatus`, delegating to `SSLUtil._needWrap/_needUnwrap/_needTask/_finished`. Unwraps are **router-fed, no channel reads**. | kept |
 | `SSLClientDataState` | Post-handshake `NOT_HANDSHAKING` unwrap loop, also no channel reads (FIN+data race fix). | kept |
 | `SSLClientBridge` | Handler-facing `BaseSessionCallback<SSLSessionConfig>`: decrypted copy → `IN_DATA`, flips the output stream on handshake success, records `tls_protocol`/`tls_cipher`, publishes `SECURE`. | kept |
 | `ClientSSLHelper` | The session's `SSLConnectionHelper`; routes statuses into the machine. **`close()` is a no-op by contract** (Rule 10). | kept |
-| `SSHBannerPhase` | RFC 4253 identification-line validation; records `banner`; gates READY. | **dissolves** into `delimited` assembler + `validate` (§11) |
-| `DataExchangePhase` | Linear `send`/`expect`/`start_tls` dialogue: build-time compiled, byte-substring expect with consume-through-match, 64K accumulation cap, STARTTLS residue fatal, `${var}` resolved at send time. Gates READY. | **dissolves** into `controller` + `responder` (§8) |
-| `ConnectionPhase` | Phase SPI (`contribute`, `gatesReady`) + the ownership/broadcast-order contract. | **deleted** — first-implementation error (§14.10); its ownership/broadcast-order contract text moves to the catalog docs |
-| `SMProtoUtil` | Package utility home (**all new utilities go here** — maintainer directive): `STRING_TO_DATA`, `STRING_VARS_TO_STRING/DATA`, `hasVars`, `BasicEvent{CONNECTED, DATAGRAM, CLOSED, RAW_IN_DATA}`, `RESULTS` + `results(smi)`. | gains `waitForClose` (§13.2) |
-| `ClientEvent` | `IN_DATA`, `SECURE`, `READY`, `START_TLS`, `BANNER_RECEIVED`. | +`IN_MESSAGE`/`OUT_MESSAGE`/`VALIDATE`, −`BANNER_RECEIVED` |
+| `MessageAssemblerState` | Catalog `assembler` (§7): boundary strategies `datagram`/`delimited` (+`strip_cr`)/`length_prefixed`/`stream`; `Assembly` accumulation holder in the machine bag (`SMProtoUtil.ASSEMBLY`). **New 2026-08-15.** | v2 |
+| `ProtocolControllerState` | Catalog `controller` (§8): the linear `exchange` grammar (`send`/`expect`/`validate`/`start_tls`), working memory + `ready_gate` in the state bag, `max_skip` framed-skip bound, completion rule → READY gate + leftover drain. **New 2026-08-15.** | v2 |
+| `ResponseControllerState` | Catalog `responder` (§5): `OUT_MESSAGE` → `ctx.write`; stateless. **New 2026-08-15.** | v2 |
+| `ProtocolTypeValidatorState` | Catalog `validator` (§9): `VALIDATE` (payload `Validation` = message + meta) → verdict into results; mismatch fails the session. **New 2026-08-15.** | v2 |
+| ~~`SSHBannerPhase`~~ | **DELETED 2026-08-15** — dissolved into `delimited` assembler + `validate` (ssh factory sugar, §11). | — |
+| ~~`DataExchangePhase`~~ | **DELETED 2026-08-15** — dissolved into `assembler` + `controller` + `responder` (§8). | — |
+| ~~`ConnectionPhase`~~ | **DELETED 2026-08-15** — first-implementation error (§14.10); ownership/broadcast-order contract text lives in `ClientTransportState`/package javadoc. | — |
+| `SMProtoUtil` | Package utility home (**all new utilities go here** — maintainer directive): `STRING_TO_DATA`, `STRING_VARS_TO_STRING/DATA`, `hasVars`, `RESULTS` + `results(smi)`. (`BasicEvent` merged into `ClientEvent` 2026-08-15 — one enum is the whole vocabulary.) | gained `waitForClose` + `closeCause` (§13.2, done 2026-08-15) |
+| `ClientEvent` | The complete session vocabulary (2026-08-15: absorbed `SMProtoUtil.BasicEvent`): `CONNECTED`, `RAW_IN_DATA`, `DATAGRAM`, `IN_DATA`, `SECURE`, `READY`, `START_TLS`, `IN_MESSAGE`, `OUT_MESSAGE`, `VALIDATE`, `CLOSED`. (`BANNER_RECEIVED` removed — v2 step 1 done.) | kept |
 | `ProtoConnect` | Observer CLI: config + `host:port` + `var=value` → prints lifecycle events; exit 0/1/2/64. Never drives the session. | kept |
 | `package-info.java` | Package overview javadoc. | kept |
 

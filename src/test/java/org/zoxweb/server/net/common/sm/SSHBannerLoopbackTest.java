@@ -33,12 +33,10 @@ public class SSHBannerLoopbackTest {
     public void bannerLifecycle() throws Exception {
         final List<String> order = Collections.synchronizedList(new ArrayList<String>());
         final CountDownLatch readyLatch = new CountDownLatch(1);
-        final CountDownLatch closedLatch = new CountDownLatch(1);
         final AtomicReference<Throwable> closedPayload = new AtomicReference<Throwable>(new Exception("sentinel"));
 
-        ClientConSM sm = ClientConSMBuilder.create("ssh-loopback")
-                .phase(new SSHBannerPhase("SSH-2.0-", "OpenSSH"))
-                .build();
+        ClientConSM sm = ClientSMFactory.fromJSON(
+                "{ \"name\": \"ssh-loopback\", \"protocol\": \"ssh\", \"ssh\": {\"banner_contains\": \"OpenSSH\"} }");
         State<Object> app = new State<Object>("app");
         app.register((Consumer<Object>) o -> {
             order.add("READY");
@@ -47,8 +45,7 @@ public class SSHBannerLoopbackTest {
         app.register((Consumer<Throwable>) t -> {
             order.add("CLOSED");
             closedPayload.set(t);
-            closedLatch.countDown();
-        }, SMProtoUtil.BasicEvent.CLOSED);
+        }, ClientEvent.CLOSED);
         sm.register(app);
 
         TCPSMCallback callback = sm.newSessionCallback();
@@ -68,7 +65,10 @@ public class SSHBannerLoopbackTest {
             assertEquals("SSH-2.0-OpenSSH_9.6", SMProtoUtil.results(sm).getValue("banner"));
 
             accepted.close();
-            assertTrue(closedLatch.await(WAIT_SEC, TimeUnit.SECONDS), "CLOSED not published on peer EOF");
+            // completion via the machine's native signal — CLOSED was delivered before the
+            // machine closed (teardown order), so order/payload above are final here
+            assertTrue(SMProtoUtil.waitForClose(sm, TimeUnit.SECONDS.toMillis(WAIT_SEC)),
+                    "session did not close on peer EOF");
 
             assertNull(closedPayload.get(), "clean EOF must deliver CLOSED with null payload");
             assertTrue(callback.isClosed());

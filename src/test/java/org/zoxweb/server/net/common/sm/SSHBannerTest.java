@@ -14,11 +14,16 @@ import java.util.function.Consumer;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Drives the SSH banner phase without sockets: CONNECTED and RAW_IN_DATA are published
- * directly (the transport router passes wire bytes through as IN_DATA in PLAIN mode), and the
- * fail paths use an unconnected TCPSMCallback whose teardown publishes CLOSED without a channel.
+ * Drives the SSH banner flow — the {@code protocol: "ssh"} catalog sugar (delimited assembler +
+ * validating controller) — without sockets: CONNECTED and RAW_IN_DATA are published directly
+ * (the transport router passes wire bytes through as IN_DATA in PLAIN mode), and the fail paths
+ * use an unconnected TCPSMCallback whose teardown publishes CLOSED without a channel.
  */
-public class SSHBannerPhaseTest {
+public class SSHBannerTest {
+
+    private static final String DEFAULT_JSON = "{ \"name\": \"ssh-test\", \"protocol\": \"ssh\" }";
+    private static final String OPENSSH_JSON =
+            "{ \"name\": \"ssh-test\", \"protocol\": \"ssh\", \"ssh\": {\"banner_contains\": \"OpenSSH\"} }";
 
     private static class Harness {
         final ClientConSM sm;
@@ -28,8 +33,8 @@ public class SSHBannerPhaseTest {
         final AtomicInteger closedCount = new AtomicInteger();
         final StringBuilder postReadyData = new StringBuilder();
 
-        Harness(SSHBannerPhase phase) {
-            sm = ClientConSMBuilder.create("ssh-test").phase(phase).build();
+        Harness(String json) {
+            sm = ClientSMFactory.fromJSON(json);
             State<Object> app = new State<Object>("app");
             app.register((Consumer<Object>) o -> {
                 readyCount.incrementAndGet();
@@ -44,19 +49,19 @@ public class SSHBannerPhaseTest {
             app.register((Consumer<Throwable>) t -> {
                 closedPayload.set(t);
                 closedCount.incrementAndGet();
-            }, SMProtoUtil.BasicEvent.CLOSED);
+            }, ClientEvent.CLOSED);
             sm.register(app);
             callback = sm.newSessionCallback();
-            sm.publishSync(SMProtoUtil.BasicEvent.CONNECTED, null);
+            sm.publishSync(ClientEvent.CONNECTED, null);
         }
 
         void feed(String wire) {
             byte[] bytes = SharedStringUtil.getBytes(wire);
-            sm.publishSync(SMProtoUtil.BasicEvent.IN_RAW_DATA,
+            sm.publishSync(ClientEvent.RAW_IN_DATA,
                     ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, bytes, 0, bytes.length, true));
         }
 
-        /** BANNER_RECEIVED is retired — the validated banner is read from the report. */
+        /** The validated banner is read from the report ({@code results.banner}). */
         String banner() {
             return SMProtoUtil.results(sm).getValue("banner");
         }
@@ -64,17 +69,18 @@ public class SSHBannerPhaseTest {
 
     @Test
     public void bannerSinglePacket() {
-        Harness h = new Harness(new SSHBannerPhase());
+        Harness h = new Harness(DEFAULT_JSON);
         h.feed("SSH-2.0-OpenSSH_9.6\r\n");
 
         assertEquals("SSH-2.0-OpenSSH_9.6", h.banner());
+        assertEquals(Boolean.TRUE, SMProtoUtil.results(h.sm).getValue("validated"));
         assertEquals(1, h.readyCount.get(), "READY must be published once");
         assertEquals(0, h.closedCount.get());
     }
 
     @Test
     public void bannerSplitAcrossPackets() {
-        Harness h = new Harness(new SSHBannerPhase());
+        Harness h = new Harness(DEFAULT_JSON);
         h.feed("SSH-2.0-Op");
         assertNull(h.banner(), "incomplete banner must not publish");
         h.feed("enSSH_9.6");
@@ -86,7 +92,7 @@ public class SSHBannerPhaseTest {
 
     @Test
     public void bareLineFeedTolerated() {
-        Harness h = new Harness(new SSHBannerPhase());
+        Harness h = new Harness(DEFAULT_JSON);
         h.feed("SSH-2.0-Whatever\n");
 
         assertEquals("SSH-2.0-Whatever", h.banner());
@@ -95,7 +101,7 @@ public class SSHBannerPhaseTest {
 
     @Test
     public void preBannerLinesSkipped() {
-        Harness h = new Harness(new SSHBannerPhase());
+        Harness h = new Harness(DEFAULT_JSON);
         h.feed("welcome to the jungle\r\nplease behave\r\nSSH-2.0-OpenSSH_9.6\r\n");
 
         assertEquals("SSH-2.0-OpenSSH_9.6", h.banner());
@@ -105,10 +111,13 @@ public class SSHBannerPhaseTest {
 
     @Test
     public void bannerContainsMismatchIsFatal() {
-        Harness h = new Harness(new SSHBannerPhase("SSH-2.0-", "OpenSSH"));
+        Harness h = new Harness(OPENSSH_JSON);
         h.feed("SSH-2.0-Dropbear\r\n");
 
         assertNull(h.banner());
+        assertEquals(Boolean.FALSE, SMProtoUtil.results(h.sm).getValue("validated"),
+                "the report must carry the false verdict");
+        assertNotNull(SMProtoUtil.results(h.sm).getValue("reason"), "the report must carry the mismatch reason");
         assertEquals(0, h.readyCount.get(), "READY must not fire on validation failure");
         assertEquals(1, h.closedCount.get(), "fatal validation must tear the session down");
         assertTrue(h.closedPayload.get() instanceof IOException,
@@ -118,7 +127,7 @@ public class SSHBannerPhaseTest {
 
     @Test
     public void oversizeIdentificationLineIsFatal() {
-        Harness h = new Harness(new SSHBannerPhase());
+        Harness h = new Harness(DEFAULT_JSON);
         StringBuilder big = new StringBuilder("SSH-2.0-");
         for (int i = 0; i < 300; i++)
             big.append('A');
@@ -131,7 +140,7 @@ public class SSHBannerPhaseTest {
 
     @Test
     public void leftoverAfterBannerRepublishedPostReady() {
-        Harness h = new Harness(new SSHBannerPhase());
+        Harness h = new Harness(DEFAULT_JSON);
         h.feed("SSH-2.0-OpenSSH_9.6\r\nKEXDATA");
 
         assertEquals("SSH-2.0-OpenSSH_9.6", h.banner());

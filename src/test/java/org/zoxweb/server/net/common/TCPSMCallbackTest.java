@@ -5,7 +5,7 @@ import org.zoxweb.server.fsm.State;
 import org.zoxweb.server.fsm.StateMachine;
 import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.server.net.NIOSocket;
-import org.zoxweb.server.net.common.sm.SMProtoUtil;
+import org.zoxweb.server.net.common.sm.ClientEvent;
 import org.zoxweb.server.net.common.sm.TCPSMCallback;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.shared.io.SharedIOUtil;
@@ -65,7 +65,7 @@ public class TCPSMCallbackTest {
         session.register((Consumer<Throwable>) t -> {
             closedPayload.set(t);
             closedCount.incrementAndGet();
-        }, SMProtoUtil.BasicEvent.CLOSED);
+        }, ClientEvent.CLOSED);
         sm.register(session);
 
         TCPSMCallback callback = new TCPSMCallback(sm);
@@ -91,7 +91,7 @@ public class TCPSMCallbackTest {
         session.register((Consumer<Throwable>) t -> {
             closedPayload.set(t);
             closedCount.incrementAndGet();
-        }, SMProtoUtil.BasicEvent.CLOSED);
+        }, ClientEvent.CLOSED);
         sm.register(session);
 
         TCPSMCallback callback = new TCPSMCallback(sm);
@@ -119,7 +119,7 @@ public class TCPSMCallbackTest {
             order.add("CONNECTED");
             connectedPayload.set(payload);
             connectedLatch.countDown();
-        }, SMProtoUtil.BasicEvent.CONNECTED);
+        }, ClientEvent.CONNECTED);
         session.register((Consumer<ByteBuffer>) bb -> {
             order.add("RAW_IN_DATA");
             byte[] chunk = new byte[bb.remaining()];
@@ -128,12 +128,12 @@ public class TCPSMCallbackTest {
             // the buffer is a consumer-owned detached copy, recache it when done
             ByteBufferUtil.cache(bb);
             dataLatch.countDown();
-        }, SMProtoUtil.BasicEvent.IN_RAW_DATA);
+        }, ClientEvent.RAW_IN_DATA);
         session.register((Consumer<Throwable>) t -> {
             order.add("CLOSED");
             closedPayload.set(t);
             closedLatch.countDown();
-        }, SMProtoUtil.BasicEvent.CLOSED);
+        }, ClientEvent.CLOSED);
         sm.register(session);
 
         TCPSMCallback callback = new TCPSMCallback(sm);

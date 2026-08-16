@@ -10,6 +10,7 @@ import org.zoxweb.server.security.SecUtil;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.shared.crypto.CryptoConst;
 import org.zoxweb.shared.io.SharedIOUtil;
+import org.zoxweb.shared.util.NVBoolean;
 import org.zoxweb.shared.util.SharedStringUtil;
 
 import javax.net.ssl.SSLContext;
@@ -49,28 +50,19 @@ public class StartTLSUpgradeSeamTest {
     private static final String GO_AHEAD = "220 Go";
 
     /**
-     * Minimal STARTTLS negotiator: waits for the go-ahead line, enforces the residue-is-fatal
-     * rule, publishes START_TLS, and completes on SECURE.
+     * Minimal STARTTLS negotiator as a custom composed state (application vocabulary): waits
+     * for the go-ahead line, enforces the residue-is-fatal rule, publishes START_TLS, and
+     * completes its READY gate on SECURE. Declares itself a gate via the {@code ready_gate}
+     * bag flag.
      */
-    static class GoAheadPhase implements ConnectionPhase {
+    static class GoAheadState extends State<Object> {
         static final String NAME = "starttls-test";
 
-        @Override
-        public String getName() {
-            return NAME;
-        }
-
-        @Override
-        public boolean gatesReady() {
-            return true;
-        }
-
-        @Override
-        public void contribute(ClientConSM sm) {
-            State<Object> state = new State<Object>(NAME);
-            state.register(new GoAhead());
-            state.register(new Secured());
-            sm.register(state);
+        GoAheadState() {
+            super(NAME);
+            getProperties().add(new NVBoolean(ClientConSMBuilder.READY_GATE, true));
+            register(new GoAhead());
+            register(new Secured());
         }
 
         static class GoAhead extends TriggerConsumer<ByteBuffer> {
@@ -120,15 +112,15 @@ public class StartTLSUpgradeSeamTest {
 
             @Override
             public void accept(Object sci) {
-                ((ClientSessionContext) getStateMachine().getConfig()).phaseComplete(NAME);
+                ((ClientSessionContext) getStateMachine().getConfig()).gateComplete(NAME);
             }
         }
     }
 
     private ClientConSM buildMachine(InetSocketAddress remote) throws Exception {
         return ClientConSMBuilder.create("starttls-seam")
-                .phase(new GoAheadPhase())
-                .phase(new SSLClientPhase(new SSLContextInfo(remote, false), SSLClientPhase.TLSMode.ON_DEMAND))
+                .state(new GoAheadState())
+                .state(new SSLClientState(new SSLContextInfo(remote, false), SSLClientState.TLSMode.ON_DEMAND))
                 .build();
     }
 
@@ -206,7 +198,6 @@ public class StartTLSUpgradeSeamTest {
 
     @Test
     public void residueAfterGoAheadIsFatalAndNoHandshakeAttempted() throws Exception {
-        final CountDownLatch closedLatch = new CountDownLatch(1);
         final AtomicReference<Throwable> closedPayload = new AtomicReference<Throwable>();
         final AtomicBoolean secureFired = new AtomicBoolean(false);
         final AtomicBoolean peerSawEOF = new AtomicBoolean(false);
@@ -234,21 +225,19 @@ public class StartTLSUpgradeSeamTest {
             ClientConSM sm = buildMachine(remote);
             State<Object> app = new State<Object>("app");
             app.register((Consumer<Object>) o -> secureFired.set(true), ClientEvent.SECURE);
-            app.register((Consumer<Throwable>) t -> {
-                closedPayload.set(t);
-                closedLatch.countDown();
-            }, SMProtoUtil.BasicEvent.CLOSED);
+            app.register((Consumer<Throwable>) t -> closedPayload.set(t), ClientEvent.CLOSED);
             sm.register(app);
 
             callback = sm.newSessionCallback();
             nioSocket.addClientSocket(remote, callback, WAIT_SEC, null);
 
-            assertTrue(closedLatch.await(WAIT_SEC, TimeUnit.SECONDS), "residue must tear the session down");
+            // teardown closes the machine last — the CLOSED payload above is final here
+            assertTrue(SMProtoUtil.waitForClose(sm, TimeUnit.SECONDS.toMillis(WAIT_SEC)),
+                    "residue must tear the session down");
             assertTrue(closedPayload.get() instanceof IOException, "CLOSED payload must be the injection IOException");
             assertTrue(closedPayload.get().getMessage().contains("injection"),
                     "cause must name the injection: " + closedPayload.get());
             assertFalse(secureFired.get(), "no handshake may be attempted on residue");
-            assertTrue(sm.isClosed(), "machine must be closed by teardown");
             serverThread.join(TimeUnit.SECONDS.toMillis(WAIT_SEC));
             assertTrue(peerSawEOF.get(), "the connection must be dropped, not continued");
         } finally {

@@ -38,7 +38,6 @@ public class PlainClientLoopbackTest {
         final List<String> order = Collections.synchronizedList(new ArrayList<String>());
         final CountDownLatch readyLatch = new CountDownLatch(1);
         final CountDownLatch dataLatch = new CountDownLatch(1);
-        final CountDownLatch closedLatch = new CountDownLatch(1);
         final ByteArrayOutputStream received = new ByteArrayOutputStream();
         final AtomicReference<Throwable> closedPayload = new AtomicReference<Throwable>(new Exception("sentinel"));
 
@@ -59,8 +58,7 @@ public class PlainClientLoopbackTest {
         app.register((Consumer<Throwable>) t -> {
             order.add("CLOSED");
             closedPayload.set(t);
-            closedLatch.countDown();
-        }, SMProtoUtil.BasicEvent.CLOSED);
+        }, ClientEvent.CLOSED);
         sm.register(app);
 
         TCPSMCallback callback = sm.newSessionCallback();
@@ -80,7 +78,10 @@ public class PlainClientLoopbackTest {
             assertTrue(dataLatch.await(WAIT_SEC, TimeUnit.SECONDS), "IN_DATA not published");
 
             accepted.close();
-            assertTrue(closedLatch.await(WAIT_SEC, TimeUnit.SECONDS), "CLOSED not published on peer EOF");
+            // completion via the machine's native signal — teardown closes the machine last,
+            // so the CLOSED consumer above has already run when this returns
+            assertTrue(SMProtoUtil.waitForClose(sm, TimeUnit.SECONDS.toMillis(WAIT_SEC)),
+                    "session did not close on peer EOF");
 
             assertEquals("plain-hello", new String(received.toByteArray()));
             assertNull(closedPayload.get(), "clean EOF must deliver CLOSED with null payload");

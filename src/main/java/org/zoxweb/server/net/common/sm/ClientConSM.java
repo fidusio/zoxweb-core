@@ -7,9 +7,10 @@ import java.util.concurrent.Executor;
 
 /**
  * Per-connection client state machine, set as the config of a
- * {@link TCPSMCallback}: it dictates what happens after socket
- * connect — TLS handshake, protocol banner validation, STARTTLS-style upgrade — based on the
- * phases it was built with ({@link ClientConSMBuilder}).
+ * {@link TCPSMCallback} / {@link UDPSMCallback}: it dictates what happens after socket
+ * connect — scripted dialogue, protocol validation, TLS handshake, STARTTLS-style upgrade —
+ * based on the catalog states it was composed with ({@link ClientConSMBuilder} /
+ * {@link ClientSMFactory}).
  * <p>
  * <b>Always synchronous.</b> Constructed with a null executor so every publish runs inline on
  * the calling thread: NIOSocket serializes dispatches per session by zeroing the key's interest

@@ -1,14 +1,14 @@
 package org.zoxweb.server.net.common.sm;
 
+import org.zoxweb.server.fsm.State;
+import org.zoxweb.server.fsm.StateMachine;
+import org.zoxweb.server.fsm.StateMachineEvent;
 import org.zoxweb.server.fsm.StateMachineInt;
-import org.zoxweb.shared.util.BiDataDecoder;
-import org.zoxweb.shared.util.BiDataEncoder;
-import org.zoxweb.shared.util.DataDecoder;
-import org.zoxweb.shared.util.NVGenericMap;
-import org.zoxweb.shared.util.NamedValue;
-import org.zoxweb.shared.util.SharedBase64;
-import org.zoxweb.shared.util.SharedStringUtil;
+import org.zoxweb.server.fsm.StateMachineListener;
+import org.zoxweb.shared.util.*;
 
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -157,10 +157,139 @@ public final class SMProtoUtil {
         }
     }
 
-    public enum BasicEvent {
-        CONNECTED,
-        DATAGRAM,
-        CLOSED,
-        IN_RAW_DATA,
+    /**
+     * Pull-style completion wait built on the machine's native completion signal
+     * (META-SM-PROTO-DESIGN.md §10): arms a latch behind a {@code MACHINE_CLOSED}
+     * {@link StateMachineListener} and awaits it — push and pull are one implementation.
+     * Teardown closes the machine <b>last</b>, after the {@code CLOSED} publish, so when this
+     * returns true the report ({@link #results}) and the close cause ({@link #closeCause}) are
+     * final. The listener is removed before returning.
+     *
+     * @param smi           the session machine
+     * @param timeoutMillis maximum wait; {@code <= 0} polls {@code isClosed()} without waiting
+     * @return true if the machine is closed, false if the wait timed out
+     */
+    public static boolean waitForClose(StateMachine<?> smi, long timeoutMillis) {
+        SUS.checkIfNulls("state machine null", smi);
+        if (smi.isClosed() || timeoutMillis <= 0)
+            return smi.isClosed();
+        final CountDownLatch latch = new CountDownLatch(1);
+        StateMachineListener listener = event -> {
+            if (event.getType() == StateMachineEvent.Type.MACHINE_CLOSED)
+                latch.countDown();
+        };
+        smi.addListener(listener);
+        try {
+            // the machine may have closed between the check above and the registration —
+            // the listener would never fire for that close
+            if (smi.isClosed())
+                return true;
+            return latch.await(timeoutMillis, TimeUnit.MILLISECONDS) || smi.isClosed();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return smi.isClosed();
+        } finally {
+            smi.removeListener(listener);
+        }
+    }
+
+    /**
+     * The session's terminating cause: the Throwable the callback error path stashed in the
+     * machine properties under the canonical {@code EXCEPTION} name (identical for both
+     * transports) and republished as the {@code CLOSED} payload by teardown.
+     *
+     * @param smi the session machine
+     * @return the stashed cause, or null (clean close — or a session still running)
+     */
+    public static Throwable closeCause(StateMachine<?> smi) {
+        SUS.checkIfNulls("state machine null", smi);
+        NamedValue<Throwable> cause = smi.getProperties().getNV(TCPSMCallback.Params.EXCEPTION.name());
+        return cause != null ? cause.getValue() : null;
+    }
+
+    /**
+     * Name of the assembler's accumulation holder in the machine properties (the shared
+     * blackboard): the {@code assembler} state installs a
+     * {@link MessageAssemblerState.Assembly} there when it is registered, and the
+     * {@code controller} state coordinates with it — the {@code stream} consume-through-match
+     * and the {@code start_tls} residue check — through the bag, never through state instances.
+     */
+    public static final String ASSEMBLY = "assembly";
+
+    /**
+     * @param smi the session machine
+     * @return the assembler's accumulation holder from the machine bag, or null when no
+     * assembler state is registered (treated as an empty accumulation by consumers)
+     */
+    public static MessageAssemblerState.Assembly assembly(StateMachineInt<?> smi) {
+        NamedValue<MessageAssemblerState.Assembly> nv = smi.getProperties().getNV(ASSEMBLY);
+        return nv != null ? nv.getValue() : null;
+    }
+
+    /**
+     * @return the first index of {@code needle} in {@code haystack}, or -1; an empty needle
+     * matches at 0. Binary-safe — the byte-sequence primitive behind {@code expect} and the
+     * {@code validate} contains-match.
+     */
+    public static int indexOf(byte[] haystack, byte[] needle) {
+        if (needle.length == 0)
+            return 0;
+        outer:
+        for (int i = 0; i + needle.length <= haystack.length; i++) {
+            for (int j = 0; j < needle.length; j++) {
+                if (haystack[i + j] != needle[j])
+                    continue outer;
+            }
+            return i;
+        }
+        return -1;
+    }
+
+    /**
+     * @return the string value of {@code name} in the bag ({@code def} when the bag is null, the
+     * entry is absent, empty, or not a string). Bag-reading primitive for state configuration.
+     */
+    public static String stringValue(NVGenericMap map, String name, String def) {
+        if (map == null)
+            return def;
+        Object v = map.getValue(name);
+        return v instanceof String && !((String) v).isEmpty() ? (String) v : def;
+    }
+
+    /**
+     * @return the int value of {@code name} in the bag ({@code def} when the bag is null, the
+     * entry is absent or not numeric). JSON numbers may parse as int/long/double — any Number
+     * is accepted.
+     */
+    public static int intValue(NVGenericMap map, String name, int def) {
+        if (map == null)
+            return def;
+        Object v = map.getValue(name);
+        return v instanceof Number ? ((Number) v).intValue() : def;
+    }
+
+    /**
+     * @return the boolean value of {@code name} in the bag ({@code def} when the bag is null,
+     * the entry is absent or not a boolean)
+     */
+    public static boolean booleanValue(NVGenericMap map, String name, boolean def) {
+        if (map == null)
+            return def;
+        Object v = map.getValue(name);
+        return v instanceof Boolean ? (Boolean) v : def;
+    }
+
+    /**
+     * Seeds a config block into a state's properties bag — the composition step: the state's
+     * bag <b>is</b> its configuration; its consumers read behavior from the bag.
+     *
+     * @param state  the catalog state under construction
+     * @param config the JSON {@code config} block (null = all defaults)
+     */
+    public static void seed(State<?> state, NVGenericMap config) {
+        if (config != null) {
+            for (GetNameValue<?> gnv : config.values())
+                state.getProperties().add(gnv);
+        }
     }
 }

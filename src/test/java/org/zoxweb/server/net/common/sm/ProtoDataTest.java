@@ -46,9 +46,9 @@ public class ProtoDataTest {
     @Test
     public void indexOfFindsSubsequence() {
         byte[] hay = "220-first\r\n250 ok\r\n".getBytes(StandardCharsets.UTF_8);
-        assertEquals(11, DataExchangePhase.indexOf(hay, "250 ".getBytes(StandardCharsets.UTF_8)));
-        assertEquals(-1, DataExchangePhase.indexOf(hay, "999".getBytes(StandardCharsets.UTF_8)));
-        assertEquals(0, DataExchangePhase.indexOf(hay, new byte[0]));
+        assertEquals(11, SMProtoUtil.indexOf(hay, "250 ".getBytes(StandardCharsets.UTF_8)));
+        assertEquals(-1, SMProtoUtil.indexOf(hay, "999".getBytes(StandardCharsets.UTF_8)));
+        assertEquals(0, SMProtoUtil.indexOf(hay, new byte[0]));
     }
 
     @Test

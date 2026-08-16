@@ -1,26 +1,44 @@
 package org.zoxweb.server.net.common.sm;
 
 /**
- * Event vocabulary of the client-connection state machine, published as bare enum names
- * (canonical ID = {@code name()}).
+ * The complete event vocabulary of the client-connection state machine, published as bare enum
+ * names (canonical ID = {@code name()}).
  * <p>
  * Reserved canonical IDs on a {@link ClientConSM} — application vocabularies sharing the
- * machine must avoid all of them (one machine per session, enforced by the TCPSMCallback
- * constructor, keeps this a per-session concern):
+ * machine must avoid all of them (one machine per session, enforced by the session-callback
+ * constructors, keeps this a per-session concern):
  * <ul>
- * <li>{@code CONNECTED}, {@code IN_RAW_DATA}, {@code DATAGRAM}, {@code CLOSED} —
- * {@link SMProtoUtil.BasicEvent}; {@code IN_RAW_DATA} / {@code DATAGRAM} are consumed
- * exclusively by the transport router ({@link ClientTransportState}), never by other states.</li>
+ * <li>the eleven members of this enum;</li>
  * <li>{@code NEED_WRAP}, {@code NEED_UNWRAP}, {@code NEED_UNWRAP_AGAIN}, {@code NEED_TASK},
  * {@code FINISHED}, {@code NOT_HANDSHAKING} — {@link javax.net.ssl.SSLEngineResult.HandshakeStatus}
  * names, routed to the SSL handshake states.</li>
- * <li>the seven members of this enum.</li>
  * </ul>
  * Naming convention (META-SM-PROTO-DESIGN.md §6): facts are nouns on the inbound data ladder
- * ({@code IN_DATA} → {@code IN_MESSAGE}), commands are imperatives ({@code VALIDATE},
- * {@code START_TLS}).
+ * ({@code RAW_IN_DATA} → {@code IN_DATA} → {@code IN_MESSAGE}), commands are imperatives
+ * ({@code VALIDATE}, {@code START_TLS}).
  */
 public enum ClientEvent {
+    /**
+     * The single session kickoff, published exactly once from the callback's
+     * {@code connected(SelectionKey)} — nothing happens on the machine before it. Payload is
+     * transport-dependent: the {@link java.nio.channels.SelectionKey} over TCP, the remote
+     * {@link java.net.InetSocketAddress} over UDP — a consumer of this event must be
+     * payload-agnostic ({@code TriggerConsumer<Object>}).
+     */
+    CONNECTED,
+    /**
+     * Wire bytes from one TCP read — partial or complete, and plain, handshake, or encrypted:
+     * payload is a detached read-mode {@link java.nio.ByteBuffer} copy. Consumed exclusively by
+     * the transport router ({@link ClientTransportState}), which recaches it; no other state
+     * ever registers this event.
+     */
+    RAW_IN_DATA,
+    /**
+     * One received datagram (UDP): payload is a {@code DataPacket} holding a detached copy of
+     * the datagram. Consumed exclusively by the UDP transport router
+     * ({@link UDPClientTransportState}); no other state ever registers this event.
+     */
+    DATAGRAM,
     /**
      * Application bytes, whatever the transport: payload is a detached read-mode
      * {@link java.nio.ByteBuffer}; exactly one active owner consumes it and recaches it via
@@ -40,9 +58,10 @@ public enum ClientEvent {
      */
     READY,
     /**
-     * Start the TLS upgrade: payload null. Published by the SSL phase itself in IMMEDIATE mode,
-     * or by a protocol negotiator after its go-ahead (which must have verified that no residue
-     * followed the go-ahead line — residue is fatal, see the STARTTLS injection contract).
+     * Start the TLS upgrade: payload null. Published by the ssl state itself in IMMEDIATE mode,
+     * or by a negotiator (the controller's {@code start_tls} step) after its go-ahead — which
+     * must have verified that no residue followed the go-ahead line; residue is fatal, see the
+     * STARTTLS injection contract.
      */
     START_TLS,
     /**
@@ -66,4 +85,12 @@ public enum ClientEvent {
      * there is no event back (VALIDATED was rejected by design).
      */
     VALIDATE,
+    /**
+     * End of session, published exactly once from the callback's close delegate — whatever the
+     * termination path (remote disconnect, fatal error, or the machine completing its run):
+     * payload is the terminating {@link Throwable} (relayed via {@code Params.EXCEPTION}) or
+     * null on a clean close. The report in the machine results bag is final when it fires; the
+     * machine itself is closed <b>after</b> this publish, as teardown's last act.
+     */
+    CLOSED,
 }

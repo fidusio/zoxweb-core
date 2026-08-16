@@ -13,7 +13,6 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -103,22 +102,20 @@ public final class ProtoConnect {
      * @return exit code: 0 clean close, 1 closed with a cause, 2 no completion within the wait
      */
     static int run(InetSocketAddress remote, ClientConSM sm, NIOSocket nioSocket,
-                   int timeoutSec, long maxWaitSec) throws java.io.IOException, InterruptedException {
-        final CountDownLatch closedLatch = new CountDownLatch(1);
-        final AtomicReference<Throwable> closeCause = new AtomicReference<Throwable>();
+                   int timeoutSec, long maxWaitSec) throws java.io.IOException {
         final boolean udp = sm.getContext().getTransport() == ClientSessionContext.Transport.UDP;
         final AtomicReference<AutoCloseable> sessionRef = new AtomicReference<AutoCloseable>();
 
         State<Object> app = new State<Object>("proto-connect");
         // payload-agnostic: CONNECTED carries a SelectionKey over TCP, the remote address over UDP
         app.register((Consumer<Object>) o -> System.out.println("CONNECTED " + remote),
-                SMProtoUtil.BasicEvent.CONNECTED);
+                ClientEvent.CONNECTED);
         app.register((Consumer<Object>) sci -> System.out.println("SECURE " + describeTLS(sci)),
                 ClientEvent.SECURE);
         app.register((Consumer<Object>) o -> {
             System.out.println("READY");
             // register the data consumer only now: pre-READY IN_DATA belongs to the negotiating
-            // phases (one active owner per buffer) — a global consumer would double-consume/recache
+            // states (one active owner per buffer) — a global consumer would double-consume/recache
             app.register((Consumer<ByteBuffer>) bb -> {
                 int n = bb.remaining();
                 byte[] chunk = new byte[n];
@@ -128,14 +125,13 @@ public final class ProtoConnect {
             }, ClientEvent.IN_DATA);
         }, ClientEvent.READY);
         app.register((Consumer<Throwable>) cause -> {
-            closeCause.set(cause);
             // report values (results bag) are final at CLOSED — the machine closes after this publish
             Object banner = SMProtoUtil.results(sm).getValue("banner");
             if (banner != null)
                 System.out.println("BANNER " + banner);
             System.out.println("CLOSED" + (cause != null ? " cause: " + cause : " (clean)"));
-            closedLatch.countDown();
-        }, SMProtoUtil.BasicEvent.CLOSED);
+            System.out.println("REPORT " + SMProtoUtil.results(sm));
+        }, ClientEvent.CLOSED);
         sm.register(app);
 
         try {
@@ -150,11 +146,13 @@ public final class ProtoConnect {
                 System.out.println("connecting to " + remote + " (timeout " + timeoutSec + "s) ...");
                 nioSocket.addClientSocket(remote, callback, timeoutSec, null);
             }
-            if (!closedLatch.await(maxWaitSec, TimeUnit.SECONDS)) {
+            // completion via the machine's native signal: MACHINE_CLOSED fires after the CLOSED
+            // publish, so the console lifecycle prints and the report are complete here
+            if (!SMProtoUtil.waitForClose(sm, TimeUnit.SECONDS.toMillis(maxWaitSec))) {
                 System.out.println("no completion within " + maxWaitSec + "s");
                 return 2;
             }
-            return closeCause.get() != null ? 1 : 0;
+            return SMProtoUtil.closeCause(sm) != null ? 1 : 0;
         } finally {
             SharedIOUtil.close(sessionRef.get());
         }

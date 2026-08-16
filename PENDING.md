@@ -23,7 +23,8 @@ and keeps working; this is not a port.
   machine already carries an `AUTO_CLOSEABLE` binding (`NVGenericMap.add` silently replaces
   same-name entries, so a second binding would hijack the first session's resources). Session
   state living in `stateMachine.getProperties()` is therefore correct by contract.
-- **Event vocabulary:** `CONNECTED` (payload `SelectionKey`), `IN_RAW_DATA` (payload `ByteBuffer`),
+- **Event vocabulary:** `CONNECTED` (payload `SelectionKey`), `RAW_IN_DATA` (payload `ByteBuffer`;
+  renamed from `IN_RAW_DATA` 2026-08-15 to match META-SM-PROTO-DESIGN.md),
   `CLOSED` (payload `Throwable` or null). No ERROR/CLOSED split: clean EOF is folded into `CLOSED`
   with a null payload; the error path relays its cause via `Params.EXCEPTION`. One ID = one payload
   type holds (`Throwable`, nullable).
@@ -59,7 +60,8 @@ and keeps working; this is not a port.
   it flips the session's `CommonChannelOutputStream` to encrypted writes. The promised
   handshake-done event landed as `ClientEvent.SECURE` (plus `READY` as the app's write gate).
 - **Event ID namespacing — decided: bare enum names stay.** Reserved vocabulary (14 IDs):
-  `BasicEvent` {CONNECTED, RAW_IN_DATA, CLOSED} + `HandshakeStatus` names {NEED_WRAP, NEED_UNWRAP,
+  `ClientEvent` {CONNECTED, RAW_IN_DATA, CLOSED, ...} (2026-08-15: `SMProtoUtil.BasicEvent` merged
+  into `ClientEvent` — one enum is the whole vocabulary) + `HandshakeStatus` names {NEED_WRAP, NEED_UNWRAP,
   NEED_UNWRAP_AGAIN, NEED_TASK, FINISHED, NOT_HANDSHAKING} + `ClientEvent` {IN_DATA, SECURE,
   READY, START_TLS, BANNER_RECEIVED}. One machine per session (ctor-enforced) confines collisions
   to a session's own vocabulary choices; `ClientEvent` javadoc is the authority.
