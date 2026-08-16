@@ -367,12 +367,58 @@ public class NIOSocket
      * @throws NullPointerException if sa or psf is null
      */
     public SelectionKey addDatagramSocket(InetSocketAddress sa, UDPSessionCallback usc) throws IOException {
-        SUS.checkIfNulls("Null values", sa, usc);
+        return addDatagramSocket(sa, (ConnectionCallback<?>) usc);
+    }
+
+    /**
+     * Creates and registers a UDP datagram socket on the specified address, driven by any
+     * {@link ConnectionCallback} (e.g. a state-machine bridge such as
+     * {@code org.zoxweb.server.net.common.sm.UDPSMCallback}) through the full
+     * {@code ConnectionCallback} lifecycle — the same contract as the TCP client path.
+     *
+     * <p>Opens a {@link DatagramChannel}, binds it to {@code sa}, hands it to the callback via
+     * {@link ConnectionCallback#setChannel(Channel)} (channel setup; a client callback typically
+     * connects it to its remote there), registers it with the selector with <b>zero</b> interest
+     * ops, then invokes {@link ConnectionCallback#connected(SelectionKey)} — the callback's
+     * kickoff, guaranteed to complete before any read dispatch — and installs the interest ops it
+     * returns. Read dispatches then go to {@link ConnectionCallback#accept(SelectionKey)} with the
+     * key's interest ops zeroed for the duration — serialized per session, same as the TCP
+     * path.</p>
+     *
+     * @param sa the socket address to bind to (IP address and port)
+     * @param cc the connection callback driving the channel
+     * @return the SelectionKey associated with the datagram channel
+     * @throws IOException          if the socket cannot be opened or bound, or the callback's
+     *                              {@code setChannel}/{@code connected} fails (the key is
+     *                              cancelled and the channel closed first)
+     * @throws NullPointerException if sa or cc is null
+     */
+    public SelectionKey addDatagramSocket(InetSocketAddress sa, ConnectionCallback<?> cc) throws IOException {
+        SUS.checkIfNulls("Null values", sa, cc);
         DatagramChannel dc = DatagramChannel.open();
         dc.setOption(StandardSocketOptions.SO_REUSEADDR, true);
-        dc.socket().bind(sa);
-        usc.setChannel(dc);
-        SelectionKey sk = selectorController.register(dc, SelectionKey.OP_READ, usc, false);
+        try {
+            dc.socket().bind(sa);
+            cc.setChannel(dc);
+        } catch (IOException | RuntimeException e) {
+            // don't leave an unregistered bound channel behind
+            SharedIOUtil.close(dc);
+            throw e;
+        }
+        // zero ops: no read dispatch may run before connected() completes (lifecycle ordering)
+        SelectionKey sk = selectorController.register(dc, 0, cc, false);
+        try {
+            int keyOps = cc.connected(sk);
+            if (keyOps >= 0 && sk.isValid()) {
+                sk.interestOps(keyOps);
+                selectorController.wakeup();
+            } else
+                selectorController.cancelSelectionKey(sk);
+        } catch (IOException | RuntimeException e) {
+            selectorController.cancelSelectionKey(sk);
+            SharedIOUtil.close(dc);
+            throw e;
+        }
         logger.getLogger().info(dc + " added");
         return sk;
     }
