@@ -445,8 +445,11 @@ v1 `ClientSMFactory` hardcodes `protocol: ssh/tls/plain` → a fixed phase set. 
 - Existing `exchange` configs keep working (TCP → `stream`, UDP → `datagram`) with byte-identical
   behavior.
 
-`SSHBannerPhase` and `DataExchangePhase` dissolve into catalog states; `ConnectionPhase` shrinks to
-a thin registrar for ordering/gating, or is absorbed into the catalog builders.
+`SSHBannerPhase` and `DataExchangePhase` dissolve into catalog states; `ConnectionPhase` is
+**deleted outright** (maintainer ruling, 2026-08-15: the phase SPI was a first-implementation
+error — the correct design is the meta-driven state catalog; there is no registrar to preserve).
+The factory registers catalog states directly, in declared order, between the mandatory lifecycle
+states; `READY` gating is the controller's completion rule (§8), not a phase attribute.
 
 ---
 
@@ -550,6 +553,11 @@ purpose-written state, not a config. Server-side counterpart ON HOLD (Rule 11).
 8. **Completion-implies-validated**: a run with no `validate` step records
    `validated=true, reason="script completed"`.
 9. **`BANNER_RECEIVED` retired**: applications read `results.banner` from the report.
+10. **`ConnectionPhase` is deleted, not shrunk** (2026-08-15) — the phase SPI was a
+    first-implementation error from an earlier session, never part of the intended design. The
+    meta-driven state catalog replaces it entirely: catalog builders register states directly;
+    `READY` gating moves to the controller completion rule. v1 is being phased out in favor of
+    v2 — do not preserve v1 structures for their own sake.
 
 *(Rejected along the way: a Phase A/B/C gap-phasing plan — superseded by the premise above.)*
 
@@ -565,6 +573,7 @@ purpose-written state, not a config. Server-side counterpart ON HOLD (Rule 11).
 | 4 | Tests routed through `ProtoConnect.run` instead of driving NIOSocket with the machine | Tests hand the callback to NIOSocket directly (Rule 3) |
 | 5 | Outcomes captured in test-side `AtomicReference`s; completion via hand-rolled `CountDownLatch` + ad-hoc observer `State` | Results in the machine's properties bag; completion via `MACHINE_CLOSED` / `isClosed` (Rules 4, 5) |
 | 6 | `setProperties` / the SES change flagged as risks | They are the composition mechanism (Rule 12, §3) |
+| 7 | `ConnectionPhase` — a hand-rolled phase SPI invented by an earlier session; v1 was built on it | The correct design was always the meta-driven state catalog. v2 exists to phase v1 out; `ConnectionPhase` is deleted, not preserved as a registrar (§11, §14.10) |
 
 Same theme, earlier: the `${var}` layer belongs to protocol value injection, never byte conversion
 (Rule 9); a connection is either TCP or UDP and nothing runs before `connected()` — don't guard
@@ -617,7 +626,7 @@ is slated to dissolve in v2, that is noted — but it is live code today.
 | `ClientSSLHelper` | The session's `SSLConnectionHelper`; routes statuses into the machine. **`close()` is a no-op by contract** (Rule 10). | kept |
 | `SSHBannerPhase` | RFC 4253 identification-line validation; records `banner`; gates READY. | **dissolves** into `delimited` assembler + `validate` (§11) |
 | `DataExchangePhase` | Linear `send`/`expect`/`start_tls` dialogue: build-time compiled, byte-substring expect with consume-through-match, 64K accumulation cap, STARTTLS residue fatal, `${var}` resolved at send time. Gates READY. | **dissolves** into `controller` + `responder` (§8) |
-| `ConnectionPhase` | Phase SPI (`contribute`, `gatesReady`) + the ownership/broadcast-order contract. | shrinks to a registrar |
+| `ConnectionPhase` | Phase SPI (`contribute`, `gatesReady`) + the ownership/broadcast-order contract. | **deleted** — first-implementation error (§14.10); its ownership/broadcast-order contract text moves to the catalog docs |
 | `SMProtoUtil` | Package utility home (**all new utilities go here** — maintainer directive): `STRING_TO_DATA`, `STRING_VARS_TO_STRING/DATA`, `hasVars`, `BasicEvent{CONNECTED, DATAGRAM, CLOSED, RAW_IN_DATA}`, `RESULTS` + `results(smi)`. | gains `waitForClose` (§13.2) |
 | `ClientEvent` | `IN_DATA`, `SECURE`, `READY`, `START_TLS`, `BANNER_RECEIVED`. | +`IN_MESSAGE`/`OUT_MESSAGE`/`VALIDATE`, −`BANNER_RECEIVED` |
 | `ProtoConnect` | Observer CLI: config + `host:port` + `var=value` → prints lifecycle events; exit 0/1/2/64. Never drives the session. | kept |
