@@ -14,8 +14,9 @@ import java.nio.charset.StandardCharsets;
  * Connection phase that validates the peer's SSH identification line (RFC 4253 §4.2) after
  * connect: accumulates {@link ClientEvent#IN_DATA} until the {@code SSH-} line arrives
  * (skipping optional pre-banner lines, bounded), validates it against the configured
- * expectations, then publishes {@link ClientEvent#BANNER_RECEIVED} with the banner string and
- * completes the phase (→ {@link ClientEvent#READY}). Any bytes following the banner line
+ * expectations, records it in the machine results bag under {@code banner}
+ * ({@code SMProtoUtil.results}), and completes the phase (→ {@link ClientEvent#READY}).
+ * Applications read the banner from the report. Any bytes following the banner line
  * (start of key exchange — legitimate for SSH) are republished as a fresh {@code IN_DATA}
  * after {@code READY}, so an application consumer registered from its {@code READY} handler
  * receives them.
@@ -128,8 +129,8 @@ public class SSHBannerPhase implements ConnectionPhase {
 
         /**
          * Handles one complete line; returns false on fatal failure. On banner success,
-         * publishes BANNER_RECEIVED, completes the phase (→ READY), then republishes any bytes
-         * remaining in the current packet as a fresh IN_DATA for the post-READY owner.
+         * records {@code results.banner}, completes the phase (→ READY), then republishes any
+         * bytes remaining in the current packet as a fresh IN_DATA for the post-READY owner.
          */
         private boolean processLine(ClientSessionContext ctx, ByteBuffer bb) {
             sawCR = false;
@@ -151,9 +152,8 @@ public class SSHBannerPhase implements ConnectionPhase {
                 }
                 done = true;
                 SMProtoUtil.results(ctx.getStateMachine()).build("banner", text);
-                publishSync(ClientEvent.BANNER_RECEIVED, text);
                 ctx.phaseComplete(NAME);
-                // a BANNER_RECEIVED/READY consumer may have failed the session inline —
+                // a READY consumer may have failed the session inline —
                 // publishing on the closed machine would throw instead of closing cleanly
                 if (bb.hasRemaining() && !ctx.getStateMachine().isClosed()) {
                     // start of key exchange — hand it to the post-READY owner as a fresh packet

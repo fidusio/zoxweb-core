@@ -36,8 +36,9 @@ import java.util.function.Consumer;
  * <li>{@code var=value} — optional {@code exchange} variables injected into the session (resolve
  * {@code ${var}} placeholders in send/expect literals).</li>
  * </ul>
- * The run prints {@code CONNECTED}, {@code BANNER_RECEIVED}, {@code SECURE} (with the negotiated
- * TLS protocol/cipher), {@code IN_DATA}, {@code READY}, and {@code CLOSED} events as they fire, then
+ * The run prints {@code CONNECTED}, {@code SECURE} (with the negotiated TLS protocol/cipher),
+ * {@code IN_DATA}, {@code READY}, and {@code CLOSED} events as they fire — plus the validated
+ * banner from the report ({@code results.banner}) at close, if the protocol recorded one — then
  * exits when the session closes. A {@code "transport": "udp"} config dials a connected datagram
  * socket instead; a probe config's machine closes the session itself once the pipeline completes
  * ({@code close_on_ready}) — this runner never drives the session, it only observes. Exit code:
@@ -112,8 +113,6 @@ public final class ProtoConnect {
         // payload-agnostic: CONNECTED carries a SelectionKey over TCP, the remote address over UDP
         app.register((Consumer<Object>) o -> System.out.println("CONNECTED " + remote),
                 SMProtoUtil.BasicEvent.CONNECTED);
-        app.register((Consumer<String>) banner -> System.out.println("BANNER_RECEIVED " + banner),
-                ClientEvent.BANNER_RECEIVED);
         app.register((Consumer<Object>) sci -> System.out.println("SECURE " + describeTLS(sci)),
                 ClientEvent.SECURE);
         app.register((Consumer<Object>) o -> {
@@ -130,6 +129,10 @@ public final class ProtoConnect {
         }, ClientEvent.READY);
         app.register((Consumer<Throwable>) cause -> {
             closeCause.set(cause);
+            // report values (results bag) are final at CLOSED — the machine closes after this publish
+            Object banner = SMProtoUtil.results(sm).getValue("banner");
+            if (banner != null)
+                System.out.println("BANNER " + banner);
             System.out.println("CLOSED" + (cause != null ? " cause: " + cause : " (clean)"));
             closedLatch.countDown();
         }, SMProtoUtil.BasicEvent.CLOSED);

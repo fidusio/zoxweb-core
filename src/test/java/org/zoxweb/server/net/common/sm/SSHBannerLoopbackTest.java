@@ -34,17 +34,12 @@ public class SSHBannerLoopbackTest {
         final List<String> order = Collections.synchronizedList(new ArrayList<String>());
         final CountDownLatch readyLatch = new CountDownLatch(1);
         final CountDownLatch closedLatch = new CountDownLatch(1);
-        final AtomicReference<String> banner = new AtomicReference<String>();
         final AtomicReference<Throwable> closedPayload = new AtomicReference<Throwable>(new Exception("sentinel"));
 
         ClientConSM sm = ClientConSMBuilder.create("ssh-loopback")
                 .phase(new SSHBannerPhase("SSH-2.0-", "OpenSSH"))
                 .build();
         State<Object> app = new State<Object>("app");
-        app.register((Consumer<String>) s -> {
-            order.add("BANNER_RECEIVED");
-            banner.set(s);
-        }, ClientEvent.BANNER_RECEIVED);
         app.register((Consumer<Object>) o -> {
             order.add("READY");
             readyLatch.countDown();
@@ -69,7 +64,8 @@ public class SSHBannerLoopbackTest {
             accepted.getOutputStream().write(SharedStringUtil.getBytes("SSH-2.0-OpenSSH_9.6\r\n"));
             accepted.getOutputStream().flush();
             assertTrue(readyLatch.await(WAIT_SEC, TimeUnit.SECONDS), "READY not published after banner");
-            assertEquals("SSH-2.0-OpenSSH_9.6", banner.get());
+            // BANNER_RECEIVED is retired — the validated banner is read from the report
+            assertEquals("SSH-2.0-OpenSSH_9.6", SMProtoUtil.results(sm).getValue("banner"));
 
             accepted.close();
             assertTrue(closedLatch.await(WAIT_SEC, TimeUnit.SECONDS), "CLOSED not published on peer EOF");
@@ -78,8 +74,7 @@ public class SSHBannerLoopbackTest {
             assertTrue(callback.isClosed());
             assertTrue(sm.isClosed(), "machine must be closed by session teardown");
             synchronized (order) {
-                assertEquals("BANNER_RECEIVED", order.get(0));
-                assertEquals("READY", order.get(1));
+                assertEquals("READY", order.get(0));
                 assertEquals("CLOSED", order.get(order.size() - 1));
             }
         } finally {

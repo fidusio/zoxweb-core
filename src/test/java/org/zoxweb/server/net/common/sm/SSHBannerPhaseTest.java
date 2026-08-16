@@ -23,7 +23,6 @@ public class SSHBannerPhaseTest {
     private static class Harness {
         final ClientConSM sm;
         final TCPSMCallback callback;
-        final AtomicReference<String> banner = new AtomicReference<String>();
         final AtomicInteger readyCount = new AtomicInteger();
         final AtomicReference<Throwable> closedPayload = new AtomicReference<Throwable>();
         final AtomicInteger closedCount = new AtomicInteger();
@@ -32,7 +31,6 @@ public class SSHBannerPhaseTest {
         Harness(SSHBannerPhase phase) {
             sm = ClientConSMBuilder.create("ssh-test").phase(phase).build();
             State<Object> app = new State<Object>("app");
-            app.register((Consumer<String>) banner::set, ClientEvent.BANNER_RECEIVED);
             app.register((Consumer<Object>) o -> {
                 readyCount.incrementAndGet();
                 // the post-READY owner registers its IN_DATA consumer from the READY handler
@@ -57,6 +55,11 @@ public class SSHBannerPhaseTest {
             sm.publishSync(SMProtoUtil.BasicEvent.IN_RAW_DATA,
                     ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, bytes, 0, bytes.length, true));
         }
+
+        /** BANNER_RECEIVED is retired — the validated banner is read from the report. */
+        String banner() {
+            return SMProtoUtil.results(sm).getValue("banner");
+        }
     }
 
     @Test
@@ -64,7 +67,7 @@ public class SSHBannerPhaseTest {
         Harness h = new Harness(new SSHBannerPhase());
         h.feed("SSH-2.0-OpenSSH_9.6\r\n");
 
-        assertEquals("SSH-2.0-OpenSSH_9.6", h.banner.get());
+        assertEquals("SSH-2.0-OpenSSH_9.6", h.banner());
         assertEquals(1, h.readyCount.get(), "READY must be published once");
         assertEquals(0, h.closedCount.get());
     }
@@ -73,11 +76,11 @@ public class SSHBannerPhaseTest {
     public void bannerSplitAcrossPackets() {
         Harness h = new Harness(new SSHBannerPhase());
         h.feed("SSH-2.0-Op");
-        assertNull(h.banner.get(), "incomplete banner must not publish");
+        assertNull(h.banner(), "incomplete banner must not publish");
         h.feed("enSSH_9.6");
         h.feed("\r\n");
 
-        assertEquals("SSH-2.0-OpenSSH_9.6", h.banner.get());
+        assertEquals("SSH-2.0-OpenSSH_9.6", h.banner());
         assertEquals(1, h.readyCount.get());
     }
 
@@ -86,7 +89,7 @@ public class SSHBannerPhaseTest {
         Harness h = new Harness(new SSHBannerPhase());
         h.feed("SSH-2.0-Whatever\n");
 
-        assertEquals("SSH-2.0-Whatever", h.banner.get());
+        assertEquals("SSH-2.0-Whatever", h.banner());
         assertEquals(1, h.readyCount.get());
     }
 
@@ -95,7 +98,7 @@ public class SSHBannerPhaseTest {
         Harness h = new Harness(new SSHBannerPhase());
         h.feed("welcome to the jungle\r\nplease behave\r\nSSH-2.0-OpenSSH_9.6\r\n");
 
-        assertEquals("SSH-2.0-OpenSSH_9.6", h.banner.get());
+        assertEquals("SSH-2.0-OpenSSH_9.6", h.banner());
         assertEquals(1, h.readyCount.get());
         assertEquals(0, h.closedCount.get());
     }
@@ -105,7 +108,7 @@ public class SSHBannerPhaseTest {
         Harness h = new Harness(new SSHBannerPhase("SSH-2.0-", "OpenSSH"));
         h.feed("SSH-2.0-Dropbear\r\n");
 
-        assertNull(h.banner.get());
+        assertNull(h.banner());
         assertEquals(0, h.readyCount.get(), "READY must not fire on validation failure");
         assertEquals(1, h.closedCount.get(), "fatal validation must tear the session down");
         assertTrue(h.closedPayload.get() instanceof IOException,
@@ -131,7 +134,7 @@ public class SSHBannerPhaseTest {
         Harness h = new Harness(new SSHBannerPhase());
         h.feed("SSH-2.0-OpenSSH_9.6\r\nKEXDATA");
 
-        assertEquals("SSH-2.0-OpenSSH_9.6", h.banner.get());
+        assertEquals("SSH-2.0-OpenSSH_9.6", h.banner());
         assertEquals(1, h.readyCount.get());
         assertEquals("KEXDATA", h.postReadyData.toString(),
                 "bytes after the banner line must reach the post-READY IN_DATA owner");
