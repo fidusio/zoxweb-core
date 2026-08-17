@@ -62,11 +62,11 @@ public class DNSProbeTest {
 
         State<Object> observer = new State<Object>("observer");
         observer.register((Consumer<Object>) o -> System.out.println("CONNECTED " + remote),
-                ClientEvent.CONNECTED);
-        observer.register((Consumer<Object>) o -> System.out.println("READY"), ClientEvent.READY);
+                CommonTrigger.CONNECTED);
+        observer.register((Consumer<Object>) o -> System.out.println("READY"), CommonTrigger.READY);
         observer.register((Consumer<Throwable>) t ->
                 System.out.println("CLOSED" + (t != null ? " cause: " + t : " (clean)")),
-                ClientEvent.CLOSED);
+                CommonTrigger.CLOSED);
         sm.register(observer);
 
         NIOSocket nioSocket = new NIOSocket(TaskUtil.defaultTaskProcessor(), TaskUtil.defaultTaskScheduler());

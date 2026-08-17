@@ -20,14 +20,14 @@ import java.security.GeneralSecurityException;
 
 /**
  * Catalog state {@code ssl} — the machine owns the handshake orchestration
- * (SSLStateMachineV2): its {@link ClientEvent#START_TLS} consumer performs the upgrade, and in
+ * (SSLStateMachineV2): its {@link CommonTrigger#START_TLS} consumer performs the upgrade, and in
  * {@link TLSMode#IMMEDIATE} an auto-start consumer publishes {@code START_TLS} on
  * {@code CONNECTED}. The engine states ({@link SSLClientHandshakeState},
  * {@link SSLClientDataState}) are registered alongside this state by the builder — the
  * untouchable {@code SSLUtil} handlers do the engine steps (zero changes to {@code net.ssl}).
  * <ul>
  * <li>{@link TLSMode#IMMEDIATE} — the upgrade auto-starts on {@code CONNECTED}
- * (HTTPS/SMTPS-style client); the state gates {@link ClientEvent#READY} ({@code ready_gate}
+ * (HTTPS/SMTPS-style client); the state gates {@link CommonTrigger#READY} ({@code ready_gate}
  * bag flag), completed by the bridge on handshake success.</li>
  * <li>{@link TLSMode#ON_DEMAND} — STARTTLS-ready: nothing auto-starts; the controller (or a
  * custom negotiator state) publishes {@code START_TLS} after its go-ahead, having verified
@@ -67,7 +67,7 @@ public class SSLClientState extends State<Object> {
     public enum TLSMode {
         /** Handshake right after connect. */
         IMMEDIATE,
-        /** STARTTLS-ready: upgrade on {@link ClientEvent#START_TLS} from a negotiator. */
+        /** STARTTLS-ready: upgrade on {@link CommonTrigger#START_TLS} from a negotiator. */
         ON_DEMAND,
     }
 
@@ -205,7 +205,7 @@ public class SSLClientState extends State<Object> {
 
     private class StartTLS extends TriggerConsumer<Object> {
         StartTLS() {
-            super(ClientEvent.START_TLS);
+            super(CommonTrigger.START_TLS);
         }
 
         @Override
@@ -216,12 +216,12 @@ public class SSLClientState extends State<Object> {
 
     private class AutoStart extends TriggerConsumer<SelectionKey> {
         AutoStart() {
-            super(ClientEvent.CONNECTED);
+            super(CommonTrigger.CONNECTED);
         }
 
         @Override
         public void accept(SelectionKey key) {
-            publishSync(ClientEvent.START_TLS, null);
+            publishSync(CommonTrigger.START_TLS, null);
         }
     }
 }

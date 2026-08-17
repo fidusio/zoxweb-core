@@ -46,7 +46,7 @@ public class PlainClientLoopbackTest {
         app.register((Consumer<Object>) payload -> {
             order.add("READY");
             readyLatch.countDown();
-        }, ClientEvent.READY);
+        }, CommonTrigger.READY);
         app.register((Consumer<ByteBuffer>) bb -> {
             order.add("IN_DATA");
             byte[] chunk = new byte[bb.remaining()];
@@ -54,11 +54,11 @@ public class PlainClientLoopbackTest {
             received.write(chunk, 0, chunk.length);
             ByteBufferUtil.cache(bb);
             dataLatch.countDown();
-        }, ClientEvent.IN_DATA);
+        }, CommonTrigger.IN_DATA);
         app.register((Consumer<Throwable>) t -> {
             order.add("CLOSED");
             closedPayload.set(t);
-        }, ClientEvent.CLOSED);
+        }, CommonTrigger.CLOSED);
         sm.register(app);
 
         TCPSMCallback callback = sm.newSessionCallback();

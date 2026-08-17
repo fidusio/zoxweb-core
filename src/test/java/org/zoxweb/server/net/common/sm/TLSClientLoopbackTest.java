@@ -98,7 +98,7 @@ public class TLSClientLoopbackTest {
             app.register((Consumer<Object>) sci -> {
                 order.add("SECURE");
                 secureLatch.countDown();
-            }, ClientEvent.SECURE);
+            }, CommonTrigger.SECURE);
             app.register((Consumer<Object>) o -> {
                 order.add("READY");
                 // post-READY owner registers its IN_DATA consumer, then sends the first message
@@ -109,15 +109,15 @@ public class TLSClientLoopbackTest {
                     echoed.set(new String(chunk));
                     ByteBufferUtil.cache(bb);
                     echoLatch.countDown();
-                }, ClientEvent.IN_DATA);
+                }, CommonTrigger.IN_DATA);
                 readyLatch.countDown();
                 try {
                     ctx.write(ByteBuffer.wrap(SharedStringUtil.getBytes("ping-over-tls")));
                 } catch (IOException e) {
                     failure.set(e);
                 }
-            }, ClientEvent.READY);
-            app.register((Consumer<Throwable>) t -> order.add("CLOSED"), ClientEvent.CLOSED);
+            }, CommonTrigger.READY);
+            app.register((Consumer<Throwable>) t -> order.add("CLOSED"), CommonTrigger.CLOSED);
             sm.register(app);
 
             callback = sm.newSessionCallback();
@@ -174,7 +174,7 @@ public class TLSClientLoopbackTest {
             final ClientSessionContext ctx = sm.getContext();
 
             State<Object> app = new State<Object>("app");
-            app.register((Consumer<Object>) sci -> secureLatch.countDown(), ClientEvent.SECURE);
+            app.register((Consumer<Object>) sci -> secureLatch.countDown(), CommonTrigger.SECURE);
             app.register((Consumer<Object>) o -> {
                 app.register((Consumer<ByteBuffer>) bb -> {
                     byte[] chunk = new byte[bb.remaining()];
@@ -182,13 +182,13 @@ public class TLSClientLoopbackTest {
                     echoed.set(new String(chunk));
                     ByteBufferUtil.cache(bb);
                     echoLatch.countDown();
-                }, ClientEvent.IN_DATA);
+                }, CommonTrigger.IN_DATA);
                 try {
                     ctx.write(ByteBuffer.wrap(SharedStringUtil.getBytes("deferred-ping")));
                 } catch (IOException e) {
                     failure.set(e);
                 }
-            }, ClientEvent.READY);
+            }, CommonTrigger.READY);
             sm.register(app);
 
             // the caller supplies the InetSocketAddress; the config never did

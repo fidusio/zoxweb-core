@@ -18,7 +18,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * <p>
  * Holds the session callback binding, the transport {@link Mode}, the SSL session state once an
  * upgrade ran, the declarative settings bag, and the READY gate that publishes the single
- * {@link ClientEvent#READY} when the last gating state completes.
+ * {@link CommonTrigger#READY} when the last gating state completes.
  */
 public class ClientSessionContext {
 
@@ -197,7 +197,7 @@ public class ClientSessionContext {
 
     /**
      * One-shot complete write of the buffer to the peer — over TCP through the session output
-     * stream (plaintext before the upgrade, encrypted after {@link ClientEvent#SECURE}), over UDP
+     * stream (plaintext before the upgrade, encrypted after {@link CommonTrigger#SECURE}), over UDP
      * as one datagram to the connected remote.
      *
      * @param bb payload in read-mode (e.g. from {@link ByteBuffer#wrap(byte[])})
@@ -233,7 +233,7 @@ public class ClientSessionContext {
 
     /**
      * Reports a READY-gating state as finished; when the last gate completes, publishes the
-     * single {@link ClientEvent#READY}. Unknown or repeated names are no-ops, as is completion
+     * single {@link CommonTrigger#READY}. Unknown or repeated names are no-ops, as is completion
      * after the machine closed (a consumer may have failed the session inline during the
      * completing dispatch — publishing READY on the closed machine would throw instead of
      * tearing down cleanly).
@@ -249,7 +249,7 @@ public class ClientSessionContext {
         if (empty && !readyPublished.getAndSet(true) && !sm.isClosed()) {
             // record the completed pipeline in the machine's results bag before the broadcast
             SMProtoUtil.results(sm).build(new NVBoolean("ready", true));
-            sm.publishSync(ClientEvent.READY, null);
+            sm.publishSync(CommonTrigger.READY, null);
         }
     }
 }

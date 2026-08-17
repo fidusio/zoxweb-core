@@ -456,17 +456,17 @@ public final class SSLUtil {
         if (sslConfig.getSSLEngine().getHandshakeStatus() == NOT_HANDSHAKING) {
 
 
-            SSLEngineResult result = smartSSLWrap(sslConfig.getSSLEngine(), bb, sslConfig.getSSLOutboundBuffer(), flip, true);
+            SSLEngineResult result = smartSSLWrap(sslConfig.getSSLEngine(), bb, sslConfig.getSSLOutBuffer(), flip, true);
             if (log.isEnabled())
                 log.getLogger().info("AFTER-NEED_WRAP-PROCESSING: " + result);
             switch (result.getStatus()) {
                 case BUFFER_UNDERFLOW:
                 case BUFFER_OVERFLOW:
                     throw new IOException(result.getStatus() + " invalid state context buffer size " +
-                            SUS.toCanonicalID(',', sslConfig.getSSLOutboundBuffer().capacity(), sslConfig.getSSLOutboundBuffer().limit(), sslConfig.getSSLOutboundBuffer().position()));
+                            SUS.toCanonicalID(',', sslConfig.getSSLOutBuffer().capacity(), sslConfig.getSSLOutBuffer().limit(), sslConfig.getSSLOutBuffer().position()));
                 case OK:
                     try {
-                        written = ByteBufferUtil.smartWrite(null, dataChannel, sslConfig.getSSLOutboundBuffer(), true);
+                        written = ByteBufferUtil.smartWrite(null, dataChannel, sslConfig.getSSLOutBuffer(), true);
                         if (usageTracker != null) usageTracker.updateUsage();
                     } catch (IOException e) {
                         SharedIOUtil.close(closeable);

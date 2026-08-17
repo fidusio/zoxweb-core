@@ -8,12 +8,12 @@ import org.zoxweb.server.net.DataPacket;
 /**
  * The base state of a UDP-transport {@link ClientConSM} (the {@link ClientTransportState} analog
  * for datagram sessions): initializes the transport on {@code CONNECTED} and routes every
- * {@code DATAGRAM} packet's payload to the consuming states as {@link ClientEvent#IN_DATA}.
+ * {@code DATAGRAM} packet's payload to the consuming states as {@link CommonTrigger#IN_DATA}.
  * <p>
  * UDP is always plaintext in this stack (no DTLS), so the routing is a pure pass-through — no
  * transport modes, no SSL feed. The router owns {@code DATAGRAM} exclusively, mirroring the
  * {@code RAW_IN_DATA} ownership rule of the TCP router: other states consume
- * {@link ClientEvent#IN_DATA} only. The packet buffer is the detached consumer-owned copy minted by
+ * {@link CommonTrigger#IN_DATA} only. The packet buffer is the detached consumer-owned copy minted by
  * {@link UDPSMCallback}; ownership transfers to the active {@code IN_DATA} owner, which recaches
  * it. The datagram's source address is dropped here — the channel is connected, so it is always
  * the session's remote.
@@ -32,7 +32,7 @@ public class UDPClientTransportState extends State<Object> {
 
     private class Connected extends TriggerConsumer<Object> {
         Connected() {
-            super(ClientEvent.CONNECTED);
+            super(CommonTrigger.CONNECTED);
         }
 
         @Override
@@ -45,19 +45,19 @@ public class UDPClientTransportState extends State<Object> {
 
     private class Datagram extends TriggerConsumer<DataPacket<Long>> {
         Datagram() {
-            super(ClientEvent.DATAGRAM);
+            super(CommonTrigger.DATAGRAM);
         }
 
         @Override
         public void accept(DataPacket<Long> packet) {
             // pass-through: ownership of the detached buffer transfers to the active IN_DATA owner
-            publishSync(ClientEvent.IN_DATA, packet.getBuffer());
+            publishSync(CommonTrigger.IN_DATA, packet.getBuffer());
         }
     }
 
     private class Closed extends TriggerConsumer<Throwable> {
         Closed() {
-            super(ClientEvent.CLOSED);
+            super(CommonTrigger.CLOSED);
         }
 
         @Override

@@ -16,6 +16,7 @@ public class SharedIOUtil {
     public static final int K_16 = Const.SizeInBytes.K.mult(16);
     public static final int K_32 = Const.SizeInBytes.K.mult(32);
     public static final int K_128 = Const.SizeInBytes.K.mult(128);
+    public static final int SSL_BUFFER_SIZE = 16709;
 
 
     /**

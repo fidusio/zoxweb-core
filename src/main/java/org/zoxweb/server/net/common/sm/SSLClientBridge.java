@@ -21,10 +21,10 @@ import java.nio.channels.SelectionKey;
  * <li>{@link #accept(ByteBuffer)} — the single decrypted-data delivery point
  * ({@code _notHandshaking}): the engine's {@code inAppData} arrives in <b>write-mode and is
  * reused</b> across unwrap iterations, so the plaintext is copied into a detached pooled buffer
- * published as {@link ClientEvent#IN_DATA}, and the source is fully drained (cleared) — the
+ * published as {@link CommonTrigger#IN_DATA}, and the source is fully drained (cleared) — the
  * "BUFFER_OVERFLOW unreachable" invariant depends on that.</li>
  * <li>{@link #sslHandshakeSuccessful(SSLConfigInt)} — flips the session output stream to
- * encrypted writes, marks the session secure, publishes {@link ClientEvent#SECURE} and
+ * encrypted writes, marks the session secure, publishes {@link CommonTrigger#SECURE} and
  * completes the ssl state's READY gate.</li>
  * <li>{@link #exception(Throwable)} — routes into the session's failure path.</li>
  * <li>The closeable delegate closes the session, so {@code _finished}'s error path
@@ -47,7 +47,7 @@ class SSLClientBridge extends BaseSessionCallback<SSLSessionConfig>
         if (inAppData.hasRemaining()) {
             ByteBuffer copy = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP,
                     inAppData.array(), 0, inAppData.remaining(), true);
-            sm.publishSync(ClientEvent.IN_DATA, copy);
+            sm.publishSync(CommonTrigger.IN_DATA, copy);
         }
         ((Buffer) inAppData).clear();
     }
@@ -65,7 +65,7 @@ class SSLClientBridge extends BaseSessionCallback<SSLSessionConfig>
         } catch (RuntimeException e) {
             // session introspection is best-effort, never fails the handshake
         }
-        sm.publishSync(ClientEvent.SECURE, sci);
+        sm.publishSync(CommonTrigger.SECURE, sci);
         ctx.gateComplete(SSLClientState.NAME);
     }
 

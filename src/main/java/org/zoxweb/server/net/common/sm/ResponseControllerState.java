@@ -8,7 +8,7 @@ import java.nio.ByteBuffer;
 
 /**
  * Catalog state {@code responder} (META-SM-PROTO-DESIGN.md §5): the machine's single writer.
- * Consumes {@link ClientEvent#OUT_MESSAGE} (decoded bytes, {@code ${var}}s already resolved by
+ * Consumes {@link CommonTrigger#OUT_MESSAGE} (decoded bytes, {@code ${var}}s already resolved by
  * the controller) and writes them to the session via
  * {@link ClientSessionContext#write(ByteBuffer)} — over TCP through the session output stream
  * (plaintext before the upgrade, encrypted after {@code SECURE}), over UDP as one datagram.
@@ -29,7 +29,7 @@ public class ResponseControllerState extends State<Object> {
     private class OutMessage extends TriggerConsumer<byte[]> {
 
         OutMessage() {
-            super(ClientEvent.OUT_MESSAGE);
+            super(CommonTrigger.OUT_MESSAGE);
         }
 
         @Override

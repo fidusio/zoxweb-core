@@ -41,11 +41,11 @@ public class SSHBannerLoopbackTest {
         app.register((Consumer<Object>) o -> {
             order.add("READY");
             readyLatch.countDown();
-        }, ClientEvent.READY);
+        }, CommonTrigger.READY);
         app.register((Consumer<Throwable>) t -> {
             order.add("CLOSED");
             closedPayload.set(t);
-        }, ClientEvent.CLOSED);
+        }, CommonTrigger.CLOSED);
         sm.register(app);
 
         TCPSMCallback callback = sm.newSessionCallback();

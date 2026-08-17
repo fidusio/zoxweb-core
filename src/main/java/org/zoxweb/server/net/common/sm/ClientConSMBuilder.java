@@ -25,14 +25,14 @@ import java.util.function.Consumer;
  *         .build();
  * </pre>
  * The builder registers the transport router state first, then the composed states in declared
- * order (broadcast order = registration order). The {@link ClientEvent#READY} gate is seeded
+ * order (broadcast order = registration order). The {@link CommonTrigger#READY} gate is seeded
  * with the transport state plus every composed state whose bag carries
  * {@code ready_gate = true} (the controller's completion rule, the IMMEDIATE ssl handshake) —
  * the last gate to complete publishes the single {@code READY}.
  */
 public class ClientConSMBuilder {
 
-    /** Bag flag a state sets to declare it gates {@link ClientEvent#READY}. */
+    /** Bag flag a state sets to declare it gates {@link CommonTrigger#READY}. */
     public static final String READY_GATE = "ready_gate";
 
     private final String name;
@@ -72,7 +72,7 @@ public class ClientConSMBuilder {
     }
 
     /**
-     * Registers a machine action that closes the session the moment {@link ClientEvent#READY}
+     * Registers a machine action that closes the session the moment {@link CommonTrigger#READY}
      * publishes — the machine itself ends the session when its configured pipeline completes
      * (probe shape: connect, run the dialogue, validate, close; the whole lifecycle is machine
      * dictated, no external driver needed). Default false: an interactive client keeps the
@@ -184,7 +184,7 @@ public class ClientConSMBuilder {
             autoClose.register((Consumer<Object>) o -> {
                 ClientSessionContext c = sm.getContext();
                 SharedIOUtil.close(c.getSession() != null ? (AutoCloseable) c.getSession() : c.getUDPSession());
-            }, ClientEvent.READY);
+            }, CommonTrigger.READY);
             sm.register(autoClose);
         }
         return sm;

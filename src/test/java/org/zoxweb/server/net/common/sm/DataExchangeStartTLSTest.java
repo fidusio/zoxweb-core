@@ -107,7 +107,7 @@ public class DataExchangeStartTLSTest {
             final ClientSessionContext ctx = sm.getContext();
 
             State<Object> app = new State<Object>("app");
-            app.register((Consumer<Object>) sci -> order.add("SECURE"), ClientEvent.SECURE);
+            app.register((Consumer<Object>) sci -> order.add("SECURE"), CommonTrigger.SECURE);
             app.register((Consumer<Object>) o -> {
                 order.add("READY");
                 app.register((Consumer<ByteBuffer>) bb -> {
@@ -116,14 +116,14 @@ public class DataExchangeStartTLSTest {
                     echoed.set(new String(chunk));
                     ByteBufferUtil.cache(bb);
                     echoLatch.countDown();
-                }, ClientEvent.IN_DATA);
+                }, CommonTrigger.IN_DATA);
                 readyLatch.countDown();
                 try {
                     ctx.write(ByteBuffer.wrap(SharedStringUtil.getBytes("secured-hello")));
                 } catch (IOException e) {
                     failure.set(e);
                 }
-            }, ClientEvent.READY);
+            }, CommonTrigger.READY);
             sm.register(app);
 
             callback = sm.newSessionCallback();

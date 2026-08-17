@@ -73,7 +73,7 @@ public class DataExchangeLoopbackTest {
             assertNotNull(sm.lookupState(MessageAssemblerState.NAME), "the assembler state must be composed");
 
             State<Object> app = new State<Object>("app");
-            app.register((Consumer<Object>) o -> readyLatch.countDown(), ClientEvent.READY);
+            app.register((Consumer<Object>) o -> readyLatch.countDown(), CommonTrigger.READY);
             sm.register(app);
 
             callback = sm.newSessionCallback();
@@ -139,7 +139,7 @@ public class DataExchangeLoopbackTest {
             sm.getContext().setVar("helo", "probe.example.org");
 
             State<Object> app = new State<Object>("app");
-            app.register((Consumer<Object>) o -> readyLatch.countDown(), ClientEvent.READY);
+            app.register((Consumer<Object>) o -> readyLatch.countDown(), CommonTrigger.READY);
             sm.register(app);
 
             callback = sm.newSessionCallback();

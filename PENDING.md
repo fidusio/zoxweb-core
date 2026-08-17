@@ -60,11 +60,11 @@ and keeps working; this is not a port.
   it flips the session's `CommonChannelOutputStream` to encrypted writes. The promised
   handshake-done event landed as `ClientEvent.SECURE` (plus `READY` as the app's write gate).
 - **Event ID namespacing — decided: bare enum names stay.** Reserved vocabulary (14 IDs):
-  `ClientEvent` {CONNECTED, RAW_IN_DATA, CLOSED, ...} (2026-08-15: `SMProtoUtil.BasicEvent` merged
-  into `ClientEvent` — one enum is the whole vocabulary) + `HandshakeStatus` names {NEED_WRAP, NEED_UNWRAP,
-  NEED_UNWRAP_AGAIN, NEED_TASK, FINISHED, NOT_HANDSHAKING} + `ClientEvent` {IN_DATA, SECURE,
+  `CommonTrigger` {CONNECTED, RAW_IN_DATA, CLOSED, ...} (2026-08-15: `SMProtoUtil.BasicEvent` merged
+  into `CommonTrigger` — one enum is the whole vocabulary) + `HandshakeStatus` names {NEED_WRAP, NEED_UNWRAP,
+  NEED_UNWRAP_AGAIN, NEED_TASK, FINISHED, NOT_HANDSHAKING} + `CommonTrigger` {IN_DATA, SECURE,
   READY, START_TLS, BANNER_RECEIVED}. One machine per session (ctor-enforced) confines collisions
-  to a session's own vocabulary choices; `ClientEvent` javadoc is the authority.
+  to a session's own vocabulary choices; `CommonTrigger` javadoc is the authority.
 
 ### Still open
 

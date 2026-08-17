@@ -14,8 +14,8 @@ import java.util.Arrays;
 
 /**
  * Catalog state {@code assembler} (META-SM-PROTO-DESIGN.md §7): consumes
- * {@link ClientEvent#IN_DATA}, accumulates until the configured boundary strategy frames one
- * complete protocol message, and publishes it as {@link ClientEvent#IN_MESSAGE}
+ * {@link CommonTrigger#IN_DATA}, accumulates until the configured boundary strategy frames one
+ * complete protocol message, and publishes it as {@link CommonTrigger#IN_MESSAGE}
  * ({@code byte[]}, detached, consumer-owned).
  * <p>
  * <b>Configuration is the state's properties bag</b> (seeded from the JSON {@code config}
@@ -176,7 +176,7 @@ public class MessageAssemblerState extends State<Object> {
     private class InData extends TriggerConsumer<ByteBuffer> {
 
         InData() {
-            super(ClientEvent.IN_DATA);
+            super(CommonTrigger.IN_DATA);
         }
 
         @Override
@@ -199,7 +199,7 @@ public class MessageAssemblerState extends State<Object> {
                         ctx.fail(new IOException("datagram message exceeds max_message " + maxMessage + " bytes"));
                         return;
                     }
-                    publishSync(ClientEvent.IN_MESSAGE, chunk);
+                    publishSync(CommonTrigger.IN_MESSAGE, chunk);
                     break;
                 case DELIMITED:
                     asm.append(chunk);
@@ -217,7 +217,7 @@ public class MessageAssemblerState extends State<Object> {
                     }
                     // the unconsumed snapshot IS the current message; the controller consumes
                     // through its match via the Assembly holder (v1 expect semantics)
-                    publishSync(ClientEvent.IN_MESSAGE, asm.snapshot());
+                    publishSync(CommonTrigger.IN_MESSAGE, asm.snapshot());
                     break;
             }
         }
@@ -243,7 +243,7 @@ public class MessageAssemblerState extends State<Object> {
                     ctx.fail(new IOException("message exceeds max_message " + maxMessage + " bytes"));
                     return;
                 }
-                publishSync(ClientEvent.IN_MESSAGE, Arrays.copyOfRange(have, 0, end));
+                publishSync(CommonTrigger.IN_MESSAGE, Arrays.copyOfRange(have, 0, end));
             }
         }
 
@@ -274,7 +274,7 @@ public class MessageAssemblerState extends State<Object> {
                 if (have.length < frame)
                     return; // frame incomplete
                 asm.consume((int) frame);
-                publishSync(ClientEvent.IN_MESSAGE, Arrays.copyOfRange(have, 0, (int) frame));
+                publishSync(CommonTrigger.IN_MESSAGE, Arrays.copyOfRange(have, 0, (int) frame));
             }
         }
     }

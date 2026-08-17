@@ -12,7 +12,6 @@ import org.zoxweb.shared.util.NVPairList;
 import org.zoxweb.shared.util.NamedValue;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -20,9 +19,9 @@ import java.util.List;
 /**
  * Catalog state {@code controller} (META-SM-PROTO-DESIGN.md §8): drives the linear
  * {@code exchange} step list against the message seams. It consumes
- * {@link ClientEvent#IN_MESSAGE} (plus {@code CONNECTED} to start and {@code SECURE} to resume
- * after an upgrade) and publishes {@link ClientEvent#OUT_MESSAGE} (→ responder),
- * {@link ClientEvent#VALIDATE} (→ validator) and {@link ClientEvent#START_TLS} (→ ssl state).
+ * {@link CommonTrigger#IN_MESSAGE} (plus {@code CONNECTED} to start and {@code SECURE} to resume
+ * after an upgrade) and publishes {@link CommonTrigger#OUT_MESSAGE} (→ responder),
+ * {@link CommonTrigger#VALIDATE} (→ validator) and {@link CommonTrigger#START_TLS} (→ ssl state).
  * <p>
  * <b>Configuration is the state's properties bag</b>:
  * <ul>
@@ -35,7 +34,7 @@ import java.util.List;
  * </ul>
  * Working memory (cursor, skip counter, inbox, current message, await-secure flag) lives in
  * the state's bag. The {@code ready_gate} bag flag marks this state as gating
- * {@link ClientEvent#READY} — the completion rule: the step list finishing is the pipeline
+ * {@link CommonTrigger#READY} — the completion rule: the step list finishing is the pipeline
  * done. A run that completes with no {@code validate} step records
  * {@code validated=true, reason="script completed"} — every run yields a verdict.
  * <p>
@@ -209,7 +208,7 @@ public class ProtocolControllerState extends State<Object> {
         return (ClientSessionContext) getStateMachine().getConfig();
     }
 
-    private void publish(ClientEvent canID, Object data) {
+    private void publish(CommonTrigger canID, Object data) {
         getStateMachine().publishSync(canID, data);
     }
 
@@ -239,7 +238,7 @@ public class ProtocolControllerState extends State<Object> {
                     ctx.fail(e);
                     return;
                 }
-                publish(ClientEvent.OUT_MESSAGE, out); // the responder writes; a failure closes the machine
+                publish(CommonTrigger.OUT_MESSAGE, out); // the responder writes; a failure closes the machine
                 cursor[0]++;
             } else if (OP_EXPECT.equals(step.op)) {
                 if (!expect(ctx, step))
@@ -260,7 +259,7 @@ public class ProtocolControllerState extends State<Object> {
                     }
                     bytes(CURRENT, message);
                 }
-                publish(ClientEvent.VALIDATE,
+                publish(CommonTrigger.VALIDATE,
                         new ProtocolTypeValidatorState.Validation(message, step.meta));
                 if (ctx.getStateMachine().isClosed())
                     return; // verdict was false — the validator failed the session
@@ -278,7 +277,7 @@ public class ProtocolControllerState extends State<Object> {
                 }
                 cursor[0]++;
                 flag(AWAIT_SECURE, true);
-                publish(ClientEvent.START_TLS, null);
+                publish(CommonTrigger.START_TLS, null);
                 if (ctx.getMode() == ClientSessionContext.Mode.PLAIN && !ctx.getStateMachine().isClosed()) {
                     // no ON_DEMAND ssl state consumed START_TLS — fail instead of a silent
                     // forever-hang waiting for a SECURE that cannot come
@@ -358,7 +357,7 @@ public class ProtocolControllerState extends State<Object> {
         ctx.gateComplete(NAME);
         if (asm != null && asm.pending() > 0 && !ctx.getStateMachine().isClosed()) {
             byte[] leftover = asm.drain();
-            publish(ClientEvent.IN_DATA,
+            publish(CommonTrigger.IN_DATA,
                     ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, leftover, 0, leftover.length, true));
         }
     }
@@ -368,7 +367,7 @@ public class ProtocolControllerState extends State<Object> {
     private class Connected extends TriggerConsumer<Object> {
         // payload-agnostic: CONNECTED carries a SelectionKey over TCP, the remote address over UDP
         Connected() {
-            super(ClientEvent.CONNECTED);
+            super(CommonTrigger.CONNECTED);
         }
 
         @Override
@@ -388,7 +387,7 @@ public class ProtocolControllerState extends State<Object> {
 
     private class Secured extends TriggerConsumer<Object> {
         Secured() {
-            super(ClientEvent.SECURE);
+            super(CommonTrigger.SECURE);
         }
 
         @Override
@@ -402,7 +401,7 @@ public class ProtocolControllerState extends State<Object> {
 
     private class InMessage extends TriggerConsumer<byte[]> {
         InMessage() {
-            super(ClientEvent.IN_MESSAGE);
+            super(CommonTrigger.IN_MESSAGE);
         }
 
         @Override

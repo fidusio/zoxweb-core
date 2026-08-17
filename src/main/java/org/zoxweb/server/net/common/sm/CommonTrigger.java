@@ -17,7 +17,7 @@ package org.zoxweb.server.net.common.sm;
  * ({@code RAW_IN_DATA} → {@code IN_DATA} → {@code IN_MESSAGE}), commands are imperatives
  * ({@code VALIDATE}, {@code START_TLS}).
  */
-public enum ClientEvent {
+public enum CommonTrigger {
     /**
      * The single session kickoff, published exactly once from the callback's
      * {@code connected(SelectionKey)} — nothing happens on the machine before it. Payload is

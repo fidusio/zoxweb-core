@@ -66,8 +66,8 @@ public class UDPClientLoopbackTest {
         assertEquals(ClientSessionContext.Transport.UDP, sm.getContext().getTransport());
 
         State<Object> app = new State<Object>("app");
-        app.register((Consumer<Object>) o -> readyLatch.countDown(), ClientEvent.READY);
-        app.register((Consumer<Throwable>) t -> closeCause.set(t), ClientEvent.CLOSED);
+        app.register((Consumer<Object>) o -> readyLatch.countDown(), CommonTrigger.READY);
+        app.register((Consumer<Throwable>) t -> closeCause.set(t), CommonTrigger.CLOSED);
         sm.register(app);
 
         InetSocketAddress remote = new InetSocketAddress(InetAddress.getLoopbackAddress(), server.getLocalPort());
@@ -122,14 +122,14 @@ public class UDPClientLoopbackTest {
             } catch (Exception e) {
                 sm.getContext().fail(e);
             }
-        }, ClientEvent.CONNECTED);
+        }, CommonTrigger.CONNECTED);
         app.register((Consumer<ByteBuffer>) bb -> {
             byte[] chunk = new byte[bb.remaining()];
             bb.get(chunk);
             ByteBufferUtil.cache(bb);
             echoed.set(new String(chunk, StandardCharsets.US_ASCII));
             dataLatch.countDown();
-        }, ClientEvent.IN_DATA);
+        }, CommonTrigger.IN_DATA);
         sm.register(app);
 
         InetSocketAddress remote = new InetSocketAddress(InetAddress.getLoopbackAddress(), server.getLocalPort());

@@ -50,7 +50,7 @@
  * receive pre-{@code READY} negotiation bytes on the broadcast.
  *
  * <h2>STARTTLS injection rule</h2>
- * A negotiator publishing {@link org.zoxweb.server.net.common.sm.ClientEvent#START_TLS} must
+ * A negotiator publishing {@link CommonTrigger#START_TLS} must
  * first verify that NO byte followed its go-ahead line in the triggering packet: such residue
  * is attacker-controllable plaintext (the classic STARTTLS injection class) and is fatal —
  * fail the session, never clear-and-continue.

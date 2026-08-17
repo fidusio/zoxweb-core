@@ -109,9 +109,9 @@ public final class ProtoConnect {
         State<Object> app = new State<Object>("proto-connect");
         // payload-agnostic: CONNECTED carries a SelectionKey over TCP, the remote address over UDP
         app.register((Consumer<Object>) o -> System.out.println("CONNECTED " + remote),
-                ClientEvent.CONNECTED);
+                CommonTrigger.CONNECTED);
         app.register((Consumer<Object>) sci -> System.out.println("SECURE " + describeTLS(sci)),
-                ClientEvent.SECURE);
+                CommonTrigger.SECURE);
         app.register((Consumer<Object>) o -> {
             System.out.println("READY");
             // register the data consumer only now: pre-READY IN_DATA belongs to the negotiating
@@ -122,8 +122,8 @@ public final class ProtoConnect {
                 bb.get(chunk);
                 ByteBufferUtil.cache(bb);
                 System.out.println("IN_DATA (" + n + " bytes): " + printable(chunk));
-            }, ClientEvent.IN_DATA);
-        }, ClientEvent.READY);
+            }, CommonTrigger.IN_DATA);
+        }, CommonTrigger.READY);
         app.register((Consumer<Throwable>) cause -> {
             // report values (results bag) are final at CLOSED — the machine closes after this publish
             Object banner = SMProtoUtil.results(sm).getValue("banner");
@@ -131,7 +131,7 @@ public final class ProtoConnect {
                 System.out.println("BANNER " + banner);
             System.out.println("CLOSED" + (cause != null ? " cause: " + cause : " (clean)"));
             System.out.println("REPORT " + SMProtoUtil.results(sm));
-        }, ClientEvent.CLOSED);
+        }, CommonTrigger.CLOSED);
         sm.register(app);
 
         try {

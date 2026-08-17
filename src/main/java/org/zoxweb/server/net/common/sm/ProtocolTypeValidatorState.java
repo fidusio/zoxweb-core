@@ -11,7 +11,7 @@ import java.util.Arrays;
 
 /**
  * Catalog state {@code validator} (META-SM-PROTO-DESIGN.md §9): consumes
- * {@link ClientEvent#VALIDATE} — the current message plus the {@code validate} match meta —
+ * {@link CommonTrigger#VALIDATE} — the current message plus the {@code validate} match meta —
  * applies the match and writes the verdict into the machine's results bag
  * ({@link SMProtoUtil#results}). There is no event back ({@code VALIDATED} was rejected by
  * design): what happens after a verdict is the controller's decision or end-of-life.
@@ -34,7 +34,7 @@ public class ProtocolTypeValidatorState extends State<Object> {
     public static final String NAME = "validator";
 
     /**
-     * The {@link ClientEvent#VALIDATE} payload: the current message plus the {@code validate}
+     * The {@link CommonTrigger#VALIDATE} payload: the current message plus the {@code validate}
      * step's match meta.
      */
     public static final class Validation {
@@ -55,7 +55,7 @@ public class ProtocolTypeValidatorState extends State<Object> {
     private class Validate extends TriggerConsumer<Validation> {
 
         Validate() {
-            super(ClientEvent.VALIDATE);
+            super(CommonTrigger.VALIDATE);
         }
 
         @Override

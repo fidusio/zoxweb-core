@@ -190,8 +190,8 @@ public class SSLSessionConfig
                 // set the ssl engine mode client or sever
                 sslEngine.setUseClientMode(clientMode);
                 // create the necessary byte buffer with the proper length
-                inSSLNetData = inRawBuffer != null ? inRawBuffer : ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, getPacketBufferSize());
-                outSSLNetData = outRawBuffer != null ? outRawBuffer : ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, getPacketBufferSize());
+                inSSLNetData = inRawBuffer != null && inRawBuffer.capacity() >= getPacketBufferSize() ? inRawBuffer : ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, getPacketBufferSize());
+                outSSLNetData = outRawBuffer != null && outRawBuffer.capacity() >= getPacketBufferSize() ? outRawBuffer : ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, getPacketBufferSize());
                 inAppData = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, getApplicationBufferSize());
                 // start the handshake
                 sslEngine.beginHandshake();
@@ -199,17 +199,7 @@ public class SSLSessionConfig
         }
     }
 
-    public int getPacketBufferSize() {
-        return sslEngine.getSession().getPacketBufferSize();
-    }
 
-    public int getApplicationBufferSize() {
-        return sslEngine.getSession().getApplicationBufferSize();
-    }
-
-    public SSLEngineResult.HandshakeStatus getHandshakeStatus() {
-        return sslEngine.getHandshakeStatus();
-    }
 
 
     public Runnable getDelegatedTask() {
@@ -227,12 +217,12 @@ public class SSLSessionConfig
     }
 
     @Override
-    public ByteBuffer getSSLInboundBuffer() {
+    public ByteBuffer getSSLInBuffer() {
         return inSSLNetData;
     }
 
     @Override
-    public ByteBuffer getSSLOutboundBuffer() {
+    public ByteBuffer getSSLOutBuffer() {
         return outSSLNetData;
     }
 

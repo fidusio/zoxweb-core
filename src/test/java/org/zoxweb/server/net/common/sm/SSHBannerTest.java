@@ -44,20 +44,20 @@ public class SSHBannerTest {
                     bb.get(chunk);
                     postReadyData.append(new String(chunk));
                     ByteBufferUtil.cache(bb);
-                }, ClientEvent.IN_DATA);
-            }, ClientEvent.READY);
+                }, CommonTrigger.IN_DATA);
+            }, CommonTrigger.READY);
             app.register((Consumer<Throwable>) t -> {
                 closedPayload.set(t);
                 closedCount.incrementAndGet();
-            }, ClientEvent.CLOSED);
+            }, CommonTrigger.CLOSED);
             sm.register(app);
             callback = sm.newSessionCallback();
-            sm.publishSync(ClientEvent.CONNECTED, null);
+            sm.publishSync(CommonTrigger.CONNECTED, null);
         }
 
         void feed(String wire) {
             byte[] bytes = SharedStringUtil.getBytes(wire);
-            sm.publishSync(ClientEvent.RAW_IN_DATA,
+            sm.publishSync(CommonTrigger.RAW_IN_DATA,
                     ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, bytes, 0, bytes.length, true));
         }
 

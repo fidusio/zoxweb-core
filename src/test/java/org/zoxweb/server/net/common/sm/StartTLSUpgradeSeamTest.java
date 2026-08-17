@@ -70,7 +70,7 @@ public class StartTLSUpgradeSeamTest {
             private boolean done = false;
 
             GoAhead() {
-                super(ClientEvent.IN_DATA);
+                super(CommonTrigger.IN_DATA);
             }
 
             @Override
@@ -92,7 +92,7 @@ public class StartTLSUpgradeSeamTest {
                                     return;
                                 }
                                 done = true;
-                                publishSync(ClientEvent.START_TLS, null);
+                                publishSync(CommonTrigger.START_TLS, null);
                                 return;
                             }
                         } else {
@@ -107,7 +107,7 @@ public class StartTLSUpgradeSeamTest {
 
         static class Secured extends TriggerConsumer<Object> {
             Secured() {
-                super(ClientEvent.SECURE);
+                super(CommonTrigger.SECURE);
             }
 
             @Override
@@ -171,14 +171,14 @@ public class StartTLSUpgradeSeamTest {
                     echoed.set(new String(chunk));
                     ByteBufferUtil.cache(bb);
                     echoLatch.countDown();
-                }, ClientEvent.IN_DATA);
+                }, CommonTrigger.IN_DATA);
                 readyLatch.countDown();
                 try {
                     ctx.write(ByteBuffer.wrap(SharedStringUtil.getBytes("ping-after-upgrade")));
                 } catch (IOException e) {
                     failure.set(e);
                 }
-            }, ClientEvent.READY);
+            }, CommonTrigger.READY);
             sm.register(app);
 
             callback = sm.newSessionCallback();
@@ -224,8 +224,8 @@ public class StartTLSUpgradeSeamTest {
 
             ClientConSM sm = buildMachine(remote);
             State<Object> app = new State<Object>("app");
-            app.register((Consumer<Object>) o -> secureFired.set(true), ClientEvent.SECURE);
-            app.register((Consumer<Throwable>) t -> closedPayload.set(t), ClientEvent.CLOSED);
+            app.register((Consumer<Object>) o -> secureFired.set(true), CommonTrigger.SECURE);
+            app.register((Consumer<Throwable>) t -> closedPayload.set(t), CommonTrigger.CLOSED);
             sm.register(app);
 
             callback = sm.newSessionCallback();

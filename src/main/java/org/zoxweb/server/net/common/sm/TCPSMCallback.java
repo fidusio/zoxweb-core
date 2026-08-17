@@ -29,15 +29,15 @@ import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * TCP session callback that bridges the NIO layer to a {@link StateMachineInt}: it converts the
- * socket's byte stream into {@link ClientEvent} publications the state machine consumes.
+ * socket's byte stream into {@link CommonTrigger} publications the state machine consumes.
  * <p>
  * Event contract:
  * <ul>
- * <li>{@link ClientEvent#CONNECTED} once, published from {@link #connected(SelectionKey)} with the
+ * <li>{@link CommonTrigger#CONNECTED} once, published from {@link #connected(SelectionKey)} with the
  * SelectionKey as payload, always before any read dispatch (NIOSocket ordering guarantee).</li>
- * <li>{@link ClientEvent#RAW_IN_DATA} per read, the payload buffer is a detached copy owned by the
+ * <li>{@link CommonTrigger#RAW_IN_DATA} per read, the payload buffer is a detached copy owned by the
  * consumer, safe for async handling; the consumer may recache it via ByteBufferUtil when done.</li>
- * <li>{@link ClientEvent#CLOSED} exactly once per session from the close delegate, whatever the
+ * <li>{@link CommonTrigger#CLOSED} exactly once per session from the close delegate, whatever the
  * termination path (EOF, read error, {@link #exception(Throwable)}, external close); the payload
  * is the causing Throwable when the error path stashed one under {@link Params#EXCEPTION},
  * null otherwise.</li>
@@ -49,7 +49,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * <p>
  * Ownership contract: <b>one state machine per TCPSMCallback</b> — the machine is per-connection,
  * owned by the session, and closed by session teardown as the last act after {@link
- * ClientEvent#CLOSED} is delivered (a closed machine rejects publishes, so the order matters).
+ * CommonTrigger#CLOSED} is delivered (a closed machine rejects publishes, so the order matters).
  * The constructor fails fast if the machine is already bound to another session callback.
  */
 public class TCPSMCallback
@@ -65,7 +65,7 @@ public class TCPSMCallback
     /**
      * Closes the session exactly once via the closeable delegate: closes the state machine's
      * {@link Params#AUTO_CLOSEABLE} resources, recaches the read buffer, publishes the
-     * {@link ClientEvent#CLOSED} event and finally closes the state machine itself, subsequent
+     * {@link CommonTrigger#CLOSED} event and finally closes the state machine itself, subsequent
      * calls are no-ops.
      *
      * @throws Exception in case of error
@@ -125,7 +125,7 @@ public class TCPSMCallback
      * Creates a session callback; registers the {@link Params#AUTO_CLOSEABLE} collection in the
      * state machine's properties and arms the close delegate that performs the one-time session
      * teardown, see {@link #close()}. One state machine per session callback: the machine is
-     * owned by the session and closed by teardown after {@link ClientEvent#CLOSED} is delivered.
+     * owned by the session and closed by teardown after {@link CommonTrigger#CLOSED} is delivered.
      *
      * @param id           the session id
      * @param stateMachine the state machine that consumes the session events
@@ -152,7 +152,7 @@ public class TCPSMCallback
                 ByteBufferUtil.cache(rawReadBuffer);
             }
             NamedValue<Throwable> exception = getConfig().getProperties().getNV(SUS.enumName(Params.EXCEPTION));
-            getConfig().publishSync(ClientEvent.CLOSED, exception != null ? exception.getValue() : null);
+            getConfig().publishSync(CommonTrigger.CLOSED, exception != null ? exception.getValue() : null);
             // last act: a closed machine rejects publishes, so CLOSED must go out first
             getConfig().close();
         });
@@ -161,7 +161,7 @@ public class TCPSMCallback
 
 
     /**
-     * Read dispatch: drains the socket, publishing one {@link ClientEvent#RAW_IN_DATA} packet per
+     * Read dispatch: drains the socket, publishing one {@link CommonTrigger#RAW_IN_DATA} packet per
      * read via {@link #accept(DataPacket)}; on EOF or read error the session is closed. Never
      * invoked before {@link #connected(SelectionKey)}, and serialized per session by NIOSocket.
      *
@@ -217,7 +217,7 @@ public class TCPSMCallback
 
     /**
      * Connection establishment: binds the channel, creates the session output stream and fires
-     * the {@link ClientEvent#CONNECTED} event with the SelectionKey as payload.
+     * the {@link CommonTrigger#CONNECTED} event with the SelectionKey as payload.
      *
      * @param key the session's selection key
      * @return the selection interest ops to install
@@ -227,14 +227,14 @@ public class TCPSMCallback
         setChannel(key.channel());
         bcos = new CommonChannelOutputStream(getChannel());
         registerAutoCloseable(bcos);
-        getConfig().publishSync(ClientEvent.CONNECTED, key);
+        getConfig().publishSync(CommonTrigger.CONNECTED, key);
         return interestOps();
     }
 
     /**
      * Registers a per-session resource in the {@link Params#AUTO_CLOSEABLE} collection; session
      * teardown closes the registered resources in registration order, before {@link
-     * ClientEvent#CLOSED} is published. Used by the transport itself (socket channel, session
+     * CommonTrigger#CLOSED} is published. Used by the transport itself (socket channel, session
      * output stream) and by states owning session-scoped resources (e.g. the SSL session state,
      * whose pooled buffers must be recached even when the session dies mid-handshake).
      *
@@ -280,7 +280,7 @@ public class TCPSMCallback
      */
     public void accept(DataPacket<Long> t) {
 
-        getConfig().publishSync(ClientEvent.RAW_IN_DATA, t.getBuffer());
+        getConfig().publishSync(CommonTrigger.RAW_IN_DATA, t.getBuffer());
 
     }
 
@@ -292,7 +292,7 @@ public class TCPSMCallback
      */
     public void accept(ByteBuffer t) {
 
-        getConfig().publishSync(ClientEvent.RAW_IN_DATA, t);
+        getConfig().publishSync(CommonTrigger.RAW_IN_DATA, t);
 
     }
 
@@ -304,7 +304,7 @@ public class TCPSMCallback
 
     /**
      * Error termination: stashes the cause under {@link Params#EXCEPTION} so the close delegate
-     * publishes it as the {@link ClientEvent#CLOSED} payload, then closes the session.
+     * publishes it as the {@link CommonTrigger#CLOSED} payload, then closes the session.
      *
      * @param e the error that terminated the session
      */

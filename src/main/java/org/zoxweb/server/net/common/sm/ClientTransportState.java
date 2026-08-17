@@ -17,9 +17,9 @@ import java.nio.channels.SelectionKey;
  * <p>
  * The router owns {@code RAW_IN_DATA} exclusively — routing is broadcast pub/sub and a second
  * consumer would double-consume wire bytes; catalog and application states consume
- * {@link ClientEvent#IN_DATA} instead, each buffer having exactly one active owner:
+ * {@link CommonTrigger#IN_DATA} instead, each buffer having exactly one active owner:
  * <ul>
- * <li>{@code PLAIN} — the packet passes through as {@link ClientEvent#IN_DATA}; ownership
+ * <li>{@code PLAIN} — the packet passes through as {@link CommonTrigger#IN_DATA}; ownership
  * transfers to the consuming state, which recaches it.</li>
  * <li>{@code TLS_HANDSHAKING} / {@code TLS_SECURE} — the packet's ciphertext is copied into the
  * SSL engine's inbound net buffer chunk by chunk, publishing the current handshake status per
@@ -44,7 +44,7 @@ public class ClientTransportState extends State<Object> {
 
     private class Connected extends TriggerConsumer<SelectionKey> {
         Connected() {
-            super(ClientEvent.CONNECTED);
+            super(CommonTrigger.CONNECTED);
         }
 
         @Override
@@ -57,7 +57,7 @@ public class ClientTransportState extends State<Object> {
 
     private class RawInData extends TriggerConsumer<ByteBuffer> {
         RawInData() {
-            super(ClientEvent.RAW_IN_DATA);
+            super(CommonTrigger.RAW_IN_DATA);
         }
 
         @Override
@@ -66,7 +66,7 @@ public class ClientTransportState extends State<Object> {
             switch (ctx.getMode()) {
                 case PLAIN:
                     // pass-through: ownership transfers to the active IN_DATA owner
-                    publishSync(ClientEvent.IN_DATA, packet);
+                    publishSync(CommonTrigger.IN_DATA, packet);
                     break;
                 case TLS_HANDSHAKING:
                 case TLS_SECURE:
@@ -83,7 +83,7 @@ public class ClientTransportState extends State<Object> {
         private void feedSSL(ClientSessionContext ctx, ByteBuffer packet) {
             SSLSessionConfig cfg = ctx.getSSLConfig();
             while (packet.hasRemaining() && !cfg.isClosed()) {
-                ByteBuffer net = cfg.getSSLInboundBuffer();
+                ByteBuffer net = cfg.getSSLInBuffer();
                 int n = Math.min(packet.remaining(), net.remaining());
                 if (n == 0) {
                     ByteBufferUtil.cache(packet);
@@ -106,7 +106,7 @@ public class ClientTransportState extends State<Object> {
 
     private class Closed extends TriggerConsumer<Throwable> {
         Closed() {
-            super(ClientEvent.CLOSED);
+            super(CommonTrigger.CLOSED);
         }
 
         @Override

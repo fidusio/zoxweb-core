@@ -29,7 +29,7 @@ public class SSLClientBridgeTest {
             bb.get(chunk);
             data.set(new String(chunk));
             ByteBufferUtil.cache(bb);
-        }, ClientEvent.IN_DATA);
+        }, CommonTrigger.IN_DATA);
         sm.register(app);
 
         SSLClientBridge bridge = new SSLClientBridge(sm);
@@ -49,7 +49,7 @@ public class SSLClientBridgeTest {
         ClientConSM sm = ClientConSMBuilder.create("bridge-empty").build();
         final AtomicInteger count = new AtomicInteger();
         State<Object> app = new State<Object>("app");
-        app.register((Consumer<ByteBuffer>) bb -> count.incrementAndGet(), ClientEvent.IN_DATA);
+        app.register((Consumer<ByteBuffer>) bb -> count.incrementAndGet(), CommonTrigger.IN_DATA);
         sm.register(app);
 
         SSLClientBridge bridge = new SSLClientBridge(sm);

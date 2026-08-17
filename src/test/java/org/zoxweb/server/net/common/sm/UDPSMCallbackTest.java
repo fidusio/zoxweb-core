@@ -68,7 +68,7 @@ public class UDPSMCallbackTest {
                 } catch (IOException e) {
                     cb.exception(e);
                 }
-            }, ClientEvent.CONNECTED);
+            }, CommonTrigger.CONNECTED);
             app.register((Consumer<Object>) o -> {
                 DataPacket<?> dp = (DataPacket<?>) o;
                 ByteBuffer bb = dp.getBuffer();
@@ -78,8 +78,8 @@ public class UDPSMCallbackTest {
                 ByteBufferUtil.cache(bb);
                 echoed.set(new String(chunk));
                 dataLatch.countDown();
-            }, ClientEvent.DATAGRAM);
-            app.register((Consumer<Throwable>) t -> closedPayload.set(t), ClientEvent.CLOSED);
+            }, CommonTrigger.DATAGRAM);
+            app.register((Consumer<Throwable>) t -> closedPayload.set(t), CommonTrigger.CLOSED);
             machine.register(app);
 
             // ephemeral local bind; NIOSocket invokes connected(SK) after registration — the

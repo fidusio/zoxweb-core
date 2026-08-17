@@ -339,7 +339,7 @@ RAW_IN_DATA → (router) → IN_DATA → (assembler) → IN_MESSAGE → (control
 | `START_TLS` | kept | null | controller / SSL AutoStart → SSL control |
 | `RAW_IN_DATA` · `DATAGRAM` · `CONNECTED` · `CLOSED` | kept | as v1 | callback → router |
 | `NEED_WRAP` · `NEED_UNWRAP` · `NEED_UNWRAP_AGAIN` · `NEED_TASK` · `FINISHED` · `NOT_HANDSHAKING` | kept | `SSLClientBridge`, or null during the config-close drain | `ClientSSLHelper` → SSL states |
-| **`BANNER_RECEIVED`** | **RETIRED** | — | removed from `ClientEvent`; applications read `results.banner` |
+| **`BANNER_RECEIVED`** | **RETIRED** | — | removed from `CommonTrigger`; applications read `results.banner` |
 
 `VALIDATED` was considered and **rejected**: the validator's only output is the report — no event
 round-trip. What happens after a verdict is the controller's meta decision or end-of-life.
@@ -515,8 +515,8 @@ port-unreachable fails the session with a cause.
 ## 13. Implementation breakdown (order; behavior-preserving where possible)
 
 1. **Events** — add `IN_MESSAGE`, `OUT_MESSAGE`, `VALIDATE`; remove `BANNER_RECEIVED` from
-   `ClientEvent` and its `ProtoConnect` / test references. **DONE 2026-08-15** (also:
-   `SMProtoUtil.BasicEvent` merged into `ClientEvent` — one enum is the whole vocabulary — and
+   `CommonTrigger` and its `ProtoConnect` / test references. **DONE 2026-08-15** (also:
+   `SMProtoUtil.BasicEvent` merged into `CommonTrigger` — one enum is the whole vocabulary — and
    the wire event renamed `IN_RAW_DATA` → `RAW_IN_DATA` to match this document).
 2. **Report listener + `waitForClose`** — one `MACHINE_CLOSED`-based utility; migrate helpers and
    tests off hand-rolled latches. **DONE 2026-08-15**: `SMProtoUtil.waitForClose(sm, millis)`
@@ -664,8 +664,8 @@ is slated to dissolve in v2, that is noted — but it is live code today.
 | ~~`SSHBannerPhase`~~ | **DELETED 2026-08-15** — dissolved into `delimited` assembler + `validate` (ssh factory sugar, §11). | — |
 | ~~`DataExchangePhase`~~ | **DELETED 2026-08-15** — dissolved into `assembler` + `controller` + `responder` (§8). | — |
 | ~~`ConnectionPhase`~~ | **DELETED 2026-08-15** — first-implementation error (§14.10); ownership/broadcast-order contract text lives in `ClientTransportState`/package javadoc. | — |
-| `SMProtoUtil` | Package utility home (**all new utilities go here** — maintainer directive): `STRING_TO_DATA`, `STRING_VARS_TO_STRING/DATA`, `hasVars`, `RESULTS` + `results(smi)`. (`BasicEvent` merged into `ClientEvent` 2026-08-15 — one enum is the whole vocabulary.) | gained `waitForClose` + `closeCause` (§13.2, done 2026-08-15) |
-| `ClientEvent` | The complete session vocabulary (2026-08-15: absorbed `SMProtoUtil.BasicEvent`): `CONNECTED`, `RAW_IN_DATA`, `DATAGRAM`, `IN_DATA`, `SECURE`, `READY`, `START_TLS`, `IN_MESSAGE`, `OUT_MESSAGE`, `VALIDATE`, `CLOSED`. (`BANNER_RECEIVED` removed — v2 step 1 done.) | kept |
+| `SMProtoUtil` | Package utility home (**all new utilities go here** — maintainer directive): `STRING_TO_DATA`, `STRING_VARS_TO_STRING/DATA`, `hasVars`, `RESULTS` + `results(smi)`. (`BasicEvent` merged into `CommonTrigger` 2026-08-15 — one enum is the whole vocabulary.) | gained `waitForClose` + `closeCause` (§13.2, done 2026-08-15) |
+| `CommonTrigger` | The complete session vocabulary (2026-08-15: absorbed `SMProtoUtil.BasicEvent`): `CONNECTED`, `RAW_IN_DATA`, `DATAGRAM`, `IN_DATA`, `SECURE`, `READY`, `START_TLS`, `IN_MESSAGE`, `OUT_MESSAGE`, `VALIDATE`, `CLOSED`. (`BANNER_RECEIVED` removed — v2 step 1 done.) | kept |
 | `ProtoConnect` | Observer CLI: config + `host:port` + `var=value` → prints lifecycle events; exit 0/1/2/64. Never drives the session. | kept |
 | `package-info.java` | Package overview javadoc. | kept |
 
