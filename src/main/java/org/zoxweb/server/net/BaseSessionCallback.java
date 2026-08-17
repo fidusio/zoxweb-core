@@ -1,12 +1,10 @@
 package org.zoxweb.server.net;
 
 import org.zoxweb.shared.io.CloseableType;
-import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.util.Identifier;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.ByteChannel;
 import java.nio.channels.Channel;
@@ -15,8 +13,9 @@ import java.nio.channels.SelectionKey;
 /**
  * Base class for byte-stream session callbacks: a {@link SessionCallback} consuming
  * {@link ByteBuffer}s and supplying an {@link OutputStream}, with the common session plumbing —
- * remote address, channel, {@link BaseChannelOutputStream}, optional {@link ProtocolHandler} and
- * delegate-backed close/isClosed.
+ * channel and {@link BaseChannelOutputStream}. Remote address, the optional
+ * {@link ProtocolHandler} and delegate-backed close/isClosed are inherited from
+ * {@link SessionCallback}.
  * <p>
  * This is the base of the SSL/protocol session callbacks, whose data unit is the raw or decrypted
  * ByteBuffer delivered via {@code accept(ByteBuffer)}. Callbacks that consume a different data
@@ -29,37 +28,10 @@ import java.nio.channels.SelectionKey;
 public abstract class BaseSessionCallback<CF>
         extends SessionCallback<CF, ByteBuffer, OutputStream>
         implements CloseableType, Identifier<String> {
-    private InetSocketAddress remoteAddress;
     private volatile BaseChannelOutputStream bcos;
     private volatile ByteChannel channel;
 
     protected String instanceID = null;
-
-
-    /**
-     * @return the session's remote peer address, null if never set
-     */
-    public InetSocketAddress getRemoteAddress() {
-        return remoteAddress;
-    }
-
-    /**
-     * Sets the session's remote peer address.
-     *
-     * @param remoteAddress the remote peer address
-     */
-    public void setRemoteAddress(InetSocketAddress remoteAddress) {
-        this.remoteAddress = remoteAddress;
-    }
-
-    /**
-     * Sets the session's remote peer address.
-     *
-     * @param ipAddress the remote peer address
-     */
-    public void setRemoteAddress(IPAddress ipAddress) {
-        this.remoteAddress = new InetSocketAddress(ipAddress.getInetAddress(), ipAddress.getPort());
-    }
 
 
     /**

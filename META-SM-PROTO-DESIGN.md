@@ -260,12 +260,14 @@ lambda (once-only; its flag flips **before** the lambda runs, which the read loo
   republishes it as the `CLOSED` payload.
 
 **`UDPSMCallback` (connected datagram client)**
-- Constructed with the fixed `remote`; the bind address is the caller's
-  (`addDatagramSocket(localBind, cb)`, ephemeral `new InetSocketAddress(0)`).
-- `setChannel(Channel)` — **silent setup only**: bind, teardown-register, `connect(remote)`
-  (guarded by `isConnected()`; failure routes through `exception()` then rethrows).
+- Constructed with the peer address, stored in the inherited `SessionCallback.remoteAddress`
+  (`setRemoteAddress` in the constructor, read back via `getRemoteAddress()`); the bind address is
+  the caller's (`addDatagramSocket(localBind, cb)`, ephemeral `new InetSocketAddress(0)`).
+- `setChannel(Channel)` — **silent setup only**: bind, teardown-register,
+  `connect(getRemoteAddress())` (guarded by `isConnected()`; failure routes through `exception()`
+  then rethrows).
 - `connected(SelectionKey)` — kickoff: idempotent `setChannel`, once-only CAS
-  `publishSync(CONNECTED, remote)`, return `OP_READ`. NIOSocket registers with **zero ops** and
+  `publishSync(CONNECTED, getRemoteAddress())`, return `OP_READ`. NIOSocket registers with **zero ops** and
   installs the returned ops only after this completes, so the machine's `CONNECTED` actions (first
   datagram) always precede any read dispatch; an early reply waits in the OS buffer.
 - `accept(SelectionKey)` — receive loop under `readLock`, same loop-top guard: `receive` → flip →
@@ -556,7 +558,7 @@ purpose-written state, not a config. Server-side counterpart ON HOLD (Rule 11).
 
 ---
 
-## 14. Settled decisions (maintainer rulings, 2026-08-15)
+## 14. Settled decisions (maintainer rulings, 2026-08-15/16)
 
 1. **Operational premise** — the machine drives the whole session end to end; the callbacks are
    machine-configured JVM transport bridges triggered by NIOSocket; the report is pushed at
@@ -581,6 +583,14 @@ purpose-written state, not a config. Server-side counterpart ON HOLD (Rule 11).
     meta-driven state catalog replaces it entirely: catalog builders register states directly;
     `READY` gating moves to the controller completion rule. v1 is being phased out in favor of
     v2 — do not preserve v1 structures for their own sake.
+11. **`remoteAddress` is standardized on `SessionCallback`, and its rough edges stay open**
+    (2026-08-16) — the field and its accessors were pulled up from `BaseSessionCallback` so the
+    whole hierarchy shares one implementation. Standardization outranks per-class specificity
+    here: proposals to re-specialize it (restoring `UDPSMCallback`'s immutable target via an
+    overridden setter or a private final field) are **rejected**. The known consequences — the
+    lost `final` on the UDP target, and the pre-connect null window on the TCP client path — are
+    deliberately left unpatched pending a larger rework; technical detail in `PENDING.md` §3.4.
+    Do not "fix" them opportunistically.
 
 *(Rejected along the way: a Phase A/B/C gap-phasing plan — superseded by the premise above.)*
 
@@ -662,7 +672,11 @@ is slated to dissolve in v2, that is noted — but it is live code today.
 **Outside the package, part of this work:** `NIOSocket.addDatagramSocket(InetSocketAddress,
 ConnectionCallback<?>)` (bind → `setChannel` → register **0 ops** → `connected(sk)` → install
 returned ops); `UDPSessionCallback.connected()` now calls `setChannel`;
-`shared.util.NVGMProperties` gained the named-bag constructor.
+`shared.util.NVGMProperties` gained the named-bag constructor; `remoteAddress` and its accessors
+moved up from `BaseSessionCallback` to `SessionCallback` (2026-08-16), so both SM callbacks now
+inherit one implementation instead of declaring their own — `TCPSMCallback.setChannel` and the
+`UDPSMCallback` constructor call `setRemoteAddress`. Its semantics are pending a larger rework —
+open items recorded in `PENDING.md` §3.4, deliberately not patched.
 
 ### Test package — `src/test/java/org/zoxweb/server/net/common/sm/` (16 classes)
 

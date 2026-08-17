@@ -313,6 +313,18 @@ implementors will see it.
   silent-no-op `close()` and an `isClosed()` that is permanently false, so reapers keyed on it never
   collect. This is what made `TCPSMCallback.close()` a no-op before the delegate was wired (§1).
   Consider making the null-delegate case still flip the flag.
+- **[open by ruling — see `META-SM-PROTO-DESIGN.md` §14.11; do not patch]** `remoteAddress` was
+  pulled up from `BaseSessionCallback` to `SessionCallback.java:32` so the whole hierarchy shares
+  one field. Two consequences are known and left open pending a larger rework:
+  - `UDPSMCallback` lost its `private final remote`. `send()` re-reads `getRemoteAddress()` per
+    call (`UDPSMCallback.java:282`) against a channel `connect()`ed to the original peer
+    (`:189`), and `ByteBufferUtil.java:315` does `channel.send(bb, destinationAddress)` — the JDK
+    throws `IllegalArgumentException` when a connected channel is handed a different target. The
+    constructor's `SUS.checkIfNulls` guard no longer covers the inherited public setter either.
+  - `NIOSocket.java:281` calls `cc.setChannel(channel)` **before** `channel.connect(sa)` at `:285`,
+    so `TCPSMCallback.java:271` writes a null address on the client path; it is repaired only when
+    `connected()` re-invokes `setChannel` (`TCPSMCallback.java:227`). Nothing reads it in that
+    window today, but the getter is public and observers may poll before `CONNECTED`.
 - Factories swallow callback-construction failure and return half-built handlers —
   `NIOSocketHandlerFactory.java:33-44`, `SSLNIOSocketHandlerFactory.java:47-58`. A config typo
   (missing no-arg constructor, bad `session_callback` class name) yields a server that accepts and

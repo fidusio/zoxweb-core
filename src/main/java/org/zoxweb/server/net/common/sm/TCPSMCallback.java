@@ -60,7 +60,6 @@ public class TCPSMCallback
     private final AtomicLong packetsCounter = new AtomicLong(0);
     private volatile CommonChannelOutputStream bcos;
     private volatile SocketChannel socket;
-    private volatile InetSocketAddress remoteAddress;
     private final String id;
 
     /**
@@ -269,8 +268,7 @@ public class TCPSMCallback
     public void setChannel(Channel channel) throws IOException{
         socket = (SocketChannel) channel;
         registerAutoCloseable(socket);
-        remoteAddress = ((InetSocketAddress) socket.getRemoteAddress());
-
+        setRemoteAddress((InetSocketAddress) socket.getRemoteAddress());
     }
 
 

@@ -81,7 +81,6 @@ public class UDPSMCallback
 
     private final AtomicLong packetsCounter = new AtomicLong(0);
     private final String id;
-    private final InetSocketAddress remote;
     private final AtomicBoolean connectedPublished = new AtomicBoolean(false);
     private volatile DatagramChannel channel;
     private final Lock sendLock = new ReentrantLock();
@@ -136,7 +135,7 @@ public class UDPSMCallback
             // last act: a closed machine rejects publishes, so CLOSED must go out first
             getConfig().close();
         });
-        this.remote = remote;
+        setRemoteAddress(remote);
         this.id = id;
     }
 
@@ -172,13 +171,6 @@ public class UDPSMCallback
     }
 
     /**
-     * @return the connected remote peer
-     */
-    public InetSocketAddress getRemote() {
-        return remote;
-    }
-
-    /**
      * Channel setup only — <b>no events</b>: binds the datagram channel, registers it in the
      * {@link Params#AUTO_CLOSEABLE} collection so teardown closes it, and connects it to the
      * remote. The machine kickoff is {@link #connected(SelectionKey)}, invoked by NIOSocket after
@@ -194,12 +186,12 @@ public class UDPSMCallback
         registerAutoCloseable(this.channel);
         try {
             if (!this.channel.isConnected())
-                this.channel.connect(remote);
+                this.channel.connect(getRemoteAddress());
         } catch (IOException | RuntimeException e) {
             // don't leave a half-initialized client behind: route through the session error
             // path (CLOSED with cause, channel closed by teardown), then surface to the caller
             exception(e);
-            throw e instanceof IOException ? (IOException) e : new IOException("UDP client init failed for " + remote, e);
+            throw e instanceof IOException ? (IOException) e : new IOException("UDP client init failed for " + getRemoteAddress(), e);
         }
     }
 
@@ -287,7 +279,7 @@ public class UDPSMCallback
      * @throws IOException on channel error
      */
     public int send(ByteBuffer byteBuffer, boolean flip) throws IOException {
-        return ByteBufferUtil.send(sendLock, channel, byteBuffer, remote, flip);
+        return ByteBufferUtil.send(sendLock, channel, byteBuffer, getRemoteAddress(), flip);
     }
 
     /**
@@ -307,7 +299,7 @@ public class UDPSMCallback
     public int connected(SelectionKey key) throws IOException {
         setChannel(key.channel());
         if (connectedPublished.compareAndSet(false, true))
-            getConfig().publishSync(ClientEvent.CONNECTED, remote);
+            getConfig().publishSync(ClientEvent.CONNECTED, getRemoteAddress());
         return interestOps();
     }
 
