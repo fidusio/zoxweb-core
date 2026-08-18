@@ -83,7 +83,7 @@ public class ClientTransportState extends State<Object> {
         private void feedSSL(ClientSessionContext ctx, ByteBuffer packet) {
             SSLSessionConfig cfg = ctx.getSSLConfig();
             while (packet.hasRemaining() && !cfg.isClosed()) {
-                ByteBuffer net = cfg.getSSLInBuffer();
+                ByteBuffer net = cfg.getSSLIOBuffers().getInBuffer();
                 int n = Math.min(packet.remaining(), net.remaining());
                 if (n == 0) {
                     ByteBufferUtil.cache(packet);

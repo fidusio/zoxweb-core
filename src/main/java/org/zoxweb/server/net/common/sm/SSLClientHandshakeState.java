@@ -78,7 +78,7 @@ public class SSLClientHandshakeState extends State<Object> {
                 // router-fed unwrap — NO channel read, see class javadoc; handshake records
                 // produce no app data, hence the EMPTY destination (as SSLUtil._needUnwrap)
                 SSLEngineResult result = SSLUtil.smartSSLUnwrap(
-                        config.getSSLEngine(), config.getSSLInBuffer(), ByteBufferUtil.EMPTY, true, true);
+                        config.getSSLEngine(), config.getSSLIOBuffers().getInBuffer(), ByteBufferUtil.EMPTY, true, true);
                 switch (result.getStatus()) {
                     case BUFFER_UNDERFLOW:
                         // partial record — wait for the router's next feed

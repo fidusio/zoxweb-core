@@ -5,6 +5,7 @@ import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.net.BaseChannelOutputStream;
 import org.zoxweb.server.net.SelectorController;
+import org.zoxweb.server.net.IOBuffers;
 import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.util.SUS;
@@ -20,10 +21,14 @@ public class SSLSessionConfig
         implements SSLConfigInt {
     public final static LogWrapper log = new LogWrapper(SSLSessionConfig.class.getName()).setEnabled(false);
 
+
+    private volatile IOBuffers sslIOBuffers = null;
+
+
     // Incoming encrypted data
-    volatile ByteBuffer inSSLNetData = null;
+    //volatile ByteBuffer inSSLNetData = null;
     // Outgoing encrypted data
-    public volatile ByteBuffer outSSLNetData = null;
+    //public volatile ByteBuffer outSSLNetData = null;
     // clear text application data
     volatile ByteBuffer inAppData = null;
     // the encrypted channel
@@ -117,8 +122,8 @@ public class SSLSessionConfig
                 selectorController.cancelSelectionKey(sslChannel);
                 selectorController.cancelSelectionKey(remoteChannel);
             }
-            SharedIOUtil.close((AutoCloseable) sslConnectionHelper);
-            ByteBufferUtil.cache(inSSLNetData, inAppData, outSSLNetData, inRemoteData);
+            SharedIOUtil.close((AutoCloseable) sslConnectionHelper, sslIOBuffers);
+            ByteBufferUtil.cache(inAppData, inRemoteData);
             SharedIOUtil.close(sslOutputStream);
 
             if (log.isEnabled()) log.getLogger().info("SSLSessionConfig-CLOSED " + Thread.currentThread() + " " +
@@ -187,17 +192,36 @@ public class SSLSessionConfig
     public void beginHandshake(ByteBuffer inRawBuffer, ByteBuffer outRawBuffer) throws SSLException {
         if (!hasBegan.get()) {
             if (!hasBegan.getAndSet(true)) {
+                sslIOBuffers = new IOBuffers();
                 // set the ssl engine mode client or sever
                 sslEngine.setUseClientMode(clientMode);
                 // create the necessary byte buffer with the proper length
-                inSSLNetData = inRawBuffer != null && inRawBuffer.capacity() >= getPacketBufferSize() ? inRawBuffer : ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, getPacketBufferSize());
-                outSSLNetData = outRawBuffer != null && outRawBuffer.capacity() >= getPacketBufferSize() ? outRawBuffer : ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, getPacketBufferSize());
+//                inSSLNetData =
+                        sslIOBuffers.setInBuffer(inRawBuffer != null && inRawBuffer.capacity() >= getPacketBufferSize() ? inRawBuffer : ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, getPacketBufferSize()));
+               // outSSLNetData =
+                sslIOBuffers.setOutBuffer(outRawBuffer != null && outRawBuffer.capacity() >= getPacketBufferSize() ? outRawBuffer : ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, getPacketBufferSize()));
                 inAppData = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, getApplicationBufferSize());
                 // start the handshake
                 sslEngine.beginHandshake();
             }
         }
     }
+
+
+//    public void beginHandshake(TransportBuffers transportBuffers) throws SSLException {
+//        if (!hasBegan.get()) {
+//            if (!hasBegan.getAndSet(true)) {
+//                // set the ssl engine mode client or sever
+//                sslEngine.setUseClientMode(clientMode);
+//                // create the necessary byte buffer with the proper length
+//                inSSLNetData = inRawBuffer != null && inRawBuffer.capacity() >= getPacketBufferSize() ? inRawBuffer : ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, getPacketBufferSize());
+//                outSSLNetData = outRawBuffer != null && outRawBuffer.capacity() >= getPacketBufferSize() ? outRawBuffer : ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, getPacketBufferSize());
+//                inAppData = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, getApplicationBufferSize());
+//                // start the handshake
+//                sslEngine.beginHandshake();
+//            }
+//        }
+//    }
 
 
 
@@ -216,14 +240,19 @@ public class SSLSessionConfig
         return sslChannel;
     }
 
-    @Override
-    public ByteBuffer getSSLInBuffer() {
-        return inSSLNetData;
-    }
+//    @Override
+//    public ByteBuffer getSSLInBuffer() {
+//        return inSSLNetData;
+//    }
+//
+//    @Override
+//    public ByteBuffer getSSLOutBuffer() {
+//        return outSSLNetData;
+//    }
 
     @Override
-    public ByteBuffer getSSLOutBuffer() {
-        return outSSLNetData;
+    public IOBuffers getSSLIOBuffers() {
+        return sslIOBuffers;
     }
 
     @Override

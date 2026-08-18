@@ -117,7 +117,7 @@ public final class SSLUtil {
         if (config.sslChannel.isOpen()) {
             if (config.getHandshakeStatus() == NOT_HANDSHAKING) {
                 try {
-                    int bytesRead = config.sslChannel.read(config.inSSLNetData);
+                    int bytesRead = config.sslChannel.read(config.getSSLIOBuffers().getInBuffer());
                     if (bytesRead == -1) {
                         if (log.isEnabled())
                             log.getLogger().info("SSLCHANNEL-CLOSED-NOT_HANDSHAKING: " + config.getHandshakeStatus() + " bytesRead: " + bytesRead);
@@ -127,7 +127,7 @@ public final class SSLUtil {
                         // even if we have read zero it will trigger BUFFER_UNDERFLOW then we wait for incoming
                         // data
                         do {
-                            result = smartSSLUnwrap(config.sslEngine, config.inSSLNetData, config.inAppData, true, true);
+                            result = smartSSLUnwrap(config.sslEngine, config.getSSLIOBuffers().getInBuffer(), config.inAppData, true, true);
                             if (log.isEnabled())
                                 log.getLogger().info("AFTER-NOT_HANDSHAKING-PROCESSING: " + result + " bytesRead: " + bytesRead + " callback: " + callback);
                             switch (result.getStatus()) {
@@ -158,7 +158,7 @@ public final class SSLUtil {
                                     break;
                             }
                         }// check if we still have encrypted data to process
-                        while (config.inSSLNetData.hasRemaining() && !config.isClosed());
+                        while (config.getSSLIOBuffers().getInBuffer().hasRemaining() && !config.isClosed());
 
 
                     }
@@ -217,7 +217,7 @@ public final class SSLUtil {
             }
         }
 
-        if (config.inSSLNetData.position() > 0) {
+        if (config.getSSLIOBuffers().getInBuffer().position() > 0) {
             //**************************************************
             // ||-----DATA BUFFER------ ||
             // ||Handshake data|App data||
@@ -289,7 +289,7 @@ public final class SSLUtil {
         if (config.getHandshakeStatus() == NEED_UNWRAP || SUS.enumName(config.getHandshakeStatus()).equals("NEED_UNWRAP_AGAIN")) {
             try {
 
-                int bytesRead = config.sslChannel.read(config.inSSLNetData);
+                int bytesRead = config.sslChannel.read(config.getSSLIOBuffers().getInBuffer());
                 if (bytesRead == -1) {
                     if (log.isEnabled())
                         log.getLogger().info("SSLCHANNEL-CLOSED-NEED_UNWRAP: " + config.getHandshakeStatus() + " bytes read: " + bytesRead);
@@ -299,13 +299,13 @@ public final class SSLUtil {
                     // even if we have read zero it will trigger BUFFER_UNDERFLOW then we wait for incoming
                     // data
                     if (log.isEnabled())
-                        log.getLogger().info("BEFORE-UNWRAP: " + config.inSSLNetData + " bytes read " + bytesRead);
-                    SSLEngineResult result = smartSSLUnwrap(config.sslEngine, config.inSSLNetData, ByteBufferUtil.EMPTY, true, true);
+                        log.getLogger().info("BEFORE-UNWRAP: " + config.getSSLIOBuffers().getInBuffer() + " bytes read " + bytesRead);
+                    SSLEngineResult result = smartSSLUnwrap(config.sslEngine, config.getSSLIOBuffers().getInBuffer(), ByteBufferUtil.EMPTY, true, true);
 
 
                     if (log.isEnabled()) {
                         log.getLogger().info("AFTER-NEED_UNWRAP-HANDSHAKING: " + result + " bytes read: " + bytesRead);
-                        log.getLogger().info("AFTER-NEED_UNWRAP-HANDSHAKING inNetData: " + config.inSSLNetData + " inAppData: " + config.inAppData);
+                        log.getLogger().info("AFTER-NEED_UNWRAP-HANDSHAKING inNetData: " + config.getSSLIOBuffers().getInBuffer() + " inAppData: " + config.inAppData);
                     }
 
                     switch (result.getStatus()) {
@@ -383,7 +383,7 @@ public final class SSLUtil {
 
         if (config.getHandshakeStatus() == NEED_WRAP) {
             try {
-                SSLEngineResult result = smartSSLWrap(config.sslEngine, ByteBufferUtil.EMPTY, config.outSSLNetData, true, true);
+                SSLEngineResult result = smartSSLWrap(config.sslEngine, ByteBufferUtil.EMPTY, config.getSSLIOBuffers().getOutBuffer(), true, true);
                 // at handshake stage, data in appOut won't be
                 // processed hence dummy buffer
                 if (log.isEnabled())
@@ -393,11 +393,11 @@ public final class SSLUtil {
                     case BUFFER_UNDERFLOW:
                     case BUFFER_OVERFLOW:
                         config.forcedClose = true;
-                        throw new IllegalStateException(result + " invalid state context " + config.outSSLNetData + " " + config.sslChannel.getRemoteAddress());
+                        throw new IllegalStateException(result + " invalid state context " + config.getSSLIOBuffers().getOutBuffer() + " " + config.sslChannel.getRemoteAddress());
                     case OK:
-                        int written = ByteBufferUtil.smartWrite(null, config.sslChannel, config.outSSLNetData, true);
+                        int written = ByteBufferUtil.smartWrite(null, config.sslChannel, config.getSSLIOBuffers().getOutBuffer(), true);
                         if (log.isEnabled())
-                            log.getLogger().info(result.getHandshakeStatus() + " After writing data HANDSHAKING-NEED_WRAP: " + config.outSSLNetData + " written:" + written);
+                            log.getLogger().info(result.getHandshakeStatus() + " After writing data HANDSHAKING-NEED_WRAP: " + config.getSSLIOBuffers().getOutBuffer() + " written:" + written);
                         config.sslConnectionHelper.publish(result.getHandshakeStatus(), callback);
                         break;
                     case CLOSED:
@@ -456,17 +456,17 @@ public final class SSLUtil {
         if (sslConfig.getSSLEngine().getHandshakeStatus() == NOT_HANDSHAKING) {
 
 
-            SSLEngineResult result = smartSSLWrap(sslConfig.getSSLEngine(), bb, sslConfig.getSSLOutBuffer(), flip, true);
+            SSLEngineResult result = smartSSLWrap(sslConfig.getSSLEngine(), bb, sslConfig.getSSLIOBuffers().getOutBuffer(), flip, true);
             if (log.isEnabled())
                 log.getLogger().info("AFTER-NEED_WRAP-PROCESSING: " + result);
             switch (result.getStatus()) {
                 case BUFFER_UNDERFLOW:
                 case BUFFER_OVERFLOW:
                     throw new IOException(result.getStatus() + " invalid state context buffer size " +
-                            SUS.toCanonicalID(',', sslConfig.getSSLOutBuffer().capacity(), sslConfig.getSSLOutBuffer().limit(), sslConfig.getSSLOutBuffer().position()));
+                            SUS.toCanonicalID(',', sslConfig.getSSLIOBuffers().getOutBuffer().capacity(), sslConfig.getSSLIOBuffers().getOutBuffer().limit(), sslConfig.getSSLIOBuffers().getOutBuffer().position()));
                 case OK:
                     try {
-                        written = ByteBufferUtil.smartWrite(null, dataChannel, sslConfig.getSSLOutBuffer(), true);
+                        written = ByteBufferUtil.smartWrite(null, dataChannel, sslConfig.getSSLIOBuffers().getOutBuffer(), true);
                         if (usageTracker != null) usageTracker.updateUsage();
                     } catch (IOException e) {
                         SharedIOUtil.close(closeable);

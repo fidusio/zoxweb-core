@@ -1,5 +1,6 @@
 package org.zoxweb.server.net.ssl;
 
+import org.zoxweb.server.net.IOBuffers;
 import org.zoxweb.shared.io.CloseableType;
 
 import javax.net.ssl.SSLEngine;
@@ -31,7 +32,7 @@ import java.nio.channels.ByteChannel;
  * <p>
  * <b>Concurrency.</b> None of the accessors synchronize. The handshake is serialized
  * per session on one worker by design; after the handshake, callers coordinate their
- * own access — e.g. {@code SSLUtil._sslWrite} wraps into {@link #getSSLOutBuffer()}
+ * own access — e.g. {@code SSLUtil._sslWrite} wraps into {@link #getSSLIOBuffers().getOutBuffer()}
  * and drains it to the channel within a single call.
  * </p>
  */
@@ -48,14 +49,17 @@ extends CloseableType {
      * Capacity &ge; {@link #getPacketBufferSize()}. {@code null} before
      * {@code beginHandshake}; recached (invalid) after {@link #close()}.
      */
-    ByteBuffer getSSLInBuffer();
+    //ByteBuffer getSSLInBuffer();
 
     /**
      * Outbound ciphertext buffer ({@code SSLEngine.wrap} destination &rarr; network).
      * Capacity &ge; {@link #getPacketBufferSize()}. {@code null} before
      * {@code beginHandshake}; recached (invalid) after {@link #close()}.
      */
-    ByteBuffer getSSLOutBuffer();
+    //ByteBuffer getSSLOutBuffer();
+
+
+    IOBuffers getSSLIOBuffers();
 
     /**
      * Decrypted plaintext buffer ({@code SSLEngine.unwrap} destination), handed to the
@@ -75,7 +79,6 @@ extends CloseableType {
 
     /**
      * Maximum TLS record size, per the engine's current {@code SSLSession}; sizes
-     * {@link #getSSLInBuffer()} and {@link #getSSLOutBuffer()}.
      */
     default int getPacketBufferSize() {return getSSLEngine().getSession().getPacketBufferSize();}
 

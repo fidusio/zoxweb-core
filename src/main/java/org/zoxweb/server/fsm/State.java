@@ -39,6 +39,10 @@ public class State<P>
     public State(String name, NVBase<?>... props) {
         super(true, "state-properties");
         this.name = name;
+        if(props != null && props.length == 1 && props[0] instanceof NVGenericMap) {
+            setProperties((NVGenericMap)props[0]);
+            return;
+        }
         if (props != null) {
             for (NVBase<?> nvb : props) {
                 getProperties().add(nvb);

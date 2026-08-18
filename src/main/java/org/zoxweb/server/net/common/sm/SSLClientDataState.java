@@ -45,7 +45,7 @@ public class SSLClientDataState extends State<Object> {
         public void accept(BaseSessionCallback<SSLSessionConfig> callback) {
             ClientSessionContext ctx = (ClientSessionContext) getStateMachine().getConfig();
             SSLSessionConfig cfg = ctx.getSSLConfig();
-            ByteBuffer net = cfg.getSSLInBuffer();
+            ByteBuffer net = cfg.getSSLIOBuffers().getInBuffer();
             try {
                 SSLEngineResult result;
                 do {

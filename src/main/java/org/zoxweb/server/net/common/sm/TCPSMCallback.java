@@ -105,7 +105,7 @@ public class TCPSMCallback
     }
 
     // 16k is a bit too big but it will be cached + plus it will support SSL
-    private final ByteBuffer rawReadBuffer = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, SharedIOUtil.K_16);
+    private volatile ByteBuffer inRawBuffer = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, SharedIOUtil.SSL_BUFFER_SIZE);
     // guards rawReadBuffer handoff between the read loop and the close delegate's recache:
     // without it an external close() (or an inline close from a RAW_IN_DATA consumer) could
     // return the buffer to the pool while the read loop is still using it
@@ -149,7 +149,7 @@ public class TCPSMCallback
             // RAW_IN_DATA consumer) re-enters the lock on the same thread and the read loop's
             // isClosed() check keeps it from touching the buffer afterwards
             synchronized (readLock) {
-                ByteBufferUtil.cache(rawReadBuffer);
+                ByteBufferUtil.cache(inRawBuffer);
             }
             NamedValue<Throwable> exception = getConfig().getProperties().getNV(SUS.enumName(Params.EXCEPTION));
             getConfig().publishSync(CommonTrigger.CLOSED, exception != null ? exception.getValue() : null);
@@ -179,15 +179,15 @@ public class TCPSMCallback
                     // must not be touched again
                     if (isClosed())
                         return;
-                    rawReadBuffer.clear();
-                    read = socket.isConnected() ? socket.read(rawReadBuffer) : -1;
+                    inRawBuffer.clear();
+                    read = socket.isConnected() ? socket.read(inRawBuffer) : -1;
                     if (read > 0) {
 
-                        rawReadBuffer.flip();
+                        inRawBuffer.flip();
 
                         // the packet buffer is a detached copy owned by the consumer, safe for async handling,
                         // the consumer may ByteBufferUtil.cache() it when done processing
-                        ByteBuffer packetBuffer = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, rawReadBuffer.array(), 0, rawReadBuffer.remaining(), true);
+                        ByteBuffer packetBuffer = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, inRawBuffer.array(), 0, inRawBuffer.remaining(), true);
                         accept(new DataPacket<>(packetsCounter.incrementAndGet(), remoteAddress,  packetBuffer));
 
                     }
