@@ -5,7 +5,7 @@ import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.net.BaseChannelOutputStream;
 import org.zoxweb.server.net.SelectorController;
-import org.zoxweb.server.net.IOBuffers;
+import org.zoxweb.server.io.IOBuffers;
 import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.util.SUS;
@@ -29,8 +29,8 @@ public class SSLSessionConfig
     //volatile ByteBuffer inSSLNetData = null;
     // Outgoing encrypted data
     //public volatile ByteBuffer outSSLNetData = null;
-    // clear text application data
-    volatile ByteBuffer inAppData = null;
+    // Decrypted data application data
+    private volatile ByteBuffer inDecryptedData = null;
     // the encrypted channel
     public volatile SocketChannel sslChannel = null;
     public volatile BaseChannelOutputStream sslOutputStream = null;
@@ -123,7 +123,7 @@ public class SSLSessionConfig
                 selectorController.cancelSelectionKey(remoteChannel);
             }
             SharedIOUtil.close((AutoCloseable) sslConnectionHelper, sslIOBuffers);
-            ByteBufferUtil.cache(inAppData, inRemoteData);
+            ByteBufferUtil.cache(inDecryptedData, inRemoteData);
             SharedIOUtil.close(sslOutputStream);
 
             if (log.isEnabled()) log.getLogger().info("SSLSessionConfig-CLOSED " + Thread.currentThread() + " " +
@@ -189,22 +189,33 @@ public class SSLSessionConfig
 //    }
 
 
-    public void beginHandshake(ByteBuffer inRawBuffer, ByteBuffer outRawBuffer) throws SSLException {
+    public IOBuffers beginHandshake(IOBuffers ioBuffers) throws SSLException {
         if (!hasBegan.get()) {
             if (!hasBegan.getAndSet(true)) {
-                sslIOBuffers = new IOBuffers();
+                this.sslIOBuffers = ioBuffers != null ? ioBuffers : new IOBuffers();
                 // set the ssl engine mode client or sever
                 sslEngine.setUseClientMode(clientMode);
                 // create the necessary byte buffer with the proper length
 //                inSSLNetData =
-                        sslIOBuffers.setInBuffer(inRawBuffer != null && inRawBuffer.capacity() >= getPacketBufferSize() ? inRawBuffer : ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, getPacketBufferSize()));
-               // outSSLNetData =
-                sslIOBuffers.setOutBuffer(outRawBuffer != null && outRawBuffer.capacity() >= getPacketBufferSize() ? outRawBuffer : ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, getPacketBufferSize()));
-                inAppData = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, getApplicationBufferSize());
+
+                if (sslIOBuffers.getInBuffer() == null || sslIOBuffers.getInBuffer().capacity() < getPacketBufferSize()) {
+                    sslIOBuffers.setInBuffer(ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, getPacketBufferSize()));
+                }
+
+                if (sslIOBuffers.getOutBuffer() == null || sslIOBuffers.getOutBuffer().capacity() < getPacketBufferSize()) {
+                    sslIOBuffers.setOutBuffer(ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, getPacketBufferSize()));
+                }
+
+
+//                sslIOBuffers.setInBuffer(sslIOBuffers.getInBuffer() != null && sslIOBuffers.getInBuffer().capacity() >= getPacketBufferSize() ? inRawBuffer : ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, getPacketBufferSize()));
+//                // outSSLNetData =
+//                sslIOBuffers.setOutBuffer(outRawBuffer != null && outRawBuffer.capacity() >= getPacketBufferSize() ? outRawBuffer : ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, getPacketBufferSize()));
+                inDecryptedData = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, getApplicationBufferSize());
                 // start the handshake
                 sslEngine.beginHandshake();
             }
         }
+        return sslIOBuffers;
     }
 
 
@@ -222,8 +233,6 @@ public class SSLSessionConfig
 //            }
 //        }
 //    }
-
-
 
 
     public Runnable getDelegatedTask() {
@@ -256,7 +265,7 @@ public class SSLSessionConfig
     }
 
     @Override
-    public ByteBuffer getSSLApplicationBuffer() {
-        return inAppData;
+    public ByteBuffer getInDecryptionBuffer() {
+        return inDecryptedData;
     }
 }

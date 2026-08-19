@@ -40,7 +40,7 @@ import java.security.GeneralSecurityException;
  * {@code endpoint_identification}, and optionally an explicit {@code ssl_context}
  * ({@code NamedValue<SSLContextInfo>}) for custom trust stores / client certificates.
  * <p>
- * The upgrade always calls {@code beginHandshake(null, null)} — fresh pooled buffers, so
+ * The upgrade always calls {@code beginHandshake(null)} — fresh pooled buffers, so
  * pre-upgrade plaintext can never become handshake input — and leaves
  * {@code SSLSessionConfig.sslOutputStream} null: the session's one output stream is flipped to
  * encrypted writes by the bridge on handshake completion.
@@ -193,7 +193,7 @@ public class SSLClientState extends State<Object> {
         ctx.getSession().registerAutoCloseable(cfg);
         try {
             // always null,null: fresh pooled buffers, pre-upgrade residue can never enter the session
-            cfg.beginHandshake(null, null);
+            cfg.beginHandshake(null);
         } catch (SSLException e) {
             ctx.fail(e);
             return;

@@ -49,7 +49,7 @@ public class SSLClientDataState extends State<Object> {
             try {
                 SSLEngineResult result;
                 do {
-                    result = SSLUtil.smartSSLUnwrap(cfg.getSSLEngine(), net, cfg.getSSLApplicationBuffer(), true, true);
+                    result = SSLUtil.smartSSLUnwrap(cfg.getSSLEngine(), net, cfg.getInDecryptionBuffer(), true, true);
                     switch (result.getStatus()) {
                         case BUFFER_UNDERFLOW:
                             // partial record — wait for the router's next feed
@@ -58,7 +58,7 @@ public class SSLClientDataState extends State<Object> {
                             throw new SSLException("BUFFER_OVERFLOW: application buffer not drained");
                         case OK:
                             if (callback != null && result.bytesProduced() > 0)
-                                callback.accept(cfg.getSSLApplicationBuffer());
+                                callback.accept(cfg.getInDecryptionBuffer());
                             break;
                         case CLOSED:
                             // close_notify received — full session teardown (publishes CLOSED)

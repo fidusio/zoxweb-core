@@ -38,8 +38,8 @@
  * <caption>owners</caption>
  * <tr><th>Buffer</th><th>Recached by</th></tr>
  * <tr><td>TCPSMCallback {@code rawReadBuffer}</td><td>TCPSMCallback close delegate (distinct
- * from all SSL buffers — the upgrade always calls {@code beginHandshake(null, null)})</td></tr>
- * <tr><td>{@code inSSLNetData} / {@code inAppData} / {@code outSSLNetData} /
+ * from all SSL buffers — the upgrade always calls {@code beginHandshake(null)})</td></tr>
+ * <tr><td>SSL {@code IOBuffers} (net in/out) / {@code inDecryptedData} /
  * {@code inRemoteData}</td><td>{@code SSLSessionConfig.close()}, once (AtomicBoolean)</td></tr>
  * <tr><td>each {@code RAW_IN_DATA} packet</td><td>the transport router (TLS modes) or the one
  * active {@code IN_DATA} owner (plain pass-through)</td></tr>

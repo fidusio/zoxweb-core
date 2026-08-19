@@ -94,7 +94,7 @@ one machine, configured programmatically (`ClientConSMBuilder`) or from JSON
   `StartTLSUpgradeSeamTest`), with `beginHandshake(null, null)` guaranteeing fresh pooled
   buffers — `rawReadBuffer` never becomes `inSSLNetData`, closing the buffer-ownership question
   below (distinct owners; table in the sm package javadoc).
-- Decrypted-data delivery: `SSLClientBridge.accept` copies the write-mode `inAppData` into a
+- Decrypted-data delivery: `SSLClientBridge.accept` copies the write-mode `inDecryptedData` into a
   detached pooled buffer (`ClientEvent.IN_DATA`) and clears the source — the
   "BUFFER_OVERFLOW unreachable" drain contract now has a named implementor.
 - Secure-mode inbound data: `SSLClientDataState` unwraps the router-buffered ciphertext via the
@@ -270,7 +270,7 @@ closes `readSource`; since `isClosed` is set before `close_internal()`, a re-ent
 run the else-branch cleanup. Those tunnels silently drop buffers out of the pool.
 
 Also `SSLUtil.java:77-87` vs `:142-151` — the "BUFFER_OVERFLOW unreachable" invariant holds only if
-every callback fully drains `inAppData` during `accept()`; that contract is written nowhere, and the
+every callback fully drains `inDecryptedData` during `accept()`; that contract is written nowhere, and the
 `callback == null` case at `:147` cannot drain at all. Belongs where `BaseSessionCallback.accept`
 implementors will see it.
 

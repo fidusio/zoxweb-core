@@ -99,8 +99,9 @@ public final class SSLUtil {
      * Handler for {@link javax.net.ssl.SSLEngineResult.HandshakeStatus#NOT_HANDSHAKING}:
      * read ciphertext from the channel and decrypt app-data records.
      * <p>
-     * Reads into {@link SSLSessionConfig#inSSLNetData}, then loops calling
-     * {@link SSLUtil#smartSSLUnwrap} until either the net buffer is fully
+     * Reads ciphertext into the net in-buffer of {@link SSLConfigInt#getSSLIOBuffers()},
+     * then loops calling {@link SSLUtil#smartSSLUnwrap} — decrypting into
+     * {@link SSLConfigInt#getInDecryptionBuffer()} — until either the net buffer is fully
      * drained or a {@code BUFFER_UNDERFLOW} signals more wire bytes are needed.
      * Each decrypted record is delivered to {@code callback}. A read of -1 or
      * {@code CLOSED} unwrap status closes the session.
@@ -127,7 +128,7 @@ public final class SSLUtil {
                         // even if we have read zero it will trigger BUFFER_UNDERFLOW then we wait for incoming
                         // data
                         do {
-                            result = smartSSLUnwrap(config.sslEngine, config.getSSLIOBuffers().getInBuffer(), config.inAppData, true, true);
+                            result = smartSSLUnwrap(config.sslEngine, config.getSSLIOBuffers().getInBuffer(), config.getInDecryptionBuffer(), true, true);
                             if (log.isEnabled())
                                 log.getLogger().info("AFTER-NOT_HANDSHAKING-PROCESSING: " + result + " bytesRead: " + bytesRead + " callback: " + callback);
                             switch (result.getStatus()) {
@@ -147,7 +148,7 @@ public final class SSLUtil {
                                     if (callback != null && bytesRead >= 0 && result.bytesProduced() > 0) {
                                         // we have decrypted data to process
                                         //config.inSSLNetData.flip();
-                                        callback.accept(config.inAppData);
+                                        callback.accept(config.getInDecryptionBuffer());
                                     }
                                     break;
                                 case CLOSED:
@@ -305,7 +306,7 @@ public final class SSLUtil {
 
                     if (log.isEnabled()) {
                         log.getLogger().info("AFTER-NEED_UNWRAP-HANDSHAKING: " + result + " bytes read: " + bytesRead);
-                        log.getLogger().info("AFTER-NEED_UNWRAP-HANDSHAKING inNetData: " + config.getSSLIOBuffers().getInBuffer() + " inAppData: " + config.inAppData);
+                        log.getLogger().info("AFTER-NEED_UNWRAP-HANDSHAKING inNetData: " + config.getSSLIOBuffers().getInBuffer() + " inAppData: " + config.getInDecryptionBuffer());
                     }
 
                     switch (result.getStatus()) {

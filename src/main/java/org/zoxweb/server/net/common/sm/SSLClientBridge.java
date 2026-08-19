@@ -19,7 +19,7 @@ import java.nio.channels.SelectionKey;
  * this bridge is. One bridge per session, created by {@link SSLClientState#upgrade}.
  * <ul>
  * <li>{@link #accept(ByteBuffer)} — the single decrypted-data delivery point
- * ({@code _notHandshaking}): the engine's {@code inAppData} arrives in <b>write-mode and is
+ * ({@code _notHandshaking}): the engine's {@code inDecryptedData} arrives in <b>write-mode and is
  * reused</b> across unwrap iterations, so the plaintext is copied into a detached pooled buffer
  * published as {@link CommonTrigger#IN_DATA}, and the source is fully drained (cleared) — the
  * "BUFFER_OVERFLOW unreachable" invariant depends on that.</li>

@@ -1,6 +1,5 @@
-package org.zoxweb.server.net;
+package org.zoxweb.server.io;
 
-import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.shared.io.CloseableTypeDelegate;
 
 import java.io.Closeable;
