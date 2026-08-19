@@ -4,7 +4,6 @@ import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.server.net.BaseSessionCallback;
 import org.zoxweb.server.net.common.ConnectionCallback;
 import org.zoxweb.server.net.ssl.SSLConfigInt;
-import org.zoxweb.server.net.ssl.SSLSessionConfig;
 import org.zoxweb.shared.io.SharedIOUtil;
 
 import java.io.IOException;
@@ -14,7 +13,7 @@ import java.nio.channels.SelectionKey;
 
 /**
  * The handler-facing SSL callback of a client session: the SSLUtil handlers require a
- * {@code BaseSessionCallback<SSLSessionConfig>} that also implements {@code ConnectionCallback}
+ * {@code BaseSessionCallback<SSLConfigInt>} that also implements {@code ConnectionCallback}
  * (for the {@code _finished} client notification), and TCPSMCallback is deliberately neither —
  * this bridge is. One bridge per session, created by {@link SSLClientState#upgrade}.
  * <ul>
@@ -31,7 +30,7 @@ import java.nio.channels.SelectionKey;
  * ({@code SharedIOUtil.close(config, callback)}) performs a real teardown.</li>
  * </ul>
  */
-class SSLClientBridge extends BaseSessionCallback<SSLSessionConfig>
+class SSLClientBridge extends BaseSessionCallback<SSLConfigInt>
         implements ConnectionCallback<ByteBuffer> {
 
     private final ClientConSM sm;

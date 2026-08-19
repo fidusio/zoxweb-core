@@ -3,6 +3,7 @@ package org.zoxweb.server.net.common.sm;
 import org.zoxweb.server.fsm.State;
 import org.zoxweb.server.fsm.TriggerConsumer;
 import org.zoxweb.server.net.BaseSessionCallback;
+import org.zoxweb.server.net.ssl.SSLConfigInt;
 import org.zoxweb.server.net.ssl.SSLSessionConfig;
 import org.zoxweb.server.net.ssl.SSLUtil;
 import org.zoxweb.shared.io.SharedIOUtil;
@@ -36,13 +37,13 @@ public class SSLClientDataState extends State<Object> {
         register(new NotHandshaking());
     }
 
-    private class NotHandshaking extends TriggerConsumer<BaseSessionCallback<SSLSessionConfig>> {
+    private class NotHandshaking extends TriggerConsumer<BaseSessionCallback<SSLConfigInt>> {
         NotHandshaking() {
             super(NOT_HANDSHAKING);
         }
 
         @Override
-        public void accept(BaseSessionCallback<SSLSessionConfig> callback) {
+        public void accept(BaseSessionCallback<SSLConfigInt> callback) {
             ClientSessionContext ctx = (ClientSessionContext) getStateMachine().getConfig();
             SSLSessionConfig cfg = ctx.getSSLConfig();
             ByteBuffer net = cfg.getSSLIOBuffers().getInBuffer();

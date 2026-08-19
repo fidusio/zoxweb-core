@@ -4,6 +4,7 @@ import org.zoxweb.server.fsm.MonoStateMachine;
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.net.BaseSessionCallback;
 import org.zoxweb.server.net.common.TCPSessionCallback;
+import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.util.*;
 
 import javax.net.ssl.SSLEngineResult;
@@ -13,7 +14,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import static javax.net.ssl.SSLEngineResult.HandshakeStatus.*;
 
-public class CustomSSLStateMachine extends MonoStateMachine<SSLEngineResult.HandshakeStatus, BaseSessionCallback<SSLSessionConfig>>
+public class CustomSSLStateMachine extends MonoStateMachine<SSLEngineResult.HandshakeStatus, BaseSessionCallback<SSLConfigInt>>
         implements SSLConnectionHelper, Closeable, Identifier<Long> {
     public static final LogWrapper log = new LogWrapper(CustomSSLStateMachine.class).setEnabled(false);
 
@@ -38,7 +39,7 @@ public class CustomSSLStateMachine extends MonoStateMachine<SSLEngineResult.Hand
         super(false);
         this.csc = csc;
         sslns = null;
-        csc.getConfig().sslConnectionHelper = this;
+        csc.getConfig().setSSLConnectionHelper(this);
         id = counter.incrementAndGet();
         register(NOT_HANDSHAKING, this::notHandshaking)
                 .register(NEED_WRAP, this::needWrap)
@@ -53,7 +54,7 @@ public class CustomSSLStateMachine extends MonoStateMachine<SSLEngineResult.Hand
         super(false);
         this.sslns = sslns;
         csc = null;
-        sslns.getConfig().sslConnectionHelper = this;
+        sslns.getConfig().setSSLConnectionHelper(this);
         id = counter.incrementAndGet();
         register(NOT_HANDSHAKING, this::notHandshaking)
                 .register(NEED_WRAP, this::needWrap)
@@ -65,30 +66,30 @@ public class CustomSSLStateMachine extends MonoStateMachine<SSLEngineResult.Hand
 
     @Override
     public void close() throws IOException {
-        getConfig().close();
+        SharedIOUtil.close(getConfig());
     }
 
     public Long getID() {
         return id;
     }
 
-    public void needWrap(BaseSessionCallback<SSLSessionConfig> callback) {
+    public void needWrap(BaseSessionCallback<SSLConfigInt> callback) {
         rcNeedWrap.register(SSLUtil._needWrap(getConfig(), callback));
     }
 
-    public void needUnwrap(BaseSessionCallback<SSLSessionConfig> callback) {
+    public void needUnwrap(BaseSessionCallback<SSLConfigInt> callback) {
         rcNeedUnwrap.register(SSLUtil._needUnwrap(getConfig(), callback));
     }
 
-    public void needTask(BaseSessionCallback<SSLSessionConfig> callback) {
+    public void needTask(BaseSessionCallback<SSLConfigInt> callback) {
         rcNeedTask.register(SSLUtil._needTask(getConfig(), callback));
     }
 
-    public void finished(BaseSessionCallback<SSLSessionConfig> callback) {
+    public void finished(BaseSessionCallback<SSLConfigInt> callback) {
         rcFinished.register(SSLUtil._finished(getConfig(), callback));
     }
 
-    public void notHandshaking(BaseSessionCallback<SSLSessionConfig> callback) {
+    public void notHandshaking(BaseSessionCallback<SSLConfigInt> callback) {
         rcNotHandshaking.register(SSLUtil._notHandshaking(getConfig(), callback));
     }
 
@@ -99,7 +100,7 @@ public class CustomSSLStateMachine extends MonoStateMachine<SSLEngineResult.Hand
         }
     }
 
-    public SSLSessionConfig getConfig() {
+    public SSLConfigInt getConfig() {
         return sslns != null ? sslns.getConfig() : csc.getConfig();
     }
 

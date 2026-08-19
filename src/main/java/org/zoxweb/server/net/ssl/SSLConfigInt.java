@@ -10,17 +10,19 @@ import java.nio.ByteBuffer;
 import java.nio.channels.ByteChannel;
 
 /**
- * Read-side facade over a live TLS session's state: the {@link SSLEngine}, the
- * encrypted channel, the net-in/net-out {@link IOBuffers} pair, and the
- * application (plaintext) buffer.
+ * The TLS session contract: state accessors (the {@link SSLEngine}, the encrypted
+ * channel, the net-in/net-out {@link IOBuffers} pair, the decryption buffer), the
+ * session's status dispatcher ({@link #getSSLConnectionHelper()}), and lifecycle
+ * controls ({@link #beginHandshake(IOBuffers)}, {@link #forceCloseEnabled(boolean)},
+ * {@link #close()}).
  * <p>
- * The sole implementation is {@link SSLSessionConfig}; this interface exists so that
- * code outside the SSL engine room — {@link SSLUtil}'s post-handshake write path
- * ({@code sslChunkedWrite}), {@code ConnectionCallback.sslHandshakeSuccessful},
+ * The sole implementation is {@link SSLSessionConfig}; this interface is what the
+ * rest of the stack programs against — {@link SSLUtil}'s handshake handlers and
+ * post-handshake write path ({@code sslChunkedWrite}), the
+ * {@code SSLConnectionHelper} dispatchers, {@code ConnectionCallback.sslHandshakeSuccessful},
  * {@code CommonChannelOutputStream}, and the {@code net.common.sm} client states —
- * can encrypt/decrypt against the session without seeing the handshake machinery
- * (helpers, selector plumbing, remote-tunnel fields) that {@code SSLSessionConfig}
- * also carries.
+ * leaving only the wiring internals (selector plumbing, remote-tunnel fields,
+ * output-stream setup) on the concrete class.
  * </p>
  * <p>
  * <b>Ownership and lifecycle.</b> The implementation owns every object exposed here;
@@ -47,11 +49,6 @@ extends CloseableType {
 
     /** The encrypted (network-facing) channel ciphertext is read from and written to. */
     ByteChannel getChannel();
-
-    //ByteBuffer getSSLInBuffer();
-
-    //ByteBuffer getSSLOutBuffer();
-
 
     /**
      * The session's ciphertext buffer pair, each with capacity &ge;
@@ -96,6 +93,35 @@ extends CloseableType {
      * @throws SSLException if the engine rejects the handshake start
      */
     IOBuffers beginHandshake(IOBuffers ioBuffers) throws SSLException;
+
+
+    /**
+     * The session's handshake-status dispatcher: {@link SSLUtil} handlers re-publish
+     * the engine's next status through it so the following step gets scheduled
+     * ({@code CustomSSLStateMachine}, {@code SSLStateMachine}, or the sm-package
+     * {@code ClientSSLHelper}). Installed via {@link #setSSLConnectionHelper}
+     * at session wiring; {@code null} before that.
+     */
+    SSLConnectionHelper getSSLConnectionHelper();
+
+    /**
+     * Installs the session's dispatcher — called exactly once, by the owning
+     * handler/machine at session wiring, before the first status publish.
+     * Not for consumers.
+     */
+    void setSSLConnectionHelper(SSLConnectionHelper sslConnectionHelper);
+
+    /** {@code true} if the engine runs in client mode (drives {@code SSLUtil._finished}'s client-side notification). */
+    boolean isClientMode();
+
+    /**
+     * Arms/disarms forced close: when {@code true}, {@link #close()} skips the
+     * close_notify drain loop and tears the session down immediately.
+     * {@code SSLUtil._needWrap} arms it when a handshake wrap hits an invalid
+     * buffer state ({@code BUFFER_UNDERFLOW}/{@code OVERFLOW}) — the session is
+     * unrecoverable and the ensuing close must not attempt a clean TLS shutdown.
+     */
+    void forceCloseEnabled(boolean force);
 
     /**
      * Maximum plaintext size a single {@code unwrap} can produce, per the engine's

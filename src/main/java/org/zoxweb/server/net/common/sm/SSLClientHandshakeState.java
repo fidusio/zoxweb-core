@@ -4,6 +4,7 @@ import org.zoxweb.server.fsm.State;
 import org.zoxweb.server.fsm.TriggerConsumer;
 import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.server.net.BaseSessionCallback;
+import org.zoxweb.server.net.ssl.SSLConfigInt;
 import org.zoxweb.server.net.ssl.SSLSessionConfig;
 import org.zoxweb.server.net.ssl.SSLUtil;
 import org.zoxweb.shared.util.SUS;
@@ -49,24 +50,24 @@ public class SSLClientHandshakeState extends State<Object> {
         return ((ClientSessionContext) tc.getStateMachine().getConfig()).getSSLConfig();
     }
 
-    private class NeedWrap extends TriggerConsumer<BaseSessionCallback<SSLSessionConfig>> {
+    private class NeedWrap extends TriggerConsumer<BaseSessionCallback<SSLConfigInt>> {
         NeedWrap() {
             super(NEED_WRAP);
         }
 
         @Override
-        public void accept(BaseSessionCallback<SSLSessionConfig> callback) {
+        public void accept(BaseSessionCallback<SSLConfigInt> callback) {
             SSLUtil._needWrap(config(this), callback);
         }
     }
 
-    private class NeedUnwrap extends TriggerConsumer<BaseSessionCallback<SSLSessionConfig>> {
+    private class NeedUnwrap extends TriggerConsumer<BaseSessionCallback<SSLConfigInt>> {
         NeedUnwrap() {
             super("NEED_UNWRAP", "NEED_UNWRAP_AGAIN");
         }
 
         @Override
-        public void accept(BaseSessionCallback<SSLSessionConfig> callback) {
+        public void accept(BaseSessionCallback<SSLConfigInt> callback) {
             SSLSessionConfig config = config(this);
             if (config == null || config.isClosed())
                 return;
@@ -100,24 +101,24 @@ public class SSLClientHandshakeState extends State<Object> {
         }
     }
 
-    private class NeedTask extends TriggerConsumer<BaseSessionCallback<SSLSessionConfig>> {
+    private class NeedTask extends TriggerConsumer<BaseSessionCallback<SSLConfigInt>> {
         NeedTask() {
             super(NEED_TASK);
         }
 
         @Override
-        public void accept(BaseSessionCallback<SSLSessionConfig> callback) {
+        public void accept(BaseSessionCallback<SSLConfigInt> callback) {
             SSLUtil._needTask(config(this), callback);
         }
     }
 
-    private class Finished extends TriggerConsumer<BaseSessionCallback<SSLSessionConfig>> {
+    private class Finished extends TriggerConsumer<BaseSessionCallback<SSLConfigInt>> {
         Finished() {
             super(FINISHED);
         }
 
         @Override
-        public void accept(BaseSessionCallback<SSLSessionConfig> callback) {
+        public void accept(BaseSessionCallback<SSLConfigInt> callback) {
             SSLUtil._finished(config(this), callback);
         }
     }

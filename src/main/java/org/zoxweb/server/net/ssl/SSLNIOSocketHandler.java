@@ -190,7 +190,7 @@ public class SSLNIOSocketHandler
             // channel selection data coming from ssl channel or tunnel response
             if (key.channel() == sslConfig.sslChannel && sslConfig.sslChannel.isConnected()) {
                 // here we have an application code that will process decrypted data
-                sslDispatcher.publish(sslConfig.getHandshakeStatus(), (BaseSessionCallback<SSLSessionConfig>) sessionCallback);
+                sslDispatcher.publish(sslConfig.getHandshakeStatus(), (BaseSessionCallback<SSLConfigInt>) sessionCallback);
             } else if (key.channel() == sslConfig.remoteChannel && sslConfig.remoteChannel.isConnected()) {
                 // this is the tunnel section connection
                 int bytesRead;
@@ -246,7 +246,7 @@ public class SSLNIOSocketHandler
             // SSLStateMachineMode
             SSLStateMachine sslStateMachine = SSLStateMachine.create(this);
             sslDispatcher = sslStateMachine;
-            sslConfig = sslStateMachine.getConfig();
+            sslConfig = (SSLSessionConfig) sslStateMachine.getConfig();
             sslConfig.selectorController = getSelectorController();
             sslConfig.sslChannel = (SocketChannel) asc;
             sslConfig.remoteConnection = remoteConnection;
@@ -316,7 +316,7 @@ public class SSLNIOSocketHandler
     }
 
 
-    public SSLSessionConfig getConfig() {
+    public SSLConfigInt getConfig() {
         return sslConfig;
     }
 

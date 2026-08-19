@@ -1,6 +1,7 @@
 package org.zoxweb.server.net.common.sm;
 
 import org.zoxweb.server.net.BaseSessionCallback;
+import org.zoxweb.server.net.ssl.SSLConfigInt;
 import org.zoxweb.server.net.ssl.SSLSessionConfig;
 import org.zoxweb.shared.util.NVBoolean;
 import org.zoxweb.shared.util.NVGenericMap;
@@ -56,7 +57,7 @@ public class ClientSessionContext {
     private volatile UDPSMCallback udpSession;
     private volatile Mode mode = Mode.PLAIN;
     private volatile SSLSessionConfig sslConfig;
-    private volatile BaseSessionCallback<SSLSessionConfig> sslBridge;
+    private volatile BaseSessionCallback<SSLConfigInt> sslBridge;
 
     ClientSessionContext(ClientConSM sm, NVGenericMap settings, Set<String> readyGates, Transport transport) {
         this.sm = sm;
@@ -187,11 +188,11 @@ public class ClientSessionContext {
     /**
      * @return the handler-facing SSL callback bridge, null until an upgrade ran
      */
-    public BaseSessionCallback<SSLSessionConfig> getSSLBridge() {
+    public BaseSessionCallback<SSLConfigInt> getSSLBridge() {
         return sslBridge;
     }
 
-    void setSSLBridge(BaseSessionCallback<SSLSessionConfig> sslBridge) {
+    void setSSLBridge(BaseSessionCallback<SSLConfigInt> sslBridge) {
         this.sslBridge = sslBridge;
     }
 

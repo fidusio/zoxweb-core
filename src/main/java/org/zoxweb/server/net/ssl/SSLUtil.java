@@ -25,7 +25,7 @@ import static javax.net.ssl.SSLEngineResult.HandshakeStatus.*;
  * {@link javax.net.ssl.SSLEngine#getHandshakeStatus()}. The caller dispatches
  * based on current status; the handler performs one step (handshake wrap/unwrap,
  * delegated tasks, or post-handshake app-data I/O) and re-publishes the resulting
- * status through {@link SSLSessionConfig#sslConnectionHelper} so the next step
+ * status through {@link SSLConfigInt#getSSLConnectionHelper()} so the next step
  * can be scheduled.
  * </p>
  *
@@ -43,7 +43,7 @@ import static javax.net.ssl.SSLEngineResult.HandshakeStatus.*;
  * after the worker finishes its full cycle and returns to the pool. While a
  * worker holds the session, the channel cannot be dispatched to any other
  * worker — there is no concurrent access to the {@link javax.net.ssl.SSLEngine},
- * the net/app buffers, or {@link SSLSessionConfig} state.
+ * the net/app buffers, or {@link SSLConfigInt} state.
  * <p>
  * The assigned worker performs the entire sequence on the same thread:
  * </p>
@@ -70,13 +70,13 @@ import static javax.net.ssl.SSLEngineResult.HandshakeStatus.*;
  * loops until every byte queued for the current call is drained to the channel,
  * or it fails. By the time {@link #sslChunkedWrite} returns normally, every byte
  * of {@code src} has been encrypted AND sent on the wire. There is no
- * "partial write left in {@code outSSLNetData}" steady state to reason about;
+ * "partial write left in the net out-buffer" steady state to reason about;
  * callers never need to retry an unsent tail because there is no unsent tail
  * on success.
  *
  * <h3>3. Plaintext IO buffers &lt; ½ SSL net buffers &rArr; {@code BUFFER_OVERFLOW} unreachable</h3>
  * Application IO buffers in this codebase are bounded to 4–8&nbsp;KB in any
- * direction. The SSL net buffers ({@code inSSLNetData}, {@code outSSLNetData})
+ * direction. The SSL net buffers (the {@code IOBuffers} in/out pair)
  * are sized to {@link javax.net.ssl.SSLSession#getPacketBufferSize() packetBufferSize}
  * (≥ ~16&nbsp;KB for TLS). With at most 8&nbsp;KB of plaintext going into a
  * ≥ 16&nbsp;KB net destination on {@code wrap}, and at most an 8&nbsp;KB-bounded
@@ -86,7 +86,7 @@ import static javax.net.ssl.SSLEngineResult.HandshakeStatus.*;
  * are dead-on-arrival guards, not recovery gaps — do not "fix" them by adding
  * drain-and-retry logic without first changing the buffer-sizing contract.
  *
- * @see SSLSessionConfig
+ * @see SSLConfigInt
  * @see javax.net.ssl.SSLEngine
  */
 public final class SSLUtil {
@@ -111,14 +111,14 @@ public final class SSLUtil {
      * @param callback receives decrypted application data (or exceptions); may be {@code null}
      * @return elapsed processing time in milliseconds
      */
-    public static long _notHandshaking(SSLSessionConfig config, BaseSessionCallback<SSLSessionConfig> callback) {
+    public static long _notHandshaking(SSLConfigInt config, BaseSessionCallback<SSLConfigInt> callback) {
         long ts = System.currentTimeMillis();
         if (log.isEnabled()) log.getLogger().info("" + config.getHandshakeStatus());
 
-        if (config.sslChannel.isOpen()) {
+        if (config.getChannel().isOpen()) {
             if (config.getHandshakeStatus() == NOT_HANDSHAKING) {
                 try {
-                    int bytesRead = config.sslChannel.read(config.getSSLIOBuffers().getInBuffer());
+                    int bytesRead = config.getChannel().read(config.getSSLIOBuffers().getInBuffer());
                     if (bytesRead == -1) {
                         if (log.isEnabled())
                             log.getLogger().info("SSLCHANNEL-CLOSED-NOT_HANDSHAKING: " + config.getHandshakeStatus() + " bytesRead: " + bytesRead);
@@ -128,7 +128,7 @@ public final class SSLUtil {
                         // even if we have read zero it will trigger BUFFER_UNDERFLOW then we wait for incoming
                         // data
                         do {
-                            result = smartSSLUnwrap(config.sslEngine, config.getSSLIOBuffers().getInBuffer(), config.getInDecryptionBuffer(), true, true);
+                            result = smartSSLUnwrap(config.getSSLEngine(), config.getSSLIOBuffers().getInBuffer(), config.getInDecryptionBuffer(), true, true);
                             if (log.isEnabled())
                                 log.getLogger().info("AFTER-NOT_HANDSHAKING-PROCESSING: " + result + " bytesRead: " + bytesRead + " callback: " + callback);
                             switch (result.getStatus()) {
@@ -170,10 +170,10 @@ public final class SSLUtil {
                     if (callback != null)
                         callback.exception(e);
 
-                    config.close();
+                    SharedIOUtil.close(config);
                 }
             } else
-                config.sslConnectionHelper.publish(config.getHandshakeStatus(), callback);
+                config.getSSLConnectionHelper().publish(config.getHandshakeStatus(), callback);
 
         }
         return System.currentTimeMillis() - ts;
@@ -184,26 +184,26 @@ public final class SSLUtil {
      * Handler for {@link javax.net.ssl.SSLEngineResult.HandshakeStatus#FINISHED}:
      * post-handshake completion hook.
      * <p>
-     * Creates the upstream connection when this session is the server side of an
-     * SSL tunnel, signals successful handshake to client-mode callbacks, and
-     * re-publishes the current status if {@code inSSLNetData} still holds
-     * buffered bytes — TLS 1.3 in particular may interleave application data
-     * in the same flight as the handshake finish.
+     * Delegates {@code createRemoteConnection()} to the session's helper — a
+     * guarded no-op unless this session fronts an SSL tunnel — signals successful
+     * handshake to client-mode callbacks, and re-publishes the current status if
+     * the net in-buffer still holds buffered bytes — TLS 1.3 in particular may
+     * interleave application data in the same flight as the handshake finish.
      * </p>
      *
      * @param config   current SSL session state
      * @param callback notified via {@link ConnectionCallback#sslHandshakeSuccessful(SSLConfigInt)} in client mode; may be {@code null}
      * @return elapsed processing time in milliseconds
      */
-    public static long _finished(SSLSessionConfig config, BaseSessionCallback<SSLSessionConfig> callback) {
+    public static long _finished(SSLConfigInt config, BaseSessionCallback<SSLConfigInt> callback) {
         long ts = System.currentTimeMillis();
 
         // ********************************************
         // Very crucial steps
         // ********************************************
-        if (config.remoteConnection != null) {
+        if (config.getSSLConnectionHelper() != null) {
             // we have SSL tunnel
-            config.sslConnectionHelper.createRemoteConnection();
+            config.getSSLConnectionHelper().createRemoteConnection();
         }
 
         if (config.isClientMode() && callback instanceof ConnectionCallback) {
@@ -225,7 +225,7 @@ public final class SSLUtil {
             // ||-----------------------||
             // The buffer has app data that needs to be decrypted
             //**************************************************
-            config.sslConnectionHelper.publish(config.getHandshakeStatus(), callback);
+            config.getSSLConnectionHelper().publish(config.getHandshakeStatus(), callback);
         }
 
         return System.currentTimeMillis() - ts;
@@ -235,7 +235,7 @@ public final class SSLUtil {
      * Handler for {@link javax.net.ssl.SSLEngineResult.HandshakeStatus#NEED_TASK}:
      * run all pending delegated tasks, then re-publish the updated status.
      * <p>
-     * Tasks are drained from {@link SSLSessionConfig#getDelegatedTask()} and
+     * Tasks are drained from the engine's {@code getDelegatedTask()} and
      * executed synchronously on the calling worker thread. Blocking operations
      * inside a task (certificate chain validation, OCSP/CRL lookup, HSM
      * signature) only stall this worker — the selector continues dispatching
@@ -247,11 +247,11 @@ public final class SSLUtil {
      * @param callback passed through to the next state handler
      * @return elapsed processing time in milliseconds
      */
-    public static long _needTask(SSLSessionConfig config, BaseSessionCallback<SSLSessionConfig> callback) {
+    public static long _needTask(SSLConfigInt config, BaseSessionCallback<SSLConfigInt> callback) {
         long ts = System.currentTimeMillis();
 
         Runnable toRun;
-        while ((toRun = config.getDelegatedTask()) != null)
+        while ((toRun = config.getSSLEngine().getDelegatedTask()) != null)
             toRun.run();
 
         SSLEngineResult.HandshakeStatus status = config.getHandshakeStatus();
@@ -260,7 +260,7 @@ public final class SSLUtil {
 
         if (log.isEnabled()) log.getLogger().info("After run: " + status);
 
-        config.sslConnectionHelper.publish(status, callback);
+        config.getSSLConnectionHelper().publish(status, callback);
 
         return ts;
     }
@@ -282,7 +282,7 @@ public final class SSLUtil {
      * @param callback passed through to the next state handler
      * @return elapsed processing time in milliseconds
      */
-    public static long _needUnwrap(SSLSessionConfig config, BaseSessionCallback<SSLSessionConfig> callback) {
+    public static long _needUnwrap(SSLConfigInt config, BaseSessionCallback<SSLConfigInt> callback) {
 
         long ts = System.currentTimeMillis();
         if (log.isEnabled()) log.getLogger().info("Entry: " + config.getHandshakeStatus());
@@ -290,7 +290,7 @@ public final class SSLUtil {
         if (config.getHandshakeStatus() == NEED_UNWRAP || SUS.enumName(config.getHandshakeStatus()).equals("NEED_UNWRAP_AGAIN")) {
             try {
 
-                int bytesRead = config.sslChannel.read(config.getSSLIOBuffers().getInBuffer());
+                int bytesRead = config.getChannel().read(config.getSSLIOBuffers().getInBuffer());
                 if (bytesRead == -1) {
                     if (log.isEnabled())
                         log.getLogger().info("SSLCHANNEL-CLOSED-NEED_UNWRAP: " + config.getHandshakeStatus() + " bytes read: " + bytesRead);
@@ -301,7 +301,7 @@ public final class SSLUtil {
                     // data
                     if (log.isEnabled())
                         log.getLogger().info("BEFORE-UNWRAP: " + config.getSSLIOBuffers().getInBuffer() + " bytes read " + bytesRead);
-                    SSLEngineResult result = smartSSLUnwrap(config.sslEngine, config.getSSLIOBuffers().getInBuffer(), ByteBufferUtil.EMPTY, true, true);
+                    SSLEngineResult result = smartSSLUnwrap(config.getSSLEngine(), config.getSSLIOBuffers().getInBuffer(), ByteBufferUtil.EMPTY, true, true);
 
 
                     if (log.isEnabled()) {
@@ -320,7 +320,7 @@ public final class SSLUtil {
                             throw new IllegalStateException("NEED_UNWRAP should never happen: " + result.getStatus());
                             // this should never happen
                         case OK:
-                            config.sslConnectionHelper.publish(result.getHandshakeStatus(), callback);
+                            config.getSSLConnectionHelper().publish(result.getHandshakeStatus(), callback);
                             break;
                         case CLOSED:
                             // check result here
@@ -334,7 +334,7 @@ public final class SSLUtil {
                 if (log.isEnabled())
                     e.printStackTrace();
                 if (callback != null) callback.exception(e);
-                config.close();
+                SharedIOUtil.close(config);
             }
         }
         return System.currentTimeMillis() - ts;
@@ -368,7 +368,7 @@ public final class SSLUtil {
      * <p>
      * The source is {@link ByteBufferUtil#EMPTY} because no application data is
      * consumed during handshake. On {@code OK}, the produced ciphertext in
-     * {@code outSSLNetData} is drained to the channel via
+     * the net out-buffer is drained to the channel via
      * {@link ByteBufferUtil#smartWrite} (which flips before draining and
      * compacts after). {@code BUFFER_UNDERFLOW}/{@code OVERFLOW} are treated as
      * fatal invariant violations; {@code forcedClose} is set and an exception
@@ -379,12 +379,12 @@ public final class SSLUtil {
      * @param callback passed through to the next state handler
      * @return elapsed processing time in milliseconds
      */
-    public static long _needWrap(SSLSessionConfig config, BaseSessionCallback<SSLSessionConfig> callback) {
+    public static long _needWrap(SSLConfigInt config, BaseSessionCallback<SSLConfigInt> callback) {
         long ts = System.currentTimeMillis();
 
         if (config.getHandshakeStatus() == NEED_WRAP) {
             try {
-                SSLEngineResult result = smartSSLWrap(config.sslEngine, ByteBufferUtil.EMPTY, config.getSSLIOBuffers().getOutBuffer(), true, true);
+                SSLEngineResult result = smartSSLWrap(config.getSSLEngine(), ByteBufferUtil.EMPTY, config.getSSLIOBuffers().getOutBuffer(), true, true);
                 // at handshake stage, data in appOut won't be
                 // processed hence dummy buffer
                 if (log.isEnabled())
@@ -393,13 +393,13 @@ public final class SSLUtil {
                 switch (result.getStatus()) {
                     case BUFFER_UNDERFLOW:
                     case BUFFER_OVERFLOW:
-                        config.forcedClose = true;
-                        throw new IllegalStateException(result + " invalid state context " + config.getSSLIOBuffers().getOutBuffer() + " " + config.sslChannel.getRemoteAddress());
+                        config.forceCloseEnabled(true);
+                        throw new IllegalStateException(result + " invalid state context " + config.getSSLIOBuffers().getOutBuffer());//+ " " + ((ServerSocketChannel)config.getChannel()).getRemoteAddress());
                     case OK:
-                        int written = ByteBufferUtil.smartWrite(null, config.sslChannel, config.getSSLIOBuffers().getOutBuffer(), true);
+                        int written = ByteBufferUtil.smartWrite(null, config.getChannel(), config.getSSLIOBuffers().getOutBuffer(), true);
                         if (log.isEnabled())
                             log.getLogger().info(result.getHandshakeStatus() + " After writing data HANDSHAKING-NEED_WRAP: " + config.getSSLIOBuffers().getOutBuffer() + " written:" + written);
-                        config.sslConnectionHelper.publish(result.getHandshakeStatus(), callback);
+                        config.getSSLConnectionHelper().publish(result.getHandshakeStatus(), callback);
                         break;
                     case CLOSED:
                         config.close();
@@ -410,14 +410,14 @@ public final class SSLUtil {
                     e.printStackTrace();
                 if (callback != null) callback.exception(e);
 
-                config.close();
+                SharedIOUtil.close(config);
             }
         }
         return System.currentTimeMillis() - ts;
     }
 
     /**
-     * Single-record SSL write: encrypt {@code bb} into {@code outSSLNetData} and
+     * Single-record SSL write: encrypt {@code bb} into the net out-buffer and
      * drain the resulting ciphertext to {@code dataChannel}.
      * <p>
      * <b>Buffer-mode contract.</b> The {@code flip} flag describes the caller's
@@ -432,7 +432,7 @@ public final class SSLUtil {
      * </ul>
      * <p>
      * After wrap, {@link SSLUtil#smartSSLWrap} compacts {@code bb}.
-     * The destination {@code outSSLNetData} is always in write-mode after wrap,
+     * The destination net out-buffer is always in write-mode after wrap,
      * so the subsequent {@link ByteBufferUtil#smartWrite} is invoked with
      * {@code flip=true} unconditionally.
      * </p>

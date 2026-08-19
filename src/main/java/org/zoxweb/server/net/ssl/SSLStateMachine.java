@@ -10,14 +10,14 @@ import javax.net.ssl.SSLEngineResult;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class SSLStateMachine extends StateMachine<SSLSessionConfig>
+public class SSLStateMachine extends StateMachine<SSLConfigInt>
         implements SSLConnectionHelper {
 
 
     @Override
-    public void publish(SSLEngineResult.HandshakeStatus status, BaseSessionCallback<SSLSessionConfig> callback) {
+    public void publish(SSLEngineResult.HandshakeStatus status, BaseSessionCallback<SSLConfigInt> callback) {
         if (!isClosed())
-            publishSync(new Trigger<BaseSessionCallback<SSLSessionConfig>>(this, status, getCurrentState(), callback));
+            publishSync(new Trigger<BaseSessionCallback<SSLConfigInt>>(this, status, getCurrentState(), callback));
     }
 
 

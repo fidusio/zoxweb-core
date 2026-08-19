@@ -18,50 +18,50 @@ public class SSLHandshakingState extends State {
     static RateCounter rcNeedTask = new RateCounter("NeedTask");
     static RateCounter rcNeedUnwrap = new RateCounter("NeedUnwrap");
 
-    static class NeedWrap extends TriggerConsumer<BaseSessionCallback<SSLSessionConfig>> {
+    static class NeedWrap extends TriggerConsumer<BaseSessionCallback<SSLConfigInt>> {
         NeedWrap() {
             super(NEED_WRAP);
         }
 
         @Override
-        public void accept(BaseSessionCallback<SSLSessionConfig> callback) {
-            rcNeedWrap.register(SSLUtil._needWrap((SSLSessionConfig) getStateMachine().getConfig(), callback));
+        public void accept(BaseSessionCallback<SSLConfigInt> callback) {
+            rcNeedWrap.register(SSLUtil._needWrap((SSLConfigInt) getStateMachine().getConfig(), callback));
         }
     }
 
-    static class NeedUnwrap extends TriggerConsumer<BaseSessionCallback<SSLSessionConfig>> {
+    static class NeedUnwrap extends TriggerConsumer<BaseSessionCallback<SSLConfigInt>> {
         NeedUnwrap() {
             super("NEED_UNWRAP", "NEED_UNWRAP_AGAIN");
         }
 
         @Override
-        public void accept(BaseSessionCallback<SSLSessionConfig> callback) {
-            rcNeedUnwrap.register(SSLUtil._needUnwrap((SSLSessionConfig) getStateMachine().getConfig(), callback));
+        public void accept(BaseSessionCallback<SSLConfigInt> callback) {
+            rcNeedUnwrap.register(SSLUtil._needUnwrap((SSLConfigInt) getStateMachine().getConfig(), callback));
         }
     }
 
-    static class NeedTask extends TriggerConsumer<BaseSessionCallback<SSLSessionConfig>> {
+    static class NeedTask extends TriggerConsumer<BaseSessionCallback<SSLConfigInt>> {
 
         NeedTask() {
             super(NEED_TASK);
         }
 
         @Override
-        public void accept(BaseSessionCallback<SSLSessionConfig> callback) {
-            rcNeedTask.register(SSLUtil._needTask((SSLSessionConfig) getStateMachine().getConfig(), callback));
+        public void accept(BaseSessionCallback<SSLConfigInt> callback) {
+            rcNeedTask.register(SSLUtil._needTask((SSLConfigInt) getStateMachine().getConfig(), callback));
         }
     }
 
 
-    static class Finished extends TriggerConsumer<BaseSessionCallback<SSLSessionConfig>> {
+    static class Finished extends TriggerConsumer<BaseSessionCallback<SSLConfigInt>> {
 
         Finished() {
             super(FINISHED);
         }
 
         @Override
-        public void accept(BaseSessionCallback<SSLSessionConfig> callback) {
-            rcFinished.register(SSLUtil._finished((SSLSessionConfig) getStateMachine().getConfig(), callback));
+        public void accept(BaseSessionCallback<SSLConfigInt> callback) {
+            rcFinished.register(SSLUtil._finished((SSLConfigInt) getStateMachine().getConfig(), callback));
         }
     }
 

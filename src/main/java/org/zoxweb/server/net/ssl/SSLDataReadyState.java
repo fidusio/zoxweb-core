@@ -11,14 +11,14 @@ public class SSLDataReadyState
         extends State {
     static RateCounter rcNotHandshaking = new RateCounter("NotHandshaking");
 
-    static class NotHandshaking extends TriggerConsumer<BaseSessionCallback<SSLSessionConfig>> {
+    static class NotHandshaking extends TriggerConsumer<BaseSessionCallback<SSLConfigInt>> {
         NotHandshaking() {
             super(NOT_HANDSHAKING);
         }
 
         @Override
-        public void accept(BaseSessionCallback<SSLSessionConfig> callback) {
-            rcNotHandshaking.register(SSLUtil._notHandshaking((SSLSessionConfig) getStateMachine().getConfig(), callback));
+        public void accept(BaseSessionCallback<SSLConfigInt> callback) {
+            rcNotHandshaking.register(SSLUtil._notHandshaking((SSLConfigInt) getStateMachine().getConfig(), callback));
         }
     }
 

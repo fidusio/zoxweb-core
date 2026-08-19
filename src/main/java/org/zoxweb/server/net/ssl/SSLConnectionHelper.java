@@ -6,10 +6,10 @@ import org.zoxweb.shared.util.GetConfig;
 import javax.net.ssl.SSLEngineResult;
 
 public interface SSLConnectionHelper
-        extends GetConfig<SSLSessionConfig> {
-    void publish(SSLEngineResult.HandshakeStatus status, BaseSessionCallback<SSLSessionConfig> callback);
+        extends GetConfig<SSLConfigInt> {
+    void publish(SSLEngineResult.HandshakeStatus status, BaseSessionCallback<SSLConfigInt> callback);
 
     void createRemoteConnection();
 
-    SSLSessionConfig getConfig();
+    SSLConfigInt getConfig();
 }

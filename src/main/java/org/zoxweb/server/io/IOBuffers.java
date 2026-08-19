@@ -2,9 +2,37 @@ package org.zoxweb.server.io;
 
 import org.zoxweb.shared.io.CloseableTypeDelegate;
 
-import java.io.Closeable;
 import java.nio.ByteBuffer;
 
+/**
+ * A closeable in/out {@link ByteBuffer} pair whose single job is to keep two
+ * direction-paired buffers under one lifecycle: {@link #close()} recaches both
+ * into the {@link ByteBufferUtil} pool, exactly once.
+ * <p>
+ * Primary use is the TLS net-buffer pair of
+ * {@code org.zoxweb.server.net.ssl.SSLConfigInt}: {@code getInBuffer()} holds
+ * inbound ciphertext (network &rarr; {@code SSLEngine.unwrap} source) and
+ * {@code getOutBuffer()} outbound ciphertext ({@code SSLEngine.wrap}
+ * destination &rarr; network). A caller may pre-populate a pair and donate it
+ * via {@code beginHandshake(IOBuffers)} for reuse across sessions; buffers left
+ * unset (or undersized, per the receiver's rules) are filled in by the receiver.
+ * The type itself is protocol-agnostic — nothing here is SSL-specific.
+ * </p>
+ * <p>
+ * <b>Ownership.</b> Exactly one owner closes the pair (for SSL, the session's
+ * {@code close()}); everyone else borrows. After close both buffers are back in
+ * the pool and must not be read, written, or retained.
+ * </p>
+ * <p>
+ * <b>Concurrency.</b> The buffer fields are {@code volatile} for cross-thread
+ * visibility and the close is delegated to a {@link CloseableTypeDelegate}
+ * (atomic, one-shot, exception-swallowing), but the accessors do not
+ * synchronize — callers coordinate access to the buffers themselves. The
+ * recache reads the fields at close time, so late {@code set*Buffer} swaps are
+ * honored; a buffer replaced <em>before</em> close is not recached by this
+ * class — the replacer is responsible for the old buffer's fate.
+ * </p>
+ */
 public class IOBuffers implements AutoCloseable {
     private volatile ByteBuffer inBuffer;
     private volatile ByteBuffer outBuffer;
@@ -18,64 +46,37 @@ public class IOBuffers implements AutoCloseable {
             ByteBufferUtil.cache(inBuffer, outBuffer);
         }, false);
     }
+
+    /** Sets the inbound buffer; {@code null} allowed (recache skips nulls). Fluent. */
     public IOBuffers setInBuffer(ByteBuffer inBuffer) {
         this.inBuffer = inBuffer;
         return this;
     }
+
+    /** The inbound buffer; {@code null} until set. Invalid after {@link #close()}. */
     public ByteBuffer getInBuffer() {
         return inBuffer;
     }
+
+    /** The outbound buffer; {@code null} until set. Invalid after {@link #close()}. */
     public ByteBuffer getOutBuffer() {
         return outBuffer;
     }
+
+    /** Sets the outbound buffer; {@code null} allowed (recache skips nulls). Fluent. */
     public IOBuffers setOutBuffer(ByteBuffer outBuffer) {
         this.outBuffer = outBuffer;
         return this;
     }
 
     /**
-     * Closes this resource, relinquishing any underlying resources.
-     * This method is invoked automatically on objects managed by the
-     * {@code try}-with-resources statement.
+     * Recaches the current in/out buffers into the {@link ByteBufferUtil} pool.
+     * One-shot and thread-safe via {@link CloseableTypeDelegate}: only the first
+     * call acts, subsequent calls are no-ops, and recache failures are swallowed
+     * rather than thrown ({@code throwIOException=false}). After this call the
+     * pair — and both buffers — must be considered invalid.
      *
-     * @throws Exception if this resource cannot be closed
-     * @apiNote While this interface method is declared to throw {@code
-     * Exception}, implementers are <em>strongly</em> encouraged to
-     * declare concrete implementations of the {@code close} method to
-     * throw more specific exceptions, or to throw no exception at all
-     * if the close operation cannot fail.
-     *
-     * <p> Cases where the close operation may fail require careful
-     * attention by implementers. It is strongly advised to relinquish
-     * the underlying resources and to internally <em>mark</em> the
-     * resource as closed, prior to throwing the exception. The {@code
-     * close} method is unlikely to be invoked more than once and so
-     * this ensures that the resources are released in a timely manner.
-     * Furthermore it reduces problems that could arise when the resource
-     * wraps, or is wrapped, by another resource.
-     *
-     * <p><em>Implementers of this interface are also strongly advised
-     * to not have the {@code close} method throw {@link
-     * InterruptedException}.</em>
-     * <p>
-     * This exception interacts with a thread's interrupted status,
-     * and runtime misbehavior is likely to occur if an {@code
-     * InterruptedException} is {@linkplain Throwable#addSuppressed
-     * suppressed}.
-     * <p>
-     * More generally, if it would cause problems for an
-     * exception to be suppressed, the {@code AutoCloseable.close}
-     * method should not throw it.
-     *
-     * <p>Note that unlike the {@link Closeable#close close}
-     * method of {@link Closeable}, this {@code close} method
-     * is <em>not</em> required to be idempotent.  In other words,
-     * calling this {@code close} method more than once may have some
-     * visible side effect, unlike {@code Closeable.close} which is
-     * required to have no effect if called more than once.
-     * <p>
-     * However, implementers of this interface are strongly encouraged
-     * to make their {@code close} methods idempotent.
+     * @throws Exception never in practice (signature inherited from {@link AutoCloseable})
      */
     @Override
     public void close() throws Exception {

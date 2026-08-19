@@ -24,7 +24,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
 
 public abstract class TCPSessionCallback
-        extends BaseSessionCallback<SSLSessionConfig>
+        extends BaseSessionCallback<SSLConfigInt>
         implements ConnectionCallback<ByteBuffer> {
     public static final LogWrapper log = new LogWrapper(TCPSessionCallback.class).setEnabled(false);
 
@@ -108,7 +108,7 @@ public abstract class TCPSessionCallback
     public void accept(SelectionKey key) {
         if (log.isEnabled()) log.getLogger().info("Accepting connection from " + getRemoteAddress());
         if (getConfig() != null && key.channel().isOpen()) {
-            getConfig().sslConnectionHelper.publish(getConfig().getHandshakeStatus(), this);
+            getConfig().getSSLConnectionHelper().publish(getConfig().getHandshakeStatus(), this);
         } else {
             try {
 
@@ -174,9 +174,9 @@ public abstract class TCPSessionCallback
 
 
             sslConfig.beginHandshake(null);
-            sslConfig.sslConnectionHelper = new CustomSSLStateMachine(this);
+            sslConfig.setSSLConnectionHelper(new CustomSSLStateMachine(this));
             // trigger the handshake process as client
-            getConfig().sslConnectionHelper.publish(getConfig().getHandshakeStatus(), this);
+            getConfig().getSSLConnectionHelper().publish(getConfig().getHandshakeStatus(), this);
 
             if (log.isEnabled()) log.getLogger().info("Will return true");
             return true;

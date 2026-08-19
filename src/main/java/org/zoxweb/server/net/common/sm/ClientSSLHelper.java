@@ -1,6 +1,7 @@
 package org.zoxweb.server.net.common.sm;
 
 import org.zoxweb.server.net.BaseSessionCallback;
+import org.zoxweb.server.net.ssl.SSLConfigInt;
 import org.zoxweb.server.net.ssl.SSLConnectionHelper;
 import org.zoxweb.server.net.ssl.SSLSessionConfig;
 
@@ -28,7 +29,7 @@ class ClientSSLHelper implements SSLConnectionHelper, Closeable {
     }
 
     @Override
-    public void publish(SSLEngineResult.HandshakeStatus status, BaseSessionCallback<SSLSessionConfig> callback) {
+    public void publish(SSLEngineResult.HandshakeStatus status, BaseSessionCallback<SSLConfigInt> callback) {
         // guard instead of throw: the config-close drain publishes after teardown started
         if (!sm.isClosed())
             sm.publishSync(status, callback);

@@ -89,6 +89,17 @@ public class SSLSessionConfig
         this.sslEngine = sslContext.newInstance();
     }
 
+    public SSLConnectionHelper getSSLConnectionHelper() {
+        return sslConnectionHelper;
+    }
+    public void setSSLConnectionHelper(SSLConnectionHelper sslConnectionHelper){
+        this.sslConnectionHelper = sslConnectionHelper;
+    }
+
+    public void forceCloseEnabled(boolean force) {
+        this.forcedClose = force;
+    }
+
     @Override
     public void close() {
 
