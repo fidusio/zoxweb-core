@@ -1,6 +1,7 @@
 package org.zoxweb.server.net.common;
 
 import org.zoxweb.server.io.ByteBufferUtil;
+import org.zoxweb.server.io.IOBuffers;
 import org.zoxweb.shared.io.CloseableTypeDelegate;
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.net.DataPacket;
@@ -49,7 +50,7 @@ public abstract class UDPSessionCallback
             this.bufferSize = bufferSize;
 
         setExecutor(executor);
-        closeableDelegate = new CloseableTypeDelegate(()-> SharedIOUtil.close(channel), true );
+        closeableDelegate = new CloseableTypeDelegate(() -> SharedIOUtil.close(channel), true);
     }
 
     protected UDPSessionCallback(Executor executor, int port) {
@@ -91,17 +92,17 @@ public abstract class UDPSessionCallback
     public void accept(SelectionKey key) {
         InetSocketAddress clientAddr = null;
         DatagramChannel channel = (DatagramChannel) key.channel();
-        ByteBuffer buffer = null;
+        IOBuffers ioBuffers = null;
         if (key.channel().isOpen()) {
             do {
                 try {
                     // allocate a data buffer from cache
-                    buffer = ByteBufferUtil.allocateByteBuffer(bufferSize);
-                    clientAddr = (InetSocketAddress) channel.receive(buffer);
+                    ioBuffers = new IOBuffers(bufferSize, true);
+                    clientAddr = (InetSocketAddress) channel.receive(ioBuffers.getInBuffer());
                     if (clientAddr != null) {
                         // flip the buffer for reading
-                        buffer.flip();
-                        DataPacket<Long> dataPacket = new DataPacket<Long>(readCounter.incrementAndGet(), clientAddr, buffer);
+                        ioBuffers.getInBuffer().flip();
+                        DataPacket<Long> dataPacket = new DataPacket<Long>(readCounter.incrementAndGet(), channel, clientAddr, ioBuffers);
                         if (executor != null) {
                             // lambda bypass
 
@@ -111,19 +112,20 @@ public abstract class UDPSessionCallback
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                 }
+
                             });
                         } else
                             recacheBufferAccept(dataPacket);
-                    }
-                    else {
+                    } else {
                         // clientAddr is null no more data to read
-                        ByteBufferUtil.cache(buffer);
+                        ByteBufferUtil.cache(ioBuffers);
+
                     }
 
                 } catch (Exception e) {
                     e.printStackTrace();
+                    ByteBufferUtil.cache(ioBuffers);
                     // recache data buffer
-                    ByteBufferUtil.cache(buffer);
                 }
             } while (clientAddr != null && key.channel().isOpen());
         }
@@ -134,7 +136,7 @@ public abstract class UDPSessionCallback
             accept(dataPacket);
         } finally {
             // recache data buffer
-            ByteBufferUtil.cache(dataPacket.getBuffer());
+            ByteBufferUtil.cache(dataPacket.getIOBuffers());
         }
 
     }
@@ -152,7 +154,7 @@ public abstract class UDPSessionCallback
 
 
     public int send(DataPacket<?> dataPacket, boolean flip) throws IOException {
-        return send(dataPacket.getBuffer(), dataPacket.getAddress(), flip);
+        return send(dataPacket.getIOBuffers().getInBuffer(), dataPacket.getAddress(), flip);
     }
 
 

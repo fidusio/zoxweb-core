@@ -30,7 +30,7 @@ public class SSLSessionConfig
     // Outgoing encrypted data
     //public volatile ByteBuffer outSSLNetData = null;
     // Decrypted data application data
-    private volatile ByteBuffer inDecryptedData = null;
+    private volatile ByteBuffer inDecryptionBuffer = null;
     // the encrypted channel
     public volatile SocketChannel sslChannel = null;
     public volatile BaseChannelOutputStream sslOutputStream = null;
@@ -134,7 +134,7 @@ public class SSLSessionConfig
                 selectorController.cancelSelectionKey(remoteChannel);
             }
             SharedIOUtil.close((AutoCloseable) sslConnectionHelper, sslIOBuffers);
-            ByteBufferUtil.cache(inDecryptedData, inRemoteData);
+            ByteBufferUtil.cache(inDecryptionBuffer, inRemoteData);
             SharedIOUtil.close(sslOutputStream);
 
             if (log.isEnabled()) log.getLogger().info("SSLSessionConfig-CLOSED " + Thread.currentThread() + " " +
@@ -182,23 +182,6 @@ public class SSLSessionConfig
     }
 
 
-//    public synchronized SSLEngineResult smartWrap(ByteBuffer source, ByteBuffer destination, boolean flip)
-//            throws SSLException {
-//        if(flip)
-//            ((Buffer) source).flip();
-//        SSLEngineResult ret = sslEngine.wrap(source, destination);
-//        source.compact();
-//        return ret;
-//    }
-//
-//    public synchronized SSLEngineResult smartUnwrap(ByteBuffer source, ByteBuffer destination, boolean flipSource) throws SSLException {
-//        if(flipSource)
-//            ((Buffer) source).flip();
-//        SSLEngineResult ret = sslEngine.unwrap(source, destination);
-//        source.compact();
-//        return ret;
-//    }
-
 
     public IOBuffers beginHandshake(IOBuffers ioBuffers) throws SSLException {
         if (!hasBegan.get()) {
@@ -206,9 +189,6 @@ public class SSLSessionConfig
                 this.sslIOBuffers = ioBuffers != null ? ioBuffers : new IOBuffers();
                 // set the ssl engine mode client or sever
                 sslEngine.setUseClientMode(clientMode);
-                // create the necessary byte buffer with the proper length
-//                inSSLNetData =
-
                 if (sslIOBuffers.getInBuffer() == null || sslIOBuffers.getInBuffer().capacity() < getPacketBufferSize()) {
                     sslIOBuffers.setInBuffer(ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, getPacketBufferSize()));
                 }
@@ -217,11 +197,7 @@ public class SSLSessionConfig
                     sslIOBuffers.setOutBuffer(ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, getPacketBufferSize()));
                 }
 
-
-//                sslIOBuffers.setInBuffer(sslIOBuffers.getInBuffer() != null && sslIOBuffers.getInBuffer().capacity() >= getPacketBufferSize() ? inRawBuffer : ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, getPacketBufferSize()));
-//                // outSSLNetData =
-//                sslIOBuffers.setOutBuffer(outRawBuffer != null && outRawBuffer.capacity() >= getPacketBufferSize() ? outRawBuffer : ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, getPacketBufferSize()));
-                inDecryptedData = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, getApplicationBufferSize());
+                inDecryptionBuffer = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, getApplicationBufferSize());
                 // start the handshake
                 sslEngine.beginHandshake();
             }
@@ -230,25 +206,6 @@ public class SSLSessionConfig
     }
 
 
-//    public void beginHandshake(TransportBuffers transportBuffers) throws SSLException {
-//        if (!hasBegan.get()) {
-//            if (!hasBegan.getAndSet(true)) {
-//                // set the ssl engine mode client or sever
-//                sslEngine.setUseClientMode(clientMode);
-//                // create the necessary byte buffer with the proper length
-//                inSSLNetData = inRawBuffer != null && inRawBuffer.capacity() >= getPacketBufferSize() ? inRawBuffer : ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, getPacketBufferSize());
-//                outSSLNetData = outRawBuffer != null && outRawBuffer.capacity() >= getPacketBufferSize() ? outRawBuffer : ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, getPacketBufferSize());
-//                inAppData = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, getApplicationBufferSize());
-//                // start the handshake
-//                sslEngine.beginHandshake();
-//            }
-//        }
-//    }
-
-
-    public Runnable getDelegatedTask() {
-        return sslEngine.getDelegatedTask();
-    }
 
     @Override
     public SSLEngine getSSLEngine() {
@@ -260,15 +217,7 @@ public class SSLSessionConfig
         return sslChannel;
     }
 
-//    @Override
-//    public ByteBuffer getSSLInBuffer() {
-//        return inSSLNetData;
-//    }
-//
-//    @Override
-//    public ByteBuffer getSSLOutBuffer() {
-//        return outSSLNetData;
-//    }
+
 
     @Override
     public IOBuffers getSSLIOBuffers() {
@@ -277,6 +226,6 @@ public class SSLSessionConfig
 
     @Override
     public ByteBuffer getInDecryptionBuffer() {
-        return inDecryptedData;
+        return inDecryptionBuffer;
     }
 }

@@ -69,8 +69,8 @@ machine.
   inside the JVM; every interaction with the remote service goes through **NIOSocket**.
 - NIOSocket triggers the callback in exactly two ways:
   1. remote connection established → `connected(SelectionKey)` → **`CONNECTED`**;
-  2. data arrival while the callback waits → `accept(data)` → **`RAW_IN_DATA`**.
-- `RAW_IN_DATA` payloads are **partial or complete**, and may be **plain, handshake, or
+  2. data arrival while the callback waits → `accept(data)` → **`IN_RAW_DATA`**.
+- `IN_RAW_DATA` payloads are **partial or complete**, and may be **plain, handshake, or
   encrypted** bytes.
 - The machine — not any helper, not any caller — performs the entire session: react to
   `CONNECTED`, assemble incoming data into protocol messages, decide and send responses,
@@ -159,7 +159,7 @@ NIOSocket ─ accept(data) ───► RAW_IN_DATA / waiting state    (mandator
    machine properties). The machine is session-owned; teardown order is sacred: close
    `AUTO_CLOSEABLE` resources → recache read buffer → publish `CLOSED` (payload = stashed
    `Params.EXCEPTION` or null) → **close the machine last** (a closed machine rejects publishes).
-7. **The transport router owns the wire event exclusively.** `RAW_IN_DATA` (TCP) / `DATAGRAM`
+7. **The transport router owns the wire event exclusively.** `IN_RAW_DATA` (TCP) / `DATAGRAM`
    (UDP) are consumed only by the router state; phases/catalog states consume `IN_DATA`. Every
    buffer is a detached pooled copy with exactly **one active owner**, who recaches it via
    `ByteBufferUtil.cache` when done. Double-cache = pool corruption.
@@ -252,7 +252,7 @@ lambda (once-only; its flag flips **before** the lambda runs, which the read loo
 - `connected(SelectionKey)` — kickoff: `setChannel`, create the session output stream
   (`CommonChannelOutputStream`, teardown-registered), `publishSync(CONNECTED, key)`, return
   `OP_READ`.
-- `accept(SelectionKey)` — read loop under `readLock`: loop-top `isClosed()` guard, clear the
+- `accept(SelectionKey)` — read loop (no lock, see §14.12): loop-top `isClosed()` guard, clear the
   pooled 16K `rawReadBuffer`, `read`, flip, mint a **detached pooled HEAP copy**,
   `publishSync(RAW_IN_DATA, copy)`; EOF (`-1`) or `IOException` → close the session. Writes go
   through `ClientSessionContext.write` → `bcos` (encrypts after `sslHandshakeSuccessful`).
@@ -277,10 +277,11 @@ lambda (once-only; its flag flips **before** the lambda runs, which the read loo
   verdict). Stray-source datagrams are dropped by the OS.
 - No TLS: `sslHandshakeSuccessful` throws `UnsupportedOperationException` (no DTLS in this stack).
 
-**Teardown (identical, the delegate lambda):** close every `AUTO_CLOSEABLE` in registration order
-(channel first — so in-flight reads exit; SSL session state after — so its drain sees a dead
-channel) → recache the raw read buffer under `readLock` → publish `CLOSED` with the stashed
-`Params.EXCEPTION` or null → `machine.close()` **last**.
+**Teardown (the delegate lambda; identical apart from the recache guard):** close every
+`AUTO_CLOSEABLE` in registration order (channel first — so in-flight reads exit; SSL session state
+after — so its drain sees a dead channel) → recache the raw read buffer (TCP: unguarded, §14.12;
+UDP: still under `readLock`) → publish `CLOSED` with the stashed `Params.EXCEPTION` or null →
+`machine.close()` **last**.
 
 **NIOSocket seam:** `addDatagramSocket(InetSocketAddress, ConnectionCallback<?>)` — bind →
 `setChannel` → register **0 ops** → `connected(sk)` → install returned ops. The legacy
@@ -295,7 +296,7 @@ channel) → recache the raw read buffer under `readLock` → publish `CLOSED` w
 | State | Role |
 |---|---|
 | **CONNECTED** | Transport initialization + the machine's kickoff actions. Entered via `connected(SelectionKey)` — the only entry point. Payload-agnostic. |
-| **Waiting / RAW_IN_DATA** | The data-routing state (v1 transport router, kept). Plain bytes → `IN_DATA` toward the assembler; handshake/encrypted bytes → the SSL states (the TLS assembler), whose decrypted output re-enters as `IN_DATA`. Owns `RAW_IN_DATA`/`DATAGRAM` exclusively. |
+| **Waiting / RAW_IN_DATA** | The data-routing state (v1 transport router, kept). Plain bytes → `IN_DATA` toward the assembler; handshake/encrypted bytes → the SSL states (the TLS assembler), whose decrypted output re-enters as `IN_DATA`. Owns `IN_RAW_DATA`/`DATAGRAM` exclusively. |
 | **CLOSED** | End-of-life: remote disconnect, fatal error, or the run completing (validation pass or fail). **Physical cleanup stays in the callback teardown delegate.** The machine-side job is finalizing the report; the push itself is `StateMachine.close()` firing `MACHINE_CLOSED` (§10). |
 
 ### Catalog states (JSON-composed building blocks; open vocabulary)
@@ -337,7 +338,7 @@ RAW_IN_DATA → (router) → IN_DATA → (assembler) → IN_MESSAGE → (control
 | `SECURE` | kept | `SSLConfigInt` | SSL bridge → controller (deferred send) |
 | `READY` | kept | null | READY gate → auto-close / application |
 | `START_TLS` | kept | null | controller / SSL AutoStart → SSL control |
-| `RAW_IN_DATA` · `DATAGRAM` · `CONNECTED` · `CLOSED` | kept | as v1 | callback → router |
+| `IN_RAW_DATA` · `DATAGRAM` · `CONNECTED` · `CLOSED` | kept | as v1 | callback → router |
 | `NEED_WRAP` · `NEED_UNWRAP` · `NEED_UNWRAP_AGAIN` · `NEED_TASK` · `FINISHED` · `NOT_HANDSHAKING` | kept | `SSLClientBridge`, or null during the config-close drain | `ClientSSLHelper` → SSL states |
 | **`BANNER_RECEIVED`** | **RETIRED** | — | removed from `CommonTrigger`; applications read `results.banner` |
 
@@ -517,7 +518,7 @@ port-unreachable fails the session with a cause.
 1. **Events** — add `IN_MESSAGE`, `OUT_MESSAGE`, `VALIDATE`; remove `BANNER_RECEIVED` from
    `CommonTrigger` and its `ProtoConnect` / test references. **DONE 2026-08-15** (also:
    `SMProtoUtil.BasicEvent` merged into `CommonTrigger` — one enum is the whole vocabulary — and
-   the wire event renamed `IN_RAW_DATA` → `RAW_IN_DATA` to match this document).
+   the wire event renamed `IN_RAW_DATA` → `IN_RAW_DATA` to match this document).
 2. **Report listener + `waitForClose`** — one `MACHINE_CLOSED`-based utility; migrate helpers and
    tests off hand-rolled latches. **DONE 2026-08-15**: `SMProtoUtil.waitForClose(sm, millis)`
    (latch-arming `MACHINE_CLOSED` listener, already-closed race covered) +
@@ -591,6 +592,13 @@ purpose-written state, not a config. Server-side counterpart ON HOLD (Rule 11).
     lost `final` on the UDP target, and the pre-connect null window on the TCP client path — are
     deliberately left unpatched pending a larger rework; technical detail in `PENDING.md` §3.4.
     Do not "fix" them opportunistically.
+12. **`TCPSMCallback.readLock` removed as useless** (2026-08-20) — maintainer ruling. A session
+    only ever closes on its own worker thread: inline from a publish inside the read loop, or from
+    the loop's own EOF/error path. `synchronized` is re-entrant, so the lock never once blocked a
+    thread; it only documented a cross-thread close that the design forbids (helpers, tests and
+    applications are pure observers — they never close a session). The buffer handoff is carried by
+    the teardown order — channel closed first, then recache — plus the read loop's loop-top
+    `isClosed()` guard. `UDPSMCallback` keeps its `readLock` for now; do not re-add the TCP one.
 
 *(Rejected along the way: a Phase A/B/C gap-phasing plan — superseded by the premise above.)*
 
@@ -650,7 +658,7 @@ is slated to dissolve in v2, that is noted — but it is live code today.
 | `ClientSessionContext` | Machine config: `Mode` (PLAIN/TLS_HANDSHAKING/TLS_SECURE), `Transport` (TCP/UDP), the single session binding, settings/vars bags, `write()` routed to stream or datagram (gated during handshake), `fail()`, and the READY gate (`phaseComplete`, records `ready=true`). | kept |
 | `TCPSMCallback` | Pure-SM TCP transport bridge (§4). | kept |
 | `UDPSMCallback` | Pure-SM UDP client bridge (§4); does **not** extend `UDPSessionCallback`. | kept |
-| `ClientTransportState` | TCP router: `CONNECTED` init + READY gate; `RAW_IN_DATA` → PLAIN pass-through as `IN_DATA`, or chunked feed into the SSL engine's inbound buffer in TLS modes. | kept (mandatory state) |
+| `ClientTransportState` | TCP router: `CONNECTED` init + READY gate; `IN_RAW_DATA` → PLAIN pass-through as `IN_DATA`, or chunked feed into the SSL engine's inbound buffer in TLS modes. | kept (mandatory state) |
 | `UDPClientTransportState` | UDP router: `CONNECTED` init + READY gate; `DATAGRAM` → `IN_DATA` pass-through (UDP is always plaintext). **New 2026-08-14.** | kept (mandatory state) |
 | `SSLClientState` | Catalog `ssl` (was `SSLClientPhase`, converted 2026-08-15): bag-configured (`mode`, `cert_validation`, `endpoint_identification`, optional `ssl_context`), `IMMEDIATE` auto-start / `ON_DEMAND` upgrade, `ready_gate` when IMMEDIATE; the builder registers the engine states alongside it. | v2 |
 | `SSLClientHandshakeState` | One consumer per `HandshakeStatus`, delegating to `SSLUtil._needWrap/_needUnwrap/_needTask/_finished`. Unwraps are **router-fed, no channel reads**. | kept |
@@ -665,7 +673,7 @@ is slated to dissolve in v2, that is noted — but it is live code today.
 | ~~`DataExchangePhase`~~ | **DELETED 2026-08-15** — dissolved into `assembler` + `controller` + `responder` (§8). | — |
 | ~~`ConnectionPhase`~~ | **DELETED 2026-08-15** — first-implementation error (§14.10); ownership/broadcast-order contract text lives in `ClientTransportState`/package javadoc. | — |
 | `SMProtoUtil` | Package utility home (**all new utilities go here** — maintainer directive): `STRING_TO_DATA`, `STRING_VARS_TO_STRING/DATA`, `hasVars`, `RESULTS` + `results(smi)`. (`BasicEvent` merged into `CommonTrigger` 2026-08-15 — one enum is the whole vocabulary.) | gained `waitForClose` + `closeCause` (§13.2, done 2026-08-15) |
-| `CommonTrigger` | The complete session vocabulary (2026-08-15: absorbed `SMProtoUtil.BasicEvent`): `CONNECTED`, `RAW_IN_DATA`, `DATAGRAM`, `IN_DATA`, `SECURE`, `READY`, `START_TLS`, `IN_MESSAGE`, `OUT_MESSAGE`, `VALIDATE`, `CLOSED`. (`BANNER_RECEIVED` removed — v2 step 1 done.) | kept |
+| `CommonTrigger` | The complete session vocabulary (2026-08-15: absorbed `SMProtoUtil.BasicEvent`): `CONNECTED`, `IN_RAW_DATA`, `DATAGRAM`, `IN_DATA`, `SECURE`, `READY`, `START_TLS`, `IN_MESSAGE`, `OUT_MESSAGE`, `VALIDATE`, `CLOSED`. (`BANNER_RECEIVED` removed — v2 step 1 done.) | kept |
 | `ProtoConnect` | Observer CLI: config + `host:port` + `var=value` → prints lifecycle events; exit 0/1/2/64. Never drives the session. | kept |
 | `package-info.java` | Package overview javadoc. | kept |
 

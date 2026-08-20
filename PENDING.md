@@ -23,7 +23,7 @@ and keeps working; this is not a port.
   machine already carries an `AUTO_CLOSEABLE` binding (`NVGenericMap.add` silently replaces
   same-name entries, so a second binding would hijack the first session's resources). Session
   state living in `stateMachine.getProperties()` is therefore correct by contract.
-- **Event vocabulary:** `CONNECTED` (payload `SelectionKey`), `RAW_IN_DATA` (payload `ByteBuffer`;
+- **Event vocabulary:** `CONNECTED` (payload `SelectionKey`), `IN_RAW_DATA` (payload `ByteBuffer`;
   renamed from `IN_RAW_DATA` 2026-08-15 to match META-SM-PROTO-DESIGN.md),
   `CLOSED` (payload `Throwable` or null). No ERROR/CLOSED split: clean EOF is folded into `CLOSED`
   with a null payload; the error path relays its cause via `Params.EXCEPTION`. One ID = one payload

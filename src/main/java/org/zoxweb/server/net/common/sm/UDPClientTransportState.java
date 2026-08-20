@@ -51,7 +51,7 @@ public class UDPClientTransportState extends State<Object> {
         @Override
         public void accept(DataPacket<Long> packet) {
             // pass-through: ownership of the detached buffer transfers to the active IN_DATA owner
-            publishSync(CommonTrigger.IN_DATA, packet.getBuffer());
+            publishSync(CommonTrigger.IN_DATA, packet.getIOBuffers().getInBuffer());
         }
     }
 

@@ -20,7 +20,7 @@ import java.io.Closeable;
  * the publish would throw on a closed machine and {@code CLOSED} would be silently lost.
  * The machine is closed exclusively by TCPSMCallback's close delegate, last.
  */
-class ClientSSLHelper implements SSLConnectionHelper, Closeable {
+class ClientSSLHelper implements SSLConnectionHelper<SSLConfigInt>, Closeable {
 
     private final ClientConSM sm;
 

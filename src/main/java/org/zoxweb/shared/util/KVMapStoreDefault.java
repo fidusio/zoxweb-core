@@ -31,11 +31,11 @@ public class KVMapStoreDefault<K, V>
 
 
     /** Converts every key prior to any usage, null disables key filtering */
-    protected DataEncoder<K, K> keyFilter = null;
+    protected volatile DataEncoder<K, K> keyFilter = null;
     /** Extracts the key from a value, used by Registrar based subclasses, null if not set */
-    protected DataDecoder<V, K> valueToKey = null;
+    protected volatile DataDecoder<V, K> valueToKey = null;
     /** The name and description of the store, exposed via getName and getDescription */
-    protected NamedDescription namedDescription;
+    protected volatile NamedDescription namedDescription;
 
 
     /**

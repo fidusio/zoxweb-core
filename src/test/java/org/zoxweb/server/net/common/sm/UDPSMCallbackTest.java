@@ -71,7 +71,7 @@ public class UDPSMCallbackTest {
             }, CommonTrigger.CONNECTED);
             app.register((Consumer<Object>) o -> {
                 DataPacket<?> dp = (DataPacket<?>) o;
-                ByteBuffer bb = dp.getBuffer();
+                ByteBuffer bb = dp.getIOBuffers().getInBuffer();
                 byte[] chunk = new byte[bb.remaining()];
                 bb.get(chunk);
                 // the packet buffer is a detached consumer-owned copy — recache when done

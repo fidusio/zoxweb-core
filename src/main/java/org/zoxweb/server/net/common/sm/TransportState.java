@@ -1,7 +1,9 @@
 package org.zoxweb.server.net.common.sm;
 
 import org.zoxweb.server.fsm.State;
+import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.util.ConfigurableType;
+import org.zoxweb.shared.util.GetName;
 import org.zoxweb.shared.util.NVGenericMap;
 
 public class TransportState extends State<NVGenericMap>
@@ -30,6 +32,31 @@ public class TransportState extends State<NVGenericMap>
         }
     }
 
+    public enum EventType
+        implements GetName
+    {
+//        IN_RAW_DATA
+        ;
+
+        private final String name;
+        private final SharedIOUtil.IOType ioType;
+        EventType(String name, SharedIOUtil.IOType ioType) {
+            this.name = name;
+            this.ioType = ioType;
+        }
+
+        /**
+         * @return the name of the object
+         */
+        @Override
+        public String getName() {
+            return name;
+        }
+
+        public SharedIOUtil.IOType getIoType() {
+            return ioType;
+        }
+    }
 
 
     public TransportState(String name, NVGenericMap map) {

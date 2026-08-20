@@ -15,7 +15,6 @@
  */
 package org.zoxweb.server.io;
 
-import org.zoxweb.server.net.DataPacket;
 import org.zoxweb.server.util.ServerUtil;
 import org.zoxweb.shared.io.BytesArray;
 import org.zoxweb.shared.io.SharedIOUtil;
@@ -302,9 +301,10 @@ public class ByteBufferUtil {
 //        return smartWrite(lock, bc, bb, true);
 //    }
 
-    public static int send(Lock lock, DatagramChannel channel, DataPacket<?> dataPacket, boolean flip) throws IOException {
-        return send(lock, channel, dataPacket.getBuffer(), dataPacket.getAddress(), flip);
-    }
+//    public static int send(Lock lock, DatagramChannel channel, DataPacket<?> dataPacket, boolean flip) throws IOException {
+//        return send(lock, channel, dataPacket.getIOBuffers().getInBuffer(), dataPacket.getAddress(), flip);
+//    }
+
     public static int send(Lock lock, DatagramChannel channel, ByteBuffer bb, SocketAddress destinationAddress, boolean flip) throws IOException {
         int sent = 0;
         if (flip)
@@ -313,8 +313,7 @@ public class ByteBufferUtil {
         ServerUtil.lock(lock);
         try {
             sent = channel.send(bb, destinationAddress);
-        }
-        finally {
+        } finally {
             ServerUtil.unlock(lock);
         }
 
@@ -327,7 +326,7 @@ public class ByteBufferUtil {
 
         try {
             if (flip)
-                 bb.flip();
+                bb.flip();
 
             while (bb.hasRemaining()) {
                 int written = bc.write(bb);
@@ -373,6 +372,20 @@ public class ByteBufferUtil {
         if (buffers != null) {
             for (ByteBuffer bb : buffers)
                 SINGLETON.cache0(bb);
+        }
+    }
+
+
+    /**
+     * Recaches both buffers of the pair, exactly once per pair: gated on the pair's
+     * one-shot {@link IOBuffers#canCache()} token, which {@link IOBuffers#close()} also
+     * consumes — repeated calls, or any cache/close combination, recache only once.
+     * Null-safe, and null buffers within the pair are skipped.
+     */
+    public static void cache(IOBuffers ioBuffers) {
+        if (ioBuffers != null && ioBuffers.canCache()) {
+            SINGLETON.cache0(ioBuffers.getInBuffer());
+            SINGLETON.cache0(ioBuffers.getOutBuffer());
         }
     }
 

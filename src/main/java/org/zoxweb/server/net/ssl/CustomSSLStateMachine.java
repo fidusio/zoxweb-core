@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import static javax.net.ssl.SSLEngineResult.HandshakeStatus.*;
 
 public class CustomSSLStateMachine extends MonoStateMachine<SSLEngineResult.HandshakeStatus, BaseSessionCallback<SSLConfigInt>>
-        implements SSLConnectionHelper, Closeable, Identifier<Long> {
+        implements SSLConnectionHelper<SSLConfigInt>, Closeable, Identifier<Long> {
     public static final LogWrapper log = new LogWrapper(CustomSSLStateMachine.class).setEnabled(false);
 
     static RateCounter rcNotHandshaking = new RateCounter("NotHandshaking");

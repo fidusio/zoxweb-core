@@ -57,7 +57,7 @@ public class SSHBannerTest {
 
         void feed(String wire) {
             byte[] bytes = SharedStringUtil.getBytes(wire);
-            sm.publishSync(CommonTrigger.RAW_IN_DATA,
+            sm.publishSync(CommonTrigger.IN_RAW_DATA,
                     ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, bytes, 0, bytes.length, true));
         }
 

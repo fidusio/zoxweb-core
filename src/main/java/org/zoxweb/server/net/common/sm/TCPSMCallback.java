@@ -2,6 +2,7 @@ package org.zoxweb.server.net.common.sm;
 
 import org.zoxweb.server.fsm.StateMachineInt;
 import org.zoxweb.server.io.ByteBufferUtil;
+import org.zoxweb.server.io.IOBuffers;
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.net.BaseChannelOutputStream;
 import org.zoxweb.server.net.DataPacket;
@@ -35,7 +36,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * <ul>
  * <li>{@link CommonTrigger#CONNECTED} once, published from {@link #connected(SelectionKey)} with the
  * SelectionKey as payload, always before any read dispatch (NIOSocket ordering guarantee).</li>
- * <li>{@link CommonTrigger#RAW_IN_DATA} per read, the payload buffer is a detached copy owned by the
+ * <li>{@link CommonTrigger#IN_RAW_DATA} per read, the payload buffer is a detached copy owned by the
  * consumer, safe for async handling; the consumer may recache it via ByteBufferUtil when done.</li>
  * <li>{@link CommonTrigger#CLOSED} exactly once per session from the close delegate, whatever the
  * termination path (EOF, read error, {@link #exception(Throwable)}, external close); the payload
@@ -94,22 +95,16 @@ public class TCPSMCallback
     }
 
 
-
     /**
      * Keys of the session entries stored in the state machine's properties.
      */
-    public enum Params
-    {
+    public enum Params {
         AUTO_CLOSEABLE,
         EXCEPTION,
     }
 
-    // 16k is a bit too big but it will be cached + plus it will support SSL
-    private volatile ByteBuffer inRawBuffer = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, SharedIOUtil.SSL_BUFFER_SIZE);
-    // guards rawReadBuffer handoff between the read loop and the close delegate's recache:
-    // without it an external close() (or an inline close from a RAW_IN_DATA consumer) could
-    // return the buffer to the pool while the read loop is still using it
-    private final Object readLock = new Object();
+
+    private volatile IOBuffers ioBuffers = new IOBuffers(SharedIOUtil.SSL_BUFFER_SIZE);
 
 
     /**
@@ -136,21 +131,17 @@ public class TCPSMCallback
         if (stateMachine.getProperties().getNV(SUS.enumName(Params.AUTO_CLOSEABLE)) != null)
             throw new IllegalArgumentException("state machine already bound to a session callback");
         setConfig(stateMachine);
-        NamedValue<CollectionAsArray<AutoCloseable>> ncClosable = new NamedValue<CollectionAsArray<AutoCloseable>>(Params.AUTO_CLOSEABLE, new CollectionAsArray<AutoCloseable>(new LinkedHashSet<>( ), new AutoCloseable[0]));
+        NamedValue<CollectionAsArray<AutoCloseable>> ncClosable = new NamedValue<CollectionAsArray<AutoCloseable>>(Params.AUTO_CLOSEABLE, new CollectionAsArray<AutoCloseable>(new LinkedHashSet<>(), new AutoCloseable[0]));
         stateMachine.getProperties().add(ncClosable);
 
         closeableDelegate.setDelegate(() ->
         {
             NamedValue<CollectionAsArray<AutoCloseable>> autoCloseables = getConfig().getProperties().getNV(SUS.enumName(Params.AUTO_CLOSEABLE));
             SharedIOUtil.close(autoCloseables.getValue().asArray());
-            // synchronized: an external close must not recache the buffer while a read
-            // dispatch still owns it — the socket is already closed above, so the in-flight
-            // read loop exits promptly and releases the lock; an inline close (from a
-            // RAW_IN_DATA consumer) re-enters the lock on the same thread and the read loop's
-            // isClosed() check keeps it from touching the buffer afterwards
-            synchronized (readLock) {
-                ByteBufferUtil.cache(inRawBuffer);
-            }
+            // the session always closes on its own worker thread — inline from a publish, or
+            // from the read loop's EOF/error path — so this recache never races a read: the
+            // socket is closed above and the loop-top isClosed() guard stops any further use
+            ByteBufferUtil.cache(ioBuffers);
             NamedValue<Throwable> exception = getConfig().getProperties().getNV(SUS.enumName(Params.EXCEPTION));
             getConfig().publishSync(CommonTrigger.CLOSED, exception != null ? exception.getValue() : null);
             // last act: a closed machine rejects publishes, so CLOSED must go out first
@@ -161,7 +152,7 @@ public class TCPSMCallback
 
 
     /**
-     * Read dispatch: drains the socket, publishing one {@link CommonTrigger#RAW_IN_DATA} packet per
+     * Read dispatch: drains the socket, publishing one {@link CommonTrigger#IN_RAW_DATA} packet per
      * read via {@link #accept(DataPacket)}; on EOF or read error the session is closed. Never
      * invoked before {@link #connected(SelectionKey)}, and serialized per session by NIOSocket.
      *
@@ -170,34 +161,32 @@ public class TCPSMCallback
     @Override
     public void accept(SelectionKey key) {
         int read = 0;
-        synchronized (readLock) {
-            try {
+        try {
 
-                do {
-                    // a publish below may close the session inline (close_notify, injection
-                    // failure); the delegate has recached rawReadBuffer at that point — it
-                    // must not be touched again
-                    if (isClosed())
-                        return;
-                    inRawBuffer.clear();
-                    read = socket.isConnected() ? socket.read(inRawBuffer) : -1;
-                    if (read > 0) {
+            do {
+                // a publish below may close the session inline (close_notify, injection
+                // failure); the delegate has recached inRawBuffer at that point — it
+                // must not be touched again
+                if (isClosed())
+                    return;
+                ioBuffers.getInBuffer().clear();
+                read = socket.isConnected() ? socket.read(ioBuffers.getInBuffer()) : -1;
+                if (read > 0) {
 
-                        inRawBuffer.flip();
+                    ioBuffers.getInBuffer().flip();
 
-                        // the packet buffer is a detached copy owned by the consumer, safe for async handling,
-                        // the consumer may ByteBufferUtil.cache() it when done processing
-                        ByteBuffer packetBuffer = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, inRawBuffer.array(), 0, inRawBuffer.remaining(), true);
-                        accept(new DataPacket<>(packetsCounter.incrementAndGet(), remoteAddress,  packetBuffer));
+                    // the packet buffer is a detached copy owned by the consumer, safe for async handling,
+                    // the consumer may ByteBufferUtil.cache() it when done processing
+                    ByteBuffer packetBuffer = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, ioBuffers.getInBuffer().array(), 0, ioBuffers.getInBuffer().remaining(), true);
+                    accept(new DataPacket<>(packetsCounter.incrementAndGet(), remoteAddress, packetBuffer));
 
-                    }
-                } while (read > 0);
+                }
+            } while (read > 0);
 
 
-            } catch (IOException e) {
-                read = -1;
-                if (log.isEnabled()) log.getLogger().info("" + e);
-            }
+        } catch (IOException e) {
+            read = -1;
+            if (log.isEnabled()) log.getLogger().info("" + e);
         }
 
         if (read == -1)
@@ -253,7 +242,7 @@ public class TCPSMCallback
     @SuppressWarnings("unchecked")
     @Override
     public <V extends Channel> V getChannel() {
-        return (V)socket;
+        return (V) socket;
     }
 
     /**
@@ -265,7 +254,7 @@ public class TCPSMCallback
      * @throws IOException in case of error
      */
     @Override
-    public void setChannel(Channel channel) throws IOException{
+    public void setChannel(Channel channel) throws IOException {
         socket = (SocketChannel) channel;
         registerAutoCloseable(socket);
         setRemoteAddress((InetSocketAddress) socket.getRemoteAddress());
@@ -280,7 +269,7 @@ public class TCPSMCallback
      */
     public void accept(DataPacket<Long> t) {
 
-        getConfig().publishSync(CommonTrigger.RAW_IN_DATA, t.getBuffer());
+        getConfig().publishSync(CommonTrigger.IN_RAW_DATA, t.getIOBuffers().getInBuffer());
 
     }
 
@@ -292,7 +281,7 @@ public class TCPSMCallback
      */
     public void accept(ByteBuffer t) {
 
-        getConfig().publishSync(CommonTrigger.RAW_IN_DATA, t);
+        getConfig().publishSync(CommonTrigger.IN_RAW_DATA, t);
 
     }
 
@@ -310,7 +299,7 @@ public class TCPSMCallback
      */
     @Override
     public void exception(Throwable e) {
-        if(!isClosed())
+        if (!isClosed())
             getConfig().getProperties().add(new NamedValue<Throwable>(Params.EXCEPTION, e));
         SharedIOUtil.close(this);
         if (log.isEnabled()) log.getLogger().info("" + e);

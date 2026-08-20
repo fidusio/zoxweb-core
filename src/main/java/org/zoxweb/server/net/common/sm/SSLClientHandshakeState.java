@@ -76,8 +76,21 @@ public class SSLClientHandshakeState extends State<Object> {
             if (hs != NEED_UNWRAP && !"NEED_UNWRAP_AGAIN".equals(SUS.enumName(hs)))
                 return;
             try {
-                // router-fed unwrap — NO channel read, see class javadoc; handshake records
-                // produce no app data, hence the EMPTY destination (as SSLUtil._needUnwrap)
+                // router-fed unwrap — NO channel read, see class javadoc. The EMPTY destination
+                // is deliberate and client-side-exact: while a CLIENT engine is genuinely
+                // NEED_UNWRAP only server handshake records can arrive (no app data before the
+                // server Finished, and consuming that Finished flips us to NEED_WRAP), so
+                // bytesProduced is provably 0 and no destination capacity is needed. A peer that
+                // violates it earns BUFFER_OVERFLOW -> SSLException -> ctx.fail, the correct
+                // strict verdict for a conformance checker.
+                //
+                // SSLUtil._needUnwrap is shared with server sessions, where a producing unwrap at
+                // the handshake boundary is real, so IT targets the decryption buffer — sized to
+                // applicationBufferSize by beginHandshake, see SSLUtil invariant 3 — and leaves
+                // delivery to the state transition rather than dispatching from the handshake
+                // handler. The same chain exists here: Finished -> SSLUtil._finished republishes
+                // NOT_HANDSHAKING while the net buffer still holds bytes, and SSLClientDataState
+                // drains the decryption buffer into the callback.
                 SSLEngineResult result = SSLUtil.smartSSLUnwrap(
                         config.getSSLEngine(), config.getSSLIOBuffers().getInBuffer(), ByteBufferUtil.EMPTY, true, true);
                 switch (result.getStatus()) {

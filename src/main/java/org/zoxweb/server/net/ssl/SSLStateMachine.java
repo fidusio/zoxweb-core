@@ -11,7 +11,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class SSLStateMachine extends StateMachine<SSLConfigInt>
-        implements SSLConnectionHelper {
+        implements SSLConnectionHelper<SSLConfigInt> {
 
 
     @Override

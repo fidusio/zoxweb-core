@@ -19,6 +19,15 @@ public class SharedIOUtil {
     public static final int SSL_BUFFER_SIZE = 16709;
 
 
+    public enum IOType
+    {
+        // incoming data, event, trigger
+        IN,
+        // outgoing data, event, trigger
+        OUT
+    }
+
+
     /**
      * Close an AutoCloseable object if c is null the action is discarded, while closing catch any exception silently
      *

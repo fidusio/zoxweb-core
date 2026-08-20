@@ -78,13 +78,21 @@ import static javax.net.ssl.SSLEngineResult.HandshakeStatus.*;
  * Application IO buffers in this codebase are bounded to 4–8&nbsp;KB in any
  * direction. The SSL net buffers (the {@code IOBuffers} in/out pair)
  * are sized to {@link javax.net.ssl.SSLSession#getPacketBufferSize() packetBufferSize}
- * (≥ ~16&nbsp;KB for TLS). With at most 8&nbsp;KB of plaintext going into a
- * ≥ 16&nbsp;KB net destination on {@code wrap}, and at most an 8&nbsp;KB-bounded
- * record being decrypted into an inbound app buffer, {@code BUFFER_OVERFLOW}
- * cannot occur. The {@code IllegalStateException} paths for {@code BUFFER_OVERFLOW}
- * in {@link #_notHandshaking _notHandshaking} and {@link #_needWrap _needWrap}
- * are dead-on-arrival guards, not recovery gaps — do not "fix" them by adding
- * drain-and-retry logic without first changing the buffer-sizing contract.
+ * (≥ ~16&nbsp;KB for TLS), and the inbound plaintext destination —
+ * {@link SSLConfigInt#getInDecryptionBuffer() the decryption buffer} — is allocated
+ * once by {@link SSLConfigInt#beginHandshake(org.zoxweb.server.io.IOBuffers) beginHandshake} at
+ * {@link javax.net.ssl.SSLSession#getApplicationBufferSize() applicationBufferSize},
+ * the engine's own ceiling for the plaintext a single {@code unwrap} can produce.
+ * With at most 8&nbsp;KB of plaintext going into a ≥ 16&nbsp;KB net destination on
+ * {@code wrap}, and every {@code unwrap} decrypting into a destination sized to the
+ * engine's maximum, {@code BUFFER_OVERFLOW} cannot occur — in the handshake handlers
+ * as well as the data ones, since {@link #_needUnwrap _needUnwrap} and
+ * {@link #_notHandshaking _notHandshaking} share that one destination buffer.
+ * The {@code IllegalStateException} paths for {@code BUFFER_OVERFLOW}
+ * in {@link #_notHandshaking _notHandshaking}, {@link #_needUnwrap _needUnwrap} and
+ * {@link #_needWrap _needWrap} are dead-on-arrival guards, not recovery gaps — do not
+ * "fix" them by adding drain-and-retry logic without first changing the
+ * buffer-sizing contract.
  *
  * @see SSLConfigInt
  * @see javax.net.ssl.SSLEngine
@@ -271,11 +279,22 @@ public final class SSLUtil {
      * (and Java 9+ {@code NEED_UNWRAP_AGAIN}): read ciphertext and unwrap into
      * the engine during handshake.
      * <p>
-     * The destination is {@link ByteBufferUtil#EMPTY} because no application
-     * data is produced during handshake. {@code BUFFER_UNDERFLOW} simply returns
-     * — the selector will re-dispatch when more wire bytes arrive.
-     * {@code BUFFER_OVERFLOW} is not expected here and is treated as a fatal
-     * invariant violation.
+     * The destination is {@link SSLConfigInt#getInDecryptionBuffer()} — the session's real
+     * decryption buffer, allocated at {@code SSLSession.getApplicationBufferSize()} by
+     * {@code beginHandshake} — not {@link ByteBufferUtil#EMPTY}. A single {@code unwrap}
+     * can never produce more plaintext than that, so {@code BUFFER_OVERFLOW} is unreachable
+     * here (invariant 3 above): its branch is a dead-on-arrival guard, not a recovery gap.
+     * {@code BUFFER_UNDERFLOW} simply returns — the selector will re-dispatch when more
+     * wire bytes arrive.
+     * </p>
+     * <p>
+     * Handshake records produce no application data. When a record does produce some — a
+     * flight interleaving app data with the handshake finish — this handler deliberately
+     * does not dispatch it: the published status carries the session forward through the
+     * handshake chain to {@link #_finished _finished}, which re-publishes
+     * {@code NOT_HANDSHAKING} while the net in-buffer still holds bytes, and
+     * {@link #_notHandshaking _notHandshaking} then delivers the decryption buffer to the
+     * callback in stream order. The state transition owns delivery, not this handler.
      * </p>
      *
      * @param config   current SSL session state
@@ -301,7 +320,7 @@ public final class SSLUtil {
                     // data
                     if (log.isEnabled())
                         log.getLogger().info("BEFORE-UNWRAP: " + config.getSSLIOBuffers().getInBuffer() + " bytes read " + bytesRead);
-                    SSLEngineResult result = smartSSLUnwrap(config.getSSLEngine(), config.getSSLIOBuffers().getInBuffer(), ByteBufferUtil.EMPTY, true, true);
+                    SSLEngineResult result = smartSSLUnwrap(config.getSSLEngine(), config.getSSLIOBuffers().getInBuffer(), config.getInDecryptionBuffer()/*ByteBufferUtil.EMPTY*/, true, true);
 
 
                     if (log.isEnabled()) {

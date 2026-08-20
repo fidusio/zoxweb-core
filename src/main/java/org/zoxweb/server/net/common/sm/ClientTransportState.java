@@ -57,7 +57,7 @@ public class ClientTransportState extends State<Object> {
 
     private class RawInData extends TriggerConsumer<ByteBuffer> {
         RawInData() {
-            super(CommonTrigger.RAW_IN_DATA);
+            super(CommonTrigger.IN_RAW_DATA);
         }
 
         @Override
