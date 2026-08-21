@@ -28,20 +28,22 @@ import static javax.net.ssl.SSLEngineResult.HandshakeStatus.*;
  * calling thread, because NIOSocket's key-interest gating already serializes each session on one
  * worker (the gate is the serialization mechanism, no lock needed).
  * <p>
- * One instance per session, and each constructor <b>self-installs</b> this dispatcher into the
- * session's {@link SSLConfigInt} ({@code setSSLConnectionHelper(this)}) before any publish can
- * occur — the invariant that lets {@code SSLUtil._finished} call
- * {@link #createRemoteConnection()} unconditionally. Two wiring paths:
+ * One instance per session. The single constructor
+ * {@link #CustomSSLStateMachine(SSLConfigInt, SSLHandshakeFinished)} <b>self-installs</b> this
+ * dispatcher into the session's {@link SSLConfigInt} ({@code setSSLConnectionHelper(this)})
+ * before any publish can occur — the invariant that lets {@code SSLUtil._finished} call
+ * {@link #notifySSLHandshakeFinished()} unconditionally. The {@link SSLHandshakeFinished}
+ * target passed in is where handshake completion lands:
  * <ul>
- * <li>{@link #CustomSSLStateMachine(SSLConfigInt)} — generic: any session that only needs the
- * engine driven, e.g. a plain client's {@code TCPSessionCallback.sslUpgrade()}. No tunnel on
- * this path — {@link #createRemoteConnection()} is a no-op.</li>
- * <li>{@link #CustomSSLStateMachine(SSLNIOSocketHandler)} — server transport; additionally
- * wires the <b>tunnel hook</b>: {@code _finished} → {@link #createRemoteConnection()} →
- * {@code SSLNIOSocketHandler.createRemoteConnection()}, the lazy opener of a tunnel's remote
+ * <li><b>server transport</b> ({@code SSLNIOSocketHandler}) — completion is the <b>tunnel
+ * hook</b>: {@code _finished} → {@link #notifySSLHandshakeFinished()} →
+ * {@code SSLNIOSocketHandler.sslHandshakeSuccessful()}, the lazy opener of a tunnel's remote
  * leg (SSL↔SSL / SSL↔PLAIN tunnel, HTTP CONNECT proxy). That chain is the hook's <b>only</b>
  * caller, and plain TLS termination never exercises it ({@code remoteConnection == null}), so
  * severing it is invisible to the test suite — do not.</li>
+ * <li><b>plain client</b> ({@code TCPSessionCallback.sslUpgrade()} passes the callback
+ * itself) — completion triggers {@code connectedFinished()}, the secure-connection-ready
+ * notification. No tunnel on this path.</li>
  * </ul>
  * The full-FSM alternative ({@link SSLStateMachine} + engine states, selected by
  * {@code simpleStateMachine = false}) drives the same five handlers behind the
@@ -59,9 +61,8 @@ public class CustomSSLStateMachine extends MonoStateMachine<SSLEngineResult.Hand
     static RateCounter rcFinished = new RateCounter("Finished");
 
     private static final AtomicLong counter = new AtomicLong();
-    // server transport, null on the generic path — its presence gates the tunnel hook
-    private final SSLNIOSocketHandler sslns;
     private final SSLConfigInt sslConfigInt;
+    private final SSLHandshakeFinished sslHandshakeFinished;
     private final long id;
 
     /**
@@ -72,39 +73,20 @@ public class CustomSSLStateMachine extends MonoStateMachine<SSLEngineResult.Hand
     }
 
     /**
-     * Generic wiring: drives the engine of any {@link SSLConfigInt} session — e.g. a plain
-     * client's {@code TCPSessionCallback.sslUpgrade()}. Self-installs as the session's
-     * {@link SSLConnectionHelper}; no tunnel on this path ({@link #createRemoteConnection()}
-     * is a no-op).
+     * Drives the engine of any {@link SSLConfigInt} session — server transport
+     * ({@code SSLNIOSocketHandler.setupConnection}) and plain client
+     * ({@code TCPSessionCallback.sslUpgrade()}) alike. Self-installs as the session's
+     * {@link SSLConnectionHelper} before any publish can occur.
      *
-     * @param sslConfigInt the session state this dispatcher drives
+     * @param sslConfigInt         the session state this dispatcher drives
+     * @param sslHandshakeFinished where handshake completion lands (see class javadoc);
+     *                             guarded — a null target makes completion a no-op
      */
-    public CustomSSLStateMachine(SSLConfigInt sslConfigInt) {
+    public CustomSSLStateMachine(SSLConfigInt sslConfigInt, SSLHandshakeFinished sslHandshakeFinished) {
         super(false);
+        this.sslHandshakeFinished = sslHandshakeFinished;
         this.sslConfigInt = sslConfigInt;
         sslConfigInt.setSSLConnectionHelper(this);
-        sslns = null;
-        id = counter.incrementAndGet();
-        register(NOT_HANDSHAKING, this::notHandshaking)
-                .register(NEED_WRAP, this::needWrap)
-                .register(NEED_UNWRAP, this::needUnwrap)
-                .register(FINISHED, this::finished)
-                .register(NEED_TASK, this::needTask)
-        ;
-    }
-
-    /**
-     * Server wiring: drives the handler's session and additionally delegates the tunnel hook
-     * ({@link #createRemoteConnection()}) to the transport. Self-installs as the session's
-     * {@link SSLConnectionHelper}.
-     *
-     * @param sslns the server transport whose session this dispatcher drives
-     */
-    public CustomSSLStateMachine(SSLNIOSocketHandler sslns) {
-        super(false);
-        this.sslns = sslns;
-        sslConfigInt = sslns.getConfig();
-        sslns.getConfig().setSSLConnectionHelper(this);
         id = counter.incrementAndGet();
         register(NOT_HANDSHAKING, this::notHandshaking)
                 .register(NEED_WRAP, this::needWrap)
@@ -148,9 +130,10 @@ public class CustomSSLStateMachine extends MonoStateMachine<SSLEngineResult.Hand
     }
 
     /**
-     * {@code FINISHED}: post-handshake hook via {@link SSLUtil#_finished} — tunnel hook,
-     * client-mode {@code sslHandshakeSuccessful}, then the buffered-bytes drain chain into
-     * {@code NOT_HANDSHAKING} (delivery belongs to the state transition).
+     * {@code FINISHED}: post-handshake hook via {@link SSLUtil#_finished} —
+     * {@link #notifySSLHandshakeFinished()} (tunnel hook / client completion), then the
+     * buffered-bytes drain chain into {@code NOT_HANDSHAKING} (delivery belongs to the
+     * state transition).
      */
     public void finished(BaseSessionCallback<SSLConfigInt> callback) {
         rcFinished.register(SSLUtil._finished(getConfig(), callback));
@@ -162,15 +145,16 @@ public class CustomSSLStateMachine extends MonoStateMachine<SSLEngineResult.Hand
     }
 
     /**
-     * The tunnel hook, invoked by {@code SSLUtil._finished} on handshake completion: on the
-     * server path delegates to {@code SSLNIOSocketHandler.createRemoteConnection()} — the lazy
-     * opener of a tunnel's remote leg, and that method's only caller (see the class javadoc) —
-     * a guarded no-op otherwise (generic/client sessions front no tunnel).
+     * Invoked by {@code SSLUtil._finished} on handshake completion: delegates to the
+     * {@link SSLHandshakeFinished} target supplied at construction — the tunnel hook on the
+     * server path ({@code SSLNIOSocketHandler.sslHandshakeSuccessful()}, and this chain is
+     * that method's only caller — see the class javadoc), {@code connectedFinished()} on the
+     * plain-client path. Guarded no-op when the target is null.
      */
     @Override
-    public void createRemoteConnection() {
-        if (sslns != null) {
-            sslns.createRemoteConnection();
+    public void notifySSLHandshakeFinished() throws IOException {
+        if(sslHandshakeFinished != null) {
+            sslHandshakeFinished.sslHandshakeSuccessful(getConfig());
         }
     }
 

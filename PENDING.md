@@ -112,8 +112,10 @@ one machine, configured programmatically (`ClientConSMBuilder`) or from JSON
 
 **Remaining (follow-ups):** the actual SMTP negotiator phase (EHLO/STARTTLS/redo-EHLO per RFC
 3207) and its `DOWNGRADED` / `tls_required` policy; the inherited close_notify defect (§3.3,
-unchanged by design); server-side mid-stream upgrade (the current phase is client-mode — the
-`_finished` notification gates on `isClientMode()`).
+unchanged by design); server-side mid-stream upgrade *(2026-08-21: the old `isClientMode()` gate
+in `_finished` is gone — completion now routes unconditionally through
+`SSLConnectionHelper.notifySSLHandshakeFinished()` to the session's `SSLHandshakeFinished`
+target)*.
 
 Original design notes kept below for reference.
 
@@ -121,6 +123,9 @@ Additive by design — keep `SSLStateMachine` and `CustomSSLStateMachine` untouc
 fragile). *(2026-08-20, maintainer refactor — not an sm-side edit: `CustomSSLStateMachine` now has
 a generic `SSLConfigInt` constructor and self-installs the helper on both paths; the
 `TCPSessionCallback` constructor is retired. See META-SSL-ENGINE-DESIGN.md §9.9.)*
+*(2026-08-21: `createRemoteConnection()` in the snippet below is now
+`notifySSLHandshakeFinished() throws IOException`, delivered to a per-session
+`SSLHandshakeFinished` target; single ctor `(SSLConfigInt, SSLHandshakeFinished)`.)*
 
 ### The seam
 

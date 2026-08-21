@@ -1,12 +1,14 @@
 package org.zoxweb.server.net.common.sm;
 
 import org.zoxweb.server.net.BaseSessionCallback;
+import org.zoxweb.server.net.common.ConnectionCallback;
 import org.zoxweb.server.net.ssl.SSLConfigInt;
 import org.zoxweb.server.net.ssl.SSLConnectionHelper;
 import org.zoxweb.server.net.ssl.SSLSessionConfig;
 
 import javax.net.ssl.SSLEngineResult;
 import java.io.Closeable;
+import java.io.IOException;
 
 /**
  * The session's {@link SSLConnectionHelper}: routes handshake statuses into the client machine
@@ -36,8 +38,13 @@ class ClientSSLHelper implements SSLConnectionHelper<SSLConfigInt>, Closeable {
     }
 
     @Override
-    public void createRemoteConnection() {
-        // client session, no tunnel
+    public void notifySSLHandshakeFinished() throws IOException {
+        // SSLUtil._finished routes handshake completion exclusively through the helper;
+        // the bridge flips the output stream to encrypted writes, marks the session
+        // TLS_SECURE, publishes SECURE and completes the ssl state's READY gate.
+        // The bridge is set by SSLClientState.upgrade before the first publish, so it
+        // is always present when FINISHED fires.
+        ((ConnectionCallback<?>) sm.getContext().getSSLBridge()).sslHandshakeSuccessful(getConfig());
     }
 
     @Override

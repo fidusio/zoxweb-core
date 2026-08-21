@@ -7,6 +7,7 @@ import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedStringUtil;
 
 import javax.net.ssl.SSLEngineResult;
+import java.io.IOException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -59,79 +60,17 @@ public class SSLStateMachine extends StateMachine<SSLConfigInt>
     private volatile SSLNIOSocketHandler sslNIOSocket = null;
 
 
-    //    private SSLStateMachine(long id, TaskSchedulerProcessor tsp) {
-//        super("SSLSessionStateMachine-" + id, tsp);
-//    }
+
     private SSLStateMachine(long id, Executor executor) {
         super("SSLSessionStateMachine-" + id, executor);
     }
 
     @Override
-    public void createRemoteConnection() {
-        sslNIOSocket.createRemoteConnection();
+    public void notifySSLHandshakeFinished() throws IOException {
+        sslNIOSocket.sslHandshakeSuccessful(getConfig());
     }
 
-//    public void close()
-//    {
-//        if (!isClosed.getAndSet(true))
-//        {
-//            SSLSessionConfig config = getConfig();
-//            if(config.sslEngine != null)
-//            {
-//
-//                try
-//                {
-//                    config.sslEngine.closeOutbound();
-//                    while (!config.forcedClose && config.hasBegan.get() && !config.sslEngine.isOutboundDone() && config.sslChannel.isOpen())
-//                    {
-//                        SSLEngineResult.HandshakeStatus hs = config.getHandshakeStatus();
-//                        switch (hs)
-//                        {
-//                            case NEED_WRAP:
-//                            case NEED_UNWRAP:
-//                                dispatch(hs, null);
-//                                break;
-//                            default:
-//                                IOUtil.close(config.sslChannel);
-//                        }
-//                    }
-//
-//                }
-//                catch (Exception e)
-//                {
-//                    e.printStackTrace();
-//                }
-//            }
-//
-//
-//            IOUtil.close(config.sslChannel);
-//            IOUtil.close(config.remoteChannel);
-//            config.selectorController.cancelSelectionKey(config.sslChannel);
-//            config.selectorController.cancelSelectionKey(config.remoteChannel);
-//            ByteBufferUtil.cache(config.inSSLNetData, config.inAppData, config.outSSLNetData, config.inRemoteData);
-//            IOUtil.close(config.sslOutputStream);
-//
-//            if (log.isEnabled()) log.getLogger().info("SSLSessionConfig-CLOSED " +Thread.currentThread() + " " +
-//                    config.sslChannel);// + " Address: " + connectionRemoteAddress);
 
-    ////            TaskUtil.getDefaultTaskScheduler().queue(Const.TimeInMillis.SECOND.MILLIS, ()->
-    ////                log.getLogger().info(SSLStateMachine.rates()));
-//        }
-//    }
-
-
-//    public static SSLStateMachine create(SSLContextInfo sslContext, Executor e)
-//    {
-//        SSLSessionConfig sslSessionConfig = new SSLSessionConfig(sslContext);
-//        return create(sslSessionConfig, e);
-//    }
-
-//    public static SSLStateMachine create(SSLNIOSocket sslnioSocket)
-//    {
-//        SSLStateMachine ret = create(sslnioSocket.getSSLContextInfo(), null);
-//        ret.sslNIOSocket = sslnioSocket;
-//        return ret;
-//    }
     public static SSLStateMachine create(SSLNIOSocketHandler sslnioSocket) {
         SSLStateMachine sslSessionSM = new SSLStateMachine(counter.incrementAndGet(), null);
         sslSessionSM.sslNIOSocket = sslnioSocket;
@@ -141,33 +80,15 @@ public class SSLStateMachine extends StateMachine<SSLConfigInt>
         sslSessionSM.setConfig(config);
         config.sslConnectionHelper = sslSessionSM;
 
-//        TriggerConsumerInt<Void> init = new TriggerConsumer<Void>(StateInt.States.INIT) {
-//            @Override
-//            public void accept(Void o) {
-//                if (log.isEnabled()) log.getLogger().info(getState().getStateMachine().getName() + " CREATED");
-//                //SSLSessionConfig config = (SSLSessionConfig) getStateMachine().getConfig();
-//                //publish(new Trigger<SelectableChannel>(getState(), null, SessionState.WAIT_FOR_HANDSHAKING));
-//            }
-//        };
 
-//    TriggerConsumerInt<SSLSessionCallback> closed =
-//        new TriggerConsumer<SSLSessionCallback>(SessionState.CLOSE) {
-//          @Override
-//          public void accept(SSLSessionCallback callback)
-//          {
-//            SSLSessionConfig config = (SSLSessionConfig)getStateMachine().getConfig();
-//            config.close();
-//            if (log.isEnabled()) log.getLogger().info(getStateMachine().getName() + " " + callback + " closed");
-//          }
-//        };
 
         sslSessionSM.setConfig(config)
                 .setEventLogEnabled(false)
                 .register(new State<>(StateInt.States.INIT).register((a)->{if (log.isEnabled()) log.getLogger().info(sslSessionSM.getName() + " CREATED");}, StateInt.States.INIT))
                 .register(new SSLHandshakingState())
-                .register(new SSLDataReadyState())
+                .register(new SSLDataReadyState());
         //.register(new State(SessionState.CLOSE).register(closed))
-        ;
+
 
 
         return sslSessionSM;

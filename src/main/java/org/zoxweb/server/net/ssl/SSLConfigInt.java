@@ -20,7 +20,7 @@ import java.nio.channels.ByteChannel;
  * The sole implementation is {@link SSLSessionConfig}; this interface is what the
  * rest of the stack programs against — {@link SSLUtil}'s handshake handlers and
  * post-handshake write path ({@code sslChunkedWrite}), the
- * {@code SSLConnectionHelper} dispatchers, {@code ConnectionCallback.sslHandshakeSuccessful},
+ * {@code SSLConnectionHelper} dispatchers, {@code SSLHandshakeFinished.sslHandshakeSuccessful},
  * {@code CommonChannelOutputStream}, and the {@code net.common.sm} client states —
  * leaving only the wiring internals (selector plumbing, remote-tunnel fields,
  * output-stream setup) on the concrete class.
@@ -71,7 +71,7 @@ public interface SSLConfigInt
      * {@code null} before {@link #beginHandshake(IOBuffers)}; recached (invalid) after
      * {@link #close()}.
      */
-    ByteBuffer getInDecryptionBuffer();
+    ByteBuffer getInDecryptedBuffer();
 
 
     /**
@@ -102,14 +102,14 @@ public interface SSLConfigInt
      * {@code ClientSSLHelper}). Installed via {@link #setSSLConnectionHelper}
      * at session wiring; {@code null} before that.
      */
-    SSLConnectionHelper getSSLConnectionHelper();
+    SSLConnectionHelper<SSLConfigInt> getSSLConnectionHelper();
 
     /**
      * Installs the session's dispatcher — called exactly once, by the owning
      * handler/machine at session wiring, before the first status publish.
      * Not for consumers.
      */
-    void setSSLConnectionHelper(SSLConnectionHelper sslConnectionHelper);
+    void setSSLConnectionHelper(SSLConnectionHelper<SSLConfigInt> sslConnectionHelper);
 
     /** {@code true} if the engine runs in client mode (drives {@code SSLUtil._finished}'s client-side notification). */
     boolean isClientMode();
@@ -125,7 +125,7 @@ public interface SSLConfigInt
 
     /**
      * Maximum plaintext size a single {@code unwrap} can produce, per the engine's
-     * current {@code SSLSession}; sizes {@link #getInDecryptionBuffer()} and caps
+     * current {@code SSLSession}; sizes {@link #getInDecryptedBuffer()} and caps
      * {@code SSLUtil.sslChunkedWrite}'s single-shot path.
      */
     default int getApplicationBufferSize() {

@@ -1,7 +1,7 @@
 # META-SSL-ENGINE-DESIGN — how the TLS engine driver actually works
 
 **Packages:** `org.zoxweb.server.net.ssl` (engine driver + server machines) ·
-`org.zoxweb.server.net.common.sm` (client machine) · **Updated:** 2026-08-20
+`org.zoxweb.server.net.common.sm` (client machine)
 **Status:** load-proven in production (≈19K TLS-terminated HTTPS req/s, 50–60K WS-TLS msg/s on an
 8-core SBC). The code is tuned and fragile. Flag suspicions, do not patch unprompted.
 
@@ -46,8 +46,9 @@ the next handshake step", it is the `publish` call at the bottom of the previous
 |---|---|---|
 | Engine step handlers | `SSLUtil._needWrap` / `_needUnwrap` / `_needTask` / `_finished` / `_notHandshaking` | The five handlers. One engine step each. Shared by **every** driver, server and client |
 | Per-session state | `SSLSessionConfig` (implements `SSLConfigInt`) | Engine, channel, the three buffers, close logic |
-| Dispatcher contract | `SSLConnectionHelper<C>` | `publish(status, callback)` + `createRemoteConnection()` |
-| Default dispatcher (server + generic client) | `CustomSSLStateMachine` | `MonoStateMachine` — a plain status→lambda table, `synchronous=false`. Since 2026-08-20: a generic `SSLConfigInt` constructor (self-installs the helper; no tunnel) plus the `SSLNIOSocketHandler` constructor (adds the tunnel hook — see §9.9) |
+| Dispatcher contract | `SSLConnectionHelper<C>` | `publish(status, callback)` + `notifySSLHandshakeFinished()` |
+| Completion target | `SSLHandshakeFinished` | `sslHandshakeSuccessful(SSLConfigInt)` — where `_finished` lands: `SSLNIOSocketHandler` (tunnel hook), `TCPSessionCallback` (`connectedFinished`); the validator machine reaches `SSLClientBridge` via `ClientSSLHelper` instead |
+| Default dispatcher (server + generic client) | `CustomSSLStateMachine` | `MonoStateMachine` — a plain status→lambda table, `synchronous=false`. One constructor `(SSLConfigInt, SSLHandshakeFinished)` — self-installs the helper; the target receives handshake completion (see §9.9) |
 | Server dispatcher (full-FSM path) | `SSLStateMachine` + `SSLHandshakingState` + `SSLDataReadyState` | Same five handlers behind the `org.zoxweb.server.fsm` framework. Selected by `simpleStateMachine=false` |
 | Server transport | `SSLNIOSocketHandler` | Owns the channel; `accept(SelectionKey)` publishes the current status |
 | Client transport (plain client) | `TCPSessionCallback` | `sslUpgrade()` installs a `CustomSSLStateMachine`, then publishes to start |
@@ -79,7 +80,7 @@ also sets client/server mode and calls `SSLEngine.beginHandshake()`:
 |---|---|---|---|
 | net in | `getSSLIOBuffers().getInBuffer()` | ≥ `SSLSession.getPacketBufferSize()` (~16 KB+) | inbound **ciphertext** — the `unwrap` source |
 | net out | `getSSLIOBuffers().getOutBuffer()` | ≥ `getPacketBufferSize()` | outbound **ciphertext** — the `wrap` destination |
-| decryption | `getInDecryptionBuffer()` | `SSLSession.getApplicationBufferSize()` | inbound **plaintext** — the `unwrap` destination |
+| decryption | `getInDecryptedBuffer()` | `SSLSession.getApplicationBufferSize()` | inbound **plaintext** — the `unwrap` destination |
 
 A caller may **donate** a pre-allocated `IOBuffers` pair; anything missing or undersized is
 replaced. Undersized donated buffers are dropped to GC on purpose — only correctly sized buffers go
@@ -111,7 +112,7 @@ It is not a leak.
 | `_needUnwrap` | **yes** (`channel.read(netIn)`) | net in | **decryption buffer** | `publish(result.getHandshakeStatus())` |
 | `_needWrap` | no (writes) | `ByteBufferUtil.EMPTY` | net out → `smartWrite` to channel | `publish(result.getHandshakeStatus())` |
 | `_needTask` | no | — | — | runs all delegated tasks, then `publish(engine.getHandshakeStatus())` |
-| `_finished` | no | — | — | `createRemoteConnection()`, `sslHandshakeSuccessful` in client mode, then `publish(current status)` **iff `netIn.position() > 0`** |
+| `_finished` | no | — | — | `helper.notifySSLHandshakeFinished()` → the session's `SSLHandshakeFinished` target (unconditional; a thrown exception is terminal — session closed, no continuation), then `publish(current status)` **iff `netIn.position() > 0`** |
 | `_notHandshaking` | **yes** | net in | decryption buffer | loops unwrapping; `callback.accept(decryptionBuffer)` whenever `bytesProduced > 0`; exits on `BUFFER_UNDERFLOW` |
 
 Status guards: `_needUnwrap`, `_needWrap` and `_notHandshaking` each re-check
@@ -141,7 +142,7 @@ selector: readable ─▶ interestOps=0 ─▶ worker ─▶ publish(engine.getH
             publish(next)            publish(next)                                   │
                  │                                                                   │
                  ▼                                                                   │
-             FINISHED ──▶ createRemoteConnection + sslHandshakeSuccessful             │
+             FINISHED ──▶ notifySSLHandshakeFinished ─▶ sslHandshakeSuccessful        │
                  │                                                                   │
                  └── netIn.position() > 0 ? ──▶ publish(NOT_HANDSHAKING) ─────────────┘
                                   │
@@ -174,7 +175,11 @@ every readable event, which is the *only* thing needed to drive a whole session.
 
 **Validator client machine** (`net.common.sm`) — `ClientSSLHelper` routes publishes into
 `ClientConSM`, where `SSLClientHandshakeState` / `SSLClientDataState` consume them.
-`NEED_WRAP` / `NEED_TASK` / `FINISHED` delegate straight to `SSLUtil`. The two **unwrap** paths are
+`NEED_WRAP` / `NEED_TASK` / `FINISHED` delegate straight to `SSLUtil`; on completion,
+`ClientSSLHelper.notifySSLHandshakeFinished()` delegates to the session's `SSLClientBridge`
+(output stream flipped to encrypted writes, `TLS_SECURE`, results bag, `SECURE` publish, the
+ssl state's READY gate — the bridge is set by `SSLClientState.upgrade` before the first
+publish, so it is always present at `FINISHED`). The two **unwrap** paths are
 re-implemented locally for one reason:
 
 > In that stack `TCPSMCallback` drains the socket and the transport router feeds the net in-buffer.
@@ -260,19 +265,20 @@ These get "discovered" over and over. Each is false. Do not report them.
    `forcedClose`; the `default` branch closes the channel, which terminates it.
 
 9. **"The helper is installed twice / the wiring is asymmetric between server and client."**
-   Resolved 2026-08-20: both `CustomSSLStateMachine` constructors now **self-install** the helper
-   into the session config (`setSSLConnectionHelper(this)`) — the generic `SSLConfigInt` ctor
-   replaced the `TCPSessionCallback` one, and `sslUpgrade()` passes the config. That invariant
-   (helper installed before any publish) is why `_finished` calls
-   `helper.createRemoteConnection()` unconditionally. `sslUpgrade()`'s outer
-   `setSSLConnectionHelper(new CustomSSLStateMachine(config))` re-sets the same instance —
-   redundant but idempotent, not a defect. **Review rule: the tunnel hook
-   (`_finished` → helper → `SSLNIOSocketHandler.createRemoteConnection()`) is that method's only
-   call chain, and plain-TLS tests never exercise it (`remoteConnection == null`) — check it
-   explicitly in any dispatcher change; its loss is invisible to the suite.**
-
-10. **"`SSLConfigInt.getSSLConnectionHelper()` uses a raw `SSLConnectionHelper`."**
-    Cosmetic only. Call sites use `publish`/`createRemoteConnection`, both of which erase harmlessly.
+   False. `CustomSSLStateMachine` has a single constructor
+   `(SSLConfigInt, SSLHandshakeFinished)` that **self-installs** the helper into the session
+   config (`setSSLConnectionHelper(this)`); server transport and plain client differ only in
+   the completion target they pass (`SSLNIOSocketHandler` / `TCPSessionCallback`). That
+   invariant (helper installed before any publish) is why `_finished` calls
+   `helper.notifySSLHandshakeFinished()` unconditionally. `sslUpgrade()`'s outer
+   `setSSLConnectionHelper(new CustomSSLStateMachine(config, this))` re-sets the same
+   instance — redundant but idempotent, not a defect. **Review rule: `_finished`'s completion
+   chain (`helper.notifySSLHandshakeFinished()` → target `sslHandshakeSuccessful`) carries
+   BOTH post-handshake side-effects — the server tunnel hook
+   (`SSLNIOSocketHandler.sslHandshakeSuccessful`, that method's only call chain, never
+   exercised by plain-TLS tests since `remoteConnection == null`) and the validator machine's
+   SECURE/READY gate (`ClientSSLHelper` → `SSLClientBridge`, covered by the sm TLS loopback
+   tests). Check both explicitly in any dispatcher change.**
 
 Two more from the surrounding stack that land on the same code: workers catching `Throwable` is
 Rule 1 ("the app must survive"), and there is no hung-task protection anywhere by choice — Rule 2
@@ -290,8 +296,8 @@ Rule 1 ("the app must survive"), and there is no hung-task protection anywhere b
 - `SSLSessionConfig.selectorController` is `@Deprecated` with a written removal plan: closing a
   channel already cancels its keys, so the two `cancelSelectionKey` calls only force a prompt
   `wakeup()`.
-- `getSSLSession()` moved from `SSLSessionConfig` up to a `default` on `SSLConfigInt`
-  (2026-08-20). No callers in the repo yet — kept for external/API use.
+- `SSLConfigInt.getSSLSession()` is a `default` accessor with no callers in the repo —
+  kept for external/API use.
 
 ---
 
@@ -302,7 +308,8 @@ org/zoxweb/server/net/ssl/
   SSLUtil.java                  the five handlers + smartSSLWrap/Unwrap + sslChunkedWrite/_sslWrite
   SSLConfigInt.java             per-session contract (engine, channel, buffers, beginHandshake)
   SSLSessionConfig.java         the implementation: buffers, SNI, close/drain
-  SSLConnectionHelper.java      publish(status, callback) + createRemoteConnection
+  SSLConnectionHelper.java      publish(status, callback) + notifySSLHandshakeFinished
+  SSLHandshakeFinished.java     completion target: sslHandshakeSuccessful(SSLConfigInt)
   CustomSSLStateMachine.java    default server/client dispatcher (MonoStateMachine)
   SSLStateMachine.java          full-FSM dispatcher  ---+
   SSLHandshakingState.java      NEED_* triggers         +-- simpleStateMachine=false path
@@ -314,7 +321,8 @@ org/zoxweb/server/net/common/
   TCPSessionCallback.java       client sslUpgrade() + accept(key) publish
 
 org/zoxweb/server/net/common/sm/     (see META-SM-PROTO-DESIGN.md for the machine itself)
-  ClientSSLHelper.java          publishes into ClientConSM; close() is a no-op by contract
+  ClientSSLHelper.java          publishes into ClientConSM; close() is a no-op by contract;
+                                notifySSLHandshakeFinished delegates to the SSLClientBridge
   SSLClientHandshakeState.java  router-fed NEED_UNWRAP (EMPTY dest); others delegate to SSLUtil
   SSLClientDataState.java       router-fed NOT_HANDSHAKING loop, delivers plaintext
 

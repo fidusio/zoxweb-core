@@ -3,10 +3,7 @@ package org.zoxweb.server.net.common;
 import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.net.BaseSessionCallback;
-import org.zoxweb.server.net.ssl.CustomSSLStateMachine;
-import org.zoxweb.server.net.ssl.SSLConfigInt;
-import org.zoxweb.server.net.ssl.SSLContextInfo;
-import org.zoxweb.server.net.ssl.SSLSessionConfig;
+import org.zoxweb.server.net.ssl.*;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.net.DNSResolverInt;
@@ -25,7 +22,7 @@ import java.util.UUID;
 
 public abstract class TCPSessionCallback
         extends BaseSessionCallback<SSLConfigInt>
-        implements ConnectionCallback<ByteBuffer> {
+        implements ConnectionCallback<ByteBuffer>, SSLHandshakeFinished {
     public static final LogWrapper log = new LogWrapper(TCPSessionCallback.class).setEnabled(false);
 
     private volatile SSLContextInfo sslContextInfo;
@@ -174,7 +171,7 @@ public abstract class TCPSessionCallback
 
 
             sslConfig.beginHandshake(null);
-            sslConfig.setSSLConnectionHelper(new CustomSSLStateMachine(sslConfig));
+            sslConfig.setSSLConnectionHelper(new CustomSSLStateMachine(sslConfig, this));
             // trigger the handshake process as client
             getConfig().getSSLConnectionHelper().publish(getConfig().getHandshakeStatus(), this);
 

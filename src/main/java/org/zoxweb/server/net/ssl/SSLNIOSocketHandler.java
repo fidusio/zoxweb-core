@@ -42,7 +42,12 @@ import java.security.NoSuchAlgorithmException;
 
 
 public class SSLNIOSocketHandler
-        extends ProtocolHandler {
+        extends ProtocolHandler
+        implements SSLHandshakeFinished
+
+{
+
+
 
 
     private static class TunnelCallback extends BaseSessionCallback<SSLSessionConfig> {
@@ -235,7 +240,7 @@ public class SSLNIOSocketHandler
             sslConfig.sslOutputStream = new CommonChannelOutputStream(this, (ByteChannel) asc)
                     .setSSLSessionConfig(sslConfig);
             ((BaseSessionCallback<SSLSessionConfig>)sessionCallback).setConfig(sslConfig);
-            sslDispatcher = new CustomSSLStateMachine(this);
+            sslDispatcher = new CustomSSLStateMachine(sslConfig, this);
             sessionCallback.setProtocolHandler(this);
             sessionCallback.setOutputStream(sslConfig.sslOutputStream);
 
@@ -327,7 +332,18 @@ public class SSLNIOSocketHandler
     }
 
 
-    void createRemoteConnection() {
+
+    /**
+     * The server-side {@link SSLHandshakeFinished} target — the <b>tunnel hook</b>, reached
+     * only via {@code SSLUtil._finished} → {@code notifySSLHandshakeFinished()}: lazily opens
+     * a tunnel's remote leg (SSL↔SSL / SSL↔PLAIN tunnel, HTTP CONNECT proxy) on handshake
+     * completion. Plain TLS termination never exercises it ({@code remoteConnection == null}),
+     * so its loss is invisible to the test suite — see META-SSL-ENGINE-DESIGN.md §9.9.
+     */
+    @Override
+    public void sslHandshakeSuccessful(SSLConfigInt sslConfigInt) throws IOException {
+
+
         if (sslConfig.remoteConnection != null && sslConfig.inRemoteData == null) {
             synchronized (sslConfig) {
                 if (sslConfig.inRemoteData == null) {

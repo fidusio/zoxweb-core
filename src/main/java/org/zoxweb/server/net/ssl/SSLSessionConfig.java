@@ -69,7 +69,7 @@ public class SSLSessionConfig
 
     volatile SocketChannel remoteChannel = null;
     volatile ByteBuffer inRemoteData = null;
-    public volatile SSLConnectionHelper sslConnectionHelper = null;
+    public volatile SSLConnectionHelper<SSLConfigInt> sslConnectionHelper = null;
     volatile boolean forcedClose = false;
     volatile IPAddress remoteConnection = null;
     private volatile String sniHostName = null;
@@ -89,10 +89,10 @@ public class SSLSessionConfig
         this.sslEngine = sslContext.newInstance();
     }
 
-    public SSLConnectionHelper getSSLConnectionHelper() {
+    public SSLConnectionHelper<SSLConfigInt> getSSLConnectionHelper() {
         return sslConnectionHelper;
     }
-    public void setSSLConnectionHelper(SSLConnectionHelper sslConnectionHelper){
+    public void setSSLConnectionHelper(SSLConnectionHelper<SSLConfigInt> sslConnectionHelper){
         this.sslConnectionHelper = sslConnectionHelper;
     }
 
@@ -220,7 +220,7 @@ public class SSLSessionConfig
     }
 
     @Override
-    public ByteBuffer getInDecryptionBuffer() {
+    public ByteBuffer getInDecryptedBuffer() {
         return inDecryptionBuffer;
     }
 }

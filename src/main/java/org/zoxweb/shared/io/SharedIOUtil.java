@@ -29,9 +29,18 @@ public class SharedIOUtil {
 
 
     /**
-     * Close an AutoCloseable object if c is null the action is discarded, while closing catch any exception silently
+     * Null-tolerant, exception-swallowing bulk close — the cleanup/teardown idiom.
+     * <p>
+     * <b>Contract: this method NEVER throws, for any input.</b> A {@code null} array and
+     * {@code null} entries are silently skipped; every non-null entry is closed in order;
+     * any {@code Exception} thrown by an individual {@code close()} is suppressed and the
+     * remaining entries are still closed. It is therefore always safe to call with
+     * possibly-null references and from error-handling paths — e.g.
+     * {@code SSLUtil._finished}'s catch relies on it to fully tear a session down even
+     * when its callback is null.
+     * </p>
      *
-     * @param acs auto closable array
+     * @param acs the closeables; the array itself or any entry may be null
      */
     public static void close(AutoCloseable... acs) {
         if (acs != null) {
@@ -48,8 +57,12 @@ public class SharedIOUtil {
     }
 
     /**
-     * @param c closable
-     * @return IOException or null if none generated
+     * Single-target close that reports instead of throwing: null is ignored, and an
+     * {@code IOException} from {@code close()} is returned to the caller rather than
+     * thrown. Like {@link #close(AutoCloseable...)}, this method never throws.
+     *
+     * @param c the closeable; may be null (ignored)
+     * @return the IOException raised by {@code c.close()}, or null if none
      */
     public static IOException close(Closeable c) {
         if (c != null) {

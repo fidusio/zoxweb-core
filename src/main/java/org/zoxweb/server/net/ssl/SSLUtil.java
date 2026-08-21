@@ -3,7 +3,6 @@ package org.zoxweb.server.net.ssl;
 import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.net.BaseSessionCallback;
-import org.zoxweb.server.net.common.ConnectionCallback;
 import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.UsageTracker;
@@ -79,7 +78,7 @@ import static javax.net.ssl.SSLEngineResult.HandshakeStatus.*;
  * direction. The SSL net buffers (the {@code IOBuffers} in/out pair)
  * are sized to {@link javax.net.ssl.SSLSession#getPacketBufferSize() packetBufferSize}
  * (≥ ~16&nbsp;KB for TLS), and the inbound plaintext destination —
- * {@link SSLConfigInt#getInDecryptionBuffer() the decryption buffer} — is allocated
+ * {@link SSLConfigInt#getInDecryptedBuffer() the decryption buffer} — is allocated
  * once by {@link SSLConfigInt#beginHandshake(org.zoxweb.server.io.IOBuffers) beginHandshake} at
  * {@link javax.net.ssl.SSLSession#getApplicationBufferSize() applicationBufferSize},
  * the engine's own ceiling for the plaintext a single {@code unwrap} can produce.
@@ -109,7 +108,7 @@ public final class SSLUtil {
      * <p>
      * Reads ciphertext into the net in-buffer of {@link SSLConfigInt#getSSLIOBuffers()},
      * then loops calling {@link SSLUtil#smartSSLUnwrap} — decrypting into
-     * {@link SSLConfigInt#getInDecryptionBuffer()} — until either the net buffer is fully
+     * {@link SSLConfigInt#getInDecryptedBuffer()} — until either the net buffer is fully
      * drained or a {@code BUFFER_UNDERFLOW} signals more wire bytes are needed.
      * Each decrypted record is delivered to {@code callback}. A read of -1 or
      * {@code CLOSED} unwrap status closes the session.
@@ -136,7 +135,7 @@ public final class SSLUtil {
                         // even if we have read zero it will trigger BUFFER_UNDERFLOW then we wait for incoming
                         // data
                         do {
-                            result = smartSSLUnwrap(config.getSSLEngine(), config.getSSLIOBuffers().getInBuffer(), config.getInDecryptionBuffer(), true, true);
+                            result = smartSSLUnwrap(config.getSSLEngine(), config.getSSLIOBuffers().getInBuffer(), config.getInDecryptedBuffer(), true, true);
                             if (log.isEnabled())
                                 log.getLogger().info("AFTER-NOT_HANDSHAKING-PROCESSING: " + result + " bytesRead: " + bytesRead + " callback: " + callback);
                             switch (result.getStatus()) {
@@ -156,7 +155,7 @@ public final class SSLUtil {
                                     if (callback != null && bytesRead >= 0 && result.bytesProduced() > 0) {
                                         // we have decrypted data to process
                                         //config.inSSLNetData.flip();
-                                        callback.accept(config.getInDecryptionBuffer());
+                                        callback.accept(config.getInDecryptedBuffer());
                                     }
                                     break;
                                 case CLOSED:
@@ -192,15 +191,26 @@ public final class SSLUtil {
      * Handler for {@link javax.net.ssl.SSLEngineResult.HandshakeStatus#FINISHED}:
      * post-handshake completion hook.
      * <p>
-     * Delegates {@code createRemoteConnection()} to the session's helper — a
-     * guarded no-op unless this session fronts an SSL tunnel — signals successful
-     * handshake to client-mode callbacks, and re-publishes the current status if
-     * the net in-buffer still holds buffered bytes — TLS 1.3 in particular may
-     * interleave application data in the same flight as the handshake finish.
+     * Routes handshake completion exclusively through the session helper's
+     * {@code notifySSLHandshakeFinished()} — unconditional, valid because every
+     * dispatcher installs the helper before any publish. The helper delivers it to
+     * the session's {@link SSLHandshakeFinished} target: the tunnel hook on the
+     * server transport ({@code SSLNIOSocketHandler.sslHandshakeSuccessful}), the
+     * {@code connectedFinished()} notification on the plain client
+     * ({@code TCPSessionCallback}), and the SECURE/READY gate on the validator
+     * machine ({@code ClientSSLHelper} delegating to its {@code SSLClientBridge}).
+     * Then re-publishes the current status if the net in-buffer still holds
+     * buffered bytes — TLS 1.3 in particular may interleave application data in
+     * the same flight as the handshake finish.
+     * </p>
+     * <p>
+     * The exception path is <b>terminal</b>: {@code SharedIOUtil.close(config, callback)}
+     * (null-tolerant, never throws) fully tears the session down before the callback is
+     * notified — there is no continuation after a completion failure.
      * </p>
      *
      * @param config   current SSL session state
-     * @param callback notified via {@link ConnectionCallback#sslHandshakeSuccessful(SSLConfigInt)} in client mode; may be {@code null}
+     * @param callback passed to the drain-chain publish; may be {@code null}
      * @return elapsed processing time in milliseconds
      */
     public static long _finished(SSLConfigInt config, BaseSessionCallback<SSLConfigInt> callback) {
@@ -209,22 +219,13 @@ public final class SSLUtil {
         // ********************************************
         // Very crucial steps
         // ********************************************
-
-            // we have SSL tunnel
-            config.getSSLConnectionHelper().createRemoteConnection();
-
-
-        if (config.isClientMode() && callback instanceof ConnectionCallback) {
-            /*
-             * special case if the connection is a client connection
-             */
-            try {
-                ((ConnectionCallback) callback).sslHandshakeSuccessful(config);
-            } catch (Exception e) {
-                SharedIOUtil.close(config, callback);
-                callback.exception(e);
-            }
+        try {
+            config.getSSLConnectionHelper().notifySSLHandshakeFinished();
+        } catch (Exception e) {
+            SharedIOUtil.close(config, callback);
+            callback.exception(e);
         }
+
 
         if (config.getSSLIOBuffers().getInBuffer().position() > 0) {
             //**************************************************
@@ -279,7 +280,7 @@ public final class SSLUtil {
      * (and Java 9+ {@code NEED_UNWRAP_AGAIN}): read ciphertext and unwrap into
      * the engine during handshake.
      * <p>
-     * The destination is {@link SSLConfigInt#getInDecryptionBuffer()} — the session's real
+     * The destination is {@link SSLConfigInt#getInDecryptedBuffer()} — the session's real
      * decryption buffer, allocated at {@code SSLSession.getApplicationBufferSize()} by
      * {@code beginHandshake} — not {@link ByteBufferUtil#EMPTY}. A single {@code unwrap}
      * can never produce more plaintext than that, so {@code BUFFER_OVERFLOW} is unreachable
@@ -320,12 +321,12 @@ public final class SSLUtil {
                     // data
                     if (log.isEnabled())
                         log.getLogger().info("BEFORE-UNWRAP: " + config.getSSLIOBuffers().getInBuffer() + " bytes read " + bytesRead);
-                    SSLEngineResult result = smartSSLUnwrap(config.getSSLEngine(), config.getSSLIOBuffers().getInBuffer(), config.getInDecryptionBuffer()/*ByteBufferUtil.EMPTY*/, true, true);
+                    SSLEngineResult result = smartSSLUnwrap(config.getSSLEngine(), config.getSSLIOBuffers().getInBuffer(), config.getInDecryptedBuffer()/*ByteBufferUtil.EMPTY*/, true, true);
 
 
                     if (log.isEnabled()) {
                         log.getLogger().info("AFTER-NEED_UNWRAP-HANDSHAKING: " + result + " bytes read: " + bytesRead);
-                        log.getLogger().info("AFTER-NEED_UNWRAP-HANDSHAKING inNetData: " + config.getSSLIOBuffers().getInBuffer() + " inAppData: " + config.getInDecryptionBuffer());
+                        log.getLogger().info("AFTER-NEED_UNWRAP-HANDSHAKING inNetData: " + config.getSSLIOBuffers().getInBuffer() + " inAppData: " + config.getInDecryptedBuffer());
                     }
 
                     switch (result.getStatus()) {
