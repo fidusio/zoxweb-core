@@ -23,16 +23,20 @@ and keeps working; this is not a port.
   machine already carries an `AUTO_CLOSEABLE` binding (`NVGenericMap.add` silently replaces
   same-name entries, so a second binding would hijack the first session's resources). Session
   state living in `stateMachine.getProperties()` is therefore correct by contract.
-- **Event vocabulary:** `CONNECTED` (payload `SelectionKey`), `IN_RAW_DATA` (payload `ByteBuffer`;
-  renamed from `IN_RAW_DATA` 2026-08-15 to match META-SM-PROTO-DESIGN.md),
+- **Event vocabulary:** `CONNECTED` (payload `SelectionKey`), `IN_RAW_DATA` (payload since
+  2026-08-20 a `DataPacket<Long>` — read counter, socket, peer address — wrapping the session's
+  live `IOBuffers` pair; see META-SM-PROTO-DESIGN.md §14.13),
   `CLOSED` (payload `Throwable` or null). No ERROR/CLOSED split: clean EOF is folded into `CLOSED`
   with a null payload; the error path relays its cause via `Params.EXCEPTION`. One ID = one payload
   type holds (`Throwable`, nullable).
-- **Packet ownership:** each read publishes a **detached copy** owned by the consumer (recache via
-  `ByteBufferUtil.cache` when done). The earlier flip/compact partial-consumption framing model is
-  gone; framing across packets is the consumer's job (including its own memory bounds for frames
-  larger than the 16K read buffer). The `accept(ByteBuffer)` overload is the no-copy entry for
-  buffer-based delivery (e.g. decrypted SSL data) — caller keeps ownership there.
+- **Packet ownership (superseded 2026-08-20 — B2 ruling, META-SM-PROTO-DESIGN.md §14.13):** the
+  TCP read now publishes its live read pair **borrowed, zero-copy**; the transport router is the
+  only consumer, mints the detached `IN_DATA` copies itself, and never recaches the borrow. The
+  earlier flip/compact partial-consumption framing model is gone; framing across packets is the
+  consumer's job (including its own memory bounds for frames larger than the 16K read buffer).
+  The `accept(ByteBuffer)` overload is retired (commented out) along with the `DataPacket`
+  ByteBuffer constructors — a single-buffer payload wraps via
+  `new IOBuffers().setInBuffer(buffer)`.
 - **Teardown order** (close delegate, one-shot): close `AUTO_CLOSEABLE` resources
   (`LinkedHashSet`, registration order) → recache the read buffer → publish `CLOSED` → close the
   machine **last**. A closed machine rejects publishes (`IllegalStateException`, silently
@@ -114,7 +118,9 @@ unchanged by design); server-side mid-stream upgrade (the current phase is clien
 Original design notes kept below for reference.
 
 Additive by design — keep `SSLStateMachine` and `CustomSSLStateMachine` untouched (load-proven,
-fragile).
+fragile). *(2026-08-20, maintainer refactor — not an sm-side edit: `CustomSSLStateMachine` now has
+a generic `SSLConfigInt` constructor and self-installs the helper on both paths; the
+`TCPSessionCallback` constructor is retired. See META-SSL-ENGINE-DESIGN.md §9.9.)*
 
 ### The seam
 
@@ -293,12 +299,12 @@ implementors will see it.
 - `SSLUtil.java:160-161` `_notHandshaking` loop condition tests free space, not remaining ciphertext
   (buffer is in write mode after compact) — comment is wrong; termination depends on
   `BUFFER_UNDERFLOW`. Misleading to anyone "optimizing" that path.
-- `CustomSSLStateMachine.java:43-48` does not register `NEED_UNWRAP_AGAIN` (`SSLHandshakingState:34`
-  does) — unregistered keys are silent no-ops in `MonoStateMachine.publish`. DTLS-only today, but the
-  two machines are meant to mirror each other.
-- `CustomSSLStateMachine.java:124` prints profanity to stdout for any unrecognized lookup type —
-  including `SSL_CONNECTION_COUNT`, which the parallel `SSLStateMachine.lookupType:194-195` supports
-  and this one does not.
+- `CustomSSLStateMachine` (both constructors' `register` chains) does not register
+  `NEED_UNWRAP_AGAIN` (`SSLHandshakingState` does) — unregistered keys are silent no-ops in
+  `MonoStateMachine.publish`. DTLS-only today, but the two machines are meant to mirror each other.
+- `CustomSSLStateMachine.lookupType` prints to raw stdout for any unrecognized lookup type
+  (profanity removed 2026-08-20) — including `SSL_CONNECTION_COUNT`, which the parallel
+  `SSLStateMachine.lookupType` supports and this one does not.
 - `SSLNIOSocketHandler.java:324-327` `upgradeToTLS()` returns `sslConfig != null` with no side
   effects — claims success without doing anything.
 - `SSLUtil.java:482-484` `_sslWrite` throws `SSLException` on any transient non-`NOT_HANDSHAKING`

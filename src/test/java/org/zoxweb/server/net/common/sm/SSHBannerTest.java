@@ -3,11 +3,18 @@ package org.zoxweb.server.net.common.sm;
 import org.junit.jupiter.api.Test;
 import org.zoxweb.server.fsm.State;
 import org.zoxweb.server.io.ByteBufferUtil;
+import org.zoxweb.server.io.IOBuffers;
+import org.zoxweb.server.net.DataPacket;
+import org.zoxweb.server.net.NIOSocket;
+import org.zoxweb.server.task.TaskUtil;
+import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.util.SharedStringUtil;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
@@ -31,6 +38,7 @@ public class SSHBannerTest {
         final AtomicInteger readyCount = new AtomicInteger();
         final AtomicReference<Throwable> closedPayload = new AtomicReference<Throwable>();
         final AtomicInteger closedCount = new AtomicInteger();
+        final AtomicLong packetCounter = new AtomicLong();
         final StringBuilder postReadyData = new StringBuilder();
 
         Harness(String json) {
@@ -57,8 +65,13 @@ public class SSHBannerTest {
 
         void feed(String wire) {
             byte[] bytes = SharedStringUtil.getBytes(wire);
-            sm.publishSync(CommonTrigger.IN_RAW_DATA,
-                    ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, bytes, 0, bytes.length, true));
+            // IN_RAW_DATA carries a DataPacket wrapping the borrowed pair (the router copies,
+            // never recaches); no channel here, and the peer address is a placeholder
+            sm.publishSync(CommonTrigger.IN_RAW_DATA, new DataPacket<Long>(
+                    packetCounter.incrementAndGet(), null,
+                    InetSocketAddress.createUnresolved("test.local", 22),
+                    new IOBuffers().setInBuffer(ByteBufferUtil.allocateByteBuffer(
+                            ByteBufferUtil.BufferType.HEAP, bytes, 0, bytes.length, true))));
         }
 
         /** The validated banner is read from the report ({@code results.banner}). */
@@ -147,5 +160,42 @@ public class SSHBannerTest {
         assertEquals(1, h.readyCount.get());
         assertEquals("KEXDATA", h.postReadyData.toString(),
                 "bytes after the banner line must reach the post-READY IN_DATA owner");
+    }
+
+    /**
+     * Command-line runner: dials a real SSH endpoint and prints the banner + KEXINIT probe
+     * lifecycle via {@link ProtoConnect#run} — the report carries {@code kex_algorithms} and
+     * the {@code pq_kex} post-quantum readiness verdict.
+     * <pre>
+     *   SSHBannerTest host [port]     (port defaults to 22)
+     * </pre>
+     * The config sets {@code close_on_ready} so the machine records the banner, captures the
+     * KEXINIT and closes the session itself — this runner, like every application, only
+     * observes. Exit code: 0 clean close, 1 closed with a cause, 2 timed out, 64 usage error.
+     */
+    public static void main(String[] args) throws Exception {
+        if (args.length < 1 || args.length > 2) {
+            System.err.println("usage: SSHBannerTest host [port]");
+            System.exit(64);
+            return;
+        }
+        String host = args[0];
+        int port = args.length == 2 ? Integer.parseInt(args[1]) : 22;
+
+        ClientConSM sm = ClientSMFactory.fromJSON(
+                "{ \"name\": \"ssh-banner\", \"protocol\": \"ssh\", \"close_on_ready\": true," +
+                " \"ssh\": {\"kex_check\": true} }");
+        int timeoutSec = ClientSMFactory.timeoutSec(sm.getContext().getSettings());
+
+        NIOSocket nioSocket = new NIOSocket(TaskUtil.defaultTaskProcessor(), TaskUtil.defaultTaskScheduler());
+        int exit;
+        try {
+            exit = ProtoConnect.run(new InetSocketAddress(host, port), sm, nioSocket,
+                    timeoutSec, timeoutSec + 30);
+        } finally {
+            SharedIOUtil.close(nioSocket);
+            TaskUtil.close();
+        }
+        System.exit(exit);
     }
 }

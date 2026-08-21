@@ -2,6 +2,7 @@ package org.zoxweb.server.net.common.sm;
 
 import org.zoxweb.server.fsm.StateMachineInt;
 import org.zoxweb.server.io.ByteBufferUtil;
+import org.zoxweb.server.io.IOBuffers;
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.net.DataPacket;
 import org.zoxweb.server.net.SessionCallback;
@@ -47,9 +48,10 @@ import java.util.concurrent.locks.ReentrantLock;
  * is invoked. {@link #setChannel(Channel)} is channel setup only (bind, connect, teardown
  * registration) and publishes no events.</li>
  * <li>{@link CommonTrigger#DATAGRAM} per received datagram, payload the {@link DataPacket}.
- * <b>The packet buffer is a detached copy owned by the consumer</b> — same ownership contract as the
- * TCP {@code RAW_IN_DATA} packets: safe for async handling, the consumer recaches it via
- * {@code ByteBufferUtil.cache} when done.</li>
+ * <b>The packet buffer is a detached copy owned by the consumer</b>: safe for async handling, the
+ * consumer recaches it via {@code ByteBufferUtil.cache} when done. (Unlike the TCP path, which
+ * since 2026-08-20 publishes its live read pair zero-copy as a borrow — UDP deliberately keeps
+ * the copy contract.)</li>
  * <li>{@link CommonTrigger#CLOSED} exactly once per session from the close delegate, whatever the
  * termination path (receive error, {@link #exception(Throwable)}, external close); the payload is
  * the causing Throwable when the error path stashed one under {@link Params#EXCEPTION}, null
@@ -87,9 +89,6 @@ public class UDPSMCallback
 
     // 16k covers every practical datagram (EDNS, SNMP bulk); cached on teardown
     private final ByteBuffer rawReadBuffer = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, SharedIOUtil.K_16);
-    // guards rawReadBuffer handoff between the read loop and the close delegate's recache,
-    // same discipline as TCPSMCallback
-    private final Object readLock = new Object();
 
     /**
      * Creates a UDP client callback with a UUID7 generated id, targeting {@code remote}.
@@ -124,12 +123,10 @@ public class UDPSMCallback
         {
             NamedValue<CollectionAsArray<AutoCloseable>> autoCloseables = getConfig().getProperties().getNV(SUS.enumName(Params.AUTO_CLOSEABLE));
             SharedIOUtil.close(autoCloseables.getValue().asArray());
-            // synchronized: an external close must not recache the buffer while a read
-            // dispatch still owns it — the channel is already closed above, so the in-flight
-            // read loop exits promptly and releases the lock
-            synchronized (readLock) {
-                ByteBufferUtil.cache(rawReadBuffer);
-            }
+            // the session always closes on its own worker thread — inline from a publish, or
+            // via exception() after the read loop — so this recache never races a read: the
+            // channel is closed above and the loop-top isClosed() guard stops any further use
+            ByteBufferUtil.cache(rawReadBuffer);
             NamedValue<Throwable> exception = getConfig().getProperties().getNV(SUS.enumName(Params.EXCEPTION));
             getConfig().publishSync(CommonTrigger.CLOSED, exception != null ? exception.getValue() : null);
             // last act: a closed machine rejects publishes, so CLOSED must go out first
@@ -228,30 +225,29 @@ public class UDPSMCallback
     @Override
     public void accept(SelectionKey key) {
         IOException error = null;
-        synchronized (readLock) {
-            try {
-                InetSocketAddress from;
-                do {
-                    // a publish below may close the session inline; the delegate has recached
-                    // rawReadBuffer at that point — it must not be touched again
-                    if (isClosed())
-                        return;
-                    rawReadBuffer.clear();
-                    from = channel.isOpen() ? (InetSocketAddress) channel.receive(rawReadBuffer) : null;
-                    if (from != null) {
-                        rawReadBuffer.flip();
-                        // the packet buffer is a detached copy owned by the consumer, safe for
-                        // async handling; the consumer recaches it via ByteBufferUtil.cache
-                        ByteBuffer packetBuffer = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, rawReadBuffer.array(), 0, rawReadBuffer.remaining(), true);
-                        accept(new DataPacket<>(packetsCounter.incrementAndGet(), from, packetBuffer));
-                    }
-                } while (from != null);
-            } catch (IOException e) {
-                // connected channel: ICMP port-unreachable and channel errors land here —
-                // fatal for a client session
-                error = e;
-                if (log.isEnabled()) log.getLogger().info("" + e);
-            }
+        try {
+            InetSocketAddress from;
+            do {
+                // a publish below may close the session inline; the delegate has recached
+                // rawReadBuffer at that point — it must not be touched again
+                if (isClosed())
+                    return;
+                rawReadBuffer.clear();
+                from = channel.isOpen() ? (InetSocketAddress) channel.receive(rawReadBuffer) : null;
+                if (from != null) {
+                    rawReadBuffer.flip();
+                    // the packet's in-buffer is a detached copy owned by the consumer, safe for
+                    // async handling; the consumer recaches it via ByteBufferUtil.cache
+                    ByteBuffer packetBuffer = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, rawReadBuffer.array(), 0, rawReadBuffer.remaining(), true);
+                    accept(new DataPacket<>(packetsCounter.incrementAndGet(), channel, from,
+                            new IOBuffers().setInBuffer(packetBuffer)));
+                }
+            } while (from != null);
+        } catch (IOException e) {
+            // connected channel: ICMP port-unreachable and channel errors land here —
+            // fatal for a client session
+            error = e;
+            if (log.isEnabled()) log.getLogger().info("" + e);
         }
 
         if (error != null)

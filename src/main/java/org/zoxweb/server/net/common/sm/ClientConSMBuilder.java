@@ -119,18 +119,21 @@ public class ClientConSMBuilder {
      * brings the engine states {@link SSLClientHandshakeState}/{@link SSLClientDataState}
      * with it).
      *
-     * @throws IllegalArgumentException on a UDP transport combined with an ssl state or a
-     *                                  {@code start_tls} script step (no DTLS in this stack);
+     * @throws IllegalArgumentException on a UDP transport combined with an ssl state, an
+     *                                  {@code ssh_kex} state or a {@code start_tls} script step;
      *                                  on a controller with no assembler (its {@code expect}s
-     *                                  could never be satisfied); or on a {@code start_tls}
-     *                                  step without an ON_DEMAND ssl state (the publish would
-     *                                  have no consumer — a silent forever-hang)
+     *                                  could never be satisfied); on an {@code ssh_kex} state
+     *                                  with no controller (it activates when the script
+     *                                  completes); or on a {@code start_tls} step without an
+     *                                  ON_DEMAND ssl state (the publish would have no
+     *                                  consumer — a silent forever-hang)
      */
     public ClientConSM build() {
         boolean udp = transport == ClientSessionContext.Transport.UDP;
         ProtocolControllerState controller = null;
         MessageAssemblerState assembler = null;
         SSLClientState ssl = null;
+        SSHKexState sshKex = null;
         for (State<?> s : states) {
             if (s instanceof ProtocolControllerState)
                 controller = (ProtocolControllerState) s;
@@ -138,11 +141,25 @@ public class ClientConSMBuilder {
                 assembler = (MessageAssemblerState) s;
             else if (s instanceof SSLClientState)
                 ssl = (SSLClientState) s;
+            else if (s instanceof SSHKexState)
+                sshKex = (SSHKexState) s;
         }
         if (udp && ssl != null)
             throw new IllegalArgumentException("ssl state over UDP transport: no DTLS in this stack");
         if (controller != null && assembler == null)
             throw new IllegalArgumentException("controller without an assembler: expects could never be satisfied");
+        if (sshKex != null) {
+            if (udp)
+                throw new IllegalArgumentException("ssh_kex state over UDP transport: SSH requires a TCP stream");
+            if (controller == null)
+                throw new IllegalArgumentException(
+                        "ssh_kex without a controller: it activates when the script completes and would never run");
+            if (assembler != null && states.indexOf(sshKex) > states.indexOf(assembler))
+                throw new IllegalArgumentException(
+                        "ssh_kex declared after the assembler: broadcast order is declaration order, and the" +
+                        " IN_DATA handoff requires ssh_kex to see each buffer first (skipping it until the" +
+                        " assembly finishes) — declare ssh_kex before the assembler");
+        }
         if (controller != null && controller.hasStartTLS()) {
             if (udp)
                 throw new IllegalArgumentException("start_tls step over UDP transport: no DTLS in this stack");

@@ -21,7 +21,6 @@ import org.zoxweb.shared.util.SUS;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
 import java.nio.channels.Channel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
@@ -36,8 +35,12 @@ import java.util.concurrent.atomic.AtomicLong;
  * <ul>
  * <li>{@link CommonTrigger#CONNECTED} once, published from {@link #connected(SelectionKey)} with the
  * SelectionKey as payload, always before any read dispatch (NIOSocket ordering guarantee).</li>
- * <li>{@link CommonTrigger#IN_RAW_DATA} per read, the payload buffer is a detached copy owned by the
- * consumer, safe for async handling; the consumer may recache it via ByteBufferUtil when done.</li>
+ * <li>{@link CommonTrigger#IN_RAW_DATA} per read, the payload is the {@link DataPacket} (read
+ * counter id, socket channel, peer address) wrapping the session's live read pair
+ * ({@code IOBuffers}) published zero-copy — <b>borrowed, still owned by this callback</b>. The
+ * consumer (the transport router, exclusively) must fully consume it inline and never recache or
+ * retain it: the callback clears and refills the in-buffer on the next read and recaches the pair
+ * at teardown. Safe because publishes are synchronous on the read worker.</li>
  * <li>{@link CommonTrigger#CLOSED} exactly once per session from the close delegate, whatever the
  * termination path (EOF, read error, {@link #exception(Throwable)}, external close); the payload
  * is the causing Throwable when the error path stashed one under {@link Params#EXCEPTION},
@@ -62,6 +65,7 @@ public class TCPSMCallback
     private volatile CommonChannelOutputStream bcos;
     private volatile SocketChannel socket;
     private final String id;
+    private volatile IOBuffers rawIOBuffers = new IOBuffers(SharedIOUtil.SSL_BUFFER_SIZE);
 
     /**
      * Closes the session exactly once via the closeable delegate: closes the state machine's
@@ -104,7 +108,7 @@ public class TCPSMCallback
     }
 
 
-    private volatile IOBuffers ioBuffers = new IOBuffers(SharedIOUtil.SSL_BUFFER_SIZE);
+
 
 
     /**
@@ -141,7 +145,7 @@ public class TCPSMCallback
             // the session always closes on its own worker thread — inline from a publish, or
             // from the read loop's EOF/error path — so this recache never races a read: the
             // socket is closed above and the loop-top isClosed() guard stops any further use
-            ByteBufferUtil.cache(ioBuffers);
+            ByteBufferUtil.cache(rawIOBuffers);
             NamedValue<Throwable> exception = getConfig().getProperties().getNV(SUS.enumName(Params.EXCEPTION));
             getConfig().publishSync(CommonTrigger.CLOSED, exception != null ? exception.getValue() : null);
             // last act: a closed machine rejects publishes, so CLOSED must go out first
@@ -165,20 +169,20 @@ public class TCPSMCallback
 
             do {
                 // a publish below may close the session inline (close_notify, injection
-                // failure); the delegate has recached inRawBuffer at that point — it
+                // failure); the delegate has recached rawIOBuffers at that point — it
                 // must not be touched again
                 if (isClosed())
                     return;
-                ioBuffers.getInBuffer().clear();
-                read = socket.isConnected() ? socket.read(ioBuffers.getInBuffer()) : -1;
+                rawIOBuffers.getInBuffer().clear();
+                read = socket.isConnected() ? socket.read(rawIOBuffers.getInBuffer()) : -1;
                 if (read > 0) {
 
-                    ioBuffers.getInBuffer().flip();
+                    rawIOBuffers.getInBuffer().flip();
 
-                    // the packet buffer is a detached copy owned by the consumer, safe for async handling,
-                    // the consumer may ByteBufferUtil.cache() it when done processing
-                    ByteBuffer packetBuffer = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, ioBuffers.getInBuffer().array(), 0, ioBuffers.getInBuffer().remaining(), true);
-                    accept(new DataPacket<>(packetsCounter.incrementAndGet(), remoteAddress, packetBuffer));
+                    // zero-copy: the packet carries the session's live read pair, BORROWED —
+                    // the router consumes it inline (publishSync, same worker) and never
+                    // recaches it; this callback still owns the pair and recaches at teardown
+                    accept(new DataPacket<>(packetsCounter.incrementAndGet(), socket, remoteAddress, rawIOBuffers));
 
                 }
             } while (read > 0);
@@ -262,28 +266,29 @@ public class TCPSMCallback
 
 
     /**
-     * Publishes the packet's payload to the state machine; the packet holds a detached copy of the
-     * read data, see {@link #accept(SelectionKey)}.
+     * Publishes the packet itself to the state machine as {@link CommonTrigger#IN_RAW_DATA}.
+     * The packet wraps the session's live read buffers, borrowed — see
+     * {@link #accept(SelectionKey)}; the consumer must not recache or retain it.
      *
      * @param t the data packet to publish
      */
     public void accept(DataPacket<Long> t) {
 
-        getConfig().publishSync(CommonTrigger.IN_RAW_DATA, t.getIOBuffers().getInBuffer());
-
-    }
-
-    /**
-     * Convenience overload for buffer-based delivery (e.g. decrypted SSL data); publishes the
-     * buffer as is — the caller keeps ownership, unlike the packet path no copy is made.
-     *
-     * @param t the incoming data buffer
-     */
-    public void accept(ByteBuffer t) {
-
         getConfig().publishSync(CommonTrigger.IN_RAW_DATA, t);
 
     }
+
+//    /**
+//     * Convenience overload for buffer-based delivery (e.g. decrypted SSL data); publishes the
+//     * buffer as is — the caller keeps ownership, unlike the packet path no copy is made.
+//     *
+//     * @param t the incoming data buffer
+//     */
+//    public void accept(ByteBuffer t) {
+//
+//        getConfig().publishSync(CommonTrigger.IN_RAW_DATA, t);
+//
+//    }
 
     @Override
     public void sslHandshakeSuccessful(SSLConfigInt sci) throws IOException {

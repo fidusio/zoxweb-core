@@ -12,9 +12,9 @@ import java.nio.channels.Channel;
  * A datagram unit pairing an {@link IOBuffers} pair with its peer address: the source of a
  * received packet or the destination of an outbound one, plus an optional identifier (e.g. a
  * read counter on the UDP receive path). The payload is the pair's in-buffer, reached through
- * {@link #getIOBuffers()}; the {@link ByteBuffer} constructor wraps a single buffer into a pair.
- * A packet may also carry the {@link Channel} it arrived on or is bound for; it is optional and
- * null on every {@link ByteBuffer} constructor path.
+ * {@link #getIOBuffers()} — a single {@link ByteBuffer} payload is carried as
+ * {@code new IOBuffers().setInBuffer(buffer)}. A packet may also carry the {@link Channel} it
+ * arrived on or is bound for; it is optional and may be null.
  * <p>
  * The buffers are held by reference, not copied, and on the receive path the payload is a pooled
  * buffer that the dispatcher recaches after the callback returns — do not retain it beyond that
@@ -29,27 +29,6 @@ public class DataPacket<I>
     private final InetSocketAddress address;
     private final I id;
 
-
-    /**
-     * Creates a packet with no identifier.
-     *
-     * @param sa     the peer address, source or destination of the packet
-     * @param buffer the payload, held by reference not copied
-     */
-    public DataPacket(InetSocketAddress sa, ByteBuffer buffer) {
-        this(null, sa, buffer);
-    }
-
-    /**
-     * Creates a packet.
-     *
-     * @param id     the packet identifier, can be null
-     * @param sa     the peer address, source or destination of the packet
-     * @param buffer the payload, held by reference not copied
-     */
-    public DataPacket(I id, InetSocketAddress sa, ByteBuffer buffer) {
-        this(id, null, sa, new IOBuffers().setInBuffer(buffer));
-    }
 
     /**
      * Creates a packet over an existing buffer pair.
@@ -81,7 +60,7 @@ public class DataPacket<I>
 
     /**
      * @return the channel the packet arrived on or is bound for, null when the packet was created
-     * without one (every {@link ByteBuffer} constructor path)
+     * without one
      */
     public Channel getChannel() {
         return channel;

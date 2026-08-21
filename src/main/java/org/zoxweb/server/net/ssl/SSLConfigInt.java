@@ -6,6 +6,7 @@ import org.zoxweb.shared.io.CloseableType;
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLEngineResult;
 import javax.net.ssl.SSLException;
+import javax.net.ssl.SSLSession;
 import java.nio.ByteBuffer;
 import java.nio.channels.ByteChannel;
 
@@ -43,7 +44,7 @@ import java.nio.channels.ByteChannel;
  * </p>
  */
 public interface SSLConfigInt
-extends CloseableType {
+        extends CloseableType {
     /** The session's crypto engine; also the source of the defaults below. Never {@code null}. */
     SSLEngine getSSLEngine();
 
@@ -71,7 +72,6 @@ extends CloseableType {
      * {@link #close()}.
      */
     ByteBuffer getInDecryptionBuffer();
-
 
 
     /**
@@ -136,7 +136,9 @@ extends CloseableType {
      * Maximum TLS record size, per the engine's current {@code SSLSession}; sizes
      * both buffers of {@link #getSSLIOBuffers()}.
      */
-    default int getPacketBufferSize() {return getSSLEngine().getSession().getPacketBufferSize();}
+    default int getPacketBufferSize() {
+        return getSSLEngine().getSession().getPacketBufferSize();
+    }
 
     /**
      * The engine's live handshake status. Application data may flow only at
@@ -144,5 +146,10 @@ extends CloseableType {
      */
     default SSLEngineResult.HandshakeStatus getHandshakeStatus() {
         return getSSLEngine().getHandshakeStatus();
+    }
+
+
+    default SSLSession getSSLSession() {
+        return getSSLEngine() != null ? getSSLEngine().getSession() : null;
     }
 }

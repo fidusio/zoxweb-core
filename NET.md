@@ -82,8 +82,9 @@ callback receives:
 - **Writing**: `BaseChannelOutputStream.write(ByteBuffer, boolean flip)` — pass
   `flip=true` if your buffer is in write-mode, `false` if already read-mode (e.g. from
   `ByteBuffer.wrap(...)`). The `OutputStream` byte/array methods handle this for you.
-- **UDP**: `DataPacket.getBuffer()` is read-mode, pool-owned, and reclaimed the moment
-  your `accept(DataPacket)` returns — copy if processing asynchronously.
+- **UDP**: the packet payload (`DataPacket.getIOBuffers().getInBuffer()`) is read-mode,
+  pool-owned, and reclaimed the moment your `accept(DataPacket)` returns — copy if
+  processing asynchronously.
 
 ## Build recipes
 
@@ -183,7 +184,7 @@ nioSocket.addClientSocket(client);
 ```java
 UDPSessionCallback udp = new UDPSessionCallback(TaskUtil.defaultTaskProcessor(), 9090, 2048) {
     @Override public void accept(DataPacket<?> packet) throws IOException {
-        // packet.getAddress() = sender; packet.getBuffer() = payload (read-mode)
+        // packet.getAddress() = sender; packet.getIOBuffers().getInBuffer() = payload (read-mode)
         // BUFFER IS POOL-OWNED: valid only until this method returns — copy if async
         send(reply, packet.getAddress(), true);            // thread-safe reply
     }

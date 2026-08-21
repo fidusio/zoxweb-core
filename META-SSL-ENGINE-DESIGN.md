@@ -47,7 +47,7 @@ the next handshake step", it is the `publish` call at the bottom of the previous
 | Engine step handlers | `SSLUtil._needWrap` / `_needUnwrap` / `_needTask` / `_finished` / `_notHandshaking` | The five handlers. One engine step each. Shared by **every** driver, server and client |
 | Per-session state | `SSLSessionConfig` (implements `SSLConfigInt`) | Engine, channel, the three buffers, close logic |
 | Dispatcher contract | `SSLConnectionHelper<C>` | `publish(status, callback)` + `createRemoteConnection()` |
-| Server dispatcher (default) | `CustomSSLStateMachine` | `MonoStateMachine` — a plain status→lambda table, `synchronous=false` |
+| Default dispatcher (server + generic client) | `CustomSSLStateMachine` | `MonoStateMachine` — a plain status→lambda table, `synchronous=false`. Since 2026-08-20: a generic `SSLConfigInt` constructor (self-installs the helper; no tunnel) plus the `SSLNIOSocketHandler` constructor (adds the tunnel hook — see §9.9) |
 | Server dispatcher (full-FSM path) | `SSLStateMachine` + `SSLHandshakingState` + `SSLDataReadyState` | Same five handlers behind the `org.zoxweb.server.fsm` framework. Selected by `simpleStateMachine=false` |
 | Server transport | `SSLNIOSocketHandler` | Owns the channel; `accept(SelectionKey)` publishes the current status |
 | Client transport (plain client) | `TCPSessionCallback` | `sslUpgrade()` installs a `CustomSSLStateMachine`, then publishes to start |
@@ -260,7 +260,16 @@ These get "discovered" over and over. Each is false. Do not report them.
    `forcedClose`; the `default` branch closes the channel, which terminates it.
 
 9. **"The helper is installed twice / the wiring is asymmetric between server and client."**
-   Known and transitional — mid-refactor, serving both paths. Do not re-flag.
+   Resolved 2026-08-20: both `CustomSSLStateMachine` constructors now **self-install** the helper
+   into the session config (`setSSLConnectionHelper(this)`) — the generic `SSLConfigInt` ctor
+   replaced the `TCPSessionCallback` one, and `sslUpgrade()` passes the config. That invariant
+   (helper installed before any publish) is why `_finished` calls
+   `helper.createRemoteConnection()` unconditionally. `sslUpgrade()`'s outer
+   `setSSLConnectionHelper(new CustomSSLStateMachine(config))` re-sets the same instance —
+   redundant but idempotent, not a defect. **Review rule: the tunnel hook
+   (`_finished` → helper → `SSLNIOSocketHandler.createRemoteConnection()`) is that method's only
+   call chain, and plain-TLS tests never exercise it (`remoteConnection == null`) — check it
+   explicitly in any dispatcher change; its loss is invisible to the suite.**
 
 10. **"`SSLConfigInt.getSSLConnectionHelper()` uses a raw `SSLConnectionHelper`."**
     Cosmetic only. Call sites use `publish`/`createRemoteConnection`, both of which erase harmlessly.
@@ -281,6 +290,8 @@ Rule 1 ("the app must survive"), and there is no hung-task protection anywhere b
 - `SSLSessionConfig.selectorController` is `@Deprecated` with a written removal plan: closing a
   channel already cancels its keys, so the two `cancelSelectionKey` calls only force a prompt
   `wakeup()`.
+- `getSSLSession()` moved from `SSLSessionConfig` up to a `default` on `SSLConfigInt`
+  (2026-08-20). No callers in the repo yet — kept for external/API use.
 
 ---
 

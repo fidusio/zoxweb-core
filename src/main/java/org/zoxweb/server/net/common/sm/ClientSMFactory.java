@@ -67,6 +67,7 @@ public final class ClientSMFactory {
         CATALOG.put(ResponseControllerState.NAME, config -> new ResponseControllerState());
         CATALOG.put(ProtocolTypeValidatorState.NAME, config -> new ProtocolTypeValidatorState());
         CATALOG.put(SSLClientState.NAME, ClientSMFactory::sslState);
+        CATALOG.put(SSHKexState.NAME, SSHKexState::new);
     }
 
     private static State<?> sslState(NVGenericMap config) {
@@ -225,6 +226,25 @@ public final class ClientSMFactory {
             // delimited assembler + a controller that awaits the identification line and
             // validates it, reporting results.banner
             NVGenericMap sshCfg = subMap(cfg, "ssh");
+
+            // optional KEXINIT capture — the PQ-readiness check: kex_check records the server's
+            // kex_algorithms + pq_kex verdict; pq_required (implies the check) fails the session
+            // when no post-quantum key exchange is offered. Declared BEFORE the assembler:
+            // broadcast order is declaration order, and the wire-buffer handoff (the assembler
+            // owns IN_DATA until the script completes, ssh_kex after) depends on the kex state
+            // seeing each buffer first and skipping it until the assembly is finished
+            boolean pqRequired = SMProtoUtil.booleanValue(sshCfg, "pq_required", false);
+            boolean kexComposed = pqRequired || SMProtoUtil.booleanValue(sshCfg, "kex_check", false);
+            if (kexComposed) {
+                NVGenericMap kexCfg = new NVGenericMap();
+                if (pqRequired)
+                    kexCfg.build(new NVBoolean("pq_required", true));
+                String pqAlgorithms = SMProtoUtil.stringValue(sshCfg, "pq_algorithms", null);
+                if (pqAlgorithms != null)
+                    kexCfg.build("pq_algorithms", pqAlgorithms);
+                builder.state(new SSHKexState(kexCfg));
+            }
+
             NVGenericMap assemblerCfg = new NVGenericMap();
             assemblerCfg.build("boundary", "delimited")
                     .build("terminator", "txt:\n")
@@ -242,6 +262,14 @@ public final class ClientSMFactory {
                 validateMeta.build("exact", exact);
             validateMeta.build("report", "banner");
             List<GetNameValue<?>> steps = new ArrayList<GetNameValue<?>>();
+            if (kexComposed && SMProtoUtil.booleanValue(sshCfg, "send_ident", true)) {
+                // the KEXINIT capture needs the server to proceed to key exchange, and some
+                // servers (e.g. GitHub's) wait for the client's identification line before
+                // sending theirs (RFC 4253 §4.2: both sides send independently) — so the probe
+                // identifies itself normally (§0). Banner-only checks stay fully passive.
+                steps.add(new NVPair(ProtocolControllerState.OP_SEND,
+                        "txt:" + SMProtoUtil.stringValue(sshCfg, "client_ident", "SSH-2.0-zoxweb_probe") + "\r\n"));
+            }
             steps.add(new NVPair(ProtocolControllerState.OP_EXPECT, "txt:SSH-"));
             steps.add(new NamedValue<NVGenericMap>(ProtocolControllerState.OP_VALIDATE, validateMeta));
             NVGenericMap controllerCfg = new NVGenericMap();

@@ -3,7 +3,7 @@ package org.zoxweb.server.net.common;
 import org.junit.jupiter.api.Test;
 import org.zoxweb.server.fsm.State;
 import org.zoxweb.server.fsm.StateMachine;
-import org.zoxweb.server.io.ByteBufferUtil;
+import org.zoxweb.server.net.DataPacket;
 import org.zoxweb.server.net.NIOSocket;
 import org.zoxweb.server.net.common.sm.CommonTrigger;
 import org.zoxweb.server.net.common.sm.TCPSMCallback;
@@ -120,13 +120,14 @@ public class TCPSMCallbackTest {
             connectedPayload.set(payload);
             connectedLatch.countDown();
         }, CommonTrigger.CONNECTED);
-        session.register((Consumer<ByteBuffer>) bb -> {
+        session.register((Consumer<DataPacket<Long>>) packet -> {
             order.add("RAW_IN_DATA");
+            ByteBuffer bb = packet.getIOBuffers().getInBuffer();
             byte[] chunk = new byte[bb.remaining()];
             bb.get(chunk);
             received.write(chunk, 0, chunk.length);
-            // the buffer is a consumer-owned detached copy, recache it when done
-            ByteBufferUtil.cache(bb);
+            // the packet wraps the callback's live read buffers, borrowed — do NOT recache;
+            // the callback recaches at teardown
             dataLatch.countDown();
         }, CommonTrigger.IN_RAW_DATA);
         session.register((Consumer<Throwable>) t -> {

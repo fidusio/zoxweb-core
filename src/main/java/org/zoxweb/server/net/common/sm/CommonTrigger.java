@@ -58,9 +58,14 @@ public enum CommonTrigger {
     IN_MESSAGE,
     /**
      * Wire bytes from one TCP read — partial or complete, and plain, handshake, or encrypted:
-     * payload is a detached read-mode {@link java.nio.ByteBuffer} copy. Consumed exclusively by
-     * the transport router ({@link ClientTransportState}), which recaches it; no other state
-     * ever registers this event.
+     * payload is a {@code org.zoxweb.server.net.DataPacket} (read counter id, socket channel,
+     * peer address) wrapping the session's live read pair
+     * ({@code org.zoxweb.server.io.IOBuffers}), published zero-copy and <b>borrowed</b> — the
+     * pair is still owned by the publishing callback, which refills the
+     * in-buffer on the next read and recaches the pair at teardown. Consumed exclusively by the
+     * transport router ({@link ClientTransportState}), inline (synchronous publish, same worker);
+     * the router must never recache or retain it, and everything it forwards downstream is a
+     * detached copy. No other state ever registers this event.
      */
     IN_RAW_DATA,
     /**

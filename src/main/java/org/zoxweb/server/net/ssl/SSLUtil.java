@@ -209,10 +209,10 @@ public final class SSLUtil {
         // ********************************************
         // Very crucial steps
         // ********************************************
-        if (config.getSSLConnectionHelper() != null) {
+
             // we have SSL tunnel
             config.getSSLConnectionHelper().createRemoteConnection();
-        }
+
 
         if (config.isClientMode() && callback instanceof ConnectionCallback) {
             /*

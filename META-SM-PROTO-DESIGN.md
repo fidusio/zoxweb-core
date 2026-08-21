@@ -1,8 +1,11 @@
 # META-SM-PROTO-DESIGN — the Composable Protocol Validator
 
-**Package:** `org.zoxweb.server.net.common.sm` · **Updated:** 2026-08-15
-**Status:** **v2 implemented** (steps 1–6 of §13 done 2026-08-15, uncommitted, 16 test classes /
-92 tests green): the state catalog (`assembler`/`controller`/`responder`/`validator`/`ssl`) is
+**Package:** `org.zoxweb.server.net.common.sm` · **Updated:** 2026-08-20
+**Status:** **v2 implemented** (steps 1–6 of §13 done 2026-08-15, uncommitted; 2026-08-20 added
+the `ssh_kex` catalog state — the SSH KEXINIT PQ-readiness check, §11/§12/§17 —, the TCP
+`IN_RAW_DATA` zero-copy borrow (§14.13) and the `readLock` removals (§14.12); 17 sm test
+classes / 75 tests green, plus `TCPSMCallbackTest` and the fsm suites): the state catalog
+(`assembler`/`controller`/`responder`/`validator`/`ssl`/`ssh_kex`) is
 live, the phase SPI (`ConnectionPhase`, `SSHBannerPhase`, `DataExchangePhase`, `SSLClientPhase`)
 is **deleted**, the factory composes machines from JSON (explicit `states` + sugar), and the
 READY gate is the controller's completion rule.
@@ -160,9 +163,14 @@ NIOSocket ─ accept(data) ───► RAW_IN_DATA / waiting state    (mandator
    `AUTO_CLOSEABLE` resources → recache read buffer → publish `CLOSED` (payload = stashed
    `Params.EXCEPTION` or null) → **close the machine last** (a closed machine rejects publishes).
 7. **The transport router owns the wire event exclusively.** `IN_RAW_DATA` (TCP) / `DATAGRAM`
-   (UDP) are consumed only by the router state; phases/catalog states consume `IN_DATA`. Every
-   buffer is a detached pooled copy with exactly **one active owner**, who recaches it via
-   `ByteBufferUtil.cache` when done. Double-cache = pool corruption.
+   (UDP) are consumed only by the router state; phases/catalog states consume `IN_DATA`.
+   Ownership differs by rung (since 2026-08-20, ruling §14.13): the TCP `IN_RAW_DATA` payload is
+   a `DataPacket` (read counter, socket, peer address) wrapping the callback's **live read pair
+   (`IOBuffers`), borrowed** — the router consumes it inline
+   (synchronous publish, same worker) and must never recache or retain it; the callback refills
+   it next read and recaches at teardown. Every buffer past the router — `IN_DATA` onward — and
+   every UDP `DATAGRAM` packet is a **detached pooled copy** with exactly **one active owner**,
+   who recaches it via `ByteBufferUtil.cache` when done. Double-cache = pool corruption.
 8. **The config describes a protocol, never an endpoint.** No host in the JSON; an optional
    top-level `port` is a default-port hint only. TLS SNI/hostname verification bind to the address
    the caller dialed (deferred `SSLContextInfo` at upgrade time).
@@ -253,9 +261,12 @@ lambda (once-only; its flag flips **before** the lambda runs, which the read loo
   (`CommonChannelOutputStream`, teardown-registered), `publishSync(CONNECTED, key)`, return
   `OP_READ`.
 - `accept(SelectionKey)` — read loop (no lock, see §14.12): loop-top `isClosed()` guard, clear the
-  pooled 16K `rawReadBuffer`, `read`, flip, mint a **detached pooled HEAP copy**,
-  `publishSync(RAW_IN_DATA, copy)`; EOF (`-1`) or `IOException` → close the session. Writes go
-  through `ClientSessionContext.write` → `bcos` (encrypts after `sslHandshakeSuccessful`).
+  in-buffer of the session's `IOBuffers` pair (`rawIOBuffers`, 16K), `read`, flip, then
+  **zero-copy publish**: `publishSync(IN_RAW_DATA, packet)` where the payload is the
+  `DataPacket<Long>` itself (read counter, socket, peer address, `rawIOBuffers`) — the wrapped
+  pair is **borrowed** by the router, never recached by it (§14.13); the PLAIN-mode
+  detached copy is minted by the router. EOF (`-1`) or `IOException` → close the session. Writes
+  go through `ClientSessionContext.write` → `bcos` (encrypts after `sslHandshakeSuccessful`).
 - `exception(Throwable)` — stash under `Params.EXCEPTION` (if still open) → close; the delegate
   republishes it as the `CLOSED` payload.
 
@@ -270,18 +281,19 @@ lambda (once-only; its flag flips **before** the lambda runs, which the read loo
   `publishSync(CONNECTED, getRemoteAddress())`, return `OP_READ`. NIOSocket registers with **zero ops** and
   installs the returned ops only after this completes, so the machine's `CONNECTED` actions (first
   datagram) always precede any read dispatch; an early reply waits in the OS buffer.
-- `accept(SelectionKey)` — receive loop under `readLock`, same loop-top guard: `receive` → flip →
-  detached copy → `publishSync(DATAGRAM, DataPacket)`; drain until empty. Any receive
+- `accept(SelectionKey)` — receive loop (no lock, see §14.12), same loop-top guard: `receive` → flip →
+  detached copy wrapped in an `IOBuffers` pair (the `DataPacket` also carries the datagram
+  channel; the `DataPacket` ByteBuffer constructors were removed 2026-08-20) →
+  `publishSync(DATAGRAM, DataPacket)`; drain until empty. Any receive
   `IOException` — including ICMP port-unreachable, which a *connected* channel surfaces — is
   **fatal for a client**: `exception(e)` → `CLOSED` with cause (the fast "nothing listening"
   verdict). Stray-source datagrams are dropped by the OS.
 - No TLS: `sslHandshakeSuccessful` throws `UnsupportedOperationException` (no DTLS in this stack).
 
-**Teardown (the delegate lambda; identical apart from the recache guard):** close every
-`AUTO_CLOSEABLE` in registration order (channel first — so in-flight reads exit; SSL session state
-after — so its drain sees a dead channel) → recache the raw read buffer (TCP: unguarded, §14.12;
-UDP: still under `readLock`) → publish `CLOSED` with the stashed `Params.EXCEPTION` or null →
-`machine.close()` **last**.
+**Teardown (identical, the delegate lambda):** close every `AUTO_CLOSEABLE` in registration order
+(channel first — so in-flight reads exit; SSL session state after — so its drain sees a dead
+channel) → recache the raw read buffer (unguarded, §14.12) → publish `CLOSED` with the stashed
+`Params.EXCEPTION` or null → `machine.close()` **last**.
 
 **NIOSocket seam:** `addDatagramSocket(InetSocketAddress, ConnectionCallback<?>)` — bind →
 `setChannel` → register **0 ops** → `connected(sk)` → install returned ops. The legacy
@@ -338,7 +350,8 @@ RAW_IN_DATA → (router) → IN_DATA → (assembler) → IN_MESSAGE → (control
 | `SECURE` | kept | `SSLConfigInt` | SSL bridge → controller (deferred send) |
 | `READY` | kept | null | READY gate → auto-close / application |
 | `START_TLS` | kept | null | controller / SSL AutoStart → SSL control |
-| `IN_RAW_DATA` · `DATAGRAM` · `CONNECTED` · `CLOSED` | kept | as v1 | callback → router |
+| `IN_RAW_DATA` | kept | `DataPacket<Long>` wrapping the session's live `IOBuffers` pair, **borrowed** (zero-copy since 2026-08-20, §14.13) | callback → router |
+| `DATAGRAM` · `CONNECTED` · `CLOSED` | kept | as v1 | callback → router |
 | `NEED_WRAP` · `NEED_UNWRAP` · `NEED_UNWRAP_AGAIN` · `NEED_TASK` · `FINISHED` · `NOT_HANDSHAKING` | kept | `SSLClientBridge`, or null during the config-close drain | `ClientSSLHelper` → SSL states |
 | **`BANNER_RECEIVED`** | **RETIRED** | — | removed from `CommonTrigger`; applications read `results.banner` |
 
@@ -448,7 +461,8 @@ v1 `ClientSMFactory` hardcodes `protocol: ssh/tls/plain` → a fixed phase set. 
 - Adding a state type later = one catalog entry; **zero factory-core change**.
 - **`protocol: "ssh"` becomes factory sugar**, expanding to `assembler` (`delimited`, CRLF,
   `max_message` 255) + `controller` `[{"validate": {prefix, contains, exact, report: "banner"}}]`.
-  The bespoke `SSHBannerPhase` dissolves entirely.
+  The bespoke `SSHBannerPhase` dissolves entirely. `ssh.kex_check` / `ssh.pq_required` append the
+  `ssh_kex` catalog state (the KEXINIT PQ-readiness capture, 2026-08-20).
 - Existing `exchange` configs keep working (TCP → `stream`, UDP → `datagram`) with byte-identical
   behavior.
 
@@ -471,7 +485,15 @@ verify the certificate identity against the dialed host; set it to `false` only 
 endpoints with self-signed certificates or when the check is "what does this endpoint negotiate?" —
 chain validation without hostname verification would accept a valid certificate issued for a
 different host, so the two always move together),
-`ssh {banner_prefix, banner_contains, banner_exact, banner_max_line, pre_banner_cap}`, `vars`
+`ssh {banner_prefix, banner_contains, banner_exact, banner_max_line, pre_banner_cap, kex_check,
+pq_required, pq_algorithms, send_ident, client_ident}` (`kex_check`/`pq_required`/`pq_algorithms`
+compose the `ssh_kex` state — `SSH_MSG_KEXINIT` capture after the banner: records
+`results.kex_algorithms` + `results.pq_kex`; `pq_required` fails the session when no post-quantum
+key exchange is offered; `pq_algorithms` overrides the default PQ name set. With the kex check
+composed, `send_ident` (default true) prepends a `send` of the client identification line
+(`client_ident`, default `SSH-2.0-zoxweb_probe`) — RFC 4253 §4.2 has both sides send
+independently, and some servers (GitHub's) wait for the client line before sending their KEXINIT;
+banner-only checks stay fully passive), `vars`
 (defaults for `${name}` injection), `exchange[]` (`send` / `expect` / `start_tls` steps).
 
 Data literals carry a one-word encoding prefix: `txt:` (UTF-8 verbatim), `hex:` (whitespace
@@ -592,13 +614,26 @@ purpose-written state, not a config. Server-side counterpart ON HOLD (Rule 11).
     lost `final` on the UDP target, and the pre-connect null window on the TCP client path — are
     deliberately left unpatched pending a larger rework; technical detail in `PENDING.md` §3.4.
     Do not "fix" them opportunistically.
-12. **`TCPSMCallback.readLock` removed as useless** (2026-08-20) — maintainer ruling. A session
-    only ever closes on its own worker thread: inline from a publish inside the read loop, or from
-    the loop's own EOF/error path. `synchronized` is re-entrant, so the lock never once blocked a
-    thread; it only documented a cross-thread close that the design forbids (helpers, tests and
-    applications are pure observers — they never close a session). The buffer handoff is carried by
-    the teardown order — channel closed first, then recache — plus the read loop's loop-top
-    `isClosed()` guard. `UDPSMCallback` keeps its `readLock` for now; do not re-add the TCP one.
+12. **`readLock` removed from both SM callbacks as useless** (2026-08-20, TCP; UDP same day) —
+    maintainer ruling. A session only ever closes on its own worker thread: inline from a publish
+    inside the read loop, or from the loop's own EOF/receive-error path. `synchronized` is
+    re-entrant, so the lock never once blocked a thread; it only documented a cross-thread close
+    that the design forbids (helpers, tests and applications are pure observers — they never close
+    a session). The buffer handoff is carried by the teardown order — channel closed first, then
+    recache — plus the read loop's loop-top `isClosed()` guard. Do not re-add either lock.
+13. **TCP `IN_RAW_DATA` is zero-copy borrow; the copy moved to the router** (2026-08-20) —
+    maintainer decision (B2). `TCPSMCallback` publishes a `DataPacket` (read counter, socket,
+    peer address) wrapping its live read pair (`IOBuffers`) instead
+    of minting a per-read detached copy; safe because `publishSync` runs the router to completion
+    on the read worker before the loop continues. The router is the only state that sees the
+    borrow: it never recaches the pair (both `feedSSL` recaches deleted), and in PLAIN mode it
+    mints the detached `IN_DATA` copy itself — so the `IN_DATA` contract (copy, consumer
+    recaches) is unchanged for every downstream state. **UDP keeps the detached-copy contract
+    for `DATAGRAM` — settled ruling (2026-08-20, converting to the borrow was analyzed and
+    declined): the copy keeps the event safe for async consumers if async handling is ever
+    supported, and UDP has no DTLS so a borrow would buy no single-copy win, only doc/test
+    churn. Do not re-propose.** TLS ciphertext feed is thereby single-copy: wire → SSL net
+    in-buffer.
 
 *(Rejected along the way: a Phase A/B/C gap-phasing plan — superseded by the premise above.)*
 
@@ -648,7 +683,7 @@ DNS-shaped responder + a `main(ip [port])` verified live against `8.8.8.8:53` �
 Everything below **exists and is green**. The v2 sections (§5–§13) are design only. Where a class
 is slated to dissolve in v2, that is noted — but it is live code today.
 
-### Main package — `src/main/java/org/zoxweb/server/net/common/sm/` (20 files)
+### Main package — `src/main/java/org/zoxweb/server/net/common/sm/` (21 files)
 
 | Class | Role | v2 fate |
 |---|---|---|
@@ -669,6 +704,7 @@ is slated to dissolve in v2, that is noted — but it is live code today.
 | `ProtocolControllerState` | Catalog `controller` (§8): the linear `exchange` grammar (`send`/`expect`/`validate`/`start_tls`), working memory + `ready_gate` in the state bag, `max_skip` framed-skip bound, completion rule → READY gate + leftover drain. **New 2026-08-15.** | v2 |
 | `ResponseControllerState` | Catalog `responder` (§5): `OUT_MESSAGE` → `ctx.write`; stateless. **New 2026-08-15.** | v2 |
 | `ProtocolTypeValidatorState` | Catalog `validator` (§9): `VALIDATE` (payload `Validation` = message + meta) → verdict into results; mismatch fails the session. **New 2026-08-15.** | v2 |
+| `SSHKexState` | Catalog `ssh_kex`: passive `SSH_MSG_KEXINIT` capture — the PQ-readiness check. Activates on `IN_DATA` once the controller's script completed (`Assembly.isFinished()`); frames RFC 4253 binary packets (skips pre-KEXINIT chatter bounded by `max_skip`, DISCONNECT fails), parses the first name-list, records `kex_algorithms`/`pq_kex`/`pq_kex_algorithms`; `pq_required` fails the session on no PQ offer (and on close-before-KEXINIT via its `CLOSED` consumer); gates READY; residue republished post-READY. Requires assembler+controller (builder fail-fast); the richer-than-`exchange` coded-state pattern of §8. **New 2026-08-20.** | v2 |
 | ~~`SSHBannerPhase`~~ | **DELETED 2026-08-15** — dissolved into `delimited` assembler + `validate` (ssh factory sugar, §11). | — |
 | ~~`DataExchangePhase`~~ | **DELETED 2026-08-15** — dissolved into `assembler` + `controller` + `responder` (§8). | — |
 | ~~`ConnectionPhase`~~ | **DELETED 2026-08-15** — first-implementation error (§14.10); ownership/broadcast-order contract text lives in `ClientTransportState`/package javadoc. | — |
@@ -686,10 +722,10 @@ inherit one implementation instead of declaring their own — `TCPSMCallback.set
 `UDPSMCallback` constructor call `setRemoteAddress`. Its semantics are pending a larger rework —
 open items recorded in `PENDING.md` §3.4, deliberately not patched.
 
-### Test package — `src/test/java/org/zoxweb/server/net/common/sm/` (16 classes)
+### Test package — `src/test/java/org/zoxweb/server/net/common/sm/` (17 classes)
 
 `ClientConSMBuilderTest`, `ClientSMFactoryTest`, `ClientSSLHelperTest`, `SSLClientBridgeTest`,
-`ProtoDataTest`, `ProtoConnectTest`, `SSHBannerPhaseTest`, `SSHBannerLoopbackTest`,
+`ProtoDataTest`, `ProtoConnectTest`, `SSHBannerTest`, `SSHKexTest`, `SSHBannerLoopbackTest`,
 `PlainClientLoopbackTest`, `TLSClientLoopbackTest`, `DataExchangeLoopbackTest`,
 `DataExchangeStartTLSTest`, `StartTLSUpgradeSeamTest`, `UDPSMCallbackTest`,
 `UDPClientLoopbackTest`, `DNSProbeTest`. Plus `net/common/TCPSMCallbackTest` and three
