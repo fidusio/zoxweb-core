@@ -321,7 +321,7 @@ public final class SSLUtil {
                     // data
                     if (log.isEnabled())
                         log.getLogger().info("BEFORE-UNWRAP: " + config.getSSLIOBuffers().getInBuffer() + " bytes read " + bytesRead);
-                    SSLEngineResult result = smartSSLUnwrap(config.getSSLEngine(), config.getSSLIOBuffers().getInBuffer(), config.getInDecryptedBuffer()/*ByteBufferUtil.EMPTY*/, true, true);
+                    SSLEngineResult result = smartSSLUnwrap(config.getSSLEngine(), config.getSSLIOBuffers().getInBuffer(), config.getInDecryptedBuffer(), true, true);
 
 
                     if (log.isEnabled()) {
@@ -414,7 +414,7 @@ public final class SSLUtil {
                     case BUFFER_UNDERFLOW:
                     case BUFFER_OVERFLOW:
                         config.forceCloseEnabled(true);
-                        throw new IllegalStateException(result + " invalid state context " + config.getSSLIOBuffers().getOutBuffer());//+ " " + ((ServerSocketChannel)config.getChannel()).getRemoteAddress());
+                        throw new IllegalStateException(result + " invalid state context " + config.getSSLIOBuffers().getOutBuffer());
                     case OK:
                         int written = ByteBufferUtil.smartWrite(null, config.getChannel(), config.getSSLIOBuffers().getOutBuffer(), true);
                         if (log.isEnabled())

@@ -161,30 +161,18 @@ public abstract class BaseChannelOutputStream extends OutputStream
      * care of any size limits.
      * </p>
      *
-     * @param b   source array
+     * @param buffer   source array
      * @param off start offset in {@code b}
      * @param len number of bytes to write
      * @throws IOException               if an I/O error occurs
      * @throws IndexOutOfBoundsException if {@code off}, {@code len}, or {@code off + len} is out of bounds
      */
     @Override
-    public void write(byte[] b, int off, int len) throws IOException {
-        if (off < 0 || len < 0 || off > b.length - len)
+    public void write(byte[] buffer, int off, int len) throws IOException {
+        SUS.checkIfNulls("b can't be null ", buffer);
+        if (off < 0 || len < 0 || off > buffer.length - len)
             throw new IndexOutOfBoundsException();
-
-
-        // added duel mode from performance tuning !?!?
-//        if (outAppData == null)
-        write(ByteBuffer.wrap(b, off, len), false);
-//        else {
-//            int end = off + len;
-//            while (off < end) {
-//                int tempLen = Math.min(end - off, outAppData.capacity() - outAppData.position());
-//                outAppData.put(b, off, tempLen);
-//                write(outAppData, true);
-//                off += tempLen;
-//            }
-//        }
+        write(ByteBuffer.wrap(buffer, off, len), false);
     }
 
 

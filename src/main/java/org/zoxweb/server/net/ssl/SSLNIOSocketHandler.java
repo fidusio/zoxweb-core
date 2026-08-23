@@ -238,7 +238,7 @@ public class SSLNIOSocketHandler
             sslConfig.sslChannel = (SocketChannel) asc;
             sslConfig.remoteConnection = remoteConnection;
             sslConfig.sslOutputStream = new CommonChannelOutputStream(this, (ByteChannel) asc)
-                    .setSSLSessionConfig(sslConfig);
+                    .setSSLConfigInt(sslConfig);
             ((BaseSessionCallback<SSLSessionConfig>)sessionCallback).setConfig(sslConfig);
             sslDispatcher = new CustomSSLStateMachine(sslConfig, this);
             sessionCallback.setProtocolHandler(this);
@@ -257,7 +257,7 @@ public class SSLNIOSocketHandler
             sslConfig.remoteConnection = remoteConnection;
             //sslConfig.sslOutputStream = new SSLChannelOutputStream(this, sslConfig, 512);
             sslConfig.sslOutputStream = new CommonChannelOutputStream(this, (ByteChannel) asc)
-                    .setSSLSessionConfig(sslConfig);
+                    .setSSLConfigInt(sslConfig);
             ((BaseSessionCallback<SSLSessionConfig>)sessionCallback).setConfig(sslConfig);
             sessionCallback.setProtocolHandler(this);
             sessionCallback.setOutputStream(sslConfig.sslOutputStream);

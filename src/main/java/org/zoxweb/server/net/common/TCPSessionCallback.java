@@ -54,12 +54,10 @@ public abstract class TCPSessionCallback
     }
 
     protected TCPSessionCallback(SSLContextInfo sslContextInfo, String id) {
-        setSSLContextInfo(sslContextInfo);
-        setRemoteAddress(sslContextInfo.getClientAddress());
-        if (id == null) {
-            id = UUID.randomUUID().toString();
-        }
-        setID(id);
+        setSSLContextInfo(sslContextInfo)
+                .setRemoteAddress(sslContextInfo.getClientAddress());
+
+        setID(id != null ? id : UUID.randomUUID().toString());
         boolean stat = closeableDelegate.setDelegate(() -> {
             SharedIOUtil.close(getChannel(), getOutputStream());
             ByteBufferUtil.cache(dataBuffer);
@@ -152,20 +150,20 @@ public abstract class TCPSessionCallback
 
     /**
      * perform the ssl upgrade
-     * @param sk
+     * @param channel
      * @return
      * @throws IOException
      */
-    protected boolean sslUpgrade(SelectionKey sk) throws IOException {
+    protected boolean sslUpgrade(SocketChannel channel) throws IOException {
         if (log.isEnabled()) log.getLogger().info("SSL upgrade started");
         if (sslContextInfo != null) {
             if (log.isEnabled()) log.getLogger().info("SSLContextInfo: " + sslContextInfo + " isClient: " + isClient());
             SSLSessionConfig sslConfig = new SSLSessionConfig(sslContextInfo);
 //            sslConfig.selectorController = getSelectorController();
-            sslConfig.sslChannel = (SocketChannel) sk.channel();
+            sslConfig.sslChannel = channel;
 
-            sslConfig.sslOutputStream = new CommonChannelOutputStream(null, (ByteChannel) sk.channel())
-                    .setSSLSessionConfig(sslConfig);
+            sslConfig.sslOutputStream = new CommonChannelOutputStream(null, (ByteChannel) channel)
+                    .setSSLConfigInt(sslConfig);
             setConfig(sslConfig);
             setOutputStream(sslConfig.sslOutputStream);
 
@@ -187,7 +185,7 @@ public abstract class TCPSessionCallback
     public final int connected(SelectionKey sk) throws IOException {
         setRemoteAddress((InetSocketAddress) ((SocketChannel) sk.channel()).getRemoteAddress());
         setChannel(sk.channel());
-        if (!sslUpgrade(sk)) {
+        if (!sslUpgrade((SocketChannel) sk.channel())) {
             // this not a secure connection
             setOutputStream(new CommonChannelOutputStream(null, (ByteChannel) sk.channel()));
             connectedFinished();

@@ -293,7 +293,7 @@ public class TCPSMCallback
     @Override
     public void sslHandshakeSuccessful(SSLConfigInt sci) throws IOException {
         // flips the session output stream to encrypted writes; requires connected() to have run (bcos set)
-        bcos.setSSLSessionConfig(sci);
+        bcos.setSSLConfigInt(sci);
     }
 
     /**
