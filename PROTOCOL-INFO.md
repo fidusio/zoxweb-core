@@ -76,6 +76,7 @@ Understand this lifecycle; every authoring rule below follows from it.
 | `ready` | `true` — the script ran to completion (absent on failure/incomplete) |
 | *your `report` keys* | the matched text a `validate` step captured, or the `true`/`false` outcome of an `optional` probe (§5.3) |
 | `tls_protocol`, `tls_cipher` | the negotiated TLS session, when TLS ran |
+| `latency_ms` | connect-to-verdict duration in milliseconds (TLS handshake and dialogue included), recorded on every completed or failed run |
 
 A run with no `validate` step still yields `validated: true, reason: "script completed"` —
 reaching the end of the dialogue is itself the check.
@@ -135,7 +136,7 @@ can switch it mid-script, §5.5).
 |---|---|---|---|
 | `datagram` | one received datagram, as-is (no accumulation) | **UDP** | — |
 | `delimited` | the bytes up to (excluding) a terminator sequence, detected across chunks | — | `terminator` (data literal, default `txt:\r\n`), `strip_cr` (drop one trailing CR before the terminator — CR-tolerant line protocols) |
-| `length_prefixed` | a whole binary frame whose header carries the payload length | — | `length: { "offset": 0, "size": 1\|2\|4, "endian": "big"\|"little", "adjust": 0 }` — the frame is `offset + size + parsed-length + adjust` bytes, delivered whole (header included) |
+| `length_prefixed` | a whole binary frame whose header carries the payload length | — | `length: { "offset": 0, "size": 1\|2\|3\|4, "endian": "big"\|"little", "adjust": 0 }` — the frame is `offset + size + parsed-length + adjust` bytes, delivered whole (header included); `size: 3` covers 24-bit headers (the HTTP/2 frame shape) |
 | `stream` | there is no framing: the unconsumed accumulation itself is matched against, and each match **consumes through its end** | **TCP** | — |
 
 `max_message` (default 65536) caps the accumulation/message size — a breach fails the session, so
@@ -207,7 +208,7 @@ accumulation). Meta keys, all optional, checked in order with short-circuit:
   `validated`/`reason` are never touched. This is the *flexible* mode: an assertion says "the
   endpoint must", a probe says "tell me whether the endpoint does".
 - `extract` — for **binary** messages: first narrow the message to a **length-prefixed field at a
-  fixed offset** (read a 1/2/4-byte length at `offset`, take the `length + adjust` bytes that
+  fixed offset** (read a 1/2/3/4-byte length at `offset`, take the `length + adjust` bytes that
   follow it); the matches and `report` then apply to the extracted field. The offset must be
   fixed by the protocol specification — extraction is declarative framing, not computation.
   Out-of-bounds extraction is a validation failure.

@@ -256,6 +256,49 @@ public class SSLContextInfo
 
 
     /**
+     * Creates a client-side SSLContextInfo from an externally supplied SSLContext using default
+     * protocols and ciphers. Equivalent to
+     * {@code new SSLContextInfo(sslContext, clientAddress, null, null)}.
+     *
+     * @param sslContext    the pre-configured SSLContext to mint client engines from.
+     *                      Must not be null.
+     * @param clientAddress the server address to connect to (hostname used for SNI).
+     *                      Must not be null — it is what marks this configuration client-mode.
+     */
+    public SSLContextInfo(SSLContext sslContext, InetSocketAddress clientAddress) {
+        this(sslContext, clientAddress, null, null);
+    }
+
+    /**
+     * Creates a client-side SSLContextInfo from an externally supplied SSLContext.
+     *
+     * <p>This is the injection seam for an external TLS stack: the caller owns the SSLContext —
+     * its provider (e.g. a BCJSSE/Bouncy Castle context for PQC-capable handshakes), trust
+     * material, and key material — and this factory only mints client engines from it, with SNI
+     * taken from {@code clientAddress}. {@link #isClient()} reports {@code true}, so the result
+     * is accepted by {@code TCPSessionCallback.setSSLContextInfo(...)} and upgrades at connect
+     * time.</p>
+     *
+     * @param sslContext    the pre-configured SSLContext to mint client engines from.
+     *                      Must not be null.
+     * @param clientAddress the server address to connect to (hostname used for SNI).
+     *                      Must not be null — it is what marks this configuration client-mode.
+     * @param protocols     array of SSL/TLS protocol versions to enable on created SSLEngines.
+     *                      If null or empty, the engine's defaults are used.
+     * @param ciphers       array of cipher suite names to enable on created SSLEngines.
+     *                      If null or empty, the engine's defaults are used.
+     */
+    public SSLContextInfo(SSLContext sslContext, InetSocketAddress clientAddress, String[] protocols, String[] ciphers) {
+        if (sslContext == null || clientAddress == null)
+            throw new NullPointerException("sslContext and clientAddress can't be null");
+        this.sslContext = sslContext;
+        this.protocols = protocols;
+        this.ciphers = ciphers;
+        // non-null clientAddress indicates client mode
+        this.clientAddress = clientAddress;
+    }
+
+    /**
      * Creates a client-side SSLContextInfo using an IPAddress.
      *
      * <p>This constructor configures SSL for client connections to the specified server.

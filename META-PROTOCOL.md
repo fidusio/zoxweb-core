@@ -163,7 +163,7 @@ message exists. `max_message` (default 65536) caps the accumulation — a breach
 |---|---|---|---|
 | `datagram` | one datagram = one message; no accumulation | **UDP** | — |
 | `delimited` | message ends at a terminator, binary-safe, detected across chunk boundaries | — | `terminator` (default `txt:\r\n`), `strip_cr` (drop a trailing `\r` before the terminator) |
-| `length_prefixed` | a header field carries the payload length | — | `length: {offset, size (1/2/4), endian (big/little, default big), adjust}` |
+| `length_prefixed` | a header field carries the payload length | — | `length: {offset, size (1/2/3/4), endian (big/little, default big), adjust}` — `size 3` covers 24-bit headers (the HTTP/2 frame shape) |
 | `stream` | the accumulation-so-far *is* the current message; the pump consumes through each match | **TCP** | — |
 
 Defaults by transport mean most definitions write only `"boundary"`, or nothing.
@@ -207,7 +207,7 @@ matching stays binary-safe; the `report` text keeps the message's original case.
 matching is always byte-exact — case tolerance is a validation-only option.
 
 An optional **`extract`** block first narrows the message to a **length-prefixed field at a fixed
-offset** — `{offset, size (1/2/4), endian (default big), adjust}` reads the field length at
+offset** — `{offset, size (1/2/3/4), endian (default big), adjust}` reads the field length at
 `offset` inside the message and takes the bytes that follow it; the matches and the `report` then
 apply to the extracted field. Out-of-bounds extraction is a validation failure. This is
 declarative framing, not computation — the offset is fixed by the protocol, never derived from a
@@ -323,6 +323,7 @@ The verdict lives in an `NVGenericMap` owned by the engine, exposed via `getResu
 | `ready` | completion | the script finished |
 | `<report>` | validate step's `report` key | matched message text (e.g. `banner`), or the boolean outcome of an `optional` probe |
 | `tls_protocol` / `tls_cipher` | TLS completion | negotiated session parameters |
+| `latency_ms` | completion or failure | connect-to-verdict duration in milliseconds; the clock starts at the host's `markOpen()` (connect — so an immediate handshake is measured) or at script start when never called, and the first measurement wins |
 
 The failure cause is additionally available as `getCloseCause()` (the `Throwable` stashed by
 `exception(...)`/`fail(...)`), and always agrees with `validated`/`reason`.
@@ -353,9 +354,12 @@ Protocol shapes are definition files, not code. Shipped under `src/test/resource
 
 | File | Shape |
 |---|---|
-| `ssh-banner.json` | delimited banner phase (`expect "txt:SSH-"` + `validate {prefix "txt:SSH-2.0-", report "banner"}`), then the client ident `send` (RFC 4253 — some servers wait for it), a `boundary` switch to RFC 4253 binary packets (`length_prefixed {offset 0, size 4}`), and a `validate` whose `extract {offset 22, size 4}` reports the server's key-exchange name-list from `SSH_MSG_KEXINIT` as `kex_algorithms` |
+| `ssh-banner.json` | delimited banner-only check: `expect "txt:SSH-"` + `validate {prefix "txt:SSH-2.0-", report "banner"}` |
+| `ssh-banner-kex.json` | the banner phase of `ssh-banner.json`, then the client ident `send` (RFC 4253 — some servers wait for it), a `boundary` switch to RFC 4253 binary packets (`length_prefixed {offset 0, size 4}`), a `validate` whose `extract {offset 22, size 4}` asserts `sha2` and reports the server's key-exchange name-list from `SSH_MSG_KEXINIT` as `kex_algorithms`, and an `optional` probe on the same extract reporting post-quantum kex support (`sntrup761`) as `pq_kex` |
 | `smtp-starttls.json` | `tls {mode on_demand}`; EHLO dialogue → `expect` the STARTTLS capability → `start_tls` → post-upgrade EHLO round-trip (RFC 3207 shape) |
 | `dns-probe.json` | `transport udp`; one `hex:` DNS query datagram with a fixed transaction id → `validate {contains "hex:<txn id>", report "dns"}` |
+| `postgres-ssl-probe.json` | `tls {mode on_demand, cert_validation false}`; the 8-byte `SSLRequest` `send` → `expect "txt:S"` (ask-then-upgrade) → `start_tls` → `boundary` switch to backend messages (`length_prefixed {offset 1, size 4, adjust -4}`) → StartupMessage `send` → `validate {prefix "txt:R"}` reporting the AuthenticationRequest as `auth_request` |
+| `https-server.json` | `tls {mode immediate, cert_validation true}`; encrypted `GET` with `${host}` → `expect` the end of the header block → `validate {prefix "txt:HTTP/"}` capturing `response_headers` → `optional` probe `{contains "txt:Server:", ignore_case}` reporting `server` |
 
 A new protocol check is a new JSON file. Code is only ever added for behavior the schema cannot
 express (branching, computed values) — and such a check belongs in purpose-written classes, not

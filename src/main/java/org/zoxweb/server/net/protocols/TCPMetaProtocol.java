@@ -96,6 +96,7 @@ public class TCPMetaProtocol extends TCPSessionCallback implements ExchangeScrip
      */
     @Override
     protected void connectedFinished() throws IOException {
+        script.markOpen(); // latency clock from connect, so an immediate handshake is measured
         if (script.getTLSMode() == ExchangeScript.TLSMode.IMMEDIATE) {
             try {
                 startTLS(script.isCertValidation());

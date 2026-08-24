@@ -1,0 +1,17 @@
+{
+  "name": "postgres-ssl-probe",
+  "transport": "tcp",
+  "port": 5432,
+  "timeout_sec": 5,
+  "close_on_ready": true,
+  "tls": { "mode": "on_demand", "cert_validation": false },
+  "exchange": [
+    { "send": "hex:00000008 04D2162F" },
+    { "expect": "txt:S" },
+    { "start_tls": true },
+    { "boundary": { "boundary": "length_prefixed", "max_message": 8192,
+                    "length": { "offset": 1, "size": 4, "endian": "big", "adjust": -4 } } },
+    { "send": "hex:00000026 00030000 75736572 00 70726F6265 00 6461746162617365 00 706F737467726573 00 00" },
+    { "validate": { "prefix": "txt:R", "report": "auth_request" } }
+  ]
+}

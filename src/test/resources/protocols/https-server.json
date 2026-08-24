@@ -1,0 +1,16 @@
+{
+  "name": "https-server",
+  "transport": "tcp",
+  "port": 443,
+  "timeout_sec": 5,
+  "close_on_ready": true,
+  "tls": { "mode": "immediate", "cert_validation": true },
+  "assembler": { "boundary": "stream" },
+  "vars": { "host": "probe.local" },
+  "exchange": [
+    { "send": "txt:GET / HTTP/1.1\r\nHost: ${host}\r\nConnection: close\r\n\r\n" },
+    { "expect": "txt:\r\n\r\n" },
+    { "validate": { "prefix": "txt:HTTP/", "report": "response_headers" } },
+    { "validate": { "contains": "txt:Server:", "ignore_case": true, "optional": true, "report": "server" } }
+  ]
+}

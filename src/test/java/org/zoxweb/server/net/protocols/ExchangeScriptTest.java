@@ -85,18 +85,18 @@ public class ExchangeScriptTest {
         assertThrows(IllegalArgumentException.class, () -> script("{\"exchange\": [{\"transmogrify\": \"txt:x\"}]}", h));
         // unknown boundary
         assertThrows(IllegalArgumentException.class, () -> script("{\"assembler\": {\"boundary\": \"telepathic\"}}", h));
-        // invalid length_prefixed size
+        // invalid length_prefixed size (1/2/3/4 are legal)
         assertThrows(IllegalArgumentException.class, () -> script(
-                "{\"assembler\": {\"boundary\": \"length_prefixed\", \"length\": {\"size\": 3}}}", h));
+                "{\"assembler\": {\"boundary\": \"length_prefixed\", \"length\": {\"size\": 5}}}", h));
         // boundary step over udp (one datagram = one message)
         assertThrows(IllegalArgumentException.class, () -> script(
                 "{\"transport\": \"udp\", \"exchange\": [{\"boundary\": {\"boundary\": \"stream\"}}]}", h));
         // boundary step with an invalid framing block fails at compile
         assertThrows(IllegalArgumentException.class, () -> script(
-                "{\"exchange\": [{\"boundary\": {\"boundary\": \"length_prefixed\", \"length\": {\"size\": 3}}}]}", h));
+                "{\"exchange\": [{\"boundary\": {\"boundary\": \"length_prefixed\", \"length\": {\"size\": 5}}}]}", h));
         // invalid extract size
         assertThrows(IllegalArgumentException.class, () -> script(
-                "{\"exchange\": [{\"validate\": {\"extract\": {\"size\": 3}}}]}", h));
+                "{\"exchange\": [{\"validate\": {\"extract\": {\"size\": 5}}}]}", h));
     }
 
     // ---- port hints: single value or well-known-port list ----
@@ -371,6 +371,40 @@ public class ExchangeScriptTest {
         s.start();
         s.feed(utf8("toolarge"));
         assertNotNull(h.failure);
+    }
+
+    @Test
+    public void threeByteLengthPrefixedFrames() {
+        FakeHost h = new FakeHost();
+        // the HTTP/2 frame-header shape: 3-byte big-endian payload length
+        ExchangeScript s = script(
+                "{\"assembler\": {\"boundary\": \"length_prefixed\", \"length\": {\"offset\": 0, \"size\": 3}},"
+                        + " \"exchange\": [{\"expect\": \"txt:PONG\"}, {\"validate\": {\"contains\": \"txt:PONG\", \"report\": \"frame\"}}]}", h);
+        s.start();
+        s.feed(new byte[]{0x00, 0x00});                       // split header across chunks
+        s.feed(new byte[]{0x04, 'P', 'O', 'N', 'G'});
+        assertTrue(s.isDone());
+        assertEquals(Boolean.TRUE, s.getResults().getValue("validated"));
+    }
+
+    @Test
+    public void latencyRecordedOnCompletionAndFailure() {
+        FakeHost h = new FakeHost();
+        ExchangeScript s = script("{\"exchange\": [{\"expect\": \"txt:OK\"}]}", h);
+        s.start();
+        s.feed(utf8("OK"));
+        assertTrue(s.isDone());
+        Object latency = s.getResults().getValue("latency_ms");
+        assertTrue(latency instanceof Long && (Long) latency >= 0, "latency on completion: " + latency);
+
+        FakeHost h2 = new FakeHost();
+        ExchangeScript f = script(
+                "{\"exchange\": [{\"expect\": \"txt:HELLO\"}, {\"validate\": {\"prefix\": \"txt:BYE\"}}]}", h2);
+        f.start();
+        f.feed(utf8("HELLO"));
+        assertTrue(f.isFailed());
+        Object failLatency = f.getResults().getValue("latency_ms");
+        assertTrue(failLatency instanceof Long && (Long) failLatency >= 0, "latency on failure: " + failLatency);
     }
 
     // ---- validation verdicts ----

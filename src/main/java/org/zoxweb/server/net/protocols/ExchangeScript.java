@@ -118,8 +118,9 @@ public class ExchangeScript {
             lengthSize = ProtoUtil.intValue(length, "size", 2);
             lengthBigEndian = !"little".equalsIgnoreCase(ProtoUtil.stringValue(length, "endian", "big"));
             lengthAdjust = ProtoUtil.intValue(length, "adjust", 0);
-            if (boundary == Boundary.LENGTH_PREFIXED && lengthSize != 1 && lengthSize != 2 && lengthSize != 4)
-                throw new IllegalArgumentException("length_prefixed size must be 1, 2 or 4: " + lengthSize);
+            if (boundary == Boundary.LENGTH_PREFIXED
+                    && lengthSize != 1 && lengthSize != 2 && lengthSize != 3 && lengthSize != 4)
+                throw new IllegalArgumentException("length_prefixed size must be 1, 2, 3 or 4: " + lengthSize);
         }
     }
 
@@ -171,6 +172,7 @@ public class ExchangeScript {
     private boolean secure;
     private byte[] inbox;
     private byte[] current;
+    private long openNanos; // latency clock; 0 = not started
 
     /**
      * Compiles a definition fail-fast with an engine-private assembly buffer.
@@ -324,8 +326,8 @@ public class ExchangeScript {
         if (extract == null)
             return;
         int size = ProtoUtil.intValue(extract, "size", 4);
-        if (size != 1 && size != 2 && size != 4)
-            throw new IllegalArgumentException("extract size must be 1, 2 or 4: " + size);
+        if (size != 1 && size != 2 && size != 3 && size != 4)
+            throw new IllegalArgumentException("extract size must be 1, 2, 3 or 4: " + size);
         if (ProtoUtil.intValue(extract, "offset", 0) < 0)
             throw new IllegalArgumentException("extract offset must be >= 0");
     }
@@ -414,10 +416,21 @@ public class ExchangeScript {
      * Starts the script (initial sends go out). Idempotent — the host calls it from its
      * connected/secured entry point.
      */
+    /**
+     * The host reports the transport is connected: starts the latency clock. Hosts call it at
+     * connection establishment so TLS handshake time is measured; a script whose host never
+     * calls it starts the clock at {@link #start()} instead.
+     */
+    public void markOpen() {
+        if (openNanos == 0)
+            openNanos = System.nanoTime();
+    }
+
     public void start() {
         if (started || failed)
             return;
         started = true;
+        markOpen();
         pump();
     }
 
@@ -747,6 +760,7 @@ public class ExchangeScript {
         reason = "validation failed: " + reason + ": " + new String(target, StandardCharsets.UTF_8);
         results.build(new NVBoolean("validated", false)).build("reason", reason);
         failed = true;
+        recordLatency();
         host.fail(new IOException(reason));
         return false;
     }
@@ -780,7 +794,14 @@ public class ExchangeScript {
         if (results.getNV("validated") == null)
             results.build(new NVBoolean("validated", true)).build("reason", "script completed");
         results.build(new NVBoolean("ready", true));
+        recordLatency();
         host.complete();
+    }
+
+    /** Freezes the connect-to-verdict duration as {@code latency_ms} — first measurement wins. */
+    private void recordLatency() {
+        if (openNanos != 0 && results.getNV("latency_ms") == null)
+            results.build(new NVLong("latency_ms", (System.nanoTime() - openNanos) / 1000000L));
     }
 
     /**
@@ -796,6 +817,7 @@ public class ExchangeScript {
                     : "session failed";
             results.build(new NVBoolean("validated", false)).build("reason", reason);
         }
+        recordLatency();
     }
 
     /** Engine-detected failure: record the verdict, then ask the host to close with the cause. */
