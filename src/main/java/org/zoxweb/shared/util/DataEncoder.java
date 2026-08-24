@@ -42,6 +42,7 @@ package org.zoxweb.shared.util;
  * <ul>
  *     <li>{@link #StringLower} - Converts strings to lowercase</li>
  *     <li>{@link #StringUpper} - Converts strings to uppercase</li>
+ *     <li>{@link #LowerAscii} - ASCII case-folds a byte array ({@code 'A'..'Z'} only, binary-safe)</li>
  * </ul>
  *
  * @param <EI> the input type to encode
@@ -67,6 +68,28 @@ public interface DataEncoder<EI, EO>
      * </p>
      */
     DataEncoder<String, String> StringUpper = (s) -> s != null ? s.toUpperCase() : null;
+
+
+    /**
+     * Encoder that ASCII case-folds a byte array: {@code 'A'..'Z'} are lowered, every other
+     * byte — digits, symbols, control bytes, values above 0x7F — is untouched, so folding is
+     * binary-safe with no locale or UTF-8 case rules. This is the primitive behind
+     * case-insensitive protocol-token matching (e.g. the exchange-script {@code validate}
+     * {@code ignore_case} option).
+     * <p>
+     * Returns null for null input and the same (empty) array for empty input; a non-empty
+     * input is folded into a fresh copy — the input array is never modified.
+     * </p>
+     */
+    DataEncoder<byte[], byte[]> LowerAscii = (data) -> {
+        if (data == null || data.length == 0) return data;
+        byte[] ret = new byte[data.length];
+        for (int i = 0; i < data.length; i++) {
+            byte b = data[i];
+            ret[i] = (b >= 'A' && b <= 'Z') ? (byte) (b + 32) : b;
+        }
+        return ret;
+    };
 
     /**
      * Encodes the input and converts it to an output object.

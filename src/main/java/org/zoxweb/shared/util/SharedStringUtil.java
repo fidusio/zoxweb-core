@@ -979,6 +979,7 @@ public final class SharedStringUtil {
     public static byte[] hexToBytes(String str)
             throws IllegalArgumentException, NullPointerException {
         str = str.toUpperCase().trim();
+        str = str.replaceAll("\\s", "");
 
         if (str.startsWith("0X")) {
             str = SharedStringUtil.valueAfterLeftToken(str, "0X");

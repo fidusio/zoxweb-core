@@ -1,15 +1,6 @@
 package org.zoxweb.server.net.protocols;
 
-import org.zoxweb.shared.util.BiDataDecoder;
-import org.zoxweb.shared.util.BiDataEncoder;
-import org.zoxweb.shared.util.DataDecoder;
-import org.zoxweb.shared.util.GetNameValue;
-import org.zoxweb.shared.util.NVGenericMap;
-import org.zoxweb.shared.util.NVIntList;
-import org.zoxweb.shared.util.NVLongList;
-import org.zoxweb.shared.util.NVStringList;
-import org.zoxweb.shared.util.SharedBase64;
-import org.zoxweb.shared.util.SharedStringUtil;
+import org.zoxweb.shared.util.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,34 +37,6 @@ public final class ProtoUtil {
     private static final Pattern VAR_PATTERN = Pattern.compile("\\$\\{([^}]+)\\}");
 
     /**
-     * Decodes a prefixed literal ({@code txt:} / {@code hex:} / {@code base64:}) to bytes; a null
-     * or empty literal yields an empty array. Throws {@link IllegalArgumentException} if a
-     * declared hex/base64 body fails to decode.
-     */
-    public static final DataDecoder<String, byte[]> STRING_TO_DATA = (encoded) -> {
-        if (encoded == null || encoded.isEmpty())
-            return new byte[0];
-        int c = encoded.indexOf(':');
-        String prefix = c > 0 ? encoded.substring(0, c).toLowerCase() : "";
-        String body = c > 0 ? encoded.substring(c + 1) : encoded;
-        try {
-            switch (prefix) {
-                case "hex":
-                    return SharedStringUtil.hexToBytes(body.replaceAll("\\s", ""));
-                case "base64":
-                    return SharedBase64.decode(body);
-                case "txt":
-                    return SharedStringUtil.getBytes(body);
-                default:
-                    // no recognized prefix: whole string is UTF-8 text
-                    return SharedStringUtil.getBytes(encoded);
-            }
-        } catch (RuntimeException e) {
-            throw new IllegalArgumentException("cannot decode " + prefix + ": data: " + e.getMessage(), e);
-        }
-    };
-
-    /**
      * Variable substitution encoder: replaces every {@code ${name}} in the input string with the
      * variable bag's string value for {@code name}. A referenced variable that is absent (or whose
      * value is empty) is fatal — a generic definition that expects an injected value must not
@@ -105,7 +68,7 @@ public final class ProtoUtil {
     /**
      * Variable-aware data decoder: resolves {@code ${var}} placeholders in the body of the
      * literal against the variable bag (via {@link #STRING_VARS_TO_STRING}), then decodes the
-     * result via {@link #STRING_TO_DATA}. Substitution is confined to the body so a variable
+     * result via {@link DataDecoder#StringToData}. Substitution is confined to the body so a variable
      * value containing a colon can never be mistaken for the encoding prefix.
      * <p>
      * {@code decode(encoded, vars)}: null/empty literal yields an empty array. Throws
@@ -122,7 +85,7 @@ public final class ProtoUtil {
             return SharedStringUtil.getBytes(STRING_VARS_TO_STRING.encode(encoded, vars));
         String prefix = encoded.substring(0, c);
         String body = STRING_VARS_TO_STRING.encode(encoded.substring(c + 1), vars);
-        return STRING_TO_DATA.decode(prefix + ":" + body);
+        return DataDecoder.StringToData.decode(prefix + ":" + body);
     };
 
     /**
@@ -165,6 +128,23 @@ public final class ProtoUtil {
         }
         return true;
     }
+
+//
+//    public static final DataEncoder<byte[], byte[]> BYTES_TO_
+//
+//    /**
+//     * @return a copy of {@code data} with ASCII {@code 'A'..'Z'} lowered and every other byte
+//     * untouched — the folding primitive behind the {@code validate} {@code ignore_case} option.
+//     * ASCII-only by design: matching stays binary-safe, no locale or UTF-8 case rules.
+//     */
+//    public static byte[] lowerAscii(byte[] data) {
+//        byte[] folded = new byte[data.length];
+//        for (int i = 0; i < data.length; i++) {
+//            byte b = data[i];
+//            folded[i] = (b >= 'A' && b <= 'Z') ? (byte) (b + 32) : b;
+//        }
+//        return folded;
+//    }
 
     /**
      * @return the string value of {@code name} in the bag ({@code def} when the bag is null, the

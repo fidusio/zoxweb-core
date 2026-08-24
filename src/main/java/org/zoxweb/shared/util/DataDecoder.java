@@ -39,6 +39,7 @@ package org.zoxweb.shared.util;
  * <h2>Built-in Decoders</h2>
  * <ul>
  *     <li>{@link #AsStringOrNull} - Returns the input as a String if it is one, null otherwise</li>
+ *     <li>{@link #StringToData} - Decodes a {@code txt:}/{@code hex:}/{@code base64:}-prefixed literal to bytes</li>
  * </ul>
  *
  * @param <DI> the input type to decode
@@ -64,4 +65,39 @@ public interface DataDecoder<DI, DO>
      * </p>
      */
     DataDecoder<Object, String> AsStringOrNull = (o)-> o instanceof String ? (String)o : null;
+
+
+    /**
+     * Decoder for prefix-encoded data literals: the input splits at the <b>first</b> colon and
+     * the prefix (matched case-insensitively) selects the encoding — {@code txt:} UTF-8
+     * verbatim, {@code hex:} hex digits with whitespace ignored, {@code base64:} a Base64 body.
+     * A string with no recognized prefix is taken in full — colon included — as UTF-8 text
+     * ({@code "USER: bob"} is text, not a directive).
+     * <p>
+     * A null or empty input yields an empty array, never null. Throws
+     * {@link IllegalArgumentException} if a declared hex/base64 body fails to decode.
+     * </p>
+     */
+    DataDecoder<String, byte[]> StringToData = (encoded) -> {
+        if (encoded == null || encoded.isEmpty())
+            return Const.EMPTY_BYTE_ARRAY;
+        int c = encoded.indexOf(':');
+        String prefix = c > 0 ? encoded.substring(0, c).toLowerCase() : "";
+        String body = c > 0 ? encoded.substring(c + 1) : encoded;
+        try {
+            switch (prefix) {
+                case "hex":
+                    return SharedStringUtil.hexToBytes(body);
+                case "base64":
+                    return SharedBase64.decode(body);
+                case "txt":
+                    return SharedStringUtil.getBytes(body);
+                default:
+                    // no recognized prefix: whole string is UTF-8 text
+                    return SharedStringUtil.getBytes(encoded);
+            }
+        } catch (RuntimeException e) {
+            throw new IllegalArgumentException("cannot decode " + prefix + ": data: " + e.getMessage(), e);
+        }
+    };
 }

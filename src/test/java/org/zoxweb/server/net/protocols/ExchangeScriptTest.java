@@ -391,6 +391,73 @@ public class ExchangeScriptTest {
     }
 
     @Test
+    public void validateIgnoreCaseMatchesAndReportsOriginal() {
+        FakeHost h = new FakeHost();
+        ExchangeScript s = script(
+                "{\"exchange\": [{\"expect\": \"txt:\\r\\n\\r\\n\"},"
+                        + " {\"validate\": {\"contains\": \"txt:Server:\", \"ignore_case\": true, \"report\": \"headers\"}}]}", h);
+        s.start();
+        s.feed(utf8("HTTP/1.1 200 OK\r\nserver: nginx\r\n\r\n"));
+        assertTrue(s.isDone());
+        assertEquals(Boolean.TRUE, s.getResults().getValue("validated"));
+        assertEquals("HTTP/1.1 200 OK\r\nserver: nginx\r\n\r\n", s.getResults().getValue("headers"));
+    }
+
+    @Test
+    public void validateIgnoreCaseOffStaysByteExact() {
+        FakeHost h = new FakeHost();
+        ExchangeScript s = script(
+                "{\"exchange\": [{\"expect\": \"txt:\\r\\n\\r\\n\"},"
+                        + " {\"validate\": {\"contains\": \"txt:Server:\"}}]}", h);
+        s.start();
+        s.feed(utf8("HTTP/1.1 200 OK\r\nserver: nginx\r\n\r\n"));
+        assertTrue(s.isFailed());
+        assertEquals(Boolean.FALSE, s.getResults().getValue("validated"));
+    }
+
+    @Test
+    public void optionalValidateReportsSupportMatrixWithoutFailing() {
+        FakeHost h = new FakeHost();
+        // capability probe: V1 present, V2 absent — both reported, neither fails the run
+        ExchangeScript s = script(
+                "{\"exchange\": [{\"expect\": \"txt:\\r\\n\"},"
+                        + " {\"validate\": {\"contains\": \"txt:V1\", \"optional\": true, \"report\": \"v1_supported\"}},"
+                        + " {\"validate\": {\"contains\": \"txt:V2\", \"optional\": true, \"report\": \"v2_supported\"}}]}", h);
+        s.start();
+        s.feed(utf8("CAP V1\r\n"));
+        assertTrue(s.isDone());
+        assertEquals(Boolean.TRUE, s.getResults().getValue("v1_supported"));
+        assertEquals(Boolean.FALSE, s.getResults().getValue("v2_supported"));
+        // probes never touch the verdict: completion rule reports the run itself
+        assertEquals(Boolean.TRUE, s.getResults().getValue("validated"));
+        assertEquals("script completed", s.getResults().getValue("reason"));
+        assertEquals(Boolean.TRUE, s.getResults().getValue("ready"));
+        assertEquals(1, h.completes);
+    }
+
+    @Test
+    public void optionalValidateNoneSupportedStillCompletes() {
+        FakeHost h = new FakeHost();
+        ExchangeScript s = script(
+                "{\"exchange\": [{\"expect\": \"txt:\\r\\n\"},"
+                        + " {\"validate\": {\"contains\": \"txt:V1\", \"optional\": true, \"report\": \"v1_supported\"}},"
+                        + " {\"validate\": {\"contains\": \"txt:V2\", \"optional\": true, \"report\": \"v2_supported\"}}]}", h);
+        s.start();
+        s.feed(utf8("CAP legacy\r\n"));
+        assertTrue(s.isDone());
+        assertEquals(Boolean.FALSE, s.getResults().getValue("v1_supported"));
+        assertEquals(Boolean.FALSE, s.getResults().getValue("v2_supported"));
+        assertEquals(Boolean.TRUE, s.getResults().getValue("validated"));
+    }
+
+    @Test
+    public void optionalValidateWithoutReportIsCompileError() {
+        FakeHost h = new FakeHost();
+        assertThrows(IllegalArgumentException.class, () -> script(
+                "{\"exchange\": [{\"validate\": {\"contains\": \"txt:V1\", \"optional\": true}}]}", h));
+    }
+
+    @Test
     public void completionRuleWithoutValidate() {
         FakeHost h = new FakeHost();
         ExchangeScript s = script("{\"exchange\": [{\"send\": \"txt:LOG ping\\r\\n\"}]}", h);

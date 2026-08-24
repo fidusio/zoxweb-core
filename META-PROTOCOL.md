@@ -124,6 +124,13 @@ Fail-fast validation at compile: unknown transport, tls mode, boundary, or excha
 `hex:`/`base64:` literals. The retired sm-era keys (`protocol`, `ssh`, `states`) are rejected
 with a clear error — protocol shapes are definition files now (§8).
 
+**Key names are case-insensitive.** The definition is parsed into an `NVGenericMap`, whose entry
+names match regardless of case — `"Port"`, `"PORT"`, and `"port"` are the same key, at every
+nesting level (top-level, `tls`, `assembler`, step blocks). This also means two `report` keys
+differing only by case collide into one results entry — don't author that. Key-case tolerance is
+a *config* property: data literals (§2.1) stay byte-exact unless a `validate` opts into
+`ignore_case` (§3.3).
+
 ### 2.1 Data literals and variables
 
 Every data literal (`send`, `expect`, `terminator`, `validate.prefix/contains/exact`) carries an
@@ -193,6 +200,12 @@ order), plus an optional `report` key.
 { "validate": { "prefix": "txt:SSH-2.0-", "contains": "txt:OpenSSH", "report": "banner" } }
 ```
 
+An optional `ignore_case` (default `false`) ASCII-folds **both sides** of the
+`prefix`/`contains`/`exact` comparisons — for tokens the protocol itself defines as
+case-insensitive (HTTP header names, SMTP verbs/keywords). Folding is `A–Z`→`a–z` only, so
+matching stays binary-safe; the `report` text keeps the message's original case. `expect`
+matching is always byte-exact — case tolerance is a validation-only option.
+
 An optional **`extract`** block first narrows the message to a **length-prefixed field at a fixed
 offset** — `{offset, size (1/2/4), endian (default big), adjust}` reads the field length at
 `offset` inside the message and takes the bytes that follow it; the matches and the `report` then
@@ -208,6 +221,13 @@ reply. It is how the SSH definition reports the server's key-exchange name-list 
 Pass → `validated=true`; with `report` → the matched message text is stored in results under that
 key. Fail → `validated=false` + `reason`, and the session is failed with the same cause — the
 report and the close cause always agree. The report is complete on both the pass and fail path.
+
+An **`optional`** flag turns the step from assertion into probe: the match outcome is recorded as
+a boolean under the `report` key (mandatory with `optional` — compile rejects the combination
+without it), the script continues on match and mismatch alike, and `validated`/`reason` are
+untouched. Since a validate never clears the current message, several probes can examine the same
+reply — the capability/version-matrix idiom: one run reports which protocol variants the endpoint
+supports (V1 only, V2 only, both, neither) without any of them failing the session.
 
 ### 3.4 The host seam
 
@@ -301,7 +321,7 @@ The verdict lives in an `NVGenericMap` owned by the engine, exposed via `getResu
 | `validated` | validate step, or the completion rule | the verdict — present on every completed run |
 | `reason` | validate step / failure path | mismatch cause, or `"script completed"` |
 | `ready` | completion | the script finished |
-| `<report>` | validate step's `report` key | matched message text (e.g. `banner`) |
+| `<report>` | validate step's `report` key | matched message text (e.g. `banner`), or the boolean outcome of an `optional` probe |
 | `tls_protocol` / `tls_cipher` | TLS completion | negotiated session parameters |
 
 The failure cause is additionally available as `getCloseCause()` (the `Throwable` stashed by

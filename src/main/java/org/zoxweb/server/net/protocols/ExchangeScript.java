@@ -2,13 +2,7 @@ package org.zoxweb.server.net.protocols;
 
 import org.zoxweb.server.io.UByteArrayOutputStream;
 import org.zoxweb.server.util.GSONUtil;
-import org.zoxweb.shared.util.GetNameValue;
-import org.zoxweb.shared.util.NVBoolean;
-import org.zoxweb.shared.util.NVGenericMap;
-import org.zoxweb.shared.util.NVPair;
-import org.zoxweb.shared.util.NVPairList;
-import org.zoxweb.shared.util.NamedValue;
-import org.zoxweb.shared.util.SUS;
+import org.zoxweb.shared.util.*;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -114,7 +108,7 @@ public class ExchangeScript {
             }
             maxMessage = ProtoUtil.intValue(block, "max_message", DEFAULT_MAX_MESSAGE);
             maxSkip = ProtoUtil.intValue(block, "max_skip", DEFAULT_MAX_SKIP);
-            terminator = ProtoUtil.STRING_TO_DATA.decode(
+            terminator = DataDecoder.StringToData.decode(
                     ProtoUtil.stringValue(block, "terminator", DEFAULT_TERMINATOR));
             if (boundary == Boundary.DELIMITED && terminator.length == 0)
                 throw new IllegalArgumentException("delimited boundary with an empty terminator");
@@ -293,6 +287,9 @@ public class ExchangeScript {
             } else if (OP_VALIDATE.equals(op)) {
                 NVGenericMap meta = stepBlock(value, "validate step without match meta");
                 validateExtractMeta(meta);
+                if (ProtoUtil.booleanValue(meta, "optional", false)
+                        && ProtoUtil.stringValue(meta, "report", null) == null)
+                    throw new IllegalArgumentException("optional validate without a report key");
                 ret.add(new Step(op, null, null, meta, null));
             } else if (OP_BOUNDARY.equals(op)) {
                 if (udp)
@@ -304,7 +301,7 @@ public class ExchangeScript {
                 if (ProtoUtil.hasVars(literal))
                     ret.add(new Step(op, null, literal, null, null)); // send-time var resolution
                 else
-                    ret.add(new Step(op, ProtoUtil.STRING_TO_DATA.decode(literal), null, null, null));
+                    ret.add(new Step(op, DataDecoder.StringToData.decode(literal), null, null, null));
             } else {
                 throw new IllegalArgumentException("unknown exchange step: " + op);
             }
@@ -691,7 +688,9 @@ public class ExchangeScript {
      * mismatch fails the session so the close cause and the report agree. An {@code extract}
      * block ({@code {offset, size, endian, adjust}}) first narrows the message to the
      * length-prefixed field at the fixed offset — the matches and the {@code report} then apply
-     * to the extracted field.
+     * to the extracted field. An {@code optional} step is a probe, not an assertion: the match
+     * outcome is recorded as a boolean under the {@code report} key, the script continues either
+     * way, and {@code validated}/{@code reason} are untouched.
      */
     private boolean validate(NVGenericMap meta, byte[] message) {
         String reason = null;
@@ -718,15 +717,24 @@ public class ExchangeScript {
         }
 
         if (reason == null) {
-            byte[] prefix = literal(meta, "prefix");
-            if (prefix != null && !ProtoUtil.startsWith(target, prefix))
+            // ignore_case ASCII-folds both sides of the matches; report keeps the original bytes
+            boolean ignoreCase = ProtoUtil.booleanValue(meta, "ignore_case", false);
+            byte[] subject = ignoreCase ? DataEncoder.LowerAscii.encode(target) : target;
+            byte[] prefix = fold(literal(meta, "prefix"), ignoreCase);
+            if (prefix != null && !ProtoUtil.startsWith(subject, prefix))
                 reason = "prefix mismatch";
-            byte[] contains = reason == null ? literal(meta, "contains") : null;
-            if (contains != null && ProtoUtil.indexOf(target, contains) < 0)
+            byte[] contains = reason == null ? fold(literal(meta, "contains"), ignoreCase) : null;
+            if (contains != null && ProtoUtil.indexOf(subject, contains) < 0)
                 reason = "does not contain expected sequence";
-            byte[] exact = reason == null ? literal(meta, "exact") : null;
-            if (exact != null && !Arrays.equals(target, exact))
+            byte[] exact = reason == null ? fold(literal(meta, "exact"), ignoreCase) : null;
+            if (exact != null && !Arrays.equals(subject, exact))
                 reason = "exact mismatch";
+        }
+
+        if (ProtoUtil.booleanValue(meta, "optional", false)) {
+            // probe, not verdict: record the outcome and continue on match and mismatch alike
+            results.build(new NVBoolean(ProtoUtil.stringValue(meta, "report", null), reason == null));
+            return true;
         }
 
         if (reason == null) {
@@ -743,6 +751,11 @@ public class ExchangeScript {
         return false;
     }
 
+    /** ASCII-folds a decoded match literal when {@code ignore_case} is active; null passes through. */
+    private static byte[] fold(byte[] data, boolean ignoreCase) {
+        return (data == null || !ignoreCase) ? data : DataEncoder.LowerAscii.encode(data);
+    }
+
     /** Decodes a match literal from the meta, {@code ${var}}s resolved; null when absent. */
     private byte[] literal(NVGenericMap meta, String key) {
         String raw = ProtoUtil.stringValue(meta, key, null);
@@ -750,7 +763,7 @@ public class ExchangeScript {
             return null;
         return ProtoUtil.hasVars(raw)
                 ? ProtoUtil.STRING_VARS_TO_DATA.decode(raw, vars)
-                : ProtoUtil.STRING_TO_DATA.decode(raw);
+                : DataDecoder.StringToData.decode(raw);
     }
 
     // ---- completion and failure ----

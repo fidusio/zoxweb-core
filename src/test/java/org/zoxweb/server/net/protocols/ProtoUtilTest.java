@@ -1,6 +1,7 @@
 package org.zoxweb.server.net.protocols;
 
 import org.junit.jupiter.api.Test;
+import org.zoxweb.shared.util.DataDecoder;
 import org.zoxweb.shared.util.NVGenericMap;
 
 import java.nio.charset.StandardCharsets;
@@ -16,13 +17,13 @@ public class ProtoUtilTest {
 
     @Test
     public void txtIsUtf8Verbatim() {
-        assertArrayEquals("PING\r\n".getBytes(StandardCharsets.UTF_8), ProtoUtil.STRING_TO_DATA.decode("txt:PING\r\n"));
+        assertArrayEquals("PING\r\n".getBytes(StandardCharsets.UTF_8), DataDecoder.StringToData.decode("txt:PING\r\n"));
     }
 
     @Test
     public void hexDecodesIgnoringWhitespace() {
-        assertArrayEquals(new byte[]{0x0d, 0x0a}, ProtoUtil.STRING_TO_DATA.decode("hex:0d0a"));
-        assertArrayEquals(new byte[]{0x0d, 0x0a}, ProtoUtil.STRING_TO_DATA.decode("hex:0d 0a"));
+        assertArrayEquals(new byte[]{0x0d, 0x0a}, DataDecoder.StringToData.decode("hex:0d0a"));
+        assertArrayEquals(new byte[]{0x0d, 0x0a}, DataDecoder.StringToData.decode("hex:0d 0a"));
     }
 
     @Test
@@ -30,25 +31,25 @@ public class ProtoUtilTest {
         byte[] raw = {0, 1, 2, 'h', 'e', 'l', 'l', 'o'};
         String b64 = org.zoxweb.shared.util.SharedBase64.encodeAsString(
                 org.zoxweb.shared.util.SharedBase64.Base64Type.DEFAULT, raw);
-        assertArrayEquals(raw, ProtoUtil.STRING_TO_DATA.decode("base64:" + b64));
+        assertArrayEquals(raw, DataDecoder.StringToData.decode("base64:" + b64));
     }
 
     @Test
     public void noPrefixFallsBackToText() {
-        assertArrayEquals("hello".getBytes(StandardCharsets.UTF_8), ProtoUtil.STRING_TO_DATA.decode("hello"));
+        assertArrayEquals("hello".getBytes(StandardCharsets.UTF_8), DataDecoder.StringToData.decode("hello"));
         // colon-bearing but unrecognized prefix: the whole string, colon included, is text
-        assertArrayEquals("USER: bob".getBytes(StandardCharsets.UTF_8), ProtoUtil.STRING_TO_DATA.decode("USER: bob"));
+        assertArrayEquals("USER: bob".getBytes(StandardCharsets.UTF_8), DataDecoder.StringToData.decode("USER: bob"));
     }
 
     @Test
     public void emptyOrNullYieldsEmpty() {
-        assertEquals(0, ProtoUtil.STRING_TO_DATA.decode(null).length);
-        assertEquals(0, ProtoUtil.STRING_TO_DATA.decode("").length);
+        assertEquals(0, DataDecoder.StringToData.decode(null).length);
+        assertEquals(0, DataDecoder.StringToData.decode("").length);
     }
 
     @Test
     public void malformedLiteralIsFatal() {
-        assertThrows(IllegalArgumentException.class, () -> ProtoUtil.STRING_TO_DATA.decode("hex:XYZ"));
+        assertThrows(IllegalArgumentException.class, () -> DataDecoder.StringToData.decode("hex:XYZ"));
     }
 
     @Test
