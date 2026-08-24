@@ -1,0 +1,22 @@
+{
+  "name": "smtp-starttls",
+  "port": [25, 587],
+  "timeout_sec": 5,
+  "close_on_ready": true,
+  "tls": { "mode": "on_demand", "cert_validation": false },
+  "vars": { "helo": "probe.local" },
+  "exchange": [
+    { "expect": "txt:220 " },
+    { "expect": "txt:\r\n" },
+    { "send": "txt:EHLO ${helo}\r\n" },
+    { "expect": "txt:STARTTLS" },
+    { "expect": "txt:\r\n" },
+    { "send": "txt:STARTTLS\r\n" },
+    { "expect": "txt:220 " },
+    { "expect": "txt:\r\n" },
+    { "start_tls": true },
+    { "send": "txt:EHLO ${helo}\r\n" },
+    { "expect": "txt:\r\n" },
+    { "validate": { "contains": "txt:250", "report": "post_tls_ehlo" } }
+  ]
+}

@@ -28,13 +28,14 @@ public abstract class TCPSessionCallback
     private volatile SSLContextInfo sslContextInfo;
     private int timeoutInSec = 5;
     private final ByteBuffer dataBuffer = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, SharedIOUtil.K_1);
+    protected volatile boolean implWillFlipBuffer = false;
 
     private DNSResolverInt dnsResolver;
     protected volatile int interestOps = SelectionKey.OP_READ;
 
-    protected TCPSessionCallback() {
+    protected TCPSessionCallback(String id) {
 
-        setID(UUID.randomUUID().toString());
+        setID(id != null ? id : UUID.randomUUID().toString());
         boolean stat = closeableDelegate.setDelegate(() -> {
             SharedIOUtil.close(getChannel(), getOutputStream());
             ByteBufferUtil.cache(dataBuffer);
@@ -44,7 +45,7 @@ public abstract class TCPSessionCallback
     }
 
     protected TCPSessionCallback(IPAddress ipAddress) {
-        this();
+        this((String) null);
         setRemoteAddress(new InetSocketAddress(ipAddress.getInetAddress(), ipAddress.getPort()));
 
     }
@@ -54,16 +55,17 @@ public abstract class TCPSessionCallback
     }
 
     protected TCPSessionCallback(SSLContextInfo sslContextInfo, String id) {
+        this(id);
         setSSLContextInfo(sslContextInfo)
                 .setRemoteAddress(sslContextInfo.getClientAddress());
 
-        setID(id != null ? id : UUID.randomUUID().toString());
-        boolean stat = closeableDelegate.setDelegate(() -> {
-            SharedIOUtil.close(getChannel(), getOutputStream());
-            ByteBufferUtil.cache(dataBuffer);
-        });
-        if (!stat)
-            throw new IllegalStateException("Cannot set delegate to TCPSessionCallback");
+//        setID(id != null ? id : UUID.randomUUID().toString());
+//        boolean stat = closeableDelegate.setDelegate(() -> {
+//            SharedIOUtil.close(getChannel(), getOutputStream());
+//            ByteBufferUtil.cache(dataBuffer);
+//        });
+//        if (!stat)
+//            throw new IllegalStateException("Cannot set delegate to TCPSessionCallback");
     }
 
     public DNSResolverInt dnsResolver() {
@@ -112,15 +114,27 @@ public abstract class TCPSessionCallback
 
                 int read;
                 do {
+                    // loop-top guard: accept(dataBuffer) may close the session (e.g. a
+                    // validator's close_on_ready) — teardown has recached nothing here, but the
+                    // channel is dead and the loop must not keep touching session state
+                    if (isClosed())
+                        return;
                     ((Buffer) dataBuffer).clear();
                     read = ((SocketChannel) key.channel()).isConnected() ? ((SocketChannel) key.channel()).read(dataBuffer) : -1;
+                    if (log.isEnabled()) log.getLogger().info("Read " + read + " bytes");
 
                     if (read > 0) {
-                        dataBuffer.flip();
+
+                        if (!implWillFlipBuffer)
+                            dataBuffer.flip();
+
                         accept(dataBuffer);
                     }
                 }
-                while (read > 0);
+                // getConfig() != null: accept(dataBuffer) upgraded to TLS mid-dispatch — exit so
+                // the next selector dispatch routes handshake bytes through the SSL path instead
+                // of feeding ciphertext to the plain accept
+                while (read > 0 && getConfig() == null);
 
 
                 if (read == -1) {
@@ -148,17 +162,27 @@ public abstract class TCPSessionCallback
     }
 
 
+    protected void startTLS(boolean certValidationEnabled) throws NoSuchAlgorithmException, KeyManagementException, IOException {
+        if (log.isEnabled()) log.getLogger().info("Starting TLS");
+        if (sslContextInfo == null) {
+            SSLContextInfo temp = new SSLContextInfo(getRemoteAddress(), certValidationEnabled);
+            setSSLContextInfo(temp);
+            internalSSLUpgrade(getChannel());
+        }
+    }
+
     /**
      * perform the ssl upgrade
      * @param channel
      * @return
      * @throws IOException
      */
-    protected boolean sslUpgrade(SocketChannel channel) throws IOException {
+    private boolean internalSSLUpgrade(SocketChannel channel) throws IOException {
         if (log.isEnabled()) log.getLogger().info("SSL upgrade started");
         if (sslContextInfo != null) {
-            if (log.isEnabled()) log.getLogger().info("SSLContextInfo: " + sslContextInfo + " isClient: " + isClient());
-            SSLSessionConfig sslConfig = new SSLSessionConfig(sslContextInfo);
+            if (log.isEnabled())
+                log.getLogger().info("SSLContextInfo: " + getSSLContextInfo() + " isClient: " + isClient());
+            SSLSessionConfig sslConfig = new SSLSessionConfig(getSSLContextInfo());
 //            sslConfig.selectorController = getSelectorController();
             sslConfig.sslChannel = channel;
 
@@ -185,7 +209,7 @@ public abstract class TCPSessionCallback
     public final int connected(SelectionKey sk) throws IOException {
         setRemoteAddress((InetSocketAddress) ((SocketChannel) sk.channel()).getRemoteAddress());
         setChannel(sk.channel());
-        if (!sslUpgrade((SocketChannel) sk.channel())) {
+        if (!internalSSLUpgrade((SocketChannel) sk.channel())) {
             // this not a secure connection
             setOutputStream(new CommonChannelOutputStream(null, (ByteChannel) sk.channel()));
             connectedFinished();
@@ -203,11 +227,14 @@ public abstract class TCPSessionCallback
 
     protected abstract void connectedFinished() throws IOException;
 
+    protected abstract void sslUpgraded(SSLConfigInt sslConfig) throws IOException;
+
     /**
      * will be called in one condition when the connection is secure and finished the ssl handshake
      */
     public void sslHandshakeSuccessful(SSLConfigInt sci) throws IOException {
-        connectedFinished();
+        //connectedFinished();
+        sslUpgraded(sci);
     }
 
 //    public void close() throws IOException {

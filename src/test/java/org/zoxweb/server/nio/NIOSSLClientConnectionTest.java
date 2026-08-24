@@ -5,9 +5,11 @@ import org.zoxweb.server.http.HTTPURLCallback;
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.net.NIOSocket;
 import org.zoxweb.server.net.common.TCPSessionCallback;
+import org.zoxweb.server.net.ssl.SSLConfigInt;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.http.HTTPResponse;
+import org.zoxweb.shared.http.HTTPResponseData;
 import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.task.ConsumerCallback;
@@ -69,6 +71,13 @@ public class NIOSSLClientConnectionTest {
             log.getLogger().info(getRemoteAddress() + " " + channel.isConnected() + " total: " + total());
             SharedIOUtil.close(this);
         }
+
+        @Override
+        protected void sslUpgraded(SSLConfigInt sslConfig) throws IOException {
+            log.getLogger().info(getRemoteAddress() + " ****************************** ssl upgraded *******************************"  );
+            connectedFinished();
+
+        }
     }
 
 
@@ -81,7 +90,7 @@ public class NIOSSLClientConnectionTest {
         try {
             long ts = System.currentTimeMillis();
             List<IPAddress> ipAddressesList = new ArrayList<IPAddress>();
-
+            HTTPURLCallback.log.setEnabled(false);
             HTTPNIOSocket httpNIOSocket = new HTTPNIOSocket(new NIOSocket(TaskUtil.defaultTaskProcessor(), TaskUtil.defaultTaskScheduler()));
             for (int i = 0; i < args.length; i++) {
                 IPAddress ipAddress = null;
@@ -111,6 +120,7 @@ public class NIOSSLClientConnectionTest {
                         @Override
                         public void accept(HTTPResponse r) {
                             log.getLogger().info(r.getCorrelationID() + " " + r.getStatus() + " " + Const.TimeInMillis.toString(r.getDuration()));
+                            log.getLogger().info(new String(((HTTPResponseData)r).getData()));
                             successCount.incrementAndGet();
                         }
                     });
@@ -131,6 +141,7 @@ public class NIOSSLClientConnectionTest {
                     ipAddressesList.add(ipAddress);
                     System.out.println(ipAddress);
                 } catch (Exception e) {
+                    e.printStackTrace();
                     ipAddress = null;
                 }
 

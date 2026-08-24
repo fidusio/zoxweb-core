@@ -338,7 +338,7 @@ public class SSLNIOSocketHandler
      * only via {@code SSLUtil._finished} → {@code notifySSLHandshakeFinished()}: lazily opens
      * a tunnel's remote leg (SSL↔SSL / SSL↔PLAIN tunnel, HTTP CONNECT proxy) on handshake
      * completion. Plain TLS termination never exercises it ({@code remoteConnection == null}),
-     * so its loss is invisible to the test suite — see META-SSL-ENGINE-DESIGN.md §9.9.
+     * so its loss is invisible to the test suite — see META-SSL-ENGINE-DESIGN.md §9.8.
      */
     @Override
     public void sslHandshakeSuccessful(SSLConfigInt sslConfigInt) throws IOException {

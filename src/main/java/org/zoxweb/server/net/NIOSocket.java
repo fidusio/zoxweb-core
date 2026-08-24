@@ -372,8 +372,8 @@ public class NIOSocket
 
     /**
      * Creates and registers a UDP datagram socket on the specified address, driven by any
-     * {@link ConnectionCallback} (e.g. a state-machine bridge such as
-     * {@code org.zoxweb.server.net.common.sm.UDPSMCallback}) through the full
+     * {@link ConnectionCallback} (e.g. a client validator such as
+     * {@code org.zoxweb.server.net.protocols.UDPMetaProtocol}) through the full
      * {@code ConnectionCallback} lifecycle — the same contract as the TCP client path.
      *
      * <p>Opens a {@link DatagramChannel}, binds it to {@code sa}, hands it to the callback via

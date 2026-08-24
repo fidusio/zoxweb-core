@@ -2,6 +2,7 @@ package org.zoxweb.server.net.common;
 
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.net.NIOSocket;
+import org.zoxweb.server.net.ssl.SSLConfigInt;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.io.SharedIOUtil;
@@ -50,7 +51,7 @@ public class TCPPortScan
     public void exception(Throwable e) {
 
         failCount.incrementAndGet();
-        log.getLogger().info(getRemoteAddress() + " " + e + " " + total());
+        //log.getLogger().info(getRemoteAddress() + " " + e + " " + total());
         SharedIOUtil.close(this);
     }
 
@@ -62,6 +63,11 @@ public class TCPPortScan
         //System.out.println(getRemoteAddress() + " " + channel.isConnected() + " total: " + total());
         System.out.println(getRemoteAddress() + " " + channel.isConnected() + " total: " + total());
         SharedIOUtil.close(this);
+    }
+
+    @Override
+    protected void sslUpgraded(SSLConfigInt sslConfig) throws IOException {
+
     }
 
 

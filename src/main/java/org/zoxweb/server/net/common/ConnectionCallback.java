@@ -25,8 +25,8 @@ import java.nio.channels.SelectionKey;
  * releasing its own resources.</li>
  * <li>{@link CloseableType} close/isClosed terminate and report the session state.</li>
  * </ol>
- * Reference implementations: {@code TCPSessionCallback}, {@code TCPSMCallback} (D = DataPacket),
- * {@code UDPSessionCallback}.
+ * Reference implementations: {@code TCPSessionCallback} (D = ByteBuffer),
+ * {@code UDPSessionCallback} (D = DataPacket).
  *
  * @param <D> the data unit the callback consumes, e.g. ByteBuffer or DataPacket
  */

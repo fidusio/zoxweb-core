@@ -1,0 +1,11 @@
+{
+  "name": "dns-probe",
+  "transport": "udp",
+  "port": 53,
+  "timeout_sec": 3,
+  "exchange": [
+    { "send": "hex:1234 0100 0001 0000 0000 0000 07 6578616d706c65 03 636f6d 00 0001 0001" },
+    { "expect": "hex:1234" },
+    { "validate": { "contains": "hex:1234", "report": "dns" } }
+  ]
+}

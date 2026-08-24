@@ -21,7 +21,7 @@ import java.nio.channels.ByteChannel;
  * rest of the stack programs against — {@link SSLUtil}'s handshake handlers and
  * post-handshake write path ({@code sslChunkedWrite}), the
  * {@code SSLConnectionHelper} dispatchers, {@code SSLHandshakeFinished.sslHandshakeSuccessful},
- * {@code CommonChannelOutputStream}, and the {@code net.common.sm} client states —
+ * and {@code CommonChannelOutputStream} —
  * leaving only the wiring internals (selector plumbing, remote-tunnel fields,
  * output-stream setup) on the concrete class.
  * </p>

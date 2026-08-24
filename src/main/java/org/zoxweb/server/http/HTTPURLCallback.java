@@ -2,6 +2,7 @@ package org.zoxweb.server.http;
 
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.net.common.TCPSessionCallback;
+import org.zoxweb.server.net.ssl.SSLConfigInt;
 import org.zoxweb.server.net.ssl.SSLContextInfo;
 import org.zoxweb.shared.http.*;
 import org.zoxweb.shared.io.SharedIOUtil;
@@ -63,7 +64,7 @@ public class HTTPURLCallback extends TCPSessionCallback {
     private volatile ConsumerCallback<? extends HTTPResponse> callback;
 
     /** Whether incoming {@link ByteBuffer}s should be flipped by the parser before reading. */
-    private final boolean flip;
+
     private final RateCounter rc = new RateCounter();
 
     /**
@@ -120,9 +121,10 @@ public class HTTPURLCallback extends TCPSessionCallback {
      */
     public HTTPURLCallback(HTTPMessageConfigInterface hmci, ConsumerCallback<? extends HTTPResponse> callback, boolean flip)
             throws IOException {
+        super((String)null);
         SUS.checkIfNulls("null HTTPMessageConfigInterface", hmci);
         this.callback = callback;
-        this.flip = flip;
+        this.implWillFlipBuffer = flip;
         this.hmci = hmci;
         try {
             init();
@@ -226,7 +228,7 @@ public class HTTPURLCallback extends TCPSessionCallback {
     @Override
     public void accept(ByteBuffer byteBuffer) {
         try {
-            if (hrm.parseResponse(hmci.getURIScheme(), byteBuffer, flip)) {
+            if (hrm.parseResponse(hmci.getURIScheme(), byteBuffer, implWillFlipBuffer)) {
                 HTTPMessageConfigInterface respHMCI = hrm.parse();
                 respHMCI.setContent(hrm.getDataStream().toByteArray());
 
@@ -257,6 +259,20 @@ public class HTTPURLCallback extends TCPSessionCallback {
      */
     @Override
     protected void connectedFinished() throws IOException {
+        if(log.isEnabled()) log.getLogger().info("HTTPURLCallback.connectedFinished " + hmci.isSSL());
+        if(!hmci.isSSL()) {
+            processConnection();
+        }
+    }
+
+    @Override
+    protected void sslUpgraded(SSLConfigInt sslConfig) throws IOException {
+        if(log.isEnabled()) log.getLogger().info("HTTPURLCallback.sslUpgraded " + hmci.isSSL());
+        processConnection();
+    }
+
+
+    private void processConnection() throws IOException {
         rc.start();
         hrm = new HTTPRawMessage(true);
         HTTPRequestFormatter hrf = new HTTPRequestFormatter(hmci);
@@ -270,7 +286,6 @@ public class HTTPURLCallback extends TCPSessionCallback {
         if (log.isEnabled())  log.getLogger().info(getID()+ " After sending request " + Const.TimeInMillis.toString(System.currentTimeMillis() - start));
         if (log.isEnabled())
             log.getLogger().info(getID() + " " + getRemoteAddress() + " " + ((SocketChannel) getChannel()).isConnected());
-
     }
 
     /**

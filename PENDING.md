@@ -10,6 +10,12 @@ sections has been changed in the codebase; those sections are assessment only.
 
 ## 1. Work in progress — FSM-driven NIO session (greenfield)
 
+**CLOSED 2026-08-24 — `org.zoxweb.server.net.common.sm` was deleted** (too complicated);
+superseded by the JSON meta-driven validators in `org.zoxweb.server.net.protocols`
+(`TCPMetaProtocol`/`UDPMetaProtocol`/`ExchangeScript`), see `META-PROTOCOL.md`. This section and
+§2 are kept as historical record only; the classes and `META-SM-PROTO-DESIGN.md` they cite no
+longer exist.
+
 New design, driven by `org.zoxweb.server.fsm`. The existing `TCPSessionCallback` path stays as-is
 and keeps working; this is not a port.
 
@@ -25,11 +31,11 @@ and keeps working; this is not a port.
   state living in `stateMachine.getProperties()` is therefore correct by contract.
 - **Event vocabulary:** `CONNECTED` (payload `SelectionKey`), `IN_RAW_DATA` (payload since
   2026-08-20 a `DataPacket<Long>` — read counter, socket, peer address — wrapping the session's
-  live `IOBuffers` pair; see META-SM-PROTO-DESIGN.md §14.13),
+  live `IOBuffers` pair; the B2 zero-copy ruling),
   `CLOSED` (payload `Throwable` or null). No ERROR/CLOSED split: clean EOF is folded into `CLOSED`
   with a null payload; the error path relays its cause via `Params.EXCEPTION`. One ID = one payload
   type holds (`Throwable`, nullable).
-- **Packet ownership (superseded 2026-08-20 — B2 ruling, META-SM-PROTO-DESIGN.md §14.13):** the
+- **Packet ownership (superseded 2026-08-20 — B2 ruling):** the
   TCP read now publishes its live read pair **borrowed, zero-copy**; the transport router is the
   only consumer, mints the detached `IN_DATA` copies itself, and never recaches the borrow. The
   earlier flip/compact partial-consumption framing model is gone; framing across packets is the
@@ -83,6 +89,11 @@ and keeps working; this is not a port.
 
 ## 2. Delivered 2026-08-13 — SSLStateMachineV2 = `org.zoxweb.server.net.common.sm`
 
+**CLOSED 2026-08-24 — see the §1 banner: the sm package was deleted, superseded by
+`org.zoxweb.server.net.protocols` (META-PROTOCOL.md). Historical record; the SSL-seam notes on
+`net.ssl` itself (`SSLConnectionHelper`, `SSLConfigInt`, `notifySSLHandshakeFinished`) remain
+accurate — that layer survives unchanged.**
+
 The client-connection state machine framework (`ClientConSM` + `SSLClientPhase`) is the
 V2: protocol phases (plain / SSH banner / STARTTLS-ready TLS) and TLS handshake orchestration in
 one machine, configured programmatically (`ClientConSMBuilder`) or from JSON
@@ -122,7 +133,7 @@ Original design notes kept below for reference.
 Additive by design — keep `SSLStateMachine` and `CustomSSLStateMachine` untouched (load-proven,
 fragile). *(2026-08-20, maintainer refactor — not an sm-side edit: `CustomSSLStateMachine` now has
 a generic `SSLConfigInt` constructor and self-installs the helper on both paths; the
-`TCPSessionCallback` constructor is retired. See META-SSL-ENGINE-DESIGN.md §9.9.)*
+`TCPSessionCallback` constructor is retired. See META-SSL-ENGINE-DESIGN.md §9.8.)*
 *(2026-08-21: `createRemoteConnection()` in the snippet below is now
 `notifySSLHandshakeFinished() throws IOException`, delivered to a per-session
 `SSLHandshakeFinished` target; single ctor `(SSLConfigInt, SSLHandshakeFinished)`.)*
@@ -322,20 +333,21 @@ implementors will see it.
 - **[verified] `CloseableTypeDelegate.close():39-41` returns early on a null delegate without
   setting `isClosed`.** Any `BaseSessionCallback` subclass that forgets `setDelegate` gets a
   silent-no-op `close()` and an `isClosed()` that is permanently false, so reapers keyed on it never
-  collect. This is what made `TCPSMCallback.close()` a no-op before the delegate was wired (§1).
-  Consider making the null-delegate case still flip the flag.
-- **[open by ruling — see `META-SM-PROTO-DESIGN.md` §14.11; do not patch]** `remoteAddress` was
-  pulled up from `BaseSessionCallback` to `SessionCallback.java:32` so the whole hierarchy shares
-  one field. Two consequences are known and left open pending a larger rework:
-  - `UDPSMCallback` lost its `private final remote`. `send()` re-reads `getRemoteAddress()` per
-    call (`UDPSMCallback.java:282`) against a channel `connect()`ed to the original peer
-    (`:189`), and `ByteBufferUtil.java:315` does `channel.send(bb, destinationAddress)` — the JDK
-    throws `IllegalArgumentException` when a connected channel is handed a different target. The
-    constructor's `SUS.checkIfNulls` guard no longer covers the inherited public setter either.
-  - `NIOSocket.java:281` calls `cc.setChannel(channel)` **before** `channel.connect(sa)` at `:285`,
-    so `TCPSMCallback.java:271` writes a null address on the client path; it is repaired only when
-    `connected()` re-invokes `setChannel` (`TCPSMCallback.java:227`). Nothing reads it in that
-    window today, but the getter is public and observers may poll before `CONNECTED`.
+  collect. This is what made the (since-deleted) sm callback's `close()` a silent no-op before its
+  delegate was wired (§1). Consider making the null-delegate case still flip the flag.
+- **[open by maintainer ruling — do not patch]** `remoteAddress` was pulled up from
+  `BaseSessionCallback` to `SessionCallback.java:32` so the whole hierarchy shares one
+  implementation. The ruling: **standardization outranks per-class specificity** — proposals to
+  re-specialize it (an immutable per-class target via an overridden setter or a private final
+  field) are rejected; the rough edges are deliberately left open pending a larger rework:
+  - subclasses lose `final` on their target address, and the inherited public setter escapes any
+    constructor null-guard — a caller can retarget a session whose channel is already
+    `connect()`ed to the original peer (the JDK then throws `IllegalArgumentException` on a
+    connected `DatagramChannel.send` to a different target).
+  - `NIOSocket` calls `cc.setChannel(channel)` **before** `channel.connect(sa)` on the TCP client
+    path, so a callback that resolves its remote in `setChannel` records null there; it is
+    repaired only when `connected()` runs. Nothing reads it in that window today, but the getter
+    is public and observers may poll before the kickoff.
 - Factories swallow callback-construction failure and return half-built handlers —
   `NIOSocketHandlerFactory.java:33-44`, `SSLNIOSocketHandlerFactory.java:47-58`. A config typo
   (missing no-arg constructor, bad `session_callback` class name) yields a server that accepts and
@@ -372,8 +384,6 @@ implementors will see it.
   (masked mod 64) → garbage netmask for any IPv6 input.
 - `NetworkTunnel.java:40`, `:76`, `:106` — `closedStat` flags are non-volatile but read/written
   across relay threads.
-- ~~`TCPSMCallback` (old revision) / `TCPSessionCallback` contrast~~ — resolved: TCPSMCallback wires
-  its close delegate in the constructor since phase one (§1).
 - `NIOConfig.java:225` inner retry catch prints `e` instead of `e1`, hiding the retry's real failure;
   `:234` logs "Adding Incoming rule" inside the **outgoing** loop; `:195-198` SSL context init
   failures are swallowed so a TLS listener can be silently absent at runtime.

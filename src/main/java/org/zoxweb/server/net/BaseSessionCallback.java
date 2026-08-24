@@ -19,7 +19,7 @@ import java.nio.channels.SelectionKey;
  * <p>
  * This is the base of the SSL/protocol session callbacks, whose data unit is the raw or decrypted
  * ByteBuffer delivered via {@code accept(ByteBuffer)}. Callbacks that consume a different data
- * unit (e.g. {@code TCPSMCallback} with DataPacket) extend {@link SessionCallback} directly
+ * unit (e.g. a DataPacket consumer) extend {@link SessionCallback} directly
  * instead: Java's erasure forbids inheriting {@code accept(ByteBuffer)} from this class alongside
  * another {@code accept(D)} of the same erasure.
  *
