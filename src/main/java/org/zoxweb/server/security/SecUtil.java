@@ -1,5 +1,9 @@
 package org.zoxweb.server.security;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.jsse.provider.BouncyCastleJsseProvider;
+import org.bouncycastle.pqc.jcajce.provider.BouncyCastlePQCProvider;
+import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.server.util.LockHolder;
 import org.zoxweb.server.util.ReflectionUtil;
@@ -25,7 +29,11 @@ import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 
 public final class SecUtil {
+    public static final LogWrapper log = new LogWrapper(SecUtil.class).setEnabled(false);
     public static CryptoConst.SecureRandomType SECURE_RANDOM_ALGO = null;
+    public static final String BC_PROVIDER = "BC";
+    public static final String BC_CKD_PROVIDER = "BCPQC";
+    public static final String BC_BCJSSE = "BCJSSE";
     //public static final SecUtil SINGLETON = new SecUtil();
     private static final Map<Method, ResourceSecurity> methodResourceSecurityMap = new LinkedHashMap<>();
     private static final Map<String, CredentialHasher<?>> credentialHasherMap = new LinkedHashMap<>();
@@ -37,13 +45,53 @@ public final class SecUtil {
     private SecUtil() {
     }
 
+
+
+
+
+    public static void loadProviders() {
+
+        if (SecUtil.getProvider(BC_PROVIDER) == null) {
+            Provider prov = new BouncyCastleProvider();
+            SecUtil.addProviderAt(prov, 1);
+//            SecUtil.addProvider(prov);
+            checkProviderExists(BC_PROVIDER);
+        }
+
+        if (SecUtil.getProvider(BC_BCJSSE) == null) {
+            Provider prov = new BouncyCastleJsseProvider();
+            SecUtil.addProviderAt(prov, 2);
+//            SecUtil.addProvider(prov);
+            checkProviderExists(BC_BCJSSE);
+            SecTag.REGISTRAR.registerValue(new SecTag(BC_BCJSSE, SecTag.TagID.X509));
+            SecTag.REGISTRAR.registerValue(new SecTag(BC_BCJSSE, SecTag.TagID.TLS));
+        }
+        if (SecUtil.getProvider(BC_CKD_PROVIDER) == null) {
+            Provider prov = new BouncyCastlePQCProvider();
+            SecUtil.addProvider(prov);
+            checkProviderExists(BC_CKD_PROVIDER);
+        }
+    }
+
+    private static void checkProviderExists(String providerName) {
+        Provider provider = SecUtil.getProvider(providerName);
+        if (provider != null)
+            log.getLogger().info("Provider Loaded: " + SUS.toCanonicalID('-', provider.getName(), provider.getVersion(), provider.getInfo()));
+        else
+            log.getLogger().info("**Warning**: Provider " + providerName + " NOT Loaded ");
+    }
+    // DO NOT REMOVE FROM HERE
     static {
+        java.util.logging.Logger bcLogger = java.util.logging.Logger.getLogger("org.bouncycastle");
+        bcLogger.setLevel(java.util.logging.Level.SEVERE);
+        bcLogger.setUseParentHandlers(false);  // Prevents parent loggers from handling
         addCredentialHasher(new BCryptPasswordHasher(10));
         addCredentialHasher(new SHAPasswordHasher(8196));
+        addCredentialHasher(new ArgonPasswordHasher());
+        loadProviders();
         SecTag.REGISTRAR.registerValue(new SecTag(SecTag.SUN_JSSE, SecTag.TagID.X509, "SunX509"));
         SecTag.REGISTRAR.registerValue(new SecTag(SecTag.SUN_JSSE, SecTag.TagID.TLS));
     }
-
 
     /**
      * Parses a token into its JWT structure without verifying the signature, the returned JWT

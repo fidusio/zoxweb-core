@@ -3,6 +3,7 @@ package org.zoxweb.server.net.common;
 import org.zoxweb.server.net.ssl.SSLConfigInt;
 import org.zoxweb.shared.task.ExceptionCallback;
 import org.zoxweb.shared.io.CloseableType;
+import org.zoxweb.shared.util.GetResults;
 
 import java.io.IOException;
 import java.nio.channels.Channel;
@@ -31,7 +32,7 @@ import java.nio.channels.SelectionKey;
  * @param <D> the data unit the callback consumes, e.g. ByteBuffer or DataPacket
  */
 public interface ConnectionCallback<D>
-        extends ExceptionCallback, SKHandler, CloseableType {
+        extends ExceptionCallback, SKHandler, CloseableType, GetResults {
     /**
      * Called when incoming data or something to do
      * @param key the input argument
