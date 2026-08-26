@@ -69,7 +69,7 @@
 
 
         <!-- dependency jars -->
-        <bc.version>RELEASE</bc.version>
+        <bc.version>1.84</bc.version>
         <gson.version>2.14.0</gson.version>
         <javax-cache.version>1.1.1</javax-cache.version>
         <angus.mail.version>2.0.5</angus.mail.version>
