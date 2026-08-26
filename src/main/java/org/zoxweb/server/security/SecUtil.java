@@ -25,7 +25,10 @@ import java.lang.reflect.Method;
 import java.security.*;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
-import java.util.*;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantLock;
 
 public final class SecUtil {
@@ -34,10 +37,10 @@ public final class SecUtil {
     public static final String BC_PROVIDER = "BC";
     public static final String BC_CKD_PROVIDER = "BCPQC";
     public static final String BC_BCJSSE = "BCJSSE";
-    //public static final SecUtil SINGLETON = new SecUtil();
     private static final Map<Method, ResourceSecurity> methodResourceSecurityMap = new LinkedHashMap<>();
     private static final Map<String, CredentialHasher<?>> credentialHasherMap = new LinkedHashMap<>();
     private static volatile SecureRandom defaultSecureRandom = null;
+    private static final AtomicBoolean initialized = new AtomicBoolean(false);
 
 
     public static final LockHolder SEC_LOCK = new LockHolder(new ReentrantLock());
@@ -73,6 +76,18 @@ public final class SecUtil {
         }
     }
 
+
+    public static void reloadProviders() {
+        boolean stat = SecUtil.removeProvider(BC_CKD_PROVIDER);
+        log.getLogger().info("Provider " + BC_CKD_PROVIDER + " removed: " + stat);
+        stat = SecUtil.removeProvider(BC_PROVIDER);
+        log.getLogger().info("Provider " + BC_PROVIDER + " removed: " + stat);
+        stat = SecUtil.removeProvider(BC_BCJSSE);
+        log.getLogger().info("Provider " + BC_BCJSSE + " removed: " + stat);
+
+        loadProviders();
+    }
+
     private static void checkProviderExists(String providerName) {
         Provider provider = SecUtil.getProvider(providerName);
         if (provider != null)
@@ -80,17 +95,25 @@ public final class SecUtil {
         else
             log.getLogger().info("**Warning**: Provider " + providerName + " NOT Loaded ");
     }
+
+    public static void init()
+    {
+        if(initialized.compareAndSet(false, true))
+        {
+            java.util.logging.Logger bcLogger = java.util.logging.Logger.getLogger("org.bouncycastle");
+            bcLogger.setLevel(java.util.logging.Level.SEVERE);
+            bcLogger.setUseParentHandlers(false);  // Prevents parent loggers from handling
+            addCredentialHasher(new BCryptPasswordHasher(10));
+            addCredentialHasher(new SHAPasswordHasher(8196));
+            addCredentialHasher(new ArgonPasswordHasher());
+            loadProviders();
+            SecTag.REGISTRAR.registerValue(new SecTag(SecTag.SUN_JSSE, SecTag.TagID.X509, "SunX509"));
+            SecTag.REGISTRAR.registerValue(new SecTag(SecTag.SUN_JSSE, SecTag.TagID.TLS));
+        }
+    }
     // DO NOT REMOVE FROM HERE
     static {
-        java.util.logging.Logger bcLogger = java.util.logging.Logger.getLogger("org.bouncycastle");
-        bcLogger.setLevel(java.util.logging.Level.SEVERE);
-        bcLogger.setUseParentHandlers(false);  // Prevents parent loggers from handling
-        addCredentialHasher(new BCryptPasswordHasher(10));
-        addCredentialHasher(new SHAPasswordHasher(8196));
-        addCredentialHasher(new ArgonPasswordHasher());
-        loadProviders();
-        SecTag.REGISTRAR.registerValue(new SecTag(SecTag.SUN_JSSE, SecTag.TagID.X509, "SunX509"));
-        SecTag.REGISTRAR.registerValue(new SecTag(SecTag.SUN_JSSE, SecTag.TagID.TLS));
+       init();
     }
 
     /**

@@ -41,6 +41,10 @@ public final class CryptoConst {
 
     public static final String KEY_STORE_TYPE = "JCEKS";
 
+    public static final String ML_KEM = "ML-KEM";
+    public static final String ML_DSA = "ML-DSA";
+
+
     public enum PKInfo
             implements GetName, CanonicalID {
         EC_224(CryptoAlgo.EC, "secp224r1"),
@@ -51,9 +55,9 @@ public final class CryptoConst {
         RSA_2048(CryptoAlgo.RSA, "2048"),
         RSA_3072(CryptoAlgo.RSA, "3072"),
         RSA_4096(CryptoAlgo.RSA, "4096"),
-        KYBER_512(CryptoAlgo.CRYSTALS_KYBER, "kyber512"),
-        KYBER_768(CryptoAlgo.CRYSTALS_KYBER, "kyber768"),
-        KYBER_1024(CryptoAlgo.CRYSTALS_KYBER, "kyber1024"),
+        ML_KEM_512(CryptoAlgo.ML_KEM, "ML-KEM-512"),
+        ML_KEM_768(CryptoAlgo.ML_KEM, "ML-KEM-768"),
+        ML_KEM_1024(CryptoAlgo.ML_KEM, "ML-KEM-1024"),
 
         ;
 
@@ -121,8 +125,10 @@ public final class CryptoConst {
         DSA("DSA"),
         EC("EC"),
         RSA("RSA"),
-        CRYSTALS_KYBER("Kyber"),
-        CRYSTALS("CRYSTALS"),
+        // NIST-final PQC names (JCA names in the main BC provider; the draft
+        // Kyber/Dilithium algorithms are gone from BCPQC as of BC 1.85)
+        ML_KEM(CryptoConst.ML_KEM),
+        ML_DSA(CryptoConst.ML_DSA),
         ;
 
 
@@ -300,7 +306,7 @@ public final class CryptoConst {
         SHA256_EC(CryptoAlgo.EC, "SHA256withECDSA"),
         SHA384_EC(CryptoAlgo.EC, "SHA384withECDSA"),
         SHA512_EC(CryptoAlgo.EC, "SHA512withECDSA"),
-        CRYSTALS_DILITHIUM(CryptoAlgo.CRYSTALS, "Dilithium");
+        ML_DSA(CryptoAlgo.ML_DSA, "ML-DSA");
         private final String name;
         private final CryptoAlgo cryptoAlgo;
 
