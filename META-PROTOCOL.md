@@ -290,24 +290,31 @@ a recognizable token into the probe and match its echo. No TLS over UDP (no DTLS
 
 ## 5. Buffer ownership & delivery modes
 
-`TCPMetaProtocol.accept(ByteBuffer)` receives data in **two different modes** and must
-normalize both; the engine always gets a detached `byte[]` copy and never sees a live buffer:
+`TCPMetaProtocol` shares its session accumulator with the engine: the pooled `dataAssembler`
+(a `UByteArrayOutputStream`) is handed to the `ExchangeScript` constructor,
+`accept(ByteBuffer)` appends every delivery straight into it via
+`ByteBufferUtil.write(buffer, dataAssembler, true)`, and `script.parse()` frames tokens off the
+accumulation — consumed in place via `shiftLeft` — with no intermediate chunk copy. The only
+per-message copy is the framed message itself (`copyBytes`), which must survive the next
+compaction. The session recaches the accumulator once at `close()`.
 
-- **Plain path**: `TCPSessionCallback`'s read loop delivers its own `dataBuffer`, already
-  **flipped (read-mode)**. Copy the remaining bytes out; do not clear or cache it — the read loop
-  owns and clears it per iteration.
-- **TLS path**: `SSLUtil` delivers the session's decrypted buffer **unflipped (write-mode) and
-  reused** across dispatches. Flip it, copy the bytes out, then `clear()` it so the next unwrap
-  appends from position 0.
+`accept(ByteBuffer)` receives data in two delivery modes, normalized by one mechanism — the
+session sets `implWillFlipBuffer = true`, so the plain read loop skips its own flip and both
+paths deliver **write-mode** buffers:
 
-The two paths are distinguished by `getConfig() != null` (set once the SSL upgrade begins).
+- **Plain path**: the read loop's own `dataBuffer` — append only; the loop owns and clears it
+  per iteration.
+- **TLS path**: the session's decrypted buffer, reused across dispatches.
 
-`UDPMetaProtocol` follows its base class's per-packet ownership: a pooled buffer is
-allocated per datagram and recached in a `finally` after the consumer returns; the engine's copy
-is taken inside that window.
+`ByteBufferUtil.write(..., flip = true)` flips the source, drains it fully, and compacts it, so
+either reused buffer is ready for its next fill.
 
-Writes are one-shot complete: `CommonChannelOutputStream.write` drains the buffer fully (looping
-via `smartWrite` / `sslChunkedWrite`) before returning — there is no partial-write queue by
+`UDPMetaProtocol` allocates one pooled `rawReadBuffer` at construction and runs its own client
+receive loop in `accept(SelectionKey)`: drain the channel, hand the engine one detached copy per
+datagram via `feed()`, recache the buffer once at `close()`.
+
+Writes are one-shot complete: the session output stream drains the buffer fully (looping via
+`smartWrite` / the SSL chunked write) before returning — there is no partial-write queue by
 design.
 
 ---
@@ -339,12 +346,23 @@ release the completion latch — once only; later closes are no-ops.
 
 ---
 
-## 7. `ProtoConnect` CLI
+## 7. `ProtoConnect` — factories & CLI
 
-The operational runner: `ProtoConnect <definition.json> <host:port> [var=value ...]` — loads the
-definition, builds the matching validator, drives it through NIOSocket, prints lifecycle events
-and the final report. Exit codes: `0` validated, `1` failed, `2` transport error, `64` usage. It
-is a pure observer — it never sends, closes, or orchestrates; the validator runs the session.
+The programmatic entry points are the `createTCPValidator` / `createUDPValidator` factories:
+endpoint + definition in (endpoint as `InetSocketAddress`, `"host[:port]"` string, or
+`IPAddress`; definition as JSON text or parsed `NVGenericMap`), bound validator out; a missing
+port falls back to the definition's `port` hint. The TCP validator carries its remote address
+and timeout, so it goes to `NIOSocket.addClientSocket(validator)`; the UDP one to
+`addDatagramSocket(new InetSocketAddress(0), validator)`.
+
+The CLI: `ProtoConnect <definition.json> <host[:port]> [name=value ...]` — loads the
+definition, builds the matching validator per its `transport`, injects each `name=value` as a
+`${name}` variable, drives it through NIOSocket, and prints the results and the verdict. It is
+a pure observer — the validator performs and closes the session itself.
+
+Exit codes: `0` validated; `1` failed (validation mismatch, STARTTLS residue, connection or I/O
+error); `2` no completion within the wait window (about twice the definition's `timeout_sec`);
+`64` usage error or invalid definition.
 
 ---
 

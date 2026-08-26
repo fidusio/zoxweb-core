@@ -11,7 +11,7 @@ import java.util.Arrays;
 
 public class BCSSLGroupSetter
         implements SSLGroupSetterInt {
-    public static final LogWrapper log = new LogWrapper(BCSSLGroupSetter.class).setEnabled(true);
+    public static final LogWrapper log = new LogWrapper(BCSSLGroupSetter.class).setEnabled(false);
     /**
      * Array of named groups (elliptic curves) to be configured on SSLEngine instances.
      * <p>These groups are used for key exchange during the TLS handshake.</p>

@@ -153,6 +153,7 @@ public abstract class TCPSessionCallback
 
     /**
      * The application specific data processor
+     *
      * @param byteBuffer the input argument
      */
     public abstract void accept(ByteBuffer byteBuffer);
@@ -173,6 +174,7 @@ public abstract class TCPSessionCallback
 
     /**
      * perform the ssl upgrade
+     *
      * @param channel
      * @return
      * @throws IOException
