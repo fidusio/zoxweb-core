@@ -15,11 +15,12 @@
  */
 package org.zoxweb.shared.protocol;
 
-import org.zoxweb.shared.util.BaseSubjectID;
 import org.zoxweb.shared.io.CloseableType;
+import org.zoxweb.shared.util.BaseSubjectID;
 import org.zoxweb.shared.util.GetNVProperties;
 
 import java.util.Set;
+import java.util.function.Supplier;
 
 /**
  * Interface for protocol session management.
@@ -57,6 +58,8 @@ public interface ProtoSession<S, T>
      * @return set of AutoCloseable objects
      */
     Set<AutoCloseable> getAutoCloseables();
+
+    void addCloseMonitor(Supplier<Boolean> closeMonitor);
 
     /**
      * Attaches the session to the current context (e.g., a thread).
