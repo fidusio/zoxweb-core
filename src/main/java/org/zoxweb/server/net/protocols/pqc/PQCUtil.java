@@ -91,6 +91,13 @@ public final class PQCUtil {
      * manager when the server sends a CertificateRequest, so the recorder flips the flag and
      * offers no certificate — the fact ({@code client_cert_requested}) is captured without any
      * mTLS support.
+     * <p>
+     * One context per session, deliberately — never cache or share the result
+     * (META-TCP-PQC.md §6). A shared BCJSSE context owns a session cache keyed by peer
+     * host:port with no per-context way to disable resumption ({@code setSessionCacheSize(0)}
+     * means unlimited), and a resumed handshake skips the key exchange and certificate steps
+     * the audit observes. The recorder flag is per session too. A warm build costs
+     * single-digit milliseconds.
      */
     public static SSLContext createClientContext(boolean certValidation, final AtomicBoolean clientCertRequested)
             throws GeneralSecurityException {

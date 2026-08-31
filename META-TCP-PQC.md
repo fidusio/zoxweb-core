@@ -50,7 +50,7 @@ subclassed** — the auditor is a completion target, nothing more.
 | `sslUpgraded(SSLConfigInt sci)` | **the single introspection point** — the designed completion seam (`_finished` → `notifySSLHandshakeFinished` → `sslHandshakeSuccessful` → here). All of §5's capture and evaluation runs here, then the session closes itself |
 | `accept(ByteBuffer)` | ignore — the auditor exchanges no application data |
 | `exception(Throwable)` | record the failure into the report (handshake refusal is itself a finding, e.g. "TLSv1.0 offer rejected" — see §7), stash the close cause, close once |
-| lifecycle | `NVGenericMap` results bag + close latch + `waitForClose(millis)` / `getCloseCause()`, mirroring `TCPMetaProtocol` |
+| lifecycle | `NVGenericMap` results bag + close latch + `waitForClose(millis)` / `getCloseCause()`, mirroring `TCPMetaProtocol`; `onClose(hook)` is the push-style twin — fired exactly once from the close path, so an event-driven consumer never parks a thread on the session |
 
 A handshake-failure path must distinguish, in the report, *refused offer* (server declined the
 pinned protocol/group — a sweep data point) from *transport failure* (connect refused, timeout —
@@ -116,6 +116,15 @@ imports `org.bouncycastle.*`.
   BCPQC set the rest of the security stack uses (BC at position 1, BCJSSE at position 2,
   idempotent). First use of the auditor therefore registers the providers process-wide when
   nothing else has; contexts are still created against the instance, never by name lookup;
+- **one context per session, deliberately — never cached or shared.** A shared BCJSSE client
+  context owns a session cache keyed by peer host:port, and the provider offers no per-context
+  way to disable resumption (`setSessionCacheSize(0)` means *unlimited*; the only off switch is
+  a JVM-global system property read once at class load). A resumed handshake skips the key
+  exchange and certificate steps the audit exists to observe, so sharing a context can silently
+  corrupt every fact in the report for repeat targets. The per-session context also carries the
+  session's client-cert-request recorder in its key manager. A warm context build costs
+  single-digit milliseconds against handshakes that dominate the session — do not "optimize"
+  this into a cache;
 - the context enters the transport through
   `new SSLContextInfo(sslContext, clientAddress, protocols, ciphers)` (the client-mode
   external-context constructor); per-session pinning uses that constructor's `protocols` array
@@ -137,7 +146,7 @@ imports `org.bouncycastle.*`.
 `PQCSweep` runs sessions sequentially or in parallel (each session is independent; NIOSocket
 handles concurrency). One sweep probes one endpoint on one `NIOSocket` — its own, or a
 caller-supplied shared one so a fleet of concurrent sweeps rides a single selector; the
-`auditAsync` variants deliver the same report to a callback from a `TaskUtil` worker instead of
+`asyncAudit` variants deliver the same report to a callback from a `TaskUtil` worker instead of
 blocking the caller. The sweep aggregates:
 
 - **version matrix** — one session per candidate (`TLSv1.3`, `TLSv1.2`, `TLSv1.1`, `TLSv1.0`,
@@ -243,9 +252,27 @@ report shaped like the hosted `check-qdz` service. Summary form = one hybrid-fir
 suites with strength classification (`STRONG` / `WEAK` / `INSECURE`), and the revocation
 check. `overall-status` follows the service's semantics (`READY` / `PARTIAL` / `NOT_READY` /
 `UNTRUSTED` / `ERROR`, trust failure outranking readiness); facts come from the same sessions
-the sweep uses — the facade only reshapes and classifies. Its API mirrors the sweep's:
-synchronous `check` on an owned or caller-supplied (shared) `NIOSocket`, and `checkAsync`
-variants delivering the same report to a callback from a `TaskUtil` worker.
+the sweep uses — the facade only reshapes and classifies. Unlike the sweep, the facade never
+builds an `NIOSocket` of its own: every `check` / `asyncCheck` runs on a caller-supplied
+socket (standing up a selector loop costs a thread and a `Selector`; the caller opens one once
+and reuses it across checks, so a fleet of concurrent checks rides a single selector).
+
+The check is event-driven end to end — a continuation pipeline, not a blocking loop. Each
+session registers a close hook (`onClose`) before it is opened; when the session closes
+(handshake completion, failure, or the per-session deadline — a scheduled close on the
+socket's scheduler), the hook queues the next stage on the socket's executor: hybrid-first
+session → default-offer fallback → summary shaping → (detailed) one session per protocol
+candidate → the cipher-discovery loops → revocation → verdict → callback. A stage reshapes
+facts and launches at most one session, then returns; no thread is ever parked on a session,
+so a fleet of checks wider than the worker pool cannot starve itself (20 concurrent checks
+complete on a two-thread executor). `asyncCheck` returns as soon as the first session is
+launched and delivers the report to the callback from the executor; `check` is the same
+pipeline with only the calling thread waiting on the final report. The one blocking stage is
+the detailed form's revocation exchange (ordinary HTTP on the worker that runs it). The report
+is JSON-compatible with the hosted service: `cert-chain` and `supported-cipher-suites` are
+`NVGenericMapList` (JSON arrays), and `total-scanned` is a zero placeholder up front that the
+hosting endpoint sets on the finished report
+(`((NVLong) report.getNV("total-scanned")).setValue(counter)`).
 
 ---
 

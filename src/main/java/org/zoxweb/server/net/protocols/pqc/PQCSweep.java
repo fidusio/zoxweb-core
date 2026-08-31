@@ -39,7 +39,7 @@ import java.util.function.Consumer;
  * <p>
  * One sweep runs its sessions sequentially on one {@link NIOSocket} — owned by the sweep, or
  * caller-supplied so many concurrent sweeps share one selector (the fleet form). The
- * {@code auditAsync} variants deliver the same report to a callback from a {@link TaskUtil}
+ * {@code asyncAudit} variants deliver the same report to a callback from a {@link TaskUtil}
  * worker instead of blocking the caller. Contains no Bouncy Castle imports — the BC seam stays
  * in {@link PQCUtil} behind {@link TCPPQCProtocol}.
  */
@@ -47,10 +47,14 @@ public final class PQCSweep {
 
     public static final long DEFAULT_SESSION_TIMEOUT_MILLIS = TimeUnit.SECONDS.toMillis(10);
 
-    /** Version candidates, strongest first; each pinned as the only enabled protocol. */
+    /**
+     * Version candidates, strongest first; each pinned as the only enabled protocol.
+     */
     public static final String[] VERSION_CANDIDATES = {"TLSv1.3", "TLSv1.2", "TLSv1.1", "TLSv1"};
 
-    /** The PQ-hybrid-only group offer — completing is the strong form of PQ readiness. */
+    /**
+     * The PQ-hybrid-only group offer — completing is the strong form of PQ readiness.
+     */
     public static final String[] PQ_ONLY_GROUPS =
             {"X25519MLKEM768", "SecP256r1MLKEM768", "SecP384r1MLKEM1024"};
 
@@ -64,23 +68,31 @@ public final class PQCSweep {
             {"X25519MLKEM768", "SecP256r1MLKEM768", "SecP384r1MLKEM1024",
                     "x25519", "secp256r1", "secp384r1"};
 
-    /** The classical-only group offer — probes the non-PQ fallback posture. */
+    /**
+     * The classical-only group offer — probes the non-PQ fallback posture.
+     */
     public static final String[] CLASSICAL_ONLY_GROUPS = {"x25519", "secp256r1", "secp384r1"};
 
     private PQCSweep() {
     }
 
-    /** Full sweep with the default per-session timeout, without cipher enumeration. */
+    /**
+     * Full sweep with the default per-session timeout, without cipher enumeration.
+     */
     public static NVGenericMap audit(InetSocketAddress remote) {
         return audit(remote, DEFAULT_SESSION_TIMEOUT_MILLIS);
     }
 
-    /** Full sweep without cipher enumeration. */
+    /**
+     * Full sweep without cipher enumeration.
+     */
     public static NVGenericMap audit(InetSocketAddress remote, long sessionTimeoutMillis) {
         return audit(remote, sessionTimeoutMillis, false);
     }
 
-    /** Full sweep, optional cipher matrix, no revocation check. */
+    /**
+     * Full sweep, optional cipher matrix, no revocation check.
+     */
     public static NVGenericMap audit(InetSocketAddress remote, long sessionTimeoutMillis,
                                      boolean enumerateCiphers) {
         return audit(remote, sessionTimeoutMillis, enumerateCiphers, false);
@@ -200,11 +212,13 @@ public final class PQCSweep {
         }
     }
 
-    /** Asynchronous sweep on the default {@link TaskUtil} processor. */
-    public static void auditAsync(InetSocketAddress remote, long sessionTimeoutMillis,
+    /**
+     * Asynchronous sweep on the default {@link TaskUtil} processor.
+     */
+    public static void asyncAudit(InetSocketAddress remote, long sessionTimeoutMillis,
                                   boolean enumerateCiphers, boolean checkRevocation,
                                   Consumer<NVGenericMap> callback) {
-        auditAsync((Executor) null, remote, sessionTimeoutMillis, enumerateCiphers, checkRevocation, callback);
+        asyncAudit((Executor) null, remote, sessionTimeoutMillis, enumerateCiphers, checkRevocation, callback);
     }
 
     /**
@@ -214,7 +228,7 @@ public final class PQCSweep {
      * processor). One task stays busy per running sweep; failures land in the report, never in
      * a thrown exception.
      */
-    public static void auditAsync(Executor executor, final InetSocketAddress remote,
+    public static void asyncAudit(Executor executor, final InetSocketAddress remote,
                                   final long sessionTimeoutMillis, final boolean enumerateCiphers,
                                   final boolean checkRevocation, final Consumer<NVGenericMap> callback) {
         SUS.checkIfNulls("callback is required", callback);
@@ -222,11 +236,13 @@ public final class PQCSweep {
                 () -> callback.accept(audit(remote, sessionTimeoutMillis, enumerateCiphers, checkRevocation)));
     }
 
-    /** Asynchronous shared-socket sweep on the default {@link TaskUtil} processor. */
-    public static void auditAsync(NIOSocket nioSocket, InetSocketAddress remote,
+    /**
+     * Asynchronous shared-socket sweep on the default {@link TaskUtil} processor.
+     */
+    public static void asyncAudit(NIOSocket nioSocket, InetSocketAddress remote,
                                   long sessionTimeoutMillis, boolean enumerateCiphers,
                                   boolean checkRevocation, Consumer<NVGenericMap> callback) {
-        auditAsync(null, nioSocket, remote, sessionTimeoutMillis, enumerateCiphers, checkRevocation, callback);
+        asyncAudit(nioSocket != null ? nioSocket.getExecutor() : null, nioSocket, remote, sessionTimeoutMillis, enumerateCiphers, checkRevocation, callback);
     }
 
     /**
@@ -235,12 +251,12 @@ public final class PQCSweep {
      * they arrive. The socket is never closed here; its lifecycle belongs to the caller. A
      * null executor uses the default {@link TaskUtil} processor.
      */
-    public static void auditAsync(Executor executor, final NIOSocket nioSocket,
+    public static void asyncAudit(Executor executor, final NIOSocket nioSocket,
                                   final InetSocketAddress remote, final long sessionTimeoutMillis,
                                   final boolean enumerateCiphers, final boolean checkRevocation,
                                   final Consumer<NVGenericMap> callback) {
         SUS.checkIfNulls("callback and nioSocket are required", callback, nioSocket);
-        (executor != null ? executor : TaskUtil.defaultTaskProcessor()).execute(
+        (executor != null ? executor : nioSocket.getExecutor() != null ? nioSocket.getExecutor() : TaskUtil.defaultTaskProcessor()).execute(
                 () -> callback.accept(audit(nioSocket, remote, sessionTimeoutMillis, enumerateCiphers, checkRevocation)));
     }
 
@@ -272,7 +288,9 @@ public final class PQCSweep {
         return run(nioSocket, remote, namedGroups, protocols, null, timeoutMillis);
     }
 
-    /** One audited session with the given pinned offers; never throws. */
+    /**
+     * One audited session with the given pinned offers; never throws.
+     */
     private static SessionOutcome run(NIOSocket nioSocket, InetSocketAddress remote,
                                       String[] namedGroups, String[] protocols, String[] ciphers,
                                       long timeoutMillis) {
@@ -304,7 +322,9 @@ public final class PQCSweep {
         }
     }
 
-    /** Folds one outcome into the matrix entry: status, negotiated parameters, reason. */
+    /**
+     * Folds one outcome into the matrix entry: status, negotiated parameters, reason.
+     */
     private static NVGenericMap candidate(String name, SessionOutcome outcome) {
         NVGenericMap entry = new NVGenericMap(name);
         entry.build("status", outcome.status);
@@ -354,7 +374,9 @@ public final class PQCSweep {
         return ciphers;
     }
 
-    /** One version's discovery loop; never throws, returns the suites in discovery order. */
+    /**
+     * One version's discovery loop; never throws, returns the suites in discovery order.
+     */
     static List<String> discoverCiphers(NIOSocket nioSocket, InetSocketAddress remote,
                                         String version, List<String> remaining,
                                         long timeoutMillis) {
@@ -373,7 +395,9 @@ public final class PQCSweep {
         return discovered;
     }
 
-    /** The negotiated suite of one session with the given pinned offer, or null. */
+    /**
+     * The negotiated suite of one session with the given pinned offer, or null.
+     */
     private static String negotiatedCipher(NIOSocket nioSocket, InetSocketAddress remote,
                                            String version, String[] offer, long timeoutMillis) {
         Object v = run(nioSocket, remote, null, new String[]{version}, offer, timeoutMillis)

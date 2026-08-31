@@ -33,6 +33,8 @@ import java.util.TimeZone;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 /**
  * The TLS-posture auditor session (META-TCP-PQC.md): one connection, one handshake, one
@@ -58,6 +60,7 @@ public class TCPPQCProtocol extends TCPSessionCallback {
 
     private final NVGenericMap results = new NVGenericMap("results");
     private final CountDownLatch closeLatch = new CountDownLatch(1);
+    private final AtomicReference<Consumer<TCPPQCProtocol>> closeHook = new AtomicReference<Consumer<TCPPQCProtocol>>();
     private volatile Throwable closeCause;
     private final long openMillis = System.currentTimeMillis();
     private volatile int expiryThresholdDays = DEFAULT_EXPIRY_THRESHOLD_DAYS;
@@ -157,6 +160,37 @@ public class TCPPQCProtocol extends TCPSessionCallback {
     }
 
     /**
+     * Push-style completion: the hook runs exactly once, on the thread that closes the session
+     * (handshake completion, failure, a timeout closing it, or the caller), right after the
+     * close — the report is final when it fires. The event-driven twin of
+     * {@link #waitForClose(long)}: a consumer that registers a hook before
+     * {@link NIOSocket#addClientSocket} never has to park a thread on the session. A session
+     * already closed runs the hook immediately on the registering thread. The hook is invoked
+     * from inside the session's close path, so it should hand any real work to an executor
+     * rather than block or open sockets in place.
+     *
+     * @return this
+     */
+    public TCPPQCProtocol onClose(Consumer<TCPPQCProtocol> hook) {
+        closeHook.set(hook);
+        if (isClosed())
+            fireCloseHook();
+        return this;
+    }
+
+    private void fireCloseHook() {
+        Consumer<TCPPQCProtocol> hook = closeHook.getAndSet(null);
+        if (hook != null) {
+            try {
+                hook.accept(this);
+            } catch (Throwable t) {
+                // the session is already closed; a failing hook must not unwind the closer
+                if (log.isEnabled()) log.getLogger().info("close hook failed: " + t);
+            }
+        }
+    }
+
+    /**
      * Pull-style completion wait: true once the session is closed (the report is final), false
      * on timeout.
      */
@@ -222,6 +256,7 @@ public class TCPPQCProtocol extends TCPSessionCallback {
             super.close();
         } finally {
             closeLatch.countDown();
+            fireCloseHook();
         }
     }
 

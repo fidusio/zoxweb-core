@@ -809,7 +809,8 @@ public class NIOSocket
                                 selectorController.wakeup();
                             } else
                                 selectorController.cancelSelectionKey(key);
-                        } catch (IOException e) {
+                        } catch (Exception e) {
+                            e.printStackTrace();
                             SharedIOUtil.close(key.channel());
                             connectData.exception(e);
 

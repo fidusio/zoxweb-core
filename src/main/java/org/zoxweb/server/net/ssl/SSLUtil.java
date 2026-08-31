@@ -10,6 +10,7 @@ import org.zoxweb.shared.util.UsageTracker;
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLEngineResult;
 import javax.net.ssl.SSLException;
+import java.io.EOFException;
 import java.io.IOException;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
@@ -314,7 +315,12 @@ public final class SSLUtil {
                 if (bytesRead == -1) {
                     if (log.isEnabled())
                         log.getLogger().info("SSLCHANNEL-CLOSED-NEED_UNWRAP: " + config.getHandshakeStatus() + " bytes read: " + bytesRead);
-                    config.close();
+                    // abrupt peer close (FIN) mid-handshake: notify the session exactly like the
+                    // catch below does for a RST (IOException) — then close. Null-guarded because
+                    // SSLSessionConfig.close()'s drain loop publishes with a null callback.
+                    if (callback != null)
+                        callback.exception(new EOFException("connection closed by peer during TLS handshake"));
+                    SharedIOUtil.close(config);
                 } else {
                     // bytesRead 0 or more
                     // even if we have read zero it will trigger BUFFER_UNDERFLOW then we wait for incoming
@@ -346,7 +352,10 @@ public final class SSLUtil {
                             // check result here
                             if (log.isEnabled())
                                 log.getLogger().info("CLOSED-DURING-NEED_UNWRAP: " + result + " bytes read: " + bytesRead);
-                            config.close();
+                            // close_notify mid-handshake: same notify-then-close as the EOF branch
+                            if (callback != null)
+                                callback.exception(new SSLException("connection closed by peer during TLS handshake (close_notify)"));
+                            SharedIOUtil.close(config);
                             break;
                     }
                 }
