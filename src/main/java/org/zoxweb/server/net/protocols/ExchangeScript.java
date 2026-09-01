@@ -2,10 +2,13 @@ package org.zoxweb.server.net.protocols;
 
 import org.zoxweb.server.fsm.MonoStateMachine;
 import org.zoxweb.server.io.UByteArrayOutputStream;
+import org.zoxweb.server.net.protocols.ProtoUtil.ResKey;
 import org.zoxweb.server.util.GSONUtil;
+import org.zoxweb.server.util.IDGs;
 import org.zoxweb.shared.util.*;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -104,8 +107,6 @@ public class ExchangeScript extends MonoStateMachine<String, ExchangeScript.Step
     private static final int UNRESOLVED = Integer.MIN_VALUE;
     private static final String TARGET_DONE_NAME = "done";
     private static final String TARGET_FAIL_NAME = "fail";
-    // results keys a record step may never write — verdict integrity
-    private static final String[] RESERVED_RESULT_KEYS = {"validated", "reason", "ready", "latency_ms"};
 
     private static final byte[] EMPTY = new byte[0];
 
@@ -340,6 +341,14 @@ public class ExchangeScript extends MonoStateMachine<String, ExchangeScript.Step
             throw new IllegalArgumentException("start_tls over udp is not supported");
         if (hasStartTLS && tlsMode != TLSMode.ON_DEMAND)
             throw new IllegalArgumentException("start_tls requires a tls block with mode on_demand");
+
+        // run identity — present in every results bag from birth: a time-ordered (v7) UUID for
+        // the run, the definition's protocol name, and the transport. The endpoint joins at
+        // recordEndpoint (host/port), timestamps at markOpen (open_ts) and verdict freeze
+        // (close_ts).
+        results.build(ResKey.GUID, IDGs.UUIDV7.genID())
+                .build(ResKey.PROTO_NAME, name)
+                .build(ResKey.TRANSPORT, udp ? "udp" : "tcp");
     }
 
     /**
@@ -464,8 +473,8 @@ public class ExchangeScript extends MonoStateMachine<String, ExchangeScript.Step
         NVGenericMap block = stepBlock(value, "record step without a constants block");
         List<GetNameValue<?>> entries = new ArrayList<GetNameValue<?>>();
         for (GetNameValue<?> gnv : block.values()) {
-            for (String reserved : RESERVED_RESULT_KEYS)
-                if (reserved.equalsIgnoreCase(gnv.getName()))
+            for (ResKey reserved : ResKey.values())
+                if (reserved.getName().equalsIgnoreCase(gnv.getName()))
                     throw new IllegalArgumentException("record key '" + gnv.getName() + "' is reserved for the verdict");
             entries.add(gnv);
         }
@@ -650,7 +659,11 @@ public class ExchangeScript extends MonoStateMachine<String, ExchangeScript.Step
 
     // ---- session state accessors ----
 
-    /** @return the verdict bag: {@code validated}/{@code reason}/{@code ready}/report keys/TLS params */
+    /**
+     * @return the verdict bag: run identity ({@code guid}/{@code proto-name}/{@code transport},
+     * the dialed {@code host}/{@code port}, {@code open_ts}/{@code close_ts} epoch millis) plus
+     * {@code validated}/{@code reason}/{@code ready}/report keys/TLS params
+     */
     @Override
     public NVGenericMap getResults() {
         return results;
@@ -669,13 +682,29 @@ public class ExchangeScript extends MonoStateMachine<String, ExchangeScript.Step
     // ---- the host-driven lifecycle ----
 
     /**
-     * The host reports the transport is connected: starts the latency clock. Hosts call it at
-     * connection establishment so TLS handshake time is measured; a script whose host never
-     * calls it starts the clock at {@link #start()} instead.
+     * Stamps the dialed endpoint into the results as {@code host}/{@code port} — first value
+     * wins, so a factory-stamped endpoint survives the connect-time restamp. {@code host} is
+     * the dialed name or IP literal ({@code getHostString()} — never a reverse lookup).
+     * Idempotent; a null endpoint is ignored.
+     */
+    public void recordEndpoint(InetSocketAddress endpoint) {
+        if (endpoint == null || results.getNV(ResKey.HOST) != null)
+            return;
+        results.build(ResKey.HOST, endpoint.getHostString())
+                .build(new NVInt(ResKey.PORT, endpoint.getPort()));
+    }
+
+    /**
+     * The host reports the transport is connected: starts the latency clock and stamps
+     * {@code open_ts} (epoch millis) into the results. Hosts call it at connection
+     * establishment so TLS handshake time is measured; a script whose host never calls it
+     * starts the clock at {@link #start()} instead.
      */
     public void markOpen() {
-        if (openNanos == 0)
+        if (openNanos == 0) {
             openNanos = System.nanoTime();
+            results.build(new NVLong(ResKey.OPEN_TS, System.currentTimeMillis()));
+        }
     }
 
     /**
@@ -1137,7 +1166,7 @@ public class ExchangeScript extends MonoStateMachine<String, ExchangeScript.Step
         }
 
         if (reason == null) {
-            results.build(new NVBoolean("validated", true));
+            results.build(new NVBoolean(ResKey.VALIDATED, true));
             String report = ProtoUtil.stringValue(meta, "report", null);
             if (report != null)
                 results.build(report, capture != null ? capture : new String(target, StandardCharsets.UTF_8));
@@ -1152,7 +1181,7 @@ public class ExchangeScript extends MonoStateMachine<String, ExchangeScript.Step
 
         // no route, or on_mismatch: "fail" — the legacy failure verdict either way
         reason = "validation failed: " + reason + ": " + new String(target, StandardCharsets.UTF_8);
-        results.build(new NVBoolean("validated", false)).build("reason", reason);
+        results.build(new NVBoolean(ResKey.VALIDATED, false)).build(ResKey.REASON, reason);
         failed = true;
         recordLatency();
         host.fail(new IOException(reason));
@@ -1185,17 +1214,23 @@ public class ExchangeScript extends MonoStateMachine<String, ExchangeScript.Step
     private void complete() {
         done = true;
         assemblyFinished = true;
-        if (results.getNV("validated") == null)
-            results.build(new NVBoolean("validated", true)).build("reason", "script completed");
-        results.build(new NVBoolean("ready", true));
+        if (results.getNV(ResKey.VALIDATED) == null)
+            results.build(new NVBoolean(ResKey.VALIDATED, true))
+                    .build(ResKey.REASON, "script completed");
+        results.build(new NVBoolean(ResKey.READY, true));
         recordLatency();
         host.complete();
     }
 
-    /** Freezes the connect-to-verdict duration as {@code latency_ms} — first measurement wins. */
+    /**
+     * Freezes the verdict clock: {@code close_ts} (epoch millis) and the connect-to-verdict
+     * duration as {@code latency_ms} — first measurement wins on both.
+     */
     private void recordLatency() {
-        if (openNanos != 0 && results.getNV("latency_ms") == null)
-            results.build(new NVLong("latency_ms", (System.nanoTime() - openNanos) / 1000000L));
+        if (results.getNV(ResKey.CLOSE_TS) == null)
+            results.build(new NVLong(ResKey.CLOSE_TS, System.currentTimeMillis()));
+        if (openNanos != 0 && results.getNV(ResKey.LATENCY_MS) == null)
+            results.build(new NVLong(ResKey.LATENCY_MS, (System.nanoTime() - openNanos) / 1000000L));
     }
 
     /**
@@ -1205,11 +1240,11 @@ public class ExchangeScript extends MonoStateMachine<String, ExchangeScript.Step
      */
     public void recordFailure(Throwable cause) {
         failed = true;
-        if (results.getNV("validated") == null) {
+        if (results.getNV(ResKey.VALIDATED) == null) {
             String reason = cause != null
                     ? (cause.getMessage() != null ? cause.getMessage() : cause.toString())
                     : "session failed";
-            results.build(new NVBoolean("validated", false)).build("reason", reason);
+            results.build(new NVBoolean(ResKey.VALIDATED, false)).build(ResKey.REASON, reason);
         }
         recordLatency();
     }

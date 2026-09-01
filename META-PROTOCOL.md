@@ -203,7 +203,7 @@ loop, one handler per op, inline on the read worker.
 | `{"boundary": {…}}` | switch framing | replaces the active framing with the step's `assembler`-shaped block (§3.1); the accumulation residue reframes under the new rule. TCP only |
 | `{"label": "<name>"}` | no-op jump target | names a forward route target; labels are case-insensitive and unique; `done`/`fail` are reserved |
 | `{"jump": "<target>"}` | unconditional route | forward jump to a label, or the reserved `done` (complete now) / `fail` (fail the session) |
-| `{"record": {…}}` | merge constants | writes the block's literal keys into the results — the way a branch marks which path ran. The verdict keys (`validated`, `reason`, `ready`, `latency_ms`) are rejected at compile |
+| `{"record": {…}}` | merge constants | writes the block's literal keys into the results — the way a branch marks which path ran. The engine-owned keys (`ProtoUtil.ResKey`: `validated`, `reason`, `ready`, `latency_ms`, `guid`, `proto-name`, `transport`, `host`, `port`, `open_ts`, `close_ts`, `tls_protocol`, `tls_cipher`, `tls_kex_group`, `error`, `scan-id`, `scan-time-in-ms`, `total-scanned`) are rejected at compile |
 
 **Completion rule:** the step list finishing = session done → `ready=true` in results →
 `close_on_ready` honored. **A run that completes with no `validate` step records
@@ -402,10 +402,18 @@ design.
 
 ## 6. Results & completion contract
 
-The verdict lives in an `NVGenericMap` owned by the engine, exposed via `getResults()`:
+The verdict lives in an `NVGenericMap` owned by the engine, exposed via `getResults()`. The
+reserved keys below are published as the `ProtoUtil.ResKey` enum (implements `GetName`) —
+the engine writes and readers query the bag through those values, never restrung literals:
 
 | Key | Writer | Meaning |
 |---|---|---|
+| `guid` | construction | run identity: a time-ordered (v7) UUID minted per validator — present in every results bag |
+| `proto-name` | construction | the definition's protocol name (`name` key, default `protocol-validator`) |
+| `transport` | construction | `tcp` or `udp` |
+| `host` / `port` | `recordEndpoint(...)` — the factories, the UDP constructor, TCP connect | the dialed endpoint: host as given (name or IP literal, never a reverse lookup) and port; first value wins |
+| `open_ts` | `markOpen()` (connect) | epoch millis when the transport connected (absent if the session never opened) |
+| `close_ts` | verdict freeze | epoch millis when the verdict was frozen (completion or failure); first measurement wins |
 | `validated` | validate step, or the completion rule | the verdict — present on every completed run |
 | `reason` | validate step / failure path | mismatch cause, or `"script completed"` |
 | `ready` | completion | the script finished |

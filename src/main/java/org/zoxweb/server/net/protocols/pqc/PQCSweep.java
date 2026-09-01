@@ -1,8 +1,10 @@
 package org.zoxweb.server.net.protocols.pqc;
 
 import org.zoxweb.server.net.NIOSocket;
+import org.zoxweb.server.net.protocols.ProtoUtil.ResKey;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.shared.io.SharedIOUtil;
+import org.zoxweb.shared.util.GetName;
 import org.zoxweb.shared.util.GetNameValue;
 import org.zoxweb.shared.util.NVBoolean;
 import org.zoxweb.shared.util.NVGenericMap;
@@ -123,7 +125,7 @@ public final class PQCSweep {
             try {
                 nioSocket = new NIOSocket(TaskUtil.defaultTaskProcessor(), TaskUtil.defaultTaskScheduler());
             } catch (Exception e) {
-                return new NVGenericMap("pqc_sweep").build("error", "selector setup failed: "
+                return new NVGenericMap("pqc_sweep").build(ResKey.ERROR, "selector setup failed: "
                         + (e.getMessage() != null ? e.getMessage() : e.toString()));
             }
             return audit(nioSocket, remote, sessionTimeoutMillis, enumerateCiphers, checkRevocation);
@@ -302,7 +304,7 @@ public final class PQCSweep {
             NVGenericMap results = session.getResults();
             X509Certificate[] chain = session.getCapturedChain();
             byte[] stapled = session.getStapledOCSP();
-            if (results.getValue("tls_protocol") != null)
+            if (results.getValue(ResKey.TLS_PROTOCOL) != null)
                 return new SessionOutcome("supported", null, results, chain, stapled);
             if (!closed)
                 return new SessionOutcome("error", "no completion within timeout", results, chain, stapled);
@@ -328,9 +330,9 @@ public final class PQCSweep {
     private static NVGenericMap candidate(String name, SessionOutcome outcome) {
         NVGenericMap entry = new NVGenericMap(name);
         entry.build("status", outcome.status);
-        copy(outcome.results, entry, "tls_protocol");
-        copy(outcome.results, entry, "tls_cipher");
-        copy(outcome.results, entry, "tls_kex_group");
+        copy(outcome.results, entry, ResKey.TLS_PROTOCOL);
+        copy(outcome.results, entry, ResKey.TLS_CIPHER);
+        copy(outcome.results, entry, ResKey.TLS_KEX_GROUP);
         if (outcome.results.getNV("pqc_kex") != null)
             entry.add((GetNameValue<?>) outcome.results.getNV("pqc_kex"));
         if (outcome.reason != null)
@@ -338,7 +340,7 @@ public final class PQCSweep {
         return entry;
     }
 
-    private static void copy(NVGenericMap from, NVGenericMap to, String key) {
+    private static void copy(NVGenericMap from, NVGenericMap to, GetName key) {
         Object v = from.getValue(key);
         if (v instanceof String)
             to.build(key, (String) v);
@@ -386,7 +388,7 @@ public final class PQCSweep {
                     remaining.toArray(new String[0]), timeoutMillis);
             if (!"supported".equals(outcome.status))
                 break;
-            Object negotiated = outcome.results.getValue("tls_cipher");
+            Object negotiated = outcome.results.getValue(ResKey.TLS_CIPHER);
             // the pinned offer guarantees membership; a foreign pick would loop forever
             if (!(negotiated instanceof String) || !remaining.remove(negotiated))
                 break;
@@ -401,7 +403,7 @@ public final class PQCSweep {
     private static String negotiatedCipher(NIOSocket nioSocket, InetSocketAddress remote,
                                            String version, String[] offer, long timeoutMillis) {
         Object v = run(nioSocket, remote, null, new String[]{version}, offer, timeoutMillis)
-                .results.getValue("tls_cipher");
+                .results.getValue(ResKey.TLS_CIPHER);
         return v instanceof String ? (String) v : null;
     }
 
@@ -493,7 +495,7 @@ public final class PQCSweep {
                 System.out.println("pqc_ready: " + ((NVGenericMap) summary).getValue("ready"));
             if (gradeIt)
                 System.out.println("grade: " + PQCGrader.grade(report));
-            exit = report.getValue("tls_protocol") != null ? 0 : 1;
+            exit = report.getValue(ResKey.TLS_PROTOCOL) != null ? 0 : 1;
             System.out.println("verdict: " + (exit == 0 ? "SWEPT (exit 0)" : "BASELINE FAILED (exit 1)"));
         } catch (Exception e) {
             System.err.println("sweep error: " + e);

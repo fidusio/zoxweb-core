@@ -75,6 +75,11 @@ Understand this lifecycle; every authoring rule below follows from it.
 
 | Key | Meaning |
 |---|---|
+| `guid` | run identity: a time-ordered (v7) UUID minted per run — present in every report |
+| `proto-name` | the definition's protocol name |
+| `transport` | `tcp` or `udp` |
+| `host`, `port` | the dialed endpoint (host as given — name or IP literal) |
+| `open_ts`, `close_ts` | epoch millis: connect time and verdict time |
 | `validated` | `true`/`false` — present on every run that completed or failed |
 | `reason` | the failure cause, or `"script completed"` when no validate step ran |
 | `ready` | `true` — the script ran to completion (absent on failure/incomplete) |
@@ -338,8 +343,11 @@ are forward-only** — a backward or self target is rejected at load, so loops a
 - `{"jump": "target"}` — unconditional forward jump. `{"jump": "done"}` ends the main path
   before the branch tail.
 - `{"record": {"key": value, ...}}` — merge constant strings/booleans/numbers into the results;
-  the way each branch marks which path ran. The verdict keys (`validated`, `reason`, `ready`,
-  `latency_ms`) are rejected at load. Keys are case-insensitive — a `record` key colliding with
+  the way each branch marks which path ran. The engine-owned keys (`validated`, `reason`,
+  `ready`, `latency_ms`, `guid`, `proto-name`, `transport`, `host`, `port`, `open_ts`,
+  `close_ts`, `tls_protocol`, `tls_cipher`, `tls_kex_group`, `error`, `scan-id`,
+  `scan-time-in-ms`, `total-scanned`) are rejected at load. Keys are case-insensitive — a
+  `record` key colliding with
   a `report` key merges into one entry, last writer wins.
 - **Expect alternatives** — the block form of `expect`. Steps stay single-key objects, so the
   alternatives live *inside* the value (a byte literal that genuinely starts with `{` must be

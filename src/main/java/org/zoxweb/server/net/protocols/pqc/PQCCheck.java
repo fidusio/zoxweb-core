@@ -1,6 +1,7 @@
 package org.zoxweb.server.net.protocols.pqc;
 
 import org.zoxweb.server.net.NIOSocket;
+import org.zoxweb.server.net.protocols.ProtoUtil.ResKey;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.util.*;
@@ -163,12 +164,12 @@ public final class PQCCheck {
             try {
                 out.build("host", remote.getHostString())
                         .build(new NVInt("port", remote.getPort()))
-                        .build("scan-id", UUID.randomUUID().toString())
+                        .build(ResKey.SCAN_ID, UUID.randomUUID().toString())
                         // hosted check-qdz shape: the hosting endpoint sets total-scanned on the
-                        // finished report (((NVLong) r.getNV("total-scanned")).setValue(counter));
+                        // finished report (((NVLong) r.getNV(ResKey.TOTAL_SCANNED)).setValue(counter));
                         // scan-time-in-ms is a placeholder filled at delivery so both sit up front
-                        .build(new NVLong("total-scanned", 0))
-                        .build(new NVLong("scan-time-in-ms", 0));
+                        .build(new NVLong(ResKey.TOTAL_SCANNED, 0))
+                        .build(new NVLong(ResKey.SCAN_TIME_IN_MS, 0));
                 // the hosted service's client shape: hybrids first; fall back to the default offer
                 launch(PQCSweep.PQ_PREFERRED_GROUPS, null, null, new Consumer<TCPPQCProtocol>() {
                     @Override
@@ -266,7 +267,7 @@ public final class PQCCheck {
         // -- summary stages --
 
         private void onPrimary(TCPPQCProtocol session) {
-            if (results(session).getValue("tls_protocol") == null) {
+            if (results(session).getValue(ResKey.TLS_PROTOCOL) == null) {
                 // fall back only when the failure might be offer-dependent (a TLS-level
                 // rejection, or a hang with no cause); a transport failure (refused,
                 // unreachable) would just repeat identically and double the wait
@@ -287,9 +288,9 @@ public final class PQCCheck {
 
         private void onBaseline(TCPPQCProtocol session) {
             NVGenericMap results = results(session);
-            if (results.getValue("tls_protocol") == null) {
+            if (results.getValue(ResKey.TLS_PROTOCOL) == null) {
                 // the service's scan-level error shape: no success key, error-message + UNKNOWN verdict
-                Object error = results.getValue("error");
+                Object error = results.getValue(ResKey.ERROR);
                 String message = friendlyError(error != null ? String.valueOf(error) : null);
                 out.build("secure", "no")
                         .build("error-message", message)
@@ -313,9 +314,9 @@ public final class PQCCheck {
             out.build(new NVBoolean("success", true))
                     .build("secure", "yes");
 
-            Object tlsProtocol = results.getValue("tls_protocol");
-            Object cipher = results.getValue("tls_cipher");
-            Object group = results.getValue("tls_kex_group");
+            Object tlsProtocol = results.getValue(ResKey.TLS_PROTOCOL);
+            Object cipher = results.getValue(ResKey.TLS_CIPHER);
+            Object group = results.getValue(ResKey.TLS_KEX_GROUP);
             tlsVersion = String.valueOf(tlsProtocol);
             pqKex = Boolean.TRUE.equals(results.getValue("pqc_kex"));
             out.build("tls-version", tlsVersion)
@@ -375,7 +376,7 @@ public final class PQCCheck {
             launch(null, new String[]{version}, null, new Consumer<TCPPQCProtocol>() {
                 @Override
                 public void accept(TCPPQCProtocol probe) {
-                    if (results(probe).getValue("tls_protocol") != null)
+                    if (results(probe).getValue(ResKey.TLS_PROTOCOL) != null)
                         supportedVersions.add(version);
                     probeVersion(current + 1);
                 }
@@ -411,7 +412,7 @@ public final class PQCCheck {
                         @Override
                         public void accept(TCPPQCProtocol probe) {
                             NVGenericMap r = results(probe);
-                            Object negotiated = r.getValue("tls_protocol") != null ? r.getValue("tls_cipher") : null;
+                            Object negotiated = r.getValue(ResKey.TLS_PROTOCOL) != null ? r.getValue(ResKey.TLS_CIPHER) : null;
                             // the pinned offer guarantees membership; a foreign pick would loop forever
                             if (negotiated instanceof String && remaining.remove(negotiated)) {
                                 suiteNames.add((String) negotiated);
@@ -507,7 +508,7 @@ public final class PQCCheck {
 
         private void deliver() {
             if (delivered.compareAndSet(false, true)) {
-                ((NVLong) out.getNV("scan-time-in-ms")).setValue(System.currentTimeMillis() - startMillis);
+                ((NVLong) out.getNV(ResKey.SCAN_TIME_IN_MS)).setValue(System.currentTimeMillis() - startMillis);
                 callback.accept(out);
             }
         }

@@ -192,6 +192,12 @@ Top level (baseline session; every key best-effort, absent when not determinable
 
 | Key | Type | Meaning |
 |---|---|---|
+| `guid` | text | run identity: a time-ordered (v7) UUID minted per session — the shared `ProtoUtil.ResKey` vocabulary (META-PROTOCOL.md §6), present in every report from construction |
+| `proto-name` | text | `"pqc-tls"` (`TCPPQCProtocol.PROTOCOL_NAME`) — no JSON definition names this auditor |
+| `transport` | text | `tcp` |
+| `host` / `port` | text / int | the dialed endpoint (host as given — name or IP literal) |
+| `open_ts` | long | epoch millis at session construction (this class's latency convention) |
+| `close_ts` | long | epoch millis when the session closed — stamped once on every close path |
 | `tls_protocol` / `tls_cipher` | text | negotiated session |
 | `tls_kex_group` | text | negotiated named group, when the provider exposes it |
 | `pqc_kex` | boolean | negotiated group is ML-KEM / hybrid |
@@ -217,7 +223,9 @@ provider's default offer and audits with that. The report carries `offer` —
 the downgrade path. This is the connect-strategy counterpart of the sweep's `pq_only`
 candidate: one call, strongest answer first, graceful fallback.
 
-Sweep additions: `versions.<candidate>` → `supported`/`refused`/`error`, `groups.<candidate>` →
+The sweep report embeds the baseline session's results at top level, so it inherits the run
+identity above (the baseline session's `guid`/timestamps — `sweep_duration_ms` remains the whole
+sweep's clock). Sweep additions: `versions.<candidate>` → `supported`/`refused`/`error`, `groups.<candidate>` →
 same, each with the candidate's negotiated parameters when supported. When the cipher matrix
 ran, `ciphers` holds `tls13` and `tls12` (string lists — the discovered suites, in discovery
 order, which is the server's preference order over the offer; empty when the version yielded

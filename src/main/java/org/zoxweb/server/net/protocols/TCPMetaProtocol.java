@@ -129,6 +129,7 @@ public class TCPMetaProtocol extends TCPSessionCallback implements ExchangeScrip
      */
     @Override
     protected void connectedFinished() throws IOException {
+        script.recordEndpoint(getRemoteAddress()); // no-op when a factory already stamped it
         script.markOpen(); // latency clock from connect, so an immediate handshake is measured
         if (script.getTLSMode() == ExchangeScript.TLSMode.IMMEDIATE) {
             try {
@@ -147,8 +148,8 @@ public class TCPMetaProtocol extends TCPSessionCallback implements ExchangeScrip
         try {
             // best-effort session introspection — never fails the run
             script.getResults()
-                    .build("tls_protocol", sci.getSSLEngine().getSession().getProtocol())
-                    .build("tls_cipher", sci.getSSLEngine().getSession().getCipherSuite());
+                    .build(ProtoUtil.ResKey.TLS_PROTOCOL, sci.getSSLEngine().getSession().getProtocol())
+                    .build(ProtoUtil.ResKey.TLS_CIPHER, sci.getSSLEngine().getSession().getCipherSuite());
         } catch (RuntimeException e) {
             if (log.isEnabled()) log.getLogger().info("tls introspection failed: " + e);
         }

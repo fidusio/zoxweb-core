@@ -10,6 +10,7 @@ import org.bouncycastle.tls.NamedGroup;
 import org.bouncycastle.tls.SecurityParameters;
 import org.bouncycastle.tls.TlsContext;
 import org.zoxweb.server.net.NIOSocket;
+import org.zoxweb.server.net.protocols.ProtoUtil.ResKey;
 import org.zoxweb.server.net.ssl.SSLCheckDisabler;
 import org.zoxweb.server.security.SSLGroupSetterInt;
 import org.zoxweb.server.security.SecUtil;
@@ -346,7 +347,7 @@ public final class PQCUtil {
                 nioSocket = new NIOSocket(TaskUtil.defaultTaskProcessor(), TaskUtil.defaultTaskScheduler());
             } catch (Exception e) {
                 return new NVGenericMap("results").build("offer", "none")
-                        .build("error", "selector setup failed: "
+                        .build(ResKey.ERROR, "selector setup failed: "
                                 + (e.getMessage() != null ? e.getMessage() : e.toString()));
             }
 
@@ -356,7 +357,7 @@ public final class PQCUtil {
                 pq = new TCPPQCProtocol(null, remote, PQ_STRICT_GROUPS);
                 nioSocket.addClientSocket(pq);
                 boolean done = pq.waitForClose(sessionTimeoutMillis);
-                if (done && pq.getResults().getValue("tls_protocol") != null) {
+                if (done && pq.getResults().getValue(ResKey.TLS_PROTOCOL) != null) {
                     pq.getResults().build("offer", "pq_only");
                     return pq.getResults();
                 }
@@ -384,7 +385,7 @@ public final class PQCUtil {
                 NVGenericMap results = fallback != null ? fallback.getResults() : new NVGenericMap("results");
                 results.build("offer", "downgraded_default")
                         .build("pq_only_reason", pqReason)
-                        .build("error", e.getMessage() != null ? e.getMessage() : e.toString());
+                        .build(ResKey.ERROR, e.getMessage() != null ? e.getMessage() : e.toString());
                 return results;
             } finally {
                 SharedIOUtil.close(fallback);
@@ -424,19 +425,19 @@ public final class PQCUtil {
 
             Object offer = report.getValue("offer");
             if ("pq_only".equals(offer)) {
-                System.out.println("PQ-ONLY OK   : " + report.getValue("tls_protocol")
-                        + " kex=" + report.getValue("tls_kex_group")
-                        + " cipher=" + report.getValue("tls_cipher"));
+                System.out.println("PQ-ONLY OK   : " + report.getValue(ResKey.TLS_PROTOCOL)
+                        + " kex=" + report.getValue(ResKey.TLS_KEX_GROUP)
+                        + " cipher=" + report.getValue(ResKey.TLS_CIPHER));
                 exit = 0;
-            } else if (report.getValue("tls_protocol") != null) {
+            } else if (report.getValue(ResKey.TLS_PROTOCOL) != null) {
                 System.out.println("DOWNGRADED   : pq-only failed (" + report.getValue("pq_only_reason") + ")");
-                System.out.println("default offer: " + report.getValue("tls_protocol")
-                        + " kex=" + report.getValue("tls_kex_group")
+                System.out.println("default offer: " + report.getValue(ResKey.TLS_PROTOCOL)
+                        + " kex=" + report.getValue(ResKey.TLS_KEX_GROUP)
                         + " pqc_kex=" + report.getValue("pqc_kex"));
                 exit = 1;
             } else {
                 System.out.println("UNREACHABLE  : pq-only (" + report.getValue("pq_only_reason")
-                        + "), default (" + report.getValue("error") + ")");
+                        + "), default (" + report.getValue(ResKey.ERROR) + ")");
                 exit = 2;
             }
             System.out.println("issuer       : " + issuerOf(report));

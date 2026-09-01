@@ -113,6 +113,9 @@ public class TCPMetaProtocolLifecycleTest {
                     bag.set(results);
                 });
         assertEquals(0, fired.get(), "callback must not fire before close");
+        // the factory stamps the dialed endpoint before any connect
+        assertNotNull(v.getResults().getValue("host"));
+        assertEquals(9, (Integer) v.getResults().getValue("port"));
 
         v.exception(new IOException("boom"));
         assertEquals(1, fired.get(), "callback fires on close");

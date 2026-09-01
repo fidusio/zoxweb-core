@@ -1,5 +1,6 @@
 package org.zoxweb.server.net.protocols.pqc;
 
+import org.zoxweb.server.net.protocols.ProtoUtil.ResKey;
 import org.zoxweb.shared.util.NVGenericMap;
 import org.zoxweb.shared.util.NVStringList;
 
@@ -45,7 +46,7 @@ public final class PQCGrader {
         List<String> reasons = new ArrayList<String>();
         String letter;
 
-        if (report == null || report.getValue("tls_protocol") == null) {
+        if (report == null || report.getValue(ResKey.TLS_PROTOCOL) == null) {
             reasons.add("baseline session never completed - no posture information");
             letter = "E";
         } else if (trustFailures(report, reasons)) {

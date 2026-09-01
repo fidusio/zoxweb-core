@@ -62,6 +62,7 @@ public class UDPMetaProtocol extends UDPSessionCallback implements ExchangeScrip
         script = new ExchangeScript(protocolConfig, this);
         if (!script.isUDP())
             throw new IllegalArgumentException("tcp definition on the UDP validator — use TCPMetaProtocol");
+        script.recordEndpoint(remote); // the target is known at construction — stamp host/port
         rawReadBuffer = ByteBufferUtil.allocateByteBuffer(ByteBufferUtil.BufferType.HEAP, getBufferSize());
     }
 

@@ -961,4 +961,78 @@ public class ExchangeScriptTest {
         s.feed(utf8("{\"status\""));
         assertTrue(s.isDone());
     }
+
+    // ---- run identity: guid / name / transport / timestamps (META-PROTOCOL.md §6) ----
+
+    @Test
+    public void everyResultCarriesRunIdentityAndTimestamps() {
+        FakeHost h = new FakeHost();
+        ExchangeScript s = script("{\"name\": \"probe-x\", \"exchange\": ["
+                + "{\"expect\": \"txt:\\r\\n\"},"
+                + "{\"validate\": {\"prefix\": \"txt:220\"}}]}", h);
+        // identity is present from birth — before the session ever opens
+        assertNotNull(s.getResults().getValue("guid"));
+        assertEquals("probe-x", s.getResults().getValue("proto-name"));
+        assertEquals("tcp", s.getResults().getValue("transport"));
+
+        // the host stamps the dialed endpoint; first value wins, restamp is a no-op
+        s.recordEndpoint(java.net.InetSocketAddress.createUnresolved("smtp.example.com", 587));
+        s.recordEndpoint(java.net.InetSocketAddress.createUnresolved("other.example.com", 25));
+        assertEquals("smtp.example.com", s.getResults().getValue("host"));
+        assertEquals(587, (Integer) s.getResults().getValue("port"));
+
+        long before = System.currentTimeMillis();
+        s.start();
+        s.feed(utf8("220 ok\r\n"));
+        assertTrue(s.isDone());
+
+        // guid is a parseable UUID
+        java.util.UUID.fromString((String) s.getResults().getValue("guid"));
+        // timestamps are epoch millis: connect time and verdict time, ordered and current
+        long openTs = (Long) s.getResults().getValue("open_ts");
+        long closeTs = (Long) s.getResults().getValue("close_ts");
+        assertTrue(openTs >= before, "open_ts is epoch millis");
+        assertTrue(closeTs >= openTs, "close_ts freezes at or after open_ts");
+        assertTrue(closeTs <= System.currentTimeMillis(), "close_ts is epoch millis");
+    }
+
+    @Test
+    public void failedRunCarriesRunIdentityAndCloseTs() {
+        FakeHost h = new FakeHost();
+        ExchangeScript s = script("{\"transport\": \"udp\", \"exchange\": ["
+                + "{\"validate\": {\"exact\": \"txt:PONG\"}}]}", h);
+        s.start();
+        s.feed(utf8("NOPE"));
+        assertTrue(s.isFailed());
+        java.util.UUID.fromString((String) s.getResults().getValue("guid"));
+        assertEquals("udp", s.getResults().getValue("transport"));
+        assertEquals(ExchangeScript.DEFAULT_NAME, s.getResults().getValue("proto-name"));
+        assertTrue((Long) s.getResults().getValue("close_ts") > 0, "failure freezes close_ts too");
+    }
+
+    @Test
+    public void guidsAreUniquePerRun() {
+        FakeHost h = new FakeHost();
+        ExchangeScript s1 = script("{\"name\": \"same\"}", h);
+        ExchangeScript s2 = script("{\"name\": \"same\"}", h);
+        assertNotEquals((String) s1.getResults().getValue("guid"),
+                (String) s2.getResults().getValue("guid"), "each run mints its own guid");
+    }
+
+    @Test
+    public void recordMayNotClobberRunIdentity() {
+        FakeHost h = new FakeHost();
+        assertThrows(IllegalArgumentException.class,
+                () -> script("{\"exchange\": [{\"record\": {\"guid\": \"x\"}}]}", h));
+        assertThrows(IllegalArgumentException.class,
+                () -> script("{\"exchange\": [{\"record\": {\"proto-name\": \"x\"}}]}", h));
+        assertThrows(IllegalArgumentException.class,
+                () -> script("{\"exchange\": [{\"record\": {\"transport\": \"tcp\"}}]}", h));
+        assertThrows(IllegalArgumentException.class,
+                () -> script("{\"exchange\": [{\"record\": {\"host\": \"x\"}}]}", h));
+        assertThrows(IllegalArgumentException.class,
+                () -> script("{\"exchange\": [{\"record\": {\"port\": 25}}]}", h));
+        assertThrows(IllegalArgumentException.class,
+                () -> script("{\"exchange\": [{\"record\": {\"open_ts\": 1}}]}", h));
+    }
 }

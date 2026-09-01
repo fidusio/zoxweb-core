@@ -52,6 +52,7 @@ public final class ProtoConnect {
         SUS.checkIfNulls("remote and config can't be null", remote, config);
         TCPMetaProtocol ret = new TCPMetaProtocol(null, config);
         ret.setRemoteAddress(remote);
+        ret.getScript().recordEndpoint(remote); // host/port in the results even if connect fails
         return ret;
     }
 
@@ -63,7 +64,9 @@ public final class ProtoConnect {
     public static TCPMetaProtocol createTCPProtocol(String address, NVGenericMap config) {
         SUS.checkIfNulls("address and config can't be null", address, config);
         TCPMetaProtocol ret = new TCPMetaProtocol(null, config);
-        ret.setRemoteAddress(requireEndpoint(parseEndpoint(address, ret.getScript().getPort()), address));
+        InetSocketAddress remote = requireEndpoint(parseEndpoint(address, ret.getScript().getPort()), address);
+        ret.setRemoteAddress(remote);
+        ret.getScript().recordEndpoint(remote);
         return ret;
     }
 
@@ -75,9 +78,11 @@ public final class ProtoConnect {
         SUS.checkIfNulls("address and config can't be null", address, config);
         TCPMetaProtocol ret = new TCPMetaProtocol(null, config);
         int port = address.getPort() > 0 ? address.getPort() : ret.getScript().getPort();
-        ret.setRemoteAddress(requireEndpoint(
+        InetSocketAddress remote = requireEndpoint(
                 port > 0 ? new InetSocketAddress(address.getInetAddress(), port) : null,
-                "" + address));
+                "" + address);
+        ret.setRemoteAddress(remote);
+        ret.getScript().recordEndpoint(remote);
         return ret;
     }
 
@@ -310,7 +315,7 @@ public final class ProtoConnect {
             System.out.println("verdict: NO COMPLETION (exit 2)");
             return 2;
         }
-        boolean validated = Boolean.TRUE.equals(results.getValue("validated")) && cause == null;
+        boolean validated = Boolean.TRUE.equals(results.getValue(ProtoUtil.ResKey.VALIDATED)) && cause == null;
         System.out.println("verdict: " + (validated ? "VALIDATED (exit 0)" : "FAILED (exit 1)"));
         return validated ? 0 : 1;
     }

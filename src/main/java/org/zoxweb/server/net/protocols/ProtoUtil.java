@@ -33,6 +33,67 @@ public final class ProtoUtil {
     private ProtoUtil() {
     }
 
+    /**
+     * The reserved results keys — the single vocabulary for every engine-owned results entry
+     * across the subsystem: the meta-protocol verdict and run identity (META-PROTOCOL.md §6),
+     * the TLS session metadata both validators capture, and the PQC session/report
+     * infrastructure keys (META-TCP-PQC.md §8). Every engine write goes through these values,
+     * and a definition's {@code record} step may never name one — rejected at compile.
+     */
+    public enum ResKey implements GetName {
+        /** the verdict — present on every completed or failed run */
+        VALIDATED("validated"),
+        /** the failure cause, or {@code "script completed"} */
+        REASON("reason"),
+        /** the script ran to completion */
+        READY("ready"),
+        /** connect-to-verdict duration in milliseconds */
+        LATENCY_MS("latency_ms"),
+        /** run identity: a time-ordered (v7) UUID minted per validator */
+        GUID("guid"),
+        /** the definition's protocol name */
+        PROTO_NAME("proto-name"),
+        /** {@code tcp} or {@code udp} */
+        TRANSPORT("transport"),
+        /** the dialed host — name or IP literal as given, never a reverse lookup */
+        HOST("host"),
+        /** the dialed port */
+        PORT("port"),
+        /** epoch millis when the transport connected */
+        OPEN_TS("open_ts"),
+        /** epoch millis when the verdict was frozen */
+        CLOSE_TS("close_ts"),
+        /** negotiated TLS protocol version (both validators, on TLS completion) */
+        TLS_PROTOCOL("tls_protocol"),
+        /** negotiated TLS cipher suite (both validators, on TLS completion) */
+        TLS_CIPHER("tls_cipher"),
+        /** negotiated named group, when the provider exposes it (PQC auditor) */
+        TLS_KEX_GROUP("tls_kex_group"),
+        /** transport/handshake failure cause on a PQC session that did not complete */
+        ERROR("error"),
+        /** one bundled report's identity ({@code PQCCheck}'s hosted shape) */
+        SCAN_ID("scan-id"),
+        /** one bundled report's wall-clock duration ({@code PQCCheck}'s hosted shape) */
+        SCAN_TIME_IN_MS("scan-time-in-ms"),
+        /**
+         * scan counter on a bundled report ({@code PQCCheck}'s hosted shape): a placeholder the
+         * report consumer fills from its datastore — reserved so a definition can never fake it
+         */
+        TOTAL_SCANNED("total-scanned"),
+        ;
+
+        private final String name;
+
+        ResKey(String name) {
+            this.name = name;
+        }
+
+        @Override
+        public String getName() {
+            return name;
+        }
+    }
+
     /** {@code ${name}} placeholder — name is any run of characters other than '}'. */
     private static final Pattern VAR_PATTERN = Pattern.compile("\\$\\{([^}]+)\\}");
 

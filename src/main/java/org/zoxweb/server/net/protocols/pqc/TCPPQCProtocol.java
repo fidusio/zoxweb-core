@@ -3,12 +3,15 @@ package org.zoxweb.server.net.protocols.pqc;
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.net.NIOSocket;
 import org.zoxweb.server.net.common.TCPSessionCallback;
+import org.zoxweb.server.net.protocols.ProtoUtil.ResKey;
 import org.zoxweb.server.net.ssl.SSLConfigInt;
 import org.zoxweb.server.net.ssl.SSLContextInfo;
 import org.zoxweb.server.task.TaskUtil;
+import org.zoxweb.server.util.IDGs;
 import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.util.NVBoolean;
 import org.zoxweb.shared.util.NVGenericMap;
+import org.zoxweb.shared.util.NVInt;
 import org.zoxweb.shared.util.NVLong;
 
 import javax.net.ssl.SSLSession;
@@ -57,6 +60,9 @@ public class TCPPQCProtocol extends TCPSessionCallback {
     public static final LogWrapper log = new LogWrapper(TCPPQCProtocol.class).setEnabled(false);
 
     public static final int DEFAULT_EXPIRY_THRESHOLD_DAYS = 30;
+
+    /** The {@code proto-name} run-identity value — this auditor has no JSON definition to name it. */
+    public static final String PROTOCOL_NAME = "pqc-tls";
 
     private final NVGenericMap results = new NVGenericMap("results");
     private final CountDownLatch closeLatch = new CountDownLatch(1);
@@ -126,6 +132,17 @@ public class TCPPQCProtocol extends TCPSessionCallback {
         info.setSSLGroupSetter(PQCUtil.engineConfigurer(
                 namedGroups != null && namedGroups.length > 0 ? namedGroups : null, PQCUtil.DEFAULT_ALPN));
         setSSLContextInfo(info);
+        // run identity (META-PROTOCOL.md §6 keys, shared via ProtoUtil.ResKey): present in
+        // every audit report from birth; open_ts follows this class's latency convention
+        // (openMillis = construction), close_ts joins in close()
+        results.build(ResKey.GUID, IDGs.UUIDV7.genID())
+                .build(ResKey.PROTO_NAME, PROTOCOL_NAME)
+                .build(ResKey.TRANSPORT, "tcp")
+                .build(new NVLong(ResKey.OPEN_TS, openMillis));
+        if (remote != null) {
+            results.build(ResKey.HOST, remote.getHostString())
+                    .build(new NVInt(ResKey.PORT, remote.getPort()));
+        }
     }
 
     /** @return the audit report (final once the session is closed) */
@@ -238,8 +255,8 @@ public class TCPPQCProtocol extends TCPSessionCallback {
         if (log.isEnabled()) log.getLogger().info("exception: " + e);
         if (!isClosed()) {
             closeCause = e;
-            if (results.getNV("error") == null)
-                results.build("error", e != null
+            if (results.getNV(ResKey.ERROR) == null)
+                results.build(ResKey.ERROR, e != null
                         ? (e.getMessage() != null ? e.getMessage() : e.toString())
                         : "session failed");
             // a server may abort after demanding a client certificate — that demand is a finding
@@ -255,6 +272,10 @@ public class TCPPQCProtocol extends TCPSessionCallback {
         try {
             super.close();
         } finally {
+            // every close path — introspection, failure, or a timeout-forced close — freezes
+            // close_ts exactly once, before observers wake
+            if (results.getNV(ResKey.CLOSE_TS) == null)
+                results.build(new NVLong(ResKey.CLOSE_TS, System.currentTimeMillis()));
             closeLatch.countDown();
             fireCloseHook();
         }
@@ -265,8 +286,8 @@ public class TCPPQCProtocol extends TCPSessionCallback {
     private void introspect(SSLConfigInt sci) {
         SSLSession session = sci.getSSLEngine().getSession();
         try {
-            results.build("tls_protocol", session.getProtocol())
-                    .build("tls_cipher", session.getCipherSuite());
+            results.build(ResKey.TLS_PROTOCOL, session.getProtocol())
+                    .build(ResKey.TLS_CIPHER, session.getCipherSuite());
         } catch (RuntimeException e) {
             if (log.isEnabled()) log.getLogger().info("session introspection failed: " + e);
         }
@@ -275,7 +296,7 @@ public class TCPPQCProtocol extends TCPSessionCallback {
         int group = PQCUtil.negotiatedGroup(sci.getSSLEngine());
         String groupName = PQCUtil.groupName(group);
         if (groupName != null) {
-            results.build("tls_kex_group", groupName)
+            results.build(ResKey.TLS_KEX_GROUP, groupName)
                     .build(new NVBoolean("pqc_kex", PQCUtil.isPQGroup(group)));
         }
 
@@ -509,7 +530,7 @@ public class TCPPQCProtocol extends TCPSessionCallback {
             if (audit.getCloseCause() != null)
                 System.out.println("cause: " + audit.getCloseCause());
             exit = !closed ? 2
-                    : (audit.getCloseCause() == null && audit.getResults().getNV("error") == null ? 0 : 1);
+                    : (audit.getCloseCause() == null && audit.getResults().getNV(ResKey.ERROR) == null ? 0 : 1);
             System.out.println("verdict: " + (exit == 0 ? "AUDITED (exit 0)"
                     : exit == 2 ? "NO COMPLETION (exit 2)" : "FAILED (exit 1)"));
             SharedIOUtil.close(audit);
