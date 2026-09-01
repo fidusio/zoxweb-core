@@ -38,7 +38,7 @@ public class PlainLoopbackTest {
     @Test
     public void scriptedDialogueToReady() throws Exception {
         ServerSocket server = new ServerSocket(0, 1, InetAddress.getLoopbackAddress());
-        TCPMetaProtocol validator = ProtoConnect.createTCPValidator(
+        TCPMetaProtocol validator = ProtoConnect.createTCPProtocol(
                 new InetSocketAddress(InetAddress.getLoopbackAddress(), server.getLocalPort()),
                 "{ \"name\": \"greeting-check\", \"close_on_ready\": true,"
                         + " \"vars\": {\"who\": \"default\"},"
@@ -80,7 +80,7 @@ public class PlainLoopbackTest {
     @Test
     public void peerEofClosesCleanly() throws Exception {
         ServerSocket server = new ServerSocket(0, 1, InetAddress.getLoopbackAddress());
-        TCPMetaProtocol validator = ProtoConnect.createTCPValidator(
+        TCPMetaProtocol validator = ProtoConnect.createTCPProtocol(
                 new InetSocketAddress(InetAddress.getLoopbackAddress(), server.getLocalPort()),
                 "{ \"exchange\": [ {\"expect\": \"txt:NEVER\"} ] }");
 

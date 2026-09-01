@@ -55,4 +55,76 @@ public class TCPMetaProtocolLifecycleTest {
         assertNull(v.getCloseCause(), "manual close carries no cause");
         assertTrue(v.waitForClose(0), "poll after close is true");
     }
+
+    // ---- onClose: the event-driven completion hook ----
+
+    @Test
+    public void onCloseFiresExactlyOnceWithFinalVerdict() throws Exception {
+        TCPMetaProtocol v = new TCPMetaProtocol("t", "{\"exchange\": [{\"expect\": \"txt:never\"}]}");
+        final java.util.concurrent.atomic.AtomicInteger fired = new java.util.concurrent.atomic.AtomicInteger();
+        final java.util.concurrent.atomic.AtomicReference<Object> verdict =
+                new java.util.concurrent.atomic.AtomicReference<Object>();
+        v.onClose(closed -> {
+            fired.incrementAndGet();
+            // the hook must see the finished session: verdict recorded, cause stashed
+            verdict.set(closed.getResults().getValue("validated"));
+        });
+        assertEquals(0, fired.get(), "hook must not fire before close");
+
+        v.exception(new IOException("boom"));
+        assertEquals(1, fired.get(), "hook fires on close");
+        assertEquals(Boolean.FALSE, verdict.get(), "hook sees the final verdict");
+
+        v.close(); // idempotent close must not re-fire
+        assertEquals(1, fired.get(), "hook fires exactly once");
+    }
+
+    @Test
+    public void onCloseAfterCloseFiresImmediately() throws Exception {
+        TCPMetaProtocol v = new TCPMetaProtocol("t", "{\"name\": \"bare\"}");
+        v.close();
+        final java.util.concurrent.atomic.AtomicInteger fired = new java.util.concurrent.atomic.AtomicInteger();
+        v.onClose(closed -> fired.incrementAndGet());
+        assertEquals(1, fired.get(), "a hook registered on a closed session runs immediately");
+    }
+
+    @Test
+    public void onCloseThrowingHookDoesNotUnwindTheCloser() throws Exception {
+        TCPMetaProtocol v = new TCPMetaProtocol("t", "{\"name\": \"bare\"}");
+        v.onClose(closed -> {
+            throw new RuntimeException("hook boom");
+        });
+        v.close(); // must not throw
+        assertTrue(v.isClosed());
+    }
+
+    // ---- ProtoConnect callback factories: Consumer<NVGenericMap> wired through onClose ----
+
+    @Test
+    public void factoryCallbackDeliversFinalResultsOnce() {
+        final java.util.concurrent.atomic.AtomicInteger fired = new java.util.concurrent.atomic.AtomicInteger();
+        final java.util.concurrent.atomic.AtomicReference<org.zoxweb.shared.util.NVGenericMap> bag =
+                new java.util.concurrent.atomic.AtomicReference<org.zoxweb.shared.util.NVGenericMap>();
+        TCPMetaProtocol v = ProtoConnect.createTCPProtocol(
+                new java.net.InetSocketAddress(java.net.InetAddress.getLoopbackAddress(), 9),
+                "{\"exchange\": [{\"expect\": \"txt:never\"}]}",
+                results -> {
+                    fired.incrementAndGet();
+                    bag.set(results);
+                });
+        assertEquals(0, fired.get(), "callback must not fire before close");
+
+        v.exception(new IOException("boom"));
+        assertEquals(1, fired.get(), "callback fires on close");
+        assertSame(v.getResults(), bag.get(), "callback receives the session's results bag");
+        assertEquals(Boolean.FALSE, bag.get().getValue("validated"));
+    }
+
+    @Test
+    public void factoryNullCallbackRejected() {
+        assertThrows(NullPointerException.class, () -> ProtoConnect.createTCPProtocol(
+                new java.net.InetSocketAddress(java.net.InetAddress.getLoopbackAddress(), 9),
+                "{\"name\": \"bare\"}",
+                (java.util.function.Consumer<org.zoxweb.shared.util.NVGenericMap>) null));
+    }
 }

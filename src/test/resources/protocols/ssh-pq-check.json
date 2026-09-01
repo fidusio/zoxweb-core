@@ -1,0 +1,26 @@
+{
+  "name": "ssh-pq-check",
+  "port": 22,
+  "timeout_sec": 5,
+  "close_on_ready": true,
+  "assembler": { "boundary": "delimited", "terminator": "txt:\n", "strip_cr": true, "max_message": 255 },
+  "exchange": [
+    { "expect": "txt:SSH-" },
+    { "validate": { "prefix": "txt:SSH-2.0-", "report": "banner" } },
+    { "send": "txt:SSH-2.0-generic_probe\r\n" },
+    { "boundary": { "boundary": "length_prefixed", "max_message": 35000,
+                    "length": { "offset": 0, "size": 4 } } },
+    { "validate": { "extract": { "offset": 22, "size": 4 }, "contains": "txt:sha2", "report": "kex_algorithms" } },
+    { "validate": { "extract": { "offset": 22, "size": 4 }, "contains": "txt:sntrup761", "optional": true, "report": "pq_sntrup761" } },
+    { "validate": { "extract": { "offset": 22, "size": 4 }, "contains": "txt:mlkem", "optional": true, "report": "pq_mlkem" } },
+    { "validate": { "extract": { "offset": 22, "size": 4 }, "contains": "txt:sntrup761", "on_mismatch": "try_mlkem" } },
+    { "record": { "pq_supported": true } },
+    { "jump": "done" },
+    { "label": "try_mlkem" },
+    { "validate": { "extract": { "offset": 22, "size": 4 }, "contains": "txt:mlkem", "on_mismatch": "no_pq" } },
+    { "record": { "pq_supported": true } },
+    { "jump": "done" },
+    { "label": "no_pq" },
+    { "record": { "pq_supported": false } }
+  ]
+}

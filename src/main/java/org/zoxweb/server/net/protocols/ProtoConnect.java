@@ -13,21 +13,25 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 /**
- * The operational probe runner (META-PROTOCOL.md §7):
+ * The operational meta protocol runner (META-PROTOCOL.md §7):
  * <pre>
  *   ProtoConnect &lt;definition.json&gt; &lt;host[:port]&gt; [name=value ...]
  * </pre>
- * Loads the JSON definition, builds the matching validator (TCP or UDP per the definition's
+ * Loads the JSON definition, builds the matching protocol (TCP or UDP per the definition's
  * {@code transport}), injects the {@code name=value} variables, drives it through NIOSocket, and
  * prints the final report. The port defaults to the definition's {@code port} hint when the
- * endpoint omits it. Pure observer — the validator runs and closes the session itself.
+ * endpoint omits it. Pure observer — the protocol runs and closes the session itself.
  * <p>
- * The static factories ({@link #createTCPValidator(InetSocketAddress, String)} and friends) are
- * the programmatic equivalent: endpoint + definition in, ready-to-connect validator out — hand
- * the TCP one to {@code NIOSocket.addClientSocket(validator)} (remote and timeout ride on the
- * callback) and the UDP one to {@code NIOSocket.addDatagramSocket(new InetSocketAddress(0), validator)}.
+ * The static factories ({@link #createTCPProtocol(InetSocketAddress, String)} and friends) are
+ * the programmatic equivalent: endpoint + definition in, ready-to-connect protocol out — hand
+ * the TCP one to {@code NIOSocket.addClientSocket(protocol)} (remote and timeout ride on the
+ * callback) and the UDP one to {@code NIOSocket.addDatagramSocket(new InetSocketAddress(0), protocol)}.
+ * Every factory also has a {@code Consumer<NVGenericMap>} form that delivers the final results
+ * bag exactly once when the session closes (the {@code onClose} hook) — the event-driven
+ * alternative to {@code waitForClose}.
  * <p>
  * Exit codes: {@code 0} validated (clean close), {@code 1} session failed (closed with a cause /
  * verdict false), {@code 2} no completion within the wait, {@code 64} usage or definition error.
@@ -37,14 +41,14 @@ public final class ProtoConnect {
     private ProtoConnect() {
     }
 
-    // ---- validator factories: endpoint + definition (JSON text or parsed NVGenericMap) in,
-    // ---- bound validator out ----
+    // ---- protocol factories: endpoint + definition (JSON text or parsed NVGenericMap) in,
+    // ---- bound protocol out ----
 
     /**
-     * Builds a TCP validator from a parsed definition, bound to {@code remote} — ready for
-     * {@code NIOSocket.addClientSocket(validator)}.
+     * Builds a TCP protocol from a parsed definition, bound to {@code remote} — ready for
+     * {@code NIOSocket.addClientSocket(protocol)}.
      */
-    public static TCPMetaProtocol createTCPValidator(InetSocketAddress remote, NVGenericMap config) {
+    public static TCPMetaProtocol createTCPProtocol(InetSocketAddress remote, NVGenericMap config) {
         SUS.checkIfNulls("remote and config can't be null", remote, config);
         TCPMetaProtocol ret = new TCPMetaProtocol(null, config);
         ret.setRemoteAddress(remote);
@@ -52,11 +56,11 @@ public final class ProtoConnect {
     }
 
     /**
-     * Builds a TCP validator from a parsed definition, bound to {@code address} — an
+     * Builds a TCP protocol from a parsed definition, bound to {@code address} — an
      * {@code "host[:port]"} string; a missing port falls back to the definition's {@code port}
      * hint.
      */
-    public static TCPMetaProtocol createTCPValidator(String address, NVGenericMap config) {
+    public static TCPMetaProtocol createTCPProtocol(String address, NVGenericMap config) {
         SUS.checkIfNulls("address and config can't be null", address, config);
         TCPMetaProtocol ret = new TCPMetaProtocol(null, config);
         ret.setRemoteAddress(requireEndpoint(parseEndpoint(address, ret.getScript().getPort()), address));
@@ -64,10 +68,10 @@ public final class ProtoConnect {
     }
 
     /**
-     * Builds a TCP validator from a parsed definition, bound to {@code address}; a missing/zero
+     * Builds a TCP protocol from a parsed definition, bound to {@code address}; a missing/zero
      * port falls back to the definition's {@code port} hint.
      */
-    public static TCPMetaProtocol createTCPValidator(IPAddress address, NVGenericMap config) {
+    public static TCPMetaProtocol createTCPProtocol(IPAddress address, NVGenericMap config) {
         SUS.checkIfNulls("address and config can't be null", address, config);
         TCPMetaProtocol ret = new TCPMetaProtocol(null, config);
         int port = address.getPort() > 0 ? address.getPort() : ret.getScript().getPort();
@@ -78,20 +82,20 @@ public final class ProtoConnect {
     }
 
     /**
-     * Builds a UDP validator from a parsed definition, targeting {@code remote} — ready for
-     * {@code NIOSocket.addDatagramSocket(new InetSocketAddress(0), validator)}.
+     * Builds a UDP protocol from a parsed definition, targeting {@code remote} — ready for
+     * {@code NIOSocket.addDatagramSocket(new InetSocketAddress(0), protocol)}.
      */
-    public static UDPMetaProtocol createUDPValidator(InetSocketAddress remote, NVGenericMap config) {
+    public static UDPMetaProtocol createUDPProtocol(InetSocketAddress remote, NVGenericMap config) {
         SUS.checkIfNulls("remote and config can't be null", remote, config);
         return new UDPMetaProtocol(null, config, remote);
     }
 
     /**
-     * Builds a UDP validator from a parsed definition, targeting {@code address} — an
+     * Builds a UDP protocol from a parsed definition, targeting {@code address} — an
      * {@code "host[:port]"} string; a missing port falls back to the definition's {@code port}
      * hint.
      */
-    public static UDPMetaProtocol createUDPValidator(String address, NVGenericMap config) {
+    public static UDPMetaProtocol createUDPProtocol(String address, NVGenericMap config) {
         SUS.checkIfNulls("address and config can't be null", address, config);
         InetSocketAddress remote = requireEndpoint(
                 parseEndpoint(address, defaultPort(config)), address);
@@ -99,10 +103,10 @@ public final class ProtoConnect {
     }
 
     /**
-     * Builds a UDP validator from a parsed definition, targeting {@code address}; a missing/zero
+     * Builds a UDP protocol from a parsed definition, targeting {@code address}; a missing/zero
      * port falls back to the definition's {@code port} hint.
      */
-    public static UDPMetaProtocol createUDPValidator(IPAddress address, NVGenericMap config) {
+    public static UDPMetaProtocol createUDPProtocol(IPAddress address, NVGenericMap config) {
         SUS.checkIfNulls("address and config can't be null", address, config);
         int port = address.getPort() > 0 ? address.getPort() : defaultPort(config);
         InetSocketAddress remote = requireEndpoint(
@@ -112,34 +116,122 @@ public final class ProtoConnect {
 
     // JSON-text forms — parse once, then delegate to the NVGenericMap equivalents
 
-    /** JSON-text form of {@link #createTCPValidator(InetSocketAddress, NVGenericMap)}. */
-    public static TCPMetaProtocol createTCPValidator(InetSocketAddress remote, String json) {
-        return createTCPValidator(remote, parse(json));
+    /** JSON-text form of {@link #createTCPProtocol(InetSocketAddress, NVGenericMap)}. */
+    public static TCPMetaProtocol createTCPProtocol(InetSocketAddress remote, String json) {
+        return createTCPProtocol(remote, parse(json));
     }
 
-    /** JSON-text form of {@link #createTCPValidator(String, NVGenericMap)}. */
-    public static TCPMetaProtocol createTCPValidator(String address, String json) {
-        return createTCPValidator(address, parse(json));
+    /** JSON-text form of {@link #createTCPProtocol(String, NVGenericMap)}. */
+    public static TCPMetaProtocol createTCPProtocol(String address, String json) {
+        return createTCPProtocol(address, parse(json));
     }
 
-    /** JSON-text form of {@link #createTCPValidator(IPAddress, NVGenericMap)}. */
-    public static TCPMetaProtocol createTCPValidator(IPAddress address, String json) {
-        return createTCPValidator(address, parse(json));
+    /** JSON-text form of {@link #createTCPProtocol(IPAddress, NVGenericMap)}. */
+    public static TCPMetaProtocol createTCPProtocol(IPAddress address, String json) {
+        return createTCPProtocol(address, parse(json));
     }
 
-    /** JSON-text form of {@link #createUDPValidator(InetSocketAddress, NVGenericMap)}. */
-    public static UDPMetaProtocol createUDPValidator(InetSocketAddress remote, String json) {
-        return createUDPValidator(remote, parse(json));
+    /** JSON-text form of {@link #createUDPProtocol(InetSocketAddress, NVGenericMap)}. */
+    public static UDPMetaProtocol createUDPProtocol(InetSocketAddress remote, String json) {
+        return createUDPProtocol(remote, parse(json));
     }
 
-    /** JSON-text form of {@link #createUDPValidator(String, NVGenericMap)}. */
-    public static UDPMetaProtocol createUDPValidator(String address, String json) {
-        return createUDPValidator(address, parse(json));
+    /** JSON-text form of {@link #createUDPProtocol(String, NVGenericMap)}. */
+    public static UDPMetaProtocol createUDPProtocol(String address, String json) {
+        return createUDPProtocol(address, parse(json));
     }
 
-    /** JSON-text form of {@link #createUDPValidator(IPAddress, NVGenericMap)}. */
-    public static UDPMetaProtocol createUDPValidator(IPAddress address, String json) {
-        return createUDPValidator(address, parse(json));
+    /** JSON-text form of {@link #createUDPProtocol(IPAddress, NVGenericMap)}. */
+    public static UDPMetaProtocol createUDPProtocol(IPAddress address, String json) {
+        return createUDPProtocol(address, parse(json));
+    }
+
+    // ---- callback forms: the same factories plus a results consumer, fired once on close ----
+    // The consumer receives the final verdict bag (getResults()) exactly once when the session
+    // closes — completion, failure, or remote EOF alike — the event-driven alternative to
+    // waitForClose. It occupies the protocol's onClose hook and runs inside the close path:
+    // hand real work to an executor rather than block in place.
+
+    /** {@link #createTCPProtocol(InetSocketAddress, NVGenericMap)} with a results callback. */
+    public static TCPMetaProtocol createTCPProtocol(InetSocketAddress remote, NVGenericMap config,
+                                                    Consumer<NVGenericMap> callback) {
+        return withCallback(createTCPProtocol(remote, config), callback);
+    }
+
+    /** {@link #createTCPProtocol(String, NVGenericMap)} with a results callback. */
+    public static TCPMetaProtocol createTCPProtocol(String address, NVGenericMap config,
+                                                    Consumer<NVGenericMap> callback) {
+        return withCallback(createTCPProtocol(address, config), callback);
+    }
+
+    /** {@link #createTCPProtocol(IPAddress, NVGenericMap)} with a results callback. */
+    public static TCPMetaProtocol createTCPProtocol(IPAddress address, NVGenericMap config,
+                                                    Consumer<NVGenericMap> callback) {
+        return withCallback(createTCPProtocol(address, config), callback);
+    }
+
+    /** {@link #createTCPProtocol(InetSocketAddress, String)} with a results callback. */
+    public static TCPMetaProtocol createTCPProtocol(InetSocketAddress remote, String json,
+                                                    Consumer<NVGenericMap> callback) {
+        return withCallback(createTCPProtocol(remote, json), callback);
+    }
+
+    /** {@link #createTCPProtocol(String, String)} with a results callback. */
+    public static TCPMetaProtocol createTCPProtocol(String address, String json,
+                                                    Consumer<NVGenericMap> callback) {
+        return withCallback(createTCPProtocol(address, json), callback);
+    }
+
+    /** {@link #createTCPProtocol(IPAddress, String)} with a results callback. */
+    public static TCPMetaProtocol createTCPProtocol(IPAddress address, String json,
+                                                    Consumer<NVGenericMap> callback) {
+        return withCallback(createTCPProtocol(address, json), callback);
+    }
+
+    /** {@link #createUDPProtocol(InetSocketAddress, NVGenericMap)} with a results callback. */
+    public static UDPMetaProtocol createUDPProtocol(InetSocketAddress remote, NVGenericMap config,
+                                                    Consumer<NVGenericMap> callback) {
+        return withCallback(createUDPProtocol(remote, config), callback);
+    }
+
+    /** {@link #createUDPProtocol(String, NVGenericMap)} with a results callback. */
+    public static UDPMetaProtocol createUDPProtocol(String address, NVGenericMap config,
+                                                    Consumer<NVGenericMap> callback) {
+        return withCallback(createUDPProtocol(address, config), callback);
+    }
+
+    /** {@link #createUDPProtocol(IPAddress, NVGenericMap)} with a results callback. */
+    public static UDPMetaProtocol createUDPProtocol(IPAddress address, NVGenericMap config,
+                                                    Consumer<NVGenericMap> callback) {
+        return withCallback(createUDPProtocol(address, config), callback);
+    }
+
+    /** {@link #createUDPProtocol(InetSocketAddress, String)} with a results callback. */
+    public static UDPMetaProtocol createUDPProtocol(InetSocketAddress remote, String json,
+                                                    Consumer<NVGenericMap> callback) {
+        return withCallback(createUDPProtocol(remote, json), callback);
+    }
+
+    /** {@link #createUDPProtocol(String, String)} with a results callback. */
+    public static UDPMetaProtocol createUDPProtocol(String address, String json,
+                                                    Consumer<NVGenericMap> callback) {
+        return withCallback(createUDPProtocol(address, json), callback);
+    }
+
+    /** {@link #createUDPProtocol(IPAddress, String)} with a results callback. */
+    public static UDPMetaProtocol createUDPProtocol(IPAddress address, String json,
+                                                    Consumer<NVGenericMap> callback) {
+        return withCallback(createUDPProtocol(address, json), callback);
+    }
+
+    private static TCPMetaProtocol withCallback(TCPMetaProtocol protocol, Consumer<NVGenericMap> callback) {
+        SUS.checkIfNulls("callback can't be null", callback);
+        return protocol.onClose(closed -> callback.accept(closed.getResults()));
+    }
+
+    private static UDPMetaProtocol withCallback(UDPMetaProtocol protocol, Consumer<NVGenericMap> callback) {
+        SUS.checkIfNulls("callback can't be null", callback);
+        return protocol.onClose(closed -> callback.accept(closed.getResults()));
     }
 
     private static NVGenericMap parse(String json) {
@@ -172,10 +264,10 @@ public final class ProtoConnect {
         try {
             NVGenericMap config = GSONUtil.fromJSONDefault(json, NVGenericMap.class);
             boolean udp = "udp".equalsIgnoreCase(ProtoUtil.stringValue(config, "transport", "tcp"));
-            TCPMetaProtocol tcp = udp ? null : createTCPValidator(args[1], json);
-            UDPMetaProtocol udpValidator = udp ? createUDPValidator(args[1], json) : null;
+            TCPMetaProtocol tcp = udp ? null : createTCPProtocol(args[1], json);
+            UDPMetaProtocol udpProtocol = udp ? createUDPProtocol(args[1], json) : null;
 
-            ExchangeScript script = udp ? udpValidator.getScript() : tcp.getScript();
+            ExchangeScript script = udp ? udpProtocol.getScript() : tcp.getScript();
             for (int i = 2; i < args.length; i++) {
                 int eq = args[i].indexOf('=');
                 if (eq <= 0) {
@@ -192,12 +284,12 @@ public final class ProtoConnect {
 
             int exit;
             if (udp) {
-                nioSocket.addDatagramSocket(new InetSocketAddress(0), udpValidator);
-                exit = outcome(udpValidator.waitForClose(waitMillis), udpValidator.getCloseCause(),
-                        udpValidator.getResults());
-                SharedIOUtil.close(udpValidator);
+                nioSocket.addDatagramSocket(new InetSocketAddress(0), udpProtocol);
+                exit = outcome(udpProtocol.waitForClose(waitMillis), udpProtocol.getCloseCause(),
+                        udpProtocol.getResults());
+                SharedIOUtil.close(udpProtocol);
             } else {
-                nioSocket.addClientSocket(tcp); // remote, timeout and resolver ride on the validator
+                nioSocket.addClientSocket(tcp); // remote, timeout and resolver ride on the protocol
                 exit = outcome(tcp.waitForClose(waitMillis), tcp.getCloseCause(), tcp.getResults());
                 SharedIOUtil.close(tcp);
             }

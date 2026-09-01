@@ -22,10 +22,13 @@ values, record a pass/fail verdict, and close. That is the entire capability sur
 - **No discovery.** The caller supplies a single `InetSocketAddress`. There is no host
   enumeration, no port ranging, no parallel-target machinery. The config cannot name a host — an
   optional top-level `port` is a default-port *hint* only.
-- **No branching, parsing, or computation.** The `exchange` script is deliberately linear: it can
-  send a constant and check that a reply contains an expected sequence, nothing more. It cannot
-  read a value out of a response and act on it. Anything richer is out of scope and requires
-  purpose-written code.
+- **A guarded linear script — no loops, no computation.** The `exchange` script is a linear step
+  list with a **forward-only** cursor. Labeled steps and outcome routes (an expect block's
+  `alt`, a validate's `on_mismatch`, `jump`; reserved targets `done`/`fail`) may only jump
+  forward — enforced at compile, so loops are impossible by construction. A `regex` capture
+  *reads* a value into the report, but the script can never compute with it: no captured value
+  ever feeds a send. Anything richer (loops, computed values, multi-connection logic) is out of
+  scope and requires purpose-written code.
 - **No credential logic, no retry/backoff, no rate manipulation.** Sessions are single-shot and
   identify themselves normally.
 - **Protocols live in JSON, never in code.** There is no protocol-specific sugar in the engine:
@@ -43,8 +46,11 @@ before the upgrade.
 
 ## 1. Architecture
 
-Four classes, layered on the existing transport and TLS plumbing — no state-machine framework,
-no event vocabulary, no property bags:
+Four classes, layered on the existing transport and TLS plumbing. Step dispatch is a
+`MonoStateMachine` op→handler table (the `CustomSSLStateMachine` pattern: one registered
+handler per op, publish-chained inline on the read worker) — not the full
+`org.zoxweb.server.fsm.StateMachine` framework: no states, no triggers, no event vocabulary,
+no property bags:
 
 ```
                     JSON definition (file or string)
@@ -53,7 +59,8 @@ no event vocabulary, no property bags:
                      ┌─ ExchangeScript ─────────────┐
                      │ assembler (framing)          │
                      │ step pump (send/expect/      │
-                     │   validate/start_tls)        │
+                     │   validate/start_tls/label/  │
+                     │   jump/record)               │
                      │ results (NVGenericMap)       │
                      └──────┬───────────────────────┘
               host seam: write() · startTLS() · fail() · complete()
@@ -83,7 +90,7 @@ EOF/error path or from a script decision); observers never drive or close a sess
 
 1. Build a validator from a JSON definition: `new TCPMetaProtocol(id, json)` /
    `new UDPMetaProtocol(id, json, remoteAddress)` — or the `ProtoConnect.createTCPValidator` /
-   `createUDPValidator` factories (endpoint + definition in, bound validator out).
+   `createUDPProtocol` factories (endpoint + definition in, bound validator out).
 2. Hand endpoint + validator to NIOSocket:
    `addClientSocket(InetSocketAddress, ConnectionCallback<?>, timeoutInSec, resolver)` (TCP) or
    `addDatagramSocket(InetSocketAddress localBind, ConnectionCallback<?>)` (UDP).
@@ -111,7 +118,7 @@ Top-level keys:
 | `tls` | `{mode, cert_validation}` | — | TLS behavior (§4.2, §4.3); TCP only |
 | `assembler` | `{boundary, …}` | by transport | message framing (§3.1) |
 | `vars` | object | — | defaults for `${name}` injection |
-| `exchange` | array of steps | — | the linear script (§3.2) |
+| `exchange` | array of steps | — | the guarded linear script (§3.2) |
 
 `tls` block: `mode` is `"immediate"` (handshake right after connect) or `"on_demand"` (upgrade
 when the script executes `start_tls`); `cert_validation` defaults to `true` — validate the chain
@@ -121,8 +128,13 @@ certificate issued for a different host.
 
 Fail-fast validation at compile: unknown transport, tls mode, boundary, or exchange op;
 `udp` × {`tls`, `start_tls`}; `start_tls` without an `on_demand` tls block; malformed
-`hex:`/`base64:` literals. The retired sm-era keys (`protocol`, `ssh`, `states`) are rejected
-with a clear error — protocol shapes are definition files now (§8).
+`hex:`/`base64:` literals. Routing and capture (§3.2.1, §3.3): duplicate/empty/reserved
+labels; unknown, backward, or self route targets; an expect block without `match`, an empty
+`alt` list, an alt entry missing `match` or `goto`; `on_timeout` (reserved for phase 2);
+`optional` + `on_mismatch`; a malformed regex, `${var}` in a regex, `group` without a regex or
+out of the pattern's range; an empty `record` block or a `record` key naming a reserved verdict
+key. The retired sm-era keys (`protocol`, `ssh`, `states`) are rejected with a clear error —
+protocol shapes are definition files now (§8).
 
 **Key names are case-insensitive.** The definition is parsed into an `NVGenericMap`, whose entry
 names match regardless of case — `"Port"`, `"PORT"`, and `"port"` are the same key, at every
@@ -175,21 +187,67 @@ reframes under the new rule. Not available over UDP (one datagram = one message)
 
 ### 3.2 Step pump
 
-The `exchange` script is a **linear step list**; a cursor advances through it as the session
-progresses. The pump runs after every state change (start, new data, TLS secured) until it blocks
-waiting for data, fails, or completes.
+The `exchange` script is a **guarded linear step list**: a forward-only cursor advances through
+it as the session progresses, and outcome routes (§3.2.1) may only jump forward. The pump runs
+after every state change (start, new data, TLS secured) until it blocks waiting for data, fails,
+or completes. Dispatch is the inherited `MonoStateMachine` op→handler table — publish is the
+loop, one handler per op, inline on the read worker.
 
 | Op | Action | Semantics |
 |---|---|---|
 | `{"send": "<literal>"}` | write to the session | `${vars}` resolved at send time; bytes go through the host's write path (encrypted when the session is secure) |
 | `{"expect": "<literal>"}` | wait for a match | per-message contains-match. Framed boundaries: a non-matching complete message is skipped, bounded by `max_skip` (default 65536) — the SMTP `250-` continuation idiom. `stream`: match against the accumulation, consume through the end of the match |
-| `{"validate": {…}}` | apply the verdict match | see §3.3; a mismatch fails the session |
+| `{"expect": {"match": …, "alt": […]}}` | wait, with routes | block form of `expect`: the same main match plus alternative patterns, each routed to a forward label — §3.2.1 |
+| `{"validate": {…}}` | apply the verdict match | see §3.3; a mismatch fails the session — unless the step routes it with `on_mismatch` (§3.2.1) |
 | `{"start_tls": true}` | upgrade to TLS | residue check, then the host seam's `startTLS()`; the pump resumes when the handshake completes (§4.3) |
 | `{"boundary": {…}}` | switch framing | replaces the active framing with the step's `assembler`-shaped block (§3.1); the accumulation residue reframes under the new rule. TCP only |
+| `{"label": "<name>"}` | no-op jump target | names a forward route target; labels are case-insensitive and unique; `done`/`fail` are reserved |
+| `{"jump": "<target>"}` | unconditional route | forward jump to a label, or the reserved `done` (complete now) / `fail` (fail the session) |
+| `{"record": {…}}` | merge constants | writes the block's literal keys into the results — the way a branch marks which path ran. The verdict keys (`validated`, `reason`, `ready`, `latency_ms`) are rejected at compile |
 
 **Completion rule:** the step list finishing = session done → `ready=true` in results →
 `close_on_ready` honored. **A run that completes with no `validate` step records
-`validated=true, reason="script completed"`** — every run yields a verdict.
+`validated=true, reason="script completed"`** — every run yields a verdict; on a branched
+script the `record` keys carry which path produced it.
+
+#### 3.2.1 Routing — the guarded-linear rules
+
+Every route target is a `label` name, or the reserved `done` (= the end of the step list) /
+`fail` (= fail the session). Every resolved route must point **strictly forward** of the
+routing step — enforced at compile, so loops are impossible by construction.
+
+**Steps stay single-key objects.** The JSON→`NVGenericMap` mapping keeps only the first key of
+a multi-key step object, so route metadata lives *inside* the step's value: the `expect` block
+form, and `on_mismatch` inside the `validate` meta. An `expect` value is treated as a block when
+it is an object (or a string that starts with `{` — a byte literal genuinely starting with `{`
+must be written with the `txt:` prefix).
+
+```json
+{ "expect": { "match": "txt:STARTTLS",
+              "alt": [ { "match": "txt:250 ", "goto": "plaintext_only" } ] } }
+```
+
+Alt evaluation, by boundary:
+- **`stream`**: the main `match` is tried first and **wins regardless of byte position**; then
+  each alt in declaration order. The matching pattern (main or alt) consumes through its own
+  match and becomes the current message. An alt that matches mid-line leaves residue — a branch
+  that feeds `start_tls` must still consume through the line terminator, or the residue check
+  fails the upgrade (by design).
+- **Framed** (`delimited`/`length_prefixed`/`datagram`): per delivered message, main first, then
+  the alts in order; a message matching *neither* is skipped exactly as today (`max_skip`
+  bounded) — the `250-` continuation idiom survives. Author alt patterns that cannot occur in
+  continuation lines, or the alt fires where a skip was intended.
+
+`{"validate": {…, "on_mismatch": "<target>"}}` routes a mismatch forward instead of failing:
+the verdict and the current message stay untouched, so the routed path can re-examine the same
+reply. `on_mismatch: "fail"` keeps the legacy failure verdict verbatim; `optional` and
+`on_mismatch` conflict (a probe never mismatches) and are rejected at compile.
+
+`on_timeout` is **reserved for phase 2** and rejected at compile: no inactivity timer exists on
+client sessions today (the `NIOChannelMonitor` appointment is connect-only), and firing a route
+from the scheduler thread would race the lock-free engine. The phase-2 shape is a
+selector-worker wake that calls a future `ExchangeScript.timeout()` inline on the session's own
+worker.
 
 ### 3.3 Validation
 
@@ -228,6 +286,29 @@ without it), the script continues on match and mismatch alike, and `validated`/`
 untouched. Since a validate never clears the current message, several probes can examine the same
 reply — the capability/version-matrix idiom: one run reports which protocol variants the endpoint
 supports (V1 only, V2 only, both, neither) without any of them failing the session.
+
+An optional **`regex`** is checked **last**, after `prefix`/`contains`/`exact`:
+
+```json
+{ "validate": { "regex": "HTTP/1\\.[01] (\\d{3})", "report": "status" } }
+```
+
+- The value is a **plain Java regex** — the data-literal prefix rules do *not* apply (regex is
+  its own escaping language; a `hex:`/`base64:` pattern is meaningless against decoded text),
+  and `${var}`s are rejected, which is what makes `Pattern.compile` a compile-time fail-fast.
+- The subject is the (post-`extract`) message decoded **ISO-8859-1** — a 1:1 byte↔char mapping,
+  so binary messages match safely — via `Matcher.find()` (contains-style). `ignore_case` never
+  folds a regex; use an inline `(?i)`.
+- **`group`** selects the reported capture: default group 1 when the pattern captures, else the
+  whole match (group 0); an explicit `group` is range-checked at compile. On a match, the
+  capture is what `report` stores (it wins over the whole-message text; note the charset
+  asymmetry — captures are ISO-8859-1 text, legacy reports UTF-8). A regex mismatch is a normal
+  validation mismatch: it fails the session, or routes via `on_mismatch`. With `optional`, the
+  boolean contract holds — the probe records match presence, never the capture; to get the
+  capture *and* tolerance, use a non-optional regex step with `on_mismatch`.
+
+The capture is **report-only**: it can never feed a send or a later match — reading a value into
+the report is observation, not computation, and the no-computation charter stands.
 
 ### 3.4 The host seam
 
@@ -328,18 +409,24 @@ The verdict lives in an `NVGenericMap` owned by the engine, exposed via `getResu
 | `validated` | validate step, or the completion rule | the verdict — present on every completed run |
 | `reason` | validate step / failure path | mismatch cause, or `"script completed"` |
 | `ready` | completion | the script finished |
-| `<report>` | validate step's `report` key | matched message text (e.g. `banner`), or the boolean outcome of an `optional` probe |
+| `<report>` | validate step's `report` key | matched message text (e.g. `banner`), a regex capture (§3.3), or the boolean outcome of an `optional` probe |
+| `<record>` | a `record` step | the step's constants — typically which branch of a routed script ran (§3.2.1). Case-insensitive names: `record`, `report`, and capture keys differing only by case collide into one entry, last writer wins |
 | `tls_protocol` / `tls_cipher` | TLS completion | negotiated session parameters |
 | `latency_ms` | completion or failure | connect-to-verdict duration in milliseconds; the clock starts at the host's `markOpen()` (connect — so an immediate handshake is measured) or at script start when never called, and the first measurement wins |
 
 The failure cause is additionally available as `getCloseCause()` (the `Throwable` stashed by
 `exception(...)`/`fail(...)`), and always agrees with `validated`/`reason`.
 
-Completion is observed with `waitForClose(millis)` (latch released when the session closes) or by
-polling `isClosed()`. Sessions end in exactly one of three ways: script completion (with
-`close_on_ready`, self-close), remote disconnect/EOF, or failure (validation mismatch, residue,
-I/O error, port-unreachable) — the results bag and close cause are final before the close
-completes.
+Completion is observed three ways: pull-style with `waitForClose(millis)` (latch released when
+the session closes) or by polling `isClosed()`; or event-driven with `onClose(Consumer)` — the
+`PQCCheck` idiom — a one-shot hook fired exactly once when the session closes, with the results
+bag and close cause final when it fires. Register the hook before handing the validator to
+NIOSocket and no thread ever parks on the session; a hook registered on an already-closed
+session runs immediately, and a throwing hook never unwinds the closer. The hook runs inside
+the close path — hand real work to an executor rather than block in place. Sessions end in
+exactly one of three ways: script completion (with `close_on_ready`, self-close), remote
+disconnect/EOF, or failure (validation mismatch, residue, I/O error, port-unreachable) — the
+results bag and close cause are final before the close completes.
 
 Teardown (both transports): close the channel and session streams, recache session buffers, and
 release the completion latch — once only; later closes are no-ops.
@@ -348,12 +435,16 @@ release the completion latch — once only; later closes are no-ops.
 
 ## 7. `ProtoConnect` — factories & CLI
 
-The programmatic entry points are the `createTCPValidator` / `createUDPValidator` factories:
+The programmatic entry points are the `createTCPProtocol` / `createUDPProtocol` factories:
 endpoint + definition in (endpoint as `InetSocketAddress`, `"host[:port]"` string, or
 `IPAddress`; definition as JSON text or parsed `NVGenericMap`), bound validator out; a missing
 port falls back to the definition's `port` hint. The TCP validator carries its remote address
 and timeout, so it goes to `NIOSocket.addClientSocket(validator)`; the UDP one to
-`addDatagramSocket(new InetSocketAddress(0), validator)`.
+`addDatagramSocket(new InetSocketAddress(0), validator)`. Every factory also has a
+`Consumer<NVGenericMap>` form: the consumer receives the final results bag exactly once when
+the session closes — completion, failure, or remote EOF alike — wired through the validator's
+`onClose` hook (§6), so it occupies that hook and follows its rules (fires immediately if
+already closed, runs inside the close path — hand real work to an executor).
 
 The CLI: `ProtoConnect <definition.json> <host[:port]> [name=value ...]` — loads the
 definition, builds the matching validator per its `transport`, injects each `name=value` as a
@@ -374,14 +465,17 @@ Protocol shapes are definition files, not code. Shipped under `src/test/resource
 |---|---|
 | `ssh-banner.json` | delimited banner-only check: `expect "txt:SSH-"` + `validate {prefix "txt:SSH-2.0-", report "banner"}` |
 | `ssh-banner-kex.json` | the banner phase of `ssh-banner.json`, then the client ident `send` (RFC 4253 — some servers wait for it), a `boundary` switch to RFC 4253 binary packets (`length_prefixed {offset 0, size 4}`), a `validate` whose `extract {offset 22, size 4}` asserts `sha2` and reports the server's key-exchange name-list from `SSH_MSG_KEXINIT` as `kex_algorithms`, and an `optional` probe on the same extract reporting post-quantum kex support (`sntrup761`) as `pq_kex` |
-| `smtp-starttls.json` | `tls {mode on_demand}`; EHLO dialogue → `expect` the STARTTLS capability → `start_tls` → post-upgrade EHLO round-trip (RFC 3207 shape) |
+| `smtp-starttls.json` | `tls {mode on_demand}`; greeting captured as `banner` → EHLO dialogue → `expect` the STARTTLS capability → `start_tls` → post-upgrade EHLO round-trip (RFC 3207 shape) |
 | `dns-probe.json` | `transport udp`; one `hex:` DNS query datagram with a fixed transaction id → `validate {contains "hex:<txn id>", report "dns"}` |
 | `postgres-ssl-probe.json` | `tls {mode on_demand, cert_validation false}`; the 8-byte `SSLRequest` `send` → `expect "txt:S"` (ask-then-upgrade) → `start_tls` → `boundary` switch to backend messages (`length_prefixed {offset 1, size 4, adjust -4}`) → StartupMessage `send` → `validate {prefix "txt:R"}` reporting the AuthenticationRequest as `auth_request` |
 | `https-server.json` | `tls {mode immediate, cert_validation true}`; encrypted `GET` with `${host}` → `expect` the end of the header block → `validate {prefix "txt:HTTP/"}` capturing `response_headers` → `optional` probe `{contains "txt:Server:", ignore_case}` reporting `server` |
+| `smtp-posture.json` | the guarded-linear posture probe: greeting captured as `banner` → EHLO dialogue → `expect` block whose main match is the STARTTLS capability with an `alt {match "txt:250 ", goto plaintext_only}` → each branch `record`s `starttls_offered` true/false; both postures complete `validated: true` |
+| `ssh-pq-check.json` | the PQ-readiness upgrade of `ssh-banner-kex.json`: banner + kex-list capture, per-algorithm `optional` probes (`pq_sntrup761`, `pq_mlkem`), and a guarded-linear branch folding them into one `pq_supported` boolean — every posture completes `validated: true` |
+| `http-status-regex.json` | regex capture: `GET` with `${host}` → `validate {regex "HTTP/1\\.[01] (\\d{3})", report "status", on_mismatch "not_http"}` — the routed path `record`s `http: false` |
 
 A new protocol check is a new JSON file. Code is only ever added for behavior the schema cannot
-express (branching, computed values) — and such a check belongs in purpose-written classes, not
-in this engine.
+express (loops, computed values, multi-connection logic) — and such a check belongs in
+purpose-written classes, not in this engine.
 
 ---
 
@@ -398,7 +492,10 @@ Tests are skipped by default (`skipTests=true` in the pom) — `-DskipTests=fals
 GPG signs at `verify`; use `package`/`test` for development. Test keystore for the TLS suites:
 `src/test/resources/test.zoxweb.org.jks` — PKCS12, storepass `password`, alias `selfsigned`.
 
-Test coverage: hermetic engine tests (no sockets: framing, pump, fail-fast matrix, encodings);
-loopback integration for plain exchange, immediate TLS (against `SSLNIOSocketHandlerFactory`),
-STARTTLS positive + injection negative, UDP exchange, and the DNS probe (hermetic responder plus
+Test coverage: hermetic engine tests (no sockets: framing, pump, fail-fast matrix, encodings,
+routing — alt/jump/on_mismatch/record incl. the residue check on routed paths — and regex
+capture); loopback integration for plain exchange, immediate TLS (against
+`SSLNIOSocketHandlerFactory`), STARTTLS positive + injection negative, the branched SMTP
+posture probe (`SMTPPostureLoopbackTest`, one definition against both server postures), UDP
+exchange, and the DNS probe (hermetic responder plus
 a live `main`).

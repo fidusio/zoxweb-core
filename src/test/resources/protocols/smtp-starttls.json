@@ -6,8 +6,8 @@
   "tls": { "mode": "on_demand", "cert_validation": false },
   "vars": { "helo": "probe.local" },
   "exchange": [
-    { "expect": "txt:220 " },
     { "expect": "txt:\r\n" },
+    { "validate": { "prefix": "txt:220", "report": "banner" } },
     { "send": "txt:EHLO ${helo}\r\n" },
     { "expect": "txt:STARTTLS" },
     { "expect": "txt:\r\n" },

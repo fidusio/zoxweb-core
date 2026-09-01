@@ -100,7 +100,7 @@ public class SSHBannerTest {
      */
     private TCPMetaProtocol probe(String definitionPath, String banner, byte[] kexInit) throws Exception {
         ServerSocket server = new ServerSocket(0, 1, InetAddress.getLoopbackAddress());
-        TCPMetaProtocol validator = ProtoConnect.createTCPValidator(
+        TCPMetaProtocol validator = ProtoConnect.createTCPProtocol(
                 new InetSocketAddress(InetAddress.getLoopbackAddress(), server.getLocalPort()),
                 definitionJSON(definitionPath));
         NIOSocket nioSocket = new NIOSocket(TaskUtil.defaultTaskProcessor(), TaskUtil.defaultTaskScheduler());

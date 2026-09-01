@@ -56,7 +56,7 @@ public class DNSProbeTest {
         // the endpoint string; a missing port falls back to the definition's port hint
         String endpoint = args.length > 1 ? args[0] + ":" + args[1] : args[0];
         NIOSocket nioSocket = new NIOSocket(TaskUtil.defaultTaskProcessor(), TaskUtil.defaultTaskScheduler());
-        UDPMetaProtocol probe = ProtoConnect.createUDPValidator(endpoint, definitionJSON());
+        UDPMetaProtocol probe = ProtoConnect.createUDPProtocol(endpoint, definitionJSON());
         int exit;
         try {
             System.out.println("CONNECTING " + endpoint);
@@ -108,7 +108,7 @@ public class DNSProbeTest {
         NIOSocket nioSocket = new NIOSocket(TaskUtil.defaultTaskProcessor(), TaskUtil.defaultTaskScheduler());
         UDPMetaProtocol validator = null;
         try {
-            validator = ProtoConnect.createUDPValidator(
+            validator = ProtoConnect.createUDPProtocol(
                     new InetSocketAddress(InetAddress.getLoopbackAddress(), server.getLocalPort()),
                     definitionJSON());
             assertTrue(validator.getScript().isUDP());

@@ -605,4 +605,360 @@ public class ExchangeScriptTest {
         assertNotNull(h.failure);
         assertTrue(h.failure.getMessage().contains("${missing}"));
     }
+
+    // ---- guarded linear script: routing fail-fast matrix ----
+
+    @Test
+    public void compileFailFastRouting() {
+        FakeHost h = new FakeHost();
+        // duplicate label
+        assertThrows(IllegalArgumentException.class, () -> script(
+                "{\"exchange\": [{\"label\": \"a\"}, {\"label\": \"a\"}]}", h));
+        // reserved label names
+        assertThrows(IllegalArgumentException.class, () -> script("{\"exchange\": [{\"label\": \"done\"}]}", h));
+        assertThrows(IllegalArgumentException.class, () -> script("{\"exchange\": [{\"label\": \"fail\"}]}", h));
+        // empty label / non-string jump
+        assertThrows(IllegalArgumentException.class, () -> script("{\"exchange\": [{\"label\": \"\"}]}", h));
+        assertThrows(IllegalArgumentException.class, () -> script("{\"exchange\": [{\"jump\": 5}]}", h));
+        // unknown route target
+        assertThrows(IllegalArgumentException.class, () -> script("{\"exchange\": [{\"jump\": \"nowhere\"}]}", h));
+        // backward/self route: forward-only, loops impossible by construction
+        assertThrows(IllegalArgumentException.class, () -> script(
+                "{\"exchange\": [{\"label\": \"a\"}, {\"jump\": \"a\"}]}", h));
+        // expect block without a match literal
+        assertThrows(IllegalArgumentException.class, () -> script(
+                "{\"exchange\": [{\"expect\": {\"alt\": [{\"match\": \"txt:x\", \"goto\": \"done\"}]}}]}", h));
+        // a '{'-leading expect that is not valid JSON needs the txt: prefix
+        assertThrows(IllegalArgumentException.class, () -> script(
+                "{\"exchange\": [{\"expect\": \"{notjson\"}]}", h));
+        // empty alt list / alt entry missing goto
+        assertThrows(IllegalArgumentException.class, () -> script(
+                "{\"exchange\": [{\"expect\": {\"match\": \"txt:x\", \"alt\": []}}]}", h));
+        assertThrows(IllegalArgumentException.class, () -> script(
+                "{\"exchange\": [{\"expect\": {\"match\": \"txt:x\", \"alt\": [{\"match\": \"txt:y\"}]}}]}", h));
+        // on_timeout is reserved for phase 2
+        assertThrows(IllegalArgumentException.class, () -> script(
+                "{\"exchange\": [{\"expect\": {\"match\": \"txt:x\", \"on_timeout\": \"done\"}}]}", h));
+        // optional and on_mismatch conflict
+        assertThrows(IllegalArgumentException.class, () -> script(
+                "{\"exchange\": [{\"validate\": {\"contains\": \"txt:x\", \"optional\": true,"
+                        + " \"report\": \"p\", \"on_mismatch\": \"done\"}}]}", h));
+        // malformed regex / ${var} in regex
+        assertThrows(IllegalArgumentException.class, () -> script(
+                "{\"exchange\": [{\"validate\": {\"regex\": \"([\"}}]}", h));
+        assertThrows(IllegalArgumentException.class, () -> script(
+                "{\"exchange\": [{\"validate\": {\"regex\": \"${v}\\\\d+\"}}]}", h));
+        // group without a regex / group out of range
+        assertThrows(IllegalArgumentException.class, () -> script(
+                "{\"exchange\": [{\"validate\": {\"contains\": \"txt:x\", \"group\": 1}}]}", h));
+        assertThrows(IllegalArgumentException.class, () -> script(
+                "{\"exchange\": [{\"validate\": {\"regex\": \"(a)\", \"group\": 2}}]}", h));
+        // empty record block / reserved record key
+        assertThrows(IllegalArgumentException.class, () -> script("{\"exchange\": [{\"record\": {}}]}", h));
+        assertThrows(IllegalArgumentException.class, () -> script(
+                "{\"exchange\": [{\"record\": {\"validated\": true}}]}", h));
+    }
+
+    // ---- guarded linear script: routing at run time ----
+
+    @Test
+    public void altRoutesStreamAndRecordsBranch() {
+        String def = "{\"exchange\": ["
+                + "{\"expect\": {\"match\": \"txt:220 \", \"alt\": [{\"match\": \"txt:421 \", \"goto\": \"refused\"}]}},"
+                + "{\"expect\": \"txt:\\r\\n\"},"
+                + "{\"send\": \"txt:MAIN\\r\\n\"},"
+                + "{\"record\": {\"branch\": \"main\"}},"
+                + "{\"jump\": \"done\"},"
+                + "{\"label\": \"refused\"},"
+                + "{\"expect\": \"txt:\\r\\n\"},"
+                + "{\"record\": {\"branch\": \"refused\"}}]}";
+
+        // alt path: refusal routes, main-path send never goes out, run still completes
+        FakeHost h1 = new FakeHost();
+        ExchangeScript s1 = script(def, h1);
+        s1.start();
+        s1.feed(utf8("421 busy\r\n"));
+        assertTrue(s1.isDone());
+        assertEquals("", h1.wireText(), "main-path send must not run on the alt route");
+        assertEquals("refused", s1.getResults().getValue("branch"));
+        assertEquals(Boolean.TRUE, s1.getResults().getValue("validated"));
+        assertEquals("script completed", s1.getResults().getValue("reason"));
+
+        // main path: jump done skips the alt tail
+        FakeHost h2 = new FakeHost();
+        ExchangeScript s2 = script(def, h2);
+        s2.start();
+        s2.feed(utf8("220 ok\r\n"));
+        assertTrue(s2.isDone());
+        assertEquals("MAIN\r\n", h2.wireText());
+        assertEquals("main", s2.getResults().getValue("branch"));
+    }
+
+    @Test
+    public void altMainWinsOverEarlierAltPosition() {
+        FakeHost h = new FakeHost();
+        ExchangeScript s = script("{\"exchange\": ["
+                + "{\"expect\": {\"match\": \"txt:B\", \"alt\": [{\"match\": \"txt:A\", \"goto\": \"alt_path\"}]}},"
+                + "{\"record\": {\"path\": \"main\"}},"
+                + "{\"jump\": \"done\"},"
+                + "{\"label\": \"alt_path\"},"
+                + "{\"record\": {\"path\": \"alt\"}}]}", h);
+        s.start();
+        // the alt token arrives first in the stream, but the main match has priority
+        s.feed(utf8("AB"));
+        assertTrue(s.isDone());
+        assertEquals("main", s.getResults().getValue("path"));
+    }
+
+    @Test
+    public void altRoutesFramedPreservesSkip() {
+        FakeHost h = new FakeHost();
+        ExchangeScript s = script("{\"assembler\": {\"boundary\": \"delimited\"}, \"exchange\": ["
+                + "{\"expect\": {\"match\": \"txt:250 \", \"alt\": [{\"match\": \"txt:421\", \"goto\": \"refused\"}]}},"
+                + "{\"record\": {\"branch\": \"main\"}},"
+                + "{\"jump\": \"done\"},"
+                + "{\"label\": \"refused\"},"
+                + "{\"record\": {\"branch\": \"refused\"}}]}", h);
+        s.start();
+        // continuation lines match neither the main pattern nor the alt — skipped as today
+        s.feed(utf8("250-first\r\n250-second\r\n421 refused\r\n"));
+        assertTrue(s.isDone());
+        assertEquals("refused", s.getResults().getValue("branch"));
+    }
+
+    @Test
+    public void framedMaxSkipStillEnforcedWithAlts() {
+        FakeHost h = new FakeHost();
+        ExchangeScript s = script(
+                "{\"assembler\": {\"boundary\": \"delimited\", \"max_skip\": 8}, \"exchange\": ["
+                        + "{\"expect\": {\"match\": \"txt:NEVER\", \"alt\": [{\"match\": \"txt:ALSONEVER\", \"goto\": \"done\"}]}}]}", h);
+        s.start();
+        s.feed(utf8("junk one\r\njunk two\r\n"));
+        assertTrue(s.isFailed());
+        assertTrue(h.failure.getMessage().contains("max_skip"));
+    }
+
+    @Test
+    public void altGotoFailFailsSession() {
+        FakeHost h = new FakeHost();
+        ExchangeScript s = script("{\"exchange\": ["
+                + "{\"expect\": {\"match\": \"txt:220 \", \"alt\": [{\"match\": \"txt:421\", \"goto\": \"fail\"}]}}]}", h);
+        s.start();
+        s.feed(utf8("421 go away\r\n"));
+        assertTrue(s.isFailed());
+        assertEquals(Boolean.FALSE, s.getResults().getValue("validated"));
+        assertTrue(h.failure.getMessage().contains("routed to fail"));
+    }
+
+    @Test
+    public void jumpToDoneCompletesEarly() {
+        FakeHost h = new FakeHost();
+        ExchangeScript s = script("{\"exchange\": ["
+                + "{\"send\": \"txt:A\"}, {\"jump\": \"done\"}, {\"send\": \"txt:B\"}]}", h);
+        s.start();
+        assertTrue(s.isDone());
+        assertEquals("A", h.wireText(), "steps after a jump to done must not run");
+        assertEquals(1, h.completes);
+        assertEquals(Boolean.TRUE, s.getResults().getValue("validated"));
+    }
+
+    @Test
+    public void onMismatchRoutesInsteadOfFailing() {
+        FakeHost h = new FakeHost();
+        ExchangeScript s = script("{\"exchange\": ["
+                + "{\"expect\": \"txt:\\r\\n\"},"
+                + "{\"validate\": {\"contains\": \"txt:250\", \"on_mismatch\": \"fallback\", \"report\": \"smtp_reply\"}},"
+                + "{\"record\": {\"proto\": \"smtp\"}},"
+                + "{\"jump\": \"done\"},"
+                + "{\"label\": \"fallback\"},"
+                + "{\"validate\": {\"contains\": \"txt:HTTP\", \"report\": \"http_reply\"}}]}", h);
+        s.start();
+        s.feed(utf8("HTTP/1.1 200 OK\r\n"));
+        assertTrue(s.isDone());
+        assertNull(s.getResults().getValue("smtp_reply"), "mismatched validate must not report");
+        assertNull(s.getResults().getValue("proto"));
+        assertEquals("HTTP/1.1 200 OK\r\n", s.getResults().getValue("http_reply"),
+                "the routed path examines the same current message");
+        assertEquals(Boolean.TRUE, s.getResults().getValue("validated"));
+        assertNull(h.failure);
+    }
+
+    @Test
+    public void onMismatchToFailMatchesLegacyFailure() {
+        FakeHost h = new FakeHost();
+        ExchangeScript s = script("{\"exchange\": ["
+                + "{\"expect\": \"txt:\\r\\n\"},"
+                + "{\"validate\": {\"contains\": \"txt:250\", \"on_mismatch\": \"fail\"}}]}", h);
+        s.start();
+        s.feed(utf8("HTTP/1.1 200 OK\r\n"));
+        assertTrue(s.isFailed());
+        assertEquals(Boolean.FALSE, s.getResults().getValue("validated"));
+        assertTrue(((String) s.getResults().getValue("reason")).startsWith("validation failed:"),
+                "on_mismatch to fail keeps the legacy failure verdict");
+    }
+
+    @Test
+    public void recordMergesConstantsAndCaseInsensitiveCollision() {
+        FakeHost h = new FakeHost();
+        ExchangeScript s = script("{\"exchange\": ["
+                + "{\"record\": {\"tag\": \"one\", \"flag\": true}},"
+                + "{\"record\": {\"TAG\": \"two\"}}]}", h);
+        s.start();
+        assertTrue(s.isDone());
+        assertEquals(Boolean.TRUE, s.getResults().getValue("flag"));
+        // results keys are case-insensitive: TAG and tag collide, last writer wins
+        assertEquals("two", s.getResults().getValue("tag"));
+    }
+
+    // ---- regex capture in validate ----
+
+    @Test
+    public void regexCaptureDefaultGroupOne() {
+        FakeHost h = new FakeHost();
+        ExchangeScript s = script("{\"exchange\": ["
+                + "{\"expect\": \"txt:\\r\\n\"},"
+                + "{\"validate\": {\"regex\": \"SSH-2\\\\.0-([\\\\w.]+)\", \"report\": \"version\"}}]}", h);
+        s.start();
+        s.feed(utf8("SSH-2.0-OpenSSH_9.6\r\n"));
+        assertTrue(s.isDone());
+        assertEquals("OpenSSH_9.6", s.getResults().getValue("version"),
+                "a pattern with groups reports group 1 by default");
+        assertEquals(Boolean.TRUE, s.getResults().getValue("validated"));
+    }
+
+    @Test
+    public void regexGroupZeroWholeMatchAndGrouplessDefault() {
+        // explicit group 0 reports the whole match even when the pattern captures
+        FakeHost h1 = new FakeHost();
+        ExchangeScript s1 = script("{\"exchange\": ["
+                + "{\"expect\": \"txt:\\r\\n\"},"
+                + "{\"validate\": {\"regex\": \"HTTP/1\\\\.1 (\\\\d{3})\", \"group\": 0, \"report\": \"status_line\"}}]}", h1);
+        s1.start();
+        s1.feed(utf8("HTTP/1.1 200 OK\r\n"));
+        assertEquals("HTTP/1.1 200", s1.getResults().getValue("status_line"));
+
+        // a pattern without groups defaults to the whole match
+        FakeHost h2 = new FakeHost();
+        ExchangeScript s2 = script("{\"exchange\": ["
+                + "{\"expect\": \"txt:\\r\\n\"},"
+                + "{\"validate\": {\"regex\": \"\\\\d{3}\", \"report\": \"status\"}}]}", h2);
+        s2.start();
+        s2.feed(utf8("HTTP/1.1 200 OK\r\n"));
+        assertEquals("200", s2.getResults().getValue("status"));
+    }
+
+    @Test
+    public void regexMismatchFailsSession() {
+        FakeHost h = new FakeHost();
+        ExchangeScript s = script("{\"exchange\": ["
+                + "{\"expect\": \"txt:\\r\\n\"},"
+                + "{\"validate\": {\"regex\": \"\\\\d{4}\", \"report\": \"code\"}}]}", h);
+        s.start();
+        s.feed(utf8("no digits here\r\n"));
+        assertTrue(s.isFailed());
+        assertEquals(Boolean.FALSE, s.getResults().getValue("validated"));
+        assertTrue(((String) s.getResults().getValue("reason")).contains("regex mismatch"));
+    }
+
+    @Test
+    public void regexWithOnMismatchRoutes() {
+        FakeHost h = new FakeHost();
+        ExchangeScript s = script("{\"exchange\": ["
+                + "{\"expect\": \"txt:\\r\\n\"},"
+                + "{\"validate\": {\"regex\": \"\\\\d{4}\", \"report\": \"code\", \"on_mismatch\": \"nomatch\"}},"
+                + "{\"jump\": \"done\"},"
+                + "{\"label\": \"nomatch\"},"
+                + "{\"record\": {\"code_found\": false}}]}", h);
+        s.start();
+        s.feed(utf8("no digits here\r\n"));
+        assertTrue(s.isDone());
+        assertEquals(Boolean.FALSE, s.getResults().getValue("code_found"));
+        assertEquals(Boolean.TRUE, s.getResults().getValue("validated"));
+        assertNull(h.failure);
+    }
+
+    @Test
+    public void regexAfterExtract() {
+        FakeHost h = new FakeHost();
+        // datagram message: 1-byte length then the field; the regex sees the extracted field only
+        ExchangeScript s = script("{\"transport\": \"udp\", \"exchange\": ["
+                + "{\"validate\": {\"extract\": {\"offset\": 0, \"size\": 1},"
+                + " \"regex\": \"([0-9]+)\", \"report\": \"build\"}}]}", h);
+        s.start();
+        byte[] datagram = new byte[6];
+        datagram[0] = 5;
+        System.arraycopy(utf8("ab123"), 0, datagram, 1, 5);
+        s.feed(datagram);
+        assertTrue(s.isDone());
+        assertEquals("123", s.getResults().getValue("build"));
+    }
+
+    @Test
+    public void regexBinarySafeHighBytes() {
+        FakeHost h = new FakeHost();
+        ExchangeScript s = script("{\"transport\": \"udp\", \"exchange\": ["
+                + "{\"validate\": {\"regex\": \"V(\\\\d)\", \"report\": \"proto_version\"}}]}", h);
+        s.start();
+        // bytes above 0x7F must not derail the match (ISO-8859-1 maps bytes 1:1)
+        s.feed(new byte[]{0x01, (byte) 0xC3, (byte) 0x9F, 'V', '2', (byte) 0xFF});
+        assertTrue(s.isDone());
+        assertEquals("2", s.getResults().getValue("proto_version"));
+    }
+
+    @Test
+    public void regexOptionalRecordsBooleanOnly() {
+        FakeHost h = new FakeHost();
+        ExchangeScript s = script("{\"exchange\": ["
+                + "{\"expect\": \"txt:\\r\\n\"},"
+                + "{\"validate\": {\"regex\": \"(\\\\d{3})\", \"optional\": true, \"report\": \"has_status\"}}]}", h);
+        s.start();
+        s.feed(utf8("HTTP/1.1 200 OK\r\n"));
+        assertTrue(s.isDone());
+        // an optional probe keeps the boolean contract — never the capture
+        assertEquals(Boolean.TRUE, s.getResults().getValue("has_status"));
+    }
+
+    // ---- STARTTLS residue on routed paths ----
+
+    @Test
+    public void startTLSResidueEnforcedOnRoutedPath() {
+        FakeHost h = new FakeHost();
+        ExchangeScript s = script("{\"tls\": {\"mode\": \"on_demand\"}, \"exchange\": ["
+                + "{\"expect\": {\"match\": \"txt:NEVER\\r\\n\", \"alt\": [{\"match\": \"txt:ALT \", \"goto\": \"upgrade\"}]}},"
+                + "{\"label\": \"upgrade\"},"
+                + "{\"start_tls\": true}]}", h);
+        s.start();
+        // the alt consumes only through its own match — the leftover line is injection residue
+        s.feed(utf8("ALT go\r\n"));
+        assertTrue(s.isFailed());
+        assertTrue(h.failure.getMessage().contains("STARTTLS injection"));
+        assertEquals(0, h.startTLSCalls);
+    }
+
+    @Test
+    public void startTLSRoutedPathCleanWhenAltConsumesTheLine() {
+        FakeHost h = new FakeHost();
+        ExchangeScript s = script("{\"tls\": {\"mode\": \"on_demand\"}, \"exchange\": ["
+                + "{\"expect\": {\"match\": \"txt:NEVER\\r\\n\", \"alt\": [{\"match\": \"txt:ALT go\\r\\n\", \"goto\": \"upgrade\"}]}},"
+                + "{\"label\": \"upgrade\"},"
+                + "{\"start_tls\": true}]}", h);
+        s.start();
+        s.feed(utf8("ALT go\r\n"));
+        assertFalse(s.isFailed());
+        assertEquals(1, h.startTLSCalls);
+        s.secured();
+        assertTrue(s.isDone());
+    }
+
+    // ---- expect block detection escape hatch ----
+
+    @Test
+    public void expectBraceLiteralNeedsTxtPrefix() {
+        FakeHost h = new FakeHost();
+        // with the txt: prefix, a '{'-leading byte literal stays a literal
+        ExchangeScript s = script("{\"exchange\": [{\"expect\": \"txt:{\\\"status\\\"\"}]}", h);
+        s.start();
+        s.feed(utf8("{\"status\""));
+        assertTrue(s.isDone());
+    }
 }

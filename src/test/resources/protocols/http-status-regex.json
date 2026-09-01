@@ -1,0 +1,15 @@
+{
+  "name": "http-status-regex",
+  "port": [80, 8080],
+  "timeout_sec": 5,
+  "close_on_ready": true,
+  "vars": { "host": "example.com" },
+  "exchange": [
+    { "send": "txt:GET / HTTP/1.1\r\nHost: ${host}\r\nConnection: close\r\n\r\n" },
+    { "expect": "txt:\r\n\r\n" },
+    { "validate": { "regex": "HTTP/1\\.[01] (\\d{3})", "report": "status", "on_mismatch": "not_http" } },
+    { "jump": "done" },
+    { "label": "not_http" },
+    { "record": { "http": false } }
+  ]
+}

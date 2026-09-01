@@ -63,7 +63,7 @@ public class TLSImmediateTest {
             int port = ((ServerSocketChannel) serverKey.channel()).socket().getLocalPort();
 
             // cert_validation false: self-signed test certificate
-            validator = ProtoConnect.createTCPValidator(
+            validator = ProtoConnect.createTCPProtocol(
                     new InetSocketAddress(InetAddress.getLoopbackAddress(), port),
                     "{ \"name\": \"tls-echo\", \"close_on_ready\": true,"
                             + " \"tls\": {\"mode\": \"immediate\", \"cert_validation\": false},"

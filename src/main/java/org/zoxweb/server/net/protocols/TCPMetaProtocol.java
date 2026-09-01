@@ -16,6 +16,8 @@ import java.security.GeneralSecurityException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 /**
  * The TCP protocol validator (META-PROTOCOL.md §1, §4): a {@link TCPSessionCallback} whose
@@ -38,6 +40,7 @@ public class TCPMetaProtocol extends TCPSessionCallback implements ExchangeScrip
     private final ExchangeScript script;
     private volatile Throwable closeCause;
     private final CountDownLatch closeLatch = new CountDownLatch(1);
+    private final AtomicReference<Consumer<TCPMetaProtocol>> closeHook = new AtomicReference<Consumer<TCPMetaProtocol>>();
     private final UByteArrayOutputStream dataAssembler = ByteBufferUtil.allocateUBAOS(SharedIOUtil.K_1);
     private final AtomicBoolean assemblerRecached = new AtomicBoolean(false);
 
@@ -71,6 +74,36 @@ public class TCPMetaProtocol extends TCPSessionCallback implements ExchangeScrip
     /** @return the session's terminating cause, or null (clean close — or a session still running) */
     public Throwable getCloseCause() {
         return closeCause;
+    }
+
+    /**
+     * Registers a one-shot completion hook, fired exactly once when the session closes — the
+     * verdict bag and close cause are final when it fires. The event-driven twin of
+     * {@link #waitForClose(long)} (the {@code PQCCheck.onClose} idiom): a consumer that
+     * registers before {@code NIOSocket.addClientSocket} never has to park a thread on the
+     * session. A session already closed runs the hook immediately on the registering thread.
+     * The hook is invoked from inside the session's close path, so it should hand any real
+     * work to an executor rather than block or open sockets in place.
+     *
+     * @return this
+     */
+    public TCPMetaProtocol onClose(Consumer<TCPMetaProtocol> hook) {
+        closeHook.set(hook);
+        if (isClosed())
+            fireCloseHook();
+        return this;
+    }
+
+    private void fireCloseHook() {
+        Consumer<TCPMetaProtocol> hook = closeHook.getAndSet(null);
+        if (hook != null) {
+            try {
+                hook.accept(this);
+            } catch (Throwable t) {
+                // the session is already closed; a failing hook must not unwind the closer
+                if (log.isEnabled()) log.getLogger().info("close hook failed: " + t);
+            }
+        }
     }
 
     /**
@@ -157,8 +190,8 @@ public class TCPMetaProtocol extends TCPSessionCallback implements ExchangeScrip
     }
 
     /**
-     * Recaches the session's assembly buffer once and releases the completion latch after the
-     * inherited teardown.
+     * Recaches the session's assembly buffer once, releases the completion latch, and fires the
+     * {@link #onClose(Consumer)} hook after the inherited teardown — the verdict is final first.
      */
     @Override
     public void close() throws IOException {
@@ -168,6 +201,7 @@ public class TCPMetaProtocol extends TCPSessionCallback implements ExchangeScrip
             if (assemblerRecached.compareAndSet(false, true))
                 ByteBufferUtil.cache(dataAssembler);
             closeLatch.countDown();
+            fireCloseHook();
         }
     }
 

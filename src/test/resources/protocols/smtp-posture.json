@@ -1,0 +1,20 @@
+{
+  "name": "smtp-posture",
+  "port": [25, 587],
+  "timeout_sec": 5,
+  "close_on_ready": true,
+  "vars": { "helo": "probe.local" },
+  "exchange": [
+    { "expect": "txt:\r\n" },
+    { "validate": { "prefix": "txt:220", "report": "banner" } },
+    { "send": "txt:EHLO ${helo}\r\n" },
+    { "expect": { "match": "txt:STARTTLS",
+                  "alt": [ { "match": "txt:250 ", "goto": "plaintext_only" } ] } },
+    { "expect": "txt:\r\n" },
+    { "record": { "starttls_offered": true } },
+    { "jump": "done" },
+    { "label": "plaintext_only" },
+    { "expect": "txt:\r\n" },
+    { "record": { "starttls_offered": false } }
+  ]
+}

@@ -19,6 +19,8 @@ import java.nio.channels.SelectionKey;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 /**
  * The UDP protocol validator (META-PROTOCOL.md §1, §4.4): a client-shaped
@@ -46,6 +48,7 @@ public class UDPMetaProtocol extends UDPSessionCallback implements ExchangeScrip
     private final CountDownLatch closeLatch = new CountDownLatch(1);
     private final AtomicBoolean connectedOnce = new AtomicBoolean(false);
     private final AtomicBoolean bufferRecached = new AtomicBoolean(false);
+    private final AtomicReference<Consumer<UDPMetaProtocol>> closeHook = new AtomicReference<Consumer<UDPMetaProtocol>>();
 
     public UDPMetaProtocol(String id, String jsonConfig, InetSocketAddress remote) {
         this(id, GSONUtil.fromJSONDefault(jsonConfig, NVGenericMap.class), remote);
@@ -79,6 +82,36 @@ public class UDPMetaProtocol extends UDPSessionCallback implements ExchangeScrip
     /** @return the session's terminating cause, or null (clean close — or a session still running) */
     public Throwable getCloseCause() {
         return closeCause;
+    }
+
+    /**
+     * Registers a one-shot completion hook, fired exactly once when the session closes — the
+     * verdict bag and close cause are final when it fires. The event-driven twin of
+     * {@link #waitForClose(long)} (the {@code PQCCheck.onClose} idiom): a consumer that
+     * registers before {@code NIOSocket.addDatagramSocket} never has to park a thread on the
+     * session. A session already closed runs the hook immediately on the registering thread.
+     * The hook is invoked from inside the session's close path, so it should hand any real
+     * work to an executor rather than block or open sockets in place.
+     *
+     * @return this
+     */
+    public UDPMetaProtocol onClose(Consumer<UDPMetaProtocol> hook) {
+        closeHook.set(hook);
+        if (isClosed())
+            fireCloseHook();
+        return this;
+    }
+
+    private void fireCloseHook() {
+        Consumer<UDPMetaProtocol> hook = closeHook.getAndSet(null);
+        if (hook != null) {
+            try {
+                hook.accept(this);
+            } catch (Throwable t) {
+                // the session is already closed; a failing hook must not unwind the closer
+                if (log.isEnabled()) log.getLogger().info("close hook failed: " + t);
+            }
+        }
     }
 
     /**
@@ -180,7 +213,10 @@ public class UDPMetaProtocol extends UDPSessionCallback implements ExchangeScrip
         }
     }
 
-    /** Recaches the session read buffer once and releases the completion latch after teardown. */
+    /**
+     * Recaches the session read buffer once, releases the completion latch, and fires the
+     * {@link #onClose(Consumer)} hook after teardown — the verdict is final first.
+     */
     @Override
     public void close() throws IOException {
         try {
@@ -189,6 +225,7 @@ public class UDPMetaProtocol extends UDPSessionCallback implements ExchangeScrip
             if (bufferRecached.compareAndSet(false, true))
                 ByteBufferUtil.cache(rawReadBuffer);
             closeLatch.countDown();
+            fireCloseHook();
         }
     }
 

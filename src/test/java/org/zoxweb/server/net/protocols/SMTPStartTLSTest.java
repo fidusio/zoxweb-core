@@ -93,7 +93,7 @@ public class SMTPStartTLSTest {
             }, "smtp-starttls-server");
             serverThread.start();
 
-            validator = ProtoConnect.createTCPValidator(remote, definitionJSON());
+            validator = ProtoConnect.createTCPProtocol(remote, definitionJSON());
             nioSocket.addClientSocket(validator);
 
             assertTrue(validator.waitForClose(TimeUnit.SECONDS.toMillis(WAIT_SEC)),
@@ -137,7 +137,7 @@ public class SMTPStartTLSTest {
             }, "smtp-injection-server");
             serverThread.start();
 
-            validator = ProtoConnect.createTCPValidator(remote,
+            validator = ProtoConnect.createTCPProtocol(remote,
                     "{ \"tls\": {\"mode\": \"on_demand\", \"cert_validation\": false},"
                             + " \"exchange\": ["
                             + "  {\"expect\": \"txt:220 \"},"

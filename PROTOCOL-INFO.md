@@ -19,10 +19,14 @@ A definition is a **conformance check**, not a protocol client:
 
 - **One endpoint.** The operator supplies the address at run time. The definition may declare the
   protocol's well-known port(s) as a *hint*, never a target.
-- **Linear script only.** The dialogue is a fixed list of steps executed top to bottom. There is
-  **no branching, no parsing a value out of a reply, no computing** — a step can send a constant
-  and check that a reply contains an expected sequence, nothing more. If the check you are asked
-  for needs to read a value and act on it, say so: it is out of scope for a definition.
+- **Guarded linear script.** The dialogue is a fixed list of steps executed top to bottom with a
+  **forward-only** cursor. Limited routing exists (§5.5): an `expect` may declare alternative
+  patterns routed to a forward `label`, a `validate` may route a mismatch with `on_mismatch`,
+  and `jump` skips forward — reserved targets `done`/`fail`. Routes may never point backward,
+  so loops are impossible. There is **no computing**: a `validate` may *capture* text with a
+  `regex` into the report (§5.3), but a captured value can never feed a later send or match. If
+  the check you are asked for needs to read a value and act on it, say so: it is out of scope
+  for a definition.
 - **Single-shot.** No retries, no backoff, no credentials, no rate manipulation. The session
   identifies itself normally (e.g. a normal EHLO/client-ident line).
 - **Safe TLS by default.** Certificate-chain validation is on unless the definition disables it.
@@ -74,7 +78,8 @@ Understand this lifecycle; every authoring rule below follows from it.
 | `validated` | `true`/`false` — present on every run that completed or failed |
 | `reason` | the failure cause, or `"script completed"` when no validate step ran |
 | `ready` | `true` — the script ran to completion (absent on failure/incomplete) |
-| *your `report` keys* | the matched text a `validate` step captured, or the `true`/`false` outcome of an `optional` probe (§5.3) |
+| *your `report` keys* | the matched text or regex capture a `validate` step stored, or the `true`/`false` outcome of an `optional` probe (§5.3) |
+| *your `record` keys* | the constants a `record` step merged — typically which branch of a routed script ran (§5.5) |
 | `tls_protocol`, `tls_cipher` | the negotiated TLS session, when TLS ran |
 | `latency_ms` | connect-to-verdict duration in milliseconds (TLS handshake and dialogue included), recorded on every completed or failed run |
 
@@ -109,11 +114,15 @@ reaching the end of the dialogue is itself the check.
 | `tls` | object | absent = plaintext | `mode`: `"immediate"` (handshake before the script) or `"on_demand"` (upgrade at the script's `start_tls` step). `cert_validation` defaults `true` (chain trust is part of the check — public HTTPS/WebPKI); set `false` for self-signed/internal endpoints — the common case outside public HTTPS — or the handshake itself fails before the posture is measured |
 | `assembler` | object | by transport | message framing, §4 |
 | `vars` | object of strings | — | defaults for `${name}` placeholders, §6 |
-| `exchange` | array of steps | — | the linear script, §5 |
+| `exchange` | array of steps | — | the guarded linear script, §5 |
 
 Invalid combinations are rejected before any connection: unknown transport/mode/boundary/op,
 `udp` + `tls`, `start_tls` without an `on_demand` tls block, `start_tls` with `immediate` (the
-link is already secure), malformed data literals, out-of-range ports.
+link is already secure), malformed data literals, out-of-range ports. Routing and capture:
+duplicate/empty/reserved labels, unknown or backward route targets, an expect block without
+`match`, an empty `alt` list or an alt entry missing `match`/`goto`, `on_timeout` (reserved),
+`optional`+`on_mismatch`, a malformed regex or `${var}` inside one, `group` without a regex or
+out of the pattern's range, an empty `record` block or a `record` key naming a verdict key.
 
 **Key names are case-insensitive** at every nesting level — `"Port"`, `"PORT"`, and `"port"` are
 the same key (write lowercase anyway, as every example does). Two consequences: never give two
@@ -126,7 +135,7 @@ opts into `ignore_case` (§5.3).
 ## 4. Assembly — how raw bytes become messages
 
 The `assembler` block declares the framing. One strategy is active at a time (a `boundary` step
-can switch it mid-script, §5.5).
+can switch it mid-script, §5.6).
 
 ```json
 "assembler": { "boundary": "delimited", "terminator": "txt:\n", "strip_cr": true, "max_message": 255 }
@@ -212,10 +221,27 @@ accumulation). Meta keys, all optional, checked in order with short-circuit:
   follow it); the matches and `report` then apply to the extracted field. The offset must be
   fixed by the protocol specification — extraction is declarative framing, not computation.
   Out-of-bounds extraction is a validation failure.
+- `regex` — checked **last**, after `prefix`/`contains`/`exact`: a **plain Java regex** (the
+  `txt:`/`hex:` prefix rules do *not* apply, and `${var}`s are rejected — the pattern compiles
+  fail-fast at load). It runs contains-style (`find()`) against the post-`extract` message
+  decoded ISO-8859-1, so binary messages match safely; `ignore_case` never folds a regex — use
+  an inline `(?i)`. `group` picks the reported capture (default: group 1 when the pattern
+  captures, else the whole match; range-checked at load). On a match, the capture is what
+  `report` stores. The capture is **report-only** — it can never feed a send or a later match.
+  With `optional`, the boolean contract holds: the probe records match presence, never the
+  capture (want both capture and tolerance? use a non-optional regex with `on_mismatch`).
 
-A mismatch **fails the session** (unless `optional`): `validated: false` plus a `reason`, and
-the connection closes. A pass records `validated: true`. Multiple validate steps are allowed;
-typically one per captured artifact.
+  ```json
+  { "validate": { "regex": "HTTP/1\\.[01] (\\d{3})", "report": "status" } }
+  ```
+- `on_mismatch` — route the mismatch to a forward `label` (or `done`/`fail`) instead of failing
+  the session (§5.5): the verdict and the current message stay untouched, so the routed path
+  can re-examine the same reply. `on_mismatch: "fail"` keeps the normal failure verdict.
+  Conflicts with `optional` (a probe never mismatches) — rejected at load.
+
+A mismatch **fails the session** (unless `optional`, or routed by `on_mismatch`):
+`validated: false` plus a `reason`, and the connection closes. A pass records
+`validated: true`. Multiple validate steps are allowed; typically one per captured artifact.
 
 **Pattern — the capability/version matrix.** Because a validate does not clear the current
 message, several probes can examine the *same* reply: mandatory conformance as an assertion,
@@ -283,11 +309,14 @@ protocol question, so the script must ask it in the protocol's own vocabulary an
 Because these expects consume exactly the affirmative bytes, the residue check is satisfied as a
 side effect — the go-ahead rule and the residue rule are the same discipline.
 
-**When the peer refuses.** There is no branching: a refusal (a `454`, an `N`, a capability line
-that never mentions the upgrade) simply never matches, and the session ends by timeout or peer
-close with no `ready` flag — the operator reads "script did not complete" as "upgrade not
-available". One definition asserts one posture; to assert the opposite (e.g. "this endpoint must
-**not** offer STARTTLS"), author a separate definition that expects the refusal bytes instead.
+**When the peer refuses.** Two ways to author it. As an *assertion*, a refusal (a `454`, an
+`N`, a capability line that never mentions the upgrade) simply never matches, and the session
+ends by timeout or peer close with no `ready` flag — the operator reads "script did not
+complete" as "upgrade not available"; to assert the opposite posture, author a separate
+definition that expects the refusal bytes instead. As an *observation*, route the refusal with
+an expect alternative (§5.5) — match the affirmative on the main path, `goto` a branch on the
+refusal bytes, and `record` which posture was seen; both paths complete `validated: true` and
+the `record` key carries the answer.
 
 **Trap: a `validate` right after `start_tls` sees pre-TLS bytes.** `start_tls` does not open a
 new request/response round — only a `send` does — so the current message crossing the upgrade is
@@ -299,7 +328,45 @@ automatically when the handshake completes. Capture the go-ahead (if wanted) wit
 *before* `start_tls` under an honest key, and after the upgrade only validate replies to a new
 encrypted `send`.
 
-### 5.5 `{"boundary": { ...assembler block... }}` — switch framing mid-script
+### 5.5 Routing — `label`, `jump`, expect alternatives, `record`
+
+The guarded-linear routing vocabulary. Every route target is a `label` name (case-insensitive,
+unique), or the reserved `done` (complete the script now) / `fail` (fail the session). **Routes
+are forward-only** — a backward or self target is rejected at load, so loops are impossible.
+
+- `{"label": "name"}` — a no-op jump target.
+- `{"jump": "target"}` — unconditional forward jump. `{"jump": "done"}` ends the main path
+  before the branch tail.
+- `{"record": {"key": value, ...}}` — merge constant strings/booleans/numbers into the results;
+  the way each branch marks which path ran. The verdict keys (`validated`, `reason`, `ready`,
+  `latency_ms`) are rejected at load. Keys are case-insensitive — a `record` key colliding with
+  a `report` key merges into one entry, last writer wins.
+- **Expect alternatives** — the block form of `expect`. Steps stay single-key objects, so the
+  alternatives live *inside* the value (a byte literal that genuinely starts with `{` must be
+  written with the `txt:` prefix):
+
+  ```json
+  { "expect": { "match": "txt:STARTTLS",
+                "alt": [ { "match": "txt:250 ", "goto": "plaintext_only" } ] } }
+  ```
+
+  The main `match` behaves exactly like the string form and **always wins over the
+  alternatives** (regardless of byte position on `stream`); alts are tried in declaration
+  order. On `stream`, the matching pattern (main or alt) consumes through its own end and
+  becomes the current message — an alt feeding a later `start_tls` must consume through the
+  line terminator, or the residue check fails the upgrade (§5.4, by design). On framed
+  boundaries, a message matching *neither* main nor any alt is **skipped** as usual
+  (`max_skip`-bounded) — the `250-` continuation idiom survives, so author alt patterns that
+  cannot occur in continuation lines.
+
+The one-definition-one-posture rule (§5.4) softens accordingly: a definition may now *observe*
+both postures in one run — match the affirmative on the main path, route the refusal to a
+branch, and `record` which one happened — with both paths ending `validated: true` and the
+`record` key carrying the answer. Reserve hard assertions (an unrouted `expect`/`validate`) for
+what must be true on every path. `on_timeout` is reserved for a future phase and rejected at
+load — a peer that answers nothing still ends as timeout/no-`ready`.
+
+### 5.6 `{"boundary": { ...assembler block... }}` — switch framing mid-script
 
 Replaces the active framing from this step on; residue in the accumulation reframes under the new
 rule. TCP only. Use it when a protocol changes shape mid-dialogue — e.g. a text banner line
@@ -360,8 +427,13 @@ so the definition stays generic.
    verdict (public HTTPS/WebPKI endpoints); `false` for self-signed/internal endpoints — the
    common case outside public HTTPS — and for negotiation-posture checks, where a failed chain
    would mask the answer.
-9. Never: hostnames/IPs in the definition, branching logic, computed values, credentials,
-   retries, more than one connection's worth of dialogue.
+9. Route only what the check *observes*; assert what must hold on every path. Every branch
+   should `record` which path ran, alt patterns must not occur in framed continuation lines
+   (§5.5), and a stream alt feeding `start_tls` must consume through the line terminator.
+   Capture with `regex` only what the operator wants to *read* — a capture can never be acted
+   on.
+10. Never: hostnames/IPs in the definition, backward routes or loops, computed values,
+    credentials, retries, more than one connection's worth of dialogue.
 
 ---
 
@@ -378,8 +450,8 @@ so the definition stays generic.
   "tls": { "mode": "on_demand", "cert_validation": false },
   "vars": { "helo": "probe.local" },
   "exchange": [
-    { "expect": "txt:220 " },
     { "expect": "txt:\r\n" },
+    { "validate": { "prefix": "txt:220", "report": "banner" } },
     { "send": "txt:EHLO ${helo}\r\n" },
     { "expect": "txt:STARTTLS" },
     { "expect": "txt:\r\n" },
@@ -394,9 +466,10 @@ so the definition stays generic.
 }
 ```
 
-Reading it: consume the greeting line; EHLO; wait until a capability line mentions STARTTLS and
-consume through its end; request the upgrade; consume the go-ahead line completely (residue check
-passes); handshake; re-EHLO encrypted per RFC 3207; validate and capture the encrypted reply.
+Reading it: consume the greeting through its terminator and capture it as `banner` (validating
+the `220` prefix); EHLO; wait until a capability line mentions STARTTLS and consume through its
+end; request the upgrade; consume the go-ahead line completely (residue check passes);
+handshake; re-EHLO encrypted per RFC 3207; validate and capture the encrypted reply.
 `cert_validation` is off because mail servers are routinely self-signed and the check is
 STARTTLS posture, not chain trust (§1).
 
@@ -448,7 +521,65 @@ Reading it: one canned A-record query for `example.com` with transaction id `0x1
 datagram must echo the id; capture it. `close_on_ready` and the `datagram` boundary are the UDP
 defaults.
 
-### 9.4 Minimal reachability check (no validate step)
+### 9.4 SMTP posture probe (guarded-linear routing + record)
+
+```json
+{
+  "name": "smtp-posture",
+  "port": [25, 587],
+  "timeout_sec": 5,
+  "close_on_ready": true,
+  "vars": { "helo": "probe.local" },
+  "exchange": [
+    { "expect": "txt:\r\n" },
+    { "validate": { "prefix": "txt:220", "report": "banner" } },
+    { "send": "txt:EHLO ${helo}\r\n" },
+    { "expect": { "match": "txt:STARTTLS",
+                  "alt": [ { "match": "txt:250 ", "goto": "plaintext_only" } ] } },
+    { "expect": "txt:\r\n" },
+    { "record": { "starttls_offered": true } },
+    { "jump": "done" },
+    { "label": "plaintext_only" },
+    { "expect": "txt:\r\n" },
+    { "record": { "starttls_offered": false } }
+  ]
+}
+```
+
+Reading it: consume the greeting and capture it as `banner`; EHLO; wait on the capability reply
+— a line mentioning
+STARTTLS takes the main path, while the final `250 ` line without it routes to
+`plaintext_only` (the `250-` continuations match neither and keep waiting). Each branch
+consumes through its line's end, `record`s the posture, and completes — **both** postures end
+`validated: true, ready: true`; the operator reads the answer from `starttls_offered`. Note
+`jump: "done"` ending the main path before the branch tail, and that this probe only
+*observes* the posture — it never upgrades, so no `tls` block is needed.
+
+### 9.5 HTTP status capture (regex + on_mismatch)
+
+```json
+{
+  "name": "http-status-regex",
+  "port": [80, 8080],
+  "timeout_sec": 5,
+  "close_on_ready": true,
+  "vars": { "host": "example.com" },
+  "exchange": [
+    { "send": "txt:GET / HTTP/1.1\r\nHost: ${host}\r\nConnection: close\r\n\r\n" },
+    { "expect": "txt:\r\n\r\n" },
+    { "validate": { "regex": "HTTP/1\\.[01] (\\d{3})", "report": "status", "on_mismatch": "not_http" } },
+    { "jump": "done" },
+    { "label": "not_http" },
+    { "record": { "http": false } }
+  ]
+}
+```
+
+Reading it: one canned request; consume through the header block; the regex captures the status
+code into `status` (group 1 is the default when the pattern captures). A non-HTTP reply routes
+to `not_http` and `record`s `http: false` instead of failing the run.
+
+### 9.6 Minimal reachability check (no validate step)
 
 ```json
 {

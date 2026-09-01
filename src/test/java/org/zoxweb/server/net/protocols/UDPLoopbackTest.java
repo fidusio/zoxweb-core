@@ -27,7 +27,7 @@ public class UDPLoopbackTest {
     @Test
     public void tcpDefinitionRejected() {
         assertThrows(IllegalArgumentException.class,
-                () -> ProtoConnect.createUDPValidator(
+                () -> ProtoConnect.createUDPProtocol(
                         new InetSocketAddress(InetAddress.getLoopbackAddress(), 9), "{\"transport\": \"tcp\"}"));
     }
 
@@ -55,19 +55,29 @@ public class UDPLoopbackTest {
         NIOSocket nioSocket = new NIOSocket(TaskUtil.defaultTaskProcessor(), TaskUtil.defaultTaskScheduler());
         UDPMetaProtocol validator = null;
         try {
-            validator = ProtoConnect.createUDPValidator(
+            // event-driven twin of waitForClose: the Consumer<NVGenericMap> factory form wires
+            // the onClose hook before open; fired with the final results bag on self-close
+            final java.util.concurrent.CountDownLatch hookFired = new java.util.concurrent.CountDownLatch(1);
+            final AtomicReference<Object> hookVerdict = new AtomicReference<Object>();
+            validator = ProtoConnect.createUDPProtocol(
                     new InetSocketAddress(InetAddress.getLoopbackAddress(), server.getLocalPort()),
                     "{ \"transport\": \"udp\","
                             + " \"exchange\": ["
                             + "  {\"send\": \"txt:PING\"},"
                             + "  {\"expect\": \"txt:PONG\"},"
                             + "  {\"validate\": {\"exact\": \"txt:PONG\", \"report\": \"pong\"}}"
-                            + " ] }");
+                            + " ] }",
+                    results -> {
+                        hookVerdict.set(results.getValue("validated"));
+                        hookFired.countDown();
+                    });
 
             nioSocket.addDatagramSocket(new InetSocketAddress(InetAddress.getLoopbackAddress(), 0), validator);
 
             assertTrue(validator.waitForClose(TimeUnit.SECONDS.toMillis(WAIT_SEC)),
                     "close_on_ready (UDP default) must close the session after the script completes");
+            assertTrue(hookFired.await(WAIT_SEC, TimeUnit.SECONDS), "onClose hook fired on self-close");
+            assertEquals(Boolean.TRUE, hookVerdict.get(), "hook sees the final verdict");
             assertTrue(validator.isClosed());
             assertNull(validator.getCloseCause(), "clean completion");
             assertEquals(Boolean.TRUE, validator.getResults().getValue("validated"));
