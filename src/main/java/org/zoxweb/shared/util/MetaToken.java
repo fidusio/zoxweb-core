@@ -82,8 +82,11 @@ public enum MetaToken
     RECURSIVE("recursive") //	Recursive
     ,
     REFERENCE_GUID(Const.REFERENCE_GUID),
-
-    REFERENCE_ID("reference_id") // 	Reference ID of the attribute to be deprecated replaced by GUID.
+    /**
+     * Replaced by GUID
+     */
+    @Deprecated
+    REFERENCE_ID("reference_id")
     ,
     REFERENCE_TYPE("reference_type"),
 

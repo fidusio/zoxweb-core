@@ -20,9 +20,10 @@ import org.zoxweb.shared.filters.ValueFilter;
 import java.io.Serializable;
 
 /**
- * This class implements the NVConfig interface. This class 
- * initializes and returns the attributes of NVConfig which 
+ * This class implements the NVConfig interface. This class
+ * initializes and returns the attributes of NVConfig which
  * serves as a parent class for NVConfigEntityLocal class.
+ *
  * @author mzebib
  */
 @SuppressWarnings("serial")
@@ -57,6 +58,7 @@ public class NVConfigPortable
 
     /**
      * Checks if the property is unique.
+     *
      * @return true if unique
      */
     public boolean isUnique() {
@@ -65,6 +67,7 @@ public class NVConfigPortable
 
     /**
      * Sets whether the property is unique.
+     *
      * @param unique
      */
     public void setUnique(boolean unique) {
@@ -81,6 +84,7 @@ public class NVConfigPortable
     /**
      * This constructor instantiates NVConfigLocal based on set values
      * for the following parameters:
+     *
      * @param name
      * @param description
      * @param displayName
@@ -115,6 +119,7 @@ public class NVConfigPortable
 
     /**
      * Returns the name.
+     *
      * @return name
      */
     public String getName() {
@@ -123,14 +128,34 @@ public class NVConfigPortable
 
     /**
      * Sets the name.
+     *
      * @param name
      */
     public void setName(String name) {
+//        name = SUS.trimOrNull(name);
+//        if (name != null) {
+//            if (name.length() > 63) {
+//                throw new IllegalArgumentException("Invalid name for NVConfig too long > 63 bytes " + name);
+//            }
+//            char first = name.charAt(0);
+//            if (!((first >= 'a' && first <= 'z') || (first >= 'A' && first <= 'Z') || first == '_')) {
+//                throw new IllegalArgumentException("Invalid name for NVConfig must start with [a-zA-Z_]: " + name);
+//            }
+//            for (int i = 1; i < name.length(); i++) {
+//                char c = name.charAt(i);
+//                if (!((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_' || c == '-')) {
+//                    throw new IllegalArgumentException("Invalid name for NVConfig illegal character '" + c
+//                            + "' at index " + i + " (allowed: [a-zA-0-9_-]): " + name);
+//                }
+//            }
+//        }
         this.name = name;
     }
 
+
     /**
      * Returns the description.
+     *
      * @return description
      */
     public String getDescription() {
@@ -139,6 +164,7 @@ public class NVConfigPortable
 
     /**
      * Sets the description.
+     *
      * @param str
      */
     public void setDescription(String str) {
@@ -147,6 +173,7 @@ public class NVConfigPortable
 
     /**
      * Checks if attribute is mandatory.
+     *
      * @return true if mandatory
      */
     public boolean isMandatory() {
@@ -155,6 +182,7 @@ public class NVConfigPortable
 
     /**
      * Sets mandatory condition of attribute.
+     *
      * @param mandatory
      */
     public void setMandatory(boolean mandatory) {
@@ -163,6 +191,7 @@ public class NVConfigPortable
 
     /**
      * Checks if attribute is editable.
+     *
      * @return true if user editable
      */
     public boolean isEditable() {
@@ -171,6 +200,7 @@ public class NVConfigPortable
 
     /**
      * Sets editable condition of attribute.
+     *
      * @param val
      */
     public void setEditable(boolean val) {
@@ -179,6 +209,7 @@ public class NVConfigPortable
 
     /**
      * Returns the meta type.
+     *
      * @return class type
      */
     public Class<?> getMetaType() {
@@ -187,6 +218,7 @@ public class NVConfigPortable
 
     /**
      * Sets the meta type.
+     *
      * @param metaType
      */
     public void setMetaType(Class<?> metaType) {
@@ -195,6 +227,7 @@ public class NVConfigPortable
 
     /**
      * Returns the display name.
+     *
      * @return display name
      */
     public String getDisplayName() {
@@ -207,6 +240,7 @@ public class NVConfigPortable
 
     /**
      * Sets the display name.
+     *
      * @param displayName
      */
     public void setDisplayName(String displayName) {
@@ -215,6 +249,7 @@ public class NVConfigPortable
 
     /**
      * Returns the value filter.
+     *
      * @return value filter
      */
     public synchronized ValueFilter<?, ?> getValueFilter() {
@@ -231,6 +266,7 @@ public class NVConfigPortable
 
     /**
      * Sets the value filter.
+     *
      * @param vf
      */
     public synchronized void setValueFilter(@SuppressWarnings("rawtypes") ValueFilter vf) {
@@ -239,6 +275,7 @@ public class NVConfigPortable
 
     /**
      * Checks if property is an array.
+     *
      * @return true if array
      */
     @Override
@@ -248,6 +285,7 @@ public class NVConfigPortable
 
     /**
      * Sets if property is an array.
+     *
      * @param array
      */
     @Override
@@ -257,6 +295,7 @@ public class NVConfigPortable
 
     /**
      * Returns the base meta type.
+     *
      * @return the base class if type is array
      */
     @Override
@@ -266,6 +305,7 @@ public class NVConfigPortable
 
     /**
      * Checks if property is an enum.
+     *
      * @return true if enum
      */
     @Override
@@ -279,6 +319,7 @@ public class NVConfigPortable
 
     /**
      * Sets if property is hidden.
+     *
      * @param hidden
      */
     @Override
@@ -288,6 +329,7 @@ public class NVConfigPortable
 
     /**
      * Checks if the property is hidden.
+     *
      * @return true if hidden
      */
     @Override
@@ -296,8 +338,8 @@ public class NVConfigPortable
     }
 
     /**
-     * @see org.zoxweb.shared.util.NVConfig#isTypeReferenceID()
      * @return
+     * @see org.zoxweb.shared.util.NVConfig#isTypeReferenceID()
      */
     @Override
     public boolean isTypeReferenceID() {
@@ -305,8 +347,8 @@ public class NVConfigPortable
     }
 
     /**
-     * @see org.zoxweb.shared.util.NVConfig#setTypeReferenceID(boolean)
      * @param type
+     * @see org.zoxweb.shared.util.NVConfig#setTypeReferenceID(boolean)
      */
     @Override
     public void setTypeReferenceID(boolean type) {

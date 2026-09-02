@@ -30,7 +30,7 @@ public class APIBatchResult<V extends NVEntity>
 
         REPORT_ID(NVConfigManager.createNVConfig("report_id", "The report ID.", "ReportID", true, true, String.class)),
         TOTAL_MATCHES(NVConfigManager.createNVConfig("total_matches", "The total number of matches.", "TotalMatches", true, true, Integer.class)),
-        START_RANGE(NVConfigManager.createNVConfig("start range", "The starting index of range.", "StartRange", true, true, Integer.class)),
+        START_RANGE(NVConfigManager.createNVConfig("start_range", "The starting index of range.", "StartRange", true, true, Integer.class)),
         END_RANGE(NVConfigManager.createNVConfig("end_range", "The ending index of range.", "EndRange", true, true, Integer.class)),
         BATCH(NVConfigManager.createNVConfigEntity("batch", "The results list.", "Batch", false, true, true, NVEntity.class, ArrayType.LIST)),
 

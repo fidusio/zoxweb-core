@@ -61,7 +61,9 @@ public class TCPPQCProtocol extends TCPSessionCallback {
 
     public static final int DEFAULT_EXPIRY_THRESHOLD_DAYS = 30;
 
-    /** The {@code proto-name} run-identity value — this auditor has no JSON definition to name it. */
+    /**
+     * The {@code proto-name} run-identity value — this auditor has no JSON definition to name it.
+     */
     public static final String PROTOCOL_NAME = "pqc-tls";
 
     private final NVGenericMap results = new NVGenericMap("results");
@@ -75,7 +77,9 @@ public class TCPPQCProtocol extends TCPSessionCallback {
     private volatile X509Certificate[] completedChain;
     private volatile byte[] stapledOCSP;
 
-    /** Audits the endpoint with the provider's default named-group offer. */
+    /**
+     * Audits the endpoint with the provider's default named-group offer.
+     */
     public TCPPQCProtocol(String id, InetSocketAddress remote) throws GeneralSecurityException {
         this(id, remote, null);
     }
@@ -139,39 +143,50 @@ public class TCPPQCProtocol extends TCPSessionCallback {
                 .build(ResKey.PROTO_NAME, PROTOCOL_NAME)
                 .build(ResKey.TRANSPORT, "tcp")
                 .build(new NVLong(ResKey.OPEN_TS, openMillis));
-        if (remote != null) {
-            results.build(ResKey.HOST, remote.getHostString())
-                    .build(new NVInt(ResKey.PORT, remote.getPort()));
-        }
+
+        results.build(ResKey.HOST, remote.getHostString())
+                .build(new NVInt(ResKey.PORT, remote.getPort()));
     }
 
-    /** @return the audit report (final once the session is closed) */
+    /**
+     * @return the audit report (final once the session is closed)
+     */
     public NVGenericMap getResults() {
         return results;
     }
 
-    /** @return the session's terminating cause, or null (clean audit — or a session still running) */
+    /**
+     * @return the session's terminating cause, or null (clean audit — or a session still running)
+     */
     public Throwable getCloseCause() {
         return closeCause;
     }
 
-    /** Days-to-expiry threshold for the {@code expires_soon} flag (default 30). */
+    /**
+     * Days-to-expiry threshold for the {@code expires_soon} flag (default 30).
+     */
     public TCPPQCProtocol expiryThresholdDays(int days) {
         this.expiryThresholdDays = days;
         return this;
     }
 
-    /** @return the peer chain as sent by the server (no appended anchor), or null */
+    /**
+     * @return the peer chain as sent by the server (no appended anchor), or null
+     */
     public X509Certificate[] getCapturedChain() {
         return capturedChain;
     }
 
-    /** @return the chain completed with the resolved trust anchor; the sent chain when none */
+    /**
+     * @return the chain completed with the resolved trust anchor; the sent chain when none
+     */
     public X509Certificate[] getCompletedChain() {
         return completedChain != null ? completedChain : capturedChain;
     }
 
-    /** @return the DER-encoded OCSP response the server stapled, or null */
+    /**
+     * @return the DER-encoded OCSP response the server stapled, or null
+     */
     public byte[] getStapledOCSP() {
         return stapledOCSP;
     }
@@ -224,12 +239,16 @@ public class TCPPQCProtocol extends TCPSessionCallback {
 
     // ---- TCPSessionCallback hooks ----
 
-    /** Not reached on the pre-set-context path (the upgrade rides {@code connected()}); defensive no-op. */
+    /**
+     * Not reached on the pre-set-context path (the upgrade rides {@code connected()}); defensive no-op.
+     */
     @Override
     protected void connectedFinished() {
     }
 
-    /** The auditor exchanges no application data; anything the peer sends post-handshake is ignored. */
+    /**
+     * The auditor exchanges no application data; anything the peer sends post-handshake is ignored.
+     */
     @Override
     public void accept(ByteBuffer byteBuffer) {
     }
@@ -249,7 +268,9 @@ public class TCPPQCProtocol extends TCPSessionCallback {
         }
     }
 
-    /** Failure path: stash the close cause, record the error, close once. */
+    /**
+     * Failure path: stash the close cause, record the error, close once.
+     */
     @Override
     public void exception(Throwable e) {
         if (log.isEnabled()) log.getLogger().info("exception: " + e);
@@ -393,7 +414,9 @@ public class TCPPQCProtocol extends TCPSessionCallback {
         X509Certificate anchor; // the trust-store root, when identifiable
     }
 
-    /** Offline PKIX evaluation against the JVM trust store; resolves the anchor when trusted. */
+    /**
+     * Offline PKIX evaluation against the JVM trust store; resolves the anchor when trusted.
+     */
     private static TrustOutcome validateChain(X509Certificate[] chain) {
         TrustOutcome outcome = new TrustOutcome();
         try {
@@ -414,7 +437,9 @@ public class TCPPQCProtocol extends TCPSessionCallback {
         return outcome;
     }
 
-    /** The trust-store root that issued the last sent certificate, when identifiable. */
+    /**
+     * The trust-store root that issued the last sent certificate, when identifiable.
+     */
     private static X509Certificate resolveAnchor(X509Certificate last, X509Certificate[] roots) {
         if (roots != null) {
             for (X509Certificate root : roots) {
@@ -431,7 +456,9 @@ public class TCPPQCProtocol extends TCPSessionCallback {
         return null;
     }
 
-    /** Maps the leaf key algorithm to the key-exchange-style authType {@code checkServerTrusted} expects. */
+    /**
+     * Maps the leaf key algorithm to the key-exchange-style authType {@code checkServerTrusted} expects.
+     */
     private static String authType(PublicKey key) {
         String alg = key.getAlgorithm();
         if ("RSA".equalsIgnoreCase(alg))

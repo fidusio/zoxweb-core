@@ -1325,6 +1325,9 @@ public final class Const {
         EQUAL("="),
         GT(">"),
         LT("<"),
+        // APPEND-ONLY (ordinals are persisted — see comment above): pattern matching
+        LIKE("LIKE"),
+        NOT_LIKE("NOT LIKE"),
         ;
 
         private final String value;
