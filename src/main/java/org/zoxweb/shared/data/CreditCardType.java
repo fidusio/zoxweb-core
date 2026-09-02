@@ -21,21 +21,21 @@ import org.zoxweb.shared.util.SUS;
 /**
  * This enum includes credit card types and validates
  * the credit card type based on credit card number.
+ *
  * @author mzebib
  *
  */
-public enum CreditCardType 
-	implements ValueFilter<String, CreditCardType>
-{
-	
-	// "[4]\\d{12}|[4]\\d{15}"
-	// "^4[0-9]{12}(?:[0-9]{3})?$"
-	VISA("^4[0-9]{12}(?:[0-9]{3})?$", "V", "Visa"),
-	
-	MASTER("[5][12345]\\d{14}", "M", "MasterCard"),
+public enum CreditCardType
+        implements ValueFilter<String, CreditCardType> {
 
-	AMEX("[3][47]\\d{13}", "A", "American Express"),
-		    
+    // "[4]\\d{12}|[4]\\d{15}"
+    // "^4[0-9]{12}(?:[0-9]{3})?$"
+    VISA("^4[0-9]{12}(?:[0-9]{3})?$", "V", "Visa"),
+
+    MASTER("[5][12345]\\d{14}", "M", "MasterCard"),
+
+    AMEX("[3][47]\\d{13}", "A", "American Express"),
+
 //	DISCOVER("6011\\d{12}", "D", "Discover"),
 //	
 //	DINERS("[3][068]\\d{12}", "?", "Diners"),
@@ -43,102 +43,72 @@ public enum CreditCardType
 //	ENROUTE("2014\\d{11}|2149\\d{11}"),
 //	
 //	JCB("3088\\d{12}|3096\\d{12}|3112\\d{12}|3158\\d{12}|3337\\d{12}|3528\\d{12}")
-	;
+    ;
 
-    private CreditCardType(String pattern)
-    {
-           this(pattern, "?", null);
+    private CreditCardType(String pattern) {
+        this(pattern, "?", null);
     }
-    
-    private CreditCardType(String pattern, String verisign, String display)
-    {
-    	this.pattern  = pattern;
+
+    private CreditCardType(String pattern, String verisign, String display) {
+        this.pattern = pattern;
         this.verisign = verisign;
         this.display = display;
     }
-    
-    public String getPayPalCode()
-    {
-           return verisign;
+
+    public String getPayPalCode() {
+        return verisign;
     }
-    
-    public String getDisplay()
-    {
-    	return display;
+
+    public String getDisplay() {
+        return display;
     }
-    
-    private String pattern;
-    private String verisign;
-    private String display;
 
-	/**
-	 * This method returns Canonical ID.
-	 */
-	@Override
-	public String toCanonicalID() 
-	{
-		return (display != null) ? display : name() ;
-	}
+    private final String pattern;
+    private final String verisign;
+    private final String display;
 
-	/**
-	 * Looks up the credit card type given the credit card number.
-	 * @param ccNumber
-	 * @return the credit card type
-	 */
-	public static CreditCardType lookup(String ccNumber)
-	{
-		if (!SUS.isEmpty(ccNumber))
-		{
-			for (CreditCardType type: CreditCardType.values())
-			{
-				if (type.isValid(ccNumber))
-				{
-					return type;
-				}
-			}
-		}
-		
-		return null;
-	}
-	
-	/**
-	 * Validates the credit card type given the credit card number.
-	 * @param ccNumber
-	 */
-	@Override
-	public CreditCardType validate(String ccNumber) 
-			throws NullPointerException, IllegalArgumentException 
-	{
-		SUS.checkIfNulls("Null credit card number", ccNumber);
-		ccNumber = SUS.trimOrNull(ccNumber);
-		ccNumber = ccNumber.replaceAll("[ -]", "");
-		
-    	if (ccNumber.matches(pattern))
-    	{
-    		return this;
-    	}
-    		
-    	throw new IllegalArgumentException("Invalid Credit Card Type " + ccNumber);
-		
-	}
+    /**
+     * This method returns Canonical ID.
+     */
+    @Override
+    public String toCanonicalID() {
+        return (display != null) ? display : name();
+    }
 
-	/**
-	 * Checks if the credit card type is valid.
-	 * @param ccNumber
-	 */
-	@Override
-	public boolean isValid(String ccNumber) 
-	{
-		try
-		{
-			validate(ccNumber);
-			return true;
-		}
-		
-		catch (Exception e)
-		{
-			return false;
-		}
-	}
+    /**
+     * Looks up the credit card type given the credit card number.
+     *
+     * @param ccNumber
+     * @return the credit card type
+     */
+    public static CreditCardType lookup(String ccNumber) {
+        if (!SUS.isEmpty(ccNumber)) {
+            for (CreditCardType type : CreditCardType.values()) {
+                if (type.isValid(ccNumber)) {
+                    return type;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Validates the credit card type given the credit card number.
+     *
+     * @param ccNumber
+     */
+    @Override
+    public CreditCardType validate(String ccNumber)
+            throws NullPointerException, IllegalArgumentException {
+        SUS.checkIfNulls("Null credit card number", ccNumber);
+        ccNumber = SUS.trimOrNull(ccNumber);
+        ccNumber = ccNumber.replaceAll("[ -]", "");
+
+        if (ccNumber.matches(pattern)) {
+            return this;
+        }
+        throw new IllegalArgumentException("Invalid Credit Card Type " + ccNumber);
+    }
 
 }

@@ -16,6 +16,7 @@
 package org.zoxweb.shared.filters;
 
 import org.zoxweb.shared.util.CanonicalID;
+import org.zoxweb.shared.util.DataEncoder;
 import org.zoxweb.shared.util.Validator;
 
 import java.io.Serializable;
@@ -23,19 +24,24 @@ import java.io.Serializable;
 
 /**
  * The filter interface is used to validate and check property values
- * @author mnael
  *
  * @param <I> Input value
  * @param <O> Output filtered value
+ * @author mnael
  */
 public interface ValueFilter<I, O>
-        extends Serializable, CanonicalID, Validator<I> {
+        extends Serializable, CanonicalID, DataEncoder<I,O>, Validator<I> {
+
+    default O encode(I input) {
+        return validate(input);
+    }
 
     /**
      * Validate the object
+     *
      * @param in value to be validated
      * @return validated acceptable value
-     * @throws NullPointerException if in is null
+     * @throws NullPointerException     if in is null
      * @throws IllegalArgumentException if in is invalid
      */
     O validate(I in)
@@ -43,8 +49,21 @@ public interface ValueFilter<I, O>
 
     /**
      * Check if the value is valid
+     *
      * @param in value to be checked
      * @return true if in value valid
      */
-    boolean isValid(I in);
+    default boolean isValid(I in) {
+        try {
+            validate(in);
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
+
+
+    default String toCanonicalID(){
+        return getClass().getName();
+    }
 }

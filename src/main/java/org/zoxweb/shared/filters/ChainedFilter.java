@@ -25,7 +25,6 @@ public class ChainedFilter
     private ValueFilter<String, String>[] vfs;
 
     public ChainedFilter() {
-
     }
 
     @SafeVarargs
@@ -68,16 +67,6 @@ public class ChainedFilter
         return in;
     }
 
-    @Override
-    public boolean isValid(String in) {
-        try {
-            validate(in);
-        } catch (Exception e) {
-            return false;
-        }
-
-        return true;
-    }
 
     public ValueFilter<String, String>[] getValueFilters() {
         return vfs;

@@ -6,8 +6,7 @@ import org.zoxweb.shared.util.SUS;
 
 
 public class TokenFilter
-        implements ValueFilter<String, String>,
-        DataEncoder<String, String> {
+        implements ValueFilter<String, String>{
     public static final TokenFilter UPPER_COLON = new TokenFilter("UpperColon", Const.StringType.UPPER, ":");
     public static final TokenFilter LOWER_COLON = new TokenFilter("LowerColon", Const.StringType.LOWER, ":");
     public static final TokenFilter COLON = new TokenFilter("Colon", Const.StringType.AS_IS, ":");
@@ -65,8 +64,4 @@ public class TokenFilter
         return canID;
     }
 
-    @Override
-    public String encode(String value) {
-        return validate(value);
-    }
 }

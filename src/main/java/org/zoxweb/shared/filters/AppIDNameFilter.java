@@ -16,58 +16,40 @@
 package org.zoxweb.shared.filters;
 
 import org.zoxweb.shared.util.SUS;
-import org.zoxweb.shared.util.SharedUtil;
 
 @SuppressWarnings("serial")
 public class AppIDNameFilter
-        implements ValueFilter<String, String>
-{
-	
-	public static final AppIDNameFilter SINGLETON  = new AppIDNameFilter();
+        implements ValueFilter<String, String> {
 
-	private AppIDNameFilter()
-	{
-		
-	}
-	
-	@Override
-	public String toCanonicalID()
-    {
-		return null;
-	}
+    public static final AppIDNameFilter SINGLETON = new AppIDNameFilter();
 
-	@Override
-	public String validate(String in)
-            throws NullPointerException, IllegalArgumentException
-    {
-		if (isValid(in))
-        {
+    private AppIDNameFilter() {
+
+    }
+
+    @Override
+    public String validate(String in)
+            throws NullPointerException, IllegalArgumentException {
+        if (isValid(in)) {
             return in.trim().toLowerCase();
         }
+        SUS.checkIfNulls("Null App name", in);
 
-		SUS.checkIfNulls("Null App name", in);
-		
-		throw new IllegalArgumentException("Invalid App name " + in);
-	}
+        throw new IllegalArgumentException("Invalid App name " + in);
+    }
 
-	@Override
-	public boolean isValid(String in) 
-	{
-		if (!SUS.isEmpty(in))
-		{
-			in = in.trim();
-			for (int i = 0; i < in.length(); i++)
-			{
-				if (!Character.isLetterOrDigit(in.charAt(i)))
-				{
-					return false;
-				}	
-			}
-
-			return true;
-		}
-			
-		return false;
-	}
+    @Override
+    public boolean isValid(String in) {
+        if (!SUS.isEmpty(in)) {
+            in = in.trim();
+            for (int i = 0; i < in.length(); i++) {
+                if (!Character.isLetterOrDigit(in.charAt(i))) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
+    }
 
 }

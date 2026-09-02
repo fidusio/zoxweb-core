@@ -106,6 +106,8 @@ public interface APIDataStore<P, S>
     default void abortTransaction() {
     }
 
+    default boolean isTransactionActive(){return false;}
+
     /**
      * This method searches for documents.
      *

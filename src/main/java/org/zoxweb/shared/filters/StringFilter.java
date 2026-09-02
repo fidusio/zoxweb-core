@@ -23,7 +23,7 @@ public class StringFilter extends
      * @return
      */
     @Override
-    public String decode(String input) {
+    public String validate(String input) {
         SFType type = SharedUtil.lookupEnum(config.getValue("type"), SFType.values());
         String ret = input;
         switch (type) {

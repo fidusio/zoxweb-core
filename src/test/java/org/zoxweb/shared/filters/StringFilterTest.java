@@ -23,7 +23,9 @@ public class StringFilterTest
         String[] toTest = {"Johny", "---{missing end", "missning front---}", "fgfdkgfdkagjfdakjg```java\nvalue between\n```-====df,kdslkfgdslgsdgfsdag"};
         for (String test : toTest)
         {
-            System.out.println(test  + " result: " + sf.decode(test));
+            System.out.println("+++++++++++++++++++++++++++++++++++++++++++++++++");
+            System.out.println(test  + " |---result---| " + sf.encode(test));
+            System.out.println("-------------------------------------------------");
         }
 
         System.out.println("\n" + GSONUtil.toJSONDefault(config, true));

@@ -46,15 +46,7 @@ public enum HTTPEncoder
                     (Object) nvp.getValue();// MN 2025-02-22 DO NOT REMOVE the Object casting It is on purpose to support int and long and other type NOT String
         }
 
-        @Override
-        public boolean isValid(GetNameValue<String> nvp) {
-            return nvp != null && nvp.getValue() != null && nvp.getName() != null;
-        }
 
-        @Override
-        public String toCanonicalID() {
-            return null;
-        }
     },
     /** REST URI path segment encoding format: value1/value2 */
     URI_REST_ENCODED(null, "/") {
@@ -67,15 +59,7 @@ public enum HTTPEncoder
             return nvp.getValue();
         }
 
-        @Override
-        public boolean isValid(GetNameValue<String> nvp) {
-            return nvp != null && nvp.getValue() != null;
-        }
 
-        @Override
-        public String toCanonicalID() {
-            return null;
-        }
     },
     /** HTTP header parameter encoding format: name=value; name2=value2 */
     HEADER("=", "; ") {
@@ -90,15 +74,7 @@ public enum HTTPEncoder
                     (Object) nvp.getValue();// MN 2025-02-22 DO NOT REMOVE the Object casting It is on purpose to support int and long and other type NOT String
         }
 
-        @Override
-        public boolean isValid(GetNameValue<String> nvp) {
-            return nvp != null && nvp.getValue() != null;
-        }
 
-        @Override
-        public String toCanonicalID() {
-            return null;
-        }
     };
 
     private final String paramSep;
@@ -113,6 +89,12 @@ public enum HTTPEncoder
     @Override
     public String getName() {
         return name().toLowerCase();
+    }
+
+
+    @Override
+    public boolean isValid(GetNameValue<String> nvp) {
+        return nvp != null && nvp.getValue() != null;
     }
 
     /**

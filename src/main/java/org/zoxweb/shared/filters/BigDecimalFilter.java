@@ -15,57 +15,31 @@
  */
 package org.zoxweb.shared.filters;
 
-import java.math.BigDecimal;
-
 import org.zoxweb.shared.util.SUS;
-import org.zoxweb.shared.util.SharedUtil;
+
+import java.math.BigDecimal;
 
 @SuppressWarnings("serial")
 public class BigDecimalFilter
-    implements ValueFilter<String, BigDecimal>
-{
+        implements ValueFilter<String, BigDecimal> {
 
-	public static final BigDecimalFilter SINGLETON = new BigDecimalFilter();
-	
-	private BigDecimalFilter()
-    {
-		
-	}
+    public static final BigDecimalFilter SINGLETON = new BigDecimalFilter();
 
-	@Override
-	public String toCanonicalID()
-    {
-		return BigDecimalFilter.class.getName();
-	}
+    private BigDecimalFilter() {
+    }
 
-	@Override
-	public BigDecimal validate(String in) 
-        throws NullPointerException, IllegalArgumentException
-    {
-		SUS.checkIfNulls("Input empty or null.", in);
-		
-		try
-        {
-			return new BigDecimal(in);
-		}
-		catch (NumberFormatException e)
-        {
-			throw new IllegalArgumentException(e.getMessage());
-		}
-	}
 
-	@Override
-	public boolean isValid(String in)
-    {
-		try
-        {
-			validate(in);
-			return true;
-		}
-		catch (Exception e)
-        {
-			return false;
-		}
-	}
+    @Override
+    public BigDecimal validate(String in)
+            throws NullPointerException, IllegalArgumentException {
+        SUS.checkIfNulls("Input empty or null.", in);
+
+        try {
+            return new BigDecimal(in);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException(e.getMessage());
+        }
+    }
+
 
 }

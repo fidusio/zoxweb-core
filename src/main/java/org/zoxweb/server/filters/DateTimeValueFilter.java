@@ -37,20 +37,13 @@ public class DateTimeValueFilter
         SDF = DateUtil.createSDF(pattern, timezone);
     }
 
-    /**
-     * @see org.zoxweb.shared.util.CanonicalID#toCanonicalID()
-     * @return
-     */
-    public String toCanonicalID() {
-        return null;
-    }
 
     /**
-     * @see org.zoxweb.shared.filters.ValueFilter#validate(java.lang.Object)
      * @param in value to be validated
      * @return
      * @throws NullPointerException
      * @throws IllegalArgumentException
+     * @see org.zoxweb.shared.filters.ValueFilter#validate(java.lang.Object)
      */
     public Long validate(String in)
             throws NullPointerException, IllegalArgumentException {
@@ -60,20 +53,4 @@ public class DateTimeValueFilter
             throw new IllegalArgumentException(e.getMessage());
         }
     }
-
-    /**
-     * @see org.zoxweb.shared.filters.ValueFilter#isValid(java.lang.Object)
-     * @param in value to be checked
-     * @return
-     */
-    public boolean isValid(String in) {
-        try {
-            validate(in);
-            return true;
-        } catch (Exception e) {
-
-        }
-        return false;
-    }
-
 }

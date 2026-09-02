@@ -20,70 +20,60 @@ import org.zoxweb.shared.util.SUS;
 
 @SuppressWarnings("serial")
 public class CanonicalFilenameFilter
-    implements ValueFilter<String, String>
-{
+        implements ValueFilter<String, String> {
 
-	public static final CanonicalFilenameFilter SINGLETON = new CanonicalFilenameFilter();
-	
-	private CanonicalFilenameFilter() {
-		
-	}
+    public static final CanonicalFilenameFilter SINGLETON = new CanonicalFilenameFilter();
 
-	@Override
-	public String toCanonicalID()
-    {
-		return "static:ValueFilter:CanonicalFilenameFilter";
-	}
+    private CanonicalFilenameFilter() {
 
-	@Override
-	public String validate(String filename)
-        throws NullPointerException, IllegalArgumentException
-    {
-		
-		filename = SUS.trimOrNull( filename);
+    }
 
-		if (filename == null)
-		{
-			return "" + Const.FilenameSep.SLASH;
-		}
+    @Override
+    public String toCanonicalID() {
+        return "static:ValueFilter:CanonicalFilenameFilter";
+    }
 
-		Const.FilenameSep replaceWith = Const.FilenameSep.SLASH;
-		
-		for (Const.FilenameSep replace: Const.FilenameSep.values())
-		{
-			if (replace == replaceWith)
-			{
-				continue;
-			}
+    @Override
+    public String validate(String filename)
+            throws NullPointerException, IllegalArgumentException {
 
-			filename = filename.replace(replace.sep, replaceWith.sep);
-		}
-		
-		String tokens[] = filename.split(""+Const.FilenameSep.SLASH);
-		StringBuilder ret = new StringBuilder();
+        filename = SUS.trimOrNull(filename);
 
-		for (String token : tokens)
-		{
-			if (!token.isEmpty())
-			{
-				ret.append(replaceWith.sep);
-				ret.append(token);
-			}
-		}
-		
-		if (ret.length() == 0)
-		{
-			ret.append(replaceWith.sep);
-		}
-		
-		return ret.toString();
-		
-	}
+        if (filename == null) {
+            return "" + Const.FilenameSep.SLASH;
+        }
 
-	@Override
-	public boolean isValid(String in)
-    {
-		return validate(in).equals(in);
-	}
+        Const.FilenameSep replaceWith = Const.FilenameSep.SLASH;
+
+        for (Const.FilenameSep replace : Const.FilenameSep.values()) {
+            if (replace == replaceWith) {
+                continue;
+            }
+
+            filename = filename.replace(replace.sep, replaceWith.sep);
+        }
+
+        String tokens[] = filename.split("" + Const.FilenameSep.SLASH);
+        StringBuilder ret = new StringBuilder();
+
+        for (String token : tokens) {
+            if (!token.isEmpty()) {
+                ret.append(replaceWith.sep);
+                ret.append(token);
+            }
+        }
+
+        if (ret.length() == 0) {
+            ret.append(replaceWith.sep);
+        }
+
+        return ret.toString();
+
+    }
+
+    @Override
+    public boolean isValid(String in) {
+        return validate(in).equals(in);
+    }
 
 }
