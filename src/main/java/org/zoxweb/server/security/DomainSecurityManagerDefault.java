@@ -101,11 +101,21 @@ public class DomainSecurityManagerDefault
 
     /**
      * Fetches the {@link PrincipalIdentifier} row matching the given principal
-     * identifier, or {@code null} if none exists.
+     * identifier, or {@code null} if none exists. The identifier is normalized
+     * with {@link SecConst.SubjectIDFilter} (trimmed, lowercased) before the
+     * query so it matches the stored form regardless of the datastore's case
+     * sensitivity; an identifier the filter rejects cannot match any row and
+     * resolves to {@code null}.
      */
     private PrincipalIdentifier resolvePrincipal(String principalID) {
+        String normalized;
+        try {
+            normalized = SecConst.SubjectIDFilter.SINGLETON.validate(principalID);
+        } catch (NullPointerException | IllegalArgumentException e) {
+            return null;
+        }
         return first(ds().search(PrincipalIdentifier.NVC_PRINCIPAL_IDENTIFIER, null,
-                new QueryMatch<>(RelationalOperator.EQUAL, principalID, PrincipalIdentifier.Param.PRINCIPAL_ID)));
+                new QueryMatch<>(RelationalOperator.EQUAL, normalized, PrincipalIdentifier.Param.PRINCIPAL_ID)));
     }
 
     /**

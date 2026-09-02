@@ -20,18 +20,18 @@ class PrincipalIdentifierTest {
 
     @Test
     void oneArgConstructorSetsOnlyPrincipalID() {
-        PrincipalIdentifier pi = new PrincipalIdentifier("test");
+        PrincipalIdentifier pi = new PrincipalIdentifier("testuser");
 
-        assertEquals("test", pi.getPrincipalID());
+        assertEquals("testuser", pi.getPrincipalID());
         assertNull(pi.getDomainID());
         assertNull(pi.getAppID());
     }
 
     @Test
     void threeArgConstructorSetsAllFields() {
-        PrincipalIdentifier pi = new PrincipalIdentifier("test", "test1.com", "test2");
+        PrincipalIdentifier pi = new PrincipalIdentifier("testuser", "test1.com", "test2");
 
-        assertEquals("test", pi.getPrincipalID());
+        assertEquals("testuser", pi.getPrincipalID());
         assertEquals("test1.com", pi.getDomainID());
         assertEquals("test2", pi.getAppID());
     }
@@ -39,13 +39,13 @@ class PrincipalIdentifierTest {
     @Test
     void threeArgConstructorRejectsInvalidDomain() {
         assertThrows(IllegalArgumentException.class,
-                () -> new PrincipalIdentifier("test", "notADomain", "app"));
+                () -> new PrincipalIdentifier("testuser", "notADomain", "app"));
     }
 
     @Test
     void threeArgConstructorRejectsInvalidAppName() {
         assertThrows(IllegalArgumentException.class,
-                () -> new PrincipalIdentifier("test", "test.com", "bad app!"));
+                () -> new PrincipalIdentifier("testuser", "test.com", "bad app!"));
     }
 
     // ---------- PrincipalID ----------
@@ -53,22 +53,37 @@ class PrincipalIdentifierTest {
     @Test
     void setAndGetPrincipalID() {
         PrincipalIdentifier pi = new PrincipalIdentifier();
-        pi.setPrincipalID("test");
-        assertEquals("test", pi.getPrincipalID());
+        pi.setPrincipalID("testuser");
+        assertEquals("testuser", pi.getPrincipalID());
+    }
+
+    @Test
+    void setPrincipalIDIsNormalizedByFilter() {
+        PrincipalIdentifier pi = new PrincipalIdentifier();
+        pi.setPrincipalID("  TestUser@Example.COM ");
+        assertEquals("testuser@example.com", pi.getPrincipalID());
+    }
+
+    @Test
+    void setPrincipalIDRejectsTooShortOrInvisibleCharacters() {
+        PrincipalIdentifier pi = new PrincipalIdentifier("testuser");
+        assertThrows(IllegalArgumentException.class, () -> pi.setPrincipalID("short"));
+        assertThrows(IllegalArgumentException.class, () -> pi.setPrincipalID("test\u200Buser"));
+        assertEquals("testuser", pi.getPrincipalID());
     }
 
     @Test
     void setPrincipalIDOverwritesPreviousValue() {
-        PrincipalIdentifier pi = new PrincipalIdentifier("first");
-        pi.setPrincipalID("second");
-        assertEquals("second", pi.getPrincipalID());
+        PrincipalIdentifier pi = new PrincipalIdentifier("first-user");
+        pi.setPrincipalID("second-user");
+        assertEquals("second-user", pi.getPrincipalID());
     }
 
     @Test
-    void setPrincipalIDToNullClearsValue() {
-        PrincipalIdentifier pi = new PrincipalIdentifier("test");
-        pi.setPrincipalID(null);
-        assertNull(pi.getPrincipalID());
+    void setPrincipalIDToNullIsRejectedForMandatoryField() {
+        PrincipalIdentifier pi = new PrincipalIdentifier("testuser");
+        assertThrows(NullPointerException.class, () -> pi.setPrincipalID(null));
+        assertEquals("testuser", pi.getPrincipalID());
     }
 
     // ---------- DomainID ----------
@@ -137,7 +152,7 @@ class PrincipalIdentifierTest {
 
     @Test
     void getDomainAppIDReturnsCanonicalForm() {
-        PrincipalIdentifier pi = new PrincipalIdentifier("user", "test.com", "myApp");
+        PrincipalIdentifier pi = new PrincipalIdentifier("username", "test.com", "myApp");
         String canonical = pi.getDomainAppID();
 
         assertNotNull(canonical);
@@ -149,8 +164,8 @@ class PrincipalIdentifierTest {
 
     @Test
     void equalsIsSymmetric() {
-        PrincipalIdentifier a = new PrincipalIdentifier("test");
-        PrincipalIdentifier b = new PrincipalIdentifier("test");
+        PrincipalIdentifier a = new PrincipalIdentifier("testuser");
+        PrincipalIdentifier b = new PrincipalIdentifier("testuser");
 
         assertEquals(a, b);
         assertEquals(b, a);
@@ -158,8 +173,8 @@ class PrincipalIdentifierTest {
 
     @Test
     void equalsReturnsFalseForDifferentPrincipalID() {
-        PrincipalIdentifier a = new PrincipalIdentifier("test");
-        PrincipalIdentifier b = new PrincipalIdentifier("other");
+        PrincipalIdentifier a = new PrincipalIdentifier("testuser");
+        PrincipalIdentifier b = new PrincipalIdentifier("otheruser");
 
         assertNotEquals(a, b);
     }
@@ -174,8 +189,8 @@ class PrincipalIdentifierTest {
 
     @Test
     void equalsIgnoresDomainAndApp() {
-        PrincipalIdentifier a = new PrincipalIdentifier("test", "a.com", "app1");
-        PrincipalIdentifier b = new PrincipalIdentifier("test", "b.com", "app2");
+        PrincipalIdentifier a = new PrincipalIdentifier("testuser", "a.com", "app1");
+        PrincipalIdentifier b = new PrincipalIdentifier("testuser", "b.com", "app2");
 
         assertEquals(a, b);
     }
@@ -191,14 +206,14 @@ class PrincipalIdentifierTest {
     @Test
     @SuppressWarnings({"SimplifiableAssertion", "ConstantValue"})
     void equalsReturnsFalseForNull() {
-        PrincipalIdentifier pi = new PrincipalIdentifier("test");
+        PrincipalIdentifier pi = new PrincipalIdentifier("testuser");
         assertFalse(pi.equals(null));
     }
 
     @Test
     @SuppressWarnings({"SimplifiableAssertion", "EqualsBetweenInconvertibleTypes"})
     void equalsReturnsFalseForUnrelatedType() {
-        PrincipalIdentifier pi = new PrincipalIdentifier("test");
+        PrincipalIdentifier pi = new PrincipalIdentifier("testuser");
         Object stringValue = "test";
         Object intValue = 42;
 
@@ -222,7 +237,7 @@ class PrincipalIdentifierTest {
 
     @Test
     void hashCodeIsConsistentAcrossCalls() {
-        PrincipalIdentifier pi = new PrincipalIdentifier("test");
+        PrincipalIdentifier pi = new PrincipalIdentifier("testuser");
         int first = pi.hashCode();
         int second = pi.hashCode();
         assertEquals(first, second);
@@ -230,8 +245,8 @@ class PrincipalIdentifierTest {
 
     @Test
     void equalObjectsHaveEqualHashCodes() {
-        PrincipalIdentifier a = new PrincipalIdentifier("test");
-        PrincipalIdentifier b = new PrincipalIdentifier("test");
+        PrincipalIdentifier a = new PrincipalIdentifier("testuser");
+        PrincipalIdentifier b = new PrincipalIdentifier("testuser");
 
         assertEquals(a, b);
         assertEquals(a.hashCode(), b.hashCode());
@@ -245,7 +260,8 @@ class PrincipalIdentifierTest {
         pi.setPrincipalID("test@gmail.com");
         assertNotEquals(empty, pi.hashCode());
 
-        pi.setPrincipalID(null);
-        assertEquals(empty, pi.hashCode());
+        // principal_id is mandatory: null is rejected and the hash is unchanged
+        assertThrows(NullPointerException.class, () -> pi.setPrincipalID(null));
+        assertNotEquals(empty, pi.hashCode());
     }
 }

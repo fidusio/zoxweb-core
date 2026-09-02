@@ -13,7 +13,11 @@ class DomainSecurityManagerDefaultTest {
     private static final String PASSWORD = "Secret123!";
 
     private DomainSecurityManager newManager() {
-        return new DomainSecurityManagerDefault().setDataStore(new MockAPIDataStore());
+        // credential classes are registered explicitly by the caller: the manager scans only
+        // registered collections, and deployments may use other types (e.g. API keys)
+        return new DomainSecurityManagerDefault()
+                .setDataStore(new MockAPIDataStore())
+                .addCredentialType(CIPassword.class);
     }
 
     @Test
