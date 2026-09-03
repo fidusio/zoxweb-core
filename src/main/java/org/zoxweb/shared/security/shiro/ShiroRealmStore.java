@@ -18,6 +18,7 @@ package org.zoxweb.shared.security.shiro;
 
 import org.zoxweb.shared.data.UserIDDAO;
 import org.zoxweb.shared.security.AccessException;
+import org.zoxweb.shared.security.RealmController;
 import org.zoxweb.shared.security.SubjectIdentifier;
 import org.zoxweb.shared.util.GetValue;
 

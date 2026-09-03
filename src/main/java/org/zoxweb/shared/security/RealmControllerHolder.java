@@ -1,4 +1,4 @@
-package org.zoxweb.shared.security.shiro;
+package org.zoxweb.shared.security;
 
 public interface RealmControllerHolder<O,I> {
     RealmController<O,I> getRealmController();

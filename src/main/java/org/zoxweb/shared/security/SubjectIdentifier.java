@@ -36,7 +36,6 @@ public class SubjectIdentifier
     public enum Param
             implements GetNVConfig {
         SUBJECT_GUID(NVConfigManager.createNVConfig(MetaToken.SUBJECT_GUID.getName(), "The subject global identifier.", "SubjectGUID", true, false, true, String.class, null)),
-//        SUBJECT_ID(NVConfigManager.createNVConfig(MetaToken.SUBJECT_ID.getName(), "Subject identifier", "SubjectID", true, true, true, String.class, SecConst.SubjectIDFilter.SINGLETON)),
         SUBJECT_TYPE(NVConfigManager.createNVConfig("subject_type", "Subject Type", "SubjectType", true, true, SubjectType.class)),
         SUBJECT_STATUS(NVConfigManager.createNVConfig("subject_status", "Subject status", "SubjectStatus", true, true, SecConst.SecStatus.class)),
         ;

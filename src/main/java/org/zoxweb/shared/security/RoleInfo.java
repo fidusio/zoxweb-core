@@ -43,6 +43,14 @@ public class RoleInfo extends AuthzInfo {
         super(NVC_ROLE_INFO);
     }
 
+    public RoleInfo(String name, String description, PermissionInfo... permissions) {
+        this();
+        setName(name);
+        setDescription(description);
+        setPermissions(permissions);
+
+    }
+
     /**
      * Constructor that sets a role
      *

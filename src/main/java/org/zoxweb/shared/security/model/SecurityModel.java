@@ -1,7 +1,7 @@
 package org.zoxweb.shared.security.model;
 
-import org.zoxweb.shared.security.shiro.ShiroPermission;
-import org.zoxweb.shared.security.shiro.ShiroRole;
+import org.zoxweb.shared.security.PermissionInfo;
+import org.zoxweb.shared.security.RoleInfo;
 import org.zoxweb.shared.util.*;
 
 public final class SecurityModel {
@@ -240,8 +240,8 @@ public final class SecurityModel {
         }
 
 
-        public ShiroPermission toPermission(String domainID, String appID, NVPair... tokens) {
-            return SecurityModel.toPermission(domainID, appID, getName(), getDescription(), getValue(), tokens);
+        public PermissionInfo toPermission(NVPair... tokens) {
+            return SecurityModel.toPermission(getName(), getDescription(), getValue(), tokens);
         }
 
 
@@ -273,26 +273,16 @@ public final class SecurityModel {
             return description;
         }
 
-        public ShiroRole toRole(AppID<String> appID) {
-            return toRole(appID.getDomainID(), appID.getAppID());
+
+
+
+        public static RoleInfo toRole(String name, String description) {
+            return new RoleInfo(name, description);
         }
 
-        public ShiroRole toRole(String domainID, String appID) {
-            return toRole(domainID, appID, name, description);
-        }
 
-
-        public static ShiroRole toRole(AppID<String> appID, String name, String description) {
-            return new ShiroRole(appID.getDomainID(), appID.getAppID(), name, description);
-        }
-
-        public static ShiroRole toRole(String domainID, String appID, String name, String description) {
-            return new ShiroRole(domainID, appID, name, description);
-        }
-
-        public static ShiroRole addPermission(ShiroRole role, ShiroPermission permission) {
-            permission.setDomainAppID(role.getDomainID(), role.getAppID());
-            role.getPermissions().add(permission);
+        public static RoleInfo addPermission(RoleInfo role, PermissionInfo permission) {
+            role.addPermission(permission);
             return role;
         }
     }
@@ -354,14 +344,6 @@ public final class SecurityModel {
         public String pattern() {
             return pattern;
         }
-
-
-//		public ShiroPermissionDAO toPermission(String domainID, String appID, NVPair ...tokens)
-//		{
-//			return SecurityModel.toPermission(domainID, appID, getName(), getDescription(), getValue());
-//		}
-
-
     }
 
     /**
@@ -369,16 +351,16 @@ public final class SecurityModel {
      * @param gnv
      * @return
      */
-    public static ShiroPermission toPermission(String domainID, String appID, GetNameValue<String> gnv, NVPair... tokens) {
-        return toPermission(domainID, appID, gnv.getName(), null, gnv.getValue(), tokens);
+    public static PermissionInfo toPermission( GetNameValue<String> gnv, NVPair... tokens) {
+        return toPermission(gnv.getName(), null, gnv.getValue(), tokens);
     }
 
-    public static ShiroPermission toPermission(String domainID, String appID, String name, String description, String pattern, NVPair... tokens) {
-        ShiroPermission ret = new ShiroPermission();
+    public static PermissionInfo toPermission( String name, String description, String pattern, NVPair... tokens) {
+        PermissionInfo ret = new PermissionInfo();
         ret.setName(name);
         ret.setDescription(description);
         //ret.setEmbedAppIDEnabled(embedAppID);
-        ret.setDomainAppID(domainID, appID);
+        //ret.setDomainAppID(domainID, appID);
 
 
         if (tokens != null && tokens.length > 0) {
@@ -387,7 +369,7 @@ public final class SecurityModel {
         }
 
 
-        ret.setPermissionPattern(pattern);
+        ret.setPermissionToken(pattern);
         return ret;
 
     }

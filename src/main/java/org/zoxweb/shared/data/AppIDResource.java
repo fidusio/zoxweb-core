@@ -153,20 +153,6 @@ public class AppIDResource
 
 
 
-//    public static AppIDResource toAppID(String gid) {
-//        gid = SUS.trimOrNull(gid);
-//        SUS.checkIfNulls("Null app global ig", gid);
-//        int sepIndex = gid.lastIndexOf(ShiroBase.CAN_ID_SEP);
-//        if (sepIndex < 1 || sepIndex + 1 == gid.length())
-//            throw new IllegalArgumentException("Illegal gid:" + gid);
-//
-//        String domainID = FilterType.DOMAIN.validate(gid.substring(0, sepIndex));
-//        String appID = AppIDNameFilter.SINGLETON.validate(gid.substring(sepIndex + 1));
-//
-//
-//        return new AppIDResource(domainID, appID);
-//
-//    }
 
     public static AppIDResource toAppID(String domainID, String appID) {
         return new AppIDResource(domainID, appID);

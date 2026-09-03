@@ -26,7 +26,6 @@ import org.zoxweb.shared.http.HTTPEndPoint;
 import org.zoxweb.shared.http.HTTPServerConfig;
 import org.zoxweb.shared.net.*;
 import org.zoxweb.shared.security.*;
-import org.zoxweb.shared.security.shiro.*;
 import org.zoxweb.shared.util.*;
 
 import java.util.HashSet;
@@ -966,59 +965,6 @@ public class ZWDataFactory
             }
         },
 
-        SHIRO_PERMISSION_DAO(ShiroPermission.class.getName()) {
-            @SuppressWarnings("unchecked")
-            @Override
-            public ShiroPermission newInstance() {
-                return new ShiroPermission();
-            }
-
-            @Override
-            public NVConfigEntity getNVConfigEntity() {
-                return ShiroPermission.NVC_SHIRO_PERMISSION;
-            }
-        },
-        SHIRO_ROLE_DAO(ShiroRole.class.getName()) {
-            @SuppressWarnings("unchecked")
-            @Override
-            public ShiroRole newInstance() {
-                return new ShiroRole();
-            }
-
-            @Override
-            public NVConfigEntity getNVConfigEntity() {
-                return ShiroRole.NVC_SHIRO_ROLE;
-            }
-        } //		SHIRO_NVENTITY_CRUDS(ShiroNVEntityCRUDs.class.getName())
-        //		{
-        //			@SuppressWarnings("unchecked")
-        //			@Override
-        //			public ShiroNVEntityCRUDs newInstance()
-        //			{
-        //				return new ShiroNVEntityCRUDs();
-        //			}
-        //			@Override
-        //			public NVConfigEntity getNVConfigEntity()
-        //			{
-        //				return ShiroNVEntityCRUDs.NVC_SHIRO_NVENTITY_CRUDS;
-        //			}
-        //		},
-        //	org.zoxweb.shared.data.shiro
-        ,
-
-
-        SHIRO_ROLE_GROUP_DAO(ShiroRoleGroup.class.getName()) {
-            @SuppressWarnings("unchecked")
-            @Override
-            public ShiroRoleGroup newInstance() {
-                return new ShiroRoleGroup();
-            }
-
-            @Override
-            public NVConfigEntity getNVConfigEntity() {
-                return ShiroRoleGroup.NVC_SHIRO_ROLE_GROUP;
-            }
-        },
         SIMPLE_DOCUMENT_DAO(SimpleDocumentDAO.class.getName()) {
             @SuppressWarnings("unchecked")
             @Override
@@ -1054,24 +1000,7 @@ public class ZWDataFactory
             public NVConfigEntity getNVConfigEntity() {
                 return StatCounter.NVC_STAT_COUNTER_DAO;
             }
-        } //        {
-        //            @SuppressWarnings("unchecked")
-        //            @Override
-        //            public ShiroSessionData newInstance()
-        //            {
-        //                return new ShiroSessionData();
-        //            }
-        //
-        //            @Override
-        //            public NVConfigEntity getNVConfigEntity()
-        //            {
-        //                return ShiroSessionData.NVC_SESSION_DATA;
-        //            }
-        //        },
-        //		SHIRO_SESSION_DATA(ShiroSessionData.class.getName())
-        ,
-
-
+        },
         STAT_INFO(StatInfo.class.getName()) {
             @SuppressWarnings("unchecked")
             @Override

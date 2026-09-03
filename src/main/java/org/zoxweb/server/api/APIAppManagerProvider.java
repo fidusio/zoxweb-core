@@ -24,10 +24,6 @@ import org.zoxweb.shared.security.model.PermissionModel;
 import org.zoxweb.shared.security.model.SecurityModel;
 import org.zoxweb.shared.security.model.SecurityModel.AppPermission;
 import org.zoxweb.shared.security.model.SecurityModel.Role;
-import org.zoxweb.shared.security.shiro.ShiroAssociationRule;
-import org.zoxweb.shared.security.shiro.ShiroAssociationType;
-import org.zoxweb.shared.security.shiro.ShiroPermission;
-import org.zoxweb.shared.security.shiro.ShiroRole;
 import org.zoxweb.shared.util.*;
 import org.zoxweb.shared.util.Const.LogicalOperator;
 import org.zoxweb.shared.util.Const.RelationalOperator;
@@ -36,7 +32,9 @@ import org.zoxweb.shared.util.ExceptionReason.Reason;
 
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public class APIAppManagerProvider
@@ -44,18 +42,20 @@ public class APIAppManagerProvider
 
     private volatile APIDataStore<?, ?> dataStore;
     private volatile APISecurityManager<?, ?, ?> apiSecurityManager;
+    private volatile DomainSecurityManager domainSecurityManager;
 
     //private HashMap<String, SubjectAPIKey> cache = new HashMap<String, SubjectAPIKey>();
     public static final LogWrapper log = new LogWrapper(APIAppManagerProvider.class);
+    // per-subject collections removed on user delete, all keyed by subject_guid
     private static final NVConfigEntity[] USER_NVCs =
             {
                     UserIDCredentialsDAO.NVC_USER_ID_CREDENTIALS_DAO,
                     SubjectPreference.NVC_SUBJECT_PREFERENCE,
                     AppDeviceDAO.NVC_APP_DEVICE_DAO,
                     EncapsulatedKey.NVCE_ENCAPSULATED_KEY,
-                    ShiroAssociationRule.NVC_SHIRO_ASSOCIATION_RULE,
-                    ShiroPermission.NVC_SHIRO_PERMISSION,
-                    ShiroRole.NVC_SHIRO_ROLE,
+                    PermissionGrant.NVC_PERMISSION_GRANT,
+                    RoleGrant.NVC_ROLE_GRANT,
+                    RoleGroupGrant.NVC_ROLE_GROUP_GRANT,
                     AddressDAO.NVC_ADDRESS_DAO,
                     CreditCardDAO.NVC_CREDIT_CARD_DAO,
                     DeviceDAO.NVC_DEVICE_DAO,
@@ -75,6 +75,102 @@ public class APIAppManagerProvider
 
     public void setAPISecurityManager(APISecurityManager<?, ?, ?> apiSecurityManager) {
         this.apiSecurityManager = apiSecurityManager;
+    }
+
+    @Override
+    public DomainSecurityManager getDomainSecurityManager() {
+        return domainSecurityManager;
+    }
+
+    @Override
+    public void setDomainSecurityManager(DomainSecurityManager domainSecurityManager) {
+        this.domainSecurityManager = domainSecurityManager;
+    }
+
+    /**
+     * @return the injected domain security manager
+     * @throws IllegalStateException if none has been set
+     */
+    private DomainSecurityManager dsm() {
+        DomainSecurityManager ret = domainSecurityManager;
+        if (ret == null) {
+            throw new IllegalStateException("No domain security manager set");
+        }
+        return ret;
+    }
+
+    /**
+     * Resolves a subject by principal identifier first, then by GUID.
+     *
+     * @param id principal identifier or subject GUID
+     * @return the subject
+     * @throws APIException if no subject matches
+     */
+    private SubjectIdentifier resolveSubject(String id) {
+        SubjectIdentifier ret = dsm().lookupSubjectID(id);
+        if (ret == null) {
+            List<SubjectIdentifier> byGUID = getAPIDataStore().searchByID(SubjectIdentifier.NVC_SUBJECT_IDENTIFIER, id);
+            if (byGUID != null && !byGUID.isEmpty()) {
+                ret = byGUID.get(0);
+            }
+        }
+        if (ret == null) {
+            throw new APIException("Subject not found: " + id);
+        }
+        return ret;
+    }
+
+    /**
+     * @return the subject's existing grant for the role, null if none
+     */
+    private RoleGrant findRoleGrant(String subjectGUID, RoleInfo role) {
+        for (RoleGrant grant : dsm().getRoleGrants(subjectGUID)) {
+            if (SharedStringUtil.equals(grant.getRoleGUID(), role.getGUID(), false)) {
+                return grant;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Grants the role to the subject unless an identical grant already exists.
+     *
+     * @return the existing or newly created grant
+     */
+    private RoleGrant grantRoleOnce(SubjectIdentifier subject, RoleInfo role) {
+        RoleGrant ret = findRoleGrant(subject.getGUID(), role);
+        return ret != null ? ret : dsm().addRoleGrant(subject, role);
+    }
+
+    /**
+     * @return true if the authorization info belongs to the same domain as the app id
+     */
+    private static boolean sameDomain(AuthzInfo info, AppIDDefault app) {
+        String owned = info.getAppIdDAO() != null ? info.getAppIdDAO().getDomainID() : null;
+        return SharedStringUtil.equals(owned, app.getDomainID(), true);
+    }
+
+    /**
+     * Creates and persists an application role holding the given permissions.
+     *
+     * @param app     the owning application
+     * @param role    the role model supplying name and description
+     * @param all     every permission created for the app, keyed by permission name
+     * @param granted the permissions this role receives
+     * @return the persisted role
+     */
+    private RoleInfo createAppRole(AppIDDefault app, Role role, Map<String, PermissionInfo> all, PermissionModel... granted) {
+        List<PermissionInfo> perms = new ArrayList<>();
+        for (PermissionModel pm : granted) {
+            PermissionInfo pi = all.get(pm.getName());
+            if (pi == null) {
+                throw new APIException("Permission not created for app " + app.toCanonicalID() + ": " + pm.getName());
+            }
+            perms.add(pi);
+        }
+        RoleInfo ret = new RoleInfo(role.getName(), role.getDescription(), perms.toArray(new PermissionInfo[0]));
+        ret.setAppIdDAO(app);
+        return dsm().createRole(ret);
     }
 
 
@@ -151,15 +247,13 @@ public class APIAppManagerProvider
             }
 
 
-            ShiroAssociationRule sard = new ShiroAssociationRule();
-            sard.setAssociatedTo(getAPISecurityManager().currentUserID());
-            sard.setAssociate(SecurityModel.toSubjectID(temp.getAppID().getDomainID(), temp.getAppID().getAppID(), Role.APP_USER));
-            sard.setAssociationType(ShiroAssociationType.ROLE_TO_SUBJECT);
-            sard.setName("AppUserRule");
-            ///sard.setExpiration(null);
-            sard.setAssociationStatus(Status.ACTIVE);
-
-            getAPISecurityManager().addShiroRule(sard);
+            // grant the app user role to the current user
+            RoleInfo appUserRole = dsm().lookupRole(temp.getAppID().getAppID(), Role.APP_USER.getName());
+            if (appUserRole == null) {
+                throw new APIException("Role not found: " + Role.APP_USER.getName());
+            }
+            SubjectIdentifier subject = resolveSubject(getAPISecurityManager().currentUserID());
+            grantRoleOnce(subject, appUserRole);
         }
 
 
@@ -741,16 +835,16 @@ public class APIAppManagerProvider
             ret = getAPIDataStore().insert(ret);
             NVPair appIDNVP = new NVPair(SecurityModel.TOK_APP_ID, ret.toCanonicalID());
 
-            NVGenericMap permissions = new NVGenericMap();
+            // one permission per AppPermission, with the app id token embedded
+            Map<String, PermissionInfo> permissions = new HashMap<>();
             for (AppPermission ap : AppPermission.values()) {
-                ShiroPermission permission = SecurityModel.toPermission(domainID, appID, ap, appIDNVP);
-                apiSecurityManager.addPermission(permission);
-                permissions.add(permission);
+                PermissionInfo permission = SecurityModel.toPermission(ap, appIDNVP);
+                permission.setAppIdDAO(ret);
+                permission = dsm().createPermission(permission);
+                permissions.put(ap.getName(), permission);
             }
 
-
-            ShiroRole appAdminRole = SecurityModel.Role.APP_ADMIN.toRole(domainID, appID);
-            PermissionModel[] adminPermissions = {
+            createAppRole(ret, Role.APP_ADMIN, permissions,
                     AppPermission.ASSIGN_ROLE_APP,
                     AppPermission.ORDER_DELETE,
                     AppPermission.ORDER_UPDATE,
@@ -761,56 +855,26 @@ public class APIAppManagerProvider
                     AppPermission.RESOURCE_READ_PRIVATE,
                     AppPermission.RESOURCE_READ_PUBLIC,
                     AppPermission.RESOURCE_UPDATE,
-                    AppPermission.SELF
+                    AppPermission.SELF);
 
-            };
-            for (PermissionModel ap : adminPermissions) {
-
-
-                appAdminRole.getPermissions().add(permissions.getValue(ap));
-            }
-
-            ShiroRole appUserRole = SecurityModel.Role.APP_USER.toRole(domainID, appID);
-            PermissionModel[] userPermissions = {
+            createAppRole(ret, Role.APP_USER, permissions,
                     AppPermission.ORDER_CREATE,
                     AppPermission.ORDER_DELETE,
                     AppPermission.ORDER_UPDATE,
                     AppPermission.ORDER_READ_USER_APP,
                     AppPermission.RESOURCE_READ_PUBLIC,
-                    AppPermission.SELF
+                    AppPermission.SELF);
 
-            };
-            for (PermissionModel ap : userPermissions) {
-                appUserRole.getPermissions().add(permissions.getValue(ap));
-            }
+            createAppRole(ret, Role.APP_SERVICE_PROVIDER, permissions,
+                    AppPermission.ORDER_UPDATE_STATUS_APP,
+                    AppPermission.ORDER_READ_APP,
+                    AppPermission.RESOURCE_READ_PUBLIC,
+                    AppPermission.SELF);
 
-            ShiroRole appServiceProviderRole = SecurityModel.Role.APP_SERVICE_PROVIDER.toRole(domainID, appID);
-            PermissionModel[] spPermissions =
-                    {
-                            AppPermission.ORDER_UPDATE_STATUS_APP,
-                            AppPermission.ORDER_READ_APP,
-                            AppPermission.RESOURCE_READ_PUBLIC,
-                            AppPermission.SELF
-
-                    };
-            for (PermissionModel ap : spPermissions) {
-                appServiceProviderRole.getPermissions().add(permissions.getValue(ap));
-            }
-
-            ShiroRole appResourceRole = SecurityModel.Role.RESOURCE.toRole(domainID, appID);
-            PermissionModel[] resourcePermissions = {
+            createAppRole(ret, Role.RESOURCE, permissions,
                     AppPermission.RESOURCE_READ_PRIVATE,
-                    AppPermission.RESOURCE_READ_PUBLIC
-            };
-            for (PermissionModel ap : resourcePermissions) {
-                appResourceRole.getPermissions().add(permissions.getValue(ap));
-            }
+                    AppPermission.RESOURCE_READ_PUBLIC);
 
-
-            apiSecurityManager.addRole(appAdminRole);
-            apiSecurityManager.addRole(appUserRole);
-            apiSecurityManager.addRole(appServiceProviderRole);
-            apiSecurityManager.addRole(appResourceRole);
             getAPIDataStore().createSequence(ret.toCanonicalID());
 
             AppConfigDAO appConfigDAO = new AppConfigDAO();
@@ -838,15 +902,18 @@ public class APIAppManagerProvider
             // delete the APP-ID
             delete(ret);
 
-            // delete the APP-PERMISSIONS
-            getAPIDataStore().delete(ShiroPermission.NVC_SHIRO_PERMISSION,
-                    new QueryMatch<String>(RelationalOperator.EQUAL, ret.getDomainID(), AppIDDefault.Param.DOMAIN_ID),
-                    LogicalOperator.AND, new QueryMatch<String>(RelationalOperator.EQUAL, ret.getAppID(), AppIDDefault.Param.APP_ID));
-
-            // delete the APP-ROLES
-            getAPIDataStore().delete(ShiroRole.NVC_SHIRO_ROLE,
-                    new QueryMatch<String>(RelationalOperator.EQUAL, ret.getDomainID(), AppIDDefault.Param.DOMAIN_ID),
-                    LogicalOperator.AND, new QueryMatch<String>(RelationalOperator.EQUAL, ret.getAppID(), AppIDDefault.Param.APP_ID));
+            // delete the APP-ROLES first (they reference the permissions), then the APP-PERMISSIONS;
+            // the domain check is needed because the security manager matches on app id only
+            for (RoleInfo role : dsm().lookupAllRolesByAppID(ret.getAppID())) {
+                if (sameDomain(role, ret)) {
+                    dsm().deleteRole(role);
+                }
+            }
+            for (PermissionInfo permission : dsm().lookupAllPermissionsByAppID(ret.getAppID())) {
+                if (sameDomain(permission, ret)) {
+                    dsm().deletePermission(permission);
+                }
+            }
 
             // Delelte the APP-DEVICES
             getAPIDataStore().delete(AppDeviceDAO.NVC_APP_DEVICE_DAO, new QueryMatch<String>(RelationalOperator.EQUAL, ret.getReferenceID(), "app_id", "reference_id"));
@@ -875,32 +942,32 @@ public class APIAppManagerProvider
         // permission checked
         UserIDDAO userID = lookupUserIDDAO(subjectID);
         if (userID != null) {
-            String roleSubjectID = appID.getGUID() + "-" + roleName;
-            if (log.isEnabled()) log.getLogger().info("role:" + roleSubjectID);
+            if (log.isEnabled()) log.getLogger().info("role:" + appID.toCanonicalID() + ":" + roleName);
             if (log.isEnabled())
                 log.getLogger().info("userid:" + userID.getPrimaryEmail() + ":" + userID.getSubjectGUID());
-            ShiroRole role = getAPISecurityManager().lookupRole(roleSubjectID);
+            RoleInfo role = dsm().lookupRole(appID.getAppID(), roleName);
             if (role == null) {
                 throw new APIException("Role not found");
             } else {
-                ShiroAssociationRule sard = new ShiroAssociationRule(role.getName() + "-" + userID.getSubjectID(), role, ShiroAssociationType.ROLE_TO_SUBJECT, userID);
+                SubjectIdentifier subject = resolveSubject(userID.getSubjectGUID());
 
                 switch (crud) {
                     case CREATE:
-                        getAPISecurityManager().addShiroRule(sard);
+                        grantRoleOnce(subject, role);
                         if (log.isEnabled()) log.getLogger().info("Created");
                         getAPISecurityManager().invalidateResource(subjectID);
                         break;
                     case DELETE:
-                        getAPISecurityManager().deleteShiroRule(sard);
+                        RoleGrant grant = findRoleGrant(subject.getGUID(), role);
+                        if (grant != null) {
+                            dsm().deleteRoleGrant(grant);
+                        }
                         if (log.isEnabled()) log.getLogger().info("Deleted");
                         getAPISecurityManager().invalidateResource(subjectID);
+                        break;
                     default:
                         break;
-
                 }
-
-
             }
         } else {
             throw new APIException("User not found");

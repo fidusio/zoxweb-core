@@ -1,6 +1,5 @@
-package org.zoxweb.shared.security.shiro;
+package org.zoxweb.shared.security;
 
-import org.zoxweb.shared.security.*;
 import org.zoxweb.shared.util.BaseSubjectID;
 
 import java.util.Set;
@@ -107,126 +106,133 @@ extends AuthorizationInfoLookup<O,I>
 
 
     /**
-     * Add a shiro permission
+     * Add a permission
      * @param permission to be added
      * @return the added permission
      * @throws AccessSecurityException if not permitted
      */
-    ShiroPermission addPermission(ShiroPermission permission)
+    PermissionInfo addPermission(PermissionInfo permission)
             throws AccessSecurityException;
 
     /**
-     * Updated a shiro permission
+     * Update a permission
      * @param permission to be updated
-     * @return the shiro permission
-     * @throws AccessSecurityException if no permitted
+     * @return the updated permission
+     * @throws AccessSecurityException if not permitted
      */
-    ShiroPermission updatePermission(ShiroPermission permission)
+    PermissionInfo updatePermission(PermissionInfo permission)
             throws AccessSecurityException;
 
     /**
-     * Delete a shiro permission
+     * Delete a permission
      * @param permission to be deleted
      * @return the deleted permission null if not found
      * @throws AccessSecurityException if not permitted
      */
-    ShiroPermission deletePermission(ShiroPermission permission)
+    PermissionInfo deletePermission(PermissionInfo permission)
             throws AccessSecurityException;
 
     /**
-     * Add a shiro role
-     * @param shiroRole to be added
-     * @return the added shiro role
+     * Add a role
+     * @param role to be added
+     * @return the added role
      * @throws AccessSecurityException if not permitted
      */
-    ShiroRole addRole(ShiroRole shiroRole)
+    RoleInfo addRole(RoleInfo role)
             throws AccessSecurityException;
 
     /**
-     * Update a shiro role
-     * @param shiroRole to be added
-     * @return the added shiro role
+     * Update a role
+     * @param role to be updated
+     * @return the updated role
      * @throws AccessSecurityException if not permitted
      */
-    ShiroRole updateRole(ShiroRole shiroRole)
+    RoleInfo updateRole(RoleInfo role)
             throws AccessSecurityException;
 
     /**
-     * Delete a shiro role
-     * @param shiroRole to be deleted
-     * @return the deleted shiro role
+     * Delete a role
+     * @param role to be deleted
+     * @return the deleted role
      * @throws AccessSecurityException if not permitted
      */
-    ShiroRole deleteRole(ShiroRole shiroRole)
+    RoleInfo deleteRole(RoleInfo role)
             throws AccessSecurityException;
 
     /**
-     * Add a shiro group role
-     * @param shiroRoleGroup to be added
-     * @return the added shiro role group
+     * Add a role group
+     * @param roleGroup to be added
+     * @return the added role group
      * @throws AccessSecurityException if not permitted
      */
-    ShiroRoleGroup addRoleGroup(ShiroRoleGroup shiroRoleGroup)
+    RoleGroupInfo addRoleGroup(RoleGroupInfo roleGroup)
             throws AccessSecurityException;
 
     /**
-     * Update a shiro group role
-     * @param shiroRoleGroup to be updated
-     * @return the updated shiro role group
+     * Update a role group
+     * @param roleGroup to be updated
+     * @return the updated role group
      * @throws AccessSecurityException if not permitted
      */
-    ShiroRoleGroup updateRoleGroup(ShiroRoleGroup shiroRoleGroup)
+    RoleGroupInfo updateRoleGroup(RoleGroupInfo roleGroup)
             throws AccessSecurityException;
 
     /**
-     * Delete a shiro group role
-     * @param shiroRoleGroup to be deleted
-     * @return the deleted shiro role group
+     * Delete a role group
+     * @param roleGroup to be deleted
+     * @return the deleted role group
      * @throws AccessSecurityException if not permitted
      */
-    ShiroRoleGroup deleteRoleGroup(ShiroRoleGroup shiroRoleGroup)
+    RoleGroupInfo deleteRoleGroup(RoleGroupInfo roleGroup)
             throws AccessSecurityException;
 
 
     /**
-     * Add a shiro authorization info
-     * @param shiroAuthzInfo to added
-     * @return the added shiro authorization info
-     * @throws AccessSecurityException if no permitted
+     * Add a grant, binding a subject to a permission, role or role group
+     * @param grant to be added
+     * @return the added grant
+     * @throws AccessSecurityException if not permitted
      */
-    ShiroAuthzInfo addShiroAuthzInfo(ShiroAuthzInfo shiroAuthzInfo)
-            throws AccessSecurityException;
-
-    Set<ShiroAuthzInfo> lookupSubjectAuthzInfo(String subjectIdentifier)
+    GrantBase addGrant(GrantBase grant)
             throws AccessSecurityException;
 
     /**
-     * Update a shiro authorization info
-     * @param shiroAuthzInfo to updated
-     * @return the updated shiro authorization info
-     * @throws AccessSecurityException if no permitted
+     * Lookup every grant issued to a subject
+     * @param subjectIdentifier the subject identifier
+     * @return the subject grants, empty if none
+     * @throws AccessSecurityException if not permitted
      */
-    ShiroAuthzInfo updateShiroAuthzInfo(ShiroAuthzInfo shiroAuthzInfo)
+    Set<GrantBase> lookupSubjectGrants(String subjectIdentifier)
             throws AccessSecurityException;
+
     /**
-     * Delete a shiro authorization info
-     * @param shiroAuthzInfo to delted
-     * @return the deleted shiro authorization info
-     * @throws AccessSecurityException if no permitted
+     * Update a grant
+     * @param grant to be updated
+     * @return the updated grant
+     * @throws AccessSecurityException if not permitted
      */
-    ShiroAuthzInfo deleteShiroAuthzInfo(ShiroAuthzInfo shiroAuthzInfo)
+    GrantBase updateGrant(GrantBase grant)
+            throws AccessSecurityException;
+
+    /**
+     * Delete a grant
+     * @param grant to be deleted
+     * @return the deleted grant
+     * @throws AccessSecurityException if not permitted
+     */
+    GrantBase deleteGrant(GrantBase grant)
             throws AccessSecurityException;
 
     /**
      *
-     * @return the key maker associated with shiro realm controller
+     * @return the key maker associated with the realm controller
      * @throws AccessSecurityException if not permitted
      */
     KeyMaker getKeyMaker() throws AccessSecurityException;
 
     /**
-     * @param keyMaker to be set for the shiro realm controller
-     * @throws AccessSecurityException if no permitted
+     * @param keyMaker to be set for the realm controller
+     * @throws AccessSecurityException if not permitted
      */
     void setKeyMaker(KeyMaker keyMaker) throws AccessSecurityException;
 

@@ -48,6 +48,20 @@ public interface APIAppManager {
      */
     void setAPISecurityManager(APISecurityManager<?, ?, ?> apiSecurityManager);
 
+    /**
+     * Get the domain security manager used for permissions, roles and grants
+     *
+     * @return the domain security manager, null if not set
+     */
+    DomainSecurityManager getDomainSecurityManager();
+
+    /**
+     * Set the domain security manager used for permissions, roles and grants
+     *
+     * @param domainSecurityManager to be used
+     */
+    void setDomainSecurityManager(DomainSecurityManager domainSecurityManager);
+
 
     /**
      * Register user.

@@ -77,24 +77,4 @@ public class DataTest {
       }
   }
   
-//  @Test
-//  public void testSubjectData() throws IOException
-//  {
-//    ShiroSessionData ssd = new ShiroSessionData();
-//
-//    ssd.setSubjectID("xlogistx");
-//    ssd.setSubjectGUID("xlogistx.com-xlogistx");
-//    ssd.getPermissions().add("p-all");
-//    ssd.getRoles().add("r-all");
-//
-//    String json = GSONUtil.toJSON(ssd, true, false, true);
-//    ShiroSessionData ssd1 = GSONUtil.fromJSON(json);
-//    String json1 = GSONUtil.toJSON(ssd1, true, false, true);
-//
-//    assert(json.equals(json1));
-////    System.out.println(json);
-////    System.out.println(json1);
-//  }
-
-  
 }

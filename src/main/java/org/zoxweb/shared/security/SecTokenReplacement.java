@@ -13,12 +13,12 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.zoxweb.shared.security.shiro;
+package org.zoxweb.shared.security;
 
 import org.zoxweb.shared.util.GetValue;
 import org.zoxweb.shared.util.SharedStringUtil;
 
-public enum ShiroTokenReplacement
+public enum SecTokenReplacement
     implements GetValue<String>
 {
 	SUBJECT_ID("$$SUBJECT_ID$$")
@@ -27,7 +27,7 @@ public enum ShiroTokenReplacement
 	
 	private final String tokenValue;
 
-	ShiroTokenReplacement(String tokenValue)
+	SecTokenReplacement(String tokenValue)
 	{
 		this.tokenValue = tokenValue;
 	}
