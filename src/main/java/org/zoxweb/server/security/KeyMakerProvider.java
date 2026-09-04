@@ -82,17 +82,18 @@ public final class KeyMakerProvider
             throw new IllegalArgumentException("Get user ID is null.");
         }
 
-        EncapsulatedKey ekd;
+        // binding fields first: they are authenticated with the wrapped key
+        EncapsulatedKey ekd = new EncapsulatedKey();
+        ekd.setGUID(subjectID.getGUID());
+        ekd.setSubjectGUID(subjectID.getSubjectGUID());
+        ekd.setObjectReference(subjectID);
+        ekd.setKeyLockType(KeyLockType.USER_ID);
         try {
-            ekd = CryptoUtil.createEncryptedKey(encryptionKey);
+            CryptoUtil.createEncryptedKey(ekd, encryptionKey);
         } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException |
                  InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException e) {
             throw new AccessException(e.getMessage());
         }
-        ekd.setObjectReference(subjectID);
-        ekd.setKeyLockType(KeyLockType.USER_ID);
-        ekd.setSubjectGUID(subjectID.getSubjectGUID());
-        ekd.setGUID(subjectID.getGUID());
         return ekd;
     }
 
@@ -107,11 +108,13 @@ public final class KeyMakerProvider
         EncapsulatedKey ekd = lookupEncryptedKeyDOA(dataStore, nve);
         try {
             if (ekd == null) {
-                ekd = CryptoUtil.createEncryptedKey(key);
+                // binding fields first: they are authenticated with the wrapped key
+                ekd = new EncapsulatedKey();
+                ekd.setGUID(nve.getGUID());
+                ekd.setSubjectGUID(nve.getSubjectGUID());
                 ekd.setObjectReference(nve);
                 ekd.setKeyLockType(KeyLockType.USER_ID);
-                ekd.setSubjectGUID(nve.getSubjectGUID());
-                ekd.setGUID(nve.getGUID());
+                CryptoUtil.createEncryptedKey(ekd, key);
                 ekd = dataStore.insert(ekd);
             }
         } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException |
@@ -132,7 +135,10 @@ public final class KeyMakerProvider
             String id = chainedIDs[i];
             try {
                 EncapsulatedKey ekd = lookupEncryptedKeyDOA(dataStore, id);
-                tempKey = CryptoUtil.decryptEncryptedData(ekd, tempKey);
+                if (ekd == null) {
+                    throw new AccessException("No key for " + id);
+                }
+                tempKey = CryptoUtil.unwrapKey(ekd, tempKey);
             } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException |
                      InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException |
                      SignatureException e) {

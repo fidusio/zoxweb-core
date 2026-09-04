@@ -51,33 +51,33 @@ public class CryptoUtilTest {
       ubaos.close();
       byte[] original = ubaos.toByteArray();
 
+      byte[] wrappingKey = SecUtil.randomBytes(CryptoUtil.MIN_KEY_BYTES);
       for (int i = 0; i < repeat; i++) {
         EncryptedData ed = new EncryptedData();
         long delta = System.nanoTime();
-        ed = CryptoUtil.encryptData(ed, "password".getBytes(), original);
+        ed = CryptoUtil.encryptData(ed, wrappingKey, original);
         delta = System.nanoTime() - delta;
         System.out.println("Encrypting: " + original.length + " bytes took " + Const.TimeInMillis
             .nanosToString(delta));
         //System.out.println(ed.toCanonicalID());
         delta = System.nanoTime();
-        byte[] data = CryptoUtil.decryptEncryptedData(ed, "password");
+        byte[] data = CryptoUtil.decryptEncryptedData(ed, wrappingKey);
         delta = System.nanoTime() - delta;
         System.out.println(
             SUS.slowEquals(original, data) + ": decrypting took " + Const.TimeInMillis
                 .nanosToString(delta));
       }
 
-      EncapsulatedKey ekd = CryptoUtil.createEncryptedKey("password");
-      byte[] key = CryptoUtil.decryptEncryptedData(ekd, "password");
+      EncapsulatedKey ekd = CryptoUtil.createEncryptedKey(wrappingKey);
+      byte[] key = CryptoUtil.unwrapKey(ekd, wrappingKey);
       System.out.println(SharedStringUtil.bytesToHex(key));
-      System.out.println(ekd.toCanonicalID());
+      System.out.println(ekd.getWrappedKey());
 
       EncryptedData ed = CryptoUtil
-          .encryptData(new EncapsulatedKey(), SharedStringUtil.getBytes("password"),
-              SharedStringUtil.getBytes("password"));
+          .encryptData(new EncryptedData(), wrappingKey, SharedStringUtil.getBytes("password"));
       System.out.println(ed.toCanonicalID());
 
-      key = CryptoUtil.decryptEncryptedData(ed, "password");
+      key = CryptoUtil.decryptEncryptedData(ed, wrappingKey);
       System.out.println(SharedStringUtil.bytesToHex(key));
 
     } catch (Exception e) {

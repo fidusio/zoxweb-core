@@ -30,6 +30,7 @@ import org.zoxweb.shared.util.*;
 import org.zoxweb.shared.util.SharedBase64.Base64Type;
 
 import javax.crypto.*;
+import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import javax.net.ssl.HttpsURLConnection;
@@ -44,8 +45,10 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.security.spec.*;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -59,9 +62,21 @@ public class CryptoUtil {
 
     private static final String RSASSA_PSS = "RSASSA-PSS";
 
-    public static final int MIN_KEY_BYTES = 6;
+    /**
+     * Minimum wrapping or content key length in bytes. The record KDF is HKDF, which adds no
+     * stretching, so keys must be random and full size.
+     */
+    public static final int MIN_KEY_BYTES = 32;
 
+    /**
+     * Rounds for {@link #hashWithIterations} callers; the record path no longer iterates.
+     */
     public static final int DEFAULT_ITERATION = 8192;
+
+    private static final String GCM_TRANSFORMATION = "AES/GCM/NoPadding";
+    private static final String JDK_JCE_PROVIDER = "SunJCE";
+    /** HKDF label under which a record cipher key is derived from the wrapping key. */
+    private static final byte[] RECORD_KDF_LABEL = SharedStringUtil.getBytes("enc");
 
 
     public static String base64URLHmacSHA256(String secret, String data)
@@ -78,155 +93,137 @@ public class CryptoUtil {
         return sha256HMAC.doFinal(data);
     }
 
-
-    public static EncapsulatedKey rekeyEncryptedKey(final EncapsulatedKey toBeRekeyed,
-                                                    String originalKey, String newKey)
-            throws NullPointerException, IllegalArgumentException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
-        SUS.checkIfNulls("Null parameter", originalKey, toBeRekeyed, newKey);
-        return rekeyEncryptedKey(toBeRekeyed, SharedStringUtil.getBytes(originalKey),
-                SharedStringUtil.getBytes(newKey));
-    }
-
-    public static EncapsulatedKey rekeyEncryptedKey(final EncapsulatedKey toBeRekeyed,
-                                                    final byte[] originalKey, final byte[] newKey)
-            throws NullPointerException, IllegalArgumentException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
-        SUS.checkIfNulls("Null parameter", originalKey, toBeRekeyed, newKey);
-        byte[] decyptedKey = decryptEncryptedData(toBeRekeyed, originalKey);
-
-        return (EncapsulatedKey) encryptData(toBeRekeyed, newKey, decyptedKey);
-    }
-
-    public static EncapsulatedKey createEncryptedKey(String key)
-            throws NullPointerException,
-            IllegalArgumentException,
-            InvalidKeyException,
-            NoSuchAlgorithmException,
-            NoSuchPaddingException,
-            InvalidAlgorithmParameterException,
-            IllegalBlockSizeException,
-            BadPaddingException {
-        return createEncryptedKey(SharedStringUtil.getBytes(key));
-    }
-
-    public static EncapsulatedKey createEncryptedKey(final byte[] key)
-            throws NullPointerException,
-            IllegalArgumentException,
-            NoSuchAlgorithmException,
-            NoSuchPaddingException,
-            InvalidKeyException,
-            InvalidAlgorithmParameterException,
-            IllegalBlockSizeException,
-            BadPaddingException {
-
-        return (EncapsulatedKey) encryptData(new EncapsulatedKey(), key, null);
-    }
-
-
-    public static EncryptedData encryptData(final EncryptedData ekd, final byte[] key, byte[] data)
-            throws NullPointerException,
-            IllegalArgumentException,
-            NoSuchAlgorithmException,
-            NoSuchPaddingException,
-            InvalidKeyException,
-            InvalidAlgorithmParameterException,
-            IllegalBlockSizeException,
-            BadPaddingException {
-        return encryptData(ekd, key, data, DEFAULT_ITERATION);
-    }
-
-    public static EncryptedData encryptData(final EncryptedData ekd, final byte[] key, byte[] data, int hashIteration)
-            throws NullPointerException,
-            IllegalArgumentException,
-            NoSuchAlgorithmException,
-            NoSuchPaddingException,
-            InvalidKeyException,
-            InvalidAlgorithmParameterException,
-            IllegalBlockSizeException,
-            BadPaddingException {
-
-        SUS.checkIfNulls("Null key", key, ekd);
-
-        if (key.length < MIN_KEY_BYTES || hashIteration < 1) {
-            throw new IllegalArgumentException(
-                    "Key too short " + key.length * Byte.SIZE + "(bits) min size " + Const.TypeInBytes.BYTE
-                            .sizeInBits(MIN_KEY_BYTES) + "(bits)" + " hash iteration " + hashIteration);
+    /**
+     * RFC 5869 HKDF over HMAC-SHA256.
+     *
+     * @param ikm    input keying material
+     * @param salt   salt, may be null or empty
+     * @param info   context label
+     * @param length output length in bytes, at most 255 x 32
+     */
+    public static byte[] hkdfSHA256(byte[] ikm, byte[] salt, byte[] info, int length)
+            throws NoSuchAlgorithmException, InvalidKeyException {
+        SUS.checkIfNulls("Null HKDF input", ikm, info);
+        if (length < 1 || length > 255 * 32) {
+            throw new IllegalArgumentException("HKDF length out of range: " + length);
         }
-
-        //EncryptedData ret = ekd ;
-        ekd.setName(CryptoConst.CryptoAlgo.AES.getName() + "-" + Const.TypeInBytes.BYTE.sizeInBits(CryptoConst.AES_256_KEY_SIZE));
-        ekd.setDescription(CryptoConst.AES_ENCRYPTION_CBC_NO_PADDING);
-        ekd.setHMACAlgoName(CryptoConst.SignatureAlgo.HMAC_SHA_256.getName());
-
-        // create iv vector
-        MessageDigest digest = HashUtil.getMessageDigest(CryptoConst.HashType.SHA_256);
-        //IvParameterSpec ivSpec = new IvParameterSpec(generateRandomHashedBytes(digest, AES_BLOCK_SIZE, DEFAULT_ITERATION));
-        IvParameterSpec ivSpec = new IvParameterSpec(
-                generateKey(CryptoConst.CryptoAlgo.AES, (Const.TypeInBytes.BYTE.sizeInBits(CryptoConst.AES_256_KEY_SIZE) / 2)).getEncoded());
-        SecretKeySpec aesKey = new SecretKeySpec(
-                hashWithIterations(digest, ivSpec.getIV(), key, hashIteration, true), CryptoConst.CryptoAlgo.AES.getName());
-        Cipher cipher = Cipher.getInstance(CryptoConst.AES_ENCRYPTION_CBC_NO_PADDING);
-        cipher.init(Cipher.ENCRYPT_MODE, aesKey, ivSpec);
-        Mac hmac = HashUtil.getMac(CryptoConst.SignatureAlgo.HMAC_SHA_256);
-        hmac.init(new SecretKeySpec(aesKey.getEncoded(), CryptoConst.SignatureAlgo.HMAC_SHA_256.getName()));
-        // the initialization vector first
-        hmac.update(ivSpec.getIV());
-
-        hmac.update(SharedStringUtil.getBytes(ekd.getName().toLowerCase()));
-        hmac.update(SharedStringUtil.getBytes(ekd.getDescription().toLowerCase()));
-        hmac.update(SharedStringUtil.getBytes(ekd.getHMACAlgoName().toLowerCase()));
-        if (ekd.isHMACAll()) {
-            if (!SUS.isEmpty(ekd.getSubjectGUID())) {
-                hmac.update(SharedStringUtil.getBytes(ekd.getSubjectGUID()));
+        String algo = CryptoConst.SignatureAlgo.HMAC_SHA_256.getName();
+        Mac mac = HashUtil.getMac(CryptoConst.SignatureAlgo.HMAC_SHA_256);
+        mac.init(new SecretKeySpec(salt != null && salt.length > 0 ? salt : new byte[32], algo));
+        byte[] prk = mac.doFinal(ikm);
+        byte[] okm = new byte[length];
+        byte[] t = new byte[0];
+        try {
+            mac.init(new SecretKeySpec(prk, algo));
+            int pos = 0;
+            for (int i = 1; pos < length; i++) {
+                mac.update(t);
+                mac.update(info);
+                mac.update((byte) i);
+                t = mac.doFinal();
+                int n = Math.min(t.length, length - pos);
+                System.arraycopy(t, 0, okm, pos, n);
+                pos += n;
             }
-
-            if (!SUS.isEmpty(ekd.getGUID())) {
-                hmac.update(
-                        SharedStringUtil.getBytes(SUS.toTrimmedLowerCase(ekd.getGUID())));
-            }
+        } finally {
+            Arrays.fill(prk, (byte) 0);
+            Arrays.fill(t, (byte) 0);
         }
+        return okm;
+    }
 
+    /**
+     * AES-GCM from the JDK provider, whose AES is intrinsic-accelerated, falling back to whatever
+     * provider is installed first.
+     */
+    private static Cipher gcmCipher() throws NoSuchAlgorithmException, NoSuchPaddingException {
+        try {
+            return Cipher.getInstance(GCM_TRANSFORMATION, JDK_JCE_PROVIDER);
+        } catch (NoSuchProviderException | NoSuchAlgorithmException e) {
+            return Cipher.getInstance(GCM_TRANSFORMATION);
+        }
+    }
+
+    private static void checkRecordKey(byte[] key) {
+        if (key.length < MIN_KEY_BYTES) {
+            throw new IllegalArgumentException("Key too short " + key.length * Byte.SIZE + "(bits) min size "
+                    + Const.TypeInBytes.BYTE.sizeInBits(MIN_KEY_BYTES) + "(bits)");
+        }
+    }
+
+    /**
+     * Seals {@code data} into {@code record} under {@code key}: AES-256-GCM with a fresh 12-byte
+     * nonce, the cipher key derived as {@code HKDF-SHA256(key, salt = iv, "enc")}, and every
+     * attribute of the record except the ciphertext as associated data. Set {@code kid},
+     * {@code ref}, {@code mask}, {@code exp} and {@code hint} on the record before calling.
+     *
+     * @param record the record to fill; its attributes are overwritten
+     * @param key    wrapping key, at least {@link #MIN_KEY_BYTES}
+     * @param data   plaintext; null means a fresh random 32-byte key
+     * @return {@code record}
+     */
+    public static EncryptedData encryptData(final EncryptedData record, final byte[] key, byte[] data)
+            throws NullPointerException,
+            IllegalArgumentException,
+            NoSuchAlgorithmException,
+            NoSuchPaddingException,
+            InvalidKeyException,
+            InvalidAlgorithmParameterException,
+            IllegalBlockSizeException,
+            BadPaddingException {
+        return encryptData(record, key, data, null);
+    }
+
+    /**
+     * As {@link #encryptData(EncryptedData, byte[], byte[])} with extra associated data appended
+     * after the record attributes; the same bytes must be supplied to decrypt.
+     */
+    public static EncryptedData encryptData(final EncryptedData record, final byte[] key, byte[] data, byte[] extraAssociatedData)
+            throws NullPointerException,
+            IllegalArgumentException,
+            NoSuchAlgorithmException,
+            NoSuchPaddingException,
+            InvalidKeyException,
+            InvalidAlgorithmParameterException,
+            IllegalBlockSizeException,
+            BadPaddingException {
+        SUS.checkIfNulls("Null key or record", key, record);
+        checkRecordKey(key);
         if (data == null) {
-            data = generateKey(CryptoConst.CryptoAlgo.AES, Const.TypeInBytes.BYTE.sizeInBits(CryptoConst.AES_256_KEY_SIZE)).getEncoded();
+            data = SecUtil.randomBytes(CryptoConst.AES_256_KEY_SIZE);
         }
+        byte[] iv = SecUtil.randomBytes(EncryptedData.IV_SIZE);
+        record.setVersion(EncryptedData.VERSION);
+        record.setAlgorithm(EncryptedData.ALG_A256GCM);
+        record.setKDF(EncryptedData.KDF_HKDF_SHA256);
+        record.setIV(iv);
+        record.setDataLength(data.length);
+        record.setEncryptedData(null);
 
-        ekd.setDataLength(data.length);
-        hmac.update(BytesValueFilter.SINGLETON.validate(ekd.getDataLength()));
-
-        // create a new key and encrypted with the key
-
-        ekd.setIV(ivSpec.getIV());
-
-        // create a loop to read the data in the size of 16 bytes
-        // write the output to a byteoputput stream
-
-        if (data.length % CryptoConst.AES_BLOCK_SIZE != 0 || data.length == 0) {
-            UByteArrayOutputStream baos = new UByteArrayOutputStream();
-            baos.write(data);
-
-            while ((baos.size() % CryptoConst.AES_BLOCK_SIZE) != 0 || baos.size() == 0) {
-                // padding
-                // instead of zero
-                // add the size
-                baos.write(baos.size());
+        byte[] recordKey = hkdfSHA256(key, iv, RECORD_KDF_LABEL, CryptoConst.AES_256_KEY_SIZE);
+        try {
+            Cipher cipher = gcmCipher();
+            cipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(recordKey, CryptoConst.CryptoAlgo.AES.getName()),
+                    new GCMParameterSpec(EncryptedData.TAG_SIZE * 8, iv));
+            cipher.updateAAD(SharedStringUtil.getBytes(record.toAssociatedData()));
+            if (extraAssociatedData != null) {
+                cipher.updateAAD(extraAssociatedData);
             }
-
-            SharedIOUtil.close(baos);
-            data = baos.toByteArray();
+            record.setEncryptedData(cipher.doFinal(data));
+        } finally {
+            Arrays.fill(recordKey, (byte) 0);
         }
-
-        //byte[] encryptedData = ;//(data != null ? data : generateKey(AES_256_KEY_SIZE, AES).getEncoded());
-        //byte[] encryptionKey = (data != null ? data : generateRandomBytes(null, AES_256_KEY_SIZE/8));
-        byte[] encryptedData = cipher.doFinal(data);
-        hmac.update(encryptedData);
-
-        // last
-        ekd.setHMAC(hmac.doFinal());
-        ekd.setEncryptedData(encryptedData);
-        return ekd;
+        return record;
     }
 
-
-    public static byte[] decryptEncryptedData(final EncryptedData ekd, final String key)
+    /**
+     * Opens a record sealed by {@link #encryptData(EncryptedData, byte[], byte[])}.
+     *
+     * @throws SignatureException       if any authenticated attribute or the ciphertext was altered,
+     *                                  or the key is wrong
+     * @throws IllegalArgumentException if the record version, cipher or KDF is not supported
+     */
+    public static byte[] decryptEncryptedData(final EncryptedData record, final byte[] key)
             throws NoSuchAlgorithmException,
             NoSuchPaddingException,
             InvalidKeyException,
@@ -234,11 +231,10 @@ public class CryptoUtil {
             IllegalBlockSizeException,
             BadPaddingException,
             SignatureException {
-        return decryptEncryptedData(ekd, SharedStringUtil.getBytes(key));
+        return decryptEncryptedData(record, key, null);
     }
 
-
-    public static byte[] decryptEncryptedData(final EncryptedData ekd, final String key, int hashIteration)
+    public static byte[] decryptEncryptedData(final EncryptedData record, final byte[] key, byte[] extraAssociatedData)
             throws NoSuchAlgorithmException,
             NoSuchPaddingException,
             InvalidKeyException,
@@ -246,73 +242,152 @@ public class CryptoUtil {
             IllegalBlockSizeException,
             BadPaddingException,
             SignatureException {
-        return decryptEncryptedData(ekd, SharedStringUtil.getBytes(key), hashIteration);
-    }
-
-
-    public static byte[] decryptEncryptedData(final EncryptedData ekd, final byte[] key)
-            throws InvalidKeyException,
-            NoSuchAlgorithmException,
-            NoSuchPaddingException,
-            InvalidAlgorithmParameterException,
-            IllegalBlockSizeException,
-            BadPaddingException,
-            SignatureException {
-        return decryptEncryptedData(ekd, key, DEFAULT_ITERATION);
-    }
-
-
-    public static byte[] decryptEncryptedData(final EncryptedData ekd, final byte[] key, int hashIteration)
-            throws NoSuchAlgorithmException,
-            NoSuchPaddingException,
-            InvalidKeyException,
-            InvalidAlgorithmParameterException,
-            IllegalBlockSizeException,
-            BadPaddingException,
-            SignatureException {
-        // create iv vector
-        MessageDigest digest = HashUtil.getMessageDigest(CryptoConst.HashType.SHA_256);
-        IvParameterSpec ivSpec = new IvParameterSpec(ekd.getIV());
-        SecretKeySpec aesKey = new SecretKeySpec(
-                hashWithIterations(digest, ivSpec.getIV(), key, hashIteration, true), CryptoConst.CryptoAlgo.AES.getName());
-        Cipher cipher = Cipher.getInstance(CryptoConst.AES_ENCRYPTION_CBC_NO_PADDING);
-        cipher.init(Cipher.DECRYPT_MODE, aesKey, ivSpec);
-        Mac hmac = HashUtil.getMac(CryptoConst.SignatureAlgo.HMAC_SHA_256.getName());
-        hmac.init(new SecretKeySpec(aesKey.getEncoded(), CryptoConst.SignatureAlgo.HMAC_SHA_256.getName()));
-        hmac.update(ivSpec.getIV());
-        // create a new key and encrypted with the key
-        hmac.update(SharedStringUtil.getBytes(ekd.getName().toLowerCase()));
-        hmac.update(SharedStringUtil.getBytes(ekd.getDescription().toLowerCase()));
-        hmac.update(SharedStringUtil.getBytes(ekd.getHMACAlgoName().toLowerCase()));
-        if (ekd.isHMACAll()) {
-            if (!SUS.isEmpty(ekd.getSubjectGUID())) {
-                hmac.update(SharedStringUtil.getBytes(ekd.getSubjectGUID()));
-            }
-
-            if (!SUS.isEmpty(ekd.getGUID())) {
-                hmac.update(
-                        SharedStringUtil.getBytes(SUS.toTrimmedLowerCase(ekd.getGUID())));
-            }
+        SUS.checkIfNulls("Null key or record", key, record);
+        checkRecordKey(key);
+        if (record.getVersion() != EncryptedData.VERSION) {
+            throw new IllegalArgumentException("Unsupported record version " + record.getVersion());
         }
-
-        hmac.update(BytesValueFilter.SINGLETON.validate(ekd.getDataLength()));
-
-        hmac.update(ekd.getEncryptedData());
-
-        if (!SUS.slowEquals(ekd.getHMAC(), hmac.doFinal())) {
+        if (!EncryptedData.ALG_A256GCM.equals(record.getAlgorithm())) {
+            throw new IllegalArgumentException("Unsupported record cipher " + record.getAlgorithm());
+        }
+        if (!EncryptedData.KDF_HKDF_SHA256.equals(record.getKDF())) {
+            throw new IllegalArgumentException("Unsupported record KDF " + record.getKDF());
+        }
+        byte[] iv = record.getIV();
+        byte[] cipherText = record.getEncryptedData();
+        if (iv == null || iv.length != EncryptedData.IV_SIZE || cipherText == null || cipherText.length < EncryptedData.TAG_SIZE) {
             throw new SignatureException("Data tampered with");
         }
 
-        byte[] decryptedData = cipher.doFinal(ekd.getEncryptedData());
-        byte[] toRet = decryptedData;
-
-        if (decryptedData.length != ekd.getDataLength()) {
-            // we must truncate the data
-            toRet = new byte[(int) ekd.getDataLength()];
-            System.arraycopy(decryptedData, 0, toRet, 0, toRet.length);
+        byte[] recordKey = hkdfSHA256(key, iv, RECORD_KDF_LABEL, CryptoConst.AES_256_KEY_SIZE);
+        byte[] plain;
+        try {
+            Cipher cipher = gcmCipher();
+            cipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(recordKey, CryptoConst.CryptoAlgo.AES.getName()),
+                    new GCMParameterSpec(EncryptedData.TAG_SIZE * 8, iv));
+            cipher.updateAAD(SharedStringUtil.getBytes(record.toAssociatedData()));
+            if (extraAssociatedData != null) {
+                cipher.updateAAD(extraAssociatedData);
+            }
+            plain = cipher.doFinal(cipherText);
+        } catch (AEADBadTagException e) {
+            throw new SignatureException("Data tampered with", e);
+        } finally {
+            Arrays.fill(recordKey, (byte) 0);
         }
+        if (plain.length != record.getDataLength()) {
+            Arrays.fill(plain, (byte) 0);
+            throw new SignatureException("Data tampered with: length mismatch");
+        }
+        return plain;
+    }
 
-        return toRet;
+    /**
+     * Wraps a fresh random 32-byte key for a new {@link EncapsulatedKey} with a fresh GUID and no
+     * binding fields. Prefer {@link #createEncryptedKey(EncapsulatedKey, byte[])} with the binding
+     * fields set, so the row is tied to its subject and reference.
+     */
+    public static EncapsulatedKey createEncryptedKey(final byte[] wrappingKey)
+            throws NullPointerException,
+            IllegalArgumentException,
+            NoSuchAlgorithmException,
+            NoSuchPaddingException,
+            InvalidKeyException,
+            InvalidAlgorithmParameterException,
+            IllegalBlockSizeException,
+            BadPaddingException {
+        return createEncryptedKey(new EncapsulatedKey(), wrappingKey);
+    }
+
+    /**
+     * Wraps a fresh random 32-byte key into {@code ek} under {@code wrappingKey}. The GUID, subject
+     * GUID, reference GUID, reference type and key lock type of the row must be set first: they are
+     * authenticated with the wrapped record. A missing GUID is assigned.
+     */
+    public static EncapsulatedKey createEncryptedKey(final EncapsulatedKey ek, final byte[] wrappingKey)
+            throws NullPointerException,
+            IllegalArgumentException,
+            NoSuchAlgorithmException,
+            NoSuchPaddingException,
+            InvalidKeyException,
+            InvalidAlgorithmParameterException,
+            IllegalBlockSizeException,
+            BadPaddingException {
+        SUS.checkIfNulls("Null key row or wrapping key", ek, wrappingKey);
+        if (ek.getGUID() == null) {
+            ek.setGUID(UUID.randomUUID().toString());
+        }
+        return wrapKey(ek, wrappingKey, null);
+    }
+
+    /**
+     * Seals {@code keyMaterial} into {@code ek} under {@code wrappingKey}: the wrapped record
+     * {@code ref} is the row GUID and its extra associated data is {@link EncapsulatedKey#toBindingData()}.
+     *
+     * @param keyMaterial the key to wrap, at least {@link #MIN_KEY_BYTES}; null means a fresh random 32-byte key
+     */
+    public static EncapsulatedKey wrapKey(final EncapsulatedKey ek, final byte[] wrappingKey, byte[] keyMaterial)
+            throws NullPointerException,
+            IllegalArgumentException,
+            NoSuchAlgorithmException,
+            NoSuchPaddingException,
+            InvalidKeyException,
+            InvalidAlgorithmParameterException,
+            IllegalBlockSizeException,
+            BadPaddingException {
+        SUS.checkIfNulls("Null key row or wrapping key", ek, wrappingKey);
+        if (ek.getGUID() == null) {
+            throw new IllegalArgumentException("EncapsulatedKey GUID not set");
+        }
+        if (keyMaterial != null) {
+            checkRecordKey(keyMaterial);
+        }
+        EncryptedData wrapped = new EncryptedData();
+        wrapped.setRef(ek.getGUID());
+        encryptData(wrapped, wrappingKey, keyMaterial, SharedStringUtil.getBytes(ek.toBindingData()));
+        ek.setWrapped(wrapped);
+        return ek;
+    }
+
+    /**
+     * Opens the key sealed in {@code ek}.
+     *
+     * @throws SignatureException if the row was re-pointed, the record altered, or the wrapping key is wrong
+     */
+    public static byte[] unwrapKey(final EncapsulatedKey ek, final byte[] wrappingKey)
+            throws NullPointerException,
+            IllegalArgumentException,
+            NoSuchAlgorithmException,
+            NoSuchPaddingException,
+            InvalidKeyException,
+            InvalidAlgorithmParameterException,
+            IllegalBlockSizeException,
+            BadPaddingException,
+            SignatureException {
+        SUS.checkIfNulls("Null key row or wrapping key", ek, wrappingKey);
+        EncryptedData wrapped = ek.getWrapped();
+        if (wrapped == null) {
+            throw new SignatureException("No wrapped key");
+        }
+        if (ek.getGUID() == null || !ek.getGUID().equals(wrapped.getRef())) {
+            throw new SignatureException("Wrapped key does not belong to this row");
+        }
+        return decryptEncryptedData(wrapped, wrappingKey, SharedStringUtil.getBytes(ek.toBindingData()));
+    }
+
+    /**
+     * Re-seals the key in {@code ek} under {@code newKey}; the key material itself is unchanged.
+     */
+    public static EncapsulatedKey rekeyEncryptedKey(final EncapsulatedKey ek,
+                                                    final byte[] originalKey, final byte[] newKey)
+            throws NullPointerException, IllegalArgumentException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
+        SUS.checkIfNulls("Null parameter", originalKey, ek, newKey);
+        byte[] material = unwrapKey(ek, originalKey);
+        try {
+            return wrapKey(ek, newKey, material);
+        } finally {
+            Arrays.fill(material, (byte) 0);
+        }
     }
 
     public static Key getKeyFromKeyStore(final InputStream keyStoreIS,

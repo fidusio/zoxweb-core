@@ -30,7 +30,7 @@ public class KeyGenerationTest {
       for (int i = 0; i < 5; i++) {
 
         EncryptedData ed = CryptoUtil
-            .encryptData(new EncapsulatedKey(), SharedStringUtil.getBytes("password"), null, 1);
+            .encryptData(new EncryptedData(), SecUtil.randomBytes(CryptoUtil.MIN_KEY_BYTES), null);
         String json = GSONUtil.toJSON(ed, false, false, false, Base64Type.URL);
         KeyPair aliceKey = CryptoUtil.generateKeyPair(CryptoConst.PKInfo.RSA_2048);//"RSA", 2048);
         long ts = System.nanoTime();
@@ -100,30 +100,20 @@ public class KeyGenerationTest {
 
     try {
 
-      int loop = 500;
+      byte[] wrappingKey = SecUtil.randomBytes(CryptoUtil.MIN_KEY_BYTES);
+      int loop = 100000;
       long ts = System.currentTimeMillis();
       for (int i = 0; i < loop; i++) {
-        CryptoUtil
-            .encryptData(new EncapsulatedKey(), SharedStringUtil.getBytes("password"), null, 8196);
+        CryptoUtil.createEncryptedKey(wrappingKey);
       }
       ts = System.currentTimeMillis() - ts;
-      System.out
-          .println("Generated " + loop + " with rehash 8196 took " + TimeInMillis.toString(ts));
-      loop = 100000;
-      ts = System.currentTimeMillis();
-      for (int i = 0; i < loop; i++) {
-        CryptoUtil
-            .encryptData(new EncapsulatedKey(), SharedStringUtil.getBytes("password"), null, 1);
-      }
-      ts = System.currentTimeMillis() - ts;
-      System.out.println("Generated " + loop + " with rehash 1 took " + TimeInMillis.toString(ts));
-      EncryptedData ed = CryptoUtil
-          .encryptData(new EncapsulatedKey(), SharedStringUtil.getBytes("password"), null, 1);
-      String json = GSONUtil.toJSON(ed, false, false, false, Base64Type.URL);
+      System.out.println("Generated " + loop + " wrapped keys took " + TimeInMillis.toString(ts));
+      EncapsulatedKey ek = CryptoUtil.createEncryptedKey(wrappingKey);
+      String json = GSONUtil.toJSON(ek, false, false, false, Base64Type.URL);
       System.out.println(json);
       System.out.println(json.length() + ":" + SharedStringUtil.getBytes(json).length);
-      ed = GSONUtil.fromJSON(json, EncapsulatedKey.class, Base64Type.URL);
-      byte[] data = CryptoUtil.decryptEncryptedData(ed, SharedStringUtil.getBytes("password"), 1);
+      ek = GSONUtil.fromJSON(json, EncapsulatedKey.class, Base64Type.URL);
+      byte[] data = CryptoUtil.unwrapKey(ek, wrappingKey);
       System.out.println(SharedStringUtil.bytesToHex(data));
     } catch (Exception e) {
       e.printStackTrace();

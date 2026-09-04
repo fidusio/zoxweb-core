@@ -20,7 +20,6 @@ import org.zoxweb.shared.util.SetDescription;
 import org.zoxweb.shared.util.SetName;
 
 public interface CryptoBase
-    extends SetName, SetDescription, CanonicalID
-{
-	
+        extends SetName, SetDescription, CanonicalID {
+
 }
