@@ -68,6 +68,9 @@ public enum MetaToken
     JSON_CONTENT("json_content") // Json content to wrap a json object
     ,
 
+    KEY_GUID("key_guid")
+    ,
+
     LOGICAL_OPERATOR("logical_operator") // LogicalOperator
     ,
 

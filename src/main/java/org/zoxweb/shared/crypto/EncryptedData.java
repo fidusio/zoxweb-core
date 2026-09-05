@@ -21,32 +21,29 @@ import org.zoxweb.shared.util.SharedBase64.Base64Type;
 
 /**
  * One encrypted value: an AES-256-GCM record whose authenticated attributes bind the ciphertext to
- * the key that wraps it and to the row and column it belongs to.
+ * the key that wraps it.
  * <p>
  * The canonical form, {@link #toCanonicalID()}, is the attributes below in this fixed order joined
  * by {@code |}: binary as base64url, numbers as digits, absent as empty. It is what a store writes
  * into a text column. {@link #toAssociatedData()} is the same string without the trailing
  * {@code |ct} and is the GCM associated data, so every attribute except the ciphertext is
- * authenticated and a record cannot be re-pointed at another key, row or column without failing
- * its tag.
+ * authenticated and a record cannot be re-pointed at another key without failing its tag.
  * <pre>
- * v     int     format version, 1
- * alg   string  A256GCM
- * kdf   string  HKDF-SHA256; the cipher key is derived from the wrapping key with the label "enc"
- * kid   string  GUID of the EncapsulatedKey whose unwrapped material is the wrapping key
- * ref   string  &lt;entityGUID&gt;:&lt;fieldName&gt;
- * iv    b64url  12-byte random nonce, fresh per encryption
- * len   long    plaintext length in bytes
- * mask  string  optional display fragment computed at encryption time (ENCRYPT_MASK fields)
- * exp   long    optional expiry, epoch millis
- * hint  string  optional
- * ct    b64url  ciphertext with the 16-byte GCM tag appended
+ * v            int     format version, 1
+ * alg          string  A256GCM
+ * kdf          string  HKDF-SHA256; the cipher key is derived from the wrapping key with the label "enc"
+ * iv           b64url  12-byte random nonce, fresh per encryption
+ * data_length  long    plaintext length in bytes
+ * mask         string  optional display fragment computed at encryption time (ENCRYPT_MASK fields)
+ * exp          long    optional expiry, epoch millis
+ * hint         string  optional
+ * cipher_data  b64url  ciphertext with the 16-byte GCM tag appended
  * </pre>
  * Text attributes may not contain {@code |}. The class stays a {@link PropertyDAO} so the meta-model
  * and JSON tooling can carry it, but the entity fields (GUID, subject GUID, name, timestamps) are
  * not part of the record and are not authenticated: only the attributes above are.
  * <p>
- * Set {@code kid}, {@code ref}, {@code mask}, {@code exp} and {@code hint} <em>before</em>
+ * Set {@code mask}, {@code exp} and {@code hint} <em>before</em>
  * encrypting; changing any of them afterwards invalidates the record.
  */
 @SuppressWarnings("serial")
@@ -55,27 +52,23 @@ public class EncryptedData
         implements CryptoBase {
 
     public static final int VERSION = 1;
-    public static final String ALG_A256GCM = "A256GCM";
-    public static final String KDF_HKDF_SHA256 = "HKDF-SHA256";
     public static final int IV_SIZE = 12;
     public static final int TAG_SIZE = 16;
     /** Separator of the canonical form. */
     public static final char SEP = '|';
-    private static final int FIELD_COUNT = 11;
+    private static final int FIELD_COUNT = 9;
 
     protected enum Param
             implements GetNVConfig {
         FORMAT_VERSION(NVConfigManager.createNVConfig("v", "Record format version", "Version", true, true, Integer.class)),
         ALGORITHM(NVConfigManager.createNVConfig("alg", "Cipher", "Algorithm", true, true, String.class)),
         KDF(NVConfigManager.createNVConfig("kdf", "Key derivation from the wrapping key", "KDF", true, true, String.class)),
-        KEY_ID(NVConfigManager.createNVConfig("kid", "GUID of the wrapping EncapsulatedKey", "KeyID", false, true, String.class)),
-        REF(NVConfigManager.createNVConfig("ref", "entityGUID:fieldName the record belongs to", "Ref", false, true, String.class)),
         IV(NVConfigManager.createNVConfig("iv", "GCM nonce", "IV", true, true, byte[].class)),
-        DATA_LENGTH(NVConfigManager.createNVConfig("len", "Plaintext length in bytes", "DataLength", true, true, Long.class)),
+        DATA_LENGTH(NVConfigManager.createNVConfig("data_length", "clear data length in bytes", "DataLength", true, true, Long.class)),
         MASK(NVConfigManager.createNVConfig("mask", "Display fragment for masked fields", "Mask", false, true, String.class)),
         EXPIRY(NVConfigManager.createNVConfig("exp", "Expiry, epoch millis", "Expiry", false, true, Long.class)),
         HINT(NVConfigManager.createNVConfig("hint", "Hint", "Hint", false, true, String.class)),
-        CIPHER_TEXT(NVConfigManager.createNVConfig("ct", "Ciphertext with the GCM tag appended", "CipherText", true, true, byte[].class)),
+        CIPHER_DATA(NVConfigManager.createNVConfig("cipher_data", "Cipher data with the GCM tag appended", "CipherData", true, true, byte[].class)),
         ;
 
         private final NVConfig nvc;
@@ -125,35 +118,6 @@ public class EncryptedData
 
     public void setKDF(String kdf) {
         setValue(Param.KDF, checkText("kdf", kdf));
-    }
-
-    /**
-     * @return GUID of the {@link EncapsulatedKey} whose unwrapped material is the wrapping key.
-     */
-    public String getKeyID() {
-        return lookupValue(Param.KEY_ID);
-    }
-
-    public void setKeyID(String keyID) {
-        setValue(Param.KEY_ID, checkText("kid", keyID));
-    }
-
-    /**
-     * @return {@code <entityGUID>:<fieldName>}, or for a wrapped key the owning row's GUID.
-     */
-    public String getRef() {
-        return lookupValue(Param.REF);
-    }
-
-    public void setRef(String ref) {
-        setValue(Param.REF, checkText("ref", ref));
-    }
-
-    /**
-     * Builds the {@code ref} attribute for a field of an entity.
-     */
-    public static String ref(String entityGUID, String fieldName) {
-        return entityGUID + ":" + fieldName;
     }
 
     public byte[] getIV() {
@@ -208,11 +172,11 @@ public class EncryptedData
      * @return ciphertext with the GCM tag appended.
      */
     public byte[] getEncryptedData() {
-        return lookupValue(Param.CIPHER_TEXT);
+        return lookupValue(Param.CIPHER_DATA);
     }
 
-    public void setEncryptedData(byte[] cipherText) {
-        setValue(Param.CIPHER_TEXT, cipherText);
+    public void setEncryptedData(byte[] cipheredData) {
+        setValue(Param.CIPHER_DATA, cipheredData);
     }
 
     /* ---------------------------------------------------------- canonical */
@@ -237,8 +201,6 @@ public class EncryptedData
         sb.append(getVersion()).append(SEP);
         append(sb, getAlgorithm()).append(SEP);
         append(sb, getKDF()).append(SEP);
-        append(sb, getKeyID()).append(SEP);
-        append(sb, getRef()).append(SEP);
         append(sb, encode(getIV())).append(SEP);
         sb.append(getDataLength()).append(SEP);
         append(sb, getMask()).append(SEP);
@@ -268,14 +230,12 @@ public class EncryptedData
         ret.setVersion(parseInt("v", t[0]));
         ret.setAlgorithm(text(t[1]));
         ret.setKDF(text(t[2]));
-        ret.setKeyID(text(t[3]));
-        ret.setRef(text(t[4]));
-        ret.setIV(decode(text(t[5])));
-        ret.setDataLength(parseLong("len", t[6]));
-        ret.setMask(text(t[7]));
-        ret.setExpiry(parseLong("exp", t[8]));
-        ret.setHint(text(t[9]));
-        ret.setEncryptedData(decode(text(t[10])));
+        ret.setIV(decode(text(t[3])));
+        ret.setDataLength(parseLong("data_length", t[4]));
+        ret.setMask(text(t[5]));
+        ret.setExpiry(parseLong("exp", t[6]));
+        ret.setHint(text(t[7]));
+        ret.setEncryptedData(decode(text(t[8])));
         return ret;
     }
 

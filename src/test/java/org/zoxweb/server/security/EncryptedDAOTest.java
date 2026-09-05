@@ -2,6 +2,7 @@ package org.zoxweb.server.security;
 
 import org.junit.jupiter.api.Test;
 import org.zoxweb.server.util.GSONUtil;
+import org.zoxweb.shared.crypto.CryptoConst;
 import org.zoxweb.shared.crypto.EncapsulatedKey;
 import org.zoxweb.shared.crypto.EncryptedData;
 import org.zoxweb.shared.crypto.KeyLockType;
@@ -14,9 +15,10 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * The AES-256-GCM record ({@link EncryptedData}) and the wrapped-key row ({@link EncapsulatedKey}):
- * round trips, the canonical form, tamper
- * detection on every authenticated attribute, and refusal of a record moved to another ref or row.
+ * The AES-256-GCM record ({@link EncryptedData}) and the wrapped key ({@link EncapsulatedKey}, an
+ * EncryptedData whose plaintext is a key): round trips, the canonical form, tamper detection on
+ * every authenticated attribute, and refusal of a wrapped key re-pointed at another subject,
+ * reference or wrapping key.
  */
 public class EncryptedDAOTest {
 
@@ -25,12 +27,10 @@ public class EncryptedDAOTest {
     static final byte[] DATA = SharedStringUtil.getBytes("The quick brown fox jumps over the lazy dog.");
 
     // field positions in the canonical form
-    static final int V = 0, ALG = 1, KDF = 2, KID = 3, REF = 4, IV = 5, LEN = 6, MASK = 7, EXP = 8, HINT = 9, CT = 10;
+    static final int V = 0, ALG = 1, KDF = 2, IV = 3, LEN = 4, MASK = 5, EXP = 6, HINT = 7, CT = 8;
 
     private static EncryptedData sealed(byte[] data) throws Exception {
         EncryptedData ed = new EncryptedData();
-        ed.setKeyID(UUID.randomUUID().toString());
-        ed.setRef(EncryptedData.ref(UUID.randomUUID().toString(), "api_key"));
         ed.setHint("unit test");
         ed.setExpiry(1_900_000_000_000L);
         ed.setMask("****1234");
@@ -56,8 +56,8 @@ public class EncryptedDAOTest {
     public void roundTrip() throws Exception {
         EncryptedData ed = sealed(DATA);
         assertEquals(EncryptedData.VERSION, ed.getVersion());
-        assertEquals(EncryptedData.ALG_A256GCM, ed.getAlgorithm());
-        assertEquals(EncryptedData.KDF_HKDF_SHA256, ed.getKDF());
+        assertEquals(CryptoConst.ALG_A256GCM, ed.getAlgorithm());
+        assertEquals(CryptoConst.KDF_HKDF_SHA256, ed.getKDF());
         assertEquals(EncryptedData.IV_SIZE, ed.getIV().length);
         assertEquals(DATA.length, ed.getDataLength());
         assertEquals(DATA.length + EncryptedData.TAG_SIZE, ed.getEncryptedData().length);
@@ -98,12 +98,10 @@ public class EncryptedDAOTest {
         EncryptedData ed = sealed(DATA);
         String canonical = ed.toCanonicalID();
         String[] f = fields(canonical);
-        assertEquals(11, f.length);
+        assertEquals(9, f.length);
         assertEquals("1", f[V]);
         assertEquals("A256GCM", f[ALG]);
         assertEquals("HKDF-SHA256", f[KDF]);
-        assertEquals(ed.getKeyID(), f[KID]);
-        assertEquals(ed.getRef(), f[REF]);
         assertEquals(String.valueOf(DATA.length), f[LEN]);
         assertEquals("****1234", f[MASK]);
         assertEquals("1900000000000", f[EXP]);
@@ -119,7 +117,6 @@ public class EncryptedDAOTest {
         // optional attributes absent: empty fields, still round-trips
         EncryptedData bare = CryptoUtil.encryptData(new EncryptedData(), KEY, DATA);
         String[] b = fields(bare.toCanonicalID());
-        assertEquals("", b[KID]);
         assertEquals("", b[MASK]);
         assertEquals("", b[EXP]);
         assertEquals("", b[HINT]);
@@ -130,10 +127,10 @@ public class EncryptedDAOTest {
         assertThrows(IllegalArgumentException.class, () -> EncryptedData.fromCanonicalID(canonical.substring(1)), "no version");
         assertThrows(IllegalArgumentException.class, () -> EncryptedData.fromCanonicalID(canonical + "|extra"));
         assertThrows(IllegalArgumentException.class, () -> EncryptedData.fromCanonicalID(canonical.substring(0, canonical.lastIndexOf('|'))));
-        assertThrows(IllegalArgumentException.class, () -> EncryptedData.fromCanonicalID("x|A256GCM|HKDF-SHA256||||0||||"));
+        assertThrows(IllegalArgumentException.class, () -> EncryptedData.fromCanonicalID("x|A256GCM|HKDF-SHA256||0||||"));
         // the separator is refused in text attributes
         assertThrows(IllegalArgumentException.class, () -> new EncryptedData().setHint("a|b"));
-        assertThrows(IllegalArgumentException.class, () -> new EncryptedData().setRef("a|b"));
+        assertThrows(IllegalArgumentException.class, () -> new EncryptedData().setMask("a|b"));
     }
 
     @Test
@@ -155,15 +152,11 @@ public class EncryptedDAOTest {
 
         // change each attribute in turn, rebuild the record, expect refusal
         String[][] changes = {
-                {String.valueOf(KID), UUID.randomUUID().toString()},
-                {String.valueOf(REF), EncryptedData.ref(UUID.randomUUID().toString(), "api_key")},
                 {String.valueOf(HINT), "other hint"},
                 {String.valueOf(MASK), "****9999"},
                 {String.valueOf(EXP), "1900000000001"},
                 {String.valueOf(LEN), String.valueOf(DATA.length - 1)},
                 // dropping an optional attribute also fails
-                {String.valueOf(KID), ""},
-                {String.valueOf(REF), ""},
                 {String.valueOf(HINT), ""},
                 {String.valueOf(MASK), ""},
                 {String.valueOf(EXP), ""},
@@ -194,73 +187,81 @@ public class EncryptedDAOTest {
         assertThrows(IllegalArgumentException.class, () -> CryptoUtil.decryptEncryptedData(alg, KEY));
     }
 
-    /** A record copied from one row or column to another is refused: ref is authenticated. */
-    @Test
-    public void movedRecordIsRefused() throws Exception {
-        String entity = UUID.randomUUID().toString();
-        EncryptedData ed = new EncryptedData();
-        ed.setRef(EncryptedData.ref(entity, "api_key"));
-        CryptoUtil.encryptData(ed, KEY, DATA);
-        String canonical = ed.toCanonicalID();
-
-        EncryptedData sameRow = EncryptedData.fromCanonicalID(canonical);
-        assertArrayEquals(DATA, CryptoUtil.decryptEncryptedData(sameRow, KEY));
-
-        EncryptedData otherColumn = EncryptedData.fromCanonicalID(canonical);
-        otherColumn.setRef(EncryptedData.ref(entity, "api_secret"));
-        assertThrows(SignatureException.class, () -> CryptoUtil.decryptEncryptedData(otherColumn, KEY));
-
-        EncryptedData otherRow = EncryptedData.fromCanonicalID(canonical);
-        otherRow.setRef(EncryptedData.ref(UUID.randomUUID().toString(), "api_key"));
-        assertThrows(SignatureException.class, () -> CryptoUtil.decryptEncryptedData(otherRow, KEY));
-    }
-
     /* ------------------------------------------------------- EncapsulatedKey */
 
     private static EncapsulatedKey keyRow() throws Exception {
         EncapsulatedKey ek = new EncapsulatedKey();
-        ek.setGUID(UUID.randomUUID().toString());
         ek.setSubjectGUID(UUID.randomUUID().toString());
         ek.setReferenceGUID(UUID.randomUUID().toString());
         ek.setReferenceType("org.zoxweb.shared.data.FileInfoDAO");
         ek.setKeyLockType(KeyLockType.NVENTITY);
+        ek.setKeyGUID(UUID.randomUUID().toString());
         return CryptoUtil.createEncryptedKey(ek, KEY);
+    }
+
+    /** Copies the sealed record attributes of one key into another, leaving the binding fields alone. */
+    private static void copyRecord(EncapsulatedKey from, EncapsulatedKey to) {
+        to.setVersion(from.getVersion());
+        to.setAlgorithm(from.getAlgorithm());
+        to.setKDF(from.getKDF());
+        to.setIV(from.getIV());
+        to.setDataLength(from.getDataLength());
+        to.setMask(from.getMask());
+        to.setExpiry(from.getExpiry());
+        to.setHint(from.getHint());
+        to.setEncryptedData(from.getEncryptedData());
     }
 
     @Test
     public void wrappedKeyRoundTrip() throws Exception {
         EncapsulatedKey ek = keyRow();
-        EncryptedData wrapped = ek.getWrapped();
-        assertNotNull(wrapped);
-        assertEquals(ek.getGUID(), wrapped.getRef(), "wrapped record ref is the row GUID");
-        assertEquals(32, wrapped.getDataLength());
-        assertEquals(ek.getGUID() + "|" + ek.getSubjectGUID() + "|" + ek.getReferenceGUID() + "|org.zoxweb.shared.data.FileInfoDAO|NVENTITY", ek.toBindingData());
+        // the key row is itself the record
+        assertEquals(EncryptedData.VERSION, ek.getVersion());
+        assertEquals(CryptoConst.ALG_A256GCM, ek.getAlgorithm());
+        assertEquals(32, ek.getDataLength());
+        assertEquals(32 + EncryptedData.TAG_SIZE, ek.getEncryptedData().length);
+        assertEquals(9, fields(ek.toCanonicalID()).length, "inherited canonical form");
+        assertEquals(32, ek.getKeySize(), "key_size is the outer key size in bytes");
+        assertEquals(ek.getSubjectGUID() + "|" + ek.getReferenceGUID() + "|" + ek.getKeyGUID() + "|32", ek.toBindingData());
+        assertFalse(ek.isKEMWrapped());
+        assertNull(ek.getKEMCiphertext());
+        assertNull(ek.getGUID(), "the entity GUID plays no part");
+        // the datastore may assign or change the entity GUID at any time without effect
+        ek.setGUID(UUID.randomUUID().toString());
+        assertArrayEquals(CryptoUtil.unwrapKey(ek, KEY), CryptoUtil.unwrapKey(ek, KEY));
+        ek.setGUID(UUID.randomUUID().toString());
         byte[] material = CryptoUtil.unwrapKey(ek, KEY);
         assertEquals(32, material.length);
         assertArrayEquals(material, CryptoUtil.unwrapKey(ek, KEY), "stable across calls");
         assertThrows(SignatureException.class, () -> CryptoUtil.unwrapKey(ek, OTHER_KEY));
+        // handing the row to the plain record decrypt, without the binding, fails closed
+        assertThrows(SignatureException.class, () -> CryptoUtil.decryptEncryptedData(ek, KEY));
 
         // the wrapped material can itself seal a record: the two-level chain
         EncryptedData ed = new EncryptedData();
-        ed.setKeyID(ek.getGUID());
-        ed.setRef(EncryptedData.ref(ek.getReferenceGUID(), "content"));
         CryptoUtil.encryptData(ed, material, DATA);
         assertArrayEquals(DATA, CryptoUtil.decryptEncryptedData(ed, CryptoUtil.unwrapKey(ek, KEY)));
     }
 
     @Test
-    public void wrappedKeyGuidIsAssigned() throws Exception {
+    public void bareWrappedKey() throws Exception {
         EncapsulatedKey ek = CryptoUtil.createEncryptedKey(KEY);
-        assertNotNull(ek.getGUID());
-        assertEquals(ek.getGUID(), ek.getWrapped().getRef());
+        assertNull(ek.getGUID());
+        assertNull(ek.getKeyGUID(), "under the master key there is no parent key");
+        assertEquals("|||32", ek.toBindingData());
         assertEquals(32, CryptoUtil.unwrapKey(ek, KEY).length);
+        // binding fields set after wrapping break it, as they must
+        ek.setReferenceGUID(UUID.randomUUID().toString());
+        assertThrows(SignatureException.class, () -> CryptoUtil.unwrapKey(ek, KEY));
     }
 
     @Test
-    public void wrappedKeyBindingFieldsAreAuthenticated() throws Exception {
+    public void bindingFieldsAreAuthenticatedLabelsAreNot() throws Exception {
         EncapsulatedKey ek = keyRow();
         String json = GSONUtil.toJSON(ek, false, false, false);
+        byte[] material = CryptoUtil.unwrapKey(ek, KEY);
 
+        // identity: subject, reference and wrapping key are bound
         EncapsulatedKey subject = GSONUtil.fromJSON(json, EncapsulatedKey.class);
         subject.setSubjectGUID(UUID.randomUUID().toString());
         assertThrows(SignatureException.class, () -> CryptoUtil.unwrapKey(subject, KEY));
@@ -269,22 +270,32 @@ public class EncryptedDAOTest {
         reference.setReferenceGUID(UUID.randomUUID().toString());
         assertThrows(SignatureException.class, () -> CryptoUtil.unwrapKey(reference, KEY));
 
+        EncapsulatedKey keyGuid = GSONUtil.fromJSON(json, EncapsulatedKey.class);
+        keyGuid.setKeyGUID(UUID.randomUUID().toString());
+        assertThrows(SignatureException.class, () -> CryptoUtil.unwrapKey(keyGuid, KEY));
+
+        // key size is bound
+        EncapsulatedKey size = GSONUtil.fromJSON(json, EncapsulatedKey.class);
+        size.setKeySize(16);
+        assertThrows(SignatureException.class, () -> CryptoUtil.unwrapKey(size, KEY));
+
+        // labels: a renamed class or a corrected lock type must not invalidate stored keys
         EncapsulatedKey type = GSONUtil.fromJSON(json, EncapsulatedKey.class);
-        type.setReferenceType("org.zoxweb.shared.data.FolderInfoDAO");
-        assertThrows(SignatureException.class, () -> CryptoUtil.unwrapKey(type, KEY));
+        type.setReferenceType("org.zoxweb.shared.data.RenamedFileInfoDAO");
+        assertArrayEquals(material, CryptoUtil.unwrapKey(type, KEY));
 
         EncapsulatedKey lock = GSONUtil.fromJSON(json, EncapsulatedKey.class);
-        lock.setKeyLockType(KeyLockType.USER_ID);
-        assertThrows(SignatureException.class, () -> CryptoUtil.unwrapKey(lock, KEY));
+        lock.setKeyLockType(KeyLockType.SUBJECT_ID);
+        assertArrayEquals(material, CryptoUtil.unwrapKey(lock, KEY));
 
-        // the wrapped record copied into another row
+        // the sealed record copied into a key row with another identity
         EncapsulatedKey other = keyRow();
-        other.setWrappedKey(ek.getWrappedKey());
+        copyRecord(ek, other);
         assertThrows(SignatureException.class, () -> CryptoUtil.unwrapKey(other, KEY));
 
         // untouched copy still opens
         EncapsulatedKey same = GSONUtil.fromJSON(json, EncapsulatedKey.class);
-        assertArrayEquals(CryptoUtil.unwrapKey(ek, KEY), CryptoUtil.unwrapKey(same, KEY));
+        assertArrayEquals(material, CryptoUtil.unwrapKey(same, KEY));
     }
 
     @Test
@@ -298,11 +309,8 @@ public class EncryptedDAOTest {
     }
 
     @Test
-    public void wrapRequiresGuidAndFullKey() throws Exception {
-        EncapsulatedKey noGuid = new EncapsulatedKey();
-        assertThrows(IllegalArgumentException.class, () -> CryptoUtil.wrapKey(noGuid, KEY, null));
+    public void wrapRequiresFullKey() throws Exception {
         EncapsulatedKey ek = new EncapsulatedKey();
-        ek.setGUID(UUID.randomUUID().toString());
         assertThrows(IllegalArgumentException.class, () -> CryptoUtil.wrapKey(ek, KEY, new byte[16]));
         assertThrows(SignatureException.class, () -> CryptoUtil.unwrapKey(ek, KEY), "nothing wrapped yet");
     }

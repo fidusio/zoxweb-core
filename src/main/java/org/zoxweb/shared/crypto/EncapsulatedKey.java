@@ -15,30 +15,40 @@
  */
 package org.zoxweb.shared.crypto;
 
-import org.zoxweb.shared.data.PropertyDAO;
 import org.zoxweb.shared.security.AccessException;
 import org.zoxweb.shared.util.*;
 
 /**
- * A wrapped key row: a random 32-byte key, sealed as an {@link EncryptedData} record under a
- * wrapping key, together with the fields that say what it protects and who owns it.
+ * A wrapped key: an {@link EncryptedData} whose plaintext is a random 32-byte AES key, sealed under
+ * an outer key, plus the fields that say what it protects and who owns it.
  * <ul>
- * <li>{@code guid}: the row's own identity and the {@code kid} every record under this key carries.</li>
  * <li>{@code subject_guid}: owning subject.</li>
- * <li>{@code reference_guid}, {@code reference_type}: the entity this key protects, or the subject
- * itself for a subject key.</li>
- * <li>{@code key_lock_type}: {@link KeyLockType#USER_ID} for a subject key, {@link KeyLockType#NVENTITY}
- * for an entity key.</li>
- * <li>{@code wrapped_key}: the sealed record as canonical JSON, whose {@code ref} is this row's GUID.</li>
+ * <li>{@code reference_guid}: the entity this key protects, or the subject itself for a subject key.</li>
+ * <li>{@code reference_type}: class name of the referenced entity; a label, not authenticated.</li>
+ * <li>{@code key_lock_type}: {@link KeyLockType#SUBJECT_ID} for a subject key, {@link KeyLockType#NVENTITY}
+ * for an entity key; a label, not authenticated.</li>
+ * <li>{@code key_guid}: the key that wrapped this one. For a KEM wrap the GUID of the public key
+ * in the registry; for a symmetric wrap the parent key, empty under the master key.</li>
+ * <li>{@code alg}, inherited: how the outer key was obtained. {@link CryptoConst#ALG_A256GCM} means a
+ * symmetric outer key, a parent key or the master key. A KEM name such as {@link CryptoConst#ML_KEM_768}
+ * means the outer key was encapsulated to a public key; then {@code cipher_data} is the encapsulated
+ * key followed by the sealed key, and only the private-key holder can open it.</li>
+ * <li>{@code key_size}, in bytes: for a symmetric wrap the size of the outer key, 32; for a KEM
+ * wrap the size of the encapsulated key, the part of {@code cipher_data} that the private-key holder
+ * decapsulates. ML-KEM-512, 768 and 1024 give 768, 1088 and 1568. Readers split
+ * {@code cipher_data} at this value, so any parameter set the KEM library knows works without a
+ * change here.</li>
  * </ul>
- * The wrapped record's associated data covers the four binding fields above through
- * {@link #toBindingData()}, so a row re-pointed at another subject or entity fails to unwrap.
- * The class no longer extends {@link EncryptedData}; it contains one.
+ * {@link #toBindingData()}, subject GUID, reference GUID, key GUID and key size, is the extra
+ * associated data of the sealed key, so a key re-pointed at another subject, entity or wrapping
+ * key, or split at another offset, fails to unwrap. Those must be set before wrapping and never
+ * change afterwards. Where the key is stored is not its concern; the entity GUID is the
+ * datastore's identity and plays no part in the crypto.
  */
 @SuppressWarnings("serial")
 public class EncapsulatedKey
-        extends PropertyDAO
-        implements CryptoBase, DoNotExpose {
+        extends EncryptedData
+        implements DoNotExpose {
 
     protected enum Param
             implements GetNVConfig {
@@ -48,7 +58,8 @@ public class EncapsulatedKey
         // represent the class name type of the NVEntity
         REFERENCE_TYPE(NVConfigManager.createNVConfig(MetaToken.REFERENCE_TYPE.getName(), "Class name of the object reference", "ReferenceType", true, true, String.class)),
         KEY_LOCK_TYPE(NVConfigManager.createNVConfig("key_lock_type", "Key lock type", "KeyLockType", true, true, KeyLockType.class)),
-        WRAPPED_KEY(NVConfigManager.createNVConfig("wrapped_key", "The wrapped key as an EncryptedData record", "WrappedKey", true, true, String.class)),
+        KEY_GUID(NVConfigManager.createNVConfig(MetaToken.KEY_GUID.getName(), "GUID of the key that wrapped this one: the public key for a KEM wrap, the parent key otherwise", "KeyGUID", false, true, String.class)),
+        KEY_SIZE(NVConfigManager.createNVConfig("key_size", "Outer key size in bytes; for a KEM wrap the encapsulated key size", "KeySize", true, true, Integer.class)),
         ;
 
         private final NVConfig nvc;
@@ -63,7 +74,7 @@ public class EncapsulatedKey
         }
     }
 
-    public final static NVConfigEntity NVCE_ENCAPSULATED_KEY = new NVConfigEntityPortable("encapsulated_key", null, "EncryptedKey", false, true, false, false, EncapsulatedKey.class, SharedUtil.extractNVConfigs(Param.values()), null, false, PropertyDAO.NVC_PROPERTY_DAO);
+    public final static NVConfigEntity NVCE_ENCAPSULATED_KEY = new NVConfigEntityPortable("encapsulated_key", null, "EncryptedKey", false, true, false, false, EncapsulatedKey.class, SharedUtil.extractNVConfigs(Param.values()), null, false, EncryptedData.NVCE_ENCRYPTED_DATA);
 
     public EncapsulatedKey() {
         super(NVCE_ENCAPSULATED_KEY);
@@ -112,41 +123,71 @@ public class EncapsulatedKey
     }
 
     /**
-     * @return the sealed record as stored, canonical JSON, or null.
+     * @return GUID of the key that wrapped this one: the registry entry of the public key for a
+     * KEM wrap, the parent key for a symmetric wrap, null under the master key.
      */
-    public String getWrappedKey() {
-        return lookupValue(Param.WRAPPED_KEY);
+    public String getKeyGUID() {
+        return lookupValue(Param.KEY_GUID);
     }
 
-    public void setWrappedKey(String wrappedKeyJSON) {
-        setValue(Param.WRAPPED_KEY, wrappedKeyJSON);
+    public void setKeyGUID(String keyGUID) {
+        setValue(Param.KEY_GUID, checkText("key_guid", keyGUID));
     }
 
     /**
-     * @return the sealed record, parsed, or null when none is set.
+     * @return the outer key size in bytes, or for a KEM wrap the encapsulated key size in bytes;
+     * 0 before wrapping.
      */
-    public EncryptedData getWrapped() {
-        String json = getWrappedKey();
-        return json != null ? EncryptedData.fromCanonicalID(json) : null;
+    public int getKeySize() {
+        Integer v = lookupValue(Param.KEY_SIZE);
+        return v != null ? v : 0;
     }
 
-    public void setWrapped(EncryptedData wrapped) {
-        setWrappedKey(wrapped != null ? wrapped.toCanonicalID() : null);
+    public void setKeySize(int keySizeInBytes) {
+        if (keySizeInBytes < 0) {
+            throw new IllegalArgumentException("Illegal key size " + keySizeInBytes);
+        }
+        setValue(Param.KEY_SIZE, keySizeInBytes);
     }
 
     /**
-     * The binding fields in fixed order joined by {@code |}: GUID, subject GUID, reference GUID,
-     * reference type and key lock type, absent as empty. It is the extra associated data of the
-     * wrapped record, so all five must be set before wrapping and must not change afterwards.
+     * @return true when {@code alg} names a KEM rather than the symmetric cipher, so unwrapping
+     * needs the private key.
+     */
+    public boolean isKEMWrapped() {
+        String alg = getAlgorithm();
+        return alg != null && !CryptoConst.ALG_A256GCM.equals(alg);
+    }
+
+    /**
+     * @return a copy of the encapsulated key, the first {@code key_size} bytes of {@code cipher_data},
+     * or null for a symmetric wrap or a malformed row.
+     */
+    public byte[] getKEMCiphertext() {
+        byte[] combined = getEncryptedData();
+        int size = getKeySize();
+        if (!isKEMWrapped() || combined == null || size <= 0 || combined.length < size) {
+            return null;
+        }
+        byte[] ret = new byte[size];
+        System.arraycopy(combined, 0, ret, 0, size);
+        return ret;
+    }
+
+    /**
+     * The binding fields joined by {@code |}: subject GUID, reference GUID, key GUID and key size,
+     * absent as empty. It is the extra associated data of the sealed key, so all four must be set
+     * before wrapping and must not change afterwards. Labels such as the reference type and lock
+     * type are deliberately not included, so they can be renamed or corrected without invalidating
+     * stored keys. The algorithm needs no place here: it is a record attribute and already
+     * authenticated.
      */
     public String toBindingData() {
-        StringBuilder sb = new StringBuilder(160);
-        EncryptedData.append(sb, getGUID()).append(EncryptedData.SEP);
-        EncryptedData.append(sb, getSubjectGUID()).append(EncryptedData.SEP);
-        EncryptedData.append(sb, getReferenceGUID()).append(EncryptedData.SEP);
-        EncryptedData.append(sb, getReferenceType()).append(EncryptedData.SEP);
-        KeyLockType klt = getKeyLockType();
-        EncryptedData.append(sb, klt != null ? klt.name() : null);
+        StringBuilder sb = new StringBuilder(96);
+        append(sb, getSubjectGUID()).append(SEP);
+        append(sb, getReferenceGUID()).append(SEP);
+        append(sb, getKeyGUID()).append(SEP);
+        sb.append(getKeySize());
         return sb.toString();
     }
 }

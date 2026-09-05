@@ -16,12 +16,19 @@
 package org.zoxweb.server.security;
 
 import org.zoxweb.server.http.HTTPUtil;
-import org.zoxweb.server.io.UByteArrayOutputStream;
+import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
+import org.bouncycastle.crypto.SecretWithEncapsulation;
+import org.bouncycastle.pqc.crypto.mlkem.MLKEMExtractor;
+import org.bouncycastle.pqc.crypto.mlkem.MLKEMGenerator;
+import org.bouncycastle.pqc.crypto.mlkem.MLKEMKeyGenerationParameters;
+import org.bouncycastle.pqc.crypto.mlkem.MLKEMKeyPairGenerator;
+import org.bouncycastle.pqc.crypto.mlkem.MLKEMParameters;
+import org.bouncycastle.pqc.crypto.mlkem.MLKEMPrivateKeyParameters;
+import org.bouncycastle.pqc.crypto.mlkem.MLKEMPublicKeyParameters;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.crypto.CryptoConst;
 import org.zoxweb.shared.crypto.EncapsulatedKey;
 import org.zoxweb.shared.crypto.EncryptedData;
-import org.zoxweb.shared.filters.BytesValueFilter;
 import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.security.JWT;
@@ -31,7 +38,6 @@ import org.zoxweb.shared.util.SharedBase64.Base64Type;
 
 import javax.crypto.*;
 import javax.crypto.spec.GCMParameterSpec;
-import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSocket;
@@ -48,7 +54,6 @@ import java.security.spec.*;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -154,8 +159,8 @@ public class CryptoUtil {
     /**
      * Seals {@code data} into {@code record} under {@code key}: AES-256-GCM with a fresh 12-byte
      * nonce, the cipher key derived as {@code HKDF-SHA256(key, salt = iv, "enc")}, and every
-     * attribute of the record except the ciphertext as associated data. Set {@code kid},
-     * {@code ref}, {@code mask}, {@code exp} and {@code hint} on the record before calling.
+     * attribute of the record except the ciphertext as associated data. Set {@code mask},
+     * {@code exp} and {@code hint} on the record before calling.
      *
      * @param record the record to fill; its attributes are overwritten
      * @param key    wrapping key, at least {@link #MIN_KEY_BYTES}
@@ -187,6 +192,23 @@ public class CryptoUtil {
             InvalidAlgorithmParameterException,
             IllegalBlockSizeException,
             BadPaddingException {
+        return sealRecord(record, key, data, extraAssociatedData, CryptoConst.ALG_A256GCM);
+    }
+
+    /**
+     * The one sealing path. {@code algorithm} is written into the record's {@code alg} before
+     * sealing, so it is authenticated: {@link CryptoConst#ALG_A256GCM} for a plain record, or the
+     * KEM that produced the outer key for a KEM-wrapped {@link EncapsulatedKey}.
+     */
+    private static EncryptedData sealRecord(final EncryptedData record, final byte[] key, byte[] data, byte[] extraAssociatedData, String algorithm)
+            throws NullPointerException,
+            IllegalArgumentException,
+            NoSuchAlgorithmException,
+            NoSuchPaddingException,
+            InvalidKeyException,
+            InvalidAlgorithmParameterException,
+            IllegalBlockSizeException,
+            BadPaddingException {
         SUS.checkIfNulls("Null key or record", key, record);
         checkRecordKey(key);
         if (data == null) {
@@ -194,8 +216,8 @@ public class CryptoUtil {
         }
         byte[] iv = SecUtil.randomBytes(EncryptedData.IV_SIZE);
         record.setVersion(EncryptedData.VERSION);
-        record.setAlgorithm(EncryptedData.ALG_A256GCM);
-        record.setKDF(EncryptedData.KDF_HKDF_SHA256);
+        record.setAlgorithm(algorithm);
+        record.setKDF(CryptoConst.KDF_HKDF_SHA256);
         record.setIV(iv);
         record.setDataLength(data.length);
         record.setEncryptedData(null);
@@ -243,18 +265,34 @@ public class CryptoUtil {
             BadPaddingException,
             SignatureException {
         SUS.checkIfNulls("Null key or record", key, record);
+        return openRecord(record, key, extraAssociatedData, record.getEncryptedData(), CryptoConst.ALG_A256GCM);
+    }
+
+    /**
+     * Opens {@code cipherText} as the sealed payload of {@code record}: the associated data comes
+     * from the record, the bytes to decrypt from the argument, so a caller can hand over a slice of
+     * the stored ciphertext. {@code expectedAlgorithm} is what the record's {@code alg} must say.
+     */
+    private static byte[] openRecord(final EncryptedData record, final byte[] key, byte[] extraAssociatedData, byte[] cipherText, String expectedAlgorithm)
+            throws NoSuchAlgorithmException,
+            NoSuchPaddingException,
+            InvalidKeyException,
+            InvalidAlgorithmParameterException,
+            IllegalBlockSizeException,
+            BadPaddingException,
+            SignatureException {
+        SUS.checkIfNulls("Null key or record", key, record);
         checkRecordKey(key);
         if (record.getVersion() != EncryptedData.VERSION) {
             throw new IllegalArgumentException("Unsupported record version " + record.getVersion());
         }
-        if (!EncryptedData.ALG_A256GCM.equals(record.getAlgorithm())) {
+        if (!expectedAlgorithm.equals(record.getAlgorithm())) {
             throw new IllegalArgumentException("Unsupported record cipher " + record.getAlgorithm());
         }
-        if (!EncryptedData.KDF_HKDF_SHA256.equals(record.getKDF())) {
+        if (!CryptoConst.KDF_HKDF_SHA256.equals(record.getKDF())) {
             throw new IllegalArgumentException("Unsupported record KDF " + record.getKDF());
         }
         byte[] iv = record.getIV();
-        byte[] cipherText = record.getEncryptedData();
         if (iv == null || iv.length != EncryptedData.IV_SIZE || cipherText == null || cipherText.length < EncryptedData.TAG_SIZE) {
             throw new SignatureException("Data tampered with");
         }
@@ -283,9 +321,9 @@ public class CryptoUtil {
     }
 
     /**
-     * Wraps a fresh random 32-byte key for a new {@link EncapsulatedKey} with a fresh GUID and no
-     * binding fields. Prefer {@link #createEncryptedKey(EncapsulatedKey, byte[])} with the binding
-     * fields set, so the row is tied to its subject and reference.
+     * Wraps a fresh random 32-byte key for a new {@link EncapsulatedKey} with no binding fields.
+     * Prefer {@link #createEncryptedKey(EncapsulatedKey, byte[])} with the binding fields set, so
+     * the key is tied to its subject and reference.
      */
     public static EncapsulatedKey createEncryptedKey(final byte[] wrappingKey)
             throws NullPointerException,
@@ -300,9 +338,9 @@ public class CryptoUtil {
     }
 
     /**
-     * Wraps a fresh random 32-byte key into {@code ek} under {@code wrappingKey}. The GUID, subject
-     * GUID, reference GUID, reference type and key lock type of the row must be set first: they are
-     * authenticated with the wrapped record. A missing GUID is assigned.
+     * Wraps a fresh random 32-byte key into {@code ek} under {@code wrappingKey}. The subject GUID,
+     * reference GUID, reference type and key lock type must be set first: they are authenticated
+     * with the wrapped record. The entity GUID is the datastore's business and is never used.
      */
     public static EncapsulatedKey createEncryptedKey(final EncapsulatedKey ek, final byte[] wrappingKey)
             throws NullPointerException,
@@ -313,16 +351,13 @@ public class CryptoUtil {
             InvalidAlgorithmParameterException,
             IllegalBlockSizeException,
             BadPaddingException {
-        SUS.checkIfNulls("Null key row or wrapping key", ek, wrappingKey);
-        if (ek.getGUID() == null) {
-            ek.setGUID(UUID.randomUUID().toString());
-        }
         return wrapKey(ek, wrappingKey, null);
     }
 
     /**
-     * Seals {@code keyMaterial} into {@code ek} under {@code wrappingKey}: the wrapped record
-     * {@code ref} is the row GUID and its extra associated data is {@link EncapsulatedKey#toBindingData()}.
+     * Seals {@code keyMaterial} into {@code ek} under {@code wrappingKey}. The key row is itself the
+     * record: its nonce, length and ciphertext are filled in place, and the extra associated data is
+     * {@link EncapsulatedKey#toBindingData()}. The entity GUID is the datastore's and is never used.
      *
      * @param keyMaterial the key to wrap, at least {@link #MIN_KEY_BYTES}; null means a fresh random 32-byte key
      */
@@ -335,17 +370,12 @@ public class CryptoUtil {
             InvalidAlgorithmParameterException,
             IllegalBlockSizeException,
             BadPaddingException {
-        SUS.checkIfNulls("Null key row or wrapping key", ek, wrappingKey);
-        if (ek.getGUID() == null) {
-            throw new IllegalArgumentException("EncapsulatedKey GUID not set");
-        }
+        SUS.checkIfNulls("Null key or wrapping key", ek, wrappingKey);
         if (keyMaterial != null) {
             checkRecordKey(keyMaterial);
         }
-        EncryptedData wrapped = new EncryptedData();
-        wrapped.setRef(ek.getGUID());
-        encryptData(wrapped, wrappingKey, keyMaterial, SharedStringUtil.getBytes(ek.toBindingData()));
-        ek.setWrapped(wrapped);
+        ek.setKeySize(wrappingKey.length);
+        encryptData(ek, wrappingKey, keyMaterial, SharedStringUtil.getBytes(ek.toBindingData()));
         return ek;
     }
 
@@ -364,15 +394,11 @@ public class CryptoUtil {
             IllegalBlockSizeException,
             BadPaddingException,
             SignatureException {
-        SUS.checkIfNulls("Null key row or wrapping key", ek, wrappingKey);
-        EncryptedData wrapped = ek.getWrapped();
-        if (wrapped == null) {
+        SUS.checkIfNulls("Null key or wrapping key", ek, wrappingKey);
+        if (ek.getEncryptedData() == null) {
             throw new SignatureException("No wrapped key");
         }
-        if (ek.getGUID() == null || !ek.getGUID().equals(wrapped.getRef())) {
-            throw new SignatureException("Wrapped key does not belong to this row");
-        }
-        return decryptEncryptedData(wrapped, wrappingKey, SharedStringUtil.getBytes(ek.toBindingData()));
+        return decryptEncryptedData(ek, wrappingKey, SharedStringUtil.getBytes(ek.toBindingData()));
     }
 
     /**
@@ -385,6 +411,199 @@ public class CryptoUtil {
         byte[] material = unwrapKey(ek, originalKey);
         try {
             return wrapKey(ek, newKey, material);
+        } finally {
+            Arrays.fill(material, (byte) 0);
+        }
+    }
+
+    /* ------------------------------------------------------------ ML-KEM */
+
+    /**
+     * An ML-KEM key pair as raw bytes: the public key goes to whoever wraps keys for its owner,
+     * the private key stays with the owner and never enters the datastore.
+     */
+    public static final class MLKEMKeyPair {
+        private final String algorithm;
+        private final byte[] publicKey;
+        private final byte[] privateKey;
+
+        MLKEMKeyPair(String algorithm, byte[] publicKey, byte[] privateKey) {
+            this.algorithm = algorithm;
+            this.publicKey = publicKey;
+            this.privateKey = privateKey;
+        }
+
+        /** The parameter set name, {@code ML-KEM-512}, {@code ML-KEM-768} or {@code ML-KEM-1024}. */
+        public String getAlgorithm() {
+            return algorithm;
+        }
+
+        public byte[] getPublicKey() {
+            return publicKey;
+        }
+
+        public byte[] getPrivateKey() {
+            return privateKey;
+        }
+    }
+
+    /**
+     * The BouncyCastle parameter set for an ML-KEM name, {@code ML-KEM-512}, {@code ML-KEM-768} or
+     * {@code ML-KEM-1024}; the library's own names, so a set it knows needs no code here.
+     */
+    private static MLKEMParameters mlkemParameters(String algorithm) {
+        SUS.checkIfNulls("Null KEM algorithm", algorithm);
+        for (MLKEMParameters p : new MLKEMParameters[]{MLKEMParameters.ml_kem_512, MLKEMParameters.ml_kem_768, MLKEMParameters.ml_kem_1024}) {
+            if (p.getName().equalsIgnoreCase(algorithm)) {
+                return p;
+            }
+        }
+        throw new IllegalArgumentException("Unsupported KEM " + algorithm);
+    }
+
+    /**
+     * Generates an ML-KEM key pair for the named parameter set.
+     */
+    public static MLKEMKeyPair generateMLKEMKeyPair(String algorithm) {
+        MLKEMParameters params = mlkemParameters(algorithm);
+        MLKEMKeyPairGenerator kpg = new MLKEMKeyPairGenerator();
+        kpg.init(new MLKEMKeyGenerationParameters(SecUtil.defaultSecureRandom(), params));
+        AsymmetricCipherKeyPair kp = kpg.generateKeyPair();
+        return new MLKEMKeyPair(params.getName(), ((MLKEMPublicKeyParameters) kp.getPublic()).getEncoded(),
+                ((MLKEMPrivateKeyParameters) kp.getPrivate()).getEncoded());
+    }
+
+    private static MLKEMPublicKeyParameters mlkemPublicKey(MLKEMParameters params, byte[] publicKey) {
+        SUS.checkIfNulls("Null public key", publicKey);
+        try {
+            return new MLKEMPublicKeyParameters(params, publicKey);
+        } catch (RuntimeException e) {
+            throw new IllegalArgumentException("Not a " + params.getName() + " public key: " + publicKey.length + " bytes", e);
+        }
+    }
+
+    private static MLKEMPrivateKeyParameters mlkemPrivateKey(MLKEMParameters params, byte[] privateKey) {
+        SUS.checkIfNulls("Null private key", privateKey);
+        try {
+            return new MLKEMPrivateKeyParameters(params, privateKey);
+        } catch (RuntimeException e) {
+            throw new IllegalArgumentException("Not a " + params.getName() + " private key: " + privateKey.length + " bytes", e);
+        }
+    }
+
+    /**
+     * Wraps a fresh random 32-byte key into {@code ek} for the holder of the ML-KEM private key
+     * matching {@code publicKey}. Only the public key is needed; the result cannot be opened by
+     * the caller. Set the binding fields and {@code key_guid}, the registry id of the public key,
+     * before calling.
+     *
+     * @param algorithm the parameter set, {@code ML-KEM-512}, {@code ML-KEM-768} or {@code ML-KEM-1024}
+     */
+    public static EncapsulatedKey createEncryptedKeyMLKEM(final EncapsulatedKey ek, final String algorithm, final byte[] publicKey)
+            throws NullPointerException,
+            IllegalArgumentException,
+            NoSuchAlgorithmException,
+            NoSuchPaddingException,
+            InvalidKeyException,
+            InvalidAlgorithmParameterException,
+            IllegalBlockSizeException,
+            BadPaddingException {
+        return wrapKeyMLKEM(ek, algorithm, publicKey, null);
+    }
+
+    /**
+     * Seals {@code keyMaterial} into {@code ek} under an outer key encapsulated to {@code publicKey}
+     * with the named ML-KEM parameter set. The row's {@code cipher_data} becomes the encapsulated
+     * key followed by the sealed key, {@code key_size} is the encapsulated key's length in bytes,
+     * and {@code alg} is the parameter set name; all three are authenticated. The outer key is
+     * never stored. An encapsulated key altered in place changes the decapsulated secret, so the
+     * tag on the sealed key refuses it.
+     *
+     * @param algorithm   the parameter set, {@code ML-KEM-512}, {@code ML-KEM-768} or {@code ML-KEM-1024}
+     * @param keyMaterial the key to wrap, at least {@link #MIN_KEY_BYTES}; null means a fresh random 32-byte key
+     */
+    public static EncapsulatedKey wrapKeyMLKEM(final EncapsulatedKey ek, final String algorithm, final byte[] publicKey, byte[] keyMaterial)
+            throws NullPointerException,
+            IllegalArgumentException,
+            NoSuchAlgorithmException,
+            NoSuchPaddingException,
+            InvalidKeyException,
+            InvalidAlgorithmParameterException,
+            IllegalBlockSizeException,
+            BadPaddingException {
+        SUS.checkIfNulls("Null key or public key", ek, publicKey);
+        if (keyMaterial != null) {
+            checkRecordKey(keyMaterial);
+        }
+        MLKEMParameters params = mlkemParameters(algorithm);
+        SecretWithEncapsulation enc = new MLKEMGenerator(SecUtil.defaultSecureRandom())
+                .generateEncapsulated(mlkemPublicKey(params, publicKey));
+        byte[] outerKey = enc.getSecret();
+        try {
+            byte[] kemCiphertext = enc.getEncapsulation();
+            ek.setKeySize(kemCiphertext.length);
+            sealRecord(ek, outerKey, keyMaterial, SharedStringUtil.getBytes(ek.toBindingData()), params.getName());
+            byte[] sealed = ek.getEncryptedData();
+            byte[] combined = new byte[kemCiphertext.length + sealed.length];
+            System.arraycopy(kemCiphertext, 0, combined, 0, kemCiphertext.length);
+            System.arraycopy(sealed, 0, combined, kemCiphertext.length, sealed.length);
+            ek.setEncryptedData(combined);
+            return ek;
+        } finally {
+            Arrays.fill(outerKey, (byte) 0);
+        }
+    }
+
+    /**
+     * Opens a key sealed by {@link #wrapKeyMLKEM}: splits the encapsulated key off the front of
+     * {@code cipher_data} at {@code key_size}, decapsulates it with {@code privateKey} for the
+     * parameter set named by {@code alg}, and opens the rest with the recovered outer key.
+     *
+     * @throws IllegalArgumentException if the row is not KEM-wrapped or names a KEM this library does not know
+     * @throws SignatureException       if the row was re-pointed or altered, or the private key does not match
+     */
+    public static byte[] unwrapKeyMLKEM(final EncapsulatedKey ek, final byte[] privateKey)
+            throws NullPointerException,
+            IllegalArgumentException,
+            NoSuchAlgorithmException,
+            NoSuchPaddingException,
+            InvalidKeyException,
+            InvalidAlgorithmParameterException,
+            IllegalBlockSizeException,
+            BadPaddingException,
+            SignatureException {
+        SUS.checkIfNulls("Null key or private key", ek, privateKey);
+        if (!ek.isKEMWrapped()) {
+            throw new IllegalArgumentException("Unsupported record cipher " + ek.getAlgorithm() + ", expected a KEM");
+        }
+        MLKEMParameters params = mlkemParameters(ek.getAlgorithm());
+        int kemSize = ek.getKeySize();
+        byte[] combined = ek.getEncryptedData();
+        if (kemSize != params.getEncapsulationLength() || combined == null || combined.length < kemSize + EncryptedData.TAG_SIZE) {
+            throw new SignatureException("Missing or malformed encapsulated key");
+        }
+        byte[] kemCiphertext = Arrays.copyOfRange(combined, 0, kemSize);
+        byte[] sealed = Arrays.copyOfRange(combined, kemSize, combined.length);
+        // ML-KEM never fails to decapsulate: a wrong key yields an unrelated secret and the tag refuses it
+        byte[] outerKey = new MLKEMExtractor(mlkemPrivateKey(params, privateKey)).extractSecret(kemCiphertext);
+        try {
+            return openRecord(ek, outerKey, SharedStringUtil.getBytes(ek.toBindingData()), sealed, params.getName());
+        } finally {
+            Arrays.fill(outerKey, (byte) 0);
+        }
+    }
+
+    /**
+     * Re-seals a KEM-wrapped key for a new public key of the named parameter set; the key material
+     * itself is unchanged.
+     */
+    public static EncapsulatedKey rekeyEncryptedKeyMLKEM(final EncapsulatedKey ek,
+                                                         final byte[] privateKey, final String newAlgorithm, final byte[] newPublicKey)
+            throws NullPointerException, IllegalArgumentException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, SignatureException {
+        SUS.checkIfNulls("Null parameter", ek, privateKey, newAlgorithm, newPublicKey);
+        byte[] material = unwrapKeyMLKEM(ek, privateKey);
+        try {
+            return wrapKeyMLKEM(ek, newAlgorithm, newPublicKey, material);
         } finally {
             Arrays.fill(material, (byte) 0);
         }

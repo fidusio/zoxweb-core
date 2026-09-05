@@ -71,7 +71,7 @@ public class CryptoUtilTest {
       EncapsulatedKey ekd = CryptoUtil.createEncryptedKey(wrappingKey);
       byte[] key = CryptoUtil.unwrapKey(ekd, wrappingKey);
       System.out.println(SharedStringUtil.bytesToHex(key));
-      System.out.println(ekd.getWrappedKey());
+      System.out.println(ekd.toCanonicalID());
 
       EncryptedData ed = CryptoUtil
           .encryptData(new EncryptedData(), wrappingKey, SharedStringUtil.getBytes("password"));

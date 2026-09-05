@@ -87,7 +87,7 @@ public final class KeyMakerProvider
         ekd.setGUID(subjectID.getGUID());
         ekd.setSubjectGUID(subjectID.getSubjectGUID());
         ekd.setObjectReference(subjectID);
-        ekd.setKeyLockType(KeyLockType.USER_ID);
+        ekd.setKeyLockType(KeyLockType.SUBJECT_ID);
         try {
             CryptoUtil.createEncryptedKey(ekd, encryptionKey);
         } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException |
@@ -113,7 +113,7 @@ public final class KeyMakerProvider
                 ekd.setGUID(nve.getGUID());
                 ekd.setSubjectGUID(nve.getSubjectGUID());
                 ekd.setObjectReference(nve);
-                ekd.setKeyLockType(KeyLockType.USER_ID);
+                ekd.setKeyLockType(KeyLockType.SUBJECT_ID);
                 CryptoUtil.createEncryptedKey(ekd, key);
                 ekd = dataStore.insert(ekd);
             }

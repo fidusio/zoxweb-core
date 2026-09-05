@@ -152,14 +152,14 @@ public class EncryptedContentTest {
                 System.out.println(ekdJSON);
                 byte[] key = CryptoUtil.unwrapKey(ekd, wrappingKey);
                 System.out.println(key.length + " " + SharedStringUtil.bytesToHex(key));
-                System.out.println(key.length + " " + SharedStringUtil.bytesToHex(ekd.getWrapped().getEncryptedData()));
+                System.out.println(key.length + " " + SharedStringUtil.bytesToHex(ekd.getEncryptedData()));
 
                 EncapsulatedKey ekdFromJSON = GSONUtil.fromJSON(ekdJSON, EncapsulatedKey.class);
 
                 key = CryptoUtil.unwrapKey(ekdFromJSON, wrappingKey);
                 System.out.println("from json       key:" + SharedStringUtil.bytesToHex(key));
                 System.out.println(
-                        "from json encrypted:" + SharedStringUtil.bytesToHex(ekdFromJSON.getWrapped().getEncryptedData()));
+                        "from json encrypted:" + SharedStringUtil.bytesToHex(ekdFromJSON.getEncryptedData()));
 
                 ekd = CryptoUtil.rekeyEncryptedKey(ekd, wrappingKey, newWrappingKey);
                 key = CryptoUtil.unwrapKey(ekd, newWrappingKey);
@@ -190,7 +190,7 @@ public class EncryptedContentTest {
                     ts = System.nanoTime() - ts;
                     System.out.print("[" + ts + " ns]");
                     System.out.println(ekdTest.getName() + "\t,Encrypted data " + SharedStringUtil
-                            .bytesToHex(ekdTest.getWrapped().getEncryptedData()));
+                            .bytesToHex(ekdTest.getEncryptedData()));
 
                     ts = System.nanoTime();
                     byte[] drecryptedKey = CryptoUtil.unwrapKey(ekdTest, wrappingKey);

@@ -21,6 +21,13 @@ import org.zoxweb.shared.util.*;
 import java.util.*;
 
 public final class CryptoConst {
+    public static final String ALG_A256GCM = "A256GCM";
+    public static final String KDF_HKDF_SHA256 = "HKDF-SHA256";
+    /** {@code alg} values for a key wrapped with an ML-KEM (FIPS 203) parameter set. */
+    public static final String ML_KEM_512 = "ML-KEM-512";
+    public static final String ML_KEM_768 = "ML-KEM-768";
+    public static final String ML_KEM_1024 = "ML-KEM-1024";
+
     private CryptoConst() {
 
     }
@@ -55,9 +62,9 @@ public final class CryptoConst {
         RSA_2048(CryptoAlgo.RSA, "2048"),
         RSA_3072(CryptoAlgo.RSA, "3072"),
         RSA_4096(CryptoAlgo.RSA, "4096"),
-        ML_KEM_512(CryptoAlgo.ML_KEM, "ML-KEM-512"),
-        ML_KEM_768(CryptoAlgo.ML_KEM, "ML-KEM-768"),
-        ML_KEM_1024(CryptoAlgo.ML_KEM, "ML-KEM-1024"),
+        ML_KEM_512(CryptoAlgo.ML_KEM, CryptoConst.ML_KEM_512),
+        ML_KEM_768(CryptoAlgo.ML_KEM,  CryptoConst.ML_KEM_768),
+        ML_KEM_1024(CryptoAlgo.ML_KEM,  CryptoConst.ML_KEM_1024),
 
         ;
 

@@ -21,7 +21,7 @@ package org.zoxweb.shared.crypto;
 public enum KeyLockType
 {
 	// User ID
-	USER_ID,
+	SUBJECT_ID,
 	// Domain ID
 	DOMAIN_ID,
 	// System ID
