@@ -6,7 +6,6 @@ import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.data.PropertyDAO;
 import org.zoxweb.shared.filters.FilterType;
 import org.zoxweb.shared.security.SecConst;
-import org.zoxweb.shared.security.SubjectInfo;
 import org.zoxweb.shared.util.Const.TimeInMillis;
 
 import java.util.List;
@@ -35,12 +34,12 @@ public class EnumTypeTest {
         public static final NVConfigEntity NVC_ENUM_TESTER = new NVConfigEntityPortable(
                 "enum_tester",
                 null,
-                SubjectInfo.class.getName(),
+                EnumTester.class.getName(),
                 true,
                 false,
                 false,
                 false,
-                SubjectInfo.class,
+                EnumTester.class,
                 SharedUtil.extractNVConfigs(Param.values()),
                 null,
                 false,

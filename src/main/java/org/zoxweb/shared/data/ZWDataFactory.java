@@ -1027,7 +1027,7 @@ public class ZWDataFactory
         },
 
 
-        SUBJECT_IDENTIFIER(SubjectAPIKey.class.getName()) {
+        SUBJECT_IDENTIFIER(SubjectIdentifier.class.getName()) {
             @SuppressWarnings("unchecked")
             @Override
             public SubjectIdentifier newInstance() {
@@ -1037,18 +1037,6 @@ public class ZWDataFactory
             @Override
             public NVConfigEntity getNVConfigEntity() {
                 return SubjectIdentifier.NVC_SUBJECT_IDENTIFIER;
-            }
-        },
-        SUBJECT_PROFILE(SubjectAPIKey.class.getName()) {
-            @SuppressWarnings("unchecked")
-            @Override
-            public SubjectInfo newInstance() {
-                return new SubjectInfo();
-            }
-
-            @Override
-            public NVConfigEntity getNVConfigEntity() {
-                return SubjectInfo.NVC_SUBJECT_INFO;
             }
         },
         SYSTEM_INFO_DAO(SystemInfoDAO.class.getName()) {
