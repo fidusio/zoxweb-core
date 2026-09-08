@@ -1,5 +1,6 @@
 package org.zoxweb.shared.security.model;
 
+import org.zoxweb.shared.app.AppIDDefault;
 import org.zoxweb.shared.security.PermissionInfo;
 import org.zoxweb.shared.security.RoleInfo;
 import org.zoxweb.shared.util.*;
@@ -21,19 +22,18 @@ public final class SecurityModel {
     // token to be dynamically replaced
     public final static String TOK_APP_ID = "$$app_id$$";
 
-    public final static String TOK_REFERENCE_ID = "$$reference_id$$";
+    public final static String TOK_GUID = "$$" + Const.GUID + "$$";
     public final static String TOK_RESOURCE_GUID = "$$" + Const.RESOURCE_GUID + "$$";
-    public final static String TOK_SUBJECT_ID = "$$" + Const.SUBJECT_ID + "$$";
+    //public final static String TOK_SUBJECT_ID = "$$" + Const.SUBJECT_ID + "$$";
     public final static String TOK_SUBJECT_GUID = "$$" + Const.SUBJECT_GUID + "$$";
     public final static String TOK_CRUD = "$$crud$$";
 
 
     public enum SecToken
             implements GetName {
-        REFERENCE_ID(TOK_REFERENCE_ID),
         APP_ID(TOK_APP_ID),
         RESOURCE_GUID(TOK_RESOURCE_GUID),
-        SUBJECT_ID(TOK_SUBJECT_ID),
+//        SUBJECT_ID(TOK_SUBJECT_ID),
         SUBJECT_GUID(TOK_SUBJECT_GUID),
         CRUD(TOK_CRUD),
         ;
@@ -100,10 +100,10 @@ public final class SecurityModel {
     public final static String PERM_CREATE_APP_ID = APP + SEP + CREATE;//APP + SEP + CREATE;//"app:create";
     public final static String PERM_DELETE_APP_ID = APP + SEP + DELETE;//APP + SEP + DELETE;//"app:delete";
     public final static String PERM_UPDATE_APP_ID = APP + SEP + UPDATE;//APP + SEP + UPDATE;//"app:update";
-    public final static String PERM_ADD_USER = SUBJECT + SEP + CREATE;//"user:create";
-    public final static String PERM_DELETE_SUBJECT = SUBJECT + SEP + DELETE;//"user:delete";
-    public final static String PERM_READ_SUBJECT = SUBJECT + SEP + READ;//"user:read";
-    public final static String PERM_UPDATE_SUBJECT = SUBJECT + SEP + UPDATE;//"user:update";
+    public final static String PERM_ADD_SUBJECT = SUBJECT + SEP + CREATE;
+    public final static String PERM_DELETE_SUBJECT = SUBJECT + SEP + DELETE;
+    public final static String PERM_READ_SUBJECT = SUBJECT + SEP + READ;
+    public final static String PERM_UPDATE_SUBJECT = SUBJECT + SEP + UPDATE;
     public final static String PERM_SELF = "self";
     public final static String PERM_PRIVATE = "private";
     public final static String PERM_PUBLIC = "public";
@@ -152,9 +152,9 @@ public final class SecurityModel {
         APP_ID(TOK_APP_ID),
         PRIVATE(PERM_PRIVATE),
         PUBLIC(PERM_PUBLIC),
-        REFERENCE_ID(TOK_REFERENCE_ID),
+        //REFERENCE_ID(TOK_REFERENCE_ID),
         RESOURCE_ID(TOK_RESOURCE_GUID),
-        SUBJECT_ID(TOK_SUBJECT_ID),
+//        SUBJECT_ID(TOK_SUBJECT_ID),
         USER_ID(TOK_SUBJECT_GUID),
         ;
 
@@ -190,10 +190,10 @@ public final class SecurityModel {
         ROLE_ADD("role_add", "Permission to add a role", PERM_ADD_ROLE),
         ROLE_DELETE("role_delete", "Permission to delete a role", PERM_DELETE_ROLE),
         ROLE_UPDATE("role_update", "Permission to update a role", PERM_UPDATE_ROLE),
-        USER_CREATE("user_create", "Permission to create a user", PERM_ADD_USER),
+        USER_CREATE("user_create", "Permission to create a user", PERM_ADD_SUBJECT),
         USER_DELETE("user_delete", "Permission to delete a user", PERM_DELETE_SUBJECT),
         USER_UPDATE("user_update", "Permission to update a user", PERM_UPDATE_SUBJECT),
-        USER_READ("user_read", "Permission to update a user", PERM_UPDATE_SUBJECT),
+        USER_READ("user_read", "Permission to update a user", PERM_READ_SUBJECT),
         RESOURCE_ADD("resource_add", "Permission to add a resource", PERM_ADD_RESOURCE, TOK_APP_ID),
         RESOURCE_ANY("resource_any", "Any permission applicable", PERM_RESOURCE_ANY),
 
@@ -288,14 +288,14 @@ public final class SecurityModel {
     }
 
 
-    public static String toSubjectID(String domainID, String appID, GetName gn) {
-        return toSubjectID(domainID, appID, gn.getName());
-    }
-
-
-    public static String toSubjectID(String domainID, String appID, String name) {
-        return SUS.toCanonicalID(AppID.CAN_ID_SEP, domainID, appID, name);
-    }
+//    public static String toSubjectID(String domainID, String appID, GetName gn) {
+//        return toSubjectID(domainID, appID, gn.getName());
+//    }
+//
+//
+//    public static String toSubjectID(String domainID, String appID, String name) {
+//        return SUS.toCanonicalID(AppID.CAN_ID_SEP, domainID, appID, name);
+//    }
 
     public enum AppPermission
             implements PermissionModel {
@@ -351,11 +351,11 @@ public final class SecurityModel {
      * @param gnv
      * @return
      */
-    public static PermissionInfo toPermission( GetNameValue<String> gnv, NVPair... tokens) {
+    public static PermissionInfo toPermission(GetNameValue<String> gnv, GetNameValue<String>... tokens) {
         return toPermission(gnv.getName(), null, gnv.getValue(), tokens);
     }
 
-    public static PermissionInfo toPermission( String name, String description, String pattern, NVPair... tokens) {
+    public static PermissionInfo toPermission(String name, String description, String pattern, GetNameValue<String>... tokens) {
         PermissionInfo ret = new PermissionInfo();
         ret.setName(name);
         ret.setDescription(description);
@@ -364,7 +364,27 @@ public final class SecurityModel {
 
 
         if (tokens != null && tokens.length > 0) {
-            for (NVPair token : tokens)
+            for (GetNameValue<String> token : tokens)
+                pattern = SharedStringUtil.embedText(pattern, token.getName(), token.getValue());
+        }
+
+
+        ret.setPermissionToken(pattern);
+        return ret;
+
+    }
+
+    public static PermissionInfo toPermission(AppIDDefault appIDDefault, String name, String description, String pattern, GetNameValue<String>... tokens) {
+        PermissionInfo ret = new PermissionInfo();
+        ret.setName(name);
+        ret.setDescription(description);
+        ret.setAppIdDAO(appIDDefault);
+        //ret.setEmbedAppIDEnabled(embedAppID);
+        //ret.setDomainAppID(domainID, appID);
+
+
+        if (tokens != null && tokens.length > 0) {
+            for (GetNameValue<String> token : tokens)
                 pattern = SharedStringUtil.embedText(pattern, token.getName(), token.getValue());
         }
 

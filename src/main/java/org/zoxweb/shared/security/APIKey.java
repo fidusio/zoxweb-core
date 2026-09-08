@@ -15,7 +15,7 @@ import org.zoxweb.shared.util.SetName;
  * @param <V> the type of the key material
  */
 public interface APIKey<V>
-        extends SetName, SetDescription,CredentialInfo {
+        extends SetName, SetDescription, CredentialInfo {
 
     /**
      * Sets the key material.
@@ -32,5 +32,6 @@ public interface APIKey<V>
     V getAPIKey();
 
     void setAppID(AppID<String> appID);
+
     AppID<String> getAppID();
 }

@@ -119,22 +119,6 @@ public class FilterTypeTest {
     }
 
     @Test
-    public void testDomainIDFilterIsValid() {
-        String[] validAccountIDs = {"www.yahoo.com", "yahoo.com", "1258058", "999", "20485"};
-
-		for (String accountID : validAccountIDs) {
-            assertTrue(FilterType.DOMAIN_ACCOUNT_ID.isValid(accountID));
-        }
-
-        String[] invalidAccountIDs = {"https://www.yahoo.com ", "http://.www.yahoo.com/", "www.yahoo.com/",
-                "yahoo.com/", "https://10.0.1.1/marwan?param=1&p1=2"};
-
-        for (String accountID : invalidAccountIDs) {
-            assertFalse(FilterType.DOMAIN_ACCOUNT_ID.isValid(accountID));
-        }
-    }
-
-    @Test
     public void testURLFilterIsValid() {
         String[] validURLs = {"https://www.google.com ", "https://10.0.1.1/hello_world?param=1&p1=2"};
 

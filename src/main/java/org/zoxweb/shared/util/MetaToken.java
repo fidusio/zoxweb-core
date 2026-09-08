@@ -17,11 +17,11 @@ package org.zoxweb.shared.util;
 
 /**
  * This enum contains meta parameters.
+ *
  * @author mzebib
  *
  */
-public enum MetaToken
-        implements GetName {
+public enum MetaToken implements GetName {
 
     ATTRIBUTES("attributes") // 	Attributes list or collection.
     ,
@@ -68,8 +68,7 @@ public enum MetaToken
     JSON_CONTENT("json_content") // Json content to wrap a json object
     ,
 
-    KEY_GUID("key_guid")
-    ,
+    KEY_GUID("key_guid"),
 
     LOGICAL_OPERATOR("logical_operator") // LogicalOperator
     ,
@@ -80,17 +79,16 @@ public enum MetaToken
     NAME("name") // 	Name of the attribute.
     ,
 
-    PERMISSION_GUID("permission_guid"),
+    PERMISSION_GUID("permission_guid"), PRINCIPAL_ID("principal_id"),
 
     RECURSIVE("recursive") //	Recursive
     ,
+
     REFERENCE_GUID(Const.REFERENCE_GUID),
     /**
      * Replaced by GUID
      */
-    @Deprecated
-    REFERENCE_ID("reference_id")
-    ,
+    @Deprecated REFERENCE_ID("reference_id"),
     REFERENCE_TYPE("reference_type"),
 
     RELATIONAL_OPERATOR("relational_operator") // RelationOperator
@@ -103,20 +101,17 @@ public enum MetaToken
     ROLE_GUID("role_guid"),
 
     STATIC("static") // is static
-    ,
-    SUBJECT_GUID(Const.SUBJECT_GUID) // Subject GUID
+    , SUBJECT_GUID(Const.SUBJECT_GUID) // Subject GUID
     ,
 
-    SUBJECT_ID(Const.SUBJECT_ID), // SubjectID token
+//    SUBJECT_ID(Const.SUBJECT_ID), // SubjectID token
 
     UNIT("unit"),
 
-    VALUE("value") // 	Value of the attribute.
-    ,
-    VALUES("values") //Values
-    ,
-    VALUE_FILTER("value_filter") // 	Value filter of the attribute.
-    ,
+    VALUE("value"), // 	Value of the attribute.
+    VALUES("values"), //Values
+    VALUE_FILTER("value_filter"), // 	Value filter of the attribute.
+
 
     ;
 
@@ -133,9 +128,7 @@ public enum MetaToken
 
 
     public static boolean isPrimitiveArray(NVBase<?> nvb) {
-        return nvb instanceof NVStringList || nvb instanceof NVIntList ||
-                nvb instanceof NVLongList || nvb instanceof NVFloatList ||
-                nvb instanceof NVDoubleList || nvb instanceof NVEnumList;
+        return nvb instanceof NVStringList || nvb instanceof NVIntList || nvb instanceof NVLongList || nvb instanceof NVFloatList || nvb instanceof NVDoubleList || nvb instanceof NVEnumList;
     }
 
     public static boolean isNVEntityArray(NVBase<?> nvb) {

@@ -15,11 +15,9 @@
  */
 package org.zoxweb.shared.filters;
 
-import org.zoxweb.shared.data.DataConst;
 import org.zoxweb.shared.util.DataEncoder;
 import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.SUS;
-import org.zoxweb.shared.util.SharedStringUtil;
 
 import java.math.BigDecimal;
 
@@ -46,16 +44,6 @@ public enum FilterType
                 throws NullPointerException, IllegalArgumentException {
             return in;
         }
-
-        /**
-         * Checks if the given value is valid.
-         * @param in value to be checked
-         * @return true if valid false if not
-         */
-        public boolean isValid(String in) {
-            return true;
-        }
-
     },
     /**
      * BigDecimal filter
@@ -71,15 +59,6 @@ public enum FilterType
         public String validate(String in)
                 throws NullPointerException, IllegalArgumentException {
             return "" + BigDecimalFilter.SINGLETON.validate(in);
-        }
-
-        /**
-         * Checks if the given value is valid.
-         * @param in value to be checked
-         * @return true if valid false if not
-         */
-        public boolean isValid(String in) {
-            return BigDecimalFilter.SINGLETON.isValid(in);
         }
     },
     /**
@@ -97,26 +76,19 @@ public enum FilterType
                 throws NullPointerException, IllegalArgumentException {
             return "" + Boolean.valueOf(in);
         }
-
-        /**
-         * Checks if the given value is valid.
-         * @param in value to be checked
-         * @return true if valid false if not
-         */
-        public boolean isValid(String in) {
-            return true;
-        }
-
     },
     CLEAR {
 
     },
     DOMAIN {
-        //private static final String REGEX = "^((?!-)[A-Za-z0-9-]{1,63}(?<!-)\\.)+[A-Za-z]{2,6}$";
-        private static final String REGEX = "^([a-zA-Z0-9]([a-zA-Z0-9\\-]{0,65}[a-zA-Z0-9])?\\.)+[a-zA-Z]{2,6}$";
-
         /**
-         * Validates the given value.
+         * Validates a bare hostname and returns it lower-cased with a leading {@code www}
+         * label ({@code www.}, {@code www2.}) removed. The hostname is otherwise returned
+         * as given: this filter never computes a registrable domain, never coerces a URL
+         * or an email address into a domain, and does not restrict the top-level domain.
+         * {@code www.zoxweb.com} and {@code zoxweb.com} are therefore the same value, while
+         * {@code admin.zoxweb.com} is a different one; the row an operator registers is the
+         * scope boundary, not this filter.
          * @param in value to be validated
          * @return validated acceptable value
          * @throws NullPointerException if in is null
@@ -128,120 +100,22 @@ public enum FilterType
             SUS.checkIfNulls("Null or empty input.", str);
             str = str.toLowerCase();
 
-            if (FilterType.URL.isValid(str)) {
-                str = FilterType.URL.validate(str);
-
-                int index = str.indexOf("://");
-
-                if (index != -1) {
-                    // keep everything after the "://"
-                    str = str.substring(index + 3);
-                }
-
-                index = str.indexOf('/');
-
-                if (index != -1) {
-                    // keep everything before the '/'
-                    str = str.substring(0, index);
-                }
-            } else if (FilterType.EMAIL.isValid(str)) {
-                str = FilterType.EMAIL.validate(str);
-                str = SharedStringUtil.valueAfterRightToken(str, "@");
+            if (str.length() > DOMAIN_MAX_LENGTH || !str.matches(DOMAIN_REGEX)) {
+                throw new IllegalArgumentException("Invalid domain: " + in);
             }
 
-            if (!str.matches(REGEX)) {
-                throw new IllegalArgumentException("Invalid input: " + in);
+            // remove a leading "www." or "www<digits>." label only
+            str = str.replaceFirst("^www\\d*\\.", "");
+
+            // "www.com" would collapse to a single label
+            if (str.indexOf('.') == -1) {
+                throw new IllegalArgumentException("Invalid domain: " + in);
             }
 
-            // check for and remove a preceding 'www'
-            // followed by any sequence of characters (non-greedy)
-            // followed by a '.'
-            // from the beginning of the string
-            str = str.replaceFirst("^www.*?\\.", "");
-
-            if (!DataConst.DomainExtension.isValidExtension(str)) {
-                throw new IllegalArgumentException("Invalid input: " + in);
-            }
-
-            String[] results = str.split("\\.");
-
-            if (results.length >= 2) {
-                StringBuilder sb = new StringBuilder();
-                sb.append(results[results.length - 2]);
-                sb.append(".");
-                sb.append(results[results.length - 1]);
-
-                str = sb.toString();
-            }
-
-            if (str != null) {
-                return str;
-            } else {
-                throw new IllegalArgumentException("Invalid input: " + in);
-            }
-        }
-
-        /**
-         * Checks if the given value is valid.
-         * @param in value to be checked
-         * @return true if valid false if not
-         */
-        public boolean isValid(String in) {
-            try {
-                validate(in);
-            } catch (Exception e) {
-                return false;
-            }
-
-            return true;
+            return str;
         }
     },
 
-    /**
-     * Domain/Account ID filter
-     */
-    DOMAIN_ACCOUNT_ID {
-        public static final String REGEX = "[www.]?[-a-zA-Z0-9][-a-zA-Z0-9+&@#%?=~_|!:,.;]*[-a-zA-Z0-9+&@#%=~_|]";
-        public static final int MAX_LENGTH = 4096;
-
-        /**
-         * Validates the given value.
-         * @param in value to be validated
-         * @return validated acceptable value
-         * @throws NullPointerException if in is null
-         * @throws IllegalArgumentException if in is invalid
-         */
-        public String validate(String in)
-                throws NullPointerException, IllegalArgumentException {
-            in = SUS.trimOrNull(in);
-            SUS.checkIfNulls("URL address null or empty", in);
-
-            if (in.matches(REGEX)) {
-                if (in.length() > MAX_LENGTH) {
-                    throw new IllegalArgumentException("URL length > max length " + in.length() + ":" + in);
-                }
-
-                return in.toLowerCase();
-            } else {
-                throw new IllegalArgumentException("Invalid URL syntax " + in);
-            }
-        }
-
-        /**
-         * Checks if the given value is valid.
-         * @param in value to be checked
-         * @return true if valid false if not
-         */
-        public boolean isValid(String in) {
-            in = SUS.trimOrNull(in);
-
-            if (in != null) {
-                return in.matches(REGEX) && !(in.length() > MAX_LENGTH);
-            }
-
-            return false;
-        }
-    },
     /**
      * Double filter
      */
@@ -257,22 +131,6 @@ public enum FilterType
                 throws NullPointerException, IllegalArgumentException {
             return "" + Double.valueOf(in);
         }
-
-        /**
-         * Checks if the given value is valid.
-         * @param in value to be checked
-         * @return true if valid false if not
-         */
-        public boolean isValid(String in) {
-            try {
-                Double.valueOf(in);
-            } catch (Exception e) {
-                return false;
-            }
-
-            return true;
-        }
-
     },
 
     /**
@@ -281,7 +139,8 @@ public enum FilterType
     EMAIL {
         //public static final String REGEX ="^[_a-zA-Z0-9-]+(\\.[_a-zA-Z0-9-]+)*@[a-zA-Z0-9-]+(\\.[a-zA-Z0-9-]+)*\\.(([0-9]{1,3})|([a-zA-Z]{2,3})|(aero|coop|info|museum|name))$";
         //public static final String REGEX ="\\b[\\w.!#$%&’*+\\/=?^`{|}~-]+@[\\w-]+(?:\\.[\\w-]+)*\\b";
-        public static final String REGEX = "^[\\w!#$%&'*+/=?`{|}~^-]+(?:\\.[\\w!#$%&'*+/=?`{|}~^-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}$";
+        // local part per RFC 5322 atext; the domain part is the same rule as FilterType.DOMAIN
+        public static final String REGEX = "^[\\w!#$%&'*+/=?`{|}~^-]+(?:\\.[\\w!#$%&'*+/=?`{|}~^-]+)*@(?:" + DOMAIN_LABEL + "\\.)+" + DOMAIN_TLD + "$";
         public static final int MAX_LENGTH = 254;
 
         /**
@@ -305,21 +164,6 @@ public enum FilterType
             } else {
                 throw new IllegalArgumentException("Invalid email: " + in);
             }
-        }
-
-        /**
-         * Checks if the given value is valid.
-         * @param in value to be checked
-         * @return true if valid false if not
-         */
-        public boolean isValid(String in) {
-            in = SUS.trimOrNull(in);
-
-            if (in != null) {
-                return in.matches(REGEX) && !(in.length() > MAX_LENGTH);
-            }
-
-            return false;
         }
     },
 
@@ -354,21 +198,6 @@ public enum FilterType
                 throws NullPointerException, IllegalArgumentException {
             return "" + Float.valueOf(in);
         }
-
-        /**
-         * Checks if the given value is valid.
-         * @param in value to be checked
-         * @return true if valid false if not
-         */
-        public boolean isValid(String in) {
-            try {
-                Float.valueOf(in);
-            } catch (Exception e) {
-                return false;
-            }
-
-            return true;
-        }
     },
     /**
      * Hashed filter
@@ -400,22 +229,6 @@ public enum FilterType
                 throws NullPointerException, IllegalArgumentException {
             return "" + Integer.valueOf(in);
         }
-
-
-        /**
-         * Checks if the given value is valid.
-         * @param in value to be checked
-         * @return true if valid false if not
-         */
-        public boolean isValid(String in) {
-            try {
-                Integer.valueOf(in);
-            } catch (Exception e) {
-                return false;
-            }
-
-            return true;
-        }
     },
     /**
      * Long filter
@@ -431,21 +244,6 @@ public enum FilterType
         public String validate(String in)
                 throws NullPointerException, IllegalArgumentException {
             return "" + Long.valueOf(in);
-        }
-
-        /**
-         * Checks if the given value is valid.
-         * @param in value to be checked
-         * @return true if valid false if not
-         */
-        public boolean isValid(String in) {
-            try {
-                Long.valueOf(in);
-            } catch (Exception e) {
-                return false;
-            }
-
-            return true;
         }
     },
     LOWERCASE {
@@ -492,21 +290,6 @@ public enum FilterType
                 throw new IllegalArgumentException("Invalid password did mot pass requirements length < 8, contains special characters");
             }
         }
-
-        /**
-         * Checks if the given value is valid.
-         * @param in value to be checked
-         * @return true if valid false if not
-         */
-        public boolean isValid(String in) {
-            in = SUS.trimOrNull(in);
-
-            if (in != null) {
-                return in.matches(REGEX);
-            }
-
-            return false;
-        }
     },
     /**
      * Prime number filter
@@ -538,21 +321,6 @@ public enum FilterType
                 throw new IllegalArgumentException("Invalid password: " + in);
             }
         }
-
-        /**
-         * Checks if the given value is valid.
-         * @param in value to be checked
-         * @return true if valid false if not
-         */
-        public boolean isValid(String in) {
-            in = SUS.trimOrNull(in);
-
-            if (in != null) {
-                return in.matches(REGEX);
-            }
-
-            return false;
-        }
     },
     TEXT_NOT_EMPTY {
         public String validate(String in)
@@ -563,19 +331,14 @@ public enum FilterType
             }
             return in;
         }
-
-        public boolean isValid(String in) {
-            return SUS.isNotEmpty(in);
-        }
     },
     UPPERCASE {
         public String validate(String in)
                 throws NullPointerException, IllegalArgumentException {
-            return DataEncoder.StringUpper.encode(in);//in.toUpperCase();
+            return DataEncoder.StringUpper.encode(in);
         }
 
         public boolean isValid(String in) {
-
             if (in != null)
                 for (char c : in.toCharArray()) {
                     if (!Character.isUpperCase(c))
@@ -617,23 +380,26 @@ public enum FilterType
                 throw new IllegalArgumentException("Invalid URL: " + in);
             }
         }
-
-        /**
-         * Checks if the given value is valid.
-         * @param in value to be checked
-         * @return true if valid false if not
-         */
-        public boolean isValid(String in) {
-            in = SUS.trimOrNull(in);
-
-            if (in != null) {
-                return in.matches(REGEX) && !(in.length() > MAX_LENGTH);
-            }
-
-            return false;
-        }
     },
     ;
+
+    /**
+     * One DNS label: 1 to 63 letters, digits or hyphens, no hyphen at either end.
+     * Shared by {@link #DOMAIN} and the domain part of {@link #EMAIL}.
+     */
+    public static final String DOMAIN_LABEL = "[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?";
+    /**
+     * Top-level label: 2 to 63 letters, or a punycode (IDN) label.
+     */
+    public static final String DOMAIN_TLD = "(?:[a-zA-Z]{2,63}|[xX][nN]--[a-zA-Z0-9-]{1,59})";
+    /**
+     * A bare hostname of two or more labels.
+     */
+    public static final String DOMAIN_REGEX = "^(?:" + DOMAIN_LABEL + "\\.)+" + DOMAIN_TLD + "$";
+    /**
+     * Maximum hostname length per RFC 1035.
+     */
+    public static final int DOMAIN_MAX_LENGTH = 253;
 
     /**
      * Validates the given value.
@@ -645,15 +411,6 @@ public enum FilterType
     public String validate(String in)
             throws NullPointerException, IllegalArgumentException {
         return in;
-    }
-
-    /**
-     * Checks if the given value is valid.
-     * @param in value to be checked
-     * @return true if valid false if not
-     */
-    public boolean isValid(String in) {
-        return true;
     }
 
     @Override

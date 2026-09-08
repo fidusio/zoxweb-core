@@ -254,7 +254,7 @@ public class EncryptedContentTest {
             try {
                 SecretKey sk = CryptoUtil.generateKey(CryptoConst.CryptoAlgo.AES, 256);
 
-                byte[] data = "Marwan NAEL is the best of the b".getBytes(StandardCharsets.UTF_8);
+                byte[] data = "Data To Test : the best of the west".getBytes(StandardCharsets.UTF_8);
 
                 EncryptedData ed = CryptoUtil.encryptData(new EncryptedData(), sk.getEncoded(), data);
                 //ed.setDataLength(16);

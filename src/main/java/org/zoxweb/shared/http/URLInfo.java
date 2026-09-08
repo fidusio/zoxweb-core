@@ -172,9 +172,9 @@ public final class URLInfo {
     }
 
 
-    public static URLInfo parse(String input) {
-        Objects.requireNonNull(input);
-        String s = input.trim();
+    public static URLInfo parse(String url) {
+        SUS.checkIfNull("url null", url);
+        String s = url.trim();
         if (s.isEmpty()) throw new IllegalArgumentException("Empty URL");
 
         int schemeIdx = s.indexOf("://");
@@ -182,6 +182,9 @@ public final class URLInfo {
 
         String scheme = SUS.trimOrNull(s.substring(0, schemeIdx));
         URIScheme uriScheme = URIScheme.match(scheme);
+        if(uriScheme == null) {
+            throw new IllegalArgumentException("Invalid scheme " + scheme);
+        }
         String rest = s.substring(schemeIdx + 3);
 
         int authorityEnd = firstIndexOfAny(rest, '/', '?', '#');

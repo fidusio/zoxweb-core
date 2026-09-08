@@ -58,17 +58,17 @@ public class PercentConverter
 
     public Range<Float> fRange()
     {
-        return new Range<>(min, max, Range.Inclusive.BOTH);
+        return new Range<>(min, max, Range.Inclusivity.BOTH);
     }
 
     public Range<Integer> iRange()
     {
-        return new Range<>((int) min, (int) max, Range.Inclusive.BOTH);
+        return new Range<>((int) min, (int) max, Range.Inclusivity.BOTH);
     }
 
     public Range<Long> lRange()
     {
-        return new Range<>((long) min, (long) max, Range.Inclusive.BOTH);
+        return new Range<>((long) min, (long) max, Range.Inclusivity.BOTH);
     }
 
 }

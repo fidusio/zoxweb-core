@@ -18,6 +18,8 @@ mvn test -DskipTests=false -Dtest=UserInfoDAOTest#methodName  # single test meth
 
 **Tests are skipped by default**: the pom sets `<skipTests>true</skipTests>` as a property. `mvn test` alone does nothing; always pass `-DskipTests=false`.
 
+**Run Java through IntelliJ, not the shell.** Whenever you need to compile, run, or test Java code (a test class, a main, a scratch snippet), use the IntelliJ MCP tools (`mcp__idea__build_project`, `mcp__idea__execute_run_configuration`, `mcp__idea__execute_terminal_command`) rather than `mvn`/`java` from the Bash or PowerShell tool. IntelliJ is much faster (incremental build, warm JVM) and picks up every jar dependency from the Maven model automatically; shell runs must rebuild the classpath and are also intercepted by Avast on this machine.
+
 Other build quirks:
 - `src/main/java` is also declared as a resource directory, so non-`.java` files there (e.g. `org/zoxweb/conf/*.json`) ship inside the jar.
 - The `maven-gpg-plugin` signs at the `verify` phase; `mvn install`/`mvn verify` will fail without the GPG key. Use `mvn package`/`mvn test` for normal development.

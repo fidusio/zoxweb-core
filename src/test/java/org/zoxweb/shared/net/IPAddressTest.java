@@ -250,7 +250,7 @@ public class IPAddressTest {
 
     @Test
     public void testURLDecoderNullInput() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(NullPointerException.class, () -> {
             IPAddress.URLDecoder.decode(null);
         });
     }

@@ -15,17 +15,10 @@
  */
 package org.zoxweb.shared.security;
 
+import org.zoxweb.shared.data.Range;
 import org.zoxweb.shared.data.SetNameDescriptionDAO;
-import org.zoxweb.shared.util.AppConfig;
-import org.zoxweb.shared.util.GetNVConfig;
-import org.zoxweb.shared.util.NVConfig;
-import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityPortable;
-import org.zoxweb.shared.util.NVConfigManager;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.*;
 import org.zoxweb.shared.util.Const.TimeInMillis;
-import org.zoxweb.shared.filters.FloatRangeFilter;
-import org.zoxweb.shared.filters.LongRangeFilter;
 
 @SuppressWarnings("serial")
 public class IPBlockerConfig
@@ -41,9 +34,9 @@ implements AppConfig
 		COMMAND(NVConfigManager.createNVConfig("command", "Command to be executed", "Command", true, true, String.class)),
 		COMMAND_TOKEN(NVConfigManager.createNVConfig("command_token", "Command token to be replaced", "CommandToken", true, true, String.class)),
 		PORT_TOKEN(NVConfigManager.createNVConfig("port_token", "Command token to be replaced", "PortToken", true, true, String.class)),
-		TRIGGER_COUNTER(NVConfigManager.createNVConfig("trigger_counter", "Trigger counter", "TriggerCounter", true, true, false, long.class, new LongRangeFilter(5, true, 14, true))),
-		RESET_TIME(NVConfigManager.createNVConfig("reset_time", "Reset time in min", "ResetTime", true, true, false, long.class, new LongRangeFilter(1, true, 15, true))),
-		RATE(NVConfigManager.createNVConfig("rate", "Rate", "Rate", true, true, false, float.class, new FloatRangeFilter(1, true, 100, true))),
+		TRIGGER_COUNTER(NVConfigManager.createNVConfig("trigger_counter", "Trigger counter", "TriggerCounter", true, true, false, long.class, Range.toRange("[5, 14]", Long.class, null, null))),
+		RESET_TIME(NVConfigManager.createNVConfig("reset_time", "Reset time in min", "ResetTime", true, true, false, long.class, Range.toRange("[1, 15]", Long.class, null, null))),
+		RATE(NVConfigManager.createNVConfig("rate", "Rate", "Rate", true, true, false, float.class, Range.toRange("[1, 100]", Float.class, null, null))),
 		REPORT_URL(NVConfigManager.createNVConfig("report_url", "Report URL for ips", "ReportURL", false, true, String.class)),
 		;
 		

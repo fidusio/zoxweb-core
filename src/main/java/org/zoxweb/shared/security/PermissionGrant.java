@@ -11,6 +11,7 @@ public class PermissionGrant extends GrantBase {
     public enum Param implements GetNVConfig {
         PERMISSION_GUID(NVConfigManager.createNVConfig("permission_guid", "A reference to a permission", "PermissionGUID", true, false, String.class)),
         RESOURCE_GUID(NVConfigManager.createNVConfig("resource_guid", "A reference to a resource", "ResourceGUID", false, false, String.class)),
+
         ;
 
         private final NVConfig nvc;

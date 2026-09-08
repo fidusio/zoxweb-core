@@ -41,7 +41,7 @@ public final class Const {
     public static final String BROKER_GUID = "broker_guid";
     public static final String GUID = "guid";
     public static final String SUBJECT_GUID = "subject_guid";
-    public static final String SUBJECT_ID = "subject_id";
+    //public static final String SUBJECT_ID = "subject_id";
     public static final String REFERENCE_GUID = "reference_guid";
     public static final String RESOURCE_GUID = "resource_guid";
 

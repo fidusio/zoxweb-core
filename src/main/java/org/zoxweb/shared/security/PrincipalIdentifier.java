@@ -17,10 +17,8 @@ public class PrincipalIdentifier
 
     public enum Param
             implements GetNVConfig {
-        PRINCIPAL_ID(NVConfigManager.createNVConfig("principal_id", "the unique identifier", "PrincipalID", true, false, true, String.class, SecConst.SubjectIDFilter.SINGLETON)),
+        PRINCIPAL_ID(NVConfigManager.createNVConfig(MetaToken.PRINCIPAL_ID.getName(), "the unique identifier", "PrincipalID", true, false, true, String.class, SecConst.SubjectIDFilter.SINGLETON)),
         PRINCIPAL_STATUS(NVConfigManager.createNVConfig("principal_status", "Principal status", "PrincipalStatus", true, true, SecConst.SecStatus.class)),
-//        DOMAIN_ID(NVConfigManager.createNVConfig("domain_id", "the domain id", "DomainID", false, false, false, String.class, null)),
-//        APP_ID(NVConfigManager.createNVConfig("app_id", "the app id", "AppID", false, false, false, String.class, null)),
         ;
 
         private final NVConfig nvc;
@@ -78,13 +76,6 @@ public class PrincipalIdentifier
         setDomainAppID(domainID, appID);
     }
 
-//    /**
-//     *
-//     * @param nvce NVConfigEntity to pass through
-//     */
-//    protected PrincipalIdentifier(NVConfigEntity nvce) {
-//        super(nvce);
-//    }
 
     /**
      *
@@ -131,39 +122,4 @@ public class PrincipalIdentifier
         return lookupValue(Param.PRINCIPAL_STATUS);
     }
 
-//    /**
-//     *
-//     * @return string app id
-//     */
-//    @Override
-//    public String getAppID() {
-//        return lookupValue(Param.APP_ID);
-//    }
-//
-//    /**
-//     *
-//     * @param appID string app id
-//     */
-//    @Override
-//    public void setAppID(String appID) {
-//        setValue(Param.APP_ID, appID);
-//    }
-//
-//    /**
-//     *
-//     * @return string domain id
-//     */
-//    @Override
-//    public String getDomainID() {
-//        return lookupValue(Param.DOMAIN_ID);
-//    }
-//
-//    /**
-//     *
-//     * @param domainID string domain id
-//     */
-//    @Override
-//    public void setDomainID(String domainID) {
-//        setValue(Param.DOMAIN_ID, domainID);
-//    }
 }

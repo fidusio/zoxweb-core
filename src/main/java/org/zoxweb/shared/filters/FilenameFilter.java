@@ -20,94 +20,70 @@ import org.zoxweb.shared.util.SUS;
 
 /**
  * This class is used to filter file names.
+ *
  * @author mzebib
  *
  */
 @SuppressWarnings("serial")
 public class FilenameFilter
-    implements ValueFilter<String, String>
-{
-	/**
-	 * This variable declares that only one instance of this class can be 
-	 * created.
-	 */
-	public static final FilenameFilter SINGLETON = new FilenameFilter();
-	
-	/**
-	 * The default constructor is declared private to prevent
-	 * outside instantiation of this class.
-	 */
-	private FilenameFilter()
-    {
-		
-	}
-	
-	/**
-	 * Validates the filename and remove all the directory post fix from it and return the file name itself.
-	 * @param fileName to validated
-	 * @return the filtered fileName
-	 * @exception NullPointerException if fileName is null or white space
-	 * @exception IllegalArgumentException if the fileName is invalid
-	 */
-	public String validate(String fileName) throws NullPointerException, IllegalArgumentException
-    {
-		fileName = SUS.trimOrNull(fileName);
-		SUS.checkIfNulls("Null filename ", fileName);
-		int lastIndex = -1;
-		
-		for (Const.FilenameSep fns : Const.FilenameSep.values())
-		{
-			int index = fileName.lastIndexOf(fns.sep);
-			
-			if (index > lastIndex)
-			{
-				lastIndex = index;
-			}
-		}
-		
-		
-		if (lastIndex == -1)
-		{
-			return fileName;
-		}
-		
-		fileName = fileName.substring(lastIndex+1);
-		fileName = SUS.trimOrNull(fileName);
-		
-		if (fileName == null)
-		{
-			throw new IllegalArgumentException ("Invalid filename " + fileName);
-		}
-		
-		return fileName;
-	}
+        implements ValueFilter<String, String> {
+    /**
+     * This variable declares that only one instance of this class can be
+     * created.
+     */
+    public static final FilenameFilter SINGLETON = new FilenameFilter();
 
     /**
-     * Checks whether the file name is valid.
-     * @param fileName
-     * @return
+     * The default constructor is declared private to prevent
+     * outside instantiation of this class.
      */
-	public boolean isValid(String fileName)
-    {
-		try
-        {
-			validate(fileName);
-		}
-		catch (Exception e)
-        {
-			return false;
-		}
-		
-		return true;
-	}
-	
-	/**
-	 * Returns a string representation of this class.
-	 */
-	@Override
-	public String toCanonicalID()
-    {
-		return "static:ValueFilter:FilenameFilter";
-	}
-	
+    private FilenameFilter() {
+
+    }
+
+    /**
+     * Validates the filename and remove all the directory post fix from it and return the file name itself.
+     *
+     * @param fileName to validated
+     * @return the filtered fileName
+     * @throws NullPointerException     if fileName is null or white space
+     * @throws IllegalArgumentException if the fileName is invalid
+     */
+    public String validate(String fileName) throws NullPointerException, IllegalArgumentException {
+        fileName = SUS.trimOrNull(fileName);
+        SUS.checkIfNulls("Null filename ", fileName);
+        int lastIndex = -1;
+
+        for (Const.FilenameSep fns : Const.FilenameSep.values()) {
+            int index = fileName.lastIndexOf(fns.sep);
+
+            if (index > lastIndex) {
+                lastIndex = index;
+            }
+        }
+
+
+        if (lastIndex == -1) {
+            return fileName;
+        }
+
+        fileName = fileName.substring(lastIndex + 1);
+        fileName = SUS.trimOrNull(fileName);
+
+        if (fileName == null) {
+            throw new IllegalArgumentException("Invalid filename " + fileName);
+        }
+
+        return fileName;
+    }
+
+
+    /**
+     * Returns a string representation of this class.
+     */
+    @Override
+    public String toCanonicalID() {
+        return "static:ValueFilter:FilenameFilter";
+    }
+
 }

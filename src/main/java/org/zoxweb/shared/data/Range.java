@@ -1,53 +1,75 @@
 package org.zoxweb.shared.data;
 
 
+import org.zoxweb.shared.filters.ValueFilter;
 import org.zoxweb.shared.util.*;
 
+/**
+ * A closed, open or half-open interval over a comparable type.
+ * <p>
+ * A {@code Range} is also a {@link ValueFilter} over its own type: {@link #validate(Comparable)}
+ * returns the value when it lies {@link #within(Comparable)} the range and throws otherwise, so a
+ * range can be handed directly to {@code NVConfigManager.createNVConfig(...)} as the field's filter,
+ * for example {@code Range.toRange("[5, 14]")}.
+ */
 @SuppressWarnings("serial")
 public class Range<T extends Comparable<T>>
-        extends CanonicalIDDAO {
+        extends CanonicalIDDAO
+        implements ValueFilter<T, T> {
 
     public static final String NUMBER_PATTERN = "[-]?[0-9]*\\.?[0-9]+";
 
     /**
-     * Include start, end in {@link Range}
+     * Include start, end in {@link Range}.
+     * <p>
+     * Two notations are accepted for an exclusive bound: the round bracket
+     * ({@code (a, b)}) and the reversed square bracket of ISO 31-11 ({@code ]a, b[}).
+     * {@link #START_TOKEN} and {@link #END_TOKEN} hold the round-bracket form, which is
+     * what {@link Range#toString()} emits; {@link #ALT_START_TOKEN} and
+     * {@link #ALT_END_TOKEN} hold the reversed form.
      */
-    public enum Inclusive {
+    public enum Inclusivity {
 
         /**
-         * {@link Range} inclusive of start, exclusive of end
+         * {@link Range} inclusive of start, exclusive of end: {@code [a, b)} or {@code [a, b[}
          */
-        START("[", ")"),
+        START("[", ")", "[", "["),
 
         /**
-         * {@link Range} inclusive of end, exclusive of start
+         * {@link Range} inclusive of end, exclusive of start: {@code (a, b]} or {@code ]a, b]}
          */
-        END("(", "]"),
+        END("(", "]", "]", "]"),
 
         /**
-         * {@link Range} inclusive of start and end
+         * {@link Range} inclusive of start and end: {@code [a, b]}
          */
-        BOTH("[", "]"),
+        BOTH("[", "]", "[", "]"),
 
         /**
-         * {@link Range} exclusive of start and end
+         * {@link Range} exclusive of start and end: {@code (a, b)} or {@code ]a, b[}
          */
-        NONE("(", ")");
+        NONE("(", ")", "]", "[");
 
         public final String START_TOKEN;
         public final String END_TOKEN;
+        public final String ALT_START_TOKEN;
+        public final String ALT_END_TOKEN;
         public final String PATTERN;
 
-        Inclusive(String startToken, String endToken) {
+        Inclusivity(String startToken, String endToken, String altStartToken, String altEndToken) {
             START_TOKEN = startToken;
             END_TOKEN = endToken;
-            PATTERN = "^\\" + START_TOKEN + NUMBER_PATTERN + "," + NUMBER_PATTERN + "\\" + END_TOKEN + "$";
+            ALT_START_TOKEN = altStartToken;
+            ALT_END_TOKEN = altEndToken;
+            String body = NUMBER_PATTERN + "," + NUMBER_PATTERN;
+            PATTERN = "^(?:\\" + START_TOKEN + body + "\\" + END_TOKEN
+                    + "|\\" + ALT_START_TOKEN + body + "\\" + ALT_END_TOKEN + ")$";
         }
 
 
-        public static Inclusive match(String token) {
+        public static Inclusivity match(String token) {
             token = token.replaceAll("\\s+", "");
-            for (Inclusive i : Inclusive.values()) {
+            for (Inclusivity i : Inclusivity.values()) {
                 if (token.matches(i.PATTERN)) {
                     return i;
                 }
@@ -63,9 +85,9 @@ public class Range<T extends Comparable<T>>
             implements GetNVConfig {
         START(NVConfigManager.createNVConfig("r_start", "Start range", "Start", true, true, Number.class)),
         END(NVConfigManager.createNVConfig("r_end", "End range", "End", true, true, Number.class)),
-        INCLUSIVE(NVConfigManager
-                .createNVConfig("inclusive", "Inclusive (default) or exclusive", "inclusive", false, true,
-                        Inclusive.class)),
+        INCLUSIVITY(NVConfigManager
+                .createNVConfig("inclusivity", "Inclusivity (default) or exclusive", "Inclusivity", false, true,
+                        Inclusivity.class)),
         UNIT(NVConfigManager.createNVConfig("unit", "Range Unit", "Unit", false, true, String.class)),
 
         ;
@@ -116,7 +138,7 @@ public class Range<T extends Comparable<T>>
     // ///////////////////////////////////////////////////////////
 
     /**
-     * Create a range with {@link Inclusive#START}
+     * Create a range with {@link Inclusivity#START}
      *
      * @param start <br/> Not null safe
      * @param end   <br/> Not null safe
@@ -131,16 +153,16 @@ public class Range<T extends Comparable<T>>
      * @param start     <br/> Not null safe
      * @param end       <br/> Not null safe
      *                  <br/>Auto switched if start > end
-     * @param inclusive <br/>If null {@link Inclusive#START} used
+     * @param inclusivity <br/>If null {@link Inclusivity#START} used
      */
-    public Range(T start, T end, Inclusive inclusive) {
+    public Range(T start, T end, Inclusivity inclusivity) {
         this();
 
         if ((start == null) || (end == null)) {
 
             throw new NullPointerException("Invalid null start / end value");
         }
-        setInclusive(inclusive);
+        setInclusivity(inclusivity);
 
         if (isBigger(start, end)) {
             setStart(end);
@@ -164,26 +186,69 @@ public class Range<T extends Comparable<T>>
      */
     public boolean within(T t) {
 
-        return within(t, getInclusive());
+        return within(t, getInclusivity());
+    }
+
+    // ///////////////////////////////////////////////////////////
+    // ///////////////////// ValueFilter /////////////////////////
+    // ///////////////////////////////////////////////////////////
+
+    /**
+     * {@link ValueFilter} contract: the value itself when it is {@link #within(Comparable)} this
+     * range, using the range's own inclusivity.
+     *
+     * @param in the value to check
+     * @return in
+     * @throws NullPointerException     if in is null
+     * @throws IllegalArgumentException if in is outside the range
+     */
+    @Override
+    public T validate(T in)
+            throws NullPointerException, IllegalArgumentException {
+        if (in == null) {
+            throw new NullPointerException("Null value for range " + this);
+        }
+        if (!within(in)) {
+            throw new IllegalArgumentException(in + " is out of range " + this);
+        }
+        return in;
+    }
+
+    /**
+     * {@link ValueFilter} contract: true when in is non-null and {@link #within(Comparable)} this range.
+     */
+    @Override
+    public boolean isValid(T in) {
+        return in != null && within(in);
+    }
+
+    /**
+     * The explicit canonical id when one was set, otherwise the interval notation
+     * ({@code [5, 14]}), which {@link #toRange(String)} reads back. This is what the meta layer
+     * records under {@code value_filter} when the range is used as a field filter.
+     */
+    @Override
+    public String toCanonicalID() {
+        String id = getCanonicalID();
+        return id != null ? id : toString();
     }
 
     /**
      * Check if this {@link Range} contains t
      *
      * @param t         <br/>Not null safe
-     * @param inclusive <br/>If null  used
+     * @param inclusivity <br/>If null  used
      * @return false for any value of t, if this.start equals this.end
      */
-    public boolean within(T t, Inclusive inclusive) {
+    public boolean within(T t, Inclusivity inclusivity) {
 
         if (t == null) {
-
             throw new NullPointerException("Invalid null value");
         }
 
-        inclusive = (inclusive == null) ? getInclusive() : inclusive;
+        inclusivity = (inclusivity == null) ? getInclusivity() : inclusivity;
 
-        switch (inclusive) {
+        switch (inclusivity) {
 
             case NONE:
                 return (isBigger(t, getStart()) && isSmaller(t, getEnd()));
@@ -191,12 +256,14 @@ public class Range<T extends Comparable<T>>
             case BOTH:
                 return (!isBigger(getStart(), t) && !isBigger(t, getEnd()));
 
+            case END:
+                return (isBigger(t, getStart()) && !isBigger(t, getEnd()));
+
             case START:
             default:
                 return (!isBigger(getStart(), t) && isBigger(getEnd(), t));
 
-            case END:
-                return (isBigger(t, getStart()) && !isBigger(t, getEnd()));
+
         }
     }
 
@@ -217,7 +284,8 @@ public class Range<T extends Comparable<T>>
      */
     public boolean intersects(Range<T> range) {
 
-        return within(range.getStart()) || within(range.getEnd());
+        // an endpoint of the other range lies in this one, or the other range contains this one
+        return within(range.getStart()) || within(range.getEnd()) || range.within(getStart());
     }
 
     /**
@@ -299,7 +367,7 @@ public class Range<T extends Comparable<T>>
      * <br/>value otherwise
      */
     public static <T extends Comparable<T>> T setWithin(T value, T min, T max) {
-        Range<T> range = new Range<>(min, max, Inclusive.BOTH);
+        Range<T> range = new Range<>(min, max, Inclusivity.BOTH);
         if (Range.isBigger(value, range.getEnd())) {
 
             value = range.getEnd();
@@ -317,7 +385,7 @@ public class Range<T extends Comparable<T>>
      */
     @Override
     public String toString() {
-        return getInclusive().START_TOKEN + getStart() + ", " + getEnd() + getInclusive().END_TOKEN;
+        return getInclusivity().START_TOKEN + getStart() + ", " + getEnd() + getInclusivity().END_TOKEN;
     }
 
     // ///////////////////////////////////////////////////////////
@@ -356,7 +424,7 @@ public class Range<T extends Comparable<T>>
 
     public int getLoopStart() {
         int loopStart = ((Number) getStart()).intValue();
-        switch (getInclusive()) {
+        switch (getInclusivity()) {
             case END:
             case NONE:
                 loopStart++;
@@ -367,7 +435,7 @@ public class Range<T extends Comparable<T>>
 
     public int getLoopEnd() {
         int loopEnd = ((Number) getEnd()).intValue();
-        switch (getInclusive()) {
+        switch (getInclusivity()) {
             case BOTH:
             case END:
                 loopEnd++;
@@ -415,19 +483,19 @@ public class Range<T extends Comparable<T>>
     /**
      * @return the inclusive type
      */
-    public Inclusive getInclusive() {
-        return lookupValue(Param.INCLUSIVE);
+    public Inclusivity getInclusivity() {
+        return lookupValue(Param.INCLUSIVITY);
     }
 
     /**
      * Set the inclusive type
      *
-     * @param inclusive <br/>If null {@link Inclusive#START} used
+     * @param inclusivity <br/>If null {@link Inclusivity#BOTH} used
      */
-    public Range<T> setInclusive(Inclusive inclusive) {
+    public Range<T> setInclusivity(Inclusivity inclusivity) {
 
-        inclusive = (inclusive == null) ? Inclusive.BOTH : inclusive;
-        setValue(Param.INCLUSIVE, inclusive);
+        inclusivity = (inclusivity == null) ? Inclusivity.BOTH : inclusivity;
+        setValue(Param.INCLUSIVITY, inclusivity);
         return this;
     }
 
@@ -459,11 +527,12 @@ public class Range<T extends Comparable<T>>
 
     public static Range toRange(String token, Class<? extends Number> override, String name, String unit) {
         token = token.replaceAll("\\s+", "");
-        Inclusive type = Inclusive.match(token);
+        Inclusivity type = Inclusivity.match(token);
         if (type == null)
             throw new IllegalArgumentException("Invalid range type:" + token);
 
-        String[] tokens = SharedStringUtil.parseString(token, ",", type.START_TOKEN, type.END_TOKEN);
+        // match() guaranteed the shape: one bracket on each side, whichever notation was used
+        String[] tokens = token.substring(1, token.length() - 1).split(",");
 
         if (tokens.length != 2) {
             throw new IllegalArgumentException("Invalid range:" + token);
@@ -485,12 +554,13 @@ public class Range<T extends Comparable<T>>
             ret = new Range<Float>(vals[0].floatValue(), vals[1].floatValue(), type);
         } else if (override == Double.class) {
             ret = new Range<Double>(vals[0].doubleValue(), vals[1].doubleValue(), type);
+        } else {
+            throw new IllegalArgumentException("Unsupported range type: " + override.getName()
+                    + " (Integer, Long, Float or Double)");
         }
 
-        if (ret != null) {
-            ret.setName(name);
-            ret.setUnit(unit);
-        }
+        ret.setName(name);
+        ret.setUnit(unit);
 
         return ret;
     }
