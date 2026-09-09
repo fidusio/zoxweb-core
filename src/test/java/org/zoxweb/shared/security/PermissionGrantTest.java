@@ -27,33 +27,7 @@ class PermissionGrantTest {
         assertNull(rm.getResourceGUID());
     }
 
-    @Test
-    void resourceMap_constructorWithType_setsType() {
-        ResourceMap rm = new ResourceMap(ResourceMap.ResourceType.URI);
-        assertEquals(ResourceMap.ResourceType.URI, rm.getResourceType());
-        assertNull(rm.getResourceGUID());
-    }
 
-    @Test
-    void resourceMap_twoArgConstructor_setsTypeAndResourceGUID() {
-        ResourceMap rm = new ResourceMap(ResourceMap.ResourceType.URI, "underlying-1");
-        assertEquals(ResourceMap.ResourceType.URI, rm.getResourceType());
-        assertEquals("underlying-1", rm.getResourceGUID());
-    }
-
-    @Test
-    void resourceMap_setAndGetType() {
-        ResourceMap rm = new ResourceMap();
-        rm.setResourceType(ResourceMap.ResourceType.PRINTER);
-        assertEquals(ResourceMap.ResourceType.PRINTER, rm.getResourceType());
-    }
-
-    @Test
-    void resourceMap_setTypeOverwritesPrevious() {
-        ResourceMap rm = new ResourceMap(ResourceMap.ResourceType.OBJECT);
-        rm.setResourceType(ResourceMap.ResourceType.METHOD);
-        assertEquals(ResourceMap.ResourceType.METHOD, rm.getResourceType());
-    }
 
     @Test
     void resourceMap_setAndGetResourceGUID() {
@@ -62,19 +36,7 @@ class PermissionGrantTest {
         assertEquals("underlying-2", rm.getResourceGUID());
     }
 
-    @Test
-    void resourceMap_setResourceGUIDOverwritesPrevious() {
-        ResourceMap rm = new ResourceMap(ResourceMap.ResourceType.OBJECT, "underlying-1");
-        rm.setResourceGUID("underlying-2");
-        assertEquals("underlying-2", rm.getResourceGUID());
-    }
 
-    @Test
-    void resourceMap_setResourceGUIDToNullClears() {
-        ResourceMap rm = new ResourceMap(ResourceMap.ResourceType.OBJECT, "underlying-1");
-        rm.setResourceGUID(null);
-        assertNull(rm.getResourceGUID());
-    }
 
     @Test
     void resourceMap_ownEntityGUIDIsIndependentOfResourceGUIDField() {
@@ -82,20 +44,14 @@ class PermissionGrantTest {
         //   - its own entity GUID (the identity other entities point at)
         //   - the resourceGUID field (the underlying domain object it maps)
         // They must be settable independently and not bleed into one another.
-        ResourceMap rm = new ResourceMap(ResourceMap.ResourceType.OBJECT, "underlying-1");
+        ResourceMap rm = new ResourceMap("underlying-1", "Object");
         rm.setGUID("rm-entity-1");
         assertEquals("rm-entity-1", rm.getGUID());
         assertEquals("underlying-1", rm.getResourceGUID());
         assertNotEquals(rm.getGUID(), rm.getResourceGUID());
     }
 
-    @Test
-    void resourceMap_allResourceTypes_roundTrip() {
-        for (ResourceMap.ResourceType t : ResourceMap.ResourceType.values()) {
-            ResourceMap rm = new ResourceMap(t);
-            assertEquals(t, rm.getResourceType());
-        }
-    }
+
 
     @Test
     void resourceMap_isAuthzInfo() {
@@ -109,7 +65,7 @@ class PermissionGrantTest {
 
     @Test
     void resourceMap_inheritsAuthzInfoFields() {
-        ResourceMap rm = new ResourceMap(ResourceMap.ResourceType.OBJECT, "invoice-42");
+        ResourceMap rm = new ResourceMap("invoice-42", "OBJECT");
         rm.setBrokerGUID("broker-1");
         rm.setName("resource.invoice42");
         rm.setDescription("Invoice #42 record");
@@ -117,7 +73,7 @@ class PermissionGrantTest {
         assertEquals("broker-1", rm.getBrokerGUID());
         assertEquals("resource.invoice42", rm.getName());
         assertEquals("Invoice #42 record", rm.getDescription());
-        assertEquals(ResourceMap.ResourceType.OBJECT, rm.getResourceType());
+        assertEquals("OBJECT", rm.getResourceType());
         assertEquals("invoice-42", rm.getResourceGUID());
     }
 
@@ -129,21 +85,41 @@ class PermissionGrantTest {
     void permissionGrant_defaultConstructor_guidsAreNull() {
         PermissionGrant pg = new PermissionGrant();
         assertNull(pg.getPermissionGUID());
-        assertNull(pg.getResourceGUID());
+        assertNull(pg.getResourceMap());
     }
 
     @Test
     void permissionGrant_singleArgConstructor_setsPermissionGUID() {
         PermissionGrant pg = new PermissionGrant("perm-1");
         assertEquals("perm-1", pg.getPermissionGUID());
-        assertNull(pg.getResourceGUID());
+        assertNull(pg.getResourceMap());
     }
 
     @Test
-    void permissionGrant_twoArgConstructor_setsBothGUIDs() {
-        PermissionGrant pg = new PermissionGrant("perm-1", "resource-1");
+    void permissionGrant_twoArgConstructor_setsPermissionGUIDAndResourceMap() {
+        ResourceMap rm = new ResourceMap("resource-1", "org.zoxweb.shared.data.DocumentDAO");
+        PermissionGrant pg = new PermissionGrant("perm-1", rm);
         assertEquals("perm-1", pg.getPermissionGUID());
-        assertEquals("resource-1", pg.getResourceGUID());
+        assertSame(rm, pg.getResourceMap());
+        assertEquals("resource-1", pg.getResourceMap().getResourceGUID());
+        assertEquals("org.zoxweb.shared.data.DocumentDAO", pg.getResourceMap().getResourceType());
+    }
+
+    @Test
+    void permissionGrant_inlinedConstructor_setsResourceMapAndToken_permissionGUIDNull() {
+        ResourceMap rm = new ResourceMap("resource-1", "org.zoxweb.shared.data.DocumentDAO");
+        PermissionGrant pg = new PermissionGrant(rm, "nventity:read,share");
+        assertSame(rm, pg.getResourceMap());
+        assertEquals("nventity:read,share", pg.getInlinedPermission());
+        assertNull(pg.getPermissionGUID());
+    }
+
+    @Test
+    void permissionGrant_catalogConstructor_leavesInlinedPermissionNull() {
+        ResourceMap rm = new ResourceMap("resource-1", "org.zoxweb.shared.data.DocumentDAO");
+        PermissionGrant pg = new PermissionGrant("perm-1", rm);
+        assertEquals("perm-1", pg.getPermissionGUID());
+        assertNull(pg.getInlinedPermission());
     }
 
     @Test
@@ -154,27 +130,31 @@ class PermissionGrantTest {
     }
 
     @Test
-    void permissionGrant_setAndGetResourceGUID() {
+    void permissionGrant_setAndGetResourceMap() {
         PermissionGrant pg = new PermissionGrant();
-        pg.setResourceGUID("resource-2");
-        assertEquals("resource-2", pg.getResourceGUID());
+        ResourceMap rm = new ResourceMap("resource-2", "org.zoxweb.shared.data.DocumentDAO");
+        pg.setResourceMap(rm);
+        assertSame(rm, pg.getResourceMap());
+        assertEquals("resource-2", pg.getResourceMap().getResourceGUID());
     }
 
     @Test
     void permissionGrant_setOverwritesPrevious() {
-        PermissionGrant pg = new PermissionGrant("perm-1", "resource-1");
+        PermissionGrant pg = new PermissionGrant("perm-1", new ResourceMap("resource-1", "org.zoxweb.shared.data.DocumentDAO"));
+        ResourceMap rm2 = new ResourceMap("resource-2", "org.zoxweb.shared.data.FolderInfoDAO");
         pg.setPermissionGUID("perm-2");
-        pg.setResourceGUID("resource-2");
+        pg.setResourceMap(rm2);
         assertEquals("perm-2", pg.getPermissionGUID());
-        assertEquals("resource-2", pg.getResourceGUID());
+        assertSame(rm2, pg.getResourceMap());
+        assertEquals("resource-2", pg.getResourceMap().getResourceGUID());
     }
 
     @Test
-    void permissionGrant_setResourceGUIDToNullClears() {
-        // Per spec 8.1: NULL ResourceMapGUID means a global grant.
-        PermissionGrant pg = new PermissionGrant("perm-1", "resource-1");
-        pg.setResourceGUID(null);
-        assertNull(pg.getResourceGUID());
+    void permissionGrant_setResourceMapToNullClears() {
+        // Per spec 8.1: a grant without a resource is a global grant.
+        PermissionGrant pg = new PermissionGrant("perm-1", new ResourceMap("resource-1", "org.zoxweb.shared.data.DocumentDAO"));
+        pg.setResourceMap(null);
+        assertNull(pg.getResourceMap());
     }
 
     @Test
@@ -363,9 +343,8 @@ class PermissionGrantTest {
         return g;
     }
 
-    private static ResourceMap resource(String guid, String name, ResourceMap.ResourceType type) {
-        ResourceMap rm = new ResourceMap(type);
-        rm.setGUID(guid);
+    private static ResourceMap resource(String guid, String name, String resType) {
+        ResourceMap rm = new ResourceMap(guid, resType);
         rm.setName(name);
         return rm;
     }
@@ -376,29 +355,31 @@ class PermissionGrantTest {
         PermissionGrant grant = new PermissionGrant(sysRead.getGUID());
 
         assertEquals(sysRead.getGUID(), grant.getPermissionGUID());
-        assertNull(grant.getResourceGUID());
+        assertNull(grant.getResourceMap());
     }
 
     @Test
-    void connectivity_globalPermissionGrant_resourceGUIDIsNull() {
-        // Per spec 8.1: NULL ResourceMapGUID means a global grant.
+    void connectivity_globalPermissionGrant_resourceMapIsNull() {
+        // Per spec 8.1: no resource map means a global grant.
         PermissionInfo sysRead = permission("perm-sys-read", "system:read");
         PermissionGrant grant = new PermissionGrant(sysRead.getGUID());
-        assertNull(grant.getResourceGUID());
+        assertNull(grant.getResourceMap());
     }
 
     @Test
     void connectivity_resourceScopedPermissionGrant_bindsToResourceMap() {
-        // Per spec 8.1: a non-null ResourceMapGUID binds the grant to a
+        // Per spec 8.1: an embedded ResourceMap binds the grant to a
         // single resource instance (ReBAC).
         PermissionInfo print = permission("perm-device-print", "device:print");
         ResourceMap printer = resource("res-printer-lobby", "resource.printer.lobby",
-                ResourceMap.ResourceType.PRINTER);
+                "PRINTER");
 
-        PermissionGrant grant = new PermissionGrant(print.getGUID(), printer.getGUID());
+        PermissionGrant grant = new PermissionGrant(print.getGUID(), printer);
 
         assertEquals(print.getGUID(), grant.getPermissionGUID());
-        assertEquals(printer.getGUID(), grant.getResourceGUID());
+        assertSame(printer, grant.getResourceMap());
+        assertEquals("res-printer-lobby", grant.getResourceMap().getResourceGUID());
+        assertEquals("PRINTER", grant.getResourceMap().getResourceType());
     }
 
     @Test
@@ -407,18 +388,18 @@ class PermissionGrantTest {
         // ResourceMap instance.
         PermissionInfo print = permission("perm-device-print", "device:print");
         ResourceMap lobbyPrinter = resource("res-printer-lobby", "resource.printer.lobby",
-                ResourceMap.ResourceType.PRINTER);
+                "PRINTER");
         ResourceMap labPrinter = resource("res-printer-lab", "resource.printer.lab",
-                ResourceMap.ResourceType.PRINTER);
+                "PRINTER");
 
-        PermissionGrant lobbyGrant = new PermissionGrant(print.getGUID(), lobbyPrinter.getGUID());
-        PermissionGrant labGrant = new PermissionGrant(print.getGUID(), labPrinter.getGUID());
+        PermissionGrant lobbyGrant = new PermissionGrant(print.getGUID(), lobbyPrinter);
+        PermissionGrant labGrant = new PermissionGrant(print.getGUID(), labPrinter);
 
         assertEquals(print.getGUID(), lobbyGrant.getPermissionGUID());
         assertEquals(print.getGUID(), labGrant.getPermissionGUID());
-        assertNotEquals(lobbyGrant.getResourceGUID(), labGrant.getResourceGUID());
-        assertEquals(lobbyPrinter.getGUID(), lobbyGrant.getResourceGUID());
-        assertEquals(labPrinter.getGUID(), labGrant.getResourceGUID());
+        assertNotEquals(lobbyGrant.getResourceMap().getResourceGUID(), labGrant.getResourceMap().getResourceGUID());
+        assertEquals("res-printer-lobby", lobbyGrant.getResourceMap().getResourceGUID());
+        assertEquals("res-printer-lab", labGrant.getResourceMap().getResourceGUID());
     }
 
     @Test

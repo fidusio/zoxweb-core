@@ -4,6 +4,7 @@ import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.net.SharedNetUtil;
 import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedStringUtil;
+import org.zoxweb.shared.util.SharedUtil;
 
 import java.util.*;
 
@@ -181,7 +182,7 @@ public final class URLInfo {
         if (schemeIdx <= 0) throw new IllegalArgumentException("Missing scheme");
 
         String scheme = SUS.trimOrNull(s.substring(0, schemeIdx));
-        URIScheme uriScheme = URIScheme.match(scheme);
+        URIScheme uriScheme = SharedUtil.lookupEnum(scheme, URIScheme.values());
         if(uriScheme == null) {
             throw new IllegalArgumentException("Invalid scheme " + scheme);
         }

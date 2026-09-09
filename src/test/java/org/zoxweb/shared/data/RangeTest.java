@@ -97,8 +97,8 @@ public class RangeTest {
         String[][] pairs =
                 {
                         {"(1,5)", "]1,5[", "NONE"},
-                        {"(1,5]", "]1,5]", "END"},
-                        {"[1,5)", "[1,5[", "START"},
+                        {"(1,5]", "]1,5]", "RIGHT"},
+                        {"[1,5)", "[1,5[", "LEFT"},
                         {"[1,5]", "[1,5]", "BOTH"},
                         {"( -2.5 , 7 )", "] -2.5 , 7 [", "NONE"},
                 };
@@ -128,6 +128,31 @@ public class RangeTest {
             assertNull(Range.Inclusivity.match(val), val);
             assertThrows(IllegalArgumentException.class, () -> Range.toRange(val), val);
         }
+    }
+
+    @Test
+    public void beanConstructedRangeDefaultsToBothInclusive() throws IOException
+    {
+        // no-arg constructor is the bean / GSON path: nothing is stored for inclusivity
+        Range<Integer> r = new Range<>();
+        r.setStart(1);
+        r.setEnd(10);
+        assertEquals(Range.Inclusivity.BOTH, r.getInclusivity());
+        assertTrue(r.within(1));
+        assertTrue(r.within(10));
+        assertFalse(r.within(11));
+        assertEquals("[1, 10]", r.toString());
+        assertEquals("[1, 10]", r.toCanonicalID());
+        assertEquals(1, r.getLoopStart());
+        assertEquals(11, r.getLoopEnd());
+
+        // explicit null behaves the same, and survives a JSON round trip
+        r.setInclusivity(null);
+        assertEquals(Range.Inclusivity.BOTH, r.getInclusivity());
+        Range<Integer> copy = GSONUtil.fromJSON(GSONUtil.toJSON(r, false), Range.class);
+        assertEquals(Range.Inclusivity.BOTH, copy.getInclusivity());
+        assertTrue(copy.within(5));
+        assertEquals(r.toString(), copy.toString());
     }
 
     @Test
@@ -194,6 +219,6 @@ public class RangeTest {
         // touching endpoint, inclusive on both sides
         assertTrue(inner.intersects(new Range<>(10, 12, Range.Inclusivity.BOTH)));
         // touching endpoint, exclusive on this side
-        assertFalse(new Range<>(5, 10, Range.Inclusivity.START).intersects(new Range<>(10, 12, Range.Inclusivity.BOTH)));
+        assertFalse(new Range<>(5, 10, Range.Inclusivity.LEFT).intersects(new Range<>(10, 12, Range.Inclusivity.BOTH)));
     }
 }

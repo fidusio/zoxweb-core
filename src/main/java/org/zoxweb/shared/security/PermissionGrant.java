@@ -3,14 +3,25 @@ package org.zoxweb.shared.security;
 import org.zoxweb.shared.util.*;
 
 /**
- * A class that defines a direct grant of a specific permission to a subject.
- * Optional ResourceMapGUID binds the grant to a single resource instance (ReBAC).
+ * A direct grant of a permission to a subject.
+ * <p>
+ * The permission comes from exactly one of two places: {@code permission_guid}, a
+ * reference to a {@link PermissionInfo} catalog row, or {@code permission_token}, a
+ * permission inlined on the grant for subject-to-subject sharing, where the catalog
+ * is admin-only. Setting both, or neither, is an invalid grant; the security manager
+ * rejects it.
+ * <p>
+ * An optional embedded {@link ResourceMap} scopes the grant to one resource instance
+ * (ReBAC); without it the grant is global. The map is mandatory for an inlined
+ * permission, and the resource it names must belong to the grantor. The grantor is
+ * recorded in the inherited {@code broker_guid}, the grantee in {@code subject_guid}.
  */
 public class PermissionGrant extends GrantBase {
 
     public enum Param implements GetNVConfig {
-        PERMISSION_GUID(NVConfigManager.createNVConfig("permission_guid", "A reference to a permission", "PermissionGUID", true, false, String.class)),
-        RESOURCE_GUID(NVConfigManager.createNVConfig("resource_guid", "A reference to a resource", "ResourceGUID", false, false, String.class)),
+        PERMISSION_GUID(NVConfigManager.createNVConfig("permission_guid", "A reference to a permission", "PermissionGUID", false, false, String.class)),
+        RESOURCE_MAP(NVConfigManager.createNVConfigEntity("resource_map", "", "", false, false, ResourceMap.class, NVConfigEntity.ArrayType.NOT_ARRAY)),
+        PERMISSION_TOKEN(NVConfigManager.createNVConfig("permission_token", "the permission token", "PermissionToken", false, false, String.class)),
 
         ;
 
@@ -48,56 +59,81 @@ public class PermissionGrant extends GrantBase {
     }
 
     /**
-     * Constructor that sets the mandatory permissionGUID.
+     * Constructor for a global, catalog-backed grant.
      *
-     * @param permissionGUID permission reference
+     * @param permissionGUID GUID of the {@link PermissionInfo} row
      */
     public PermissionGrant(String permissionGUID) {
+        this(permissionGUID, null);
+    }
+
+    /**
+     * Constructor for a catalog-backed grant scoped to one resource.
+     *
+     * @param permissionGUID GUID of the {@link PermissionInfo} row
+     * @param resMap         the resource the grant is scoped to
+     */
+    public PermissionGrant(String permissionGUID, ResourceMap resMap) {
         this();
         setPermissionGUID(permissionGUID);
+        setResourceMap(resMap);
     }
 
     /**
-     * Constructor that sets the mandatory permissionGUID,
-     * and the resourceGUID.
+     * Constructor for an inlined grant: the permission is carried on the grant itself and
+     * scoped to one resource. {@code permission_guid} stays null.
      *
-     * @param permissionGUID permission reference
-     * @param resourceGUID   resource reference
+     * @param resMap            the resource the grant is scoped to; mandatory for an inlined grant
+     * @param inlinedPermission the inlined permission token
      */
-    public PermissionGrant(String permissionGUID, String resourceGUID) {
-        this(permissionGUID);
-        setResourceGUID(resourceGUID);
+    public PermissionGrant(ResourceMap resMap, String inlinedPermission) {
+        this();
+        setResourceMap(resMap);
+        setInlinedPermission(inlinedPermission);
     }
 
     /**
-     *
-     * @param permissionGUID permission reference
+     * @param permissionGUID GUID of the {@link PermissionInfo} row; null when the
+     *                       permission is inlined
      */
     public void setPermissionGUID(String permissionGUID) {
         setValue(Param.PERMISSION_GUID, permissionGUID);
     }
 
     /**
-     *
-     * @return permission reference
+     * @return GUID of the {@link PermissionInfo} row, or null when the permission is inlined
      */
     public String getPermissionGUID() {
         return lookupValue(Param.PERMISSION_GUID);
     }
 
     /**
-     *
-     * @param resourceGUID resource reference
+     * @param resourceMap the resource the grant is scoped to; null makes the grant global
      */
-    public void setResourceGUID(String resourceGUID) {
-        setValue(Param.RESOURCE_GUID, resourceGUID);
+    public void setResourceMap(ResourceMap resourceMap) {
+        setValue(Param.RESOURCE_MAP, resourceMap);
     }
 
     /**
-     *
-     * @return resource reference
+     * @return the resource the grant is scoped to, or null for a global grant
      */
-    public String getResourceGUID() {
-        return lookupValue(Param.RESOURCE_GUID);
+    public ResourceMap getResourceMap() {
+        return lookupValue(Param.RESOURCE_MAP);
     }
+
+    /**
+     * @return the inlined permission token, or null when the grant references the catalog
+     */
+    public String getInlinedPermission() {
+        return lookupValue(Param.PERMISSION_TOKEN);
+    }
+
+    /**
+     * @param permission the inlined permission token; the security manager limits it to
+     *                   the verbs read, update, share and delete under the nventity namespace
+     */
+    public void setInlinedPermission(String permission) {
+        setValue(Param.PERMISSION_TOKEN, permission);
+    }
+
 }

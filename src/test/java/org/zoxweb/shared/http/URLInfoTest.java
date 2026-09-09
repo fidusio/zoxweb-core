@@ -299,6 +299,24 @@ public class URLInfoTest {
     }
 
     @Test
+    public void testParseUnknownSchemeThrows() {
+        // a scheme that merely starts with a known one is not that scheme
+        for (String url : new String[]{"httpx://example.com", "https2://example.com", "wssx://example.com",
+                "ftpd://example.com", "invalid://example.com"}) {
+            IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+                    () -> URLInfo.parse(url), url);
+            assertTrue(e.getMessage().startsWith("Invalid scheme"), e.getMessage());
+        }
+    }
+
+    @Test
+    public void testParseSchemeIsCaseInsensitive() {
+        assertEquals(URIScheme.HTTPS, URLInfo.parse("HTTPS://Example.com").scheme);
+        assertEquals(URIScheme.HTTP, URLInfo.parse("Http://example.com").scheme);
+        assertEquals(URIScheme.WSS, URLInfo.parse("WSS://example.com").scheme);
+    }
+
+    @Test
     public void testParseMalformedSchemeThrows() {
         assertThrows(IllegalArgumentException.class, () -> URLInfo.parse("://example.com"));
     }

@@ -5,55 +5,69 @@ import org.zoxweb.shared.filters.ValueFilter;
 import org.zoxweb.shared.util.*;
 
 /**
- * A closed, open or half-open interval over a comparable type.
+ * A closed, open or half-open interval over a comparable type, with a start, an end and an
+ * {@link Inclusivity} that says which of the two ends belong to the interval. The inclusivity
+ * defaults to {@link Inclusivity#BOTH} when none is set.
  * <p>
  * A {@code Range} is also a {@link ValueFilter} over its own type: {@link #validate(Comparable)}
  * returns the value when it lies {@link #within(Comparable)} the range and throws otherwise, so a
  * range can be handed directly to {@code NVConfigManager.createNVConfig(...)} as the field's filter,
  * for example {@code Range.toRange("[5, 14]")}.
+ * <p>
+ * Numeric ranges have a text form, parsed by {@link #toRange(String)} and produced by
+ * {@link #toString()}: two numbers separated by a comma inside a pair of brackets, where the
+ * bracket shape gives the inclusivity, see {@link Inclusivity}.
  */
 @SuppressWarnings("serial")
 public class Range<T extends Comparable<T>>
         extends CanonicalIDDAO
         implements ValueFilter<T, T> {
 
+    /**
+     * One bound in the text form: an optional minus sign, digits, an optional decimal part.
+     */
     public static final String NUMBER_PATTERN = "[-]?[0-9]*\\.?[0-9]+";
 
     /**
-     * Include start, end in {@link Range}.
+     * Which ends of the interval are included.
      * <p>
-     * Two notations are accepted for an exclusive bound: the round bracket
+     * Two notations are accepted for an excluded end: the round bracket
      * ({@code (a, b)}) and the reversed square bracket of ISO 31-11 ({@code ]a, b[}).
      * {@link #START_TOKEN} and {@link #END_TOKEN} hold the round-bracket form, which is
      * what {@link Range#toString()} emits; {@link #ALT_START_TOKEN} and
-     * {@link #ALT_END_TOKEN} hold the reversed form.
+     * {@link #ALT_END_TOKEN} hold the reversed form. {@link #match(String)} recognizes both.
      */
     public enum Inclusivity {
 
         /**
-         * {@link Range} inclusive of start, exclusive of end: {@code [a, b)} or {@code [a, b[}
+         * Left-closed, right-open: the start is included, the end is not. {@code [a, b)} or {@code [a, b[}
          */
-        START("[", ")", "[", "["),
+        LEFT("[", ")", "[", "["),
 
         /**
-         * {@link Range} inclusive of end, exclusive of start: {@code (a, b]} or {@code ]a, b]}
+         * Left-open, right-closed: the end is included, the start is not. {@code (a, b]} or {@code ]a, b]}
          */
-        END("(", "]", "]", "]"),
+        RIGHT("(", "]", "]", "]"),
 
         /**
-         * {@link Range} inclusive of start and end: {@code [a, b]}
+         * Closed: both ends included. {@code [a, b]}. The default.
          */
         BOTH("[", "]", "[", "]"),
 
         /**
-         * {@link Range} exclusive of start and end: {@code (a, b)} or {@code ]a, b[}
+         * Open: neither end included. {@code (a, b)} or {@code ]a, b[}
          */
         NONE("(", ")", "]", "[");
 
+        /** Opening bracket in the round-bracket notation, the form {@link Range#toString()} emits. */
         public final String START_TOKEN;
+        /** Closing bracket in the round-bracket notation. */
         public final String END_TOKEN;
+        /** Opening bracket in the reversed square-bracket notation. */
         public final String ALT_START_TOKEN;
+        /** Closing bracket in the reversed square-bracket notation. */
         public final String ALT_END_TOKEN;
+        /** Regex matching a whitespace-free numeric range in either notation for this inclusivity. */
         public final String PATTERN;
 
         Inclusivity(String startToken, String endToken, String altStartToken, String altEndToken) {
@@ -67,6 +81,13 @@ public class Range<T extends Comparable<T>>
         }
 
 
+        /**
+         * Identifies the inclusivity of a numeric range in text form from its brackets, in either
+         * notation. Whitespace is ignored.
+         *
+         * @param token the text form, for example {@code "[1, 5)"} or {@code "]1, 5]"}
+         * @return the matching inclusivity, or null when the text is not a well-formed range
+         */
         public static Inclusivity match(String token) {
             token = token.replaceAll("\\s+", "");
             for (Inclusivity i : Inclusivity.values()) {
@@ -86,7 +107,7 @@ public class Range<T extends Comparable<T>>
         START(NVConfigManager.createNVConfig("r_start", "Start range", "Start", true, true, Number.class)),
         END(NVConfigManager.createNVConfig("r_end", "End range", "End", true, true, Number.class)),
         INCLUSIVITY(NVConfigManager
-                .createNVConfig("inclusivity", "Inclusivity (default) or exclusive", "Inclusivity", false, true,
+                .createNVConfig("inclusivity", "Which ends are included; BOTH when unset", "Inclusivity", false, true,
                         Inclusivity.class)),
         UNIT(NVConfigManager.createNVConfig("unit", "Range Unit", "Unit", false, true, String.class)),
 
@@ -126,10 +147,10 @@ public class Range<T extends Comparable<T>>
 
 
     /**
-     * Auto switch if start > end
-     * <br>It effects {@link #setStart(Comparable)} and {@link #setEnd(Comparable)}
-     * <br>It does not affect constructor
-     * <br>Default is set to false.
+     * When true, {@link #setStart(Comparable)} and {@link #setEnd(Comparable)} swap the two ends
+     * if the new value would leave start greater than end. The constructors always swap,
+     * regardless of this flag. Not part of the entity meta, so it is neither serialized nor
+     * persisted. Default false.
      */
     private boolean isAutoSwitch = false;
 
@@ -138,11 +159,12 @@ public class Range<T extends Comparable<T>>
     // ///////////////////////////////////////////////////////////
 
     /**
-     * Create a range with {@link Inclusivity#START}
+     * Creates a closed range, {@link Inclusivity#BOTH}. The two ends are swapped if start is
+     * greater than end.
      *
-     * @param start <br/> Not null safe
-     * @param end   <br/> Not null safe
-     *              <br/>Auto switched if start > end
+     * @param start one end, not null
+     * @param end   the other end, not null
+     * @throws NullPointerException if either end is null
      */
     public Range(T start, T end) {
 
@@ -150,10 +172,12 @@ public class Range<T extends Comparable<T>>
     }
 
     /**
-     * @param start     <br/> Not null safe
-     * @param end       <br/> Not null safe
-     *                  <br/>Auto switched if start > end
-     * @param inclusivity <br/>If null {@link Inclusivity#START} used
+     * Creates a range. The two ends are swapped if start is greater than end.
+     *
+     * @param start       one end, not null
+     * @param end         the other end, not null
+     * @param inclusivity which ends are included; null means {@link Inclusivity#BOTH}
+     * @throws NullPointerException if either end is null
      */
     public Range(T start, T end, Inclusivity inclusivity) {
         this();
@@ -179,10 +203,13 @@ public class Range<T extends Comparable<T>>
     // ///////////////////////////////////////////////////////////
 
     /**
-     * Check if this {@link Range} contains t
+     * Whether t lies inside this range under the range's own inclusivity.
+     * A single-point range (start equals end) contains its point only under
+     * {@link Inclusivity#BOTH}.
      *
-     * @param t <br/>Not null safe
-     * @return false for any value of t, if this.start equals this.end
+     * @param t the value to test, not null
+     * @return true when t is inside the range
+     * @throws NullPointerException if t is null
      */
     public boolean within(T t) {
 
@@ -234,11 +261,14 @@ public class Range<T extends Comparable<T>>
     }
 
     /**
-     * Check if this {@link Range} contains t
+     * Whether t lies inside this range under the given inclusivity, which overrides the
+     * range's own for this test only. A single-point range (start equals end) contains its
+     * point only under {@link Inclusivity#BOTH}.
      *
-     * @param t         <br/>Not null safe
-     * @param inclusivity <br/>If null  used
-     * @return false for any value of t, if this.start equals this.end
+     * @param t           the value to test, not null
+     * @param inclusivity the inclusivity to apply; null means the range's own
+     * @return true when t is inside the range
+     * @throws NullPointerException if t is null
      */
     public boolean within(T t, Inclusivity inclusivity) {
 
@@ -253,24 +283,27 @@ public class Range<T extends Comparable<T>>
             case NONE:
                 return (isBigger(t, getStart()) && isSmaller(t, getEnd()));
 
-            case BOTH:
-                return (!isBigger(getStart(), t) && !isBigger(t, getEnd()));
-
-            case END:
+            case RIGHT:
                 return (isBigger(t, getStart()) && !isBigger(t, getEnd()));
 
-            case START:
-            default:
+            case LEFT:
                 return (!isBigger(getStart(), t) && isBigger(getEnd(), t));
+
+            case BOTH:
+            default:
+                return (!isBigger(getStart(), t) && !isBigger(t, getEnd()));
 
 
         }
     }
 
     /**
-     * Check if this {@link Range} contains other range
+     * Whether both ends of the other range lie inside this one. The test is on the end values
+     * under this range's inclusivity; the other range's own inclusivity is not considered, so
+     * {@code [1, 5)} does not contain {@code [1, 5)} by this test because 5 is excluded here.
      *
-     * @return false for any value of range, if this.start equals this.end
+     * @param range the other range, not null
+     * @return true when both of its ends are within this range
      */
     public boolean within(Range<T> range) {
 
@@ -278,9 +311,12 @@ public class Range<T extends Comparable<T>>
     }
 
     /**
-     * Check if this {@link Range} intersects with other range
+     * Whether the two ranges share at least one point: an end of the other range lies inside
+     * this one, or the other range contains this one's start. Inclusivity is honoured on the
+     * shared ends, so {@code [1, 5)} and {@code [5, 9]} do not intersect.
      *
-     * @return false for any value of range, if this.start equals this.end
+     * @param range the other range, not null
+     * @return true when the ranges overlap
      */
     public boolean intersects(Range<T> range) {
 
@@ -289,7 +325,7 @@ public class Range<T extends Comparable<T>>
     }
 
     /**
-     * Convenience method
+     * @return true when t1 is strictly greater than t2 by {@link Comparable#compareTo}
      */
     public static <T extends Comparable<T>> boolean isBigger(T t1, T t2) {
 
@@ -297,7 +333,7 @@ public class Range<T extends Comparable<T>>
     }
 
     /**
-     * Convenience method
+     * @return true when t1 is strictly smaller than t2 by {@link Comparable#compareTo}
      */
     public static <T extends Comparable<T>> boolean isSmaller(T t1, T t2) {
 
@@ -305,15 +341,14 @@ public class Range<T extends Comparable<T>>
     }
 
     /**
-     * Modifies range, if needed, so
-     * range.getStart() is greater or equal to intoOtherRange.getStart() and
-     * range.getEnd() is less or equal to intoOtherRange.getEnd().
-     * It does not guarantee into.contains(range)==true which depends also on inclusivity.
+     * Shrinks range in place, if needed, so that its start is not below into's start and its
+     * end is not above into's end. Only the end values move; inclusivity is untouched, so
+     * {@code into.within(range)} is not guaranteed afterwards.
      *
-     * @param range the range to fit
-     * @param into the target range. Both are not null safe
-     * @param <T> the comparable type
-     * @return the fitted range
+     * @param range the range to fit, modified and returned; not null
+     * @param into  the bounding range; not null
+     * @param <T>   the comparable type
+     * @return range
      */
     public static <T extends Comparable<T>> Range<T> fit(Range<T> range,
                                                          Range<T> into) {
@@ -323,7 +358,7 @@ public class Range<T extends Comparable<T>>
         }
 
         if (isBigger(into.getStart(), range.getEnd()) //end too small
-                || isBigger(range.getEnd(), into.getEnd())) { //start too big
+                || isBigger(range.getEnd(), into.getEnd())) { //end too big
             range.setEnd(into.getEnd());
         }
 
@@ -331,15 +366,14 @@ public class Range<T extends Comparable<T>>
     }
 
     /**
-     * Modifies range, if needed, so
-     * range.getStart() is less or equal to intoOtherRange.getStart() and
-     * range.getEnd() is greater or equal to intoOtherRange.getEnd().
-     * It does not guarantee range.contains(toContain)==true which depends also on inclusivity.
+     * Grows range in place, if needed, so that its start is not above toContain's start and
+     * its end is not below toContain's end. Only the end values move; inclusivity is
+     * untouched, so {@code range.within(toContain)} is not guaranteed afterwards.
      *
-     * @param range the range to expand
-     * @param toContain the range to contain. Both are not null safe
-     * @param <T> the comparable type
-     * @return the expanded range
+     * @param range     the range to expand, modified and returned; not null
+     * @param toContain the range to cover; not null
+     * @param <T>       the comparable type
+     * @return range
      */
     public static <T extends Comparable<T>> Range<T> expand(Range<T> range,
                                                             Range<T> toContain) {
@@ -357,14 +391,14 @@ public class Range<T extends Comparable<T>>
     }
 
     /**
-     * Returns T which is within min (inclusive) , max (inclusive)
+     * Clamps value to the closed interval [min, max]. If min is greater than max they are
+     * swapped first.
      *
-     * @param value, min, max
-     *               <br/>Not null safe
-     *               <br/> if min > max they are switched
-     * @return min if value is smaller than min
-     * <br/>max if value is bigger than max
-     * <br/>value otherwise
+     * @param value the value to clamp, not null
+     * @param min   one bound, not null
+     * @param max   the other bound, not null
+     * @param <T>   the comparable type
+     * @return min when value is below it, max when value is above it, value otherwise
      */
     public static <T extends Comparable<T>> T setWithin(T value, T min, T max) {
         Range<T> range = new Range<>(min, max, Inclusivity.BOTH);
@@ -381,7 +415,8 @@ public class Range<T extends Comparable<T>>
     }
 
     /**
-     * @see java.lang.Object#toString()
+     * The text form in round-bracket notation, for example {@code [1, 5)}; {@link #toRange(String)}
+     * reads it back.
      */
     @Override
     public String toString() {
@@ -400,10 +435,11 @@ public class Range<T extends Comparable<T>>
     }
 
     /**
-     * Set the start value
-     * <br/>Not null safe
-     * <br/>If {@link #isAutoSwitch} is set to true, and  start > end
-     * they are switched
+     * Sets the start. With auto-switch on, if the new start is greater than the current end the
+     * two are swapped; that comparison requires the end to be set already.
+     *
+     * @param start the new start, not null
+     * @return this
      */
     public Range<T> setStart(T start) {
 
@@ -422,10 +458,15 @@ public class Range<T extends Comparable<T>>
     }
 
 
+    /**
+     * First index of the half-open integer loop {@code [getLoopStart(), getLoopEnd())} that
+     * visits every integer inside this range: the start as an int, plus one when the start is
+     * excluded. Numeric ranges only.
+     */
     public int getLoopStart() {
         int loopStart = ((Number) getStart()).intValue();
         switch (getInclusivity()) {
-            case END:
+            case RIGHT:
             case NONE:
                 loopStart++;
                 break;
@@ -433,11 +474,15 @@ public class Range<T extends Comparable<T>>
         return loopStart;
     }
 
+    /**
+     * Exclusive upper index of the half-open integer loop {@code [getLoopStart(), getLoopEnd())}:
+     * the end as an int, plus one when the end is included. Numeric ranges only.
+     */
     public int getLoopEnd() {
         int loopEnd = ((Number) getEnd()).intValue();
         switch (getInclusivity()) {
             case BOTH:
-            case END:
+            case RIGHT:
                 loopEnd++;
                 break;
         }
@@ -452,10 +497,11 @@ public class Range<T extends Comparable<T>>
     }
 
     /**
-     * Set the end value
-     * <br/>Not null safe
-     * <br/>If {@link #isAutoSwitch} is set to true, and  start > end
-     * they are switched
+     * Sets the end. With auto-switch on, if the new end is smaller than the current start the
+     * two are swapped; that comparison requires the start to be set already.
+     *
+     * @param end the new end, not null
+     * @return this
      */
     public Range<T> setEnd(T end) {
 
@@ -472,42 +518,52 @@ public class Range<T extends Comparable<T>>
         return this;
     }
 
+    /**
+     * @return the free-text unit label, for example "ms" or "%", or null
+     */
     public String getUnit() {
         return lookupValue(Param.UNIT);
     }
 
+    /**
+     * @param unit a free-text unit label, or null
+     */
     public void setUnit(String unit) {
         setValue(Param.UNIT, unit);
     }
 
     /**
-     * @return the inclusive type
+     * @return which ends are included; {@link Inclusivity#BOTH} when none has been set
      */
     public Inclusivity getInclusivity() {
-        return lookupValue(Param.INCLUSIVITY);
+        Inclusivity ret =  lookupValue(Param.INCLUSIVITY);
+        return ret != null ? ret : Inclusivity.BOTH;
     }
 
     /**
-     * Set the inclusive type
+     * Sets which ends are included. Null clears the stored value, after which
+     * {@link #getInclusivity()} reports {@link Inclusivity#BOTH}.
      *
-     * @param inclusivity <br/>If null {@link Inclusivity#BOTH} used
+     * @param inclusivity the inclusivity, or null
+     * @return this
      */
     public Range<T> setInclusivity(Inclusivity inclusivity) {
-
-        inclusivity = (inclusivity == null) ? Inclusivity.BOTH : inclusivity;
         setValue(Param.INCLUSIVITY, inclusivity);
         return this;
     }
 
     /**
-     * Get {@link #isAutoSwitch}
+     * @return whether {@link #setStart(Comparable)} and {@link #setEnd(Comparable)} swap the
+     * ends to keep start below end
      */
     public boolean isAutoSwitch() {
         return isAutoSwitch;
     }
 
     /**
-     * Set {@link #isAutoSwitch}
+     * @param isAutoSwitch whether {@link #setStart(Comparable)} and {@link #setEnd(Comparable)}
+     *                     swap the ends to keep start below end
+     * @return this
      */
     public Range<T> setAutoSwitch(boolean isAutoSwitch) {
 
@@ -516,15 +572,52 @@ public class Range<T extends Comparable<T>>
     }
 
 
+    /**
+     * Parses a numeric range from its text form, see {@link #toRange(String, Class, String, String)}.
+     *
+     * @param rangeToken the text form, for example {@code "[1, 5)"}
+     * @return the range, typed from the numbers
+     * @throws IllegalArgumentException if the text is not a well-formed range
+     */
     public static  Range toRange(String rangeToken) {
         return toRange(rangeToken, null, null, null);
     }
 
+    /**
+     * Parses a numeric range from its text form and labels it, see
+     * {@link #toRange(String, Class, String, String)}.
+     *
+     * @param rangeToken the text form, for example {@code "[1, 5)"}
+     * @param name       the range's name, or null
+     * @param unit       the range's unit label, or null
+     * @return the range, typed from the numbers
+     * @throws IllegalArgumentException if the text is not a well-formed range
+     */
     public static Range toRange(String rangeToken, String name, String unit) {
         return toRange(rangeToken, null, name, unit);
     }
 
 
+    /**
+     * Parses a numeric range from its text form: two numbers separated by a comma inside a pair
+     * of brackets, whitespace ignored. The bracket shape gives the inclusivity in either notation,
+     * see {@link Inclusivity}: {@code [1, 5]}, {@code (1, 5)}, {@code [1, 5)}, {@code (1, 5]},
+     * and the reversed forms {@code ]1, 5[}, {@code [1, 5[}, {@code ]1, 5]}.
+     * <p>
+     * Without an override the element type comes from the numbers: {@code Integer} when both
+     * fit, else {@code Long}; {@code Float} when either has a decimal part, else {@code Double}
+     * when it exceeds float magnitude. A decimal number kept as {@code Float} loses precision
+     * beyond seven digits; pass {@code Double.class} to keep it.
+     *
+     * @param token    the text form
+     * @param override the element type to produce: {@code Integer}, {@code Long}, {@code Float}
+     *                 or {@code Double}; null to infer it from the numbers
+     * @param name     the range's name, or null
+     * @param unit     the range's unit label, or null
+     * @return the range
+     * @throws IllegalArgumentException if the text is not a well-formed range, or the override
+     *                                  is not one of the four supported types
+     */
     public static Range toRange(String token, Class<? extends Number> override, String name, String unit) {
         token = token.replaceAll("\\s+", "");
         Inclusivity type = Inclusivity.match(token);

@@ -122,4 +122,29 @@ public class DomainFilterTest {
         assertFalse(FilterType.EMAIL.isValid("bob@zoxweb"));
         assertFalse(FilterType.EMAIL.isValid("bob@-bad.com"));
     }
+
+    @Test
+    public void emailLocalPartIsCappedAt64Octets() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 64; i++) sb.append('a');
+        String local64 = sb.toString();
+        String local65 = local64 + "a";
+
+        // 64 is the RFC 5321 maximum and passes
+        assertTrue(FilterType.EMAIL.isValid(local64 + "@example.com"));
+        assertEquals(local64 + "@example.com", FilterType.EMAIL.validate(local64 + "@example.com"));
+
+        // 65 is rejected even though the whole address is well under 254
+        String tooLong = local65 + "@example.com";
+        assertTrue(tooLong.length() < 254);
+        assertFalse(FilterType.EMAIL.isValid(tooLong));
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+                () -> FilterType.EMAIL.validate(tooLong));
+        assertTrue(e.getMessage().contains("local part"), e.getMessage());
+
+        // dots count toward the limit, they are part of the local part
+        String dotted = "a.b.c." + local64.substring(0, 59);
+        assertEquals(65, dotted.length());
+        assertFalse(FilterType.EMAIL.isValid(dotted + "@example.com"));
+    }
 }

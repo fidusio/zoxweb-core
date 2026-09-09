@@ -15,6 +15,7 @@
  */
 package org.zoxweb.shared.filters;
 
+import org.zoxweb.shared.util.Const;
 import org.zoxweb.shared.util.DataEncoder;
 import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.SUS;
@@ -80,6 +81,10 @@ public enum FilterType
     CLEAR {
 
     },
+    /**
+     * Domain filter: a bare hostname per {@link Const.RegEx#DOMAIN}, at most
+     * {@link Const#DOMAIN_MAX_LENGTH} characters.
+     */
     DOMAIN {
         /**
          * Validates a bare hostname and returns it lower-cased with a leading {@code www}
@@ -90,9 +95,10 @@ public enum FilterType
          * {@code admin.zoxweb.com} is a different one; the row an operator registers is the
          * scope boundary, not this filter.
          * @param in value to be validated
-         * @return validated acceptable value
-         * @throws NullPointerException if in is null
-         * @throws IllegalArgumentException if in is invalid
+         * @return the hostname, lower-cased, without a leading www label
+         * @throws NullPointerException if in is null or blank
+         * @throws IllegalArgumentException if in is not a hostname of two or more labels, or is
+         *                                  longer than {@link Const#DOMAIN_MAX_LENGTH}
          */
         public String validate(String in)
                 throws NullPointerException, IllegalArgumentException {
@@ -100,7 +106,7 @@ public enum FilterType
             SUS.checkIfNulls("Null or empty input.", str);
             str = str.toLowerCase();
 
-            if (str.length() > DOMAIN_MAX_LENGTH || !str.matches(DOMAIN_REGEX)) {
+            if (str.length() > Const.DOMAIN_MAX_LENGTH || !str.matches(Const.RegEx.DOMAIN.getValue())) {
                 throw new IllegalArgumentException("Invalid domain: " + in);
             }
 
@@ -134,30 +140,37 @@ public enum FilterType
     },
 
     /**
-     * Email filter
+     * Email filter: an address per {@link Const.RegEx#EMAIL}, at most
+     * {@link Const#EMAIL_MAX_LENGTH} characters with a local part of at most
+     * {@link Const#EMAIL_LOCAL_PART_MAX_LENGTH}.
      */
     EMAIL {
-        //public static final String REGEX ="^[_a-zA-Z0-9-]+(\\.[_a-zA-Z0-9-]+)*@[a-zA-Z0-9-]+(\\.[a-zA-Z0-9-]+)*\\.(([0-9]{1,3})|([a-zA-Z]{2,3})|(aero|coop|info|museum|name))$";
-        //public static final String REGEX ="\\b[\\w.!#$%&’*+\\/=?^`{|}~-]+@[\\w-]+(?:\\.[\\w-]+)*\\b";
-        // local part per RFC 5322 atext; the domain part is the same rule as FilterType.DOMAIN
-        public static final String REGEX = "^[\\w!#$%&'*+/=?`{|}~^-]+(?:\\.[\\w!#$%&'*+/=?`{|}~^-]+)*@(?:" + DOMAIN_LABEL + "\\.)+" + DOMAIN_TLD + "$";
-        public static final int MAX_LENGTH = 254;
-
         /**
-         * Validates the given value.
+         * Validates an email address per {@link Const.RegEx#EMAIL} and returns it lower-cased.
+         * The whole address is lower-cased, local part included: the RFC leaves the local part
+         * case-sensitive, but mail systems treat it case-insensitively and a lookup key needs
+         * one canonical form.
          * @param in value to be validated
-         * @return validated acceptable value
-         * @throws NullPointerException if in is null
-         * @throws IllegalArgumentException if in is invalid
+         * @return the address, trimmed and lower-cased
+         * @throws NullPointerException if in is null or blank
+         * @throws IllegalArgumentException if in is not an address in dot-atom form, is longer
+         *                                  than {@link Const#EMAIL_MAX_LENGTH}, or its local part
+         *                                  is longer than {@link Const#EMAIL_LOCAL_PART_MAX_LENGTH}
          */
         public String validate(String in)
                 throws NullPointerException, IllegalArgumentException {
             in = SUS.trimOrNull(in);
             SUS.checkIfNulls("Email address null or empty", in);
 
-            if (in.matches(REGEX)) {
-                if (in.length() > MAX_LENGTH) {
+            if (in.matches(Const.RegEx.EMAIL.getValue())) {
+                if (in.length() > Const.EMAIL_MAX_LENGTH) {
                     throw new IllegalArgumentException("Email length > max length " + in.length() + ":" + in);
+                }
+
+                // the regex admits ASCII only in the local part, so characters equal octets here
+                int localPartLength = in.lastIndexOf('@');
+                if (localPartLength > Const.EMAIL_LOCAL_PART_MAX_LENGTH) {
+                    throw new IllegalArgumentException("Email local part > max length " + localPartLength + ":" + in);
                 }
 
                 return in.toLowerCase();
@@ -382,24 +395,6 @@ public enum FilterType
         }
     },
     ;
-
-    /**
-     * One DNS label: 1 to 63 letters, digits or hyphens, no hyphen at either end.
-     * Shared by {@link #DOMAIN} and the domain part of {@link #EMAIL}.
-     */
-    public static final String DOMAIN_LABEL = "[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?";
-    /**
-     * Top-level label: 2 to 63 letters, or a punycode (IDN) label.
-     */
-    public static final String DOMAIN_TLD = "(?:[a-zA-Z]{2,63}|[xX][nN]--[a-zA-Z0-9-]{1,59})";
-    /**
-     * A bare hostname of two or more labels.
-     */
-    public static final String DOMAIN_REGEX = "^(?:" + DOMAIN_LABEL + "\\.)+" + DOMAIN_TLD + "$";
-    /**
-     * Maximum hostname length per RFC 1035.
-     */
-    public static final int DOMAIN_MAX_LENGTH = 253;
 
     /**
      * Validates the given value.

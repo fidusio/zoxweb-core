@@ -3,20 +3,24 @@ package org.zoxweb.shared.security;
 import org.zoxweb.shared.util.*;
 
 /**
- * A class that defines a canonical handle for any securable thing - a domain object,
- * a method in a class, a URI, etc. Objects reference it through the ResourceMapGUID.
+ * A typed reference to the securable resource a {@link PermissionGrant} is scoped to.
+ * <p>
+ * The map is embedded in the grant ({@code PermissionGrant.resource_map}); it is not a
+ * row of its own and nothing points at it by GUID. It names the underlying resource by
+ * {@code resource_type}, the fully qualified class name of the entity, and
+ * {@code resource_guid}, that entity's GUID. Both are mandatory: every datastore lookup
+ * by GUID needs the class name, and the manager loads the entity through them to check
+ * that the resource belongs to the grantor before the grant is stored.
+ * <p>
+ * The security manager treats both values as caller-supplied and verifies them; nothing
+ * here does.
  */
 public class ResourceMap extends GrantBase {
-    public enum ResourceType {
-        OBJECT,
-        PRINTER,
-        METHOD,
-        URI,
-    }
 
     public enum Param implements GetNVConfig {
-        TYPE(NVConfigManager.createNVConfig("type", "The type of resource", "ResourceType", false, false, ResourceType.class)),
-        RESOURCE_GUID(NVConfigManager.createNVConfig("resource_guid", "The resource GUID", "ResourceGUID", false, false, String.class)),
+
+        RESOURCE_GUID(NVConfigManager.createNVConfig(MetaToken.RESOURCE_GUID.getName(), "The resource GUID", "ResourceGUID", true, false, String.class)),
+        RESOURCE_TYPE(NVConfigManager.createNVConfig(MetaToken.RESOURCE_TYPE.getName(), "Resource type", "ResourceType", true, false, String.class)),
         ;
 
         private final NVConfig nvc;
@@ -53,47 +57,40 @@ public class ResourceMap extends GrantBase {
     }
 
     /**
-     * Constructor that sets the Resource Type.
+     * Constructor that sets the resource reference.
      *
-     * @param type the resource type
+     * @param resourceGUID GUID of the underlying entity
+     * @param type         fully qualified class name of the underlying entity
      */
-    public ResourceMap(ResourceType type) {
+    public ResourceMap(String resourceGUID, String type) {
         this();
         setResourceType(type);
-    }
-
-    public ResourceMap(ResourceType type, String resourceGUID) {
-        this(type);
         setResourceGUID(resourceGUID);
     }
 
     /**
-     *
-     * @param type the resource type
+     * @param type fully qualified class name of the underlying entity
      */
-    public void setResourceType(ResourceType type) {
-        setValue(Param.TYPE, type);
+    public void setResourceType(String type) {
+        setValue(Param.RESOURCE_TYPE, type);
     }
 
     /**
-     *
-     * @return the resource type
+     * @return fully qualified class name of the underlying entity
      */
-    public ResourceType getResourceType() {
-        return lookupValue(Param.TYPE);
+    public String getResourceType() {
+        return lookupValue(Param.RESOURCE_TYPE);
     }
 
     /**
-     *
-     * @param resourceGUID the resource reference
+     * @param resourceGUID GUID of the underlying entity
      */
     public void setResourceGUID(String resourceGUID) {
         setValue(Param.RESOURCE_GUID, resourceGUID);
     }
 
     /**
-     *
-     * @return the resource reference
+     * @return GUID of the underlying entity
      */
     public String getResourceGUID() {
         return lookupValue(Param.RESOURCE_GUID);

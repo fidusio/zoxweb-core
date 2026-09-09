@@ -52,8 +52,8 @@ public class RangeValueFilterTest {
 
     static Inclusivity inclusivity(boolean loInc, boolean hiInc) {
         if (loInc && hiInc) return Inclusivity.BOTH;
-        if (loInc) return Inclusivity.START;
-        if (hiInc) return Inclusivity.END;
+        if (loInc) return Inclusivity.LEFT;
+        if (hiInc) return Inclusivity.RIGHT;
         return Inclusivity.NONE;
     }
 
@@ -319,7 +319,7 @@ public class RangeValueFilterTest {
 
     @Test
     public void originalFixtures() {
-        Range<Integer> intOneToHundred = new Range<>(1, 100, Inclusivity.START);
+        Range<Integer> intOneToHundred = new Range<>(1, 100, Inclusivity.LEFT);
         for (int v : new int[]{1, 99, 50, 35}) {
             assertTrue(intOneToHundred.isValid(v), "" + v);
             assertEquals(v, intOneToHundred.validate(v).intValue());
@@ -349,7 +349,7 @@ public class RangeValueFilterTest {
             assertThrows(IllegalArgumentException.class, () -> doubleOneToHundred.validate(v));
         }
 
-        Range<Long> longOneToHundred = new Range<>(1L, 100L, Inclusivity.END);
+        Range<Long> longOneToHundred = new Range<>(1L, 100L, Inclusivity.RIGHT);
         for (long v : new long[]{2, 99, 100, 50, 35}) {
             assertTrue(longOneToHundred.isValid(v), "" + v);
             assertEquals(v, longOneToHundred.validate(v).longValue());
@@ -362,27 +362,27 @@ public class RangeValueFilterTest {
 
     @Test
     public void accessorsReturnExactBoxedTypes() {
-        assertEquals(Integer.valueOf(1), new Range<>(1, 100, Inclusivity.START).getStart());
-        assertEquals(Integer.valueOf(100), new Range<>(1, 100, Inclusivity.START).getEnd());
-        assertEquals(Long.valueOf(1), new Range<>(1L, 100L, Inclusivity.START).getStart());
-        assertEquals(Long.valueOf(100), new Range<>(1L, 100L, Inclusivity.START).getEnd());
-        assertEquals(Float.valueOf(1.5f), new Range<>(1.5f, 100.25f, Inclusivity.START).getStart());
-        assertEquals(Float.valueOf(100.25f), new Range<>(1.5f, 100.25f, Inclusivity.START).getEnd());
-        assertEquals(Double.valueOf(1.5), new Range<>(1.5, 100.25, Inclusivity.START).getStart());
-        assertEquals(Double.valueOf(100.25), new Range<>(1.5, 100.25, Inclusivity.START).getEnd());
+        assertEquals(Integer.valueOf(1), new Range<>(1, 100, Inclusivity.LEFT).getStart());
+        assertEquals(Integer.valueOf(100), new Range<>(1, 100, Inclusivity.LEFT).getEnd());
+        assertEquals(Long.valueOf(1), new Range<>(1L, 100L, Inclusivity.LEFT).getStart());
+        assertEquals(Long.valueOf(100), new Range<>(1L, 100L, Inclusivity.LEFT).getEnd());
+        assertEquals(Float.valueOf(1.5f), new Range<>(1.5f, 100.25f, Inclusivity.LEFT).getStart());
+        assertEquals(Float.valueOf(100.25f), new Range<>(1.5f, 100.25f, Inclusivity.LEFT).getEnd());
+        assertEquals(Double.valueOf(1.5), new Range<>(1.5, 100.25, Inclusivity.LEFT).getStart());
+        assertEquals(Double.valueOf(100.25), new Range<>(1.5, 100.25, Inclusivity.LEFT).getEnd());
     }
 
     @Test
     public void canonicalIDAndToStringUseIntervalNotation() {
         assertEquals("[1, 100]", new Range<>(1, 100, Inclusivity.BOTH).toString());
-        assertEquals("[1, 100)", new Range<>(1, 100, Inclusivity.START).toString());
-        assertEquals("(1, 100]", new Range<>(1, 100, Inclusivity.END).toString());
+        assertEquals("[1, 100)", new Range<>(1, 100, Inclusivity.LEFT).toString());
+        assertEquals("(1, 100]", new Range<>(1, 100, Inclusivity.RIGHT).toString());
         assertEquals("(1, 100)", new Range<>(1, 100, Inclusivity.NONE).toString());
         assertEquals("[-5, 5]", new Range<>(-5L, 5L, Inclusivity.BOTH).toString());
-        assertEquals("[1.5, 2.5)", new Range<>(1.5f, 2.5f, Inclusivity.START).toString());
-        assertEquals("(0.25, 0.75]", new Range<>(0.25, 0.75, Inclusivity.END).toString());
+        assertEquals("[1.5, 2.5)", new Range<>(1.5f, 2.5f, Inclusivity.LEFT).toString());
+        assertEquals("(0.25, 0.75]", new Range<>(0.25, 0.75, Inclusivity.RIGHT).toString());
         // the filter's canonical id is the same notation, and it parses back
-        Range<Integer> r = new Range<>(1, 100, Inclusivity.START);
+        Range<Integer> r = new Range<>(1, 100, Inclusivity.LEFT);
         assertEquals("[1, 100)", r.toCanonicalID());
         assertEquals(r.toString(), Range.toRange(r.toCanonicalID()).toString());
     }

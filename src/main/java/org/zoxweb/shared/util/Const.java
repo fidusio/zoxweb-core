@@ -45,6 +45,30 @@ public final class Const {
     public static final String REFERENCE_GUID = "reference_guid";
     public static final String RESOURCE_GUID = "resource_guid";
 
+    /**
+     * One DNS label: 1 to 63 letters, digits or hyphens, no hyphen at either end (RFC 1035).
+     * Building block of {@link RegEx#DOMAIN} and the domain part of {@link RegEx#EMAIL}.
+     */
+    public static final String DOMAIN_LABEL = "[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?";
+    /**
+     * Top-level label: 2 to 63 letters, or a punycode (IDN) label.
+     * Building block of {@link RegEx#DOMAIN} and the domain part of {@link RegEx#EMAIL}.
+     */
+    public static final String DOMAIN_TLD = "(?:[a-zA-Z]{2,63}|[xX][nN]--[a-zA-Z0-9-]{1,59})";
+    /**
+     * Maximum hostname length, RFC 1035. Enforced by {@code FilterType.DOMAIN}.
+     */
+    public static final int DOMAIN_MAX_LENGTH = 253;
+    /**
+     * Maximum email address length, RFC 5321 path limit. Enforced by {@code FilterType.EMAIL}.
+     */
+    public static final int EMAIL_MAX_LENGTH = 254;
+    /**
+     * Maximum email local part length (the part before {@code @}), RFC 5321 section 4.5.3.1.1.
+     * Enforced by {@code FilterType.EMAIL}.
+     */
+    public static final int EMAIL_LOCAL_PART_MAX_LENGTH = 64;
+
     private Const() {
     }
 
@@ -1342,10 +1366,33 @@ public final class Const {
         }
     }
 
+    /**
+     * The regular expressions shared across the library. A rule lives here once; the filters in
+     * {@code FilterType} apply it and add length limits and normalization.
+     */
     public enum RegEx
             implements GetNameValue<String> {
+        /**
+         * Case-insensitive "contains" match; the {@code $$TOKEN$$} placeholder is filled by
+         * {@link #toRegEx(String, boolean)}.
+         */
         CONTAINS_NO_CASE("ContainsNoCase", "(?i).*" + TOKEN_TAG + "(.*?)"),
-        EMAIL("Email", "^[\\w.%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$");
+        /**
+         * An email address in dot-atom form: a local part of RFC 5322 {@code atext} characters
+         * with single dots between atoms, {@code @}, then a domain under the same rule as
+         * {@link #DOMAIN}. Quoted local parts and IP-literal domains are not accepted.
+         * The one email definition; {@code FilterType.EMAIL} applies it together with
+         * {@link Const#EMAIL_MAX_LENGTH}.
+         */
+        EMAIL("Email", "^[\\w!#$%&'*+/=?`{|}~^-]+(?:\\.[\\w!#$%&'*+/=?`{|}~^-]+)*@(?:" + DOMAIN_LABEL + "\\.)+" + DOMAIN_TLD + "$"),
+        /**
+         * A bare hostname of two or more {@link Const#DOMAIN_LABEL DNS labels} ending in a
+         * {@link Const#DOMAIN_TLD top-level label}. No scheme, path, port, or registrable-domain
+         * logic. The one domain definition; {@code FilterType.DOMAIN} applies it together with
+         * {@link Const#DOMAIN_MAX_LENGTH}.
+         */
+        DOMAIN("Domain", "^(?:" + DOMAIN_LABEL + "\\.)+" + DOMAIN_TLD + "$"),
+        ;
 
 
         private final NVPair nv;
