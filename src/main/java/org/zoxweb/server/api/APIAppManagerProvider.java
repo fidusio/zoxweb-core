@@ -408,7 +408,7 @@ public class APIAppManagerProvider
 
         // crutial permission check
         // of the super admin can delete user
-        getAPISecurityManager().checkPermissions(SecurityModel.Permission.USER_DELETE.getValue());
+        getAPISecurityManager().checkPermissions(SecurityModel.Permission.SUBJECT_DELETE.getValue());
 
         SUS.checkIfNulls("subjectID null", subjectID);
         UserIDDAO userID = lookupUserIDDAO(subjectID);
@@ -826,7 +826,7 @@ public class APIAppManagerProvider
     public synchronized AppIDDefault createAppIDDAO(String domainID, String appID)
             throws NullPointerException, IllegalArgumentException, AccessException, APIException {
 
-        getAPISecurityManager().checkPermissions(SecurityModel.Permission.APP_ID_CREATE.getValue());
+        getAPISecurityManager().checkPermissions(SecurityModel.Permission.APP_CREATE.getValue());
         // permission super admin only
         AppIDDefault ret = lookupAppIDDAO(domainID, appID, false);
         if (ret == null) {
@@ -871,9 +871,6 @@ public class APIAppManagerProvider
                     AppPermission.RESOURCE_READ_PUBLIC,
                     AppPermission.SELF);
 
-            createAppRole(ret, Role.RESOURCE, permissions,
-                    AppPermission.RESOURCE_READ_PRIVATE,
-                    AppPermission.RESOURCE_READ_PUBLIC);
 
             getAPIDataStore().createSequence(ret.toCanonicalID());
 
@@ -889,7 +886,7 @@ public class APIAppManagerProvider
     public synchronized AppIDDefault deleteAppIDDAO(String domainID, String appID)
             throws NullPointerException, IllegalArgumentException, AccessException, APIException {
         SUS.checkIfNulls("Null domain or app id", domainID, appID);
-        getAPISecurityManager().checkPermissions(SecurityModel.Permission.APP_ID_DELETE.getValue());
+        getAPISecurityManager().checkPermissions(SecurityModel.Permission.APP_DELETE.getValue());
         AppIDDefault ret = lookupAppIDDAO(domainID, appID, true);
 //
 //        List<AppConfigDAO> list = search(AppConfigDAO.NVC_APP_CONFIG_DAO, new QueryMatchString(Const.RelationalOperator.EQUAL, ret.getReferenceID(), AppConfigDAO.Param.APP_ID.getNVConfig().getName(), MetaToken.REFERENCE_ID.getName()));

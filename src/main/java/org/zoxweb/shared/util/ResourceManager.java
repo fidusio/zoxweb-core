@@ -11,6 +11,7 @@ public class ResourceManager
             implements GetName {
         API_SECURITY_MANAGER("APISecurityManager"),
         DATA_STORE("DataStore"),
+        DOMAIN_SECURITY_MANAGER("DomainSecurityManager"),
         REALM_STORE("RealmStore"),
         API_APP_MANAGER("APIAppManager"),
         JWT_CACHE("JWTCache"),

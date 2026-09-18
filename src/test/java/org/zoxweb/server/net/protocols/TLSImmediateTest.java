@@ -56,7 +56,7 @@ public class TLSImmediateTest {
         TCPMetaProtocol validator = null;
         try {
             SSLContextInfo serverCtx = new SSLContextInfo(SecUtil.initSSLContext(
-                    KEYSTORE, CryptoConst.PKCS12, KEYSTORE_PASSWORD.toCharArray(), null, null, null));
+                    KEYSTORE, CryptoConst.KSType.PKCS12.getName(), KEYSTORE_PASSWORD.toCharArray(), null, null, null));
             SelectionKey serverKey = nioSocket.addServerSocket(
                     new InetSocketAddress(InetAddress.getLoopbackAddress(), 0), 16,
                     new SSLNIOSocketHandlerFactory(serverCtx, EchoSSLCallback::new));

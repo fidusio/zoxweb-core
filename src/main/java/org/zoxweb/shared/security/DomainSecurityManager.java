@@ -30,6 +30,76 @@ public interface DomainSecurityManager {
      */
     SubjectIdentifier loginApiKey(String key) throws SecurityException;
 
+    /**
+     * Checks a principal's current password without logging in: no Shiro subject, no session.
+     * Accepts a subject in {@code PENDING_RESET_PASSWORD}, which {@link #login} denies, so a
+     * change-password flow keeps working while a reset is outstanding.
+     *
+     * @param principalID the principal identifier
+     * @param password    the password to verify
+     * @return {@code true} only if the principal, its subject and its password credential are
+     * usable and the password matches; {@code false} for every other case
+     */
+    boolean verifyPassword(String principalID, String password);
+
+    // Password reset
+
+    /**
+     * Self-service password reset. Issues a one-time token for the subject that owns the
+     * principal, supersedes any outstanding token, puts the subject in
+     * {@code PENDING_RESET_PASSWORD} (every login is denied until the reset completes or the
+     * token expires) and returns the clear token once, with the subject's email principals it
+     * should be delivered to. Runs without a bound subject. The HTTP layer must not reveal to the
+     * caller whether the principal exists: treat every exception here as "accepted".
+     *
+     * @param principalID any principal of the subject
+     * @return the token and the delivery addresses
+     * @throws NoRecoveryChannelException if the subject owns no email principal
+     * @throws SecurityException          if the principal is unknown or the subject is not active
+     */
+    PasswordResetRequest requestPasswordReset(String principalID) throws SecurityException;
+
+    /**
+     * Administrator-initiated reset for any subject, including one without an email principal:
+     * same token semantics, channel {@code ADMIN}, the token is returned to the caller to hand
+     * out of band. Requires {@code subject:update}.
+     *
+     * @param principalID any principal of the subject
+     * @return the token
+     * @throws SecurityException if the caller may not, the principal is unknown or the subject is not active
+     */
+    PasswordResetRequest adminResetPassword(String principalID) throws SecurityException;
+
+    /**
+     * Completes a reset: the token must be the outstanding one of the subject that owns the
+     * principal and not expired; the new password must pass the password policy. Replaces the
+     * PASSWORD credential, consumes the token and puts the subject back to {@code ACTIVE}.
+     * Runs without a bound subject.
+     *
+     * @param principalID any principal of the subject
+     * @param token       the clear token
+     * @param newPassword the new password
+     * @throws SecurityException        with a generic message on any token, principal or status failure
+     * @throws IllegalArgumentException if the new password violates the policy
+     */
+    void completePasswordReset(String principalID, String token, String newPassword) throws SecurityException;
+
+    /**
+     * Cancels an outstanding reset: supersedes the token and restores {@code ACTIVE}. Allowed to
+     * the subject itself or a {@code subject:update} holder.
+     *
+     * @param principalID any principal of the subject
+     * @return {@code true} if a pending reset was cancelled
+     */
+    boolean cancelPasswordReset(String principalID);
+
+    /**
+     * Removes expired, consumed and superseded reset tokens.
+     *
+     * @return the number of rows removed
+     */
+    int purgeExpiredResetTokens();
+
     // Subject Identifier
 
     /**
@@ -347,6 +417,56 @@ public interface DomainSecurityManager {
      * @return the subject's permission grants
      */
     PermissionGrant[] getPermissionGrants(String subjectGUID);
+
+    /**
+     * Grants a catalog permission to a subject on one resource instance. The permission's
+     * token must be of the form {@code <namespace>:<verbs>}; the resource GUID is appended
+     * when the grant is evaluated, so the grant means {@code <namespace>:<verbs>:<resource guid>}.
+     * The resource named by the map must exist. The caller is recorded as the grantor in
+     * {@code broker_guid}.
+     *
+     * @param subject        the subject receiving the grant
+     * @param permissionInfo the catalog permission to grant
+     * @param resource       the resource instance the grant is scoped to
+     * @return the persisted grant
+     * @throws IllegalArgumentException if the permission token cannot be scoped or the resource does not exist
+     * @throws AccessException          if the caller may not grant on that resource
+     */
+    PermissionGrant addPermissionGrant(SubjectIdentifier subject, PermissionInfo permissionInfo, ResourceMap resource);
+
+    /**
+     * Grants an inlined permission to a subject on one resource instance, the form of a
+     * subject-to-subject share. The token is {@code nventity:<verbs>} with the verbs
+     * {@code read}, {@code update}, {@code share} and {@code delete} only; no catalog row is
+     * involved. The resource must exist and, under enforcement, belong to the caller. The
+     * caller is recorded as the grantor in {@code broker_guid}.
+     *
+     * @param subject         the subject receiving the grant
+     * @param resource        the resource instance the grant is scoped to; mandatory
+     * @param permissionToken the inlined permission token
+     * @return the persisted grant
+     * @throws IllegalArgumentException if the token is invalid or the resource does not exist
+     * @throws AccessException          if the caller does not own the resource
+     */
+    PermissionGrant addPermissionGrant(SubjectIdentifier subject, ResourceMap resource, String permissionToken);
+
+    /**
+     * Returns every permission grant scoped to the resource with the given GUID, whatever
+     * its grantee.
+     *
+     * @param resourceGUID the GUID of the underlying entity
+     * @return the grants scoped to that resource, empty if none
+     */
+    PermissionGrant[] getPermissionGrantsByResource(String resourceGUID);
+
+    /**
+     * Revokes every permission grant scoped to the resource with the given GUID. Call it
+     * before deleting the entity, while the resource can still be loaded for the ownership check.
+     *
+     * @param resourceGUID the GUID of the underlying entity
+     * @return the number of grants removed
+     */
+    int deletePermissionGrantsByResource(String resourceGUID);
 
 
     /**

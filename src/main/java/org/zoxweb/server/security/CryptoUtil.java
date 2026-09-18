@@ -811,7 +811,7 @@ public class CryptoUtil {
             throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
         try {
             if (keyStoreType == null) {
-                keyStoreType = CryptoConst.KEY_STORE_TYPE;
+                keyStoreType = CryptoConst.KSType.JCEKS.getName();
             }
             KeyStore keystore = KeyStore.getInstance(keyStoreType);
             keystore.load(keyStoreIS, keyStorePassword);
@@ -1229,7 +1229,7 @@ public class CryptoUtil {
         ret.setKeyStore(keyStoreName);
         ret.setAlias(alias);
         ret.setKeyStorePassword(generateKey(CryptoConst.CryptoAlgo.AES, CryptoConst.AES_256_KEY_SIZE * 8).getEncoded());
-        if (CryptoConst.PKCS12.equalsIgnoreCase(keyStoreType)) {
+        if (CryptoConst.KSType.PKCS12.getName().equalsIgnoreCase(keyStoreType)) {
             ret.setAliasPassword(ret.getKeyStorePassword());
         } else {
             ret.setAliasPassword(generateKey(CryptoConst.CryptoAlgo.AES, CryptoConst.AES_256_KEY_SIZE * 8).getEncoded());

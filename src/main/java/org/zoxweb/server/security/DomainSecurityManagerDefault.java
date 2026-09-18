@@ -7,8 +7,11 @@ import org.zoxweb.shared.crypto.CIPassword;
 import org.zoxweb.shared.crypto.CredentialHasher;
 import org.zoxweb.shared.crypto.CryptoConst;
 import org.zoxweb.shared.db.QueryMatch;
+import org.zoxweb.shared.db.QueryMatchIn;
 import org.zoxweb.shared.security.*;
+import org.zoxweb.shared.security.model.SecurityModel;
 import org.zoxweb.shared.util.*;
+import org.zoxweb.shared.filters.FilterType;
 import org.zoxweb.shared.util.Const.RelationalOperator;
 
 import java.util.*;
@@ -315,13 +318,16 @@ public class DomainSecurityManagerDefault
             }
         }
         for (PermissionGrant g : getPermissionGrants(subjectGUID)) {
-            ds().delete(g, false);
+            deleteGrantAndMap(g);
         }
         for (RoleGrant g : getRoleGrants(subjectGUID)) {
             ds().delete(g, false);
         }
         for (RoleGroupGrant g : getRoleGroupGrants(subjectGUID)) {
             ds().delete(g, false);
+        }
+        for (PasswordResetToken t : resetTokensOf(subjectGUID)) {
+            ds().delete(t, false);
         }
 
         return ds().delete(subject, false);
@@ -887,20 +893,75 @@ public class DomainSecurityManagerDefault
      */
     @Override
     public PermissionGrant addPermissionGrant(SubjectIdentifier subject, PermissionInfo permissionInfo) {
+        SUS.checkIfNulls("subject and permission can't be null", subject, permissionInfo);
         PermissionGrant grant = new PermissionGrant(permissionInfo.getGUID());
         grant.setSubjectGUID(subject.getGUID());
+        grant.validateShape();
         return ds().insert(grant);
     }
 
     /**
-     * Revokes a previously-issued permission grant.
+     * Grants a catalog permission to a subject on one resource instance. The
+     * permission token must be {@code <namespace>:<verbs>} (see
+     * {@link SecurityModel#isInstanceScopable(String)}) and the resource must exist.
+     * No permission enforcement here; the grantor is not recorded.
+     *
+     * @param subject        the subject receiving the grant
+     * @param permissionInfo the catalog permission to grant
+     * @param resource       the resource instance the grant is scoped to
+     * @return the persisted grant
+     * @throws IllegalArgumentException if the token cannot be scoped or the resource does not exist
+     */
+    @Override
+    public PermissionGrant addPermissionGrant(SubjectIdentifier subject, PermissionInfo permissionInfo, ResourceMap resource) {
+        SUS.checkIfNulls("subject, permission and resource can't be null", subject, permissionInfo, resource);
+        PermissionGrant grant = new PermissionGrant(permissionInfo.getGUID(), resource);
+        grant.setSubjectGUID(subject.getGUID());
+        grant.validateShape();
+        checkCatalogTokenForScope(permissionInfo.getGUID());
+        loadResource(resource);
+        return ds().insert(grant);
+    }
+
+    /**
+     * Grants an inlined {@code nventity:<verbs>} permission to a subject on one resource
+     * instance. The token is validated by {@link SecurityModel.NVEPermissionTokenFilter}
+     * and the resource must exist. No permission enforcement here; the grantor is not recorded.
+     *
+     * @param subject         the subject receiving the grant
+     * @param resource        the resource instance the grant is scoped to
+     * @param permissionToken the inlined permission token
+     * @return the persisted grant
+     * @throws IllegalArgumentException if the token is invalid or the resource does not exist
+     */
+    @Override
+    public PermissionGrant addPermissionGrant(SubjectIdentifier subject, ResourceMap resource, String permissionToken) {
+        SUS.checkIfNulls("subject and resource can't be null", subject, resource);
+        if (SUS.isEmpty(permissionToken)) {
+            throw new IllegalArgumentException("permission token required for an inlined grant");
+        }
+        PermissionGrant grant = new PermissionGrant(resource, permissionToken);
+        grant.setSubjectGUID(subject.getGUID());
+        grant.validateShape();
+        loadResource(resource);
+        return ds().insert(grant);
+    }
+
+    /**
+     * Revokes a previously-issued permission grant, together with its embedded
+     * resource map. The grant is reloaded by GUID so a caller-supplied shell still
+     * cascades to the stored map.
      *
      * @param permissionGrant the grant to revoke
      * @return {@code true} if the grant existed and was removed
      */
     @Override
     public boolean deletePermissionGrant(PermissionGrant permissionGrant) {
-        return permissionGrant != null && ds().delete(permissionGrant, false);
+        if (permissionGrant == null || SUS.isEmpty(permissionGrant.getGUID())) {
+            return false;
+        }
+        PermissionGrant stored = first(ds().searchByID(PermissionGrant.NVC_PERMISSION_GRANT, permissionGrant.getGUID()));
+        return stored != null && deleteGrantAndMap(stored);
     }
 
     /**
@@ -915,6 +976,113 @@ public class DomainSecurityManagerDefault
         List<PermissionGrant> list = ds().search(PermissionGrant.NVC_PERMISSION_GRANT, null,
                 eq(MetaToken.SUBJECT_GUID, subjectGUID));
         return list.toArray(new PermissionGrant[0]);
+    }
+
+    /**
+     * Returns every permission grant scoped to the given resource GUID: the resource
+     * maps naming it are found first, then the grants embedding one of those maps.
+     *
+     * @param resourceGUID the GUID of the underlying entity
+     * @return the grants scoped to that resource, empty if none
+     */
+    @Override
+    public PermissionGrant[] getPermissionGrantsByResource(String resourceGUID) {
+        List<String> mapGUIDs = mapGUIDsForResource(resourceGUID);
+        if (mapGUIDs.isEmpty()) {
+            return new PermissionGrant[0];
+        }
+        List<PermissionGrant> list = ds().search(PermissionGrant.NVC_PERMISSION_GRANT, null,
+                new QueryMatchIn<>(PermissionGrant.Param.RESOURCE_MAP.getNVConfig().getName(), mapGUIDs));
+        return list.toArray(new PermissionGrant[0]);
+    }
+
+    /**
+     * Revokes every permission grant scoped to the given resource GUID, maps included.
+     *
+     * @param resourceGUID the GUID of the underlying entity
+     * @return the number of grants removed
+     */
+    @Override
+    public int deletePermissionGrantsByResource(String resourceGUID) {
+        int ret = 0;
+        for (PermissionGrant g : getPermissionGrantsByResource(resourceGUID)) {
+            if (deleteGrantAndMap(g)) {
+                ret++;
+            }
+        }
+        return ret;
+    }
+
+    /**
+     * Loads the entity a resource map names, by class name and GUID.
+     *
+     * @throws IllegalArgumentException if the map is incomplete, the class is unknown, or no row matches
+     */
+    private NVEntity loadResource(ResourceMap resource) {
+        SUS.checkIfNulls("resource map null", resource);
+        String type = resource.getResourceType();
+        String guid = resource.getResourceGUID();
+        if (SUS.isEmpty(type) || SUS.isEmpty(guid)) {
+            throw new IllegalArgumentException("resource_map requires both resource_type and resource_guid");
+        }
+        NVEntity ret;
+        try {
+            ret = first(ds().searchByID(type, guid));
+        } catch (RuntimeException e) {
+            throw new IllegalArgumentException("Unknown resource type " + type, e);
+        }
+        if (ret == null) {
+            throw new IllegalArgumentException("Resource not found " + type + ":" + guid);
+        }
+        return ret;
+    }
+
+    /**
+     * Checks that a catalog permission exists and that its token can take a resource
+     * instance as a third part.
+     *
+     * @throws IllegalArgumentException if the permission is unknown or its token is not {@code <namespace>:<verbs>}
+     */
+    private void checkCatalogTokenForScope(String permissionGUID) {
+        PermissionInfo permission = SUS.isEmpty(permissionGUID) ? null
+                : first(ds().searchByID(PermissionInfo.NVC_PERMISSION_INFO, permissionGUID));
+        if (permission == null) {
+            throw new IllegalArgumentException("Unknown permission " + permissionGUID);
+        }
+        if (!SecurityModel.isInstanceScopable(permission.getPermissionToken())) {
+            throw new IllegalArgumentException("permission token cannot be scoped to a resource: " + permission.getPermissionToken());
+        }
+    }
+
+    /**
+     * Deletes a grant row, then the resource map it embeds, if any. The grant goes first
+     * because it references the map.
+     */
+    private boolean deleteGrantAndMap(PermissionGrant grant) {
+        boolean ret = ds().delete(grant, false);
+        ResourceMap map = grant.getResourceMap();
+        if (map != null && !SUS.isEmpty(map.getGUID())) {
+            ds().delete(map, false);
+        }
+        return ret;
+    }
+
+    /**
+     * GUIDs of the resource-map rows naming the given resource GUID.
+     */
+    private List<String> mapGUIDsForResource(String resourceGUID) {
+        List<String> ret = new ArrayList<>();
+        if (SUS.isEmpty(resourceGUID)) {
+            return ret;
+        }
+        List<ResourceMap> maps = ds().search(ResourceMap.NVC_RESOURCE_MAP, null,
+                eq(MetaToken.RESOURCE_GUID, resourceGUID));
+        for (ResourceMap m : maps) {
+            if (!SUS.isEmpty(m.getGUID())) {
+                ret.add(m.getGUID());
+            }
+        }
+        return ret;
     }
 
     /**
@@ -1039,4 +1207,212 @@ public class DomainSecurityManagerDefault
         return this;
     }
 
+
+    // ------------------------------------------------------------------
+    // password verification and reset (no enforcement in the default manager)
+    // ------------------------------------------------------------------
+
+    /** Reset-token lifetime for the EMAIL channel, default {@code SecStatus.PENDING_RESET_PASSWORD.getValue()} (2 days). */
+    private volatile long emailResetTTLMillis = SecConst.SecStatus.PENDING_RESET_PASSWORD.getValue();
+    /** Reset-token lifetime for the ADMIN channel, default 4 hours. */
+    private volatile long adminResetTTLMillis = 4L * Const.TimeInMillis.HOUR.MILLIS;
+
+    public DomainSecurityManagerDefault setResetTokenTTL(PasswordResetToken.Channel channel, long ttlMillis) {
+        if (ttlMillis <= 0) {
+            throw new IllegalArgumentException("ttl must be positive");
+        }
+        if (channel == PasswordResetToken.Channel.ADMIN) {
+            adminResetTTLMillis = ttlMillis;
+        } else {
+            emailResetTTLMillis = ttlMillis;
+        }
+        return this;
+    }
+
+    @Override
+    public boolean verifyPassword(String principalID, String password) {
+        if (SUS.isEmpty(principalID) || password == null) {
+            return false;
+        }
+        PrincipalIdentifier principal = resolvePrincipal(principalID);
+        if (principal == null || (principal.getStatus() != null && principal.getStatus() != SecConst.SecStatus.ACTIVE)) {
+            return false;
+        }
+        SubjectIdentifier subject = first(ds().searchByID(SubjectIdentifier.NVC_SUBJECT_IDENTIFIER, principal.getSubjectGUID()));
+        if (subject == null) {
+            return false;
+        }
+        SecConst.SecStatus status = subject.getSubjectStatus();
+        if (status != null && status != SecConst.SecStatus.ACTIVE && status != SecConst.SecStatus.PENDING_RESET_PASSWORD) {
+            return false;
+        }
+        CredentialInfo ci = lookupCredential(principalID, CredentialInfo.Type.PASSWORD);
+        if (!(ci instanceof CIPassword)) {
+            return false;
+        }
+        if (ci.getCredentialStatus() != null && ci.getCredentialStatus() != SecConst.SecStatus.ACTIVE) {
+            return false;
+        }
+        try {
+            return SecUtil.isPasswordValid((CIPassword) ci, password);
+        } catch (RuntimeException e) {
+            return false;
+        }
+    }
+
+    private List<PasswordResetToken> resetTokensOf(String subjectGUID) {
+        return ds().search(PasswordResetToken.NVC_PASSWORD_RESET_TOKEN, null, eq(MetaToken.SUBJECT_GUID, subjectGUID));
+    }
+
+    private int supersedeOutstanding(String subjectGUID, long now) {
+        int ret = 0;
+        for (PasswordResetToken t : resetTokensOf(subjectGUID)) {
+            if (t.isOutstanding(now)) {
+                t.setStatus(SecConst.SecStatus.INACTIVE);
+                ds().update(t);
+                ret++;
+            }
+        }
+        return ret;
+    }
+
+    private SubjectIdentifier resetableSubject(String principalID) {
+        PrincipalIdentifier principal = resolvePrincipal(principalID);
+        if (principal == null || (principal.getStatus() != null && principal.getStatus() != SecConst.SecStatus.ACTIVE)) {
+            throw new SecurityException("Unknown principal");
+        }
+        SubjectIdentifier subject = first(ds().searchByID(SubjectIdentifier.NVC_SUBJECT_IDENTIFIER, principal.getSubjectGUID()));
+        if (subject == null) {
+            throw new SecurityException("Unknown principal");
+        }
+        SecConst.SecStatus status = subject.getSubjectStatus();
+        if (status != null && status != SecConst.SecStatus.ACTIVE && status != SecConst.SecStatus.PENDING_RESET_PASSWORD) {
+            throw new SecurityException("Subject is not active");
+        }
+        return subject;
+    }
+
+    private String[] emailPrincipalsOf(String subjectGUID) {
+        List<String> ret = new ArrayList<>();
+        for (PrincipalIdentifier p : lookupAllPrincipalIdentifiers(subjectGUID)) {
+            if ((p.getStatus() == null || p.getStatus() == SecConst.SecStatus.ACTIVE) && FilterType.EMAIL.isValid(p.getPrincipalID())) {
+                ret.add(p.getPrincipalID());
+            }
+        }
+        return ret.toArray(new String[0]);
+    }
+
+    private PasswordResetRequest issueResetToken(SubjectIdentifier subject, String principalID, PasswordResetToken.Channel channel,
+                                                 String brokerGUID, String[] delivery) {
+        long now = System.currentTimeMillis();
+        long ttl = channel == PasswordResetToken.Channel.ADMIN ? adminResetTTLMillis : emailResetTTLMillis;
+        String clear = PasswordResetTokenUtil.newToken();
+        PasswordResetToken row = new PasswordResetToken();
+        row.setSubjectGUID(subject.getGUID());
+        row.setPrincipalID(principalID);
+        row.setTokenHash(PasswordResetTokenUtil.hash(clear));
+        row.setExpiryTS(now + ttl);
+        row.setConsumedTS(0);
+        row.setStatus(SecConst.SecStatus.ACTIVE);
+        row.setChannel(channel);
+        row.setBrokerGUID(brokerGUID);
+        supersedeOutstanding(subject.getGUID(), now);
+        ds().insert(row);
+        subject.setSubjectStatus(SecConst.SecStatus.PENDING_RESET_PASSWORD);
+        ds().update(subject);
+        return new PasswordResetRequest(clear, subject.getGUID(), principalID, delivery, row.getExpiryTS(), channel);
+    }
+
+    @Override
+    public PasswordResetRequest requestPasswordReset(String principalID) throws SecurityException {
+        PrincipalIdentifier principal = resolvePrincipal(principalID);
+        if (principal == null) {
+            throw new SecurityException("Unknown principal");
+        }
+        SubjectIdentifier subject = resetableSubject(principalID);
+        String[] emails = emailPrincipalsOf(subject.getGUID());
+        if (emails.length == 0) {
+            throw new NoRecoveryChannelException("Subject has no email principal");
+        }
+        return issueResetToken(subject, principal.getPrincipalID(), PasswordResetToken.Channel.EMAIL, null, emails);
+    }
+
+    @Override
+    public PasswordResetRequest adminResetPassword(String principalID) throws SecurityException {
+        PrincipalIdentifier principal = resolvePrincipal(principalID);
+        if (principal == null) {
+            throw new SecurityException("Unknown principal: " + principalID);
+        }
+        SubjectIdentifier subject = resetableSubject(principalID);
+        return issueResetToken(subject, principal.getPrincipalID(), PasswordResetToken.Channel.ADMIN, null, emailPrincipalsOf(subject.getGUID()));
+    }
+
+    @Override
+    public void completePasswordReset(String principalID, String token, String newPassword) throws SecurityException {
+        final String invalid = "Invalid or expired reset token";
+        PrincipalIdentifier principal = resolvePrincipal(principalID);
+        if (principal == null || SUS.isEmpty(token)) {
+            throw new SecurityException(invalid);
+        }
+        SubjectIdentifier subject = first(ds().searchByID(SubjectIdentifier.NVC_SUBJECT_IDENTIFIER, principal.getSubjectGUID()));
+        if (subject == null) {
+            throw new SecurityException(invalid);
+        }
+        FilterType.PASSWORD.validate(newPassword);
+        long now = System.currentTimeMillis();
+        PasswordResetToken match = null;
+        for (PasswordResetToken t : resetTokensOf(subject.getGUID())) {
+            if (t.isOutstanding(now) && PasswordResetTokenUtil.matches(t.getTokenHash(), token)) {
+                match = t;
+            }
+        }
+        if (match == null) {
+            throw new SecurityException(invalid);
+        }
+        SecConst.SecStatus status = subject.getSubjectStatus();
+        if (status != null && status != SecConst.SecStatus.ACTIVE && status != SecConst.SecStatus.PENDING_RESET_PASSWORD) {
+            throw new SecurityException(invalid);
+        }
+        updateCredential(subject, HashUtil.toBCryptPassword(newPassword));
+        match.setStatus(SecConst.SecStatus.DEACTIVATED);
+        match.setConsumedTS(now);
+        ds().update(match);
+        supersedeOutstanding(subject.getGUID(), now);
+        subject.setSubjectStatus(SecConst.SecStatus.ACTIVE);
+        ds().update(subject);
+    }
+
+    @Override
+    public boolean cancelPasswordReset(String principalID) {
+        PrincipalIdentifier principal = resolvePrincipal(principalID);
+        if (principal == null) {
+            return false;
+        }
+        SubjectIdentifier subject = first(ds().searchByID(SubjectIdentifier.NVC_SUBJECT_IDENTIFIER, principal.getSubjectGUID()));
+        if (subject == null) {
+            return false;
+        }
+        boolean changed = supersedeOutstanding(subject.getGUID(), System.currentTimeMillis()) > 0;
+        if (subject.getSubjectStatus() == SecConst.SecStatus.PENDING_RESET_PASSWORD) {
+            subject.setSubjectStatus(SecConst.SecStatus.ACTIVE);
+            ds().update(subject);
+            changed = true;
+        }
+        return changed;
+    }
+
+    @Override
+    public int purgeExpiredResetTokens() {
+        long now = System.currentTimeMillis();
+        int ret = 0;
+        List<PasswordResetToken> all = ds().search(PasswordResetToken.NVC_PASSWORD_RESET_TOKEN, null);
+        for (PasswordResetToken t : all) {
+            if (!t.isOutstanding(now)) {
+                if (ds().delete(t, false)) {
+                    ret++;
+                }
+            }
+        }
+        return ret;
+    }
 }

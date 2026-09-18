@@ -27,6 +27,9 @@ public final class CryptoConst {
     public static final String ML_KEM_512 = "ML-KEM-512";
     public static final String ML_KEM_768 = "ML-KEM-768";
     public static final String ML_KEM_1024 = "ML-KEM-1024";
+    public static final String ML_DSA_44 = "ML-DSA-44";
+    public static final String ML_DSA_65 = "ML-DSA-65";
+    public static final String ML_DSA_87 = "ML-DSA-87";
 
     private CryptoConst() {
 
@@ -44,9 +47,34 @@ public final class CryptoConst {
     public static final int AES_BLOCK_SIZE = 16;
     public static final String PEM_KEY_FILTER = "-----BEGIN [^-]+-----|-----END [^-]+-----|\\s+";
 
-    public static final String PKCS12 = "PKCS12";
+    //public static final String PKCS12 = "PKCS12";
 
-    public static final String KEY_STORE_TYPE = "JCEKS";
+    //public static final String JCEKS = "JCEKS";
+
+    public enum KSType
+    implements GetName{
+        BCFKS("BCFKS"),
+        BCFKS_DEF("BCFKS-DEF"),
+        JCEKS("JCEKS"),
+        PKCS12("PKCS12"),
+
+        ;
+        private final String name;
+        KSType(String name) {
+            this.name = name;
+        }
+
+        @Override
+        public String toString(){
+            return getName();
+        }
+
+
+        @Override
+        public String getName() {
+            return name;
+        }
+    }
 
     public static final String ML_KEM = "ML-KEM";
     public static final String ML_DSA = "ML-DSA";
@@ -313,7 +341,10 @@ public final class CryptoConst {
         SHA256_EC(CryptoAlgo.EC, "SHA256withECDSA"),
         SHA384_EC(CryptoAlgo.EC, "SHA384withECDSA"),
         SHA512_EC(CryptoAlgo.EC, "SHA512withECDSA"),
-        ML_DSA(CryptoAlgo.ML_DSA, "ML-DSA");
+        ML_DSA_44(CryptoAlgo.ML_DSA, CryptoConst.ML_DSA_44),
+        ML_DSA_65(CryptoAlgo.ML_DSA, CryptoConst.ML_DSA_65),
+        ML_DSA_87(CryptoAlgo.ML_DSA, CryptoConst.ML_DSA_87),
+        ;
         private final String name;
         private final CryptoAlgo cryptoAlgo;
 

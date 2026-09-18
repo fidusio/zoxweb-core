@@ -5,12 +5,13 @@ import org.zoxweb.shared.util.*;
 /**
  * A typed reference to the securable resource a {@link PermissionGrant} is scoped to.
  * <p>
- * The map is embedded in the grant ({@code PermissionGrant.resource_map}); it is not a
- * row of its own and nothing points at it by GUID. It names the underlying resource by
- * {@code resource_type}, the fully qualified class name of the entity, and
- * {@code resource_guid}, that entity's GUID. Both are mandatory: every datastore lookup
- * by GUID needs the class name, and the manager loads the entity through them to check
- * that the resource belongs to the grantor before the grant is stored.
+ * The map is embedded in the grant ({@code PermissionGrant.resource_map}): it is created
+ * with the grant, deleted with it, and never shared between grants. A relational store may
+ * keep it as a child row referenced by the grant, but nothing else points at it by GUID.
+ * It names the underlying resource by {@code resource_type}, the fully qualified class
+ * name of the entity, and {@code resource_guid}, that entity's GUID. Both are mandatory:
+ * every datastore lookup by GUID needs the class name, and the manager loads the entity
+ * through them to check that the resource belongs to the grantor before the grant is stored.
  * <p>
  * The security manager treats both values as caller-supplied and verifies them; nothing
  * here does.
@@ -66,6 +67,21 @@ public class ResourceMap extends GrantBase {
         this();
         setResourceType(type);
         setResourceGUID(resourceGUID);
+    }
+
+    /**
+     * Constructor that references an existing entity by its GUID and class name.
+     *
+     * @param resource the underlying entity; must carry a GUID
+     * @throws NullPointerException if resource is null
+     */
+    public ResourceMap(NVEntity resource) {
+        this(guidOf(resource), resource.getClass().getName());
+    }
+
+    private static String guidOf(NVEntity resource) {
+        SUS.checkIfNulls("resource null", resource);
+        return resource.getGUID();
     }
 
     /**

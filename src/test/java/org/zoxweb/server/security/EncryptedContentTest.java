@@ -47,7 +47,7 @@ public class EncryptedContentTest {
         if (f.exists() && f.canRead()) {
             SecretKeySpec k = (SecretKeySpec) CryptoUtil
                     .getKeyFromKeyStore(new FileInputStream("/home/fidus-store/ssl/fidus-store-test.jck"),
-                            CryptoConst.KEY_STORE_TYPE, "changeit", "fidus-store-mk", "changeit");
+                            CryptoConst.KSType.JCEKS.getName(), "changeit", "fidus-store-mk", "changeit");
 
             System.out.println(k.getAlgorithm() + ":" + k.getFormat() + ":" + SharedStringUtil
                     .bytesToHex(k.getEncoded()));
@@ -56,18 +56,18 @@ public class EncryptedContentTest {
 
             CryptoUtil.updateKeyPasswordInKeyStore(
                     new FileInputStream("/home/fidus-store/ssl/fidus-store-test.jck"),
-                    CryptoConst.KEY_STORE_TYPE,
+                    CryptoConst.KSType.JCEKS.getName(),
                     "changeit", "fidus-store-mk", "changeit",
                     new FileOutputStream(fNewStore), DEFAULT_PASSWORD, "fidus-store-mk", DEFAULT_PASSWORD);
 
             k = (SecretKeySpec) CryptoUtil
-                    .getKeyFromKeyStore(new FileInputStream(fNewStore), CryptoConst.KEY_STORE_TYPE, DEFAULT_PASSWORD,
+                    .getKeyFromKeyStore(new FileInputStream(fNewStore), CryptoConst.KSType.JCEKS.getName(), DEFAULT_PASSWORD,
                             "fidus-store-mk", DEFAULT_PASSWORD);
             System.out.println(k.getAlgorithm() + ":" + k.getFormat() + ":" + SharedStringUtil
                     .bytesToHex(k.getEncoded()));
 
             KeyStore ks = CryptoUtil
-                    .loadKeyStore(new FileInputStream(fNewStore), CryptoConst.KEY_STORE_TYPE,
+                    .loadKeyStore(new FileInputStream(fNewStore), CryptoConst.KSType.JCEKS.getName(),
                             DEFAULT_PASSWORD.toCharArray());
 
             char[] aliasPassword = DEFAULT_PASSWORD.toCharArray();

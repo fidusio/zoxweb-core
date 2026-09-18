@@ -54,7 +54,7 @@ public class SMTPStartTLSTest {
         final AtomicReference<Throwable> serverFailure = new AtomicReference<Throwable>();
 
         SSLContext serverSSLContext = SecUtil.initSSLContext(
-                KEYSTORE, CryptoConst.PKCS12, KEYSTORE_PASSWORD.toCharArray(), null, null, null);
+                KEYSTORE, CryptoConst.KSType.PKCS12.getName(), KEYSTORE_PASSWORD.toCharArray(), null, null, null);
         ServerSocket server = new ServerSocket(0, 1, InetAddress.getLoopbackAddress());
         NIOSocket nioSocket = new NIOSocket(TaskUtil.defaultTaskProcessor(), TaskUtil.defaultTaskScheduler());
         TCPMetaProtocol validator = null;

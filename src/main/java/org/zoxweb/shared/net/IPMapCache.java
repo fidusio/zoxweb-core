@@ -16,9 +16,9 @@
 package org.zoxweb.shared.net;
 
 
+import org.zoxweb.shared.util.DataEncoder;
 import org.zoxweb.shared.util.KVMapStore;
 import org.zoxweb.shared.util.KVMapStoreDefault;
-import org.zoxweb.shared.util.SUS;
 
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -53,8 +53,8 @@ public class IPMapCache
      * @return true if the mapping was successful, false if excluded or null
      */
     public synchronized boolean map(String ipAddress, String macAddress) {
-        ipAddress = SUS.toTrimmedLowerCase(ipAddress);
-        macAddress = SUS.toTrimmedLowerCase(macAddress);
+        ipAddress = DataEncoder.TrimLowerCase.encode(ipAddress);
+        macAddress = DataEncoder.TrimLowerCase.encode(macAddress);
         if (ipAddress != null && macAddress != null) {
             if (!exclusionFilter.contains(ipAddress) && !exclusionFilter.contains(macAddress)) {
                 return put(ipAddress, macAddress);
@@ -71,7 +71,7 @@ public class IPMapCache
      * @param exclusion the address to exclude (IP or MAC)
      */
     public <VAL extends KVMapStore<String, String>> VAL exclude(String exclusion) {
-        super.exclude(SUS.toTrimmedLowerCase(exclusion));
+        super.exclude(DataEncoder.TrimLowerCase.encode(exclusion));
         return (VAL)this;
     }
 

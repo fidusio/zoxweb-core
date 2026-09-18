@@ -62,12 +62,46 @@ public interface DataEncoder<EI, EO>
     DataEncoder<String, String> StringLower = (s) -> s != null ? s.toLowerCase() : null;
 
     /**
+     * Encoder that lowercases and trims a string.
+     * <p>
+     * Returns null if the input is null, empty or whitespace-only, so the result is
+     * either null or a non-empty lowercase string with no leading or trailing whitespace.
+     * </p>
+     */
+    DataEncoder<String, String> TrimLowerCase = (str) -> {
+        if (str != null) {
+            str = str.toLowerCase().trim();
+            if (!str.isEmpty())
+                return str;
+        }
+
+        return null;
+    };
+
+    /**
      * Encoder that converts a string to uppercase.
      * <p>
      * Returns null if the input is null.
      * </p>
      */
     DataEncoder<String, String> StringUpper = (s) -> s != null ? s.toUpperCase() : null;
+
+    /**
+     * Encoder that uppercases and trims a string.
+     * <p>
+     * Returns null if the input is null, empty or whitespace-only, so the result is
+     * either null or a non-empty uppercase string with no leading or trailing whitespace.
+     * </p>
+     */
+    DataEncoder<String, String> TrimUpperCase = (str) -> {
+        if (str != null) {
+            str = str.toUpperCase().trim();
+            if (!str.isEmpty())
+                return str;
+        }
+
+        return null;
+    };
 
 
     /**

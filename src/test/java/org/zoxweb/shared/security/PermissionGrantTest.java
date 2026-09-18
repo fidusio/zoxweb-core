@@ -1,6 +1,7 @@
 package org.zoxweb.shared.security;
 
 import org.junit.jupiter.api.Test;
+import org.zoxweb.shared.security.model.SecurityModel;
 
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -110,16 +111,16 @@ class PermissionGrantTest {
         ResourceMap rm = new ResourceMap("resource-1", "org.zoxweb.shared.data.DocumentDAO");
         PermissionGrant pg = new PermissionGrant(rm, "nventity:read,share");
         assertSame(rm, pg.getResourceMap());
-        assertEquals("nventity:read,share", pg.getInlinedPermission());
+        assertEquals("nventity:read,share", pg.getPermissionToken());
         assertNull(pg.getPermissionGUID());
     }
 
     @Test
-    void permissionGrant_catalogConstructor_leavesInlinedPermissionNull() {
+    void permissionGrant_catalogConstructor_leavesPermissionTokenNull() {
         ResourceMap rm = new ResourceMap("resource-1", "org.zoxweb.shared.data.DocumentDAO");
         PermissionGrant pg = new PermissionGrant("perm-1", rm);
         assertEquals("perm-1", pg.getPermissionGUID());
-        assertNull(pg.getInlinedPermission());
+        assertNull(pg.getPermissionToken());
     }
 
     @Test
@@ -178,6 +179,115 @@ class PermissionGrantTest {
         assertEquals("grant.read-system", pg.getName());
         assertEquals("Grants system:read to user-42", pg.getDescription());
         assertEquals("perm-1", pg.getPermissionGUID());
+    }
+
+    // ============================================================
+    //            Inlined permission token filter + shape
+    // ============================================================
+
+    @Test
+    void permissionToken_filterNormalizesCaseAndSpaces() {
+        ResourceMap rm = new ResourceMap("resource-1", "org.zoxweb.shared.data.DocumentDAO");
+        PermissionGrant pg = new PermissionGrant(rm, " NVEntity:Read , Share ");
+        assertEquals("nventity:read,share", pg.getPermissionToken());
+        pg.setPermissionToken("nventity:delete,delete,update");
+        assertEquals("nventity:delete,update", pg.getPermissionToken(), "duplicates dropped, order kept");
+    }
+
+    @Test
+    void permissionToken_filterRejects() {
+        String[] bad = {"nventity:create", "nventity:*", "nventity:read:abc", "doc:read", "nventity:",
+                "nventity:read,,share", "nventity:read,bogus", "nventity", ""};
+        for (String token : bad) {
+            PermissionGrant pg = new PermissionGrant();
+            assertThrows(RuntimeException.class, () -> pg.setPermissionToken(token), token);
+            assertNull(pg.getPermissionToken(), token);
+        }
+        assertThrows(RuntimeException.class, () -> SecurityModel.NVEPermissionTokenFilter.SINGLETON.validate(null));
+    }
+
+    @Test
+    void permissionToken_setNullClears() {
+        PermissionGrant pg = new PermissionGrant(new ResourceMap("resource-1", "x.Y"), "nventity:read");
+        pg.setPermissionToken(null);
+        assertNull(pg.getPermissionToken());
+    }
+
+    @Test
+    void validateShape_catalogGlobal_ok() {
+        assertDoesNotThrow(() -> new PermissionGrant("perm-1").validateShape());
+    }
+
+    @Test
+    void validateShape_catalogScoped_ok() {
+        assertDoesNotThrow(() -> new PermissionGrant("perm-1", new ResourceMap("resource-1", "x.Y")).validateShape());
+    }
+
+    @Test
+    void validateShape_inlined_ok() {
+        assertDoesNotThrow(() -> new PermissionGrant(new ResourceMap("resource-1", "x.Y"), "nventity:read").validateShape());
+    }
+
+    @Test
+    void validateShape_bothRejected() {
+        PermissionGrant pg = new PermissionGrant("perm-1", new ResourceMap("resource-1", "x.Y"));
+        pg.setPermissionToken("nventity:read");
+        assertThrows(IllegalArgumentException.class, pg::validateShape);
+    }
+
+    @Test
+    void validateShape_neitherRejected() {
+        assertThrows(IllegalArgumentException.class, () -> new PermissionGrant().validateShape());
+        assertThrows(IllegalArgumentException.class,
+                () -> new PermissionGrant(null, new ResourceMap("resource-1", "x.Y")).validateShape());
+    }
+
+    @Test
+    void validateShape_inlinedWithoutMapRejected() {
+        PermissionGrant pg = new PermissionGrant();
+        pg.setPermissionToken("nventity:read");
+        assertThrows(IllegalArgumentException.class, pg::validateShape);
+    }
+
+    @Test
+    void validateShape_mapWithBlankTypeOrGuidRejected() {
+        assertThrows(IllegalArgumentException.class,
+                () -> new PermissionGrant("perm-1", new ResourceMap("resource-1", null)).validateShape());
+        assertThrows(IllegalArgumentException.class,
+                () -> new PermissionGrant("perm-1", new ResourceMap(null, "x.Y")).validateShape());
+        assertThrows(IllegalArgumentException.class,
+                () -> new PermissionGrant(new ResourceMap(), "nventity:read").validateShape());
+    }
+
+    @Test
+    void securityModel_toNVEToken_andIsInstanceScopable() {
+        assertEquals("nventity:read,share", SecurityModel.toNVEToken("Read", "share"));
+        assertThrows(IllegalArgumentException.class, () -> SecurityModel.toNVEToken("create"));
+        assertThrows(IllegalArgumentException.class, SecurityModel::toNVEToken);
+        assertTrue(SecurityModel.isInstanceScopable("nventity:read"));
+        assertTrue(SecurityModel.isInstanceScopable("nventity:read,update"));
+        assertFalse(SecurityModel.isInstanceScopable("nventity:read:*"));
+        assertFalse(SecurityModel.isInstanceScopable("nventity:read:abc"));
+        assertFalse(SecurityModel.isInstanceScopable("nventity"));
+        assertFalse(SecurityModel.isInstanceScopable("nventity:"));
+        assertFalse(SecurityModel.isInstanceScopable(null));
+    }
+
+    @Test
+    void securityModel_nveShareAllPattern() {
+        assertEquals("nventity:share:*", SecurityModel.Permission.NVE_SHARE_ALL.getValue());
+        assertEquals("nventity:read:*", SecurityModel.Permission.NVE_READ_ALL.getValue());
+        assertEquals("*", SecurityModel.Permission.SUPER_ADMIN_ALL.getValue());
+    }
+
+    @Test
+    void resourceMap_entityConstructor() {
+        PermissionInfo p = new PermissionInfo("perm.x", "x:read");
+        p.setGUID("guid-1");
+        ResourceMap rm = new ResourceMap(p);
+        assertEquals("guid-1", rm.getResourceGUID());
+        assertEquals(PermissionInfo.class.getName(), rm.getResourceType());
+        assertThrows(NullPointerException.class, () -> new ResourceMap((org.zoxweb.shared.util.NVEntity) null));
     }
 
     // ============================================================

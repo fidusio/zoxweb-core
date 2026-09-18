@@ -1,7 +1,6 @@
 package org.zoxweb.shared.security.model;
 
 
-import org.zoxweb.shared.security.model.SecurityModel.PermissionToken;
 import org.zoxweb.shared.util.*;
 
 /**
@@ -12,14 +11,13 @@ import org.zoxweb.shared.util.*;
 public class PPEncoder
         implements DataEncoder<String[], String> {
     public static final PPEncoder SINGLETON = new PPEncoder();
-    public static final char PATTERN_SEP = ':';
 
 
     private PPEncoder() {
     }
 
     public String encode(String... patterns) {
-        return SUS.trimOrEmpty(SUS.toCanonicalID(PATTERN_SEP, (Object[]) patterns)).toLowerCase();
+        return SUS.trimOrEmpty(SUS.toCanonicalID(SecurityModel.C_PART_SEP, (Object[]) patterns)).toLowerCase();
     }
 
 
@@ -29,10 +27,6 @@ public class PPEncoder
 
     public String encodePattern(String pattern, String token, String value) {
         return SharedStringUtil.embedText(pattern, token, value);
-    }
-
-    public String encodePattern(String pattern, PermissionToken token, String value) {
-        return SharedStringUtil.embedText(pattern, token.getValue(), value);
     }
 
 }

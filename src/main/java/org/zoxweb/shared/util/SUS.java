@@ -508,24 +508,6 @@ public final class SUS {
 
 
     /**
-     * Checks if str is not null then return lowercase trimmed version if the length > 0 , otherwise return null.
-     *
-     * @param str to check
-     * @return lowered case trimmed string or null
-     */
-    public static String toTrimmedLowerCase(String str) {
-        if (str != null) {
-            str = str.toLowerCase().trim();
-            if (!str.isEmpty())
-                return str;
-        }
-
-        return null;
-    }
-
-
-
-    /**
      * Return the index of the first occurrence of match[] in buffer[]
      *
      * @param buffer
