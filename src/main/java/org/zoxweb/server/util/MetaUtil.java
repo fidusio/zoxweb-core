@@ -16,6 +16,7 @@
 package org.zoxweb.server.util;
 
 
+import org.zoxweb.shared.security.AccessSecurityException;
 import org.zoxweb.shared.util.*;
 
 import java.lang.reflect.InvocationTargetException;
@@ -38,12 +39,18 @@ public class MetaUtil {
             IllegalAccessException,
             NullPointerException,
             IllegalArgumentException,
-            SecurityException, NoSuchMethodException, InvocationTargetException {
+            AccessSecurityException, NoSuchMethodException, InvocationTargetException {
         SUS.checkIfNulls("Null class name", className);
         NVConfigEntity nvce = classNameToNVCE.get(className);
 
         if (nvce == null) {
-            nvce = fromClass(Class.forName(className));
+            Class<?> clazz;
+            try {
+                clazz = Class.forName(className);
+            } catch (SecurityException e) {
+                throw new AccessSecurityException("Access denied loading class: " + className, e);
+            }
+            nvce = fromClass(clazz);
             classNameToNVCE.put(className, nvce);
         }
 
@@ -51,9 +58,14 @@ public class MetaUtil {
     }
 
     public static NVConfigEntity fromClass(Class<?> clazz)
-            throws InstantiationException, IllegalAccessException, NullPointerException, IllegalArgumentException, NoSuchMethodException, SecurityException, InvocationTargetException {
+            throws InstantiationException, IllegalAccessException, NullPointerException, IllegalArgumentException, NoSuchMethodException, AccessSecurityException, InvocationTargetException {
         SUS.checkIfNulls("Null class name", clazz);
-        Object obj = clazz.getConstructor().newInstance();
+        Object obj;
+        try {
+            obj = clazz.getConstructor().newInstance();
+        } catch (SecurityException e) {
+            throw new AccessSecurityException("Access denied instantiating: " + clazz.getName(), e);
+        }
 
         if (obj instanceof NVEntity) {
             NVEntity nve = (NVEntity) obj;

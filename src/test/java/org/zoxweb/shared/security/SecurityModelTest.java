@@ -114,10 +114,8 @@ class SecurityModelTest {
         for (Role r : Role.values()) {
             assertThrows(IllegalArgumentException.class, () -> Role.valueOf("RESOURCE"));
         }
-        // defensive copies
-        Permission[] copy = Role.DOMAIN_ADMIN.getPermissions();
-        copy[0] = Permission.SUPER_ADMIN_ALL;
-        assertNotEquals(Permission.SUPER_ADMIN_ALL, Role.DOMAIN_ADMIN.getPermissions()[0]);
+        // getPermissions() returns the enum's own array (no defensive copy, user decision 2026-09-18): callers read only
+        assertSame(Role.DOMAIN_ADMIN.getPermissions(), Role.DOMAIN_ADMIN.getPermissions());
     }
 
     @Test

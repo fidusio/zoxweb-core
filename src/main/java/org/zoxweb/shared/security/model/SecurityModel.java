@@ -525,8 +525,9 @@ public final class SecurityModel {
         /**
          * @return the permissions this role declares (a copy)
          */
+        /** The enum's own array, not a copy: read only, never write into it. */
         public Permission[] getPermissions() {
-            return permissions.clone();
+            return permissions;
         }
 
         /**
@@ -580,8 +581,9 @@ public final class SecurityModel {
         /**
          * @return the roles this group declares (a copy)
          */
+        /** The enum's own array, not a copy: read only, never write into it. */
         public Role[] getRoles() {
-            return roles.clone();
+            return roles;
         }
     }
 

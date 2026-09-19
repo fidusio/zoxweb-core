@@ -1,6 +1,6 @@
 package org.zoxweb.shared.api;
 
-import org.zoxweb.shared.security.AccessException;
+import org.zoxweb.shared.security.AccessSecurityException;
 import org.zoxweb.shared.security.JWTToken;
 import org.zoxweb.shared.util.CRUD;
 import org.zoxweb.shared.util.Const.LogicalOperator;
@@ -12,36 +12,36 @@ import org.zoxweb.shared.util.NVPair;
 public interface APISecurityManager<S, O, I> {
 
     Object encryptValue(APIDataStore<?, ?> dataStore, NVEntity container, NVConfig nvc, NVBase<?> nvb, byte msKey[])
-            throws NullPointerException, IllegalArgumentException, AccessException;
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException;
 
     Object decryptValue(APIDataStore<?, ?> dataStore, NVEntity container, NVBase<?> nvb, Object value, byte msKey[])
-            throws NullPointerException, IllegalArgumentException, AccessException;
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException;
 
     String decryptValue(APIDataStore<?, ?> dataStore, NVEntity container, NVPair nvp, byte msKey[])
-            throws NullPointerException, IllegalArgumentException, AccessException;
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException;
 
     Object decryptValue(String userID, APIDataStore<?, ?> dataStore, NVEntity container, Object value, byte msKey[])
-            throws NullPointerException, IllegalArgumentException, AccessException;
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException;
 
     NVEntity decryptValues(APIDataStore<?, ?> dataStore, NVEntity container, byte msKey[])
-            throws NullPointerException, IllegalArgumentException, AccessException;
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException;
 
     void associateNVEntityToSubjectUserID(NVEntity nve, String userID);
 
     String currentSubjectID()
-            throws AccessException;
+            throws AccessSecurityException;
 
     String currentUserID()
-            throws AccessException;
+            throws AccessSecurityException;
 
     String currentDomainID()
-            throws AccessException;
+            throws AccessSecurityException;
 
     String currentAppID()
-            throws AccessException;
+            throws AccessSecurityException;
 
     String currentJWTSubjectID()
-            throws AccessException;
+            throws AccessSecurityException;
 
     S getDaemonSubject();
 
@@ -55,30 +55,30 @@ public interface APISecurityManager<S, O, I> {
 
 
     String checkNVEntityAccess(NVEntity nve, CRUD... permissions)
-            throws NullPointerException, IllegalArgumentException, AccessException;
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException;
 
     String checkNVEntityAccess(LogicalOperator lo, NVEntity nve, CRUD... permissions)
-            throws NullPointerException, IllegalArgumentException, AccessException;
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException;
 
     String checkNVEntityAccess(String nveRefID, String nveUserID, CRUD... permissions)
-            throws NullPointerException, IllegalArgumentException, AccessException;
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException;
 
     void checkSubject(String subjectID)
-            throws NullPointerException, AccessException;
+            throws NullPointerException, AccessSecurityException;
 
     String checkNVEntityAccess(String nveRefID, CRUD... permissions)
-            throws NullPointerException, IllegalArgumentException, AccessException;
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException;
 
 
     void checkPermissions(String... permissions)
-            throws NullPointerException, IllegalArgumentException, AccessException;
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException;
 
     void checkPermissions(boolean partial, String... permissions)
-            throws NullPointerException, IllegalArgumentException, AccessException;
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException;
 
 
     void checkPermission(NVEntity nve, String permission)
-            throws NullPointerException, IllegalArgumentException, AccessException;
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException;
 
     boolean isPermitted(NVEntity nve, String permission)
             throws NullPointerException, IllegalArgumentException;
@@ -93,10 +93,10 @@ public interface APISecurityManager<S, O, I> {
      * @return
      * @throws NullPointerException
      * @throws IllegalArgumentException
-     * @throws AccessException
+     * @throws AccessSecurityException
      */
     boolean hasPermission(String permission)
-            throws NullPointerException, IllegalArgumentException, AccessException;
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException;
 
     /**
      * Check if the current subject has all the roles
@@ -104,10 +104,10 @@ public interface APISecurityManager<S, O, I> {
      * @param roles
      * @throws NullPointerException
      * @throws IllegalArgumentException
-     * @throws AccessException
+     * @throws AccessSecurityException
      */
     void checkRoles(String... roles)
-            throws NullPointerException, IllegalArgumentException, AccessException;
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException;
 
     /**
      * Check if the current subject has the roles, if partial is true one of the is sufficient
@@ -116,10 +116,10 @@ public interface APISecurityManager<S, O, I> {
      * @param roles
      * @throws NullPointerException
      * @throws IllegalArgumentException
-     * @throws AccessException
+     * @throws AccessSecurityException
      */
     void checkRoles(boolean partial, String... roles)
-            throws NullPointerException, IllegalArgumentException, AccessException;
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException;
 
     /**
      * Check if the user has the role
@@ -128,10 +128,10 @@ public interface APISecurityManager<S, O, I> {
      * @return
      * @throws NullPointerException
      * @throws IllegalArgumentException
-     * @throws AccessException
+     * @throws AccessSecurityException
      */
     boolean hasRole(String role)
-            throws NullPointerException, IllegalArgumentException, AccessException;
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException;
 
 
     /**
@@ -145,10 +145,10 @@ public interface APISecurityManager<S, O, I> {
      * @return
      * @throws NullPointerException
      * @throws IllegalArgumentException
-     * @throws AccessException
+     * @throws AccessSecurityException
      */
     S login(String subjectID, String credentials, String domainID, String appID, boolean autoLogin)
-            throws NullPointerException, IllegalArgumentException, AccessException;
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException;
 
     /**
      * Login a subject based on jwtToken
@@ -157,10 +157,10 @@ public interface APISecurityManager<S, O, I> {
      * @return
      * @throws NullPointerException
      * @throws IllegalArgumentException
-     * @throws AccessException
+     * @throws AccessSecurityException
      */
     S login(JWTToken jwtToken)
-            throws NullPointerException, IllegalArgumentException, AccessException;
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException;
 
     /**
      * Logout the current subject

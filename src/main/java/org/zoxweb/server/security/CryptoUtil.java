@@ -57,6 +57,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import org.zoxweb.shared.security.AccessSecurityException;
 
 public class CryptoUtil {
 
@@ -966,23 +967,23 @@ public class CryptoUtil {
 
 
     public static String encodeJWT(String key, JWT jwt)
-            throws GeneralSecurityException, IOException, SecurityException, NullPointerException, IllegalArgumentException {
+            throws GeneralSecurityException, IOException, AccessSecurityException, NullPointerException, IllegalArgumentException {
         return encodeJWT(key, jwt, false);
     }
 
     public static String encodeJWT(String key, JWT jwt, boolean setHash)
-            throws GeneralSecurityException, IOException, SecurityException, NullPointerException, IllegalArgumentException {
+            throws GeneralSecurityException, IOException, AccessSecurityException, NullPointerException, IllegalArgumentException {
         return encodeJWT(key != null ? SharedStringUtil.getBytes(key) : null, jwt, setHash);
     }
 
     public static String encodeJWT(byte[] key, JWT jwt)
-            throws GeneralSecurityException, IOException, SecurityException, NullPointerException, IllegalArgumentException {
+            throws GeneralSecurityException, IOException, AccessSecurityException, NullPointerException, IllegalArgumentException {
         return encodeJWT(key, jwt, false);
     }
 
     public static String encodeJWT(byte[] key, JWT jwt, boolean setHash)
             throws IOException,
-            SecurityException, GeneralSecurityException {
+            AccessSecurityException, GeneralSecurityException {
         SUS.checkIfNulls("Null jwt", jwt);
         SUS.checkIfNulls("Null jwt header", jwt.getHeader());
         SUS.checkIfNulls("Null jwt algorithm", jwt.getHeader().getJWTAlgorithm());
@@ -1013,7 +1014,7 @@ public class CryptoUtil {
                         hmac.doFinal(SharedStringUtil.getBytes(sb.toString())));
                 break;
             case none:
-                throw new SecurityException("none JWT Algo not supported");
+                throw new AccessSecurityException("none JWT Algo not supported");
             case RS256:
             case RS384:
             case RS512:
@@ -1033,7 +1034,7 @@ public class CryptoUtil {
             default:
                 // without a signing branch above the token would be emitted with an empty
                 // signature, which reads as signed but is not
-                throw new SecurityException(jwtAlgo.getName() + " JWT Algo not supported");
+                throw new AccessSecurityException(jwtAlgo.getName() + " JWT Algo not supported");
         }
 
         sb.append(".");

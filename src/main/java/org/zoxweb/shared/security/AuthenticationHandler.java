@@ -17,10 +17,10 @@ package org.zoxweb.shared.security;
 
 /**
  * This interface defines an authentication handler that validates an input credential
- * against a reference object and throws AccessException on failure.
+ * against a reference object and throws AccessSecurityException on failure.
  */
 public interface AuthenticationHandler<I, O>
     extends IsSecure
 {
-	void authenticate(I input, O against) throws AccessException;
+	void authenticate(I input, O against) throws AccessSecurityException;
 }

@@ -24,6 +24,7 @@ import org.zoxweb.shared.util.SUS;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.*;
+import org.zoxweb.shared.security.AccessSecurityException;
 
 
 /**
@@ -171,26 +172,29 @@ public class ReflectionUtil {
     }
 
     public static Object updateFinalStatic(Class<?> clazz, String fieldName, Object newValue)
-            throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+            throws NoSuchFieldException, AccessSecurityException, IllegalArgumentException, IllegalAccessException {
+        try {
+            Field field = clazz.getDeclaredField(fieldName);
+            boolean fieldAccessible = field.isAccessible();
+            field.setAccessible(true);
+            Field modifiersField = Field.class.getDeclaredField("modifiers");
+            boolean modifierAccessible = modifiersField.isAccessible();
+            modifiersField.setAccessible(true);
+            int oldModifier = field.getModifiers();
+            modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
 
-        Field field = clazz.getDeclaredField(fieldName);
-        boolean fieldAccessible = field.isAccessible();
-        field.setAccessible(true);
-        Field modifiersField = Field.class.getDeclaredField("modifiers");
-        boolean modifierAccessible = modifiersField.isAccessible();
-        modifiersField.setAccessible(true);
-        int oldModifier = field.getModifiers();
-        modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+            //field.setInt( field, field.getModifiers() & ~Modifier.FINAL );
+            field.set(null, newValue);
+            modifiersField.setInt(field, oldModifier);
 
-        //field.setInt( field, field.getModifiers() & ~Modifier.FINAL );
-        field.set(null, newValue);
-        modifiersField.setInt(field, oldModifier);
+            Object ret = field.get(null);
+            field.setAccessible(fieldAccessible);
+            modifiersField.setAccessible(modifierAccessible);
 
-        Object ret = field.get(null);
-        field.setAccessible(fieldAccessible);
-        modifiersField.setAccessible(modifierAccessible);
-
-        return ret;
+            return ret;
+        } catch (SecurityException e) {
+            throw new AccessSecurityException("Access denied updating " + clazz.getName() + "." + fieldName, e);
+        }
     }
 
 

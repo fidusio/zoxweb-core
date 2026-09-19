@@ -15,7 +15,7 @@
  */
 package org.zoxweb.shared.api;
 
-import org.zoxweb.shared.security.AccessException;
+import org.zoxweb.shared.security.AccessSecurityException;
 
 import java.io.IOException;
 import java.util.List;
@@ -36,10 +36,10 @@ public interface APISearch<I, O> {
      * @throws IllegalArgumentException
      * @throws IOException
      * @throws NullPointerException
-     * @throws AccessException
+     * @throws AccessSecurityException
      * @throws APIException
      */
     @SuppressWarnings("unchecked")
     List<O> search(I... args)
-            throws IllegalArgumentException, IOException, NullPointerException, AccessException, APIException;
+            throws IllegalArgumentException, IOException, NullPointerException, AccessSecurityException, APIException;
 }

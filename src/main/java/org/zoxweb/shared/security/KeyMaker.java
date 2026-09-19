@@ -22,27 +22,27 @@ import org.zoxweb.shared.util.NVEntity;
 public interface KeyMaker 
 {
 	EncapsulatedKey createSubjectIDKey(SubjectIdentifier subjectID, final byte[]key)
-		throws NullPointerException, IllegalArgumentException, AccessException;
+		throws NullPointerException, IllegalArgumentException, AccessSecurityException;
 	
 	EncapsulatedKey createNVEntityKey(APIDataStore<?, ?> dataStore, NVEntity nve, final byte[] key)
-		throws NullPointerException, IllegalArgumentException, AccessException;
+		throws NullPointerException, IllegalArgumentException, AccessSecurityException;
 
 	
 	
 	byte[] getKey(APIDataStore<?, ?> dataStore, final byte[] key, String ...chainedIDs)
-		throws NullPointerException, IllegalArgumentException, AccessException;
+		throws NullPointerException, IllegalArgumentException, AccessSecurityException;
 	
 	byte[] getMasterKey()
-		throws NullPointerException, IllegalArgumentException, AccessException;
+		throws NullPointerException, IllegalArgumentException, AccessSecurityException;
 
 
 	EncapsulatedKey lookupEncryptedKeyDOA(APIDataStore<?, ?> dataStore, NVEntity nve)
-		throws NullPointerException, IllegalArgumentException, AccessException;
+		throws NullPointerException, IllegalArgumentException, AccessSecurityException;
 
 	EncapsulatedKey lookupEncryptedKeyDOA(APIDataStore<?, ?> dataStore, String dataRefGUID)
-			throws NullPointerException, IllegalArgumentException, AccessException;
+			throws NullPointerException, IllegalArgumentException, AccessSecurityException;
 	
 	EncapsulatedKey lookupEncryptedKeyDOA(APIDataStore<?, ?> dataStore, String resourceRefGUID, String subjectGUID)
-		throws NullPointerException, IllegalArgumentException, AccessException;
+		throws NullPointerException, IllegalArgumentException, AccessSecurityException;
 	
 }

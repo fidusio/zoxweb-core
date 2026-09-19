@@ -17,7 +17,7 @@ package org.zoxweb.shared.api;
 
 import org.zoxweb.shared.data.LongSequence;
 import org.zoxweb.shared.db.QueryMarker;
-import org.zoxweb.shared.security.AccessException;
+import org.zoxweb.shared.security.AccessSecurityException;
 import org.zoxweb.shared.util.*;
 
 import java.util.ArrayList;
@@ -74,11 +74,11 @@ public interface APIDataStore<P, S>
      * @return the first matching entity, null if no match was found
      * @throws NullPointerException     if a required parameter is null
      * @throws IllegalArgumentException if a parameter is invalid
-     * @throws AccessException          if access is denied
+     * @throws AccessSecurityException          if access is denied
      * @throws APIException             if the search fails
      */
     default <V extends NVEntity> V findOne(NVConfigEntity nvce, List<String> fieldNames, QueryMarker... queryCriteria)
-            throws NullPointerException, IllegalArgumentException, AccessException, APIException {
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException {
         List<V> ret = search(nvce, fieldNames, queryCriteria);
 
         return (ret == null || ret.isEmpty()) ? null : ret.get(0);
@@ -118,11 +118,11 @@ public interface APIDataStore<P, S>
      * @return the matching entities
      * @throws NullPointerException     if a required parameter is null
      * @throws IllegalArgumentException if a parameter is invalid
-     * @throws AccessException          if access is denied
+     * @throws AccessSecurityException          if access is denied
      * @throws APIException             if the search fails
      */
     <V extends NVEntity> List<V> search(NVConfigEntity nvce, List<String> fieldNames, QueryMarker... queryCriteria)
-            throws NullPointerException, IllegalArgumentException, AccessException, APIException;
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException;
 
     /**
      * Searches for entities matching the query criteria and returns the first match,
@@ -135,11 +135,11 @@ public interface APIDataStore<P, S>
      * @return the first matching entity, null if no match was found
      * @throws NullPointerException     if a required parameter is null
      * @throws IllegalArgumentException if a parameter is invalid
-     * @throws AccessException          if access is denied
+     * @throws AccessSecurityException          if access is denied
      * @throws APIException             if the search fails
      */
     default <V extends NVEntity> V findOne(String className, List<String> fieldNames, QueryMarker... queryCriteria)
-            throws NullPointerException, IllegalArgumentException, AccessException, APIException {
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException {
         List<V> ret = search(className, fieldNames, queryCriteria);
 
         return (ret == null || ret.isEmpty()) ? null : ret.get(0);
@@ -155,11 +155,11 @@ public interface APIDataStore<P, S>
      * @return the matching entities
      * @throws NullPointerException     if a required parameter is null
      * @throws IllegalArgumentException if a parameter is invalid
-     * @throws AccessException          if access is denied
+     * @throws AccessSecurityException          if access is denied
      * @throws APIException             if the search fails
      */
     <V extends NVEntity> List<V> search(String className, List<String> fieldNames, QueryMarker... queryCriteria)
-            throws NullPointerException, IllegalArgumentException, AccessException, APIException;
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException;
 
     /**
      * Report search based on the NVConfigEntity collection type. The returned result
@@ -171,11 +171,11 @@ public interface APIDataStore<P, S>
      * @return the search result holding the matching IDs
      * @throws NullPointerException     if a required parameter is null
      * @throws IllegalArgumentException if a parameter is invalid
-     * @throws AccessException          if access is denied
+     * @throws AccessSecurityException          if access is denied
      * @throws APIException             if the search fails
      */
     <T> APISearchResult<T> batchSearch(NVConfigEntity nvce, QueryMarker... queryCriteria)
-            throws NullPointerException, IllegalArgumentException, AccessException, APIException;
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException;
 
     /**
      * Report search based on the class collection. The returned result holds the
@@ -187,11 +187,11 @@ public interface APIDataStore<P, S>
      * @return the search result holding the matching IDs
      * @throws NullPointerException     if a required parameter is null
      * @throws IllegalArgumentException if a parameter is invalid
-     * @throws AccessException          if access is denied
+     * @throws AccessSecurityException          if access is denied
      * @throws APIException             if the search fails
      */
     <T> APISearchResult<T> batchSearch(String className, QueryMarker... queryCriteria)
-            throws NullPointerException, IllegalArgumentException, AccessException, APIException;
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException;
 
 
     /**
@@ -232,11 +232,11 @@ public interface APIDataStore<P, S>
      * @return the batch of matching entities
      * @throws NullPointerException     if a required parameter is null
      * @throws IllegalArgumentException if a parameter is invalid
-     * @throws AccessException          if access is denied
+     * @throws AccessSecurityException          if access is denied
      * @throws APIException             if the retrieval fails
      */
     <T, V extends NVEntity> APIBatchResult<V> nextBatch(APISearchResult<T> results, int startIndex, int batchSize)
-            throws NullPointerException, IllegalArgumentException, AccessException, APIException;
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException;
 
     /**
      * User specific search, the results are scoped to the given user.
@@ -249,11 +249,11 @@ public interface APIDataStore<P, S>
      * @return the matching entities
      * @throws NullPointerException     if a required parameter is null
      * @throws IllegalArgumentException if a parameter is invalid
-     * @throws AccessException          if access is denied
+     * @throws AccessSecurityException          if access is denied
      * @throws APIException             if the search fails
      */
     <V extends NVEntity> List<V> userSearch(String userID, NVConfigEntity nvce, List<String> fieldNames, QueryMarker... queryCriteria)
-            throws NullPointerException, IllegalArgumentException, AccessException, APIException;
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException;
 
     /**
      * User specific search based on the class name as collection, the results are
@@ -267,11 +267,11 @@ public interface APIDataStore<P, S>
      * @return the matching entities
      * @throws NullPointerException     if a required parameter is null
      * @throws IllegalArgumentException if a parameter is invalid
-     * @throws AccessException          if access is denied
+     * @throws AccessSecurityException          if access is denied
      * @throws APIException             if the search fails
      */
     <V extends NVEntity> List<V> userSearch(String userID, String className, List<String> fieldNames, QueryMarker... queryCriteria)
-            throws NullPointerException, IllegalArgumentException, AccessException, APIException;
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException;
 
     /**
      * This method searches for documents based on id.
@@ -282,11 +282,11 @@ public interface APIDataStore<P, S>
      * @return the matching entities
      * @throws NullPointerException     if a required parameter is null
      * @throws IllegalArgumentException if a parameter is invalid
-     * @throws AccessException          if access is denied
+     * @throws AccessSecurityException          if access is denied
      * @throws APIException             if the search fails
      */
     <V extends NVEntity> List<V> searchByID(NVConfigEntity nvce, String... ids)
-            throws NullPointerException, IllegalArgumentException, AccessException, APIException;
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException;
 
 
     /**
@@ -298,11 +298,11 @@ public interface APIDataStore<P, S>
      * @return the matching entities
      * @throws NullPointerException     if a required parameter is null
      * @throws IllegalArgumentException if a parameter is invalid
-     * @throws AccessException          if access is denied
+     * @throws AccessSecurityException          if access is denied
      * @throws APIException             if the search fails or the class does not extend NVEntity
      */
     <V extends NVEntity> List<V> searchByID(String className, String... ids)
-            throws NullPointerException, IllegalArgumentException, AccessException, APIException;
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException;
 
 
     /**
@@ -315,11 +315,11 @@ public interface APIDataStore<P, S>
      * @return the matching entities
      * @throws NullPointerException     if a required parameter is null
      * @throws IllegalArgumentException if a parameter is invalid
-     * @throws AccessException          if access is denied
+     * @throws AccessSecurityException          if access is denied
      * @throws APIException             if the search fails
      */
     <V extends NVEntity> List<V> userSearchByID(String userID, NVConfigEntity nvce, String... ids)
-            throws NullPointerException, IllegalArgumentException, AccessException, APIException;
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException;
 
     /**
      * This method inserts a document.
@@ -329,11 +329,11 @@ public interface APIDataStore<P, S>
      * @return the inserted entity with its assigned identifiers
      * @throws NullPointerException     if nve is null
      * @throws IllegalArgumentException if the entity is invalid
-     * @throws AccessException          if access is denied
+     * @throws AccessSecurityException          if access is denied
      * @throws APIException             if the insert fails
      */
     <V extends NVEntity> V insert(V nve)
-            throws NullPointerException, IllegalArgumentException, AccessException, APIException;
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException;
 
     /**
      * This method deletes a document.
@@ -344,11 +344,11 @@ public interface APIDataStore<P, S>
      * @return true if the entity was deleted
      * @throws NullPointerException     if nve is null
      * @throws IllegalArgumentException if the entity is invalid
-     * @throws AccessException          if access is denied
+     * @throws AccessSecurityException          if access is denied
      * @throws APIException             if the delete fails
      */
     <V extends NVEntity> boolean delete(V nve, boolean withReference)
-            throws NullPointerException, IllegalArgumentException, AccessException, APIException;
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException;
 
 
     /**
@@ -360,11 +360,11 @@ public interface APIDataStore<P, S>
      * @return true if at least one entity was deleted
      * @throws NullPointerException     if a required parameter is null
      * @throws IllegalArgumentException if a parameter is invalid
-     * @throws AccessException          if access is denied
+     * @throws AccessSecurityException          if access is denied
      * @throws APIException             if the delete fails
      */
     <V extends NVEntity> boolean delete(NVConfigEntity nvce, QueryMarker... queryCriteria)
-            throws NullPointerException, IllegalArgumentException, AccessException, APIException;
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException;
 
     /**
      * This method updates a document.
@@ -475,11 +475,11 @@ public interface APIDataStore<P, S>
      * @return all the enum maps
      * @throws NullPointerException     if a required parameter is null
      * @throws IllegalArgumentException if a parameter is invalid
-     * @throws AccessException          if access is denied
+     * @throws AccessSecurityException          if access is denied
      * @throws APIException             if the retrieval fails
      */
     List<DynamicEnumMap> getAllDynamicEnumMap(String domainID, String userID)
-            throws NullPointerException, IllegalArgumentException, AccessException, APIException;
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException;
 
 
     /**
@@ -515,11 +515,11 @@ public interface APIDataStore<P, S>
      * @return the sequence
      * @throws NullPointerException     if sequenceName is null
      * @throws IllegalArgumentException if sequenceName is invalid
-     * @throws AccessException          if access is denied
+     * @throws AccessSecurityException          if access is denied
      * @throws APIException             if the creation fails
      */
     LongSequence createSequence(String sequenceName)
-            throws NullPointerException, IllegalArgumentException, AccessException, APIException;
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException;
 
     /**
      * Creates a named long sequence.
@@ -530,11 +530,11 @@ public interface APIDataStore<P, S>
      * @return the sequence
      * @throws NullPointerException     if sequenceName is null
      * @throws IllegalArgumentException if a parameter is invalid
-     * @throws AccessException          if access is denied
+     * @throws AccessSecurityException          if access is denied
      * @throws APIException             if the creation fails
      */
     LongSequence createSequence(String sequenceName, long startValue, long defaultIncrement)
-            throws NullPointerException, IllegalArgumentException, AccessException, APIException;
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException;
 
     /**
      * Deletes a named long sequence.
@@ -542,11 +542,11 @@ public interface APIDataStore<P, S>
      * @param sequenceName the name of the sequence to be deleted
      * @throws NullPointerException     if sequenceName is null
      * @throws IllegalArgumentException if sequenceName is invalid
-     * @throws AccessException          if access is denied
+     * @throws AccessSecurityException          if access is denied
      * @throws APIException             if the delete fails
      */
     void deleteSequence(String sequenceName)
-            throws NullPointerException, IllegalArgumentException, AccessException, APIException;
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException;
 
     /**
      * Returns the current value of a named long sequence without incrementing it.
@@ -555,11 +555,11 @@ public interface APIDataStore<P, S>
      * @return the current sequence value
      * @throws NullPointerException     if sequenceName is null
      * @throws IllegalArgumentException if sequenceName is invalid
-     * @throws AccessException          if access is denied
+     * @throws AccessSecurityException          if access is denied
      * @throws APIException             if the retrieval fails
      */
     long currentSequenceValue(String sequenceName)
-            throws NullPointerException, IllegalArgumentException, AccessException, APIException;
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException;
 
     /**
      * Increments a named long sequence by its default increment and returns the new value.
@@ -568,11 +568,11 @@ public interface APIDataStore<P, S>
      * @return the next sequence value
      * @throws NullPointerException     if sequenceName is null
      * @throws IllegalArgumentException if sequenceName is invalid
-     * @throws AccessException          if access is denied
+     * @throws AccessSecurityException          if access is denied
      * @throws APIException             if the increment fails
      */
     long nextSequenceValue(String sequenceName)
-            throws NullPointerException, IllegalArgumentException, AccessException, APIException;
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException;
 
     /**
      * Increments a named long sequence by the given increment and returns the new value.
@@ -582,11 +582,11 @@ public interface APIDataStore<P, S>
      * @return the next sequence value
      * @throws NullPointerException     if sequenceName is null
      * @throws IllegalArgumentException if a parameter is invalid
-     * @throws AccessException          if access is denied
+     * @throws AccessSecurityException          if access is denied
      * @throws APIException             if the increment fails
      */
     long nextSequenceValue(String sequenceName, long increment)
-            throws NullPointerException, IllegalArgumentException, AccessException, APIException;
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException;
 
     /**
      * Checks if the given reference ID is valid for the underlying data store.

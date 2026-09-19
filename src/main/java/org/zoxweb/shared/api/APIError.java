@@ -18,7 +18,7 @@ package org.zoxweb.shared.api;
 import org.zoxweb.shared.api.APIException.Category;
 import org.zoxweb.shared.api.APIException.Code;
 import org.zoxweb.shared.data.SetNameDescriptionDAO;
-import org.zoxweb.shared.security.AccessException;
+import org.zoxweb.shared.security.AccessSecurityException;
 import org.zoxweb.shared.util.GetNVConfig;
 import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
@@ -136,8 +136,8 @@ public class APIError
     public void setException(Exception e) {
         setMessage(e.getMessage());
         setExceptionClassName(e.getClass().getName());
-        if (e instanceof AccessException) {
-            AccessException ae = (AccessException) e;
+        if (e instanceof AccessSecurityException) {
+            AccessSecurityException ae = (AccessSecurityException) e;
             setReloadRequired(ae.isReloadRequired());
             setURLRedirect(ae.getURLRedirect());
         }
@@ -153,9 +153,9 @@ public class APIError
             return new IllegalArgumentException(getMessage());
         }
 
-        if (AccessException.class.getName().equals(getExceptionClassName())) {
+        if (AccessSecurityException.class.getName().equals(getExceptionClassName())) {
 
-            return new AccessException(getMessage(), getURLRedirect(), isReloadRequired());
+            return new AccessSecurityException(getMessage(), getURLRedirect(), isReloadRequired());
         }
 
 

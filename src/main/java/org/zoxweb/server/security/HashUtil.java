@@ -40,6 +40,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
+import org.zoxweb.shared.security.AccessSecurityException;
 
 /*
  * PBKDF2 salted password hashing.
@@ -230,7 +231,7 @@ public class HashUtil {
         try {
             return toPassword(CryptoConst.HashType.BCRYPT, 0, logRounds, password);
         } catch (NoSuchAlgorithmException e) {
-            throw new SecurityException(e);
+            throw new AccessSecurityException(e);
         }
     }
 
@@ -239,7 +240,7 @@ public class HashUtil {
         try {
             return toPassword(CryptoConst.HashType.BCRYPT, 0, logRounds, password);
         } catch (NoSuchAlgorithmException e) {
-            throw new SecurityException(e);
+            throw new AccessSecurityException(e);
         }
     }
 
@@ -248,7 +249,7 @@ public class HashUtil {
         try {
             return toPassword(CryptoConst.HashType.BCRYPT, 0, 10, password);
         } catch (NoSuchAlgorithmException e) {
-            throw new SecurityException(e);
+            throw new AccessSecurityException(e);
         }
     }
 
@@ -257,7 +258,7 @@ public class HashUtil {
         try {
             return toPassword(CryptoConst.HashType.BCRYPT, 0, 10, password);
         } catch (NoSuchAlgorithmException e) {
-            throw new SecurityException(e);
+            throw new AccessSecurityException(e);
         }
     }
 
@@ -378,13 +379,13 @@ public class HashUtil {
 
 
 //    public static void validatePassword(final CIPassword passwordDAO, final char[] password)
-//            throws NullPointerException, IllegalArgumentException, AccessException {
+//            throws NullPointerException, IllegalArgumentException, AccessSecurityException {
 //
 //        SUS.checkIfNulls("Null values", passwordDAO, password);
 //        if (SecUtil.SINGLETON.isPasswordValid(passwordDAO, new String(password)))
 //            return; // we hava a valid password
 //        // password validation failed,
-//        throw new AccessException("Invalid Credentials");
+//        throw new AccessSecurityException("Invalid Credentials");
 //
 //    }
 }

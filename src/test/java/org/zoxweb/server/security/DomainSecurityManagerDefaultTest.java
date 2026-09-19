@@ -47,8 +47,8 @@ class DomainSecurityManagerDefaultTest {
         // case-insensitive principal still resolves
         assertEquals(subject.getGUID(), mgr.login("ALICE@example.com", PASSWORD).getGUID());
 
-        assertThrows(SecurityException.class, () -> mgr.login(PRINCIPAL, "wrong-password"));
-        assertThrows(SecurityException.class, () -> mgr.login("nobody@example.com", PASSWORD));
+        assertThrows(AccessSecurityException.class, () -> mgr.login(PRINCIPAL, "wrong-password"));
+        assertThrows(AccessSecurityException.class, () -> mgr.login("nobody@example.com", PASSWORD));
     }
 
     @Test

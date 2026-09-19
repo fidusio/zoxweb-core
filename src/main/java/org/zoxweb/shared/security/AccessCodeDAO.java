@@ -124,7 +124,7 @@ public class AccessCodeDAO
 	}
 	
 	public synchronized long validateAccessCode(String toValidate)
-		throws AccessException
+		throws AccessSecurityException
 	{
 		String currentAccessCode = getAccessCode();
 
@@ -134,7 +134,7 @@ public class AccessCodeDAO
 
 			if (toValidate == null)
 			{
-				throw new AccessException("Invalid access code");
+				throw new AccessSecurityException("Invalid access code");
 			}
 			
 			if (!isCaseSensitive())
@@ -145,7 +145,7 @@ public class AccessCodeDAO
 			
 			if (!currentAccessCode.equals(toValidate))
 			{
-				throw new AccessException("Access Code Denied.");				
+				throw new AccessSecurityException("Access Code Denied.");
 			}
 		}
 		
@@ -154,7 +154,7 @@ public class AccessCodeDAO
 
 		if (getAccessQuota() > 0 && getAccessCount() > getAccessQuota())
 		{
-			throw new AccessException("Access Code Denied validatation quota reached.");
+			throw new AccessSecurityException("Access Code Denied validatation quota reached.");
 		}
 		
 		return getAccessCount();

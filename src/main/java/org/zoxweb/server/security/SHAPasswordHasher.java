@@ -3,7 +3,7 @@ package org.zoxweb.server.security;
 import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.shared.crypto.CIPassword;
 import org.zoxweb.shared.crypto.CryptoConst;
-import org.zoxweb.shared.security.AccessException;
+import org.zoxweb.shared.security.AccessSecurityException;
 import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedBase64;
 import org.zoxweb.shared.util.SharedStringUtil;
@@ -27,7 +27,7 @@ public class SHAPasswordHasher
         try {
             return HashUtil.toPassword(getHashType(), 0, getRounds(), password);
         } catch (NoSuchAlgorithmException e) {
-            throw new AccessException(e.getMessage());
+            throw new AccessSecurityException(e.getMessage());
         }
     }
 
@@ -36,7 +36,7 @@ public class SHAPasswordHasher
         try {
             return HashUtil.toPassword(getHashType(), 0, getRounds(), password);
         } catch (NoSuchAlgorithmException e) {
-            throw new AccessException(e.getMessage());
+            throw new AccessSecurityException(e.getMessage());
         }
     }
 
@@ -83,7 +83,7 @@ public class SHAPasswordHasher
         try {
             return HashUtil.toPassword(getHashType(), 0, getRounds(), ByteBufferUtil.toBytes(password));
         } catch (NoSuchAlgorithmException e) {
-            throw new AccessException(e.getMessage());
+            throw new AccessSecurityException(e.getMessage());
         }
     }
 

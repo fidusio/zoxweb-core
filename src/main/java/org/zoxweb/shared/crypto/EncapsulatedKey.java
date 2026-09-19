@@ -15,7 +15,7 @@
  */
 package org.zoxweb.shared.crypto;
 
-import org.zoxweb.shared.security.AccessException;
+import org.zoxweb.shared.security.AccessSecurityException;
 import org.zoxweb.shared.util.*;
 
 /**
@@ -96,11 +96,11 @@ public class EncapsulatedKey
      * Points this key at {@code nve}: its GUID becomes the reference GUID and its class name the
      * reference type.
      *
-     * @throws AccessException if the entity has no GUID yet
+     * @throws AccessSecurityException if the entity has no GUID yet
      */
     public void setObjectReference(NVEntity nve) {
         if (nve.getGUID() == null) {
-            throw new AccessException("NVEntity GUID not set.");
+            throw new AccessSecurityException("NVEntity GUID not set.");
         }
         setReferenceGUID(nve.getGUID());
         setReferenceType(nve.getClass().getName());

@@ -6,6 +6,7 @@ import org.zoxweb.server.task.TaskEvent;
 import org.zoxweb.server.task.TaskSchedulerProcessor;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.server.util.DateUtil;
+import org.zoxweb.shared.security.AccessSecurityException;
 import org.zoxweb.shared.security.JWT;
 import org.zoxweb.shared.security.JWTToken;
 import org.zoxweb.shared.util.Const.TimeInMillis;
@@ -21,7 +22,7 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * One time use JWT cache that prevents token replay attacks, a token is registered by its
  * hash and stays cached for the duration of its validity window, registering the same token
- * twice within that window is a replay and is rejected with a SecurityException.
+ * twice within that window is a replay and is rejected with a AccessSecurityException.
  * <p>Expired entries are evicted by a cleaner task queued on the task scheduler at
  * registration time, so the cache content self purges without any polling.
  */
@@ -85,7 +86,7 @@ public class JWTTokenCache
      *
      * @param jwtToken the token to register
      * @return true if the token was registered
-     * @throws SecurityException if the token is expired or already registered, replay attack
+     * @throws AccessSecurityException if the token is expired or already registered, replay attack
      */
     public boolean map(JWTToken jwtToken) {
         return put(jwtToken.getJWT().getHash(), jwtToken.getJWT());
@@ -96,7 +97,7 @@ public class JWTTokenCache
      *
      * @param jwt the jwt to register
      * @return true if the jwt was registered
-     * @throws SecurityException if the jwt is expired or already registered, replay attack
+     * @throws AccessSecurityException if the jwt is expired or already registered, replay attack
      */
     public boolean map(JWT jwt) {
         return put(jwt.getHash(), jwt);
@@ -111,19 +112,19 @@ public class JWTTokenCache
      * @param jwtHash the jwt hash used as key
      * @param jwt     to be registered
      * @return true if the jwt was registered
-     * @throws SecurityException if the jwt is expired or the hash is already registered,
+     * @throws AccessSecurityException if the jwt is expired or the hash is already registered,
      *                           replay attack
      */
     @Override
     public boolean put(String jwtHash, JWT jwt)
-            throws SecurityException {
+            throws AccessSecurityException {
 
         long issuedAtInMillis = jwt.getPayload().getIssuedAt() * 1000;
         long delta = Math.abs(System.currentTimeMillis() - issuedAtInMillis);
 
 
         if (delta >= expirationPeriod) {
-            throw new SecurityException("Expired token issued at " + DateUtil.DEFAULT_GMT_MILLIS.format(new Date(issuedAtInMillis)));
+            throw new AccessSecurityException("Expired token issued at " + DateUtil.DEFAULT_GMT_MILLIS.format(new Date(issuedAtInMillis)));
         }
 
 
@@ -132,7 +133,7 @@ public class JWTTokenCache
             lock.lock();
             if (cache.get(jwtHash) != null) {
                 // otp replay
-                throw new SecurityException("Token already used, replay attack.");
+                throw new AccessSecurityException("Token already used, replay attack.");
             }
 
             // register the token

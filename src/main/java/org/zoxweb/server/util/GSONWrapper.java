@@ -1,7 +1,7 @@
 package org.zoxweb.server.util;
 
 import org.zoxweb.shared.api.APIException;
-import org.zoxweb.shared.security.AccessException;
+import org.zoxweb.shared.security.AccessSecurityException;
 import org.zoxweb.shared.util.NVConfigEntity;
 import org.zoxweb.shared.util.NVEntity;
 import org.zoxweb.shared.util.NVGenericMap;
@@ -25,12 +25,12 @@ public class GSONWrapper {
     }
 
     public <V extends NVEntity> V fromJSON(String json, Class<? extends NVEntity> clazz)
-            throws AccessException, APIException {
+            throws AccessSecurityException, APIException {
         return fromJSON(json, clazz, b64Type);
     }
 
     public <V extends NVEntity> V fromJSON(String json, Class<? extends NVEntity> clazz, Base64Type b64t)
-            throws AccessException, APIException {
+            throws AccessSecurityException, APIException {
         return GSONUtil.fromJSON(json, clazz, b64t);
     }
 

@@ -17,18 +17,18 @@ public interface DomainSecurityManager {
      * @param principalID the principal identifier to log in with
      * @param credential  the credential proving the principal's identity, such as a password
      * @return the subject that owns the principal upon successful authentication
-     * @throws SecurityException if authentication fails
+     * @throws AccessSecurityException if authentication fails
      */
-    SubjectIdentifier login(String principalID, String credential) throws SecurityException;
+    SubjectIdentifier login(String principalID, String credential) throws AccessSecurityException;
 
     /**
      * Authenticates with an API key.
      *
      * @param key the API key to log in with
      * @return the subject that owns the API key upon successful authentication
-     * @throws SecurityException if authentication fails
+     * @throws AccessSecurityException if authentication fails
      */
-    SubjectIdentifier loginApiKey(String key) throws SecurityException;
+    SubjectIdentifier loginApiKey(String key) throws AccessSecurityException;
 
     /**
      * Checks a principal's current password without logging in: no Shiro subject, no session.
@@ -55,9 +55,9 @@ public interface DomainSecurityManager {
      * @param principalID any principal of the subject
      * @return the token and the delivery addresses
      * @throws NoRecoveryChannelException if the subject owns no email principal
-     * @throws SecurityException          if the principal is unknown or the subject is not active
+     * @throws AccessSecurityException          if the principal is unknown or the subject is not active
      */
-    PasswordResetRequest requestPasswordReset(String principalID) throws SecurityException;
+    PasswordResetRequest requestPasswordReset(String principalID) throws AccessSecurityException;
 
     /**
      * Administrator-initiated reset for any subject, including one without an email principal:
@@ -66,9 +66,9 @@ public interface DomainSecurityManager {
      *
      * @param principalID any principal of the subject
      * @return the token
-     * @throws SecurityException if the caller may not, the principal is unknown or the subject is not active
+     * @throws AccessSecurityException if the caller may not, the principal is unknown or the subject is not active
      */
-    PasswordResetRequest adminResetPassword(String principalID) throws SecurityException;
+    PasswordResetRequest adminResetPassword(String principalID) throws AccessSecurityException;
 
     /**
      * Completes a reset: the token must be the outstanding one of the subject that owns the
@@ -79,10 +79,10 @@ public interface DomainSecurityManager {
      * @param principalID any principal of the subject
      * @param token       the clear token
      * @param newPassword the new password
-     * @throws SecurityException        with a generic message on any token, principal or status failure
+     * @throws AccessSecurityException        with a generic message on any token, principal or status failure
      * @throws IllegalArgumentException if the new password violates the policy
      */
-    void completePasswordReset(String principalID, String token, String newPassword) throws SecurityException;
+    void completePasswordReset(String principalID, String token, String newPassword) throws AccessSecurityException;
 
     /**
      * Cancels an outstanding reset: supersedes the token and restores {@code ACTIVE}. Allowed to
@@ -120,9 +120,9 @@ public interface DomainSecurityManager {
      * @param password    the initial password for the subject
      * @param hashType    the hash algorithm used to store the password
      * @return the subject object
-     * @throws SecurityException if the subject cannot be created
+     * @throws AccessSecurityException if the subject cannot be created
      */
-    SubjectIdentifier createSubjectID(String principalID, String password, CryptoConst.HashType hashType) throws SecurityException;
+    SubjectIdentifier createSubjectID(String principalID, String password, CryptoConst.HashType hashType) throws AccessSecurityException;
 
     /**
      * Returns a subject by one of its principal identifiers.
@@ -430,7 +430,7 @@ public interface DomainSecurityManager {
      * @param resource       the resource instance the grant is scoped to
      * @return the persisted grant
      * @throws IllegalArgumentException if the permission token cannot be scoped or the resource does not exist
-     * @throws AccessException          if the caller may not grant on that resource
+     * @throws AccessSecurityException          if the caller may not grant on that resource
      */
     PermissionGrant addPermissionGrant(SubjectIdentifier subject, PermissionInfo permissionInfo, ResourceMap resource);
 
@@ -446,7 +446,7 @@ public interface DomainSecurityManager {
      * @param permissionToken the inlined permission token
      * @return the persisted grant
      * @throws IllegalArgumentException if the token is invalid or the resource does not exist
-     * @throws AccessException          if the caller does not own the resource
+     * @throws AccessSecurityException          if the caller does not own the resource
      */
     PermissionGrant addPermissionGrant(SubjectIdentifier subject, ResourceMap resource, String permissionToken);
 

@@ -44,6 +44,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BiFunction;
+import org.zoxweb.shared.security.AccessSecurityException;
 
 /**
  * Contains HTTP utility functionalities.
@@ -333,7 +334,7 @@ public class HTTPUtil {
         return ubaos;
     }
 
-    public static void addHTTPMethods() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+    public static void addHTTPMethods() throws NoSuchFieldException, AccessSecurityException, IllegalArgumentException, IllegalAccessException {
         if (!extraMethodAdded.get()) {
             try {
                 lock.lock();

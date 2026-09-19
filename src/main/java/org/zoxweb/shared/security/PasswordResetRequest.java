@@ -19,7 +19,7 @@ public final class PasswordResetRequest {
         this.token = token;
         this.subjectGUID = subjectGUID;
         this.principalID = principalID;
-        this.deliveryPrincipalIDs = deliveryPrincipalIDs != null ? deliveryPrincipalIDs.clone() : new String[0];
+        this.deliveryPrincipalIDs = deliveryPrincipalIDs != null ? deliveryPrincipalIDs : new String[0];
         this.expiryTS = expiryTS;
         this.channel = channel;
     }
@@ -40,7 +40,7 @@ public final class PasswordResetRequest {
 
     /** Email principals of the subject the token should be mailed to; empty when there are none. */
     public String[] getDeliveryPrincipalIDs() {
-        return deliveryPrincipalIDs.clone();
+        return deliveryPrincipalIDs;
     }
 
     public long getExpiryTS() {

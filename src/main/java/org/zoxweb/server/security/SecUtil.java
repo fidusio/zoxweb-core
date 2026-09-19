@@ -137,7 +137,7 @@ public final class SecUtil {
                 SharedBase64.decodeAsString(SharedBase64.Base64Type.URL, tokens[JWT.JWTField.PAYLOAD.ordinal()]),
                 JWTPayload.NVC_JWT_PAYLOAD, SharedBase64.Base64Type.URL);
         if (nvgmPayload == null) {
-            throw new SecurityException("Invalid JWT");
+            throw new AccessSecurityException("Invalid JWT");
         }
         JWT ret = new JWT();
 
@@ -145,7 +145,7 @@ public final class SecUtil {
         JWTPayload jwtPayload = ret.getPayload();
         JWTHeader jwtHeader = ret.getHeader();
         if (jwtHeader == null || jwtPayload == null) {
-            throw new SecurityException("Invalid JWT");
+            throw new AccessSecurityException("Invalid JWT");
         }
         jwtPayload.setProperties(nvgmPayload);
         jwtHeader.setProperties(nvgmHeader);
@@ -172,13 +172,13 @@ public final class SecUtil {
 
     public static JWT decodeJWT(String key, String token)
             throws IOException,
-            SecurityException, NullPointerException, IllegalArgumentException, GeneralSecurityException {
+            AccessSecurityException, NullPointerException, IllegalArgumentException, GeneralSecurityException {
         return decodeJWT(key != null ? SharedStringUtil.getBytes(key) : null, token);
     }
 
     public static JWT decodeJWT(byte[] key, String token)
             throws IOException,
-            SecurityException, GeneralSecurityException {
+            AccessSecurityException, GeneralSecurityException {
 
         JWT jwt;
         try {
@@ -186,7 +186,7 @@ public final class SecUtil {
         } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
-            throw new SecurityException();
+            throw new AccessSecurityException();
         }
 
 
@@ -198,7 +198,7 @@ public final class SecUtil {
             case HS512:
                 SUS.checkIfNull("Null key", key);
                 if (tokens.length != JWT.JWTField.values().length) {
-                    throw new SecurityException("Invalid token");
+                    throw new AccessSecurityException("Invalid token");
                 }
                 Mac shaHMAC = HashUtil.getMac(jwtAlgo.getSignatureAlgo());
                 SecretKeySpec secret_key = new SecretKeySpec(key, jwtAlgo.getSignatureAlgo().getName());
@@ -209,14 +209,14 @@ public final class SecUtil {
                 byte[] b64Hash = shaHMAC.doFinal(SharedStringUtil.getBytes(tokens[JWT.JWTField.PAYLOAD.ordinal()]));
 
                 if (!SharedBase64.encodeAsString(SharedBase64.Base64Type.URL, b64Hash).equals(jwt.getHash())) {
-                    throw new SecurityException("Invalid token");
+                    throw new AccessSecurityException("Invalid token");
                 }
                 break;
 
             case none:
                 // an unsecured token carries no signature, accepting it would let a forged
                 // header bypass verification entirely
-                throw new SecurityException("none JWT Algo not supported");
+                throw new AccessSecurityException("none JWT Algo not supported");
             case RS256:
             case RS384:
             case RS512:
@@ -228,7 +228,7 @@ public final class SecUtil {
             case ES512:
                 SUS.checkIfNull("Null key", key);
                 if (tokens.length != JWT.JWTField.values().length) {
-                    throw new SecurityException("Invalid token");
+                    throw new AccessSecurityException("Invalid token");
                 }
                 PublicKey publicKey = CryptoUtil.generatePublicKey(jwtAlgo.getSignatureAlgo().getCryptoAlgo().getName(), key);
 
@@ -236,14 +236,14 @@ public final class SecUtil {
                         SharedStringUtil.getBytes(
                                 tokens[JWT.JWTField.HEADER.ordinal()] + "." + tokens[JWT.JWTField.PAYLOAD.ordinal()]),
                         SharedBase64.decode(SharedBase64.Base64Type.URL, jwt.getHash()))) {
-                    throw new SecurityException("Invalid token");
+                    throw new AccessSecurityException("Invalid token");
                 }
                 break;
 
             default:
                 // never fall through to an accept, an algorithm with no verification branch
                 // above would otherwise be trusted without any signature check
-                throw new SecurityException(jwtAlgo.getName() + " JWT Algo not supported");
+                throw new AccessSecurityException(jwtAlgo.getName() + " JWT Algo not supported");
         }
 
         return jwt;

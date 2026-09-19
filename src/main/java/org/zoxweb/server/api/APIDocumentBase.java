@@ -5,7 +5,7 @@ import org.zoxweb.shared.api.APIDocumentStore;
 import org.zoxweb.shared.api.APIException;
 import org.zoxweb.shared.api.APIFileInfoMap;
 import org.zoxweb.shared.data.DataConst.DocumentStatus;
-import org.zoxweb.shared.security.AccessException;
+import org.zoxweb.shared.security.AccessSecurityException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -48,11 +48,11 @@ abstract public class APIDocumentBase<P, S>
      * @throws NullPointerException
      * @throws IllegalArgumentException
      * @throws IOException
-     * @throws AccessException
+     * @throws AccessSecurityException
      * @throws APIException
      */
     public APIFileInfoMap createFile(String folderID, APIFileInfoMap file, InputStream is, boolean closeStream)
-            throws NullPointerException, IllegalArgumentException, IOException, AccessException, APIException {
+            throws NullPointerException, IllegalArgumentException, IOException, AccessSecurityException, APIException {
 
 
         Lock lock = null;
@@ -72,7 +72,7 @@ abstract public class APIDocumentBase<P, S>
     }
 
     protected abstract APIFileInfoMap internalCreateFile(String folderID, APIFileInfoMap file, InputStream is, boolean closeStream)
-            throws NullPointerException, IllegalArgumentException, IOException, AccessException, APIException;
+            throws NullPointerException, IllegalArgumentException, IOException, AccessSecurityException, APIException;
 
 
     /**
@@ -83,10 +83,10 @@ abstract public class APIDocumentBase<P, S>
      * @throws NullPointerException
      * @throws IllegalArgumentException
      * @throws IOException
-     * @throws AccessException
+     * @throws AccessSecurityException
      */
     public APIFileInfoMap createFolder(String folderFullPath)
-            throws NullPointerException, IllegalArgumentException, IOException, AccessException, APIException {
+            throws NullPointerException, IllegalArgumentException, IOException, AccessSecurityException, APIException {
         try {
 
             pendingCalls.incrementAndGet();
@@ -99,7 +99,7 @@ abstract public class APIDocumentBase<P, S>
 
 
     protected abstract APIFileInfoMap internalCreateFolder(String folderFullPath)
-            throws NullPointerException, IllegalArgumentException, IOException, AccessException, APIException;
+            throws NullPointerException, IllegalArgumentException, IOException, AccessSecurityException, APIException;
 
     /**
      * This method reads a file.
@@ -111,7 +111,7 @@ abstract public class APIDocumentBase<P, S>
      * @throws NullPointerException
      */
     public APIFileInfoMap readFile(APIFileInfoMap map, OutputStream os, boolean closeStream)
-            throws NullPointerException, IllegalArgumentException, IOException, AccessException, APIException {
+            throws NullPointerException, IllegalArgumentException, IOException, AccessSecurityException, APIException {
         try {
 
             pendingCalls.incrementAndGet();
@@ -129,7 +129,7 @@ abstract public class APIDocumentBase<P, S>
 
 
     protected abstract APIFileInfoMap internalReadFile(APIFileInfoMap map, OutputStream os, boolean closeStream)
-            throws NullPointerException, IllegalArgumentException, IOException, AccessException, APIException;
+            throws NullPointerException, IllegalArgumentException, IOException, AccessSecurityException, APIException;
 
     /**
      * This method updates a file.
@@ -141,7 +141,7 @@ abstract public class APIDocumentBase<P, S>
      * @throws NullPointerException
      */
     public synchronized APIFileInfoMap updateFile(APIFileInfoMap map, InputStream is, boolean closeStream)
-            throws NullPointerException, IllegalArgumentException, IOException, AccessException, APIException {
+            throws NullPointerException, IllegalArgumentException, IOException, AccessSecurityException, APIException {
         try {
 
             pendingCalls.incrementAndGet();
@@ -172,7 +172,7 @@ abstract public class APIDocumentBase<P, S>
 
 
     protected abstract APIFileInfoMap internalUpdateFile(APIFileInfoMap map, InputStream is, boolean closeStream)
-            throws NullPointerException, IllegalArgumentException, IOException, AccessException, APIException;
+            throws NullPointerException, IllegalArgumentException, IOException, AccessSecurityException, APIException;
 
     /**
      * This method deletes a file.
@@ -182,7 +182,7 @@ abstract public class APIDocumentBase<P, S>
      * @throws NullPointerException
      */
     public void deleteFile(APIFileInfoMap map)
-            throws NullPointerException, IllegalArgumentException, IOException, AccessException, APIException {
+            throws NullPointerException, IllegalArgumentException, IOException, AccessSecurityException, APIException {
         Lock lock = null;
         try {
 
@@ -201,6 +201,6 @@ abstract public class APIDocumentBase<P, S>
 
 
     protected abstract void internalDeleteFile(APIFileInfoMap map)
-            throws NullPointerException, IllegalArgumentException, IOException, AccessException, APIException;
+            throws NullPointerException, IllegalArgumentException, IOException, AccessSecurityException, APIException;
 
 }

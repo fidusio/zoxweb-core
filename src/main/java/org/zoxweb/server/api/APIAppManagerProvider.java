@@ -186,7 +186,7 @@ public class APIAppManagerProvider
 
 
     public SubjectAPIKey createAppDeviceDAO(AppDeviceDAO appDeviceDAO)
-            throws NullPointerException, IllegalArgumentException, AccessException, APIException {
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException {
         SUS.checkIfNulls("AppDeviceDAO is null", appDeviceDAO);
 
         if (appDeviceDAO.getAppID() == null || appDeviceDAO.getDomainID() == null) {
@@ -201,12 +201,12 @@ public class APIAppManagerProvider
     }
 
     public SubjectAPIKey createSubjectAPIKey(SubjectAPIKey subjectAPIKey)
-            throws NullPointerException, IllegalArgumentException, AccessException, APIException {
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException {
         return createSubjectAPIKey(subjectAPIKey, Status.ACTIVE, 0);
     }
 
     public SubjectAPIKey createSubjectAPIKey(SubjectAPIKey subjectAPIKey, Status status, long ttl)
-            throws NullPointerException, IllegalArgumentException, AccessException, APIException {
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException {
         SUS.checkIfNulls("Null SubjectAPIKey", subjectAPIKey);
 
 //        if (subjectAPIKey.getSubjectID() == null) {
@@ -278,13 +278,13 @@ public class APIAppManagerProvider
 
 
     public UserIDDAO lookupUserIDDAO(String subjectID, String... params)
-            throws NullPointerException, IllegalArgumentException, AccessException, APIException {
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException {
         return lookupUserID(getAPIDataStore(), subjectID, params);
     }
 
 
     public static UserIDDAO lookupUserID(APIDataStore<?, ?> apiDataStore, String subjectID, String... params)
-            throws NullPointerException, IllegalArgumentException, AccessException, APIException {
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException {
         SUS.checkIfNulls("subjectID null", apiDataStore, subjectID);
         QueryMatch<?> query;
         if (FilterType.EMAIL.isValid(subjectID)) {
@@ -316,13 +316,13 @@ public class APIAppManagerProvider
 
 
     public synchronized UserIDDAO lookupUserIDDAO(GetValue<String> subjectID, String... params)
-            throws NullPointerException, IllegalArgumentException, AccessException {
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException {
         SUS.checkIfNulls("DB or user ID null", subjectID);
         return lookupUserIDDAO(subjectID.getValue(), params);
     }
 
     public synchronized UserIDDAO createUserIDDAO(UserIDDAO userID, SecConst.SecStatus userIDStatus, String password)
-            throws NullPointerException, IllegalArgumentException, AccessException, APIException {
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException {
         SUS.checkIfNulls("UserIDDAO object is null.", userID, userIDStatus);
 
         // validate the password
@@ -396,7 +396,7 @@ public class APIAppManagerProvider
 
         } catch (Exception e) {
             e.printStackTrace();
-            throw new AccessException(e.getMessage());
+            throw new AccessSecurityException(e.getMessage());
         }
 
         return userID;
@@ -404,7 +404,7 @@ public class APIAppManagerProvider
 
 
     public synchronized void deleteUser(String subjectID)
-            throws NullPointerException, IllegalArgumentException, AccessException, APIException {
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException {
 
         // crutial permission check
         // of the super admin can delete user
@@ -434,7 +434,7 @@ public class APIAppManagerProvider
 
 
 //    public void deleteSubjectAPIKey(String subjectID)
-//            throws NullPointerException, IllegalArgumentException, AccessException, APIException {
+//            throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException {
 //
 //    	SubjectAPIKey sak = lookupSubjectAPIKey(subjectID, true);
 //
@@ -444,7 +444,7 @@ public class APIAppManagerProvider
 
 
     public synchronized void deleteSubjectAPIKey(SubjectAPIKey subjectAPIKey)
-            throws NullPointerException, IllegalArgumentException, AccessException, APIException {
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException {
         if (subjectAPIKey != null) {
 //            getAPISecurityManager().invalidateResource(subjectAPIKey.getSubjectID());
             if (log.isEnabled()) log.getLogger().info("" + subjectAPIKey.getClass().getName());
@@ -455,7 +455,7 @@ public class APIAppManagerProvider
 
 //    @SuppressWarnings("unchecked")
 //	public 	<V extends SubjectAPIKey> V  lookupSubjectAPIKey(String subjectID, boolean throwExceptionIfNotFound)
-//            throws NullPointerException, IllegalArgumentException, AccessException, APIException {
+//            throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException {
 //    	List<SubjectAPIKey> result = getAPIDataStore().search(AppDeviceDAO.NVC_APP_DEVICE_DAO,
 //    			null,
 //    			new QueryMatchString(RelationalOperator.EQUAL, subjectID, SubjectAPIKey.Param.SUBJECT_ID));
@@ -481,14 +481,14 @@ public class APIAppManagerProvider
 
 
     public void updateSubjectAPIKey(SubjectAPIKey subjectAPIKey)
-            throws NullPointerException, IllegalArgumentException, AccessException, APIException {
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException {
 
 
     }
 
 
     public JWT validateJWT(String token)
-            throws NullPointerException, IllegalArgumentException, AccessException, APIException {
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException {
         throw new IllegalArgumentException("Not implemented yet");
 //        SUS.checkIfNulls("Null Token", token);
 //        JWT jwt;
@@ -528,7 +528,7 @@ public class APIAppManagerProvider
 
 
     public void resetPassword(String subjectID)
-            throws NullPointerException, IllegalArgumentException, AccessException, APIException {
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException {
         // lookup user id
         // generate token
         // send email
@@ -538,7 +538,7 @@ public class APIAppManagerProvider
 
 
     public UserIDDAO createUserIDDAO(String subjectID, SecConst.SecStatus userIDstatus, String password)
-            throws NullPointerException, IllegalArgumentException, AccessException, APIException {
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException {
 
         UserIDDAO uid = new UserIDDAO();
         uid.setPrimaryEmail(subjectID);
@@ -548,7 +548,7 @@ public class APIAppManagerProvider
 
 //    @Override
 //    public UserIDDAO createUserIDDAO(UserIDDAO userIDDAO, String password)
-//            throws NullPointerException, IllegalArgumentException, AccessException, APIException {
+//            throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException {
 //        SUS.checkIfNulls("UserIDDAO is null.", userIDDAO);
 //        SUS.checkIfNulls("Password is null.", password);
 //
@@ -570,7 +570,7 @@ public class APIAppManagerProvider
 //            dataStore.update(userIDCredentials);
 //        } catch (Exception e) {
 //            e.printStackTrace();
-//            throw new AccessException(e.getMessage());
+//            throw new AccessSecurityException(e.getMessage());
 //        }
 //
 //        return userIDDAO;
@@ -578,7 +578,7 @@ public class APIAppManagerProvider
 
 //
 //    public UserIDDAO lookupUserIDDAO(String subjectID)
-//            throws NullPointerException, IllegalArgumentException, AccessException, APIException 
+//            throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException 
 //    {
 //    	subjectID = FilterType.EMAIL.validate(subjectID);
 //    	
@@ -599,7 +599,7 @@ public class APIAppManagerProvider
 
 
     public SubjectPreference lookupUserPreferenceDAO(AppIDDefault appIDDAO, String subjectID)
-            throws NullPointerException, IllegalArgumentException, AccessException, APIException {
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException {
         UserIDDAO userIDDAO = lookupUserIDDAO(subjectID);
 
         return lookupUserPreferenceDAO(appIDDAO, userIDDAO);
@@ -607,7 +607,7 @@ public class APIAppManagerProvider
 
 
     public SubjectPreference lookupUserPreferenceDAO(AppIDDefault appIDDAO, UserIDDAO userIDDAO)
-            throws NullPointerException, IllegalArgumentException, AccessException, APIException {
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException {
         SUS.checkIfNulls("AppIDDAO is null", appIDDAO);
         SUS.checkIfNulls("UserIDDAO is null", userIDDAO);
 
@@ -628,7 +628,7 @@ public class APIAppManagerProvider
 
 
     public void changePassword(String oldPassword, String newPassword)
-            throws NullPointerException, IllegalArgumentException, AccessException, APIException {
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException {
         newPassword = FilterType.PASSWORD.validate(newPassword);
         String subjectID = getAPISecurityManager().currentSubjectID();
         // make the user is logged in
@@ -636,7 +636,7 @@ public class APIAppManagerProvider
 
         List<UserIDCredentialsDAO> ret = getAPIDataStore().search(UserIDCredentialsDAO.NVC_USER_ID_CREDENTIALS_DAO, null, new QueryMatchString(RelationalOperator.EQUAL, userID, UserIDCredentialsDAO.NVC_GUID));
         if (ret == null || ret.size() != 1) {
-            throw new AccessException("User not found");
+            throw new AccessSecurityException("User not found");
         }
 
 
@@ -652,7 +652,7 @@ public class APIAppManagerProvider
             getAPIDataStore().update(credentials);
 
         } catch (NoSuchAlgorithmException e) {
-            throw new AccessException("Invalid new Password");
+            throw new AccessSecurityException("Invalid new Password");
         }
         getAPISecurityManager().invalidateResource(subjectID);
 
@@ -660,44 +660,44 @@ public class APIAppManagerProvider
 
 
     public <V extends NVEntity> V create(V nve)
-            throws NullPointerException, IllegalArgumentException, AccessException, APIException {
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException {
         return getAPIDataStore().insert(nve);
     }
 
 
     public <V extends NVEntity> List<V> lookup(String subjectID, Class<V> classType)
-            throws NullPointerException, IllegalArgumentException, AccessException, APIException {
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException {
         return null;
     }
 
 
     public <V extends NVEntity> V update(V nve)
-            throws NullPointerException, IllegalArgumentException, AccessException, APIException {
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException {
         return getAPIDataStore().update(nve);
     }
 
 
     public <V extends NVEntity> boolean delete(V nve)
-            throws NullPointerException, IllegalArgumentException, AccessException, APIException {
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException {
         return delete(nve, false);
 
     }
 
     public <V extends NVEntity> boolean delete(V nve, boolean withReference)
-            throws NullPointerException, IllegalArgumentException, AccessException, APIException {
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException {
         return getAPIDataStore().delete(nve, withReference);
 
     }
 
 
     public AppIDDefault lookupAppIDDAO(String domainID, String appID)
-            throws NullPointerException, IllegalArgumentException, AccessException, APIException {
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException {
         return lookupAppIDDAO(domainID, appID, true);
     }
 
 
     public AppIDDefault lookupAppIDDAO(String domainID, String appID, boolean exceptionIfNotFound)
-            throws NullPointerException, IllegalArgumentException, AccessException, APIException {
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException {
 //        SUS.checkIfNulls("Domain ID is null", domainID);
 //        SUS.checkIfNulls("App ID is null", appID);
         domainID = FilterType.DOMAIN.validate(domainID);
@@ -721,7 +721,7 @@ public class APIAppManagerProvider
     }
 
     public AppConfigDAO lookupAppConfigDAO(String domainID, String appID)
-            throws NullPointerException, IllegalArgumentException, AccessException, APIException {
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException {
         domainID = FilterType.DOMAIN.validate(domainID);
         appID = AppIDNameFilter.SINGLETON.validate(appID);
 
@@ -738,7 +738,7 @@ public class APIAppManagerProvider
     }
 
     public synchronized SubjectAPIKey registerSubjectAPIKey(UserInfoDAO userInfoDAO, AppDeviceDAO appDeviceDAO, String subjectID, String password)
-            throws NullPointerException, IllegalArgumentException, AccessException, APIException {
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException {
 
         // Procedure
         // 1. Validation (Check null, validate password, etc.)
@@ -800,7 +800,7 @@ public class APIAppManagerProvider
     }
 
     public synchronized UserInfoDAO registerSubject(String subjectID, String password)
-            throws NullPointerException, IllegalArgumentException, AccessException, APIException {
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException {
         // TODO Auto-generated method stub
 
         if (SUS.isEmpty(subjectID) || SUS.isEmpty(password)) {
@@ -819,12 +819,12 @@ public class APIAppManagerProvider
             return userIDDAO.getUserInfo();
         }
 
-        throw new AccessException("Access Denied");
+        throw new AccessSecurityException("Access Denied");
     }
 
 
     public synchronized AppIDDefault createAppIDDAO(String domainID, String appID)
-            throws NullPointerException, IllegalArgumentException, AccessException, APIException {
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException {
 
         getAPISecurityManager().checkPermissions(SecurityModel.Permission.APP_CREATE.getValue());
         // permission super admin only
@@ -884,7 +884,7 @@ public class APIAppManagerProvider
 
 
     public synchronized AppIDDefault deleteAppIDDAO(String domainID, String appID)
-            throws NullPointerException, IllegalArgumentException, AccessException, APIException {
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException {
         SUS.checkIfNulls("Null domain or app id", domainID, appID);
         getAPISecurityManager().checkPermissions(SecurityModel.Permission.APP_DELETE.getValue());
         AppIDDefault ret = lookupAppIDDAO(domainID, appID, true);
@@ -921,17 +921,17 @@ public class APIAppManagerProvider
     }
 
     public <V extends NVEntity> List<V> search(NVConfigEntity nvce, QueryMarker... queryCriteria)
-            throws NullPointerException, IllegalArgumentException, AccessException, APIException {
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException {
         return search(nvce, null, queryCriteria);
     }
 
     public <V extends NVEntity> List<V> search(NVConfigEntity nvce, List<String> fieldNames, QueryMarker... queryCriteria)
-            throws NullPointerException, IllegalArgumentException, AccessException, APIException {
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException {
         return getAPIDataStore().search(nvce, fieldNames, queryCriteria);
     }
 
     public void updateSubjectRole(String subjectID, AppIDDefault appID, String roleName, CRUD crud)
-            throws NullPointerException, IllegalArgumentException, AccessException {
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException {
         String permission = PPEncoder.SINGLETON.encode(SecurityModel.PERM_ADD_ROLE, appID.getGUID());
         if (log.isEnabled()) log.getLogger().info("permision to check:" + permission);
         if (log.isEnabled()) log.getLogger().info(SUS.toCanonicalID(',', subjectID, roleName));
@@ -973,20 +973,20 @@ public class APIAppManagerProvider
     }
 
     public void updateSubjectPermission(String subjectID, AppIDDefault appID, String permssionName, CRUD crud)
-            throws NullPointerException, IllegalArgumentException, AccessException {
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException {
 
     }
 
 
 //	public SubjectAPIKey renewSubjectAPIKEy(String subjectID)
-//			throws NullPointerException, IllegalArgumentException, AccessException, APIException
+//			throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException
 //	{
 //		return renewSubjectAPIKEy(lookupSubjectAPIKey(subjectID, true));
 //	}
 
 //	@Override
 //	public SubjectAPIKey renewSubjectAPIKEy(SubjectAPIKey sak)
-//			throws NullPointerException, IllegalArgumentException, AccessException, APIException {
+//			throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException {
 //		// TODO Auto-generated method stub
 //		SubjectAPIKey ret = null;
 //		if (sak instanceof AppDeviceDAO)

@@ -25,7 +25,7 @@ import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.api.APIException;
 //import org.zoxweb.shared.data.AddressDAO;
 //import org.zoxweb.shared.data.UserInfoDAO;
-import org.zoxweb.shared.security.AccessException;
+import org.zoxweb.shared.security.AccessSecurityException;
 import org.zoxweb.shared.util.SharedUtil;
 
 public class AddressDAOTest {
@@ -110,7 +110,7 @@ public class AddressDAOTest {
                 UserInfoDAO uid = new UserInfoDAO();
                 uid.getListOfAddresses().add( address);
                 System.out.println(SharedUtil.toDebugString(uid));
-            } catch (APIException | AccessException e) {
+            } catch (APIException | AccessSecurityException e) {
                 e.printStackTrace();
             }
 

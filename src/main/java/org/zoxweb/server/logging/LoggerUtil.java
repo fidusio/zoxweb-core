@@ -16,6 +16,7 @@
 package org.zoxweb.server.logging;
 
 import org.zoxweb.server.util.DateUtil;
+import org.zoxweb.shared.security.AccessSecurityException;
 
 import java.io.*;
 import java.text.SimpleDateFormat;
@@ -54,7 +55,7 @@ public final class LoggerUtil {
     }
 
     public static Logger loggerToFile(String loggerName, String filename)
-            throws SecurityException, IOException {
+            throws AccessSecurityException, IOException {
         if (loggerName != null && filename != null) {
             return loggerToFile(Logger.getLogger(loggerName), filename);
         }
@@ -64,17 +65,21 @@ public final class LoggerUtil {
 
 
     public static Logger loggerToFile(Logger logger, String filename)
-            throws SecurityException, IOException {
+            throws AccessSecurityException, IOException {
         if (logger != null && filename != null) {
-            FileHandler fh = new FileHandler(filename, true);
-            //Logger rootLogger = Logger.getLogger("");
-            //Handler[] handlers = rootLogger.getHandlers();
-            //if (handlers[0] instanceof ConsoleHandler) {
-            //       rootLogger.removeHandler(handlers[0]);
-            //}
-            logger.addHandler(fh);
-            CustomFormatter formatter = new CustomFormatter(DEFAULT_FORMAT);
-            fh.setFormatter(formatter);
+            try {
+                FileHandler fh = new FileHandler(filename, true);
+                //Logger rootLogger = Logger.getLogger("");
+                //Handler[] handlers = rootLogger.getHandlers();
+                //if (handlers[0] instanceof ConsoleHandler) {
+                //       rootLogger.removeHandler(handlers[0]);
+                //}
+                logger.addHandler(fh);
+                CustomFormatter formatter = new CustomFormatter(DEFAULT_FORMAT);
+                fh.setFormatter(formatter);
+            } catch (SecurityException e) {
+                throw new AccessSecurityException("Access denied attaching file handler: " + filename, e);
+            }
             logger.info("file logging started");
         }
 

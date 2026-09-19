@@ -146,19 +146,19 @@ public class DomainSecurityManagerDefault
      * @param principalID the principal identifier to log in with
      * @param credential  the clear-text password to validate
      * @return the subject that owns the principal
-     * @throws SecurityException if the principal is unknown, no password
+     * @throws AccessSecurityException if the principal is unknown, no password
      *                           credential is stored, or validation fails
      */
     @Override
-    public SubjectIdentifier login(String principalID, String credential) throws SecurityException {
+    public SubjectIdentifier login(String principalID, String credential) throws AccessSecurityException {
         SubjectIdentifier subject = lookupSubjectID(principalID);
         if (subject == null) {
-            throw new SecurityException("Invalid credentials");
+            throw new AccessSecurityException("Invalid credentials");
         }
 
         CredentialInfo ci = lookupCredential(principalID, CredentialInfo.Type.PASSWORD);
         if (!(ci instanceof CIPassword) || !SecUtil.isPasswordValid((CIPassword) ci, credential)) {
-            throw new SecurityException("Invalid credentials");
+            throw new AccessSecurityException("Invalid credentials");
         }
 
         return subject;
@@ -172,23 +172,23 @@ public class DomainSecurityManagerDefault
      *
      * @param key the API key to log in with
      * @return the subject that owns the API key
-     * @throws SecurityException if the key cannot be resolved to a subject
+     * @throws AccessSecurityException if the key cannot be resolved to a subject
      */
     @Override
-    public SubjectIdentifier loginApiKey(String key) throws SecurityException {
+    public SubjectIdentifier loginApiKey(String key) throws AccessSecurityException {
         if (key == null) {
-            throw new SecurityException("Invalid key");
+            throw new AccessSecurityException("Invalid key");
         }
 
         SubjectAPIKey sak = first(ds().search(SubjectAPIKey.NVC_SUBJECT_API_KEY, null, eq(SubjectAPIKey.Param.API_KEY.getNVConfig().getName(), key)));
         if (sak == null) {
-            throw new SecurityException("Invalid key");
+            throw new AccessSecurityException("Invalid key");
         }
 
         SubjectIdentifier subject =
                 first(ds().searchByID(SubjectIdentifier.NVC_SUBJECT_IDENTIFIER, sak.getSubjectGUID()));
         if (subject == null) {
-            throw new SecurityException("Invalid key");
+            throw new AccessSecurityException("Invalid key");
         }
 
         return subject;
@@ -208,7 +208,7 @@ public class DomainSecurityManagerDefault
      * @param principalID    the initial principal identifier for the subject
      * @param credentialInfo the initial credential, or {@code null} for none
      * @return the persisted subject
-     * @throws SecurityException if the principal already exists or the
+     * @throws AccessSecurityException if the principal already exists or the
      *                           transaction fails
      */
     @Override
@@ -219,7 +219,7 @@ public class DomainSecurityManagerDefault
 
             PrincipalIdentifier principal = resolvePrincipal(principalID);
             if (principal != null) {
-                throw new SecurityException("principal already exists");
+                throw new AccessSecurityException("principal already exists");
             }
 
             SubjectIdentifier subject = new SubjectIdentifier();
@@ -236,7 +236,7 @@ public class DomainSecurityManagerDefault
             return subject;
         } catch (Exception e) {
             dataStore.abortTransaction();
-            throw new SecurityException(e);
+            throw new AccessSecurityException(e);
         } finally {
             dataStore.endTransaction();
         }
@@ -252,10 +252,10 @@ public class DomainSecurityManagerDefault
      * @param password    the initial clear-text password for the subject
      * @param hashType    the hash algorithm used to store the password
      * @return the persisted subject
-     * @throws SecurityException if the subject cannot be created
+     * @throws AccessSecurityException if the subject cannot be created
      */
     @Override
-    public SubjectIdentifier createSubjectID(String principalID, String password, CryptoConst.HashType hashType) throws SecurityException {
+    public SubjectIdentifier createSubjectID(String principalID, String password, CryptoConst.HashType hashType) throws AccessSecurityException {
         CredentialHasher<CIPassword> hasher = SecUtil.lookupCredentialHasher(hashType.getName());
         CIPassword ciPassword = hasher.hash(password);
 
@@ -346,14 +346,14 @@ public class DomainSecurityManagerDefault
      * @param principalID the principal identifying the owning subject
      * @param credential  the credential to attach
      * @return the attached credential
-     * @throws SecurityException        if the principal is unknown
+     * @throws AccessSecurityException        if the principal is unknown
      * @throws IllegalArgumentException if the credential is not an {@link NVEntity}
      */
     @Override
     public CredentialInfo createCredential(String principalID, CredentialInfo credential) {
         String subjectGUID = resolveSubjectGUID(principalID);
         if (subjectGUID == null) {
-            throw new SecurityException("Unknown principal: " + principalID);
+            throw new AccessSecurityException("Unknown principal: " + principalID);
         }
         if (!(credential instanceof NVEntity)) {
             throw new IllegalArgumentException("Credential must be an NVEntity to be persisted");
@@ -373,13 +373,13 @@ public class DomainSecurityManagerDefault
      * @param subjectIdentifier the subject owning the credential
      * @param credential        the credential to attach
      * @return the attached credential
-     * @throws SecurityException        if the subject has no GUID
+     * @throws AccessSecurityException        if the subject has no GUID
      * @throws IllegalArgumentException if the credential is not an {@link NVEntity}
      */
     public CredentialInfo createCredential(SubjectIdentifier subjectIdentifier, CredentialInfo credential) {
         String subjectGUID = subjectIdentifier.getSubjectGUID();
         if (subjectGUID == null) {
-            throw new SecurityException("Unknown subject");
+            throw new AccessSecurityException("Unknown subject");
         }
         if (!(credential instanceof NVEntity)) {
             throw new IllegalArgumentException("Credential must be an NVEntity to be persisted");
@@ -518,25 +518,25 @@ public class DomainSecurityManagerDefault
      * Associates an additional principal identifier with an existing subject by
      * inserting a new {@link PrincipalIdentifier} bound to the subject's GUID.
      * Uniqueness is enforced by the data store; an insert failure (duplicate
-     * principal ID) is rethrown as a {@link SecurityException}.
+     * principal ID) is rethrown as a {@link AccessSecurityException}.
      *
      * @param subject     the subject to extend
      * @param principalID the additional principal identifier to associate
      * @return the persisted principal identifier
      * @throws NullPointerException if subject is {@code null}
-     * @throws SecurityException    if principalID is empty or already exists
+     * @throws AccessSecurityException    if principalID is empty or already exists
      */
     @Override
     public PrincipalIdentifier addPrincipalID(SubjectIdentifier subject, String principalID) {
         SUS.checkIfNulls("subject can't be null", subject);
         if (SUS.isEmpty(principalID))
-            throw new SecurityException("Principal ID can't be empty");
+            throw new AccessSecurityException("Principal ID can't be empty");
         PrincipalIdentifier principal = new PrincipalIdentifier(principalID);
         principal.setSubjectGUID(subject.getGUID());
         try {
             return ds().insert(principal);
         } catch (Exception e) {
-            throw new SecurityException("Principal ID already exists: " + principalID, e);
+            throw new AccessSecurityException("Principal ID already exists: " + principalID, e);
         }
 
     }
@@ -1279,15 +1279,15 @@ public class DomainSecurityManagerDefault
     private SubjectIdentifier resetableSubject(String principalID) {
         PrincipalIdentifier principal = resolvePrincipal(principalID);
         if (principal == null || (principal.getStatus() != null && principal.getStatus() != SecConst.SecStatus.ACTIVE)) {
-            throw new SecurityException("Unknown principal");
+            throw new AccessSecurityException("Unknown principal");
         }
         SubjectIdentifier subject = first(ds().searchByID(SubjectIdentifier.NVC_SUBJECT_IDENTIFIER, principal.getSubjectGUID()));
         if (subject == null) {
-            throw new SecurityException("Unknown principal");
+            throw new AccessSecurityException("Unknown principal");
         }
         SecConst.SecStatus status = subject.getSubjectStatus();
         if (status != null && status != SecConst.SecStatus.ACTIVE && status != SecConst.SecStatus.PENDING_RESET_PASSWORD) {
-            throw new SecurityException("Subject is not active");
+            throw new AccessSecurityException("Subject is not active");
         }
         return subject;
     }
@@ -1324,10 +1324,10 @@ public class DomainSecurityManagerDefault
     }
 
     @Override
-    public PasswordResetRequest requestPasswordReset(String principalID) throws SecurityException {
+    public PasswordResetRequest requestPasswordReset(String principalID) throws AccessSecurityException {
         PrincipalIdentifier principal = resolvePrincipal(principalID);
         if (principal == null) {
-            throw new SecurityException("Unknown principal");
+            throw new AccessSecurityException("Unknown principal");
         }
         SubjectIdentifier subject = resetableSubject(principalID);
         String[] emails = emailPrincipalsOf(subject.getGUID());
@@ -1338,25 +1338,25 @@ public class DomainSecurityManagerDefault
     }
 
     @Override
-    public PasswordResetRequest adminResetPassword(String principalID) throws SecurityException {
+    public PasswordResetRequest adminResetPassword(String principalID) throws AccessSecurityException {
         PrincipalIdentifier principal = resolvePrincipal(principalID);
         if (principal == null) {
-            throw new SecurityException("Unknown principal: " + principalID);
+            throw new AccessSecurityException("Unknown principal: " + principalID);
         }
         SubjectIdentifier subject = resetableSubject(principalID);
         return issueResetToken(subject, principal.getPrincipalID(), PasswordResetToken.Channel.ADMIN, null, emailPrincipalsOf(subject.getGUID()));
     }
 
     @Override
-    public void completePasswordReset(String principalID, String token, String newPassword) throws SecurityException {
+    public void completePasswordReset(String principalID, String token, String newPassword) throws AccessSecurityException {
         final String invalid = "Invalid or expired reset token";
         PrincipalIdentifier principal = resolvePrincipal(principalID);
         if (principal == null || SUS.isEmpty(token)) {
-            throw new SecurityException(invalid);
+            throw new AccessSecurityException(invalid);
         }
         SubjectIdentifier subject = first(ds().searchByID(SubjectIdentifier.NVC_SUBJECT_IDENTIFIER, principal.getSubjectGUID()));
         if (subject == null) {
-            throw new SecurityException(invalid);
+            throw new AccessSecurityException(invalid);
         }
         FilterType.PASSWORD.validate(newPassword);
         long now = System.currentTimeMillis();
@@ -1367,11 +1367,11 @@ public class DomainSecurityManagerDefault
             }
         }
         if (match == null) {
-            throw new SecurityException(invalid);
+            throw new AccessSecurityException(invalid);
         }
         SecConst.SecStatus status = subject.getSubjectStatus();
         if (status != null && status != SecConst.SecStatus.ACTIVE && status != SecConst.SecStatus.PENDING_RESET_PASSWORD) {
-            throw new SecurityException(invalid);
+            throw new AccessSecurityException(invalid);
         }
         updateCredential(subject, HashUtil.toBCryptPassword(newPassword));
         match.setStatus(SecConst.SecStatus.DEACTIVATED);

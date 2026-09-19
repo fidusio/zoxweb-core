@@ -25,7 +25,7 @@ import org.zoxweb.shared.db.*;
 import org.zoxweb.shared.filters.FilterType;
 import org.zoxweb.shared.filters.ValueFilter;
 import org.zoxweb.shared.io.SharedIOUtil;
-import org.zoxweb.shared.security.AccessException;
+import org.zoxweb.shared.security.AccessSecurityException;
 import org.zoxweb.shared.util.*;
 import org.zoxweb.shared.util.Const.GNVType;
 import org.zoxweb.shared.util.Const.LogicalOperator;
@@ -1155,7 +1155,7 @@ public final class GSONUtil {
     }
 
     private static NVGenericMap fromJSONGenericMap(JsonObject je, NVConfigEntity nvce, Base64Type b64Type, boolean nvgmPrimitiveAsString)
-            throws APIException, AccessException {
+            throws APIException, AccessSecurityException {
         NVGenericMap ret = new NVGenericMap();
 
         Iterator<Map.Entry<String, JsonElement>> iterator = je.entrySet().iterator();
@@ -1624,13 +1624,13 @@ public final class GSONUtil {
 
 
     public static <V extends NVEntity> V fromJSON(String json, Class<? extends NVEntity> clazz)
-            throws AccessException, APIException {
+            throws AccessSecurityException, APIException {
         return fromJSON(json, clazz, null);
     }
 
     @SuppressWarnings("unchecked")
     public static <V extends NVEntity> V fromJSON(String json, Class<? extends NVEntity> clazz, Base64Type b64Type)
-            throws AccessException, APIException {
+            throws AccessSecurityException, APIException {
         JsonElement je = JsonParser.parseString(json);
 
         if (je instanceof JsonObject) {
@@ -1651,7 +1651,7 @@ public final class GSONUtil {
 
     @SuppressWarnings("unchecked")
     public static <V extends NVEntity> V fromJSON(Reader json, Class<? extends NVEntity> clazz, Base64Type b64Type)
-            throws AccessException, APIException {
+            throws AccessSecurityException, APIException {
         JsonElement je = JsonParser.parseReader(json);
 
         if (je instanceof JsonObject) {
@@ -1663,7 +1663,7 @@ public final class GSONUtil {
 
 
     private static NVEntity fromJSON(JsonObject jo, Type typeOf, Base64Type b64Type, boolean nvgmPrimitiveAsString)
-            throws AccessException, APIException {
+            throws AccessSecurityException, APIException {
         Class<? extends NVEntity> clazz = null;
         try {
             clazz = (Class<? extends NVEntity>) Class.forName(typeOf.getTypeName());
@@ -1676,7 +1676,7 @@ public final class GSONUtil {
 
     @SuppressWarnings("unchecked")
     private static NVEntity fromJSON(JsonObject jo, Class<? extends NVEntity> clazz, Base64Type b64Type, boolean nvgmPrimitiveAsString)
-            throws AccessException, APIException {
+            throws AccessSecurityException, APIException {
 
         // check if the jo has class name setup
         // before creating the new instance
@@ -1716,7 +1716,7 @@ public final class GSONUtil {
 //				throw new InstantiationException(ie.getMessage());
 
         } catch (SecurityException ie) {
-            throw new AccessException(ie.getMessage(), Reason.ACCESS_DENIED);
+            throw new AccessSecurityException(ie.getMessage(), Reason.ACCESS_DENIED);
         }
 
         if (jo.get(MetaToken.GUID.getName()) != null && !jo.get(MetaToken.GUID.getName()).isJsonNull()) {

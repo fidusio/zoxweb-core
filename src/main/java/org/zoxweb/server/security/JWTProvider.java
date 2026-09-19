@@ -23,7 +23,7 @@ public final class JWTProvider
         // TODO Auto-generated method stub
         try {
             return CryptoUtil.encodeJWT(key, jwt, false);
-        } catch (SecurityException | IOException | GeneralSecurityException e) {
+        } catch (AccessSecurityException | IOException | GeneralSecurityException e) {
 
             throw new AccessSecurityException(e.getMessage());
         }
@@ -35,7 +35,7 @@ public final class JWTProvider
         // TODO Auto-generated method stub
         try {
             return SecUtil.decodeJWT(key, b64urlToken);
-        } catch (SecurityException | IOException | GeneralSecurityException e) {
+        } catch (AccessSecurityException | IOException | GeneralSecurityException e) {
 
             e.printStackTrace();
             throw new AccessSecurityException(e.getMessage());
