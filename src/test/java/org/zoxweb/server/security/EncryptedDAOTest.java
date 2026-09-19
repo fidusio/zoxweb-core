@@ -6,7 +6,7 @@ import org.zoxweb.shared.crypto.CryptoConst;
 import org.zoxweb.shared.crypto.EncapsulatedKey;
 import org.zoxweb.shared.crypto.EncryptedData;
 import org.zoxweb.shared.crypto.KeyLockType;
-import org.zoxweb.shared.util.SharedStringUtil;
+import org.zoxweb.shared.util.SUS;
 
 import java.security.SignatureException;
 import java.util.Arrays;
@@ -24,7 +24,7 @@ public class EncryptedDAOTest {
 
     static final byte[] KEY = SecUtil.randomBytes(32);
     static final byte[] OTHER_KEY = SecUtil.randomBytes(32);
-    static final byte[] DATA = SharedStringUtil.getBytes("The quick brown fox jumps over the lazy dog.");
+    static final byte[] DATA = SUS.getBytes("The quick brown fox jumps over the lazy dog.");
 
     // field positions in the canonical form
     static final int V = 0, ALG = 1, KDF = 2, IV = 3, LEN = 4, MASK = 5, EXP = 6, HINT = 7, CT = 8;
@@ -324,6 +324,6 @@ public class EncryptedDAOTest {
         byte[] info = {(byte) 0xf0, (byte) 0xf1, (byte) 0xf2, (byte) 0xf3, (byte) 0xf4, (byte) 0xf5, (byte) 0xf6, (byte) 0xf7, (byte) 0xf8, (byte) 0xf9};
         byte[] okm = CryptoUtil.hkdfSHA256(ikm, salt, info, 42);
         assertEquals("3cb25f25faacd57a90434f64d0362f2a2d2d0a90cf1a5a4c5db02d56ecc4c5bf34007208d5b887185865",
-                SharedStringUtil.bytesToHex(okm).toLowerCase());
+                SUS.bytesToHex(okm).toLowerCase());
     }
 }

@@ -25,7 +25,7 @@ import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.NVEntity;
 import org.zoxweb.shared.util.NVPair;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.NVConfigEntity.ArrayType;
 
 /**
@@ -67,7 +67,7 @@ public class UserInfoDAO
             false,
             false,
             UserInfoDAO.class,
-            SharedUtil.extractNVConfigs(Param.values()),
+            SUS.extractNVConfigs(Param.values()),
             null,
             false,
             UserInfoBaseDAO.NVC_USER_INFO_BASE_DAO

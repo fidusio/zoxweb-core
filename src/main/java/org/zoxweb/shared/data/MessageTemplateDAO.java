@@ -25,7 +25,7 @@ import org.zoxweb.shared.util.NVConfigEntity;
 import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.NVPair;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.SUS;
 
 /**
  * The MessageTemplateDAO class defines a message template with a title, body content,
@@ -70,7 +70,7 @@ public class MessageTemplateDAO
             false,
             false,
             MessageTemplateDAO.class,
-            SharedUtil.extractNVConfigs(Param.values()),
+            SUS.extractNVConfigs(Param.values()),
             null,
             false,
             SimpleDocumentDAO.NVC_SIMPLE_DOCUMENT_DAO

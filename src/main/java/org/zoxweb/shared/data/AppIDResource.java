@@ -36,7 +36,7 @@ public class AppIDResource
             true, false,
             false, false,
             AppIDResource.class,
-            SharedUtil.extractNVConfigs(Param.values()),
+            SUS.extractNVConfigs(Param.values()),
             null,
             false,
             PropertyDAO.NVC_PROPERTY_DAO
@@ -124,8 +124,8 @@ public class AppIDResource
         if (obj instanceof AppIDResource) {
             AppIDResource appIDResource = (AppIDResource) obj;
 
-            return (SharedStringUtil.equals(getDomainID(), appIDResource.getDomainID(), true)
-                    && SharedStringUtil.equals(getAppID(), appIDResource.getAppID(), true));
+            return (SUS.equals(getDomainID(), appIDResource.getDomainID(), true)
+                    && SUS.equals(getAppID(), appIDResource.getAppID(), true));
 
         }
         return false;

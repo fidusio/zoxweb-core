@@ -76,7 +76,7 @@ public class NVCMap
 																			false, 
 																			false, 
 																			NVCMap.class, 
-																			SharedUtil.extractNVConfigs(Params.values()), 
+																			SUS.extractNVConfigs(Params.values()), 
 																			null, false, 
 																			SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO
 																		);
@@ -301,7 +301,7 @@ public class NVCMap
 			
 			if (maxLength != -1)
 			{
-				ret = SharedStringUtil.truncate(ret, maxLength);
+				ret = SUS.truncate(ret, maxLength);
 			}
 		}
 		

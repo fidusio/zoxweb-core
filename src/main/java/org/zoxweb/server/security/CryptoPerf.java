@@ -3,7 +3,6 @@ package org.zoxweb.server.security;
 import org.zoxweb.shared.crypto.CryptoConst;
 import org.zoxweb.shared.util.Const;
 import org.zoxweb.shared.util.SUS;
-import org.zoxweb.shared.util.SharedUtil;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -86,7 +85,7 @@ public class CryptoPerf {
             boolean verify = false;
             switch (command) {
                 case "gen-rnds":
-                    CryptoConst.SecureRandomType srt = SharedUtil.lookupEnum(args[index++], CryptoConst.SecureRandomType.values());
+                    CryptoConst.SecureRandomType srt = SUS.lookupEnum(args[index++], CryptoConst.SecureRandomType.values());
                     sizeInBytes = Integer.parseInt(args[index++]);
                     count = Integer.parseInt(args[index++]);
                     repeat = Integer.parseInt(args[index++]);

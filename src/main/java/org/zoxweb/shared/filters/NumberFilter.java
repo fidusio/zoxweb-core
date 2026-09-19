@@ -16,7 +16,6 @@
 package org.zoxweb.shared.filters;
 
 import org.zoxweb.shared.util.SUS;
-import org.zoxweb.shared.util.SharedUtil;
 
 /**
  * The number filter is used to validate given strings 

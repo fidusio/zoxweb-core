@@ -542,13 +542,13 @@ public class NVGenericMap
      * Searches entries by name; only the first criterion is used.
      *
      * @param criteria search criteria, criteria[0] is the name matched via
-     *        {@link SharedUtil#search}
+     *        {@link SUS#search}
      * @return the matching entries
      * @see org.zoxweb.shared.util.ArrayValues#search(java.lang.String[])
      */
     @Override
     public List<GetNameValue<?>> search(String... criteria) {
-        return SharedUtil.search(values(), criteria[0]);
+        return SUS.search(values(), criteria[0]);
     }
 
     /**

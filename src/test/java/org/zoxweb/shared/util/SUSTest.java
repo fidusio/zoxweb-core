@@ -17,7 +17,7 @@ package org.zoxweb.shared.util;
 
 import java.util.HashMap;
 
-public class SharedUtilTest {
+public class SUSTest {
 
 	private enum enumList{LEFT, RIGHT}
 
@@ -34,12 +34,12 @@ public class SharedUtilTest {
 		Class[] classType = {int.class, String.class, Float.class, Double.class, Exception.class, void.class, char.class};
 		
 		for (int i = 0; i < classType.length; i++) {
-			System.out.println(classType[i] + ": " + SharedUtil.isPrimitive(classType[i]));
+			System.out.println(classType[i] + ": " + SUS.isPrimitive(classType[i]));
 		}
 
 		String prefix = "Mr. ";
 		String name = "Mr. Mustapha";
-		System.out.println(SharedUtil.removePrefix(prefix, name));
+		System.out.println(SUS.removePrefix(prefix, name));
 		
 		
 		String str[] = new String[3];
@@ -47,16 +47,16 @@ public class SharedUtilTest {
 		str[1] = "Web";
 		str[2] = "Core";
 		
-		System.out.println(SharedUtil.toString(str));
-		System.out.println(SharedUtil.toString(str,"-"));	
-		System.out.println(SharedUtil.toString(str,".", false));
-		System.out.println(SharedUtil.toString(str,",",true));
+		System.out.println(SUS.toString(str));
+		System.out.println(SUS.toString(str,"-"));	
+		System.out.println(SUS.toString(str,".", false));
+		System.out.println(SUS.toString(str,",",true));
 		
 		
 		String test = "Java";
 		int value = 3;
 		
-		System.out.println(SharedStringUtil.format(test, value));
+		System.out.println(SUS.format(test, value));
 		
 		
 //		System.out.println(Const.SizeInBytes.B);
@@ -99,9 +99,9 @@ public class SharedUtilTest {
 		nvpgnm.add( new NVPair("marwan", "nael"));
 		System.out.println(nvpgnm.get("MarwAna"));
 
-		System.out.println(SharedStringUtil.bytesToHex("%", SharedStringUtil.getBytes("Marwan NAEL")));
+		System.out.println(SUS.bytesToHex("%", SUS.getBytes("Marwan NAEL")));
 		
-		System.out.println(SharedStringUtil.stringToHex("%", "Marwan NAEL"));
+		System.out.println(SUS.stringToHex("%", "Marwan NAEL"));
 	}
 
 }

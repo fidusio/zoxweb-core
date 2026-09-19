@@ -22,11 +22,11 @@ public class PPEncoder
 
 
     public String encodePattern(String pattern, GetNameValue<String> gnvs) {
-        return SharedStringUtil.embedText(pattern, gnvs.getName(), gnvs.getValue());
+        return SUS.embedText(pattern, gnvs.getName(), gnvs.getValue());
     }
 
     public String encodePattern(String pattern, String token, String value) {
-        return SharedStringUtil.embedText(pattern, token, value);
+        return SUS.embedText(pattern, token, value);
     }
 
 }

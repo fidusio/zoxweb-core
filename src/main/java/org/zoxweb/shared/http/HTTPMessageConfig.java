@@ -94,7 +94,7 @@ public class HTTPMessageConfig
             false,
             false,
             HTTPMessageConfig.class,
-            SharedUtil.extractNVConfigs(Params.values()), null, false, SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO);
+            SUS.extractNVConfigs(Params.values()), null, false, SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO);
 
     private volatile transient NVGenericMap attachment;
 
@@ -127,7 +127,7 @@ public class HTTPMessageConfig
         //GetNameValue<String> mp = getHeaders().get(HTTPHeaderName.CONTENT_TYPE.getName());
         if (mp != null)// && mp.getValue() != null)
         {
-            return SharedStringUtil.contains(mp, HTTPMediaType.MULTIPART_FORM_DATA.getValue(), true);
+            return SUS.contains(mp, HTTPMediaType.MULTIPART_FORM_DATA.getValue(), true);
         }
 
         return false;//lookupValue(Params.MULTI_PART_ENCODING);
@@ -211,7 +211,7 @@ public class HTTPMessageConfig
 
 
     public void setMethod(String method) {
-        HTTPMethod httpMethod = SharedUtil.lookupEnum(method, HTTPMethod.values());
+        HTTPMethod httpMethod = SUS.lookupEnum(method, HTTPMethod.values());
         setMethod(httpMethod);
     }
 
@@ -298,7 +298,7 @@ public class HTTPMessageConfig
      * @param content the content as string
      */
     public void setContent(String content) {
-        setContent(content != null ? SharedStringUtil.getBytes(content) : null);
+        setContent(content != null ? SUS.getBytes(content) : null);
     }
 
     /**
@@ -685,7 +685,7 @@ public class HTTPMessageConfig
     @Override
     public synchronized int getContentLength() {
 
-        String contentValue = getHeaders().getValue(HTTPHeader.CONTENT_LENGTH);///SharedUtil.getValue(getHeaders().get(HTTPHeaderName.CONTENT_LENGTH.getName()));
+        String contentValue = getHeaders().getValue(HTTPHeader.CONTENT_LENGTH);///SUS.getValue(getHeaders().get(HTTPHeaderName.CONTENT_LENGTH.getName()));
         if (contentValue != null) {
             return Integer.parseInt(contentValue);
         } else {
@@ -772,7 +772,7 @@ public class HTTPMessageConfig
         GetNameValue<String> ret = (GetNameValue<String>) getHeaders().get(headerName);
         if (ret != null) {
             for (String toMatch : valuesToMatch) {
-                if (SharedStringUtil.contains(ret.getValue(), toMatch, true)) {
+                if (SUS.contains(ret.getValue(), toMatch, true)) {
                     return ret;
                 }
             }
@@ -805,7 +805,7 @@ public class HTTPMessageConfig
         String mp = getHeaders().getValue(HTTPHeader.CONTENT_TYPE);
         if (mp != null)// && mp.getValue() != null)
         {
-            return SharedStringUtil.contains(mp, HTTPMediaType.APPLICATION_WWW_URL_ENC.getValue(), true);
+            return SUS.contains(mp, HTTPMediaType.APPLICATION_WWW_URL_ENC.getValue(), true);
         }
         return false;
     }
@@ -815,7 +815,7 @@ public class HTTPMessageConfig
         String mp = getHeaders().getValue(HTTPHeader.CONTENT_TYPE);
         if (mp != null)// && mp.getValue() != null)
         {
-            return SharedStringUtil.contains(mp, HTTPMediaType.MULTIPART_FORM_DATA.getValue(), true);
+            return SUS.contains(mp, HTTPMediaType.MULTIPART_FORM_DATA.getValue(), true);
         }
         return false;
     }
@@ -828,7 +828,7 @@ public class HTTPMessageConfig
         String mp = getHeaders().getValue(HTTPHeader.TRANSFER_ENCODING);
         if (mp != null)// && mp.getValue() != null)
         {
-            return SharedStringUtil.contains(mp, HTTPMediaType.CHUNKED.getValue(), true);
+            return SUS.contains(mp, HTTPMediaType.CHUNKED.getValue(), true);
         }
         return false;
     }

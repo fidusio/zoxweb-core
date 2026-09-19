@@ -120,9 +120,9 @@ public class HTTPNVGMBiEncoder
                     String mappedName = paramsNameMapping.get(parameter.getName());
                     if (mappedName != null) {
                         // extract the name email
-                        paramName = SharedStringUtil.valueAfterRightToken(mappedName, ".");
+                        paramName = SUS.valueAfterRightToken(mappedName, ".");
                         // extract the container data.profile
-                        containerName = SharedStringUtil.valueBeforeRightToken(mappedName, ".");
+                        containerName = SUS.valueBeforeRightToken(mappedName, ".");
                         if (containerName.equals(paramName)) {
                             // if the name and container are equals
                             // the container is content
@@ -146,9 +146,9 @@ public class HTTPNVGMBiEncoder
                     // if userOnlyMappedNames is not enabled add extra parameters to the content
 
                     // extract the name email
-                    paramName = SharedStringUtil.valueAfterRightToken(parameter.getName(), ".");
+                    paramName = SUS.valueAfterRightToken(parameter.getName(), ".");
                     // extract the container data.profile
-                    containerName = SharedStringUtil.valueBeforeRightToken(parameter.getName(), ".");
+                    containerName = SUS.valueBeforeRightToken(parameter.getName(), ".");
 
                     ((SetName) parameter).setName(paramName);
 

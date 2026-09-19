@@ -246,7 +246,7 @@ public final class CryptoConst {
         }
 
         public static HashType lookup(String mdName) {
-            HashType ret = SharedUtil.lookupEnum(mdName, HashType.values());
+            HashType ret = SUS.lookupEnum(mdName, HashType.values());
             if (ret == null) {
                 for (HashType ht : values()) {
                     if (ht.VARIANCES != null) {
@@ -302,7 +302,7 @@ public final class CryptoConst {
         }
 
         public static HashType toMDType(String name) {
-            return toMDType(SharedUtil.lookupEnum(name, DataMDType.values()));
+            return toMDType(SUS.lookupEnum(name, DataMDType.values()));
         }
 
         public static HashType toMDType(DataMDType dmdt) {
@@ -386,7 +386,7 @@ public final class CryptoConst {
         }
 
         public static SecureRandomType lookup(String mdName) {
-            return SharedUtil.lookupEnum(mdName, SecureRandomType.values());
+            return SUS.lookupEnum(mdName, SecureRandomType.values());
         }
     }
 
@@ -487,7 +487,7 @@ public final class CryptoConst {
 
 
         public static JWTAlgo lookup(String algo) {
-            JWTAlgo ret = SharedUtil.lookupEnum(algo, JWTAlgo.values());
+            JWTAlgo ret = SUS.lookupEnum(algo, JWTAlgo.values());
             if (ret == null && algo != null) {
                 for (JWTAlgo jwta : JWTAlgo.values()) {
                     if (jwta.getAltName() != null && algo.equalsIgnoreCase(jwta.getAltName())) {
@@ -591,7 +591,7 @@ public final class CryptoConst {
                 for (NVGenericMap cert : certs.getValue()) {
                     NVGenericMap toAdd = new NVGenericMap();
                     if (cert != null) {
-                        CertSource certType = SharedUtil.lookupEnum(cert.getValue(CERT_TYPE), CertSource.values());
+                        CertSource certType = SUS.lookupEnum(cert.getValue(CERT_TYPE), CertSource.values());
                         if (certType == null)
                             certType = CertSource.KEYSTORE;
 
@@ -601,7 +601,7 @@ public final class CryptoConst {
                 }
             } else {
                 NVGenericMap toAdd = new NVGenericMap();
-                CertSource certType = SharedUtil.lookupEnum(certConfig.getValue(CERT_TYPE), CertSource.values());
+                CertSource certType = SUS.lookupEnum(certConfig.getValue(CERT_TYPE), CertSource.values());
                 if (certType == null)
                     certType = CertSource.KEYSTORE;
 

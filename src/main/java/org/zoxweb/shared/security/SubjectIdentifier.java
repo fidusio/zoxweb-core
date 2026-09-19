@@ -61,7 +61,7 @@ public class SubjectIdentifier
             false,
             false,
             SubjectIdentifier.class,
-            SharedUtil.extractNVConfigs(Param.values()),
+            SUS.extractNVConfigs(Param.values()),
             null,
             false,
             PropertyDAO.NVC_PROPERTY_DAO

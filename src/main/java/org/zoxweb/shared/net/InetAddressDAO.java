@@ -34,7 +34,7 @@ public class InetAddressDAO
     private static final NVConfig IP_VERSION = NVConfigManager.createNVConfig("ip_version", "The ip version V4 or V6", "IPVersion", true, false, IPVersion.class);
 
     /** NVConfigEntity definition for InetAddressDAO */
-    public static final NVConfigEntity NVC_INET_ADDRESS_DAO = new NVConfigEntityPortable("inet_address_dao", null, "InetAddressDAO", true, false, false, false, InetAddressDAO.class, SharedUtil.toNVConfigList(INET_ADDRESS, IP_VERSION), null, false, SetNameDAO.NVC_NAME_DAO);
+    public static final NVConfigEntity NVC_INET_ADDRESS_DAO = new NVConfigEntityPortable("inet_address_dao", null, "InetAddressDAO", true, false, false, false, InetAddressDAO.class, SUS.toNVConfigList(INET_ADDRESS, IP_VERSION), null, false, SetNameDAO.NVC_NAME_DAO);
 
     /**
      * Default constructor.

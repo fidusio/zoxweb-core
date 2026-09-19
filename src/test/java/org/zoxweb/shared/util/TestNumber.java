@@ -20,9 +20,9 @@ public class TestNumber {
 	@Test
 	public void testLong() 
 	{
-		assert(SharedUtil.parseNumber(maxIntPlusOne) instanceof Long);
-		assert(SharedUtil.parseNumber(longMax) instanceof Long);
-		assert(SharedUtil.parseNumber(longMin) instanceof Long);
+		assert(SUS.parseNumber(maxIntPlusOne) instanceof Long);
+		assert(SUS.parseNumber(longMax) instanceof Long);
+		assert(SUS.parseNumber(longMin) instanceof Long);
 	}
 	
 	
@@ -30,21 +30,21 @@ public class TestNumber {
 	public void testInt() 
 	{
 		
-		assert(SharedUtil.parseNumber(intMax) instanceof Integer);
-		assert(SharedUtil.parseNumber(intMin) instanceof Integer);
+		assert(SUS.parseNumber(intMax) instanceof Integer);
+		assert(SUS.parseNumber(intMin) instanceof Integer);
 	}
 	
 	
 	@Test
 	public void testFloat()
 	{
-		assert(SharedUtil.parseNumber("23343.4534") instanceof Float);
+		assert(SUS.parseNumber("23343.4534") instanceof Float);
 	}
 	
 	@Test
 	public void testDouble()
 	{
-		assert(SharedUtil.parseNumber(maxDouble) instanceof Double);
+		assert(SUS.parseNumber(maxDouble) instanceof Double);
 	}
 
 	@Test
@@ -111,11 +111,11 @@ public class TestNumber {
 	@Test
 	public void parseInt()
 	{
-		System.out.println(SharedUtil.parseInt("25"));
-		System.out.println(SharedUtil.parseInt("0xff"));
+		System.out.println(SUS.parseInt("25"));
+		System.out.println(SUS.parseInt("0xff"));
 
-		System.out.println(SharedUtil.parseInt("a"));
-		System.out.println(SharedUtil.parseInt("0x2000"));
+		System.out.println(SUS.parseInt("a"));
+		System.out.println(SUS.parseInt("0x2000"));
 		System.out.println(Integer.parseInt("2000", 16));
 	}
 
@@ -123,16 +123,16 @@ public class TestNumber {
 	@Test
 	public void parseShort()
 	{
-		System.out.println(SharedUtil.parseShort("25"));
-		assert(SharedUtil.parseShort("0Xfaa") == SharedUtil.parseShort("0xfAA"));
+		System.out.println(SUS.parseShort("25"));
+		assert(SUS.parseShort("0Xfaa") == SUS.parseShort("0xfAA"));
 
 	}
 
 	@Test
 	public void parseLong()
 	{
-		System.out.println(SharedUtil.parseLong("25"));
-		assert(SharedUtil.parseLong("0Xffaa") == SharedUtil.parseLong("0xffAA"));
+		System.out.println(SUS.parseLong("25"));
+		assert(SUS.parseLong("0Xffaa") == SUS.parseLong("0xffAA"));
 
 	}
 
@@ -141,7 +141,7 @@ public class TestNumber {
 	{
 		int toSend = Integer.MAX_VALUE;
 		byte[] array = {(byte) ((toSend >> 24) & 0xff), (byte) ((toSend >> 16) & 0xff), (byte) ((toSend >> 8) & 0xff), (byte) ((toSend) & 0xff)};
-		System.out.println(SharedStringUtil.bytesToHex(array));
+		System.out.println(SUS.bytesToHex(array));
 		System.out.println((byte) ((toSend >> 24) & 0xff));
 		System.out.println((byte) ((toSend >> 16) & 0xff));
 		System.out.println((byte) ((toSend >> 8) & 0xff));
@@ -155,7 +155,7 @@ public class TestNumber {
 	{
 		short toSend = Short.MAX_VALUE;
 		byte[] array = {(byte) ((toSend >> 8) & 0xff), (byte) ((toSend) & 0xff)};
-		System.out.println(SharedStringUtil.bytesToHex(array));
+		System.out.println(SUS.bytesToHex(array));
 		System.out.println((byte) ((toSend >> 8) & 0xff));
 		System.out.println((byte) ((toSend >> 0) & 0xff));
 		System.out.println(BytesValue.SHORT.toValue(array) + " " + BytesValue.SHORT.toValue(array).equals(toSend));
@@ -169,7 +169,7 @@ public class TestNumber {
 				(byte) ((toSend >> 56) & 0xff), (byte) ((toSend >> 48) & 0xff), (byte) ((toSend >> 40) & 0xff), (byte) ((toSend>>32) & 0xff),
 				(byte) ((toSend >> 24) & 0xff), (byte) ((toSend >> 16) & 0xff), (byte) ((toSend >> 8) & 0xff), (byte) ((toSend) & 0xff)
 		};
-		System.out.println(SharedStringUtil.bytesToHex(array));
+		System.out.println(SUS.bytesToHex(array));
 		System.out.println((byte) ((toSend >> 56) & 0xff));
 		System.out.println((byte) ((toSend >> 48) & 0xff));
 		System.out.println((byte) ((toSend >> 40) & 0xff));

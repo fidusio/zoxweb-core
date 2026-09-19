@@ -347,7 +347,7 @@ public interface BytesValue<V> {
 
         @Override
         public byte[] toBytes(String s) {
-            return SharedStringUtil.getBytes(s);
+            return SUS.getBytes(s);
         }
 
         @Override
@@ -364,7 +364,7 @@ public interface BytesValue<V> {
 
         @Override
         public String toValue(byte[] bytes) {
-            return SharedStringUtil.toString(bytes);
+            return SUS.toString(bytes);
         }
 
         public String toValue(byte[] buffer, int offset) {
@@ -374,7 +374,7 @@ public interface BytesValue<V> {
 
         @Override
         public String toValue(byte[] bytes, int offset, int length) {
-            return SharedStringUtil.toString(bytes, offset, length);
+            return SUS.toString(bytes, offset, length);
         }
     };
 }

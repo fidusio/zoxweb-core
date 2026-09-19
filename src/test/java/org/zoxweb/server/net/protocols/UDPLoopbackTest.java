@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.zoxweb.server.net.NIOSocket;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.shared.io.SharedIOUtil;
-import org.zoxweb.shared.util.SharedStringUtil;
+import org.zoxweb.shared.util.SUS;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -44,7 +44,7 @@ public class UDPLoopbackTest {
                 DatagramPacket in = new DatagramPacket(buf, buf.length);
                 server.receive(in);
                 request.set(new String(in.getData(), 0, in.getLength()));
-                byte[] reply = SharedStringUtil.getBytes("PONG");
+                byte[] reply = SUS.getBytes("PONG");
                 server.send(new DatagramPacket(reply, reply.length, in.getAddress(), in.getPort()));
             } catch (Exception e) {
                 serverFailure.set(e);

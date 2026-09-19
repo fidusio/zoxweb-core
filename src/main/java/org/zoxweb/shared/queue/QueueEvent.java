@@ -19,7 +19,6 @@ import java.util.Date;
 import java.util.EventObject;
 
 import org.zoxweb.shared.util.SUS;
-import org.zoxweb.shared.util.SharedUtil;
 import org.zoxweb.shared.util.ToBytes;
 
 /**

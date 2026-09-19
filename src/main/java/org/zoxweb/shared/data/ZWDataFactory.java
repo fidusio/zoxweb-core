@@ -1192,7 +1192,7 @@ public class ZWDataFactory
     @Override
     public <V extends NVEntity> V createNVEntity(String canonicalID) {
         if (!SUS.isEmpty(canonicalID)) {
-            NVEntityTypeClass type = SharedUtil.lookupEnum(canonicalID, NVEntityTypeClass.values());
+            NVEntityTypeClass type = SUS.lookupEnum(canonicalID, NVEntityTypeClass.values());
 
             if (type == null) {
                 for (NVEntityTypeClass nveTypeClass : NVEntityTypeClass.values()) {

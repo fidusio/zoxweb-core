@@ -134,7 +134,7 @@ public class Range<T extends Comparable<T>>
             false,
             false,
             Range.class,
-            SharedUtil.extractNVConfigs(Range.Param.values()),
+            SUS.extractNVConfigs(Range.Param.values()),
             null,
             false,
             CanonicalIDDAO.NVC_CANONICAL_ID_DAO
@@ -630,9 +630,9 @@ public class Range<T extends Comparable<T>>
         if (tokens.length != 2) {
             throw new IllegalArgumentException("Invalid range:" + token);
         }
-        Number start = SharedUtil.parseNumber(tokens[0]);
-        Number end = SharedUtil.parseNumber(tokens[1]);
-        Number[] vals = SharedUtil.normalizeNumbers(start, end);
+        Number start = SUS.parseNumber(tokens[0]);
+        Number end = SUS.parseNumber(tokens[1]);
+        Number[] vals = SUS.normalizeNumbers(start, end);
 
         if (override == null)
             override = vals[0].getClass();

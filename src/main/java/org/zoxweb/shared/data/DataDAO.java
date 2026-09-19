@@ -36,7 +36,7 @@ public class DataDAO
 	
 		
 	
-	public static final NVConfigEntity NVC_DATA_DAO = new NVConfigEntityPortable("data_dao", null , "DataDAO", true, false, false, false, DataDAO.class, SharedUtil.toNVConfigList(NVC_DATA, NVC_SOURCE_ID, NVC_FULL_NAME), null, false, PropertyDAO.NVC_PROPERTY_DAO);
+	public static final NVConfigEntity NVC_DATA_DAO = new NVConfigEntityPortable("data_dao", null , "DataDAO", true, false, false, false, DataDAO.class, SUS.toNVConfigList(NVC_DATA, NVC_SOURCE_ID, NVC_FULL_NAME), null, false, PropertyDAO.NVC_PROPERTY_DAO);
 	
 	/**
 	 * This constructor creates a MessageBase object
@@ -84,7 +84,7 @@ public class DataDAO
 	{
 		if(data != null)
 		{
-			setData(SharedStringUtil.getBytes(data));
+			setData(SUS.getBytes(data));
 		}
 		else
 		{

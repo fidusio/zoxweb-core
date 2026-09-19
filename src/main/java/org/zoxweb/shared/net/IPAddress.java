@@ -42,7 +42,7 @@ public class IPAddress
     private static final NVConfig PROXY_TYPE = NVConfigManager.createNVConfig("proxy_type", "proxy type", "ProxyType", false, false, ProxyType.class);
 
     /** NVConfigEntity definition for IPAddress */
-    public static final NVConfigEntity NVC_IP_ADDRESS = new NVConfigEntityPortable("ip_address", null, "IPAddress", true, false, false, false, IPAddress.class, SharedUtil.toNVConfigList(INET_ADDRESS, PORT, BACKLOG, PROXY_TYPE), null, false, SetNameDAO.NVC_NAME_DAO);
+    public static final NVConfigEntity NVC_IP_ADDRESS = new NVConfigEntityPortable("ip_address", null, "IPAddress", true, false, false, false, IPAddress.class, SUS.toNVConfigList(INET_ADDRESS, PORT, BACKLOG, PROXY_TYPE), null, false, SetNameDAO.NVC_NAME_DAO);
 
 
     /**
@@ -233,7 +233,7 @@ public class IPAddress
      * @param pType the proxy type string
      */
     public void setProxyType(String pType) {
-        ProxyType pt = SharedUtil.lookupEnum(pType, ProxyType.values());
+        ProxyType pt = SUS.lookupEnum(pType, ProxyType.values());
         setProxyType(pt);
     }
 

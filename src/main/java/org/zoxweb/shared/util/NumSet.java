@@ -53,7 +53,7 @@ public abstract class NumSet {
     protected static long getLong(String str, byte[][] sets) {
         int radix = sets[0].length;
         long ret = 0;
-        byte[] strBytes = SharedStringUtil.getBytes(str);
+        byte[] strBytes = SUS.getBytes(str);
         for (int i = 0; i < strBytes.length; i++) {
             byte b = strBytes[strBytes.length - 1 - i];
             int val = val(b, sets);

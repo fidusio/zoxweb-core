@@ -86,7 +86,7 @@ public class SMTPCreator
     @SuppressWarnings("unchecked")
     public APIConfigInfo createEmptyConfigInfo() {
         APIConfigInfoDAO configInfo = new APIConfigInfoDAO();
-        List<NVPair> list = (List<NVPair>) SharedUtil.toNVPairs(Param.values());
+        List<NVPair> list = (List<NVPair>) SUS.toNVPairs(Param.values());
         configInfo.setAPITypeName(API_NAME);
         configInfo.setDescription("SMTP (Simple Mail Transfer Protocol) configuration is used for email set up to send and receive emails.");
         configInfo.setVersion("2020");

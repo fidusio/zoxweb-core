@@ -16,7 +16,7 @@
 package org.zoxweb.shared.http;
 
 import org.zoxweb.shared.protocol.MessageFirstLine;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.SUS;
 
 /**
  * Represents the first line of an HTTP request message.
@@ -114,7 +114,7 @@ extends MessageFirstLine
 	 */
 	public HTTPMethod getHTTPMethod()
 	{
-		return (HTTPMethod) SharedUtil.lookupEnum(getMethod(), HTTPMethod.values());
+		return (HTTPMethod) SUS.lookupEnum(getMethod(), HTTPMethod.values());
 	}
 	
 }

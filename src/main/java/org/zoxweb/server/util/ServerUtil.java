@@ -216,7 +216,7 @@ public final class ServerUtil {
 
                     if (!ni.isPointToPoint() && !ni.isLoopback() && !ni.isVirtual() && ni.getHardwareAddress() != null) {
                         NetworkInterfaceDAO niDAO = new NetworkInterfaceDAO();
-                        niDAO.setMACAddress(SharedStringUtil.bytesToHex(ni.getHardwareAddress(), ":"));
+                        niDAO.setMACAddress(SUS.bytesToHex(ni.getHardwareAddress(), ":"));
                         niDAO.setName(ni.getName());
                         niDAO.setDisplayName(ni.getDisplayName());
 

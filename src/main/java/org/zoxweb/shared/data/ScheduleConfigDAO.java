@@ -18,7 +18,7 @@ import org.zoxweb.shared.util.NVEntity;
 import org.zoxweb.shared.util.NVGenericMap;
 
 import org.zoxweb.shared.util.NVStringList;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.SUS;
 
 
 @SuppressWarnings("serial")
@@ -76,7 +76,7 @@ public class ScheduleConfigDAO
 	         false,
 	         false,
 	         ScheduleConfigDAO.class,
-	         SharedUtil.extractNVConfigs(Param.values()),
+	         SUS.extractNVConfigs(Param.values()),
 	         null,
 	         false,
 	         TimeStampDAO.NVC_TIME_STAMP_DAO
@@ -114,7 +114,7 @@ public class ScheduleConfigDAO
 	
 	public void setOnCommands(String[] onCommands)
 	{
-		NVStringList nvsl = SharedUtil.toNVStringList(PropParam.ON_COMMANDS.getName(), onCommands, true);
+		NVStringList nvsl = SUS.toNVStringList(PropParam.ON_COMMANDS.getName(), onCommands, true);
 		getProperties().add(nvsl);
 	}
 	
@@ -126,7 +126,7 @@ public class ScheduleConfigDAO
 	
 	public void setOffCommands(String[] offCommands)
 	{
-		NVStringList nvsl = SharedUtil.toNVStringList(PropParam.OFF_COMMANDS.getName(), offCommands, true);
+		NVStringList nvsl = SUS.toNVStringList(PropParam.OFF_COMMANDS.getName(), offCommands, true);
 		getProperties().add(nvsl);
 	}
 	public void setEnabled(boolean status)

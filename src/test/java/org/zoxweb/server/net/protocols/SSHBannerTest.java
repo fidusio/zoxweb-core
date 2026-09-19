@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.zoxweb.server.net.NIOSocket;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.shared.io.SharedIOUtil;
-import org.zoxweb.shared.util.SharedStringUtil;
+import org.zoxweb.shared.util.SUS;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -63,7 +63,7 @@ public class SSHBannerTest {
      * definition's length_prefixed framing and the fixed-offset extract.
      */
     private static byte[] syntheticKexInit(String kexList) throws Exception {
-        byte[] names = SharedStringUtil.getBytes(kexList);
+        byte[] names = SUS.getBytes(kexList);
         ByteArrayOutputStream payload = new ByteArrayOutputStream();
         payload.write(0);                        // padding_length
         payload.write(20);                       // SSH_MSG_KEXINIT
@@ -108,7 +108,7 @@ public class SSHBannerTest {
         try {
             nioSocket.addClientSocket(validator);
             accepted = server.accept();
-            accepted.getOutputStream().write(SharedStringUtil.getBytes(banner));
+            accepted.getOutputStream().write(SUS.getBytes(banner));
             accepted.getOutputStream().flush();
             if (kexInit != null) {
                 String clientIdent = readLine(accepted.getInputStream());

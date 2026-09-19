@@ -50,7 +50,7 @@ public abstract class NVEntity
 
     protected NVEntity(NVConfigEntity nvce) {
 //		config = nvce;
-//		attributes = SharedUtil.toData( config.getAttributes());
+//		attributes = SUS.toData( config.getAttributes());
         this(nvce, SharedMetaUtil.toData(nvce.getAttributes()));
     }
 

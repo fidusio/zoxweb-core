@@ -149,7 +149,7 @@ public class ParamUtil {
             }
 
             if (ret.size() == 1) {
-                return SharedUtil.parseInt(ret.get(0));
+                return SUS.parseInt(ret.get(0));
             }
 
             throw new IllegalArgumentException(name + " value not found or no valid");
@@ -164,7 +164,7 @@ public class ParamUtil {
             }
 
             if (ret.size() == 1) {
-                return SharedUtil.parseLong(ret.get(0));
+                return SUS.parseLong(ret.get(0));
             }
 
             throw new IllegalArgumentException(name + " value not found or no valid");
@@ -274,7 +274,7 @@ public class ParamUtil {
         public <E extends Enum<?>> E enumValue(String name, Enum<?>... enums) {
             List<String> ret = lookup(name);
             if (ret != null && ret.size() == 1) {
-                return SharedUtil.lookupEnum(ret.get(0), enums);
+                return SUS.lookupEnum(ret.get(0), enums);
             }
             return null;
         }
@@ -283,7 +283,7 @@ public class ParamUtil {
         public <E extends Enum<?>> E enumValue(GetName name, Enum<?>... enums) {
             List<String> ret = lookup(name.getName());
             if (ret != null && ret.size() == 1) {
-                return SharedUtil.lookupEnum(ret.get(0), enums);
+                return SUS.lookupEnum(ret.get(0), enums);
             }
             return null;
         }
@@ -381,7 +381,7 @@ public class ParamUtil {
 
         public String[] namelessValues(String... toAppend) {
             List<String> ret = new ArrayList<String>();
-            SharedUtil.addTo(ret, toAppend);
+            SUS.addTo(ret, toAppend);
             for (int i = 0; i < namelessCount(); i++) {
                 ret.add(stringValue((i)));
             }
@@ -444,7 +444,7 @@ public class ParamUtil {
                     }
                 } else if (args[index].indexOf('=') != -1) {
                     // we have name=value
-                    NVPair nvp = SharedUtil.toNVPair(args[index]);
+                    NVPair nvp = SUS.toNVPair(args[index]);
                     name = nvp.getName();
                     value = nvp.getValue();
                 } else {
@@ -588,7 +588,7 @@ public class ParamUtil {
     }
 
     public static String[] parseWithSep(String sep, String token) {
-        return SharedStringUtil.parseString(token, sep, true);
+        return SUS.parseString(token, sep, true);
     }
 
 

@@ -24,7 +24,7 @@ import org.zoxweb.shared.protocol.Delimiter;
 import org.zoxweb.shared.util.ArrayValues;
 import org.zoxweb.shared.util.GetNameValue;
 import org.zoxweb.shared.util.NVPair;
-import org.zoxweb.shared.util.SharedStringUtil;
+import org.zoxweb.shared.util.SUS;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -347,7 +347,7 @@ public final class HTTPMultiPartUtil {
             } else if (hmpp.getContentValue() != null) {
                 os.write(hmpp.getContentValue());
             } else if (hmpp.getValue() != null) {
-                os.write(SharedStringUtil.getBytes(hmpp.getValue()));
+                os.write(SUS.getBytes(hmpp.getValue()));
                 //log.info("Value: " + hmpp.getValue());
             }
 
@@ -360,7 +360,7 @@ public final class HTTPMultiPartUtil {
         if (hcc.isMultiPartEncoding() && (hcc.getMethod() == HTTPMethod.POST || hcc.getMethod() == HTTPMethod.PUT)) {
 //			GetNameValue<String> ct = null;
 //			String contentType = hcc.getContentType();
-            if (!SharedStringUtil.contains(hcc.getContentType(), "boundary=", true)) {
+            if (!SUS.contains(hcc.getContentType(), "boundary=", true)) {
                 hcc.setBoundary(generateBoundary(TimeUnit.NANOSECONDS));
                 // add the boundary parameter to the request header
                 hcc.getHeaders().add(new NVPair(HTTPHeader.CONTENT_TYPE, MULTI_PART_HEADER_CONTENT_TYPE.getValue() + hcc.getBoundary()));

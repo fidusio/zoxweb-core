@@ -21,7 +21,7 @@ import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
 import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.NVConfigManager;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.SUS;
 
 /**
  * The SimpleMessage class defines a generic message with a message body,
@@ -66,7 +66,7 @@ public class SimpleMessage
             false,
             false,
             SimpleMessage.class,
-            SharedUtil.extractNVConfigs(Param.MESSAGE,Param.ERROR,Param.CATEGORY,Param.TYPE, Param.STATUS, PropertyDAO.Param.PROPERTIES),
+            SUS.extractNVConfigs(Param.MESSAGE,Param.ERROR,Param.CATEGORY,Param.TYPE, Param.STATUS, PropertyDAO.Param.PROPERTIES),
             null,
             false,
             PropertyDAO.NVC_PROPERTY_DAO

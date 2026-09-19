@@ -38,7 +38,7 @@ public abstract class AuthzInfo extends PropertyDAO {
             false,
             false,
             AuthzInfo.class,
-            SharedUtil.extractNVConfigs(DataConst.DataParam.MANDATORY_NAME, Param.BROKER_GUID, Param.APP_ID_DAO),
+            SUS.extractNVConfigs(DataConst.DataParam.MANDATORY_NAME, Param.BROKER_GUID, Param.APP_ID_DAO),
             null,
             false,
             PropertyDAO.NVC_PROPERTY_DAO

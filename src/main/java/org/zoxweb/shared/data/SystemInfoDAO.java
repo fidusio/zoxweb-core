@@ -38,13 +38,13 @@ public class SystemInfoDAO
     public static final NVConfig NETWORK_INTERFACES = NVConfigManager.createNVConfigEntity("network_interfaces", "The network interfaces", "NetworkInterfaces", false, true, true, false, NetworkInterfaceDAO.NVC_NETWORK_INTERFACE_DAO, ArrayType.GET_NAME_MAP);
     public static final NVConfig APPLICATION_PROPS = NVConfigManager.createNVConfig("application_properties", "The application properties", "ApplicationProperties", false, true, true, String[].class, null);
     //public static final NVConfig APPLICATION_DAOS =  NVConfigManager.createNVConfigEntity("content", "The application DAOs","ApplicationDAOs", false, true, NVEntity[].class, ArrayType.GET_NAME_MAP);
-    public static final NVConfigEntity NVC_SYSTEM_INFO_DAO = new NVConfigEntityPortable("system_info_dao", null, "SystemInfoDAO", true, false, false, false, SystemInfoDAO.class, SharedUtil.toNVConfigList(SYSTEM_ID, DOMAIN_ID, SYSTEM_PROPS, NETWORK_INTERFACES, APPLICATION_PROPS), null, false, NVEntityContainerDAO.NVC_NVENTITY_CONTAINER_DAO);
+    public static final NVConfigEntity NVC_SYSTEM_INFO_DAO = new NVConfigEntityPortable("system_info_dao", null, "SystemInfoDAO", true, false, false, false, SystemInfoDAO.class, SUS.toNVConfigList(SYSTEM_ID, DOMAIN_ID, SYSTEM_PROPS, NETWORK_INTERFACES, APPLICATION_PROPS), null, false, NVEntityContainerDAO.NVC_NVENTITY_CONTAINER_DAO);
 
     /**
      * The default constructor.
      */
     public SystemInfoDAO() {
-        //super(SharedUtil.merge( null, NVC_SYSTEM_INFO_DAO));
+        //super(SUS.merge( null, NVC_SYSTEM_INFO_DAO));
         super(NVC_SYSTEM_INFO_DAO);
     }
 

@@ -149,7 +149,7 @@ public final class Const {
         }
 
 //    public static JavaClassVersion lookup(String version) {
-//      if (!SharedStringUtil.isEmpty(version)) {
+//      if (!SUS.isEmpty(version)) {
 //        for (JavaClassVersion ver : values()) {
 //          if (ver.VERSION.equalsIgnoreCase(version)) {
 //            return ver;
@@ -205,7 +205,7 @@ public final class Const {
         }
 
         public static Bool parse(String str) {
-            return SharedUtil.lookupEnum(str, Bool.values());
+            return SUS.lookupEnum(str, Bool.values());
         }
 
         public static boolean lookupValue(String str) {
@@ -299,7 +299,7 @@ public final class Const {
 //    }
 //
 //    public static Unit parseUnit(String str) {
-//      if (!SharedStringUtil.isEmpty(str)) {
+//      if (!SUS.isEmpty(str)) {
 //        str = str.toLowerCase();
 //
 //        for (Unit unit : Unit.values()) {
@@ -333,7 +333,7 @@ public final class Const {
 
         public static DeviceType lookup(String toMatch) {
             for (DeviceType md : DeviceType.values()) {
-                if (SharedStringUtil.contains(toMatch, md.getName(), true)) {
+                if (SUS.contains(toMatch, md.getName(), true)) {
                     return md;
                 }
             }
@@ -609,7 +609,7 @@ public final class Const {
 
             if (toConvert instanceof String) {
                 String time = (String) toConvert;
-                time = SharedStringUtil.toLowerCase(time).trim();
+                time = SUS.toLowerCase(time).trim();
                 try {
                     return Long.parseLong(time);
                 } catch (NumberFormatException e) {
@@ -1064,7 +1064,7 @@ public final class Const {
         public static GNVTypeName toGNVTypeName(char sep, String name) {
             String[] tokens = name.split(new StringBuilder().append('\\').append(sep).toString());
             if (tokens.length > 1) {
-                GNVType type = SharedUtil.lookupEnum(tokens[0], GNVType.values());
+                GNVType type = SUS.lookupEnum(tokens[0], GNVType.values());
                 if (type != null) {
                     return new GNVTypeName(type, tokens[1]);
                 }
@@ -1190,7 +1190,7 @@ public final class Const {
         }
 
         public static DayOfWeek lookup(String str) {
-            return SharedUtil.lookupEnum(str, DayOfWeek.values());
+            return SUS.lookupEnum(str, DayOfWeek.values());
         }
 
         public static DayOfWeek lookup(int val) {
@@ -1428,7 +1428,7 @@ public final class Const {
             if (!SUS.isEmpty(token) || literal) {
                 token = "\\Q" + token + "\\E";
             }
-            return SharedStringUtil.embedText(getValue(), TOKEN_TAG, token);
+            return SUS.embedText(getValue(), TOKEN_TAG, token);
         }
 
 //    public boolean matches(String toMatch, String token)

@@ -22,42 +22,42 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class SharedStringUtilTest {
+public class SUSStringTest {
 
 	@Test
 	public void testTruncate() {
 		String str = "Hello, my name is John Smith.";
-		String result = SharedStringUtil.truncate(str, str.length());
+		String result = SUS.truncate(str, str.length());
 		assertNotNull(result);
 		assertEquals("Hello, my name is John Smith.", result);
 
 		str = "Hello, my name is John Smith.";
-		result = SharedStringUtil.truncate(str, 5);
+		result = SUS.truncate(str, 5);
 		assertNotNull(result);
 		assertEquals("Hello", result);
 
-		result = SharedStringUtil.truncate(null, 0);
+		result = SUS.truncate(null, 0);
 		assertNull(result);
 	}
 	
 	@Test
 	public void testSplit()
 	{
-		System.out.println("After right:" + SharedStringUtil.valueAfterRightToken("john.smith.dickson", "."));
-		System.out.println("After right:" + SharedStringUtil.valueAfterRightToken("john/smith/dickson", "/"));
-		System.out.println("After right:" + SharedStringUtil.valueAfterRightToken("john.smith/dickson", "/"));
-		System.out.println("Before right:" + SharedStringUtil.valueBeforeRightToken("john.smith.dickson", "."));
-		System.out.println("Before left:" + SharedStringUtil.valueBeforeLeftToken("john.smith.dickson", "."));
-		System.out.println("After left:" + SharedStringUtil.valueAfterLeftToken("john.smith.dickson", "."));
+		System.out.println("After right:" + SUS.valueAfterRightToken("john.smith.dickson", "."));
+		System.out.println("After right:" + SUS.valueAfterRightToken("john/smith/dickson", "/"));
+		System.out.println("After right:" + SUS.valueAfterRightToken("john.smith/dickson", "/"));
+		System.out.println("Before right:" + SUS.valueBeforeRightToken("john.smith.dickson", "."));
+		System.out.println("Before left:" + SUS.valueBeforeLeftToken("john.smith.dickson", "."));
+		System.out.println("After left:" + SUS.valueAfterLeftToken("john.smith.dickson", "."));
 	}
 	
 	@Test
 	public void testByteToHex()
 	{
 		byte [] buffer = {0,1,2,3,4,5,6,7,0,9,10,100,-1};
-		String str = SharedStringUtil.bytesToHex(buffer, "::");
+		String str = SUS.bytesToHex(buffer, "::");
 		System.out.println(str + " length:" + str.length());
-		str = SharedStringUtil.bytesToHex(buffer);
+		str = SUS.bytesToHex(buffer);
 		System.out.println(str + " length:" + str.length());
 	}
 
@@ -69,7 +69,7 @@ public class SharedStringUtilTest {
 			"name3=v3"
 		};
 
-		List<GetNameValue<String>> parsed = SharedStringUtil.parseStrings('=', values);
+		List<GetNameValue<String>> parsed = SUS.parseStrings('=', values);
 		assert(parsed.size() == values.length);
 		System.out.println(parsed);
 	}
@@ -77,27 +77,27 @@ public class SharedStringUtilTest {
 	@Test public void spaceChars()
 	{
 		String test = "Hello World";
-		System.out.println(SharedStringUtil.spaceChars(test, "*"));
+		System.out.println(SUS.spaceChars(test, "*"));
 	}
 
 	@Test public void repeatSequence()
 	{
 		String test = "Hello World";
-		System.out.println(SharedStringUtil.repeatSequence(test, 3, "*"));
-		System.out.println(SharedStringUtil.repeatSequence(test, 3));
+		System.out.println(SUS.repeatSequence(test, 3, "*"));
+		System.out.println(SUS.repeatSequence(test, 3));
 	}
 
 	@Test public void partialParse()
 	{
 		String token = "a1:b2:c3*d4::::DA:darta";
-		System.out.println(Arrays.toString(SharedStringUtil.parseToken(token, 0, false, "*")));
+		System.out.println(Arrays.toString(SUS.parseToken(token, 0, false, "*")));
 
-		System.out.println(Arrays.toString(SharedStringUtil.parseToken(token, 3, false, "*", ":", "da")));
+		System.out.println(Arrays.toString(SUS.parseToken(token, 3, false, "*", ":", "da")));
 
 		String gpio = "gpio_0:marwan:https://yahoo.com";
 
-		System.out.println(Arrays.toString(SharedStringUtil.parseToken(gpio, 2, false, "*", ":")));
-		System.out.println(Arrays.toString(SharedStringUtil.parseToken(gpio, 0, false, "*", ":")));
+		System.out.println(Arrays.toString(SUS.parseToken(gpio, 2, false, "*", ":")));
+		System.out.println(Arrays.toString(SUS.parseToken(gpio, 0, false, "*", ":")));
 	}
 
 }

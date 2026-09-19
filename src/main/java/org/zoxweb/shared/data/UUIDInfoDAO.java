@@ -26,7 +26,7 @@ import org.zoxweb.shared.util.NVConfigEntity;
 import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.NVEntity;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.SUS;
 
 /**
  * The UUIDInfoDAO class defines a UUID-based access token to a resource,
@@ -77,7 +77,7 @@ public class UUIDInfoDAO
             false,
             false,
             UUIDInfoDAO.class,
-            SharedUtil.extractNVConfigs(Param.values()),
+            SUS.extractNVConfigs(Param.values()),
             null,
             false,
             TimeStampDAO.NVC_TIME_STAMP_DAO

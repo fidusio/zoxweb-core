@@ -17,8 +17,6 @@ package org.zoxweb.shared.net;
 
 import org.zoxweb.shared.data.Range;
 import org.zoxweb.shared.util.SUS;
-import org.zoxweb.shared.util.SharedStringUtil;
-import org.zoxweb.shared.util.SharedUtil;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -82,7 +80,7 @@ public class SharedNetUtil {
 
         for (int i = 0; i < netmask.length; i++) {
             if (i != 0) {
-                if (SharedUtil.toUnsignedInt(netmask[i - 1]) < 255) {
+                if (SUS.toUnsignedInt(netmask[i - 1]) < 255) {
                     if (netmask[i] != 0) {
                         return false;
                     } else {
@@ -142,13 +140,13 @@ public class SharedNetUtil {
         StringBuilder sb = new StringBuilder();
         int index = 0;
 
-        sb.append(SharedStringUtil.toString(address[index++]));
+        sb.append(SUS.toString(address[index++]));
         sb.append('.');
-        sb.append(SharedStringUtil.toString(address[index++]));
+        sb.append(SUS.toString(address[index++]));
         sb.append('.');
-        sb.append(SharedStringUtil.toString(address[index++]));
+        sb.append(SUS.toString(address[index++]));
         sb.append('.');
-        sb.append(SharedStringUtil.toString(address[index++]));
+        sb.append(SUS.toString(address[index++]));
 
         return sb.toString();
     }

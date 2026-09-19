@@ -67,7 +67,7 @@ extends IOTBase
             false,
             false,
             ProtocolInfo.class,
-            SharedUtil.extractNVConfigs(Param.values()),
+            SUS.extractNVConfigs(Param.values()),
             null,
             false,
             IOTBase.NVC_IOT_BASE);

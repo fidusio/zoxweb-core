@@ -143,7 +143,7 @@ public class HTTPCall {
                         if (hcc.getHTTPParameterFormatter() == HTTPEncoder.URL_ENCODED)
                             urlURI += "?" + encodedContentParams;
                         else if (hcc.getHTTPParameterFormatter() == HTTPEncoder.URI_REST_ENCODED) {
-                            urlURI = SharedStringUtil.concat(urlURI, encodedContentParams, HTTPEncoder.URI_REST_ENCODED.getValue());
+                            urlURI = SUS.concat(urlURI, encodedContentParams, HTTPEncoder.URI_REST_ENCODED.getValue());
                         }
                     }
                     break;
@@ -386,9 +386,9 @@ public class HTTPCall {
         }
 
         if (urlOverride != null)
-            ret = SharedStringUtil.concat(urlOverride, uri, "/");
+            ret = SUS.concat(urlOverride, uri, "/");
         else
-            ret = SharedStringUtil.concat(hcc.getURL(), uri, "/");
+            ret = SUS.concat(hcc.getURL(), uri, "/");
 
 
         return ret;

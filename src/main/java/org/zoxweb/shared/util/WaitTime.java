@@ -16,7 +16,7 @@ public interface WaitTime<T>
 
     default int compareTo(Delayed o) {
         // may cause error
-        return SharedUtil.signum(getDelay(TimeUnit.MILLISECONDS) - o.getDelay(TimeUnit.MILLISECONDS));
+        return SUS.signum(getDelay(TimeUnit.MILLISECONDS) - o.getDelay(TimeUnit.MILLISECONDS));
     }
 
 }

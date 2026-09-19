@@ -16,7 +16,6 @@
 package org.zoxweb.shared.filters;
 
 import org.zoxweb.shared.util.SUS;
-import org.zoxweb.shared.util.SharedUtil;
 
 @SuppressWarnings("serial")
 public class ChainedFilter
@@ -79,7 +78,7 @@ public class ChainedFilter
     public boolean isFilterSupported(ValueFilter<?, ?> toCheck) {
         if (getValueFilters() != null) {
             for (ValueFilter<String, String> vf : getValueFilters()) {
-                if (SharedUtil.equals(vf, toCheck)) {
+                if (SUS.equals(vf, toCheck)) {
                     return true;
                 }
             }
@@ -92,7 +91,7 @@ public class ChainedFilter
         boolean ret = false;
 
         if (toCheck != null && toCheckFor != null) {
-            ret = SharedUtil.equals(toCheck, toCheckFor);
+            ret = SUS.equals(toCheck, toCheckFor);
 
             if (!ret && toCheck instanceof ChainedFilter) {
                 ret = ((ChainedFilter) toCheck).isFilterSupported(toCheckFor);

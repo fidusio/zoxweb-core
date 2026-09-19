@@ -27,8 +27,6 @@ import org.zoxweb.shared.security.IPBlockerConfig;
 import org.zoxweb.shared.util.Const.TimeInMillis;
 import org.zoxweb.shared.util.NVPair;
 import org.zoxweb.shared.util.SUS;
-import org.zoxweb.shared.util.SharedStringUtil;
-import org.zoxweb.shared.util.SharedUtil;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -136,10 +134,10 @@ public class IPBlockerListener
         //long timeStamp = ste.getTimeStamp();
 
 
-        if (SharedStringUtil.contains(token, ipbc.getAuthToken(), true)) {
-            List<NVPair> results = SharedUtil.toNVPairs(token, "=", " ");
-            NVPair parameter = SharedUtil.lookup(results, ipbc.getAuthValue());
-            String value = SharedUtil.getValue(parameter);
+        if (SUS.contains(token, ipbc.getAuthToken(), true)) {
+            List<NVPair> results = SUS.toNVPairs(token, "=", " ");
+            NVPair parameter = SUS.lookup(results, ipbc.getAuthValue());
+            String value = SUS.getValue(parameter);
             if (!SUS.isEmpty(value)) {
                 value = value.toLowerCase();
                 reportBadAddress(new IPAddressEvent(ste.getSource(), new IPAddress(value, 22)));
@@ -163,7 +161,7 @@ public class IPBlockerListener
 //				if (ripi.attackCount >= ipbc.getTriggerCounter() && ripi.attackRate >= ipbc.getRate())
 //				{
 //					log.info("we must block:" + ripi);
-//					String command = SharedStringUtil.embedText(ipbc.getCommand(), ipbc.getCommandToken(), value);
+//					String command = SUS.embedText(ipbc.getCommand(), ipbc.getCommandToken(), value);
 //					log.info("we will execute:" + command);
 //					try
 //					{
@@ -212,9 +210,9 @@ public class IPBlockerListener
 
                 if (ripi.attackCount >= ipbc.getTriggerCounter() && ripi.attackRate >= ipbc.getRate()) {
                     log.info("we must block:" + ripi);
-                    String command = SharedStringUtil.embedText(ipbc.getCommand(), ipbc.getCommandToken(), isad.getInetAddress());
+                    String command = SUS.embedText(ipbc.getCommand(), ipbc.getCommandToken(), isad.getInetAddress());
                     if (!SUS.isEmpty(ipbc.getPortToken()) && isad.getPort() > 0) {
-                        command = SharedStringUtil.embedText(command, ipbc.getPortToken(), "" + isad.getPort());
+                        command = SUS.embedText(command, ipbc.getPortToken(), "" + isad.getPort());
                     }
                     log.info("we will execute:" + command);
                     try {

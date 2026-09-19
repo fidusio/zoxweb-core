@@ -46,7 +46,7 @@ extends PropertyDAO
             false,
             false,
             IOTBase.class,
-            SharedUtil.toNVConfigList(DataConst.DataParam.UNIQUE_CANONICAL_ID.getNVConfig(), ALIAS),
+            SUS.toNVConfigList(DataConst.DataParam.UNIQUE_CANONICAL_ID.getNVConfig(), ALIAS),
             null,
             false,
             PropertyDAO.NVC_PROPERTY_DAO);

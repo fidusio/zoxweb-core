@@ -116,7 +116,7 @@ public class Base64Test {
 
         try {
             byte[] b64 = SharedBase64.encode("1234567890");
-            String str = SharedStringUtil.toString(b64);
+            String str = SUS.toString(b64);
             System.out.println("1234567890 b64:" + str);
             System.out.println(SharedBase64.decodeAsString(null, "MTIzNDU2Nzg5MA"));
             System.out.println(SharedBase64.decodeAsString(null, "MTIzNDU2Nzg5MA="));
@@ -131,14 +131,14 @@ public class Base64Test {
         UUID uuid = UUID.randomUUID();
 
         byte[] uuidBytes = BytesValue.LONG.toBytes(null, 0, uuid.getMostSignificantBits(), uuid.getMostSignificantBits());
-        String str = SharedStringUtil.toString(SharedBase64.encode(Base64Type.URL, uuidBytes));
+        String str = SUS.toString(SharedBase64.encode(Base64Type.URL, uuidBytes));
         String str1 = Base64.getUrlEncoder().encodeToString(uuidBytes);
         System.out.println(str + " " + str1 + " " + str1.equals(str));
 
         byte[] b = SharedBase64.decode(Base64Type.URL, str);
         byte[] b1 = Base64.getUrlDecoder().decode(str);
         System.out.println(Arrays.equals(uuidBytes, b) + " " + Arrays.equals(uuidBytes, b1));
-        str = SharedStringUtil.toString(SharedBase64.encode(Base64Type.URL, b));
+        str = SUS.toString(SharedBase64.encode(Base64Type.URL, b));
         System.out.println(str);
 
         String base64URL = "eyJpc3MiOiJqb2UiLA0KICJleHAiOjEzMDA4MTkzODAsDQogImh0dHA6Ly9leGFtcGxlLmNvbS9pc19yb290Ijp0cnVlfQ";

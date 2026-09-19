@@ -145,7 +145,7 @@ public class SharedBase64 {
 
 
     public static boolean validate(String str) {
-        return validate(SharedStringUtil.getBytes(str));
+        return validate(SUS.getBytes(str));
     }
 
     public static boolean validate(byte[] data) {
@@ -168,7 +168,7 @@ public class SharedBase64 {
 
 
     public static Base64Type detectType(String data) {
-        return detectType(SharedStringUtil.getBytes(data));
+        return detectType(SUS.getBytes(data));
     }
 
     public static Base64Type detectType(byte[] data, int index, int len) {
@@ -270,21 +270,21 @@ public class SharedBase64 {
      * @return decoded byte array
      */
     public static byte[] decode(String str) {
-        str = SharedStringUtil.filterString(str, "\n");
-        return decode(SharedStringUtil.getBytes(str));
+        str = SUS.filterString(str, "\n");
+        return decode(SUS.getBytes(str));
     }
 
     public static byte[] decode(Base64Type bt, String str) {
-        str = SharedStringUtil.filterString(str, "\n");
-        return decode(bt, SharedStringUtil.getBytes(str));
+        str = SUS.filterString(str, "\n");
+        return decode(bt, SUS.getBytes(str));
     }
 
     public static String decodeAsString(Base64Type bt, String str) {
-        return SharedStringUtil.toString(decode(bt, SharedStringUtil.getBytes(str)));
+        return SUS.toString(decode(bt, SUS.getBytes(str)));
     }
 
     public static String decodeAsString(Base64Type bt, byte[] str) {
-        return SharedStringUtil.toString(decode(bt, str));
+        return SUS.toString(decode(bt, str));
     }
 
     /**
@@ -294,20 +294,20 @@ public class SharedBase64 {
      * @return encoded byte array
      */
     public static byte[] encode(String str) {
-        return encode(SharedStringUtil.getBytes(str));
+        return encode(SUS.getBytes(str));
     }
 
     public static byte[] encode(Base64Type bt, String str) {
-        return encode(bt, SharedStringUtil.getBytes(str));
+        return encode(bt, SUS.getBytes(str));
     }
 
     public static String encodeAsString(Base64Type bt, String str) {
-        return SharedStringUtil.toString(encode(bt, SharedStringUtil.getBytes(str)));
+        return SUS.toString(encode(bt, SUS.getBytes(str)));
     }
 
 
     public static String encodeWrappedAsString(byte[] ba) {
-        return WRAP_START_TOKEN + SharedStringUtil.toString(encode(Base64Type.URL, ba)) + WRAP_END_TOKEN;
+        return WRAP_START_TOKEN + SUS.toString(encode(Base64Type.URL, ba)) + WRAP_END_TOKEN;
     }
 
     public static byte[] decodeWrappedAsString(String str) {
@@ -321,12 +321,12 @@ public class SharedBase64 {
     }
 
     public static String encodeAsString(Base64Type bt, byte[] array) {
-        return SharedStringUtil.toString(encode(bt, array));
+        return SUS.toString(encode(bt, array));
     }
 
 
     public static String encodeAsString(Base64Type bt, byte[] array, int offset, int length) {
-        return SharedStringUtil.toString(encode(bt, array, offset, length));
+        return SUS.toString(encode(bt, array, offset, length));
     }
 
     /**

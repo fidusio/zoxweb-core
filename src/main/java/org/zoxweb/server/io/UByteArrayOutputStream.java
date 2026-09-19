@@ -18,8 +18,6 @@ package org.zoxweb.server.io;
 import org.zoxweb.shared.io.BytesArray;
 import org.zoxweb.shared.io.DataBufferController;
 import org.zoxweb.shared.util.SUS;
-import org.zoxweb.shared.util.SharedStringUtil;
-import org.zoxweb.shared.util.SharedUtil;
 
 import java.io.*;
 import java.nio.ByteBuffer;
@@ -73,7 +71,7 @@ public class UByteArrayOutputStream
 
 
     public UByteArrayOutputStream(String str) {
-        this(SharedStringUtil.getBytes(str));
+        this(SUS.getBytes(str));
     }
 
     /**
@@ -186,7 +184,7 @@ public class UByteArrayOutputStream
     }
 
     public int indexOf(int startAt, String str) {
-        byte[] match = SharedStringUtil.getBytes(str);
+        byte[] match = SUS.getBytes(str);
         return SUS.indexOf(getInternalBuffer(), startAt, size(), match, 0, match.length);
     }
 
@@ -272,7 +270,7 @@ public class UByteArrayOutputStream
      * @param str converted to bytes
      */
     public void write(String str) {
-        write(SharedStringUtil.getBytes(str));
+        write(SUS.getBytes(str));
     }
 
     @Override
@@ -487,7 +485,7 @@ public class UByteArrayOutputStream
      */
     public String getString(int startIndex) {
         int length = size() - startIndex;
-        return SharedStringUtil.toString(getInternalBuffer(), startIndex, length);
+        return SUS.toString(getInternalBuffer(), startIndex, length);
     }
 
     /**
@@ -497,14 +495,14 @@ public class UByteArrayOutputStream
      * @return a string from start index with the requested length
      */
     public String getString(int indexStart, int length) {
-        return SharedStringUtil.toString(getInternalBuffer(), indexStart, length);
+        return SUS.toString(getInternalBuffer(), indexStart, length);
     }
 
     public synchronized String toString(boolean withContent) {
         StringBuilder sb = new StringBuilder("Size  " + size() + " Buffer Length " + buf.length);
         if (withContent) {
             sb.append("\n");
-            sb.append(SharedStringUtil.toString(buf, 0, size()));
+            sb.append(SUS.toString(buf, 0, size()));
         }
 
         return sb.toString();

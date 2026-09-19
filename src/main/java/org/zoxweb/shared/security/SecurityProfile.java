@@ -56,7 +56,7 @@ implements ResourceSecurity
             false,
             false,
             SecurityProfile.class,
-            SharedUtil.extractNVConfigs(Param.values()),
+            SUS.extractNVConfigs(Param.values()),
             null,
             false,
             PropertyDAO.NVC_PROPERTY_DAO);
@@ -185,7 +185,7 @@ implements ResourceSecurity
 
     public boolean isProtocolSupported(String protocol)
     {
-        return isProtocolSupported((URIScheme)SharedUtil.lookupEnum(protocol, URIScheme.values()));
+        return isProtocolSupported((URIScheme)SUS.lookupEnum(protocol, URIScheme.values()));
     }
     public boolean isProtocolSupported(URIScheme protocol)
     {

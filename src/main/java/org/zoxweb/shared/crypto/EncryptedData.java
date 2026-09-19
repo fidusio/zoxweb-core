@@ -83,7 +83,7 @@ public class EncryptedData
         }
     }
 
-    public final static NVConfigEntity NVCE_ENCRYPTED_DATA = new NVConfigEntityPortable("encrypted_data", null, "EncryptedData", false, true, false, false, EncryptedData.class, SharedUtil.extractNVConfigs(Param.values()), null, false, PropertyDAO.NVC_PROPERTY_DAO);
+    public final static NVConfigEntity NVCE_ENCRYPTED_DATA = new NVConfigEntityPortable("encrypted_data", null, "EncryptedData", false, true, false, false, EncryptedData.class, SUS.extractNVConfigs(Param.values()), null, false, PropertyDAO.NVC_PROPERTY_DAO);
 
     public EncryptedData() {
         super(NVCE_ENCRYPTED_DATA);
@@ -307,7 +307,7 @@ public class EncryptedData
     }
 
     static String encode(byte[] bytes) {
-        return bytes != null ? SharedStringUtil.toString(SharedBase64.encode(Base64Type.URL, bytes, 0, bytes.length)) : null;
+        return bytes != null ? SUS.toString(SharedBase64.encode(Base64Type.URL, bytes, 0, bytes.length)) : null;
     }
 
     static byte[] decode(String text) {

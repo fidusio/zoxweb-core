@@ -246,13 +246,13 @@ public final class BytesArray
 
         if (o instanceof byte[]) {
             byte[] input = (byte[]) o;
-            return SharedUtil.equals(this, array, offset, offset + length, input, 0, input.length);
+            return SUS.equals(this, array, offset, offset + length, input, 0, input.length);
         }
 
         if (getClass() != o.getClass()) return false;
 
         BytesArray that = (BytesArray) o;
-        return (length == that.length) && SharedUtil.equals(() -> isValid() && that.isValid(), array, offset, offset + length, that.array, that.offset, that.offset + that.length);
+        return (length == that.length) && SUS.equals(() -> isValid() && that.isValid(), array, offset, offset + length, that.array, that.offset, that.offset + that.length);
     }
 
     /**
@@ -268,7 +268,7 @@ public final class BytesArray
             synchronized (this) {
                 if (hashCode == null) {
                     checkValidity();
-                    hashCode = SharedUtil.hashCode(array, offset, length);
+                    hashCode = SUS.hashCode(array, offset, length);
                 }
             }
         }
@@ -331,7 +331,7 @@ public final class BytesArray
         checkValidity();
         if (startAt < 0)
             throw new IllegalArgumentException("Negative start index " + startAt);
-        byte[] match = SharedStringUtil.getBytes(str);
+        byte[] match = SUS.getBytes(str);
         int ret = SUS.indexOf(array, offset + startAt, offset + length, match, 0, match.length);
         return ret != -1 ? ret - offset : -1;
     }

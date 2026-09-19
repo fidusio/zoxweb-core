@@ -54,7 +54,7 @@ public class SecSessionData
 
     }
 
-    public static final NVConfigEntity NVC_SESSION_DATA = new NVConfigEntityPortable("sec_session_data", null, "SecSessionData", true, false, false, false, SecSessionData.class, SharedUtil.extractNVConfigs(Param.SUBJECT_ID, Param.ROLES, Param.PERMISSIONS), null, false, AppIDResource.NVC_APP_ID_RESOURCE);
+    public static final NVConfigEntity NVC_SESSION_DATA = new NVConfigEntityPortable("sec_session_data", null, "SecSessionData", true, false, false, false, SecSessionData.class, SUS.extractNVConfigs(Param.SUBJECT_ID, Param.ROLES, Param.PERMISSIONS), null, false, AppIDResource.NVC_APP_ID_RESOURCE);
 
     public SecSessionData() {
         super(NVC_SESSION_DATA);

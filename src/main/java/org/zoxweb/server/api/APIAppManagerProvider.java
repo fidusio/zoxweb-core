@@ -125,7 +125,7 @@ public class APIAppManagerProvider
      */
     private RoleGrant findRoleGrant(String subjectGUID, RoleInfo role) {
         for (RoleGrant grant : dsm().getRoleGrants(subjectGUID)) {
-            if (SharedStringUtil.equals(grant.getRoleGUID(), role.getGUID(), false)) {
+            if (SUS.equals(grant.getRoleGUID(), role.getGUID(), false)) {
                 return grant;
             }
         }
@@ -147,7 +147,7 @@ public class APIAppManagerProvider
      */
     private static boolean sameDomain(AuthzInfo info, AppIDDefault app) {
         String owned = info.getAppIdDAO() != null ? info.getAppIdDAO().getDomainID() : null;
-        return SharedStringUtil.equals(owned, app.getDomainID(), true);
+        return SUS.equals(owned, app.getDomainID(), true);
     }
 
     /**
@@ -342,7 +342,7 @@ public class APIAppManagerProvider
         }
 
         userID.setReferenceID(null);
-        SharedUtil.validate(userID, true, true);
+        SUS.validate(userID, true, true);
 
         // special case to avoid chicken and egg situation
         String userIDRef = getAPIDataStore().getIDGenerator().genID();
@@ -517,8 +517,8 @@ public class APIAppManagerProvider
 //        if (subjectAPIKey instanceof AppDeviceDAO) {
 //            // validate domainID and AppID
 //            AppDeviceDAO add = (AppDeviceDAO) subjectAPIKey;
-//            if (!SharedStringUtil.equals(add.getDomainID(), jwt.getPayload().getDomainID(), true) ||
-//                    !SharedStringUtil.equals(add.getAppID(), jwt.getPayload().getAppID(), true)) {
+//            if (!SUS.equals(add.getDomainID(), jwt.getPayload().getDomainID(), true) ||
+//                    !SUS.equals(add.getAppID(), jwt.getPayload().getAppID(), true)) {
 //                throw new AccessSecurityException("Invalid AppID");
 //            }
 //        }

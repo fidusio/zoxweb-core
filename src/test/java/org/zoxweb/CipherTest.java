@@ -16,7 +16,7 @@
 package org.zoxweb;
 
 import org.zoxweb.shared.util.SharedBase64;
-import org.zoxweb.shared.util.SharedStringUtil;
+import org.zoxweb.shared.util.SUS;
 
 public class CipherTest {
 
@@ -25,7 +25,7 @@ public class CipherTest {
 		StringBuilder sb = new StringBuilder();
 
 		for (String str : args) {
-			byte[] word = SharedStringUtil.getBytes(str);
+			byte[] word = SUS.getBytes(str);
 			
 			byte[] xorCipher = new byte[word.length];
 			byte[] decrypted = new byte[word.length];
@@ -36,7 +36,7 @@ public class CipherTest {
 				System.out.println(i%key.length);
 			}
 
-			sb.append(SharedStringUtil.toString(decrypted));
+			sb.append(SUS.toString(decrypted));
 			sb.append(" ");
 		}
 		

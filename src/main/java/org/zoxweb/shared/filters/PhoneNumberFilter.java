@@ -16,9 +16,7 @@
 package org.zoxweb.shared.filters;
 
 import org.zoxweb.shared.util.SUS;
-import org.zoxweb.shared.util.SharedStringUtil;
-import org.zoxweb.shared.util.SharedStringUtil.MatchToken;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.SUS.MatchToken;
 
 @SuppressWarnings("serial")
 public class PhoneNumberFilter
@@ -72,7 +70,7 @@ public class PhoneNumberFilter
 		//	Check "+"
 		//		- Can occur zero or once
 		//		- If occurs, must be at beginning
-		MatchToken plusSignToken = SharedStringUtil.matchToken(number, PLUS_SIGN, false);
+		MatchToken plusSignToken = SUS.matchToken(number, PLUS_SIGN, false);
 		
 		if (plusSignToken != null)
 		{
@@ -87,8 +85,8 @@ public class PhoneNumberFilter
 		//		- Only one "(" and only one ")" can occur
 		//		- "(" must come before ")"
 		//		- Cannot come right after each other (must be separated by at least one character)
-		MatchToken openParenthesisToken = SharedStringUtil.matchToken(number, OPEN_PARENTHESIS, false);
-		MatchToken closeParenthesisToken = SharedStringUtil.matchToken(number, CLOSE_PARENTHESIS, false);
+		MatchToken openParenthesisToken = SUS.matchToken(number, OPEN_PARENTHESIS, false);
+		MatchToken closeParenthesisToken = SUS.matchToken(number, CLOSE_PARENTHESIS, false);
 		
 		if (openParenthesisToken != null && closeParenthesisToken != null)
 		{
@@ -112,7 +110,7 @@ public class PhoneNumberFilter
 		//		- Can occur zero or more times
 		//		- Cannot occur at beginning
 		//		- Cannot come right after each other (must be separated by at least one character)
-		MatchToken hyphenToken = SharedStringUtil.matchToken(number, HYPHEN, false);
+		MatchToken hyphenToken = SUS.matchToken(number, HYPHEN, false);
 		
 		if (hyphenToken != null)
 		{
@@ -126,7 +124,7 @@ public class PhoneNumberFilter
 		//	Check "x"
 		//		- Can occur zero or once
 		//		- Cannot occur at beginning
-		MatchToken extensionToken = SharedStringUtil.matchToken(number, EXTENSION, false);
+		MatchToken extensionToken = SUS.matchToken(number, EXTENSION, false);
 		
 		if (extensionToken != null)
 		{

@@ -72,7 +72,7 @@ public class JWTPayload
             false,
             false,
             JWTPayload.class,
-            SharedUtil.extractNVConfigs(Param.values()),
+            SUS.extractNVConfigs(Param.values()),
             null,
             true,
             SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO
@@ -85,7 +85,7 @@ public class JWTPayload
         this.nvgm = gnv;
 //		super(NVC_JWT_PAYLOAD);
 //		
-//		gnv = SharedUtil.toNVGenricMap(this);
+//		gnv = SUS.toNVGenricMap(this);
 
 
         //genericMap.

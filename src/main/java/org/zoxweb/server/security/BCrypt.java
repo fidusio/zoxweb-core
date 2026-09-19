@@ -1,6 +1,6 @@
 package org.zoxweb.server.security;
 
-import org.zoxweb.shared.util.SharedStringUtil;
+import org.zoxweb.shared.util.SUS;
 
 import java.security.MessageDigest;
 import java.security.SecureRandom;
@@ -542,7 +542,7 @@ public class BCrypt {
      * @return the hashed password
      */
     public static String hashpw(String password, String salt) {
-        return hashpw(SharedStringUtil.getBytes(password), salt);
+        return hashpw(SUS.getBytes(password), salt);
     }
 
     /**
@@ -718,7 +718,7 @@ public class BCrypt {
      * @return true if the passwords match, false otherwise
      */
     public static boolean isAMatch(String plaintext, String hashed) {
-        byte[] passwordb = SharedStringUtil.getBytes(plaintext);
+        byte[] passwordb = SUS.getBytes(plaintext);
         return equalsNoEarlyReturn(hashed, hashpwforcheck(passwordb, hashed));
     }
 
@@ -735,7 +735,7 @@ public class BCrypt {
     }
 
     static boolean equalsNoEarlyReturn(String a, String b) {
-        return MessageDigest.isEqual(SharedStringUtil.getBytes(a), SharedStringUtil.getBytes(b));
+        return MessageDigest.isEqual(SUS.getBytes(a), SUS.getBytes(b));
     }
 
 }

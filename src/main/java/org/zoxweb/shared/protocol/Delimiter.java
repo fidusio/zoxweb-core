@@ -16,7 +16,7 @@
 package org.zoxweb.shared.protocol;
 
 import org.zoxweb.shared.util.GetNameValue;
-import org.zoxweb.shared.util.SharedStringUtil;
+import org.zoxweb.shared.util.SUS;
 
 /**
  * Enumeration of common protocol delimiters and punctuation marks.
@@ -56,7 +56,7 @@ public enum Delimiter
 	Delimiter(String val)
     {
 		value = val;
-		bytes = SharedStringUtil.getBytes(value);
+		bytes = SUS.getBytes(value);
 	}
 
     /**

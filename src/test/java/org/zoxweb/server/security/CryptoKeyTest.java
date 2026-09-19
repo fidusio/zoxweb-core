@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.zoxweb.shared.crypto.CryptoConst;
 import org.zoxweb.shared.util.SharedBase64;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.SUS;
 
 import javax.crypto.KeyAgreement;
 import java.math.BigInteger;
@@ -47,14 +47,14 @@ public class CryptoKeyTest {
         System.out.println(generatedPK);
 
 
-//        System.out.println("x: " + SharedBase64.encodeAsString(SharedBase64.Base64Type.URL, SharedUtil.reverseBytes(ecpc.getGenerator().getAffineX().toByteArray())));
+//        System.out.println("x: " + SharedBase64.encodeAsString(SharedBase64.Base64Type.URL, SUS.reverseBytes(ecpc.getGenerator().getAffineX().toByteArray())));
 //        System.out.println("x: " + SharedBase64.encodeAsString(SharedBase64.Base64Type.URL, (ecpc.getGenerator().getAffineX().toByteArray())));
         byte[] x = SharedBase64.decode(SharedBase64.Base64Type.URL, "6NSq2eBuy80My3Ew0zWhKRtDOlbzud8-ZJwiU3q7PQQ");
        // x = Base64.getUrlDecoder().decode("PuCTngFNposIXCJhNJMnobetdNS9sYs6HzurD3rLZiA");
         System.out.println(x.length);
         BigInteger bi = new BigInteger(1, x);
         System.out.println(bi);
-        bi = new BigInteger(SharedUtil.reverseBytes(x));
+        bi = new BigInteger(SUS.reverseBytes(x));
         System.out.println(bi);
         System.out.println(SharedBase64.decodeAsString(SharedBase64.Base64Type.URL, "6NSq2eBuy80My3Ew0zWhKRtDOlbzud8-ZJwiU3q7PQQ"));
 

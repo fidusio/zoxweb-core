@@ -54,7 +54,7 @@ public class QueryMatchString
 
     public static QueryMatchString toQueryMatch(String query) {
         for (RelationalOperator ro : RelationalOperator.values()) {
-            NVPair nameValue = SharedUtil.toNVPair(query, ro.getValue(), false);
+            NVPair nameValue = SUS.toNVPair(query, ro.getValue(), false);
             if (nameValue != null && nameValue.getName() != null && nameValue.getValue() != null) {
                 return new QueryMatchString(nameValue, ro);
             }

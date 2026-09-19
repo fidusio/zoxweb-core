@@ -21,7 +21,7 @@ import org.zoxweb.server.util.RuntimeUtil;
 import org.zoxweb.server.util.ThresholdQueue;
 import org.zoxweb.shared.data.VMInfoDAO;
 import org.zoxweb.shared.util.ArrayQueue;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SimpleQueueInterface;
 
 import java.util.concurrent.ArrayBlockingQueue;
@@ -106,7 +106,7 @@ public class QueueTest {
 
             ts = System.nanoTime() - ts;
             String message = ts + " nanos SimpleQueue took to dequeue " + limit + ":" + uQueue.size();
-            SharedUtil.putUnique(results, ts, message);
+            SUS.putUnique(results, ts, message);
             //System.out.println( ts + " nanos SimpleQueue took  sec to dequeue " + limit + ":" + uQueue.size());
 
             ts = System.nanoTime();
@@ -117,7 +117,7 @@ public class QueueTest {
 
             ts = System.nanoTime() - ts;
             message = ts + " nanos ConcurrentLinkedQueue took to dequeue " + limit + ":" + clQueue.size();
-            SharedUtil.putUnique(results, ts, message);
+            SUS.putUnique(results, ts, message);
             //System.out.println( ts + " nanos ConcurrentLinkedQueue took  sec to dequeue " + limit + ":" + clQueue.size());
 
             ts = System.nanoTime();
@@ -128,7 +128,7 @@ public class QueueTest {
 
             ts = System.nanoTime() - ts;
             message = ts + " nanos LinkedBlockingQueue took to dequeue " + limit + ":" + lbQueue.size();
-            SharedUtil.putUnique(results, ts, message);
+            SUS.putUnique(results, ts, message);
             //System.out.println( ts + " nanos LinkedBlockingQueue took  sec to dequeue " + limit + ":" + lbQueue.size());
 
             ts = System.nanoTime();
@@ -139,7 +139,7 @@ public class QueueTest {
 
             ts = System.nanoTime() - ts;
             message = ts + " nanos ArrayBlockingQueue took to dequeue " + limit + ":" + abQueue.size();
-            SharedUtil.putUnique(results, ts, message);
+            SUS.putUnique(results, ts, message);
 
             ts = System.nanoTime();
 
@@ -149,7 +149,7 @@ public class QueueTest {
 
             ts = System.nanoTime() - ts;
             message = ts + " nanos ArrayQueue took to dequeue " + limit + ":" + abQueue.size();
-            SharedUtil.putUnique(results, ts, message);
+            SUS.putUnique(results, ts, message);
 
             //System.out.println( ts + " nanos ArrayBlockingQueue took  sec to dequeue " + limit + ":" + abQueue.size());
 

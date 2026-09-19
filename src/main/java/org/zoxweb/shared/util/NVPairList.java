@@ -157,7 +157,7 @@ public class NVPairList
      */
     @Override
     public NVPair get(String str) {
-        return SharedUtil.lookup(value, str);
+        return SUS.lookup(value, str);
     }
 
     /**
@@ -193,7 +193,7 @@ public class NVPairList
      */
     @Override
     public List<NVPair> search(String... criteria) {
-        return SharedUtil.lookup(value, criteria[0]);
+        return SUS.lookup(value, criteria[0]);
     }
 
 }

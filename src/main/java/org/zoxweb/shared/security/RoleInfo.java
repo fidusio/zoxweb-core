@@ -30,7 +30,7 @@ public class RoleInfo extends AuthzInfo {
             false,
             false,
             RoleInfo.class,
-            SharedUtil.extractNVConfigs(Param.values()),
+            SUS.extractNVConfigs(Param.values()),
             null,
             false,
             AuthzInfo.NVC_AUTHZ_INFO

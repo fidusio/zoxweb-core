@@ -21,7 +21,7 @@ import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
 import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.NVConfigManager;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.SUS;
 
 /**
  * This class extends the API transaction information interface to create
@@ -69,7 +69,7 @@ public class APITransactionInfoDAO
                     false,
                     false,
                     APITransactionInfoDAO.class,
-                    SharedUtil.extractNVConfigs(Params.values()),
+                    SUS.extractNVConfigs(Params.values()),
                     null,
                     false,
                     SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO
@@ -88,7 +88,7 @@ public class APITransactionInfoDAO
      */
 //	protected APITransactionInfoDAO(List<NVConfigEntity> list)
 //	{
-//		super(SharedUtil.merge(list, NVC_API_TRANSACTION_INFO_DAO));
+//		super(SUS.merge(list, NVC_API_TRANSACTION_INFO_DAO));
 //	}
 
     /**

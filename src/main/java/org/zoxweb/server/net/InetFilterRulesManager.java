@@ -60,7 +60,7 @@ public class InetFilterRulesManager {
         /**
          * This NVConfigEntity type constant is set to an instantiation of a NVConfigEntityLocal object based on AddressDAO.
          */
-        public static final NVConfigEntity NVC_INET_FILTER_RULE = new NVConfigEntityPortable("inet_filter_prop", null, "InetFilterProp", true, false, false, false, InetFilterRule.class, SharedUtil.extractNVConfigs(Params.values()), null, false, SetNameDAO.NVC_NAME_DAO);
+        public static final NVConfigEntity NVC_INET_FILTER_RULE = new NVConfigEntityPortable("inet_filter_prop", null, "InetFilterProp", true, false, false, false, InetFilterRule.class, SUS.extractNVConfigs(Params.values()), null, false, SetNameDAO.NVC_NAME_DAO);
 
         public InetFilterRule() {
             super(NVC_INET_FILTER_RULE);
@@ -168,7 +168,7 @@ public class InetFilterRulesManager {
             throw new IllegalArgumentException("Invalid rule " + rule + "\n format ip-netmask-[deny|allow]");
         }
         int index = rules.length;
-        SecConst.SecAction ss = (SecConst.SecAction) SharedUtil.lookupEnum(rules[--index], SecConst.SecAction.values());
+        SecConst.SecAction ss = (SecConst.SecAction) SUS.lookupEnum(rules[--index], SecConst.SecAction.values());
         if (ss == null) {
             throw new IllegalArgumentException("Invalid rule " + rule + "\n format ip-netmask-[deny|allow]");
         }

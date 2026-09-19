@@ -29,7 +29,7 @@ import org.zoxweb.shared.http.HTTPVersion;
 import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.util.Const.TimeInMillis;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.SUS;
 
 public class HTTP2ProxyTest {
 
@@ -51,7 +51,7 @@ public class HTTP2ProxyTest {
 
       //long delta2 = 0;
       IPAddress proxyAddress = new IPAddress(args[index++]);
-      HTTPMethod hMethod = SharedUtil.lookupTypedEnum(HTTPMethod.values(), args[index++]);
+      HTTPMethod hMethod = SUS.lookupTypedEnum(HTTPMethod.values(), args[index++]);
 
       HTTPMessageConfigInterface hmci = HTTPMessageConfig
           .createAndInit(null, args[index++], hMethod);
@@ -93,7 +93,7 @@ public class HTTP2ProxyTest {
         //			HTTPResponseData rdNoProxy = hc.sendRequest();
         //			delta2 = System.nanoTime() - delta2;
         //
-        //			System.out.println(SharedUtil.slowEquals(rdProxy.getData(), rdNoProxy.getData()));
+        //			System.out.println(SUS.slowEquals(rdProxy.getData(), rdNoProxy.getData()));
         //			System.out.println("Proxy time:" + TimeInMillis.nanosToString(delta1) + " no proxy time:" + TimeInMillis.nanosToString(delta2));
         System.out.println(new String(ubaos.toByteArray()));
         System.out.println("Proxy time:" + TimeInMillis.nanosToString(delta1));

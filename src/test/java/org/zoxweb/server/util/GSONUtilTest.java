@@ -138,7 +138,7 @@ public class GSONUtilTest {
 
 
 
-        System.out.println(SharedStringUtil.toString(httpMessageConfig.getContent()));
+        System.out.println(SUS.toString(httpMessageConfig.getContent()));
 
         String json2 = GSONUtil.toJSONDefault(httpMessageConfig, true );
         System.out.println(json2);

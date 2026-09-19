@@ -20,7 +20,7 @@ import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
 import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.NVConfigManager;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.SUS;
 
 /**
  * This class represents the response to an authentication request; it carries
@@ -63,7 +63,7 @@ public class AuthenticationResponse
 																						   false, 
 																						   false, 
 																						   AuthenticationResponse.class, 
-																						   SharedUtil.extractNVConfigs(Params.values()), 
+																						   SUS.extractNVConfigs(Params.values()), 
 																						   null, 
 																						   false, 
 																						   AuthenticationBase.NVC_AUTHENTICATION_BASE

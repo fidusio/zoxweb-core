@@ -143,7 +143,7 @@ public final class ProtoUtil {
             // prefix-less literal = UTF-8 text; the resolved string is taken verbatim, never
             // re-scanned for a prefix — a var value starting "hex:"/"base64:"/"txt:" is data,
             // not an encoding directive
-            return SharedStringUtil.getBytes(STRING_VARS_TO_STRING.encode(encoded, vars));
+            return SUS.getBytes(STRING_VARS_TO_STRING.encode(encoded, vars));
         String prefix = encoded.substring(0, c);
         String body = STRING_VARS_TO_STRING.encode(encoded.substring(c + 1), vars);
         return DataDecoder.StringToData.decode(prefix + ":" + body);

@@ -21,7 +21,7 @@ import org.zoxweb.shared.util.NVConfigEntity;
 import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.SetCanonicalID;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.SUS;
 
 /**
  * This class defines the data content data access object.
@@ -72,7 +72,7 @@ public class DataContentDAO
 																						false,
 																						false,
 																						DataContentDAO.class,
-																						SharedUtil.extractNVConfigs(Param.values()),
+																						SUS.extractNVConfigs(Param.values()),
 																						null,
 																						false,
 																						SimpleDocumentDAO.NVC_SIMPLE_DOCUMENT_DAO

@@ -72,12 +72,12 @@ public class SystemInfoDAOTest {
 //				for ( int i= 0 ;i <2; i++)
 //				{
 //					zTS = System.nanoTime();
-//					zBA = SharedUtil.bytesToHex(address);
+//					zBA = SUS.bytesToHex(address);
 //					zTS = System.nanoTime() - zTS;
 //					
 //					
 //					zhTS = System.nanoTime();
-//					zAddress = SharedUtil.hexToBytes(zBA);
+//					zAddress = SUS.hexToBytes(zBA);
 //					zhTS = System.nanoTime() - zhTS;
 //					
 //					
@@ -90,9 +90,9 @@ public class SystemInfoDAOTest {
 //					thTS = System.nanoTime() - thTS;
 //				}
 //				
-//				System.out.println( SharedUtil.toCanonicalID(',', niDAO.getName(), niDAO.getHardwareAddress(), "zoxweb array to hex string", zTS, zBA, "third", tTS, tBA, "delta", (tTS-zTS)));
-//				System.out.println( SharedUtil.toCanonicalID(',', niDAO.getName(), niDAO.getHardwareAddress(), "zoxweb hex string to byte array", zhTS, "third", thTS, tBA, "delta", (thTS-zhTS), SharedUtil.slowEquals(tAddress, zAddress), SharedUtil.slowEquals(tAddress, address)));
-//				System.out.println( SharedUtil.bytesToHex(zAddress));
+//				System.out.println( SUS.toCanonicalID(',', niDAO.getName(), niDAO.getHardwareAddress(), "zoxweb array to hex string", zTS, zBA, "third", tTS, tBA, "delta", (tTS-zTS)));
+//				System.out.println( SUS.toCanonicalID(',', niDAO.getName(), niDAO.getHardwareAddress(), "zoxweb hex string to byte array", zhTS, "third", thTS, tBA, "delta", (thTS-zhTS), SUS.slowEquals(tAddress, zAddress), SUS.slowEquals(tAddress, address)));
+//				System.out.println( SUS.bytesToHex(zAddress));
 //				
 //				
 //				

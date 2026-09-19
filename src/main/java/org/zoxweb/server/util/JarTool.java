@@ -67,7 +67,7 @@ public class JarTool {
                 if (mpf.match(je.getName())) {
                     //System.out.println("jar found:" + je.getName());
                     try {
-                        String fileExt = SharedStringUtil.valueAfterRightToken(je.getName(), ".");
+                        String fileExt = SUS.valueAfterRightToken(je.getName(), ".");
                         if (fileExt.equals(je.getName())) {
                             fileExt = "";
                         }
@@ -283,7 +283,7 @@ public class JarTool {
                     DataDAO toAdd = new DataDAO();
 
                     toAdd.setFullName(ze.getName());
-                    toAdd.setName(SharedStringUtil.valueAfterRightToken(ze.getName(), "/"));
+                    toAdd.setName(SUS.valueAfterRightToken(ze.getName(), "/"));
                     toAdd.setDescription(ze.getComment());
                     toAdd.setData(ubaos.toByteArray());
 
@@ -356,7 +356,7 @@ public class JarTool {
                     for (DataDAO matched : matches) {
                         rc.inc();
                         System.out.println("\t\t" + SUS.toCanonicalID(':', matched.getName(), matched.getFullName(), matched.getData().length));
-                        //System.out.println(SharedStringUtil.toString(matched.getData()));
+                        //System.out.println(SUS.toString(matched.getData()));
                     }
                 } else {
                     String[] matches = zipList(zipFile, pattern);
@@ -380,7 +380,7 @@ public class JarTool {
 
     public static byte[] gzip(String str)
             throws NullPointerException, IllegalArgumentException, IOException {
-        return gzip(SharedStringUtil.getBytes(str));
+        return gzip(SUS.getBytes(str));
     }
 
     public static byte[] gzip(byte[] content)

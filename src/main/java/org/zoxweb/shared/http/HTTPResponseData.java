@@ -17,7 +17,7 @@ package org.zoxweb.shared.http;
 
 import org.zoxweb.shared.util.Const;
 import org.zoxweb.shared.util.NVGenericMap;
-import org.zoxweb.shared.util.SharedStringUtil;
+import org.zoxweb.shared.util.SUS;
 
 import java.io.Serializable;
 import java.util.List;
@@ -72,7 +72,7 @@ public class HTTPResponseData
      */
     public String getDataAsString() {
         if (getData() != null)
-            return SharedStringUtil.toString(getData());
+            return SUS.toString(getData());
 
         return null;
     }

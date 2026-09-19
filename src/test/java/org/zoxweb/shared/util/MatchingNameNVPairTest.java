@@ -34,10 +34,10 @@ public class MatchingNameNVPairTest {
 		list.add(new NVPair("GBR", "United Kingdom"));
 		list.add(new NVPair("FRA", "France"));
 
-        Assertions.assertTrue(SharedUtil.doesNameExistNVList(list, "USA"));
-        Assertions.assertFalse(SharedUtil.doesNameExistNVList(list, "CHN"));
-        Assertions.assertTrue(SharedUtil.doesNameExistNVList(list, "FRA"));
-        Assertions.assertFalse(SharedUtil.doesNameExistNVList(list, "JPN"));
+        Assertions.assertTrue(SUS.doesNameExistNVList(list, "USA"));
+        Assertions.assertFalse(SUS.doesNameExistNVList(list, "CHN"));
+        Assertions.assertTrue(SUS.doesNameExistNVList(list, "FRA"));
+        Assertions.assertFalse(SUS.doesNameExistNVList(list, "JPN"));
 	}
 
 }

@@ -43,10 +43,10 @@ public class NVEntityMatchTest {
 
 		UserInfoDAO user4 = null;
 
-		Assertions.assertTrue(SharedUtil.equals(user1, user2));
-		Assertions.assertFalse(SharedUtil.equals(user1, user3));
-		Assertions.assertFalse(SharedUtil.equals(user2, user3));
-		Assertions.assertFalse(SharedUtil.equals(user3, user4));
+		Assertions.assertTrue(SUS.equals(user1, user2));
+		Assertions.assertFalse(SUS.equals(user1, user3));
+		Assertions.assertFalse(SUS.equals(user2, user3));
+		Assertions.assertFalse(SUS.equals(user3, user4));
 	}
 
 }

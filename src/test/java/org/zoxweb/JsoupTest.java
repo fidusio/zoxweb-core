@@ -23,7 +23,7 @@ import org.zoxweb.server.http.HTTPCall;
 import org.zoxweb.shared.http.HTTPMessageConfig;
 import org.zoxweb.shared.http.HTTPMessageConfigInterface;
 import org.zoxweb.shared.http.HTTPMethod;
-import org.zoxweb.shared.util.SharedStringUtil;
+import org.zoxweb.shared.util.SUS;
 
 public class JsoupTest {
 
@@ -32,7 +32,7 @@ public class JsoupTest {
         try {
 			int index = 0;
 			HTTPMessageConfigInterface hcc = HTTPMessageConfig.createAndInit(args[index++], null, HTTPMethod.GET);
-			String htmlBody = SharedStringUtil.toString(new HTTPCall(hcc).sendRequest().getData());
+			String htmlBody = SUS.toString(new HTTPCall(hcc).sendRequest().getData());
 		
 			String filtered = Jsoup.clean(htmlBody, Safelist.relaxed());
 			System.out.println("Different:" + htmlBody.equals(filtered));

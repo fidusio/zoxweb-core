@@ -22,7 +22,7 @@ import org.zoxweb.shared.util.NVConfigEntity;
 import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.NVEntity;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.NVConfigEntity.ArrayType;
 
 /**
@@ -60,7 +60,7 @@ public class AssociationDAO
 	/**
 	 * This NVConfigEntity type constant is set to an instantiation of a NVConfigEntityLocal object based on AddressDAO.
 	 */
-	public static final NVConfigEntity NVC_ASSOCIATION_DAO = new NVConfigEntityPortable("association_dao", null , "AssociationDAO", true, false, false, false, AssociationDAO.class, SharedUtil.extractNVConfigs(Param.values()), null, false, SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO);//,SharedUtil.extractNVConfigs( new Params[]{Params.REFERENCE_ID, Params.NAME, Params.LENGTH}));
+	public static final NVConfigEntity NVC_ASSOCIATION_DAO = new NVConfigEntityPortable("association_dao", null , "AssociationDAO", true, false, false, false, AssociationDAO.class, SUS.extractNVConfigs(Param.values()), null, false, SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO);//,SUS.extractNVConfigs( new Params[]{Params.REFERENCE_ID, Params.NAME, Params.LENGTH}));
 
 
 	public AssociationDAO()

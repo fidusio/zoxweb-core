@@ -17,7 +17,6 @@ package org.zoxweb.server.api.provider.notification.smtp;
 
 import org.zoxweb.shared.filters.ValueFilter;
 import org.zoxweb.shared.util.SUS;
-import org.zoxweb.shared.util.SharedStringUtil;
 
 @SuppressWarnings("serial")
 public class SMTPMessageIDFilter
@@ -47,8 +46,8 @@ public class SMTPMessageIDFilter
             throw new IllegalArgumentException("Message id empty");
         }
 
-        String ret = SharedStringUtil.valueAfterLeftToken(v[0], "<");
-        ret = SharedStringUtil.valueBeforeRightToken(ret, ">");
+        String ret = SUS.valueAfterLeftToken(v[0], "<");
+        ret = SUS.valueBeforeRightToken(ret, ">");
 
         return ret;
     }

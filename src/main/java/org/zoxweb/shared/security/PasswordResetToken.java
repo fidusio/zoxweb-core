@@ -54,7 +54,7 @@ public class PasswordResetToken extends PropertyDAO {
             false,
             false,
             PasswordResetToken.class,
-            SharedUtil.extractNVConfigs(Param.values()),
+            SUS.extractNVConfigs(Param.values()),
             null,
             false,
             PropertyDAO.NVC_PROPERTY_DAO

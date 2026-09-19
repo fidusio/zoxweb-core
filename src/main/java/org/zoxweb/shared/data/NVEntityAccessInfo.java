@@ -24,7 +24,7 @@ import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
 import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.NVConfigManager;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.SUS;
 
 /**
  * The NVEntityAccessInfo class defines access control information for an NVEntity:
@@ -67,7 +67,7 @@ public class NVEntityAccessInfo
             false,
             false,
             NVEntityAccessInfo.class,
-            SharedUtil.extractNVConfigs(Param.values()),
+            SUS.extractNVConfigs(Param.values()),
             null,
             false,
             TimeStampDAO.NVC_TIME_STAMP_DAO

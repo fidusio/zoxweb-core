@@ -21,7 +21,7 @@ import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
 import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.NVConfigManager;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.SUS;
 
 /**
  * The SimpleDocumentDAO class defines a simple note document with a plain text
@@ -63,7 +63,7 @@ public class SimpleDocumentDAO
             false,
             false,
             SimpleDocumentDAO.class,
-            SharedUtil.extractNVConfigs(Param.values()),
+            SUS.extractNVConfigs(Param.values()),
             null,
             false,
             TimeStampDAO.NVC_TIME_STAMP_DAO

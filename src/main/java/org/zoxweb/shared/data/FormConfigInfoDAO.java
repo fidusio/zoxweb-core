@@ -25,7 +25,7 @@ import org.zoxweb.shared.util.NVConfigEntity;
 import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.NVPair;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.SUS;
 
 @SuppressWarnings("serial")
 public class FormConfigInfoDAO 
@@ -68,7 +68,7 @@ public class FormConfigInfoDAO
 																	false, 
 																	false, 
 																	FormConfigInfoDAO.class, 
-																	SharedUtil.extractNVConfigs(Param.values()),
+																	SUS.extractNVConfigs(Param.values()),
 																	null, 
 																	false, 
 																	CanonicalIDDAO.NVC_CANONICAL_ID_DAO

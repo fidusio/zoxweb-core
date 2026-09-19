@@ -18,15 +18,15 @@ public class TokenTest
 		
 		byte[] token = BytesValue.LONG.toBytes(null, 0, uuid.getLeastSignificantBits(), uuid.getMostSignificantBits());
 		byte[] b64 = SharedBase64.encode(token);
-		byte[] uuidString = SharedBase64.encode(SharedStringUtil.embedText(""+uuid, "-", ""));
-		System.out.println(SharedStringUtil.toString(b64) + " " + uuid + " " +  SharedStringUtil.toString(uuidString));
+		byte[] uuidString = SharedBase64.encode(SUS.embedText(""+uuid, "-", ""));
+		System.out.println(SUS.toString(b64) + " " + uuid + " " +  SUS.toString(uuidString));
 		
 		try 
 		{
 			Key key = CryptoUtil.generateKey("HmacSHA256", 384);
 	
 			b64 = SharedBase64.encode(key.getEncoded());
-			System.out.println(SharedStringUtil.toString(b64) );
+			System.out.println(SUS.toString(b64) );
 		} catch (NoSuchAlgorithmException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

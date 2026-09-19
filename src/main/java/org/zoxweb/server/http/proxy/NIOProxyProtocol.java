@@ -31,7 +31,7 @@ import org.zoxweb.shared.security.SecConst;
 import org.zoxweb.shared.util.NVBoolean;
 import org.zoxweb.shared.util.NVPair;
 import org.zoxweb.shared.util.ResourceManager;
-import org.zoxweb.shared.util.SharedStringUtil;
+import org.zoxweb.shared.util.SUS;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -270,7 +270,7 @@ public class NIOProxyProtocol
                 + "<p class=\"i25\"><A HREF=\"http://www.zoxweb.com/\">ProxyNIO</A> HTTP Proxy, Version " + NIO_PROXY
                 + "</p>\r"
                 + "</BODY></HTML>";
-        hcc.setContent(SharedStringUtil.getBytes(msg));
+        hcc.setContent(SUS.getBytes(msg));
 
         return hcc;
 

@@ -69,7 +69,7 @@ public class APIAccessTokenDAO
             false,
             false,
             APIAccessTokenDAO.class,
-            SharedUtil.extractNVConfigs(Token.values()),
+            SUS.extractNVConfigs(Token.values()),
             null,
             false,
             TimeStampDAO.NVC_TIME_STAMP_DAO

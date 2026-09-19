@@ -70,7 +70,7 @@ public final class SecurityModel {
 
         public static String updateToken(String token, GetNameValue<String>... gnvs) {
             for (GetNameValue<String> gnv : gnvs) {
-                token = SharedStringUtil.embedText(token, gnv.getName(), gnv.getValue());
+                token = SUS.embedText(token, gnv.getName(), gnv.getValue());
             }
 
             return token;
@@ -672,7 +672,7 @@ public final class SecurityModel {
 
         if (tokens != null && tokens.length > 0) {
             for (GetNameValue<String> token : tokens)
-                pattern = SharedStringUtil.embedText(pattern, token.getName(), token.getValue());
+                pattern = SUS.embedText(pattern, token.getName(), token.getValue());
         }
 
 
@@ -692,7 +692,7 @@ public final class SecurityModel {
 
         if (tokens != null && tokens.length > 0) {
             for (GetNameValue<String> token : tokens)
-                pattern = SharedStringUtil.embedText(pattern, token.getName(), token.getValue());
+                pattern = SUS.embedText(pattern, token.getName(), token.getValue());
         }
 
 

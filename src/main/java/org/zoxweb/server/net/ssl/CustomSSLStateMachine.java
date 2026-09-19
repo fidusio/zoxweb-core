@@ -7,7 +7,6 @@ import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.util.Identifier;
 import org.zoxweb.shared.util.RateCounter;
 import org.zoxweb.shared.util.SUS;
-import org.zoxweb.shared.util.SharedStringUtil;
 
 import javax.net.ssl.SSLEngineResult;
 import java.io.Closeable;
@@ -179,7 +178,7 @@ public class CustomSSLStateMachine extends MonoStateMachine<SSLEngineResult.Hand
      * @return the matching counter, or null for an unknown name
      */
     public static <T> T lookupType(String type) {
-        type = SharedStringUtil.toUpperCase(type);
+        type = SUS.toUpperCase(type);
         switch (type) {
             case "NEED_WRAP":
                 return (T) rcNeedWrap;

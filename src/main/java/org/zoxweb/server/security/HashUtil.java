@@ -90,7 +90,7 @@ public class HashUtil {
         // Hash the password
         byte[] hash = pbkdf2(password, salt, PBKDF2_ITERATIONS, HASH_BYTE_SIZE);
         // format iterations:salt:hash
-        return PBKDF2_ITERATIONS + ":" + SharedStringUtil.bytesToHex(salt) + ":" + SharedStringUtil
+        return PBKDF2_ITERATIONS + ":" + SUS.bytesToHex(salt) + ":" + SUS
                 .bytesToHex(hash);
     }
 
@@ -118,8 +118,8 @@ public class HashUtil {
         // Decode the hash into its parameters
         String[] params = correctHash.split(":");
         int iterations = Integer.parseInt(params[ITERATION_INDEX]);
-        byte[] salt = SharedStringUtil.hexToBytes(params[SALT_INDEX]);
-        byte[] hash = SharedStringUtil.hexToBytes(params[PBKDF2_INDEX]);
+        byte[] salt = SUS.hexToBytes(params[SALT_INDEX]);
+        byte[] hash = SUS.hexToBytes(params[PBKDF2_INDEX]);
         // Compute the hash of the provided password, using the same salt,
         // iteration count, and hash length
         byte[] testHash = pbkdf2(password, salt, iterations, hash.length);
@@ -157,7 +157,7 @@ public class HashUtil {
 
     public static byte[] hashSequence(String algorithm, String... seqs)
             throws NoSuchAlgorithmException {
-        return hashSequence(algorithm, SharedStringUtil.getBytesArray(seqs));
+        return hashSequence(algorithm, SUS.getBytesArray(seqs));
     }
 
 
@@ -197,7 +197,7 @@ public class HashUtil {
     }
 
     public static BCryptHash toBCryptHash(int logRounds, String password) {
-        return toBCryptHash(logRounds, SharedStringUtil.getBytes(password));
+        return toBCryptHash(logRounds, SUS.getBytes(password));
     }
 
     public static boolean isBCryptPasswordValid(String password, String bCryptHash) {
@@ -224,7 +224,7 @@ public class HashUtil {
                                         String password)
             throws NullPointerException, IllegalArgumentException, NoSuchAlgorithmException {
         SUS.checkIfNulls("Null parameter", algo, password);
-        return toPassword(algo, saltLength, saltIteration, SharedStringUtil.getBytes(FilterType.PASSWORD.validate(password)));
+        return toPassword(algo, saltLength, saltIteration, SUS.getBytes(FilterType.PASSWORD.validate(password)));
     }
 
     public static CIPassword toBCryptPassword(String password, int logRounds) {
@@ -277,8 +277,8 @@ public class HashUtil {
         if (algo == CryptoConst.HashType.BCRYPT) {
             BCryptHash bcryptHash = toBCryptHash(rounds, password);
             ciPassword.setCanonicalID(bcryptHash.toCanonicalID());
-            salt = SharedStringUtil.getBytes(bcryptHash.salt);
-            hashedPassword = SharedStringUtil.getBytes(bcryptHash.hash);
+            salt = SUS.getBytes(bcryptHash.salt);
+            hashedPassword = SUS.getBytes(bcryptHash.hash);
         } else {
             if (saltLength < SALT_LENGTH) {
                 saltLength = SALT_LENGTH;
@@ -357,7 +357,7 @@ public class HashUtil {
     }
 
     public static String hashAsBase64(String algo, String msg) throws NoSuchAlgorithmException {
-        return SharedBase64.encodeAsString(SharedBase64.Base64Type.DEFAULT, hash(algo, SharedStringUtil.getBytes(msg)));
+        return SharedBase64.encodeAsString(SharedBase64.Base64Type.DEFAULT, hash(algo, SUS.getBytes(msg)));
     }
 
 
@@ -366,7 +366,7 @@ public class HashUtil {
     }
 
     public static String hashAsBase64(CryptoConst.HashType algo, String msg) throws NoSuchAlgorithmException {
-        return SharedBase64.encodeAsString(SharedBase64.Base64Type.DEFAULT, hash(algo, SharedStringUtil.getBytes(msg)));
+        return SharedBase64.encodeAsString(SharedBase64.Base64Type.DEFAULT, hash(algo, SUS.getBytes(msg)));
     }
 
     public static byte[] hash(CryptoConst.HashType algo, byte[] data) throws NoSuchAlgorithmException {

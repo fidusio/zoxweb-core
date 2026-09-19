@@ -14,7 +14,7 @@ public class PatternTest {
         for (String str: toBeTested)
         {
             System.out.println(str + ":" + str.matches(pattern));
-            System.out.println(SharedStringUtil.parseGroup(str, "{", "}", false));
+            System.out.println(SUS.parseGroup(str, "{", "}", false));
         }
     }
 

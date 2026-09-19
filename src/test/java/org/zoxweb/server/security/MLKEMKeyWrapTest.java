@@ -16,7 +16,7 @@ import org.zoxweb.shared.crypto.CryptoConst;
 import org.zoxweb.shared.crypto.EncapsulatedKey;
 import org.zoxweb.shared.crypto.EncryptedData;
 import org.zoxweb.shared.crypto.KeyLockType;
-import org.zoxweb.shared.util.SharedStringUtil;
+import org.zoxweb.shared.util.SUS;
 
 import java.security.SecureRandom;
 import java.security.SignatureException;
@@ -102,7 +102,7 @@ public class MLKEMKeyWrapTest {
 
         // and the protected material is itself a working outer key: the chain continues below it
         EncryptedData leaf = new EncryptedData();
-        byte[] payload = SharedStringUtil.getBytes("field value under the KEM-wrapped key");
+        byte[] payload = SUS.getBytes("field value under the KEM-wrapped key");
         CryptoUtil.encryptData(leaf, material, payload);
         assertArrayEquals(payload, CryptoUtil.decryptEncryptedData(leaf, CryptoUtil.decryptEncryptedData(stored, secret)));
     }
@@ -231,8 +231,8 @@ public class MLKEMKeyWrapTest {
                 "a KEM row is refused by the symmetric unwrap before any cryptography");
 
         // the material seals data below it like any key
-        EncryptedData leaf = CryptoUtil.encryptData(new EncryptedData(), material, SharedStringUtil.getBytes("shared field"));
-        assertArrayEquals(SharedStringUtil.getBytes("shared field"),
+        EncryptedData leaf = CryptoUtil.encryptData(new EncryptedData(), material, SUS.getBytes("shared field"));
+        assertArrayEquals(SUS.getBytes("shared field"),
                 CryptoUtil.decryptEncryptedData(leaf, CryptoUtil.unwrapKeyMLKEM(ek, recipient.getPrivateKey())));
     }
 

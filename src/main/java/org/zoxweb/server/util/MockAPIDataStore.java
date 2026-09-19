@@ -15,7 +15,6 @@ import org.zoxweb.shared.util.IDGenerator;
 import org.zoxweb.shared.util.NVConfigEntity;
 import org.zoxweb.shared.util.NVEntity;
 import org.zoxweb.shared.util.SUS;
-import org.zoxweb.shared.util.SharedStringUtil;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -209,7 +208,7 @@ public class MockAPIDataStore
         RelationalOperator op = qm.getOperator();
 
         if (actual instanceof String || expected instanceof String) {
-            boolean equal = SharedStringUtil.equals(
+            boolean equal = SUS.equals(
                     actual != null ? actual.toString() : null,
                     expected != null ? expected.toString() : null,
                     true);
@@ -237,7 +236,7 @@ public class MockAPIDataStore
     private String collectionForClassName(String className) {
         // Map a fully-qualified/simple class name to a stored collection by matching
         // any entity already present whose concrete class name matches.
-        String simple = SharedStringUtil.valueAfterRightToken(className, ".");
+        String simple = SUS.valueAfterRightToken(className, ".");
         for (Map.Entry<String, Map<String, NVEntity>> e : collections.entrySet()) {
             for (NVEntity nve : e.getValue().values()) {
                 if (nve.getClass().getName().equals(className)

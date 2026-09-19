@@ -21,7 +21,7 @@ import org.zoxweb.shared.util.NVConfigEntity;
 import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.NVEntity;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.NVConfigEntity.ArrayType;
 
 /**
@@ -66,7 +66,7 @@ public class MessageDAO
             false,
             false,
             DataContentDAO.class,
-            SharedUtil.extractNVConfigs(Param.values()),
+            SUS.extractNVConfigs(Param.values()),
             null,
             false,
             TimeStampDAO.NVC_TIME_STAMP_DAO

@@ -37,7 +37,7 @@ public class BasicAuthToken
             false,
             false,
             BasicAuthToken.class,
-            SharedUtil.extractNVConfigs(Param.values()),
+            SUS.extractNVConfigs(Param.values()),
             null,
             false,
             SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO
@@ -69,7 +69,7 @@ public class BasicAuthToken
 
     public void setPassword(String password)
     {
-        setValue(Param.PASSWORD, SharedStringUtil.getBytes(password));
+        setValue(Param.PASSWORD, SUS.getBytes(password));
     }
 
     @Override

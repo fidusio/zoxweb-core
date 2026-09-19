@@ -43,10 +43,10 @@ public class HashTest {
 //
 //      System.out.println(new String(SharedBase64.encode(SharedBase64.Base64Type.URL,
 //          CryptoUtil.hmacSHA256("secret".getBytes(), "secret".getBytes()))));
-//      System.out.println(SharedStringUtil
+//      System.out.println(SUS
 //          .bytesToHex(CryptoUtil.hmacSHA256("secret".getBytes(), "secret".getBytes())));
 //      byte[] hash = HashUtil.hashSequence(alorigthm, seqs);
-//      System.out.println(SharedStringUtil.bytesToHex(hash).toLowerCase());
+//      System.out.println(SUS.bytesToHex(hash).toLowerCase());
 //
 //
 //    } catch (Exception e) {

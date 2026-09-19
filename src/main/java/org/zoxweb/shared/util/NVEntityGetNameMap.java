@@ -111,7 +111,7 @@ public class NVEntityGetNameMap
     @Override
     public List<NVEntity> search(String... criteria) {
         // TODO Auto-generated method stub
-        return SharedUtil.search(values(), criteria);
+        return SUS.search(values(), criteria);
     }
 
 

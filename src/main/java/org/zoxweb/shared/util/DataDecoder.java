@@ -87,14 +87,14 @@ public interface DataDecoder<DI, DO>
         try {
             switch (prefix) {
                 case "hex":
-                    return SharedStringUtil.hexToBytes(body);
+                    return SUS.hexToBytes(body);
                 case "base64":
                     return SharedBase64.decode(body);
                 case "txt":
-                    return SharedStringUtil.getBytes(body);
+                    return SUS.getBytes(body);
                 default:
                     // no recognized prefix: whole string is UTF-8 text
-                    return SharedStringUtil.getBytes(encoded);
+                    return SUS.getBytes(encoded);
             }
         } catch (RuntimeException e) {
             throw new IllegalArgumentException("cannot decode " + prefix + ": data: " + e.getMessage(), e);

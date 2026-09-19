@@ -19,7 +19,7 @@ import org.zoxweb.shared.data.DataConst.DataParam;
 import org.zoxweb.shared.util.NVConfigEntity;
 import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.SetDescription;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.SUS;
 
 //import javax.persistence.Column;
 //import javax.persistence.MappedSuperclass;
@@ -45,7 +45,7 @@ public abstract class SetNameDescriptionDAO
             false,
             false,
             SetNameDescriptionDAO.class,
-            SharedUtil.toNVConfigList(DataParam.DESCRIPTION.getNVConfig()),
+            SUS.toNVConfigList(DataParam.DESCRIPTION.getNVConfig()),
             null,
             false,
             SetNameDAO.NVC_NAME_DAO

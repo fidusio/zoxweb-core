@@ -3,8 +3,6 @@ package org.zoxweb.shared.http;
 import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.net.SharedNetUtil;
 import org.zoxweb.shared.util.SUS;
-import org.zoxweb.shared.util.SharedStringUtil;
-import org.zoxweb.shared.util.SharedUtil;
 
 import java.util.*;
 
@@ -182,7 +180,7 @@ public final class URLInfo {
         if (schemeIdx <= 0) throw new IllegalArgumentException("Missing scheme");
 
         String scheme = SUS.trimOrNull(s.substring(0, schemeIdx));
-        URIScheme uriScheme = SharedUtil.lookupEnum(scheme, URIScheme.values());
+        URIScheme uriScheme = SUS.lookupEnum(scheme, URIScheme.values());
         if(uriScheme == null) {
             throw new IllegalArgumentException("Invalid scheme " + scheme);
         }
@@ -287,8 +285,8 @@ public final class URLInfo {
                 if (i + 2 >= s.length())
                     throw new IllegalArgumentException("Bad % encoding");
 
-                int hi = SharedStringUtil.hexToInt(s.charAt(i + 1));
-                int lo = SharedStringUtil.hexToInt(s.charAt(i + 2));
+                int hi = SUS.hexToInt(s.charAt(i + 1));
+                int lo = SUS.hexToInt(s.charAt(i + 2));
                 if (hi < 0 || lo < 0)
                     throw new IllegalArgumentException("Bad % encoding");
 
@@ -298,7 +296,7 @@ public final class URLInfo {
                 buf[len++] = (byte) c;
             }
         }
-        return SharedStringUtil.toString(buf, 0, len);
+        return SUS.toString(buf, 0, len);
     }
 
 
@@ -320,7 +318,7 @@ public final class URLInfo {
         int lastColon = hp.lastIndexOf(':');
         if (lastColon >= 0) {
             String maybePort = hp.substring(lastColon + 1);
-            if (SharedStringUtil.isDigits(maybePort)) {
+            if (SUS.isDigits(maybePort)) {
                 return new IPAddress(hp.substring(0, lastColon), SharedNetUtil.parsePort(maybePort), -1, null);
             }
         }
@@ -350,7 +348,7 @@ public final class URLInfo {
             } else if (c == ' ') {
                 out.append('+');
             } else {
-                byte[] bytes = SharedStringUtil.getBytes(String.valueOf(c));//.getBytes(Const.UTF8);
+                byte[] bytes = SUS.getBytes(String.valueOf(c));//.getBytes(Const.UTF8);
                 for (byte b : bytes) {
                     out.append('%');
                     out.append(HEX[(b >> 4) & 0xF]);
@@ -368,7 +366,7 @@ public final class URLInfo {
             if (c == '/' || isUnreserved(c)) {
                 out.append(c);
             } else {
-                byte[] bytes = SharedStringUtil.getBytes(String.valueOf(c));//String.valueOf(c).getBytes(StandardCharsets.UTF_8);
+                byte[] bytes = SUS.getBytes(String.valueOf(c));//String.valueOf(c).getBytes(StandardCharsets.UTF_8);
                 for (byte b : bytes) {
                     out.append('%');
                     out.append(HEX[(b >> 4) & 0xF]);

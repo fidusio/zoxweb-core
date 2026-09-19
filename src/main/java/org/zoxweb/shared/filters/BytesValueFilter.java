@@ -43,7 +43,7 @@ public class BytesValueFilter
         SUS.checkIfNulls("GetValue.getValue() null", in);
 
         if (in instanceof String) {
-            return SharedStringUtil.getBytes((String) in);
+            return SUS.getBytes((String) in);
         } else if (in instanceof byte[]) {
             return (byte[]) in;
         } else if (in instanceof Boolean) {
@@ -143,7 +143,7 @@ public class BytesValueFilter
 //			
 //			try 
 //			{
-//				return new String(value, offset, length, SharedStringUtil.UTF_8);
+//				return new String(value, offset, length, SUS.UTF_8);
 //			}
 //			catch (UnsupportedEncodingException e)
 //			{

@@ -71,7 +71,7 @@ public class CreditCardDAO
         false,
         false,
         CreditCardDAO.class,
-        SharedUtil.extractNVConfigs(Param.values()),
+        SUS.extractNVConfigs(Param.values()),
         null,
         false,
         SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO
@@ -208,7 +208,7 @@ public class CreditCardDAO
 	
 	public void setCardHolderName(String fullName)
 	{
-		setFirstName(SharedStringUtil.valueBeforeLeftToken(fullName, " ").trim());
-		setLastName(SharedStringUtil.valueAfterLeftToken(fullName, " ").trim());
+		setFirstName(SUS.valueBeforeLeftToken(fullName, " ").trim());
+		setLastName(SUS.valueAfterLeftToken(fullName, " ").trim());
 	}
 }

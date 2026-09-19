@@ -21,7 +21,6 @@ import org.zoxweb.shared.crypto.EncapsulatedKey;
 import org.zoxweb.shared.util.Const;
 import org.zoxweb.shared.util.Const.SizeInBytes;
 import org.zoxweb.shared.util.SUS;
-import org.zoxweb.shared.util.SharedStringUtil;
 
 public class CryptoUtilTest {
 
@@ -70,15 +69,15 @@ public class CryptoUtilTest {
 
       EncapsulatedKey ekd = CryptoUtil.createEncryptedKey(wrappingKey);
       byte[] key = CryptoUtil.unwrapKey(ekd, wrappingKey);
-      System.out.println(SharedStringUtil.bytesToHex(key));
+      System.out.println(SUS.bytesToHex(key));
       System.out.println(ekd.toCanonicalID());
 
       EncryptedData ed = CryptoUtil
-          .encryptData(new EncryptedData(), wrappingKey, SharedStringUtil.getBytes("password"));
+          .encryptData(new EncryptedData(), wrappingKey, SUS.getBytes("password"));
       System.out.println(ed.toCanonicalID());
 
       key = CryptoUtil.decryptEncryptedData(ed, wrappingKey);
-      System.out.println(SharedStringUtil.bytesToHex(key));
+      System.out.println(SUS.bytesToHex(key));
 
     } catch (Exception e) {
       e.printStackTrace();

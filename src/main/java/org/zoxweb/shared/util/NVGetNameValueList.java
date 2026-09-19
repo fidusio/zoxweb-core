@@ -49,7 +49,7 @@ public class NVGetNameValueList
      */
     @Override
     public GetNameValue<String> get(String name) {
-        return SharedUtil.lookup(value, name);
+        return SUS.lookup(value, name);
     }
 
     /**
@@ -86,7 +86,7 @@ public class NVGetNameValueList
         if (name != null) {
             for (int i = 0; i < value.size(); i++) {
                 GetNameValue<String> gnv = value.get(i);
-                if (gnv != null && SharedStringUtil.equals(gnv.getName(), name, true)) {
+                if (gnv != null && SUS.equals(gnv.getName(), name, true)) {
                     value.remove(i);
                     return gnv;
                 }
@@ -141,7 +141,7 @@ public class NVGetNameValueList
      */
     @Override
     public List<GetNameValue<String>> search(String... criteria) {
-        return SharedUtil.search(values(), criteria[0]);
+        return SUS.search(values(), criteria[0]);
     }
 
     /**

@@ -24,7 +24,6 @@ import org.zoxweb.shared.util.GetValue;
 import org.zoxweb.shared.util.NVGenericMap;
 import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedBase64.Base64Type;
-import org.zoxweb.shared.util.SharedStringUtil;
 
 import java.io.*;
 
@@ -218,7 +217,7 @@ public class ApplicationConfigManager {
 
         byte[] content = loadFile(acd, varName);
         if (content != null)
-            return SharedStringUtil.toString(content);
+            return SUS.toString(content);
         return null;
     }
 

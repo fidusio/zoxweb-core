@@ -32,7 +32,7 @@ public class PermissionInfo extends AuthzInfo {
             false,
             false,
             PermissionInfo.class,
-            SharedUtil.extractNVConfigs(Param.values()),
+            SUS.extractNVConfigs(Param.values()),
             null,
             false,
             AuthzInfo.NVC_AUTHZ_INFO

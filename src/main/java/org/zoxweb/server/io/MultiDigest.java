@@ -15,7 +15,7 @@
  */
 package org.zoxweb.server.io;
 
-import org.zoxweb.shared.util.SharedStringUtil;
+import org.zoxweb.shared.util.SUS;
 
 import java.security.MessageDigest;
 import java.util.Arrays;
@@ -104,18 +104,18 @@ public class MultiDigest
 
     public void update(char b[], int off, int len) {
         String str = new String(b, off, len);
-        update(SharedStringUtil.getBytes(str), 0, str.length());
+        update(SUS.getBytes(str), 0, str.length());
     }
 
     public void update(char b) {
         char[] temp = new char[1];
         temp[0] = b;
         String str = new String(temp);
-        update(SharedStringUtil.getBytes(str), 0, str.length());
+        update(SUS.getBytes(str), 0, str.length());
     }
 
 
     public void update(String str) {
-        update(SharedStringUtil.getBytes(str), 0, str.length());
+        update(SUS.getBytes(str), 0, str.length());
     }
 }

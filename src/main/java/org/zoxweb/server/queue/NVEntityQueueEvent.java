@@ -19,7 +19,7 @@ import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.queue.QueueEvent;
 import org.zoxweb.shared.util.NVEntity;
 import org.zoxweb.shared.util.SharedBase64.Base64Type;
-import org.zoxweb.shared.util.SharedStringUtil;
+import org.zoxweb.shared.util.SUS;
 
 import java.io.IOException;
 import java.util.Date;
@@ -50,7 +50,7 @@ public class NVEntityQueueEvent extends QueueEvent<NVEntity> {
     @Override
     public byte[] toBytes() {
         try {
-            return SharedStringUtil.getBytes(GSONUtil.toJSON(getContent(), false, false, true, Base64Type.URL));
+            return SUS.getBytes(GSONUtil.toJSON(getContent(), false, false, true, Base64Type.URL));
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

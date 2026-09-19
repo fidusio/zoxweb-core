@@ -19,7 +19,7 @@ import org.zoxweb.shared.data.DataConst.DataParam;
 import org.zoxweb.shared.util.NVConfigEntity;
 import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.SetCanonicalID;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.SUS;
 
 /**
  * The CanonicalIDDAO class extends TimeStampDAO with a canonical ID property,
@@ -43,7 +43,7 @@ public class CanonicalIDDAO
 																		false, 
 																		false, 
 																		CanonicalIDDAO.class, 
-																		SharedUtil.toNVConfigList(DataParam.CANONICAL_ID.getNVConfig()),
+																		SUS.toNVConfigList(DataParam.CANONICAL_ID.getNVConfig()),
 																		null, 
 																		false, 
 																		TimeStampDAO.NVC_TIME_STAMP_DAO

@@ -43,7 +43,7 @@ public enum HTTPAuthScheme
             if (SUS.isNotEmpty(usernameAndMaybePassword) && SUS.isNotEmpty(password)) {
 
                 return GetNameValue.create(HTTPHeader.AUTHORIZATION,
-                        BASIC.getName() + " " + new String(SharedBase64.encode(SharedStringUtil.getBytes(SUS.toCanonicalID(':', usernameAndMaybePassword, password)))));
+                        BASIC.getName() + " " + new String(SharedBase64.encode(SUS.getBytes(SUS.toCanonicalID(':', usernameAndMaybePassword, password)))));
             }
 
             if (SUS.isNotEmpty(usernameAndMaybePassword)) {
@@ -56,12 +56,12 @@ public enum HTTPAuthScheme
                 }
 
                 return GetNameValue.create(HTTPHeader.AUTHORIZATION,
-                        BASIC.getName() + " " + new String(SharedBase64.encode(SharedStringUtil.getBytes(authToken))));
+                        BASIC.getName() + " " + new String(SharedBase64.encode(SUS.getBytes(authToken))));
             }
 
             if (SUS.isNotEmpty(password)) {
                 return GetNameValue.create(HTTPHeader.AUTHORIZATION,
-                        BASIC.getName() + " " + new String(SharedBase64.encode(SharedStringUtil.getBytes(":" + password))));
+                        BASIC.getName() + " " + new String(SharedBase64.encode(SUS.getBytes(":" + password))));
             }
 
             return null;
@@ -71,7 +71,7 @@ public enum HTTPAuthScheme
 
         @Override
         public HTTPAuthorization toHTTPAuthentication(String value) {
-            String[] tokens = SharedStringUtil.parseString(value, " ", true);
+            String[] tokens = SUS.parseString(value, " ", true);
             if (tokens.length > 1) {
                 if (!BASIC.name().equalsIgnoreCase(tokens[0]))
                     throw new IllegalArgumentException("Not a basic authentication type " + tokens[0]);
@@ -79,7 +79,7 @@ public enum HTTPAuthScheme
                 value = tokens[1];
             }
 
-            String fullToken = SharedStringUtil.toString((SharedBase64.decode(SharedBase64.Base64Type.DEFAULT, SharedStringUtil.getBytes(value))));
+            String fullToken = SUS.toString((SharedBase64.decode(SharedBase64.Base64Type.DEFAULT, SUS.getBytes(value))));
 
 
             int columnIndex = fullToken.indexOf(':');
@@ -88,7 +88,7 @@ public enum HTTPAuthScheme
             }
 
 
-            //String parsed[] = SharedStringUtil.parseString(fullToken, ":");
+            //String parsed[] = SUS.parseString(fullToken, ":");
 
             String user = fullToken.substring(0, columnIndex);//parsed.length > index ? parsed[index++] : null;
             String password = fullToken.substring(columnIndex + 1);//parsed.length > index ? parsed[index++] : null;
@@ -106,7 +106,7 @@ public enum HTTPAuthScheme
             if (args.length == 1) {
                 // TODO Auto-generated method stub
                 String token = args[0];
-                String[] tokens = SharedStringUtil.parseString(token, " ", true);
+                String[] tokens = SUS.parseString(token, " ", true);
                 if (tokens.length > 1) {
                     if (!BEARER.name().equalsIgnoreCase(tokens[0]))
                         throw new IllegalArgumentException("Not a bearer authentication type " + tokens[0]);
@@ -123,7 +123,7 @@ public enum HTTPAuthScheme
         @Override
         public HTTPAuthorization toHTTPAuthentication(String value) {
 
-            String[] tokens = SharedStringUtil.parseString(value, " ", true);
+            String[] tokens = SUS.parseString(value, " ", true);
             if (tokens.length > 1) {
                 if (!BEARER.name().equalsIgnoreCase(tokens[0]))
                     throw new IllegalArgumentException("Not a bearer authentication type " + tokens[0]);
@@ -200,14 +200,14 @@ public enum HTTPAuthScheme
         if (value == null) {
             return null;
         }
-        String[] tokens = SharedStringUtil.parseString(value, " ");
+        String[] tokens = SUS.parseString(value, " ");
         if (tokens == null || tokens.length == 0) {
             throw new IllegalArgumentException("Invalid authentication value " + value);
         }
 
         int index = 0;
         String typeStr = tokens[index++];
-        HTTPAuthScheme type = SharedUtil.lookupEnum(typeStr, HTTPAuthScheme.values());
+        HTTPAuthScheme type = SUS.lookupEnum(typeStr, HTTPAuthScheme.values());
         if (type == null) {
             throw new IllegalArgumentException("Invalid authentication type " + typeStr);
 //            return new HTTPAuthorization(typeStr, tokens[index++]);

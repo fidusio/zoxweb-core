@@ -81,7 +81,7 @@ public class NIConfigDAO
     }
 
     /** NVConfigEntity definition for NIConfigDAO */
-    public static final NVConfigEntity NVC_NI_CONFIG_DAO = new NVConfigEntityPortable("ni_config_dao", null, "NIConfigDAO", true, false, false, false, NIConfigDAO.class, SharedUtil.extractNVConfigs(Param.NI_NAME, Param.INET_PROTO), null, false, PropertyDAO.NVC_PROPERTY_DAO);
+    public static final NVConfigEntity NVC_NI_CONFIG_DAO = new NVConfigEntityPortable("ni_config_dao", null, "NIConfigDAO", true, false, false, false, NIConfigDAO.class, SUS.extractNVConfigs(Param.NI_NAME, Param.INET_PROTO), null, false, PropertyDAO.NVC_PROPERTY_DAO);
 
     /**
      * Default constructor.

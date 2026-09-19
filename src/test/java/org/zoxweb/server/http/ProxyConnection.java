@@ -3,7 +3,6 @@ package org.zoxweb.server.http;
 import org.zoxweb.shared.http.*;
 import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.util.SUS;
-import org.zoxweb.shared.util.SharedUtil;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentSkipListMap;
@@ -29,7 +28,7 @@ public class ProxyConnection {
         System.out.println(HTTPStatusCode.statusByCode(rd.getStatus()));
 
         String str = SUS.toCanonicalID(' ', proxy, args[i]);
-        SharedUtil.putUnique(results, ts,
+        SUS.putUnique(results, ts,
             rd.getStatus() + " Command: " + str + " it took " + ts + " millis");
       }
       for (String str : results.values()) {

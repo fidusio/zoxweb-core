@@ -59,7 +59,7 @@ public class BillingAccountDAO
             false,
             false,
             BillingAccountDAO.class,
-            SharedUtil.extractNVConfigs(Params.values()),
+            SUS.extractNVConfigs(Params.values()),
             null,
             false,
             TimeStampDAO.NVC_TIME_STAMP_DAO

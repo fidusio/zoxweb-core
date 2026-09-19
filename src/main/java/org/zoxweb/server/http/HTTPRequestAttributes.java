@@ -107,8 +107,8 @@ public class HTTPRequestAttributes {
         this.contentDecoder = dataDecoder;
 
         if (headers != null) {
-            HTTPAuthorization temp = HTTPAuthScheme.parse((GetNameValue<String>) SharedUtil.lookup(headers, HTTPHeader.AUTHORIZATION));
-            HTTPAuthScheme authScheme = temp != null ? SharedUtil.lookupEnum(temp.getAuthScheme(), HTTPAuthScheme.BASIC, HTTPAuthScheme.BEARER) : null;
+            HTTPAuthorization temp = HTTPAuthScheme.parse((GetNameValue<String>) SUS.lookup(headers, HTTPHeader.AUTHORIZATION));
+            HTTPAuthScheme authScheme = temp != null ? SUS.lookupEnum(temp.getAuthScheme(), HTTPAuthScheme.BASIC, HTTPAuthScheme.BEARER) : null;
 
             if (authScheme == HTTPAuthScheme.BEARER) {
                 try {
@@ -124,7 +124,7 @@ public class HTTPRequestAttributes {
                 subjectID = temp.getTokenProperties().getValue("user");
             }
 
-            httpAuthentication = temp;//HTTPAuthorizationType.parse((GetNameValue<String>) SharedUtil.lookup(headers, HTTPHeaderName.AUTHORIZATION));
+            httpAuthentication = temp;//HTTPAuthorizationType.parse((GetNameValue<String>) SUS.lookup(headers, HTTPHeaderName.AUTHORIZATION));
         } else {
             httpAuthentication = null;
         }
@@ -230,8 +230,8 @@ public class HTTPRequestAttributes {
 
 
     public String getPathInfoTokenByIndex(int index, boolean caseInsensitive) {
-        return SharedStringUtil.getTokenByIndex(getPathInfo(), "/", index, caseInsensitive);
-//		String params[] = SharedStringUtil.parseStringLenient(getPathInfo(), "/");
+        return SUS.getTokenByIndex(getPathInfo(), "/", index, caseInsensitive);
+//		String params[] = SUS.parseStringLenient(getPathInfo(), "/");
 //		if (index < params.length)
 //		{
 //			return caseInsensitive ? params[index].toLowerCase() : params[index];

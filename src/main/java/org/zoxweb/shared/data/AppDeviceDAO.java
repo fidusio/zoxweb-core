@@ -62,7 +62,7 @@ public class AppDeviceDAO
             false,
             false,
             AppDeviceDAO.class,
-            SharedUtil.extractNVConfigs(Param.values()),
+            SUS.extractNVConfigs(Param.values()),
             null,
             false,
             SubjectAPIKey.NVC_SUBJECT_API_KEY

@@ -26,9 +26,9 @@ import java.util.concurrent.TimeUnit;
 public class UtilTest {
 
 	public static void main(String[] args) {
-		byte buffer[] = SharedStringUtil.hexToBytes("bede0001");
-		byte buffer1[] = SharedStringUtil.hexToBytes("0xbede0001");
-		System.out.println( SharedStringUtil.bytesToHex(buffer1) + ":" + SharedStringUtil.bytesToHex(buffer));
+		byte buffer[] = SUS.hexToBytes("bede0001");
+		byte buffer1[] = SUS.hexToBytes("0xbede0001");
+		System.out.println( SUS.bytesToHex(buffer1) + ":" + SUS.bytesToHex(buffer));
 		long ts1 = System.nanoTime();
 		long ts2 = System.nanoTime();
 		System.out.println(":delta " +(ts2 -ts1));
@@ -75,11 +75,11 @@ public class UtilTest {
 			e.printStackTrace();
 		}
 		
-		List<NVPair> result =  SharedUtil.toNVPairs("n1=v&n2=v", "=", "&");
+		List<NVPair> result =  SUS.toNVPairs("n1=v&n2=v", "=", "&");
 
 		System.out.println(result);
 		
-		result =  SharedUtil.toNVPairs("pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=196.43.230.86  user=root", "=", " ");
+		result =  SUS.toNVPairs("pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=196.43.230.86  user=root", "=", " ");
 		System.out.println(result);
 
 		System.out.println(SUS.toCanonicalID('-', null, "a", null));
@@ -87,7 +87,7 @@ public class UtilTest {
 		System.out.println(SUS.toCanonicalID(false, '-', "a", null, "b"));
 		String concat = SUS.toCanonicalID(true, '-', "a", null, "b");
 		System.out.println(concat);
-		String parsedContact[] = SharedStringUtil.parseString(concat, "-");
+		String parsedContact[] = SUS.parseString(concat, "-");
 		System.out.println(Arrays.toString(parsedContact));
 	}
 

@@ -3,7 +3,6 @@ package org.zoxweb.server.security;
 import org.zoxweb.shared.crypto.CryptoConst;
 import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedBase64;
-import org.zoxweb.shared.util.SharedStringUtil;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -29,7 +28,7 @@ public final class PasswordResetTokenUtil {
     public static String hash(String token) {
         SUS.checkIfNulls("token null", token);
         try {
-            byte[] digest = HashUtil.hash(CryptoConst.HashType.SHA_256, SharedStringUtil.getBytes(token));
+            byte[] digest = HashUtil.hash(CryptoConst.HashType.SHA_256, SUS.getBytes(token));
             return SharedBase64.encodeAsString(SharedBase64.Base64Type.URL, digest);
         } catch (NoSuchAlgorithmException e) {
             throw new IllegalStateException(e);
@@ -41,6 +40,6 @@ public final class PasswordResetTokenUtil {
         if (storedHash == null || token == null) {
             return false;
         }
-        return MessageDigest.isEqual(SharedStringUtil.getBytes(storedHash), SharedStringUtil.getBytes(hash(token)));
+        return MessageDigest.isEqual(SUS.getBytes(storedHash), SUS.getBytes(hash(token)));
     }
 }

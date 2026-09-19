@@ -65,7 +65,7 @@ public class AmountDAO
             false,
             false,
             AmountDAO.class,
-            SharedUtil.extractNVConfigs(Params.values()),
+            SUS.extractNVConfigs(Params.values()),
             null,
             true,
             SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO

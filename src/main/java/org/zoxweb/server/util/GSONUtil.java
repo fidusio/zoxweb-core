@@ -325,7 +325,7 @@ public final class GSONUtil {
             if (jp.isString()) {
                 try {
                     Enum<?>[] enums = (Enum<?>[]) Class.forName(typeOf.getTypeName()).getEnumConstants();
-                    return SharedUtil.lookupEnum(jp.getAsString(), enums);
+                    return SUS.lookupEnum(jp.getAsString(), enums);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -342,7 +342,7 @@ public final class GSONUtil {
 
     public static <T> T fromJSONDefault(byte[] json, Class<T> classOfT) {
         counter.incrementAndGet();
-        return DEFAULT_GSON.fromJson(SharedStringUtil.toString(json), classOfT);
+        return DEFAULT_GSON.fromJson(SUS.toString(json), classOfT);
     }
 
     public static <T> T fromJSONDefault(String json, Class<T> classOfT) {
@@ -618,7 +618,7 @@ public final class GSONUtil {
 
     public static byte[] toJSONHash(String mdAlgo, String json) throws NoSuchAlgorithmException {
         MessageDigest md = MessageDigest.getInstance(mdAlgo);
-        return md.digest(SharedStringUtil.getBytes(json));
+        return md.digest(SUS.getBytes(json));
     }
 
     public static QueryRequest fromQueryRequest(String json) {
@@ -1131,11 +1131,11 @@ public final class GSONUtil {
     }
 
     public static NVGenericMap fromJSONGenericMap(byte[] data, NVConfigEntity nvce, Base64Type btype) {
-        return fromJSONGenericMap(SharedStringUtil.toString(data), nvce, btype);
+        return fromJSONGenericMap(SUS.toString(data), nvce, btype);
     }
 
     public static NVGenericMap fromJSONGenericMap(byte[] data, NVConfigEntity nvce, Base64Type btype, boolean nvgPrimitiveAsString) {
-        return fromJSONGenericMap(SharedStringUtil.toString(data), nvce, btype, nvgPrimitiveAsString);
+        return fromJSONGenericMap(SUS.toString(data), nvce, btype, nvgPrimitiveAsString);
     }
 
 
@@ -1314,7 +1314,7 @@ public final class GSONUtil {
             switch (jo.size()) {
                 case 1: {
 
-                    FilterType vf = SharedUtil.lookupEnum(joType.getAsString(), FilterType.values());
+                    FilterType vf = SUS.lookupEnum(joType.getAsString(), FilterType.values());
                     if (vf != null)
                         return new NVPair(name, null, vf);
                 }
@@ -1322,7 +1322,7 @@ public final class GSONUtil {
                 case 2: {
                     JsonElement jeValue = jo.get(MetaToken.VALUE.getName());
                     if (jeValue != null) {
-                        FilterType vf = SharedUtil.lookupEnum(joType.getAsString(), FilterType.values());
+                        FilterType vf = SUS.lookupEnum(joType.getAsString(), FilterType.values());
 
                         if (vf != null)
                             return new NVPair(name, jeValue.isJsonNull() ? null : jeValue.getAsString(), vf);
@@ -1341,7 +1341,7 @@ public final class GSONUtil {
                         try {
                             Class<Enum<?>> enumType = (Class<Enum<?>>) Class.forName(joType.getAsString());
                             if (enumType.isEnum()) {
-                                Enum<?> enumValue = SharedUtil.lookupEnum(jeValue.getAsString(), enumType.getEnumConstants());
+                                Enum<?> enumValue = SUS.lookupEnum(jeValue.getAsString(), enumType.getEnumConstants());
                                 return new NVEnum(name, enumValue);
                             }
 
@@ -1407,8 +1407,8 @@ public final class GSONUtil {
             //if (jp.getAsString().indexOf(".") == -1)
 
             try {
-                Number number = SharedUtil.parseNumber(jp.getAsString());
-                return SharedUtil.numberToNVBase(name, number);
+                Number number = SUS.parseNumber(jp.getAsString());
+                return SUS.numberToNVBase(name, number);
 
             } catch (NumberFormatException e) {
                 e.printStackTrace();
@@ -1505,12 +1505,12 @@ public final class GSONUtil {
 
     public static <V extends NVEntity> V fromJSON(byte[] json)
             throws APIException {
-        return fromJSON(SharedStringUtil.toString(json), null, null);
+        return fromJSON(SUS.toString(json), null, null);
     }
 
     public static <V extends NVEntity> V fromJSON(byte[] json, Base64Type b64t)
             throws APIException {
-        return fromJSON(SharedStringUtil.toString(json), null, b64t);
+        return fromJSON(SUS.toString(json), null, b64t);
     }
 
 
@@ -1762,7 +1762,7 @@ public final class GSONUtil {
 
                         for (int i = 0; i < jsonArray.size(); i++) {
                             String jobj = jsonArray.get(i).getAsString();
-                            nel.getValue().add(SharedUtil.enumValue(metaType.getComponentType(), jobj));
+                            nel.getValue().add(SUS.enumValue(metaType.getComponentType(), jobj));
                         }
                     } else if (String[].class.equals(metaType)) {
                         JsonArray jsonArray = je.getAsJsonArray();
@@ -1783,7 +1783,7 @@ public final class GSONUtil {
                         String byteArray64 = je.getAsString();
 
                         if (byteArray64 != null) {
-                            nve.setValue(nvc, SharedBase64.decode(b64Type, SharedStringUtil.getBytes(byteArray64)));
+                            nve.setValue(nvc, SharedBase64.decode(b64Type, SUS.getBytes(byteArray64)));
                         }
                     } else if (Integer[].class.equals(metaType)) {
                         JsonArray jsonArray = je.getAsJsonArray();
@@ -1868,7 +1868,7 @@ public final class GSONUtil {
 //							}
 //							else
                             {
-                                ((NVBase<Enum<?>>) nvb).setValue(SharedUtil.enumValue(metaType, je.getAsString()));
+                                ((NVBase<Enum<?>>) nvb).setValue(SUS.enumValue(metaType, je.getAsString()));
                             }
                         }
                     } else if (String.class.equals(metaType)) {
@@ -1899,7 +1899,7 @@ public final class GSONUtil {
                     } else if (BigDecimal.class.equals(metaType)) {
                         ((NVBase<BigDecimal>) nvb).setValue(je.getAsBigDecimal());
                     } else if (Number.class.equals(metaType)) {
-                        ((NVBase<Number>) nvb).setValue(SharedUtil.parseNumber(je.getAsString()));
+                        ((NVBase<Number>) nvb).setValue(SUS.parseNumber(je.getAsString()));
                     } else if (NamedValue.class.equals(metaType)) {
                         fromJSONNamedValue(nvb, je);
 
@@ -2017,7 +2017,7 @@ public final class GSONUtil {
         }
 
         if (jo.get(MetaToken.VALUE_FILTER.getName()) != null) {
-            ValueFilter<String, String> vf = (FilterType) SharedUtil.enumValue(FilterType.class, jo.get(MetaToken.VALUE_FILTER.getName()).getAsString());
+            ValueFilter<String, String> vf = (FilterType) SUS.enumValue(FilterType.class, jo.get(MetaToken.VALUE_FILTER.getName()).getAsString());
 
             if (vf == null) {
                 vf = DynamicEnumMapManager.SINGLETON.lookup(jo.get(MetaToken.VALUE_FILTER.getName()).getAsString());
@@ -2121,7 +2121,7 @@ public final class GSONUtil {
     public static <V extends NVEntity> List<V> fromJSONs(String json, Base64Type b64Type, Class<? extends NVEntity>... classes) {
         List<V> ret = new ArrayList<V>();
 
-        List<CharSequence> tokens = SharedStringUtil.parseGroup(json, "{", "}", true);
+        List<CharSequence> tokens = SUS.parseGroup(json, "{", "}", true);
 
         for (CharSequence token : tokens) {
             for (Class<? extends NVEntity> c : classes) {

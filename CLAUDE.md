@@ -96,8 +96,8 @@ Identity model: `PrincipalIdentifier` (login handle — username/email) resolves
 
 ### Utility naming conventions
 
-- `SharedUtil`, `SharedStringUtil`, `SharedBase64`, `SharedMetaUtil` — stateless static helpers safe for `shared`.
-- `SUS` — terse null/empty guards (`SUS.isEmpty`, `SUS.checkIfNulls`), used everywhere.
+- `SUS` — the one static helper facade for `shared` (null/empty guards, NV/meta-model, enum, lookup, string, token, hex and UTF-8 helpers). The former `SharedUtil` and `SharedStringUtil` were merged into it and deleted; do not recreate them. `SharedBase64`, `SharedMetaUtil` — other stateless static helpers safe for `shared`.
+- `SUS.isEmpty`, `SUS.checkIfNulls` — the terse guards used everywhere.
 - `Const` — central constants/enums bag; `MetaToken` — well-known field names (`SUBJECT_GUID`, `GUID`, `NAME`) used in datastore queries.
 - `GSONUtil` (server) — the JSON hub for both generic and NVEntity-aware serialization.
 

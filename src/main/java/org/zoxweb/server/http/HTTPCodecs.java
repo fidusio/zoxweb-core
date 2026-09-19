@@ -208,7 +208,7 @@ public final class HTTPCodecs {
                 String hexSize = ubaos.getString(hrm.getDataMark(), index - hrm.getDataMark());
                 if (log.isEnabled())
                     log.getLogger().info("dataMark : " + hrm.getDataMark() + " match index: " + index + " ubaos size: " + ubaos.size());
-                int chunkSize = SharedUtil.hexToInt(hexSize);
+                int chunkSize = SUS.hexToInt(hexSize);
                 if (log.isEnabled()) log.getLogger().info("chunk size : " + chunkSize);
                 if (chunkSize == 0) {
                     // we have the last chunk
@@ -350,14 +350,14 @@ public final class HTTPCodecs {
 
                         if (SUS.isNotEmpty(boundary)) {
 
-                            byte[] boundaryTag = SharedStringUtil.getBytes("--" + boundary);
-                            byte[] boundaryStart = SharedStringUtil.getBytes("--" + boundary + Delimiter.CRLF.getValue());
-                            byte[] boundaryEnd = SharedStringUtil.getBytes("--" + boundary + "--" + Delimiter.CRLF.getValue());
+                            byte[] boundaryTag = SUS.getBytes("--" + boundary);
+                            byte[] boundaryStart = SUS.getBytes("--" + boundary + Delimiter.CRLF.getValue());
+                            byte[] boundaryEnd = SUS.getBytes("--" + boundary + "--" + Delimiter.CRLF.getValue());
 
                             UByteArrayOutputStream ubaos = hrm.getDataStream();
                             // check is boundaryEnd exit
                             if (ubaos.indexOf(0, boundaryEnd) == -1) {
-                                throw new IllegalArgumentException("boundary end " + SharedStringUtil.toString(boundaryEnd).trim() + " not found");
+                                throw new IllegalArgumentException("boundary end " + SUS.toString(boundaryEnd).trim() + " not found");
                             }
 
                             hmci.setBoundary(boundary);
@@ -548,11 +548,11 @@ public final class HTTPCodecs {
                             if (log.isEnabled()) log.getLogger().info("boundary=" + boundary);
                             hrm.getProperties()
                                     //        --BOUNDARY\r\n
-                                    .build(new NVBlob(ProtoMarker.BOUNDARY_START_TAG, SharedStringUtil.getBytes("--" + hmci.getBoundary() + Delimiter.CRLF.getValue())))
+                                    .build(new NVBlob(ProtoMarker.BOUNDARY_START_TAG, SUS.getBytes("--" + hmci.getBoundary() + Delimiter.CRLF.getValue())))
                                     //   \r\n\--BOUNDARY\r\n
-                                    .build(new NVBlob(ProtoMarker.BOUNDARY_CONTENT_END_TAG, SharedStringUtil.getBytes(Delimiter.CRLF.getValue() + "--" + hmci.getBoundary() + Delimiter.CRLF.getValue())))
+                                    .build(new NVBlob(ProtoMarker.BOUNDARY_CONTENT_END_TAG, SUS.getBytes(Delimiter.CRLF.getValue() + "--" + hmci.getBoundary() + Delimiter.CRLF.getValue())))
                                     //   \r\n\--BOUNDARY--\r\n
-                                    .build(new NVBlob(ProtoMarker.BOUNDARY_FINAL_TAG, SharedStringUtil.getBytes(Delimiter.CRLF.getValue() + "--" + hmci.getBoundary() + "--" + Delimiter.CRLF.getValue())));
+                                    .build(new NVBlob(ProtoMarker.BOUNDARY_FINAL_TAG, SUS.getBytes(Delimiter.CRLF.getValue() + "--" + hmci.getBoundary() + "--" + Delimiter.CRLF.getValue())));
 
                         }
 
@@ -827,7 +827,7 @@ public final class HTTPCodecs {
         if (indexOfBoundaryStart != -1) {
             int endOfSubHeadersIndex = ubaos.indexOf(indexOfBoundaryStart + boundaryStartMarker.length, hrm.getDataMark(), Delimiter.CRLFCRLF.getBytes());
 //            if (log.isEnabled())
-//                log.getLogger().info("startIndex, indexOfBoundaryStart, endOfSubHeadersIndex, indexEndOfContent, indexOfFinalTag: " + SharedUtil.toCanonicalID(',', startIndex, indexOfBoundaryStart, endOfSubHeadersIndex, indexEndOfContent, indexOfFinalTag));
+//                log.getLogger().info("startIndex, indexOfBoundaryStart, endOfSubHeadersIndex, indexEndOfContent, indexOfFinalTag: " + SUS.toCanonicalID(',', startIndex, indexOfBoundaryStart, endOfSubHeadersIndex, indexEndOfContent, indexOfFinalTag));
 
 
             if (endOfSubHeadersIndex != -1) {

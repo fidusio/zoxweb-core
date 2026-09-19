@@ -6,7 +6,7 @@ import org.zoxweb.server.security.SecUtil;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.shared.crypto.CryptoConst;
 import org.zoxweb.shared.io.SharedIOUtil;
-import org.zoxweb.shared.util.SharedStringUtil;
+import org.zoxweb.shared.util.SUS;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
@@ -69,13 +69,13 @@ public class SMTPStartTLSTest {
                     InputStream in = accepted.getInputStream();
                     byte[] buf = new byte[512];
 
-                    out.write(SharedStringUtil.getBytes("220 mx.test ESMTP\r\n"));
+                    out.write(SUS.getBytes("220 mx.test ESMTP\r\n"));
                     out.flush();
                     expectLine(in, buf, "EHLO probe.local");
-                    out.write(SharedStringUtil.getBytes("250-mx.test\r\n250 STARTTLS\r\n"));
+                    out.write(SUS.getBytes("250-mx.test\r\n250 STARTTLS\r\n"));
                     out.flush();
                     expectLine(in, buf, "STARTTLS");
-                    out.write(SharedStringUtil.getBytes("220 Go\r\n"));
+                    out.write(SUS.getBytes("220 Go\r\n"));
                     out.flush();
 
                     SSLSocket ssl = (SSLSocket) serverSSLContext.getSocketFactory()
@@ -83,7 +83,7 @@ public class SMTPStartTLSTest {
                     ssl.setUseClientMode(false);
                     ssl.startHandshake();
                     expectLine(ssl.getInputStream(), buf, "EHLO probe.local");
-                    ssl.getOutputStream().write(SharedStringUtil.getBytes("250 mx.test ready\r\n"));
+                    ssl.getOutputStream().write(SUS.getBytes("250 mx.test ready\r\n"));
                     ssl.getOutputStream().flush();
                     // hold until the client closes
                     ssl.getInputStream().read(buf);
@@ -127,7 +127,7 @@ public class SMTPStartTLSTest {
             serverThread = new Thread(() -> {
                 try (Socket accepted = server.accept()) {
                     accepted.getOutputStream().write(
-                            SharedStringUtil.getBytes("220 Go\r\nEVIL INJECTED COMMAND\r\n"));
+                            SUS.getBytes("220 Go\r\nEVIL INJECTED COMMAND\r\n"));
                     accepted.getOutputStream().flush();
                     // hold until the client closes
                     accepted.getInputStream().read(new byte[64]);

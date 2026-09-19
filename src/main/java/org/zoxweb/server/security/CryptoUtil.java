@@ -83,13 +83,13 @@ public class CryptoUtil {
     private static final String GCM_TRANSFORMATION = "AES/GCM/NoPadding";
     private static final String JDK_JCE_PROVIDER = "SunJCE";
     /** HKDF label under which a record cipher key is derived from the wrapping key. */
-    private static final byte[] RECORD_KDF_LABEL = SharedStringUtil.getBytes("enc");
+    private static final byte[] RECORD_KDF_LABEL = SUS.getBytes("enc");
 
 
     public static String base64URLHmacSHA256(String secret, String data)
             throws NoSuchAlgorithmException, InvalidKeyException {
-        byte[] hmac = hmacSHA256(SharedStringUtil.getBytes(secret), SharedStringUtil.getBytes(data));
-        return SharedStringUtil.toString(SharedBase64.encode(Base64Type.URL, hmac, 0, hmac.length));
+        byte[] hmac = hmacSHA256(SUS.getBytes(secret), SUS.getBytes(data));
+        return SUS.toString(SharedBase64.encode(Base64Type.URL, hmac, 0, hmac.length));
     }
 
     public static byte[] hmacSHA256(byte[] secret, byte[] data)
@@ -229,7 +229,7 @@ public class CryptoUtil {
             Cipher cipher = gcmCipher();
             cipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(recordKey, CryptoConst.CryptoAlgo.AES.getName()),
                     new GCMParameterSpec(EncryptedData.TAG_SIZE * 8, iv));
-            cipher.updateAAD(SharedStringUtil.getBytes(record.toAssociatedData()));
+            cipher.updateAAD(SUS.getBytes(record.toAssociatedData()));
             if (extraAssociatedData != null) {
                 cipher.updateAAD(extraAssociatedData);
             }
@@ -305,7 +305,7 @@ public class CryptoUtil {
             Cipher cipher = gcmCipher();
             cipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(recordKey, CryptoConst.CryptoAlgo.AES.getName()),
                     new GCMParameterSpec(EncryptedData.TAG_SIZE * 8, iv));
-            cipher.updateAAD(SharedStringUtil.getBytes(record.toAssociatedData()));
+            cipher.updateAAD(SUS.getBytes(record.toAssociatedData()));
             if (extraAssociatedData != null) {
                 cipher.updateAAD(extraAssociatedData);
             }
@@ -377,7 +377,7 @@ public class CryptoUtil {
             checkRecordKey(keyMaterial);
         }
         ek.setKeySize(wrappingKey.length);
-        encryptData(ek, wrappingKey, keyMaterial, SharedStringUtil.getBytes(ek.toBindingData()));
+        encryptData(ek, wrappingKey, keyMaterial, SUS.getBytes(ek.toBindingData()));
         return ek;
     }
 
@@ -400,7 +400,7 @@ public class CryptoUtil {
         if (ek.getEncryptedData() == null) {
             throw new SignatureException("No wrapped key");
         }
-        return decryptEncryptedData(ek, wrappingKey, SharedStringUtil.getBytes(ek.toBindingData()));
+        return decryptEncryptedData(ek, wrappingKey, SUS.getBytes(ek.toBindingData()));
     }
 
     /**
@@ -544,7 +544,7 @@ public class CryptoUtil {
         try {
             byte[] kemCiphertext = enc.getEncapsulation();
             ek.setKeySize(kemCiphertext.length);
-            sealRecord(ek, outerKey, keyMaterial, SharedStringUtil.getBytes(ek.toBindingData()), params.getName());
+            sealRecord(ek, outerKey, keyMaterial, SUS.getBytes(ek.toBindingData()), params.getName());
             byte[] sealed = ek.getEncryptedData();
             byte[] combined = new byte[kemCiphertext.length + sealed.length];
             System.arraycopy(kemCiphertext, 0, combined, 0, kemCiphertext.length);
@@ -589,7 +589,7 @@ public class CryptoUtil {
         // ML-KEM never fails to decapsulate: a wrong key yields an unrelated secret and the tag refuses it
         byte[] outerKey = new MLKEMExtractor(mlkemPrivateKey(params, privateKey)).extractSecret(kemCiphertext);
         try {
-            return openRecord(ek, outerKey, SharedStringUtil.getBytes(ek.toBindingData()), sealed, params.getName());
+            return openRecord(ek, outerKey, SUS.getBytes(ek.toBindingData()), sealed, params.getName());
         } finally {
             Arrays.fill(outerKey, (byte) 0);
         }
@@ -877,7 +877,7 @@ public class CryptoUtil {
 
     public static PublicKey generatePublicKey(String type, String publicKey)
             throws GeneralSecurityException {
-        String publicKeyPEM = CryptoConst.applyPemFilters(publicKey);//SharedStringUtil.filterString(publicKey, "BEGIN PUBLIC KEY", "END PUBLIC KEY", "-", "\n");
+        String publicKeyPEM = CryptoConst.applyPemFilters(publicKey);//SUS.filterString(publicKey, "BEGIN PUBLIC KEY", "END PUBLIC KEY", "-", "\n");
         // Use Base64Type.DEFAULT DO NOT USE Base64Type.URL because of - char
         return generatePublicKey(type, SharedBase64.decode(Base64Type.DEFAULT, publicKeyPEM));
     }
@@ -973,7 +973,7 @@ public class CryptoUtil {
 
     public static String encodeJWT(String key, JWT jwt, boolean setHash)
             throws GeneralSecurityException, IOException, AccessSecurityException, NullPointerException, IllegalArgumentException {
-        return encodeJWT(key != null ? SharedStringUtil.getBytes(key) : null, jwt, setHash);
+        return encodeJWT(key != null ? SUS.getBytes(key) : null, jwt, setHash);
     }
 
     public static String encodeJWT(byte[] key, JWT jwt)
@@ -995,9 +995,9 @@ public class CryptoUtil {
                 .toJSONGenericMap(jwt.getPayload().getProperties(), false, false, false);
 
         byte[] b64Payload = SharedBase64.encode(Base64Type.URL, payloadJSON);
-        sb.append(SharedStringUtil.toString(b64Header));
+        sb.append(SUS.toString(b64Header));
         sb.append(".");
-        sb.append(SharedStringUtil.toString(b64Payload));
+        sb.append(SUS.toString(b64Payload));
 
         String b64Hash = null;
 
@@ -1011,7 +1011,7 @@ public class CryptoUtil {
                 SecretKeySpec secret_key = new SecretKeySpec(key, jwtAlgo.getSignatureAlgo().getName());
                 hmac.init(secret_key);
                 b64Hash = SharedBase64.encodeAsString(Base64Type.URL,
-                        hmac.doFinal(SharedStringUtil.getBytes(sb.toString())));
+                        hmac.doFinal(SUS.getBytes(sb.toString())));
                 break;
             case none:
                 throw new AccessSecurityException("none JWT Algo not supported");
@@ -1029,7 +1029,7 @@ public class CryptoUtil {
                 b64Hash = SharedBase64.encodeAsString(Base64Type.URL,
                         CryptoUtil.sign(jwtAlgo.getSignatureAlgo(),
                                 privateKey,
-                                SharedStringUtil.getBytes(sb.toString())));
+                                SUS.getBytes(sb.toString())));
                 break;
             default:
                 // without a signing branch above the token would be emitted with an empty
@@ -1270,12 +1270,12 @@ public class CryptoUtil {
         ret.add("format", pk.getFormat());
 
         ret.add(new NVInt("key_size", pk.getEncoded().length * 8));
-        ret.add("key", SharedStringUtil.bytesToHex(pk.getEncoded()));
+        ret.add("key", SUS.bytesToHex(pk.getEncoded()));
         return ret;
     }
 
     public static NVGenericMap certificateToNVGM(X509Certificate cert) {
-        NVGenericMap ret = SharedUtil.toNVGenericMap(null, cert.getSubjectX500Principal().getName(), "=", ",", true);
+        NVGenericMap ret = SUS.toNVGenericMap(null, cert.getSubjectX500Principal().getName(), "=", ",", true);
         ret.add("type", cert.getType());
         NVGenericMap nvmg = publicKeyToNVGM(cert.getPublicKey());
         nvmg.setName("public_key");

@@ -17,7 +17,6 @@ package org.zoxweb.shared.filters;
 
 import org.zoxweb.shared.util.GetValue;
 import org.zoxweb.shared.util.SUS;
-import org.zoxweb.shared.util.SharedStringUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -157,12 +156,12 @@ public class MatchPatternFilter
 
         if (pattern.contains(MatchLiteral.ASTERISK.getValue())) {
             pattern = preFilter(pattern, MatchLiteral.ASTERISK.getValue());
-            pattern = SharedStringUtil.embedText(pattern, MatchLiteral.ASTERISK.getValue(), ASTERISK_CHARACTER_PATTERN);
+            pattern = SUS.embedText(pattern, MatchLiteral.ASTERISK.getValue(), ASTERISK_CHARACTER_PATTERN);
 
         }
 
         if (pattern.contains(MatchLiteral.QUESTION_MARK.getValue())) {
-            pattern = SharedStringUtil.embedText(pattern, MatchLiteral.QUESTION_MARK.getValue(), SINGLE_CHARACTER_PATTERN);
+            pattern = SUS.embedText(pattern, MatchLiteral.QUESTION_MARK.getValue(), SINGLE_CHARACTER_PATTERN);
         }
 
         pattern = DEFAULT_PATTERN_PREFIX + "(" + pattern + ")" + SINGLE_PATTERN_OCCURRENCE_VALUE;

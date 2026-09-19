@@ -37,7 +37,7 @@ public class HTTPAuthorization
     public static final NVConfig NVC_AUTH_SCHEME = NVConfigManager.createNVConfig("auth_scheme", null, "HTTPAuthScheme", false, true, String.class);
     public static final NVConfig NVC_TOKEN = NVConfigManager.createNVConfig("token", null, "Token", false, true, NamedValue.class);
     //public static final NVConfig NVC_TYPE_IS_HEADER = NVConfigManager.createNVConfig("type_is_header", null, "TypeIsHeader", false, true, boolean.class);
-    public static final NVConfigEntity NVC_HTTP_AUTHORIZATION = new NVConfigEntityPortable("http_authorization", null, null, true, false, false, false, HTTPAuthorization.class, SharedUtil.toNVConfigList(NVC_AUTH_SCHEME, NVC_TOKEN), null, false, SetNameDAO.NVC_NAME_DAO);
+    public static final NVConfigEntity NVC_HTTP_AUTHORIZATION = new NVConfigEntityPortable("http_authorization", null, null, true, false, false, false, HTTPAuthorization.class, SUS.toNVConfigList(NVC_AUTH_SCHEME, NVC_TOKEN), null, false, SetNameDAO.NVC_NAME_DAO);
 
 
     /**
@@ -61,7 +61,7 @@ public class HTTPAuthorization
     public static HTTPAuthorization createBasic(String user, String password) {
         HTTPAuthorization ret = new HTTPAuthorization(HTTPAuthScheme.BASIC.getName());
         ret.setName(HTTPHeader.AUTHORIZATION.getName());
-        ret.setToken(new String(SharedBase64.encode(SharedStringUtil.getBytes(SUS.toCanonicalID(':', user, password)))));
+        ret.setToken(new String(SharedBase64.encode(SUS.getBytes(SUS.toCanonicalID(':', user, password)))));
         ret.getTokenProperties().build("user", user).build("password", password);
         return ret;
     }
@@ -172,7 +172,7 @@ public class HTTPAuthorization
     }
 
     public HTTPAuthScheme authSchemeAsEnum() {
-        return SharedUtil.lookupEnum(getAuthScheme(), HTTPAuthScheme.BASIC, HTTPAuthScheme.BEARER);
+        return SUS.lookupEnum(getAuthScheme(), HTTPAuthScheme.BASIC, HTTPAuthScheme.BEARER);
     }
 
 

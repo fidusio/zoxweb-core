@@ -24,7 +24,6 @@ import org.zoxweb.shared.http.HTTPMethod;
 import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.util.Const.DeviceType;
 import org.zoxweb.shared.util.SUS;
-import org.zoxweb.shared.util.SharedUtil;
 
 public class HTTPProxyTest {
 
@@ -69,7 +68,7 @@ public class HTTPProxyTest {
           System.out.println(
               (hcc.getContent() != null ? new String(hcc.getContent()) : "") + ":" + hcc
                   .getContentLength());
-          System.out.println(DeviceType.lookup(SharedUtil
+          System.out.println(DeviceType.lookup(SUS
               .lookupValue(hcc.getHeaders().asArrayValuesString(), HTTPHeader.USER_AGENT.getName())));
         }
         System.out.println("Is Request complete " + HTTPUtil.checkRequestStatus(hcc));

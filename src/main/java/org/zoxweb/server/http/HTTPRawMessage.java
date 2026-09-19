@@ -52,7 +52,7 @@ public class HTTPRawMessage
     private volatile NamedValue<?> lastParam = null;
 
     public HTTPRawMessage(String msg) {
-        this(SharedStringUtil.getBytes(msg));
+        this(SUS.getBytes(msg));
     }
 
     public HTTPRawMessage(byte[] fullMessage) {
@@ -96,7 +96,7 @@ public class HTTPRawMessage
                         String currentHeaderLine = new String(Arrays.copyOfRange(ubaos.getInternalBuffer(), getDataMark(), endOfCurrentLine));
 
                         if (headersLineCounter > 1) {
-                            GetNameValue<String> gnv = SharedUtil.toNVPair(currentHeaderLine, ":", true);
+                            GetNameValue<String> gnv = SUS.toNVPair(currentHeaderLine, ":", true);
                             hmci.getHeaders().add(gnv);
                         } else {
 

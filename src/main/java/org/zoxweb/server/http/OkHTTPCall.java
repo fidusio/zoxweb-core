@@ -116,13 +116,13 @@ public class OkHTTPCall {
 
         RBBinaryContent(NVGenericMap nvgm) {
             this(MediaType.parse(HTTPMediaType.APPLICATION_JSON.getValue()),
-                    new UByteArrayInputStream(SharedStringUtil.getBytes(GSONUtil.toJSONDefault(nvgm))),
+                    new UByteArrayInputStream(SUS.getBytes(GSONUtil.toJSONDefault(nvgm))),
                     false);
         }
 
         RBBinaryContent(MediaType mediaType, String content) {
             this(mediaType,
-                    SUS.isNotEmpty(content) ? new UByteArrayInputStream(SharedStringUtil.getBytes(content)) : new ByteArrayInputStream(Const.EMPTY_BYTE_ARRAY),
+                    SUS.isNotEmpty(content) ? new UByteArrayInputStream(SUS.getBytes(content)) : new ByteArrayInputStream(Const.EMPTY_BYTE_ARRAY),
                     false);
         }
 
@@ -261,7 +261,7 @@ public class OkHTTPCall {
             requestBuilder.addHeader(gnv.getName(), gnv.getValue());
         }
 
-        String fullURL = HTTPUtil.formatURI(SharedStringUtil.concat(hmci.getURL(), hmci.getURI(), "/"), hmci.getParameters());
+        String fullURL = HTTPUtil.formatURI(SUS.concat(hmci.getURL(), hmci.getURI(), "/"), hmci.getParameters());
         String urlEncodedParameter = null;
         // set the url
         // if method is get and hmci.isURLEncodingEnabled() merge uri + encoded parameters

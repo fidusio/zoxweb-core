@@ -111,7 +111,7 @@ public class NVEntityReferenceIDMap
 
     @Override
     public List<NVEntity> search(String... criteria) {
-        return SharedUtil.search(values(), criteria);
+        return SUS.search(values(), criteria);
     }
 
     /**

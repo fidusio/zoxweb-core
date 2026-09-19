@@ -6,14 +6,14 @@ import org.zoxweb.shared.security.AccessSecurityException;
 import org.zoxweb.shared.util.DataDecoder;
 import org.zoxweb.shared.util.NVGenericMap;
 import org.zoxweb.shared.util.SharedBase64.Base64Type;
-import org.zoxweb.shared.util.SharedStringUtil;
+import org.zoxweb.shared.util.SUS;
 
 public class NVGenericMapByteDecoder implements DataDecoder<byte[], NVGenericMapQueueEvent> {
 
     @Override
     public NVGenericMapQueueEvent decode(byte[] input) {
         try {
-            NVGenericMap content = GSONUtil.fromJSONGenericMap(SharedStringUtil.toString(input), null, Base64Type.URL);
+            NVGenericMap content = GSONUtil.fromJSONGenericMap(SUS.toString(input), null, Base64Type.URL);
             return new NVGenericMapQueueEvent(this, content);
         } catch (AccessSecurityException | APIException | NullPointerException | IllegalArgumentException e) {
             // TODO Auto-generated catch block

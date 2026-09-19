@@ -18,7 +18,7 @@ package org.zoxweb.server.queue;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.queue.QueueEvent;
 import org.zoxweb.shared.util.NVGenericMap;
-import org.zoxweb.shared.util.SharedStringUtil;
+import org.zoxweb.shared.util.SUS;
 
 import java.io.IOException;
 import java.util.Date;
@@ -48,7 +48,7 @@ public class NVGenericMapQueueEvent extends QueueEvent<NVGenericMap> {
      */
     public byte[] toBytes() {
         try {
-            return SharedStringUtil.getBytes(GSONUtil.toJSONGenericMap(getContent(), false, false, true));
+            return SUS.getBytes(GSONUtil.toJSONGenericMap(getContent(), false, false, true));
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

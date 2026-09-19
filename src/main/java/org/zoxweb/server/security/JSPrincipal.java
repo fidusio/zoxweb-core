@@ -2,7 +2,6 @@ package org.zoxweb.server.security;
 
 import org.zoxweb.shared.util.GetName;
 import org.zoxweb.shared.util.SUS;
-import org.zoxweb.shared.util.SharedStringUtil;
 
 import java.security.Principal;
 import java.util.LinkedHashSet;
@@ -13,7 +12,7 @@ public class JSPrincipal implements Principal, GetName {
 
     public JSPrincipal(String name) {
         SUS.checkIfNulls("Principal name can't be null", name);
-        this.name = SharedStringUtil.toLowerCase(name);
+        this.name = SUS.toLowerCase(name);
     }
 
     @Override

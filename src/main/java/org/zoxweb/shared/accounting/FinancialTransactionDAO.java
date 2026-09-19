@@ -70,7 +70,7 @@ public class FinancialTransactionDAO
             false,
             false,
             FinancialTransactionDAO.class,
-            SharedUtil.extractNVConfigs(Params.values()),
+            SUS.extractNVConfigs(Params.values()),
             null,
             true,
             TimeStampDAO.NVC_TIME_STAMP_DAO

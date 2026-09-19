@@ -142,7 +142,7 @@ public class ApplicationConfigDAO
 	 */
 	public String lookupValue(String name)
 	{
-		name = SharedStringUtil.toLowerCase(name);
+		name = SUS.toLowerCase(name);
 		if (!SUS.isEmpty(name))
 		{
 			GetNameValue<?> gnv = nvgProperties.get(name);
@@ -160,8 +160,8 @@ public class ApplicationConfigDAO
 	 */
 //	public synchronized void set(String name, String value)
 //	{
-//		name = SharedStringUtil.toLowerCase(name);
-//		if (!SharedStringUtil.isEmpty(name))
+//		name = SUS.toLowerCase(name);
+//		if (!SUS.isEmpty(name))
 //			nvgProperties.add(name, value);
 //	}
 	

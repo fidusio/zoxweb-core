@@ -70,7 +70,7 @@ public class ArgonPasswordHasher extends PasswordHasher {
 
 
 //        String argon2idCanID(String password) {
-//            return argon2idCanID(SharedStringUtil.getBytes(password));
+//            return argon2idCanID(SUS.getBytes(password));
 //        }
 //
 //        String argon2idCanID(byte[] password) {
@@ -128,7 +128,7 @@ public class ArgonPasswordHasher extends PasswordHasher {
 
 
         static byte[] argon2idHash(String password, int hashLength, int saltLength, int memory, int rounds, int parallelism) {
-            return argon2idHash(SharedStringUtil.getBytes(password), hashLength, saltLength, memory, rounds, parallelism);
+            return argon2idHash(SUS.getBytes(password), hashLength, saltLength, memory, rounds, parallelism);
         }
 
         static byte[] argon2idHash(byte[] password, int hashLength, int saltLength, int memory, int rounds, int parallelism) {
@@ -136,7 +136,7 @@ public class ArgonPasswordHasher extends PasswordHasher {
         }
 
         static byte[] argon2idHash(String password, int hashLength, byte[] salt, int memory, int rounds, int parallelism) {
-            return argon2idHash(SharedStringUtil.getBytes(password), hashLength, salt, memory, rounds, parallelism);
+            return argon2idHash(SUS.getBytes(password), hashLength, salt, memory, rounds, parallelism);
         }
 
         static byte[] argon2idHash(byte[] password, int hashLength, byte[] salt, int memory, int rounds, int parallelism) {
@@ -182,7 +182,7 @@ public class ArgonPasswordHasher extends PasswordHasher {
 
     @Override
     public CIPassword hash(String password) {
-        return hash(SharedStringUtil.getBytes(password));
+        return hash(SUS.getBytes(password));
     }
 
     @Override
@@ -223,7 +223,7 @@ public class ArgonPasswordHasher extends PasswordHasher {
 
     @Override
     public boolean validate(CIPassword ci, String password) {
-        return Argon2.validate(SharedStringUtil.getBytes(password), ci);
+        return Argon2.validate(SUS.getBytes(password), ci);
     }
 
     @Override

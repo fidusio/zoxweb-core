@@ -47,7 +47,7 @@ public class NetworkInterfaceDAO
             false,
             false,
             NetworkInterfaceDAO.class,
-            SharedUtil.toNVConfigList(DISPLAY_NAME, MAC_ADDRESS, INET_ADDRESSES),
+            SUS.toNVConfigList(DISPLAY_NAME, MAC_ADDRESS, INET_ADDRESSES),
             null,
             false,
             SetNameDAO.NVC_NAME_DAO

@@ -8,7 +8,7 @@ import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.security.KeyStoreInfo;
-import org.zoxweb.shared.util.SharedStringUtil;
+import org.zoxweb.shared.util.SUS;
 
 public class KeyStoreTest {
 
@@ -23,14 +23,14 @@ public class KeyStoreTest {
 
       SecretKey sk = (SecretKey) CryptoUtil
           .getKeyFromKeyStore(ks, ksid.getAlias(), ksid.getAliasPassword());
-      System.out.println(SharedStringUtil.bytesToHex(sk.getEncoded()));
+      System.out.println(SUS.bytesToHex(sk.getEncoded()));
 
       KeyStore ksPkcs12 = KeyStore.getInstance("pkcs12");
       ksPkcs12.load(null, ksid.getKeyStorePassword().toCharArray());
       ksPkcs12.setKeyEntry(ksid.getAlias(), sk, null, null);
 
       System.out.println(
-          SharedStringUtil.bytesToHex(ksPkcs12.getKey(ksid.getAlias(), null).getEncoded()));
+          SUS.bytesToHex(ksPkcs12.getKey(ksid.getAlias(), null).getEncoded()));
       if (args.length > index) {
         FileOutputStream fos = new FileOutputStream(args[index++]);
         ksPkcs12.store(fos, ksid.getKeyStorePassword().toCharArray());

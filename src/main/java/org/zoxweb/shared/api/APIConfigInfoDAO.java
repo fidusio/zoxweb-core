@@ -87,7 +87,7 @@ public class APIConfigInfoDAO
                     false,
                     false,
                     APIConfigInfoDAO.class,
-                    SharedUtil.extractNVConfigs(Params.values()),
+                    SUS.extractNVConfigs(Params.values()),
                     null,
                     false,
                     PropertyDAO.NVC_PROPERTY_DAO

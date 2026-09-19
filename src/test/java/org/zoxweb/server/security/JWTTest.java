@@ -376,8 +376,8 @@ public class JWTTest {
       md.update(BytesValue.INT.toBytes(i));
 
       MessageDigest md2 = (MessageDigest)md.clone();
-      System.out.println(SharedStringUtil.bytesToHex(md2.digest()));
-      System.out.println(SharedStringUtil.bytesToHex(HashUtil.getMessageDigest("sha-256").digest(BytesValue.INT.toBytes(i))));
+      System.out.println(SUS.bytesToHex(md2.digest()));
+      System.out.println(SUS.bytesToHex(HashUtil.getMessageDigest("sha-256").digest(BytesValue.INT.toBytes(i))));
       System.out.println(md == md2);
     }
   }

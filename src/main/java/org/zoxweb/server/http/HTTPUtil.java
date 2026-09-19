@@ -64,7 +64,7 @@ public class HTTPUtil {
 
     public static String toWebSocketAcceptValue(String secWebSocketKey) {
 
-        byte[] secWebSocketAcceptBytes = HashUtil.getMessageDigestSilent("SHA-1").digest(SharedStringUtil.getBytes(secWebSocketKey + HTTPWSProto.WEB_SOCKET_UUID));
+        byte[] secWebSocketAcceptBytes = HashUtil.getMessageDigestSilent("SHA-1").digest(SUS.getBytes(secWebSocketKey + HTTPWSProto.WEB_SOCKET_UUID));
 
         return SharedBase64.encodeAsString(SharedBase64.Base64Type.DEFAULT, secWebSocketAcceptBytes);
     }
@@ -487,7 +487,7 @@ public class HTTPUtil {
         ArrayList<GetNameValue<String>> ret = new ArrayList<GetNameValue<String>>();
 
         for (String param : allParams) {
-            NVPair nvp = SharedUtil.toNVPair(param);
+            NVPair nvp = SUS.toNVPair(param);
             if (nvp != null && !SUS.isEmpty(nvp.getName())) {
                 nvp.setValue(urlDecode(nvp.getValue()));
                 ret.add(nvp);
@@ -511,7 +511,7 @@ public class HTTPUtil {
         String[] allParams = query.split("&");
 
         for (String param : allParams) {
-            NVPair nvp = SharedUtil.toNVPair(param);
+            NVPair nvp = SUS.toNVPair(param);
             if (nvp != null && !SUS.isEmpty(nvp.getName())) {
                 nvp.setValue(urlDecode(nvp.getValue()));
                 av.add(nvp);
@@ -570,7 +570,7 @@ public class HTTPUtil {
         String[] paramNames = pathWithMetas.split("/");
         String[] paramValues = pathWithValues.split("/");
         for (int i = 0; i < paramNames.length; i++) {
-            List<CharSequence> ch = SharedStringUtil.parseGroup(paramNames[i], "{", "}", false);
+            List<CharSequence> ch = SUS.parseGroup(paramNames[i], "{", "}", false);
             if (ch.size() == 1) {
                 String name = ch.get(0).toString();
                 String value = i < paramValues.length ? paramValues[i] : null;
@@ -588,7 +588,7 @@ public class HTTPUtil {
         String[] paramNames = uri.split("/");
 
         for (int i = 0; i < paramNames.length; i++) {
-            List<CharSequence> ch = SharedStringUtil.parseGroup(paramNames[i], "{", "}", false);
+            List<CharSequence> ch = SUS.parseGroup(paramNames[i], "{", "}", false);
             if (ch.size() == 1) {
                 String name = ch.get(0).toString();
                 ret.add(name);
@@ -716,7 +716,7 @@ public class HTTPUtil {
     public static String formatFullURL(HTTPMessageConfig hcc)
             throws UnsupportedEncodingException {
         String encodedContentParams = HTTPUtil.formatParameters(hcc.getParameters().asArrayValuesString(), null, hcc.isContentURLEncoded(), hcc.getHTTPParameterFormatter());
-        String urlURI = SharedStringUtil.concat(hcc.getURL(), hcc.getURI(), "/");
+        String urlURI = SUS.concat(hcc.getURL(), hcc.getURI(), "/");
 
         if (encodedContentParams.length() > 0) {
             urlURI += "?" + encodedContentParams;
@@ -738,7 +738,7 @@ public class HTTPUtil {
             List<String> paramNames = parseURIParameters(uri);
             for (String paramName : paramNames) {
                 Object value = func.apply(paramName, parameters);//parameters.getValue(paramName);
-                uri = SharedStringUtil.embedText(uri, "{" + paramName + "}",
+                uri = SUS.embedText(uri, "{" + paramName + "}",
                         value != null ? URLEncoder.encode("" + value, Const.UTF_8) : "");
             }
             if (override && uri.endsWith("/") && uri.length() > 1)
@@ -758,7 +758,7 @@ public class HTTPUtil {
         if (list != null && params != null) {
 
             for (String param : params) {
-                GetNameValue<String> gnvs = SharedUtil.lookupNV(list, param);
+                GetNameValue<String> gnvs = SUS.lookupNV(list, param);
 
                 if (gnvs != null) {
                     list.remove(gnvs);
@@ -770,7 +770,7 @@ public class HTTPUtil {
 
 
     public static String extractRequestCookie(HTTPResponseData rd) {
-        List<String> cookies = SharedUtil.lookupMap(rd.getHeaders(), HTTPHeader.SET_COOKIE.getName(), true);
+        List<String> cookies = SUS.lookupMap(rd.getHeaders(), HTTPHeader.SET_COOKIE.getName(), true);
 
         if (cookies != null && cookies.size() > 0) {
             StringBuilder sb = new StringBuilder();
@@ -792,7 +792,7 @@ public class HTTPUtil {
     }
 
     public static GetNameValue<String> extractHeaderCookie(HTTPResponse rd) {
-        List<String> cookies = SharedUtil.lookupMap(rd.getHeaders(), HTTPHeader.SET_COOKIE.getName(), true);
+        List<String> cookies = SUS.lookupMap(rd.getHeaders(), HTTPHeader.SET_COOKIE.getName(), true);
 
         if (cookies != null && cookies.size() > 0) {
             StringBuilder sb = new StringBuilder();
@@ -816,7 +816,7 @@ public class HTTPUtil {
     }
 
     public static NVPair extractCookie(Map<String, List<String>> rd) {
-        List<String> cookies = SharedUtil.lookupMap(rd, HTTPHeader.SET_COOKIE.getName(), true);
+        List<String> cookies = SUS.lookupMap(rd, HTTPHeader.SET_COOKIE.getName(), true);
 
         if (cookies != null && cookies.size() > 0) {
             StringBuilder sb = new StringBuilder();
@@ -842,7 +842,7 @@ public class HTTPUtil {
 
     public static List<HttpCookie> extractCookies(HTTPResponse rd) {
         List<HttpCookie> ret = new ArrayList<HttpCookie>();
-        List<String> cookies = SharedUtil.lookupMap(rd.getHeaders(), HTTPHeader.SET_COOKIE.getName(), true);
+        List<String> cookies = SUS.lookupMap(rd.getHeaders(), HTTPHeader.SET_COOKIE.getName(), true);
 
         if (cookies != null && cookies.size() > 0) {
             for (String cookie : cookies) {
@@ -857,7 +857,7 @@ public class HTTPUtil {
 
     public static HttpCookie lookupCookieByName(HTTPResponseData rd, String name) {
         if (name != null) {
-            List<String> cookies = SharedUtil.lookupMap(rd.getHeaders(), HTTPHeader.SET_COOKIE.getName(), true);
+            List<String> cookies = SUS.lookupMap(rd.getHeaders(), HTTPHeader.SET_COOKIE.getName(), true);
 
             if (cookies != null && cookies.size() > 0) {
                 for (String cookie : cookies) {
@@ -1017,7 +1017,7 @@ public class HTTPUtil {
                         hmci.setMethod(rl.getHTTPMethod());
                         hmci.setURI(rl.getURI());
                     } else {
-                        hmci.getHeaders().add(SharedUtil.toNVPair(oneLine, ":", true));
+                        hmci.getHeaders().add(SUS.toNVPair(oneLine, ":", true));
                     }
                 }
 

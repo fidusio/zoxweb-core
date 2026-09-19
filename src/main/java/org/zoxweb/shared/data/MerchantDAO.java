@@ -70,7 +70,7 @@ public class MerchantDAO
             false,
             false,
             MerchantDAO.class,
-            SharedUtil.extractNVConfigs(Param.values()),
+            SUS.extractNVConfigs(Param.values()),
             null,
             true,
             SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO

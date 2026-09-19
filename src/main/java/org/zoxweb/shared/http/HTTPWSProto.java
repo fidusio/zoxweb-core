@@ -18,7 +18,7 @@ package org.zoxweb.shared.http;
 import org.zoxweb.shared.protocol.MessageStatus;
 import org.zoxweb.shared.io.BytesArray;
 import org.zoxweb.shared.io.DataBufferController;
-import org.zoxweb.shared.util.SharedStringUtil;
+import org.zoxweb.shared.util.SUS;
 
 /**
  * WebSocket protocol utilities and constants as defined in RFC 6455.
@@ -115,7 +115,7 @@ public class HTTPWSProto
      */
     public static BytesArray formatFrame(DataBufferController dataBuffer, boolean fin, OpCode opcode, byte[] maskingKey, String data)
     {
-        return formatFrame(dataBuffer, fin, opcode, maskingKey, data != null ? SharedStringUtil.toBytes(data) : null);
+        return formatFrame(dataBuffer, fin, opcode, maskingKey, data != null ? SUS.toBytes(data) : null);
     }
 
     /**

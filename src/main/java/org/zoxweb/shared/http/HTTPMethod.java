@@ -16,7 +16,7 @@
 package org.zoxweb.shared.http;
 
 import org.zoxweb.shared.util.GetNameValue;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.SUS;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -88,7 +88,7 @@ implements GetNameValue<String>
 	 */
 	public static HTTPMethod lookup(String lookFor)
 	{
-		return SharedUtil.lookupEnum(lookFor, values());
+		return SUS.lookupEnum(lookFor, values());
 	}
 
 	/**

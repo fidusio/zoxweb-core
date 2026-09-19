@@ -35,7 +35,7 @@ public class PropertyDAO
             false,
             false,
             PropertyDAO.class,
-            SharedUtil.extractNVConfigs(Param.values()),
+            SUS.extractNVConfigs(Param.values()),
             null,
             false,
             TimeStampDAO.NVC_TIME_STAMP_DAO);

@@ -113,7 +113,7 @@ public class NVPairGetNameMap
 
 
     public List<GetNameValue<String>> search(String... criteria) {
-        return SharedUtil.search(values(), criteria[0]);
+        return SUS.search(values(), criteria[0]);
     }
 
     /**

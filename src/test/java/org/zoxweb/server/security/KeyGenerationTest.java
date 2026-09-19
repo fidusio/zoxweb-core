@@ -11,7 +11,6 @@ import org.zoxweb.shared.util.Const.TimeInMillis;
 import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedBase64;
 import org.zoxweb.shared.util.SharedBase64.Base64Type;
-import org.zoxweb.shared.util.SharedStringUtil;
 
 import java.security.Key;
 import java.security.KeyPair;
@@ -24,7 +23,7 @@ public class KeyGenerationTest {
 
   public static void main(String... args) {
 
-    //byte[] message = SharedStringUtil.getBytes("JavaConsigliere Batata, JavaConsigliere Batata, JavaConsigliere Batata, JavaConsigliere Batata, JavaConsigliere Batata, JavaConsigliere Batata, JavaConsigliere Batata, JavaConsigliere Batata, JavaConsigliere Batata.");
+    //byte[] message = SUS.getBytes("JavaConsigliere Batata, JavaConsigliere Batata, JavaConsigliere Batata, JavaConsigliere Batata, JavaConsigliere Batata, JavaConsigliere Batata, JavaConsigliere Batata, JavaConsigliere Batata, JavaConsigliere Batata.");
 
     try {
       for (int i = 0; i < 5; i++) {
@@ -49,27 +48,27 @@ public class KeyGenerationTest {
           System.out.println(CryptoUtil.toString(bobKey.getPrivate()));
           byte[] signature = CryptoUtil
               .sign(CryptoConst.SignatureAlgo.SHA256_RSA, bobKey.getPrivate(),
-                  SharedStringUtil.getBytes(json));
+                  SUS.getBytes(json));
           System.out.println("Signature length:" + signature.length + " : " + CryptoUtil
               .verify(CryptoConst.SignatureAlgo.SHA256_RSA, bobKey.getPublic(),
-                  SharedStringUtil.getBytes(json), signature) + " : " + SharedBase64
+                  SUS.getBytes(json), signature) + " : " + SharedBase64
               .encodeAsString(Base64Type.URL, signature));
           byte[] encrypted = CryptoUtil
-              .encrypt(bobKey.getPublic(), SharedStringUtil.getBytes(json));
+              .encrypt(bobKey.getPublic(), SUS.getBytes(json));
 
           byte[] decrypted = CryptoUtil.decrypt(bobKey.getPrivate(), encrypted);
           System.out.println("Signature length:" + signature.length + " : " + SharedBase64
               .encodeAsString(Base64Type.URL, signature));
-          System.out.println("Decrypted Message:" + SharedStringUtil.toString(decrypted));
+          System.out.println("Decrypted Message:" + SUS.toString(decrypted));
           System.out.println("Encrypted by bob based64 [" + encrypted.length + "]:" + SharedBase64
               .encodeAsString(Base64Type.URL, encrypted));
 
           Key aesKey = CryptoUtil.generateKey(CryptoConst.CryptoAlgo.AES, 256);
           System.out.println(CryptoUtil.toString(aesKey));
 
-          encrypted = CryptoUtil.encrypt(aliceKey.getPublic(), SharedStringUtil.getBytes(json));
+          encrypted = CryptoUtil.encrypt(aliceKey.getPublic(), SUS.getBytes(json));
           decrypted = CryptoUtil.decrypt(aliceKey.getPrivate(), encrypted);
-          System.out.println("Decrypted Message:" + SharedStringUtil.toString(decrypted));
+          System.out.println("Decrypted Message:" + SUS.toString(decrypted));
           System.out.println("Encrypted by alice based64 [" + encrypted.length + "]:" + SharedBase64
               .encodeAsString(Base64Type.URL, encrypted));
           System.out.println(j);
@@ -91,7 +90,7 @@ public class KeyGenerationTest {
       ts = System.currentTimeMillis() - ts;
       for (Key k : keys) {
         System.out.println(SUS.toCanonicalID(',', k.getAlgorithm(), k.getEncoded().length,
-            SharedStringUtil.bytesToHex(k.getEncoded())));
+            SUS.bytesToHex(k.getEncoded())));
       }
       System.out.println("it took " + TimeInMillis.toString(ts));
     } catch (Exception e) {
@@ -111,10 +110,10 @@ public class KeyGenerationTest {
       EncapsulatedKey ek = CryptoUtil.createEncryptedKey(wrappingKey);
       String json = GSONUtil.toJSON(ek, false, false, false, Base64Type.URL);
       System.out.println(json);
-      System.out.println(json.length() + ":" + SharedStringUtil.getBytes(json).length);
+      System.out.println(json.length() + ":" + SUS.getBytes(json).length);
       ek = GSONUtil.fromJSON(json, EncapsulatedKey.class, Base64Type.URL);
       byte[] data = CryptoUtil.unwrapKey(ek, wrappingKey);
-      System.out.println(SharedStringUtil.bytesToHex(data));
+      System.out.println(SUS.bytesToHex(data));
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -175,7 +174,7 @@ public class KeyGenerationTest {
                   "V6L11BWkpzGXSW4Hv43qa+GSYOD2QU68Mb59oSk2OB+BtOLpJofmbGEGgvmwyCI9\n" +
                   "MwIDAQAB"));
 
-//		  byte[] pemPrivKey = Base64.getDecoder().decode(SharedStringUtil.filterString("MIIEogIBAAKCAQEAnzyis1ZjfNB0bBgKFMSvvkTtwlvBsaJq7S5wA+kzeVOVpVWw\n" + 
+//		  byte[] pemPrivKey = Base64.getDecoder().decode(SUS.filterString("MIIEogIBAAKCAQEAnzyis1ZjfNB0bBgKFMSvvkTtwlvBsaJq7S5wA+kzeVOVpVWw\n" + 
 //		      "kWdVha4s38XM/pa/yr47av7+z3VTmvDRyAHcaT92whREFpLv9cj5lTeJSibyr/Mr\n" + 
 //		      "m/YtjCZVWgaOYIhwrXwKLqPr/11inWsAkfIytvHWTxZYEcXLgAXFuUuaS3uF9gEi\n" + 
 //		      "NQwzGTU1v0FqkqTBr4B8nW3HCN47XUu0t8Y0e+lf4s4OxQawWD79J9/5d3Ry0vbV\n" + 
@@ -206,7 +205,7 @@ public class KeyGenerationTest {
       byte[] sig = SharedBase64.decode(Base64Type.URL, jwt.getHash());
 
       System.out.println("Singnature status: " + CryptoUtil
-          .verify(SignatureAlgo.SHA256_RSA, jwtPubKey, SharedStringUtil.getBytes(tok), sig));
+          .verify(SignatureAlgo.SHA256_RSA, jwtPubKey, SUS.getBytes(tok), sig));
 
       //PrivateKey jwtPrivKey = readPrivateKey(pemPrivKey);
 //		  PrivateKey jwtPrivKey = readPrivateKey(SharedBase64.decode(Base64Type.DEFAULT, "MIIEogIBAAKCAQEAnzyis1ZjfNB0bBgKFMSvvkTtwlvBsaJq7S5wA+kzeVOVpVWw\n" + 

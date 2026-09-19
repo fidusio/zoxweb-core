@@ -26,7 +26,7 @@ import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
 import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.NVConfigManager;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.NVConfigEntity.ArrayType;
 
 @SuppressWarnings("serial")
@@ -78,7 +78,7 @@ public class DetailedCreditCardDAO
 																								false, 
 																								false, 
 																								DetailedCreditCardDAO.class, 
-																								SharedUtil.extractNVConfigs(Param.values()),
+																								SUS.extractNVConfigs(Param.values()),
 																								null, 
 																								false, 
 																								CanonicalIDDAO.NVC_CANONICAL_ID_DAO

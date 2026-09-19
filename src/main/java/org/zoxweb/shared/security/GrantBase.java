@@ -3,7 +3,7 @@ package org.zoxweb.shared.security;
 import org.zoxweb.shared.data.DataConst;
 import org.zoxweb.shared.util.NVConfigEntity;
 import org.zoxweb.shared.util.NVConfigEntityPortable;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.SUS;
 
 /**
  * This class extends AuthzInfo as an abstract class, but
@@ -20,7 +20,7 @@ public abstract class GrantBase extends AuthzInfo {
             false,
             false,
             GrantBase.class,
-            SharedUtil.extractNVConfigs(DataConst.DataParam.NAME),
+            SUS.extractNVConfigs(DataConst.DataParam.NAME),
             null,
             false,
             AuthzInfo.NVC_AUTHZ_INFO

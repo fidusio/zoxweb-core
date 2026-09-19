@@ -129,7 +129,7 @@ public class NVConfigMeta {
         MetaAction ret[] = new MetaAction[actions.size()];
         int index = 0;
         for (String str : actions) {
-            ret[index++] = SharedUtil.lookupEnum(str, MetaAction.values());
+            ret[index++] = SUS.lookupEnum(str, MetaAction.values());
         }
 
         return ret;

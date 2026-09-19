@@ -100,7 +100,7 @@ public class SMTPProvider
                 MimeMessage msg = new MimeMessage(session);
 
                 // Set From
-                String from = SharedUtil.lookupValue(notificationMessage.getExtraAttribues().get(SMTPMessageParam.SENDER_ID_NAME.getValue()));
+                String from = SUS.lookupValue(notificationMessage.getExtraAttribues().get(SMTPMessageParam.SENDER_ID_NAME.getValue()));
 
                 if (from != null) {
                     from = from + " <" + notificationMessage.getSenderID() + ">";
@@ -125,7 +125,7 @@ public class SMTPProvider
                 //msg.setHeader("Content-Type", "text/plain; charset=UTF-8");
                 // Set Cc
                 @SuppressWarnings("unchecked")
-                List<NVPair> ccList = (List<NVPair>) SharedUtil.lookupArrayValues(notificationMessage.getExtraAttribues(), SMTPMessageParam.CC.getValue());
+                List<NVPair> ccList = (List<NVPair>) SUS.lookupArrayValues(notificationMessage.getExtraAttribues(), SMTPMessageParam.CC.getValue());
 
                 if (ccList != null) {
                     for (NVPair nvp : ccList) {
@@ -135,7 +135,7 @@ public class SMTPProvider
 
                 //	Set Bcc
                 @SuppressWarnings("unchecked")
-                List<NVPair> bccList = (List<NVPair>) SharedUtil.lookupArrayValues(notificationMessage.getExtraAttribues(), SMTPMessageParam.BCC.getValue());
+                List<NVPair> bccList = (List<NVPair>) SUS.lookupArrayValues(notificationMessage.getExtraAttribues(), SMTPMessageParam.BCC.getValue());
 
                 if (bccList != null) {
                     for (NVPair nvp : bccList) {
@@ -283,16 +283,16 @@ public class SMTPProvider
 //	{
 //		APINotificationMessage notificationMessage = (APINotificationMessage) message;
 //		
-//		final String USER_NAME = SharedUtil.lookupValue(configInfo.getConfigParameters().get(SMTPCreator.Param.USERNAME.getName()));
-//		final String PASSWORD  = SharedUtil.lookupValue(configInfo.getConfigParameters().get(SMTPCreator.Param.PASSWORD.getName()));
+//		final String USER_NAME = SUS.lookupValue(configInfo.getConfigParameters().get(SMTPCreator.Param.USERNAME.getName()));
+//		final String PASSWORD  = SUS.lookupValue(configInfo.getConfigParameters().get(SMTPCreator.Param.PASSWORD.getName()));
 //		
 //		createProperties(
 //				true,
 //				true,
-//				SharedUtil.lookupValue(configInfo.getConfigParameters().get(SMTPCreator.Param.HOST.getName())),
-//				SharedUtil.lookupValue(configInfo.getConfigParameters().get(SMTPCreator.Param.PORT.getName())));
+//				SUS.lookupValue(configInfo.getConfigParameters().get(SMTPCreator.Param.HOST.getName())),
+//				SUS.lookupValue(configInfo.getConfigParameters().get(SMTPCreator.Param.PORT.getName())));
 //		
-//		 Session session = createSession(createProperties(true, true, SharedUtil.lookupValue(configInfo.getConfigParameters().get(SMTPCreator.Param.HOST.getName())), SharedUtil.lookupValue(configInfo.getConfigParameters().get(SMTPCreator.Param.PORT.getName()))),
+//		 Session session = createSession(createProperties(true, true, SUS.lookupValue(configInfo.getConfigParameters().get(SMTPCreator.Param.HOST.getName())), SUS.lookupValue(configInfo.getConfigParameters().get(SMTPCreator.Param.PORT.getName()))),
 //				                         USER_NAME, PASSWORD);
 //
 //	      try 
@@ -301,7 +301,7 @@ public class SMTPProvider
 //	         MimeMessage msg = new MimeMessage(session);
 //	         
 //	         // Set From
-//	         String from = SharedUtil.lookupValue(notificationMessage.getExtraAttribues(), SMTPMessageParam.SENDER_ID_NAME);
+//	         String from = SUS.lookupValue(notificationMessage.getExtraAttribues(), SMTPMessageParam.SENDER_ID_NAME);
 //	         
 //	         if (from != null)
 //	         {
@@ -331,7 +331,7 @@ public class SMTPProvider
 //	         //msg.setHeader("Content-Type", "text/plain; charset=UTF-8");
 //	         // Set Cc
 //	         @SuppressWarnings("unchecked")
-//	         List<NVPair> ccList = (List<NVPair>) SharedUtil.lookupAllNV(notificationMessage.getExtraAttribues(), SMTPMessageParam.CC.getValue());
+//	         List<NVPair> ccList = (List<NVPair>) SUS.lookupAllNV(notificationMessage.getExtraAttribues(), SMTPMessageParam.CC.getValue());
 //	         
 //	         if (ccList != null)
 //	         {
@@ -343,7 +343,7 @@ public class SMTPProvider
 //	         
 //	         //	Set Bcc
 //	         @SuppressWarnings("unchecked")
-//	         List<NVPair> bccList = (List<NVPair>) SharedUtil.lookupAllNV(notificationMessage.getExtraAttribues(), SMTPMessageParam.BCC.getValue());
+//	         List<NVPair> bccList = (List<NVPair>) SUS.lookupAllNV(notificationMessage.getExtraAttribues(), SMTPMessageParam.BCC.getValue());
 //	         
 //	         if (bccList != null)
 //	         {

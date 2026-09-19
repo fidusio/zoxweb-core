@@ -1,7 +1,7 @@
 package org.zoxweb.shared.crypto;
 
 import org.zoxweb.shared.util.CanonicalID;
-import org.zoxweb.shared.util.SharedStringUtil;
+import org.zoxweb.shared.util.SUS;
 
 public class BCryptHash
         implements CanonicalID {
@@ -16,7 +16,7 @@ public class BCryptHash
     public BCryptHash(String fullHash) {
         bCryptHash = fullHash;
 
-        String[] tokens = SharedStringUtil.parseString(fullHash, "\\$", true);
+        String[] tokens = SUS.parseString(fullHash, "\\$", true);
         if (CryptoConst.HashType.lookup(tokens[0]) != CryptoConst.HashType.BCRYPT)
             throw new IllegalArgumentException("Invalid bcrypt algorithm " + tokens[0]);
 

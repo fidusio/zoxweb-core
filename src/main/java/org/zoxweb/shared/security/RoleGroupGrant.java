@@ -31,7 +31,7 @@ public class RoleGroupGrant extends GrantBase {
             false,
             false,
             RoleGroupGrant.class,
-            SharedUtil.extractNVConfigs(Param.values()),
+            SUS.extractNVConfigs(Param.values()),
             null,
             false,
             GrantBase.NVC_GRANT_BASE

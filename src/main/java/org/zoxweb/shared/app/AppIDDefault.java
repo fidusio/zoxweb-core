@@ -31,7 +31,7 @@ public class AppIDDefault
             true, false,
             false, false,
             AppIDDefault.class,
-            SharedUtil.extractNVConfigs(Param.values()),
+            SUS.extractNVConfigs(Param.values()),
             null,
             false,
             AppIDResource.NVC_APP_ID_RESOURCE

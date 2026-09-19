@@ -23,7 +23,7 @@ import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.NVGenericMap;
 import org.zoxweb.shared.util.NVStringList;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.SUS;
 
 /**
  * Data access object for network connection configuration.
@@ -66,7 +66,7 @@ public class ConnectionConfig
     }
 
     /** NVConfigEntity definition for ConnectionConfig */
-    public final static NVConfigEntity NVC_CONNECTION_CONFIG_DAO = new NVConfigEntityPortable("connection_config", null, "ConnectionConfig", false, true, false, false, ConnectionConfig.class, SharedUtil
+    public final static NVConfigEntity NVC_CONNECTION_CONFIG_DAO = new NVConfigEntityPortable("connection_config", null, "ConnectionConfig", false, true, false, false, ConnectionConfig.class, SUS
             .extractNVConfigs(Param.values()), null, false, SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO);
 
     /**

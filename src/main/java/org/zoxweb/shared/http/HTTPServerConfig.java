@@ -67,7 +67,7 @@ implements AppConfig
       false,
       false,
       HTTPServerConfig.class,
-      SharedUtil.extractNVConfigs(Param.values()),
+      SUS.extractNVConfigs(Param.values()),
       null,
       false,
       PropertyDAO.NVC_PROPERTY_DAO);

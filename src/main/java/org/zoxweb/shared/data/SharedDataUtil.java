@@ -129,7 +129,7 @@ public class SharedDataUtil
 	{
 		SUS.checkIfNulls("Null parameters", entry, args);
 		List<NVEntity> matches = new ArrayList<NVEntity>();
-		//if (!SharedStringUtil.isEmpty(match))
+		//if (!SUS.isEmpty(match))
 		{
 			MatchPatternFilter mpf = MatchPatternFilter.createMatchFilter(args);
 			//Map<NVEntity, String> matchMap = 

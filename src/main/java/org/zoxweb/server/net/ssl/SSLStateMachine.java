@@ -4,7 +4,6 @@ import org.zoxweb.server.fsm.*;
 import org.zoxweb.server.net.BaseSessionCallback;
 import org.zoxweb.shared.util.GetName;
 import org.zoxweb.shared.util.SUS;
-import org.zoxweb.shared.util.SharedStringUtil;
 
 import javax.net.ssl.SSLEngineResult;
 import java.io.IOException;
@@ -100,7 +99,7 @@ public class SSLStateMachine extends StateMachine<SSLConfigInt>
     }
 
     public static <T> T lookupType(String type) {
-        type = SharedStringUtil.toUpperCase(type);
+        type = SUS.toUpperCase(type);
         switch (type) {
             case "NEED_WRAP":
                 return (T) SSLHandshakingState.rcNeedWrap;

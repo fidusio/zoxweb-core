@@ -32,13 +32,13 @@ public class StringFormatTest {
 
 			for (String values[] : params) {
 				try {
-					System.out.println(SharedStringUtil.formatStringValues("; ", values));
+					System.out.println(SUS.formatStringValues("; ", values));
 				} catch(Exception e) {
 					e.printStackTrace();
 				}
 			}
 			
-			System.out.println(SharedStringUtil.formatStringValues("; ", HTTPMediaType.APPLICATION_JSON, HTTPAttribute.CHARSET_UTF8));
+			System.out.println(SUS.formatStringValues("; ", HTTPMediaType.APPLICATION_JSON, HTTPAttribute.CHARSET_UTF8));
 
 			String toBeParsed[] = {
 					"User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; rv:44.0) Gecko/20100101 Firefox/44.0",
@@ -49,11 +49,11 @@ public class StringFormatTest {
 				};
 			
 			for (String str : toBeParsed) {
-				System.out.println(SharedUtil.toNVPair(str, ":", true));
-				System.out.println(SharedUtil.toNVPair(str, ":", false));
+				System.out.println(SUS.toNVPair(str, ":", true));
+				System.out.println(SUS.toNVPair(str, ":", false));
 			}
 			String roles = "role-1, role-2, role-3,   role-4       ";
-			System.out.println(Arrays.toString(SharedStringUtil.parseString(roles, ",",  " ")));
+			System.out.println(Arrays.toString(SUS.parseString(roles, ",",  " ")));
 		} catch(Exception e) {
 			e.printStackTrace();
 		}

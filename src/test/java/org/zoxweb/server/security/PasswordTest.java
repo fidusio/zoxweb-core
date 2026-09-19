@@ -7,7 +7,7 @@ import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.crypto.CryptoConst;
 import org.zoxweb.shared.crypto.CIPassword;
 import org.zoxweb.shared.crypto.BCryptHash;
-import org.zoxweb.shared.util.SharedStringUtil;
+import org.zoxweb.shared.util.SUS;
 
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
@@ -40,7 +40,7 @@ public class PasswordTest {
 
         String salt = BCrypt.gensalt(10);
 
-        System.out.println(Arrays.toString(SharedStringUtil.parseString(salt, "\\$", true)));
+        System.out.println(Arrays.toString(SUS.parseString(salt, "\\$", true)));
         System.out.println("Salt:" + salt + " " + salt.length()+" "  + salt.split("\\$")[3].length());
 
         BCryptHash bCrypted = HashUtil.toBCryptHash(10, "password");//BCrypt.hashpw("password", salt);

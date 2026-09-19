@@ -26,15 +26,15 @@ public class ParseGroupTest
 	public void tokes() {
 		String str = "Dear $$personal_title$$ $$first_name$$ $$last_name$$, {{bracket,{sub-bracket}}}";
 
-		List<CharSequence> listOfCharSeq = SharedStringUtil.parseGroup(str, "$$", "$$", false);
+		List<CharSequence> listOfCharSeq = SUS.parseGroup(str, "$$", "$$", false);
 		
 		System.out.println(listOfCharSeq);
 		
-		listOfCharSeq = SharedStringUtil.parseGroup(str, "{", "}", false);
+		listOfCharSeq = SUS.parseGroup(str, "{", "}", false);
 		
 		System.out.println(listOfCharSeq);
 
-		listOfCharSeq = SharedStringUtil.parseGroup(str, "$", "$", false);
+		listOfCharSeq = SUS.parseGroup(str, "$", "$", false);
 		
 		System.out.println(listOfCharSeq);
 	}

@@ -60,7 +60,7 @@ public class KeyStoreInfo
             false,
             false,
             KeyStoreInfo.class,
-            SharedUtil.extractNVConfigs(Param.values()),
+            SUS.extractNVConfigs(Param.values()),
             null,
             false,
             SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO
@@ -99,7 +99,7 @@ public class KeyStoreInfo
 
     public byte[] getKeyStorePasswordAsBytes()
     {
-        return SharedStringUtil.hexToBytes(getKeyStorePassword());
+        return SUS.hexToBytes(getKeyStorePassword());
     }
 
     public void setKeyStorePassword(String keyStorePassword)
@@ -109,7 +109,7 @@ public class KeyStoreInfo
 
     public void setKeyStorePassword(byte[] keyStorePassword)
     {
-        setValue(Param.KEY_STORE_PASSWORD, SharedStringUtil.bytesToHex(keyStorePassword));
+        setValue(Param.KEY_STORE_PASSWORD, SUS.bytesToHex(keyStorePassword));
     }
 
     public String getAlias()
@@ -129,7 +129,7 @@ public class KeyStoreInfo
 
     public byte[] getAliasPasswordAsBytes()
     {
-        return SharedStringUtil.hexToBytes(getAliasPassword());
+        return SUS.hexToBytes(getAliasPassword());
     }
 
     public void setAliasPassword(String aliasPassword)
@@ -139,7 +139,7 @@ public class KeyStoreInfo
 
     public void setAliasPassword(byte[] aliasPassword)
     {
-        setValue(Param.ALIAS_PASSWORD, SharedStringUtil.bytesToHex(aliasPassword));
+        setValue(Param.ALIAS_PASSWORD, SUS.bytesToHex(aliasPassword));
     }
 
     public String getTrustStore()
@@ -163,12 +163,12 @@ public class KeyStoreInfo
 
     public void setTrustStorePassword(byte[] aliasPassword)
     {
-        setValue(Param.TRUST_STORE_PASSWORD, SharedStringUtil.bytesToHex(aliasPassword));
+        setValue(Param.TRUST_STORE_PASSWORD, SUS.bytesToHex(aliasPassword));
     }
 
     public byte[] getTrustStorePasswordAsBytes()
     {
-        return SharedStringUtil.hexToBytes(getTrustStorePassword());
+        return SUS.hexToBytes(getTrustStorePassword());
     }
 
     /**

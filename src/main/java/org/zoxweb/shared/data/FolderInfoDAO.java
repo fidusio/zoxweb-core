@@ -55,11 +55,11 @@ public class FolderInfoDAO
             false,
             false,
             FolderInfoDAO.class,
-            SharedUtil.extractNVConfigs(Param.values()),
+            SUS.extractNVConfigs(Param.values()),
             null,
             false,
             DocumentInfoDAO.NVC_DOCUMENT_INFO_DAO
-    );//,SharedUtil.extractNVConfigs( new Params[]{Params.REFERENCE_ID, Params.NAME, Params.LENGTH}));
+    );//,SUS.extractNVConfigs( new Params[]{Params.REFERENCE_ID, Params.NAME, Params.LENGTH}));
 
     /**
      * The default constructor.

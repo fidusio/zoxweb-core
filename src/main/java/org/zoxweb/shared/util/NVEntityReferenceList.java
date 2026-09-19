@@ -60,7 +60,7 @@ public class NVEntityReferenceList
      * @return matching nventity
      */
     public NVEntity get(String name) {
-        //NVEntity ret = SharedUtil.lookup((List<? extends GetName>) value, name);
+        //NVEntity ret = SUS.lookup((List<? extends GetName>) value, name);
         if (!SUS.isEmpty(name)) {
             for (NVEntity nve : values()) {
                 if (name.equalsIgnoreCase(nve.getName()))
@@ -165,7 +165,7 @@ public class NVEntityReferenceList
 
     @Override
     public List<NVEntity> search(String... criteria) {
-        return SharedUtil.search(value, criteria);
+        return SUS.search(value, criteria);
     }
 
     /**

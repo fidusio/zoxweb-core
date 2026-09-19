@@ -55,7 +55,7 @@ public class BillingItemsContainerDAO
             false,
             false,
             BillingItemsContainerDAO.class,
-            SharedUtil.extractNVConfigs(Params.values()),
+            SUS.extractNVConfigs(Params.values()),
             null,
             false,
             CanonicalIDDAO.NVC_CANONICAL_ID_DAO

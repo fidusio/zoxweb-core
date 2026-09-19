@@ -21,7 +21,7 @@ import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
 import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.NVConfigManager;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.SUS;
 
 /**
  * The SecureDocumentDAO class defines a secure note document whose content
@@ -65,7 +65,7 @@ public class SecureDocumentDAO
             false,
             false,
             SecureDocumentDAO.class,
-            SharedUtil.extractNVConfigs(Param.values()),
+            SUS.extractNVConfigs(Param.values()),
             null,
             false,
             SimpleDocumentDAO.NVC_SIMPLE_DOCUMENT_DAO

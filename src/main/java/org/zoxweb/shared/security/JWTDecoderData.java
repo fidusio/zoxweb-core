@@ -1,7 +1,6 @@
 package org.zoxweb.shared.security;
 
 import org.zoxweb.shared.util.SUS;
-import org.zoxweb.shared.util.SharedUtil;
 
 public final class JWTDecoderData
 {

@@ -44,7 +44,7 @@ public class ResourceMap extends GrantBase {
             false,
             false,
             ResourceMap.class,
-            SharedUtil.extractNVConfigs(Param.values()),
+            SUS.extractNVConfigs(Param.values()),
             null,
             false,
             GrantBase.NVC_GRANT_BASE

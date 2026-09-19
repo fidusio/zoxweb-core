@@ -20,7 +20,7 @@ import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
 import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.NVConfigManager;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.SUS;
 
 /**
  * The RuntimeResultDAO class captures the result of an executed process:
@@ -59,7 +59,7 @@ public class RuntimeResultDAO
             false,
             false,
             RuntimeResultDAO.class,
-            SharedUtil.extractNVConfigs(ResultAttribute.values()),
+            SUS.extractNVConfigs(ResultAttribute.values()),
             null,
             false,
             SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO

@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.zoxweb.server.net.NIOSocket;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.shared.io.SharedIOUtil;
-import org.zoxweb.shared.util.SharedStringUtil;
+import org.zoxweb.shared.util.SUS;
 
 import java.io.InputStream;
 import java.net.InetAddress;
@@ -56,13 +56,13 @@ public class SMTPPostureLoopbackTest {
             nioSocket.addClientSocket(validator);
             accepted = server.accept();
 
-            accepted.getOutputStream().write(SharedStringUtil.getBytes("220 smtp.local ready\r\n"));
+            accepted.getOutputStream().write(SUS.getBytes("220 smtp.local ready\r\n"));
             accepted.getOutputStream().flush();
 
             String ehlo = readLine(accepted.getInputStream());
             assertTrue(ehlo.startsWith("EHLO "), "definition identifies itself: " + ehlo);
 
-            accepted.getOutputStream().write(SharedStringUtil.getBytes(ehloReply));
+            accepted.getOutputStream().write(SUS.getBytes(ehloReply));
             accepted.getOutputStream().flush();
 
             assertTrue(validator.waitForClose(TimeUnit.SECONDS.toMillis(WAIT_SEC)),

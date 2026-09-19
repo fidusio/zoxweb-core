@@ -17,7 +17,7 @@ package org.zoxweb.server.security;
 
 import org.junit.jupiter.api.Test;
 import org.zoxweb.shared.util.SharedBase64;
-import org.zoxweb.shared.util.SharedStringUtil;
+import org.zoxweb.shared.util.SUS;
 
 public class CryptoTest {
     @Test
@@ -31,7 +31,7 @@ public class CryptoTest {
             SecUtil.defaultSecureRandom().nextBytes(randomBytes);
             ts = System.nanoTime() - ts;
             System.out.println(
-                    ts + "\tnanos\t" + new String(SharedBase64.encode(randomBytes)) + ":" + SharedStringUtil
+                    ts + "\tnanos\t" + new String(SharedBase64.encode(randomBytes)) + ":" + SUS
                             .bytesToHex(randomBytes));
         }
     }

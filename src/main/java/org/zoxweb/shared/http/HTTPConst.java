@@ -297,7 +297,7 @@ public final class HTTPConst {
      * @return the formatted header as bytes
      */
     public static byte[] toBytes(GetNameValue<?> gnv) {
-        return SharedStringUtil.getBytes(gnv.getName() + ": " + gnv.getValue());
+        return SUS.getBytes(gnv.getName() + ": " + gnv.getValue());
     }
 
 

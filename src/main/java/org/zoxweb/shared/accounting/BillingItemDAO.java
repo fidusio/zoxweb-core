@@ -59,7 +59,7 @@ public class BillingItemDAO
             false,
             false,
             BillingItemDAO.class,
-            SharedUtil.extractNVConfigs(Params.values()),
+            SUS.extractNVConfigs(Params.values()),
             null,
             false,
             CanonicalIDDAO.NVC_CANONICAL_ID_DAO

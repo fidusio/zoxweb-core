@@ -19,7 +19,7 @@ public class GetNameValueCommentTest {
     for(String str : array)
     {
       System.out.println(str);
-      GetNameValueComment<String> nvpc = SharedUtil.parseGetNameStringComment(str, " ", "#");
+      GetNameValueComment<String> nvpc = SUS.parseGetNameStringComment(str, " ", "#");
       System.out.println(nvpc);
       assert(nvpc != null);
         
@@ -41,7 +41,7 @@ public class GetNameValueCommentTest {
     for(String str : array)
     {
       System.out.println(str);
-      GetNameValueComment <String>nvpc = SharedUtil.parseGetNameStringComment(str, " ", "#");
+      GetNameValueComment <String>nvpc = SUS.parseGetNameStringComment(str, " ", "#");
       assert(nvpc == null);
     }
   }
@@ -59,7 +59,7 @@ public class GetNameValueCommentTest {
       for(String str : array)
       {
         System.out.println(str);
-        GetNameValueComment<String> nvpc = SharedUtil.parseGetNameStringComment(str, " ");
+        GetNameValueComment<String> nvpc = SUS.parseGetNameStringComment(str, " ");
         System.out.println(nvpc);
         assert(nvpc != null);
           

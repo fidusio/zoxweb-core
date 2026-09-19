@@ -141,7 +141,7 @@ public final class SecUtil {
         }
         JWT ret = new JWT();
 
-        //jwtPayload = GSONUtil.fromJSON(SharedStringUtil.toString(SharedBase64.decode(Base64Type.URL,tokens[JWTToken.PAYLOAD.ordinal()])), JWTPayload.class);
+        //jwtPayload = GSONUtil.fromJSON(SUS.toString(SharedBase64.decode(Base64Type.URL,tokens[JWTToken.PAYLOAD.ordinal()])), JWTPayload.class);
         JWTPayload jwtPayload = ret.getPayload();
         JWTHeader jwtHeader = ret.getHeader();
         if (jwtHeader == null || jwtPayload == null) {
@@ -173,7 +173,7 @@ public final class SecUtil {
     public static JWT decodeJWT(String key, String token)
             throws IOException,
             AccessSecurityException, NullPointerException, IllegalArgumentException, GeneralSecurityException {
-        return decodeJWT(key != null ? SharedStringUtil.getBytes(key) : null, token);
+        return decodeJWT(key != null ? SUS.getBytes(key) : null, token);
     }
 
     public static JWT decodeJWT(byte[] key, String token)
@@ -203,10 +203,10 @@ public final class SecUtil {
                 Mac shaHMAC = HashUtil.getMac(jwtAlgo.getSignatureAlgo());
                 SecretKeySpec secret_key = new SecretKeySpec(key, jwtAlgo.getSignatureAlgo().getName());
                 shaHMAC.init(secret_key);
-                shaHMAC.update(SharedStringUtil.getBytes(tokens[JWT.JWTField.HEADER.ordinal()]));
+                shaHMAC.update(SUS.getBytes(tokens[JWT.JWTField.HEADER.ordinal()]));
 
                 shaHMAC.update((byte) '.');
-                byte[] b64Hash = shaHMAC.doFinal(SharedStringUtil.getBytes(tokens[JWT.JWTField.PAYLOAD.ordinal()]));
+                byte[] b64Hash = shaHMAC.doFinal(SUS.getBytes(tokens[JWT.JWTField.PAYLOAD.ordinal()]));
 
                 if (!SharedBase64.encodeAsString(SharedBase64.Base64Type.URL, b64Hash).equals(jwt.getHash())) {
                     throw new AccessSecurityException("Invalid token");
@@ -233,7 +233,7 @@ public final class SecUtil {
                 PublicKey publicKey = CryptoUtil.generatePublicKey(jwtAlgo.getSignatureAlgo().getCryptoAlgo().getName(), key);
 
                 if (!CryptoUtil.verify(jwtAlgo.getSignatureAlgo(), publicKey,
-                        SharedStringUtil.getBytes(
+                        SUS.getBytes(
                                 tokens[JWT.JWTField.HEADER.ordinal()] + "." + tokens[JWT.JWTField.PAYLOAD.ordinal()]),
                         SharedBase64.decode(SharedBase64.Base64Type.URL, jwt.getHash()))) {
                     throw new AccessSecurityException("Invalid token");
@@ -263,7 +263,7 @@ public final class SecUtil {
         SEC_LOCK.lock(true);
         try {
 
-            String[] tokens = SharedStringUtil.parseString(passwordCanID, "\\$", true);
+            String[] tokens = SUS.parseString(passwordCanID, "\\$", true);
             if (tokens.length > 1)
                 return lookupCredentialHasher(tokens[0]);
             return null;
@@ -340,7 +340,7 @@ public final class SecUtil {
     public static boolean isPasswordValid(final CIPassword ciPassword, String password)
             throws NullPointerException, IllegalArgumentException {
         SUS.checkIfNulls("Null values", ciPassword, password);
-        return isPasswordValid(ciPassword, SharedStringUtil.getBytes(password));
+        return isPasswordValid(ciPassword, SUS.getBytes(password));
     }
 
     public static boolean isPasswordValid(final CIPassword ciPassword, byte[] password)
@@ -400,8 +400,8 @@ public final class SecUtil {
      */
     public static ResourceSecurity applySecurityProp(SecurityProfile securityProfile, SecurityProp securityProp) {
         if (securityProfile != null && securityProp != null) {
-            String[] roles = SUS.isEmpty(securityProp.roles()) ? null : SharedStringUtil.parseString(securityProp.roles(), ",", " ", "\t");
-            String[] permissions = SUS.isEmpty(securityProp.permissions()) ? null : SharedStringUtil.parseString(securityProp.permissions(), ",", " ", "\t");
+            String[] roles = SUS.isEmpty(securityProp.roles()) ? null : SUS.parseString(securityProp.roles(), ",", " ", "\t");
+            String[] permissions = SUS.isEmpty(securityProp.permissions()) ? null : SUS.parseString(securityProp.permissions(), ",", " ", "\t");
             SecConst.AuthenticationType[] authTypes = securityProp.authentications();
             String[] restrictions = securityProp.restrictions().length > 0 ? securityProp.restrictions() : null;
             securityProfile.setPermissions(permissions);

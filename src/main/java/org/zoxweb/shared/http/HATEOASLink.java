@@ -21,7 +21,7 @@ import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
 import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.NVConfigManager;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.SUS;
 
 /**
  * Represents a HATEOAS (Hypermedia as the Engine of Application State) link
@@ -55,7 +55,7 @@ extends SetNameDAO
 	
 	}
 
-	public static final NVConfigEntity NVC_HATEOAS_LINK = new NVConfigEntityPortable("hateos_link", null , "HATEOASLink", true, false, false, false, HATEOASLink.class, SharedUtil.extractNVConfigs(Params.values()), null, false, SetNameDAO.NVC_NAME_DAO);
+	public static final NVConfigEntity NVC_HATEOAS_LINK = new NVConfigEntityPortable("hateos_link", null , "HATEOASLink", true, false, false, false, HATEOASLink.class, SUS.extractNVConfigs(Params.values()), null, false, SetNameDAO.NVC_NAME_DAO);
 	
 	
 	public HATEOASLink()

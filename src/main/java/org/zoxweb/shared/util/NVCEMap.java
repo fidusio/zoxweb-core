@@ -76,7 +76,7 @@ public class NVCEMap
 																			false, 
 																			false, 
 																			NVCEMap.class, 
-																			SharedUtil.extractNVConfigs(Params.values()), 
+																			SUS.extractNVConfigs(Params.values()), 
 																			null, false, 
 																			SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO
 																		);

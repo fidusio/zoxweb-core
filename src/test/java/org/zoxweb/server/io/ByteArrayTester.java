@@ -20,7 +20,6 @@ import org.zoxweb.shared.io.BytesArray;
 import org.zoxweb.shared.util.Const;
 import org.zoxweb.shared.util.Const.TypeInBytes;
 import org.zoxweb.shared.util.SUS;
-import org.zoxweb.shared.util.SharedStringUtil;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -188,7 +187,7 @@ public class ByteArrayTester {
             }
 
             UByteArrayOutputStream bufferOutput = new UByteArrayOutputStream();
-            byte[] delimiter = SharedStringUtil.getBytes("\n");
+            byte[] delimiter = SUS.getBytes("\n");
 
 
             String[] data = {"John",
@@ -283,12 +282,12 @@ public class ByteArrayTester {
         baos.write("HeWorld");
 
         // insert length bytes starting at offset: "llo" out of "XlloY"
-        byte[] src = SharedStringUtil.getBytes("XlloY");
+        byte[] src = SUS.getBytes("XlloY");
         baos.insertAt(2, src, 1, 3);
         assert "HelloWorld".equals(baos.getString(0));
 
         // offset > length is a valid range under the (offset, length) contract
-        byte[] tail = SharedStringUtil.getBytes("ABC!?");
+        byte[] tail = SUS.getBytes("ABC!?");
         baos.insertAt(baos.size(), tail, 3, 2);
         assert "HelloWorld!?".equals(baos.getString(0));
 
@@ -309,7 +308,7 @@ public class ByteArrayTester {
 
     @Test
     public void testBytesArray() {
-        BytesArray ba = new BytesArray(null, SharedStringUtil.getBytes("Hello"));
+        BytesArray ba = new BytesArray(null, SUS.getBytes("Hello"));
 
         ByteBuffer bb = ByteBufferUtil.toByteBuffer(ba);
 

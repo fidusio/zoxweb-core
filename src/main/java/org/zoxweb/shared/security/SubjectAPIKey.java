@@ -98,7 +98,7 @@ public class SubjectAPIKey
             false,
             false,
             SubjectAPIKey.class,
-            SharedUtil.extractNVConfigs(Param.values()),
+            SUS.extractNVConfigs(Param.values()),
             null,
             false,
             PropertyDAO.NVC_PROPERTY_DAO

@@ -16,7 +16,7 @@
 package org.zoxweb.shared.security;
 
 import org.zoxweb.shared.util.GetValue;
-import org.zoxweb.shared.util.SharedStringUtil;
+import org.zoxweb.shared.util.SUS;
 
 public enum SecTokenReplacement
     implements GetValue<String>
@@ -40,7 +40,7 @@ public enum SecTokenReplacement
 	
 	public String replace(String text, String value)
 	{
-		return SharedStringUtil.embedText(text, SharedStringUtil.toLowerCase(tokenValue), SharedStringUtil.toLowerCase(value));
+		return SUS.embedText(text, SUS.toLowerCase(tokenValue), SUS.toLowerCase(value));
 	}
 
 }

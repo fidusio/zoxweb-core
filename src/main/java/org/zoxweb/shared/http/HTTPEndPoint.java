@@ -66,7 +66,7 @@ public class HTTPEndPoint
             false,
             false,
             HTTPEndPoint.class,
-            SharedUtil.extractNVConfigs(Param.values()),
+            SUS.extractNVConfigs(Param.values()),
             null,
             false,
             SecurityProfile.NVC_SECURITY_PROFILE);
@@ -140,17 +140,17 @@ public class HTTPEndPoint
 //    }
 
     public boolean isPathSupported(String uri) {
-        uri = SharedStringUtil.removeCharFromEnd('/', uri);
+        uri = SUS.removeCharFromEnd('/', uri);
 
         //NVStringList toParse =  ((NVStringList)lookup(Param.PATHS));
-        String[] uriTokens = SharedStringUtil.parseString(uri, "/", true);//uri.split("/");
+        String[] uriTokens = SUS.parseString(uri, "/", true);//uri.split("/");
         for (String path : getPaths()) {
-            path = SharedStringUtil.removeCharFromEnd('/', path);
+            path = SUS.removeCharFromEnd('/', path);
             if (uri.equalsIgnoreCase(path)) {
                 return true;
             }
 
-            String[] pathTokens = SharedStringUtil.parseString(path, "/", true);//path.split("/");
+            String[] pathTokens = SUS.parseString(path, "/", true);//path.split("/");
             System.out.println(Arrays.toString(uriTokens) + ":" + Arrays.toString(pathTokens));
             for (int i = 0; i < pathTokens.length; i++) {
                 boolean optional = pathTokens[i].startsWith("{");
@@ -175,7 +175,7 @@ public class HTTPEndPoint
     }
 
     public boolean isHTTPMethodSupported(String httpMethod) {
-        return isHTTPMethodSupported((HTTPMethod) SharedUtil.lookupEnum(httpMethod, HTTPMethod.values()));
+        return isHTTPMethodSupported((HTTPMethod) SUS.lookupEnum(httpMethod, HTTPMethod.values()));
     }
 
     public boolean isHTTPMethodSupported(HTTPMethod httpMethod) {
@@ -215,7 +215,7 @@ public class HTTPEndPoint
 //
 //    public boolean isProtocolSupported(String protocol)
 //    {
-//        return isProtocolSupported((URIScheme)SharedUtil.lookupEnum(protocol, URIScheme.values()));
+//        return isProtocolSupported((URIScheme)SUS.lookupEnum(protocol, URIScheme.values()));
 //    }
 //    public boolean isProtocolSupported(URIScheme protocol)
 //    {

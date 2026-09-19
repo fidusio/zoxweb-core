@@ -17,8 +17,6 @@ package org.zoxweb.shared.http;
 
 import org.zoxweb.shared.util.GetValue;
 import org.zoxweb.shared.util.SUS;
-import org.zoxweb.shared.util.SharedStringUtil;
-import org.zoxweb.shared.util.SharedUtil;
 
 /**
  * Enumeration of common MIME types (media types) used in HTTP Content-Type headers.
@@ -105,7 +103,7 @@ public enum HTTPMediaType
      * @return the matching HTTPMediaType, or null if not found
      */
     public static HTTPMediaType lookup(String str) {
-        return (HTTPMediaType) SharedUtil.matchingEnumContent(HTTPMediaType.values(), str);
+        return (HTTPMediaType) SUS.matchingEnumContent(HTTPMediaType.values(), str);
     }
 
     /**
@@ -118,7 +116,7 @@ public enum HTTPMediaType
         str = SUS.trimOrNull(str);
 
         if (str != null) {
-            String ext = SharedStringUtil.valueAfterRightToken(str, ".").toLowerCase();
+            String ext = SUS.valueAfterRightToken(str, ".").toLowerCase();
             for (HTTPMediaType mt : HTTPMediaType.values()) {
                 if (mt.extensions != null) {
                     for (String mtExt : mt.extensions) {

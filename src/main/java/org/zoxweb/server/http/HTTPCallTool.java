@@ -28,7 +28,7 @@ import org.zoxweb.shared.task.ConsumerCallback;
 import org.zoxweb.shared.util.Const;
 import org.zoxweb.shared.util.ParamUtil;
 import org.zoxweb.shared.util.RateCounter;
-import org.zoxweb.shared.util.SharedStringUtil;
+import org.zoxweb.shared.util.SUS;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -63,7 +63,7 @@ public final class HTTPCallTool {
 
             if (printResult) {
                 log.getLogger().info("Total: " + HTTPCall.HTTP_CALLS.getCounts() + " Fail: " + failCounter + " status: " + hrd.getStatus());
-                log.getLogger().info(SharedStringUtil.toString(hrd.getData()));
+                log.getLogger().info(SUS.toString(hrd.getData()));
             }
         }
     };
@@ -169,7 +169,7 @@ public final class HTTPCallTool {
 
 //                    if(printResult) {
 //                        log.getLogger().info("Total: " + totalCount()+ " Fail: " + failCounter + " status: " + hrd.getStatus());
-//                        log.getLogger().info(SharedStringUtil.toString(((HTTPResponseData)hrd).getData()));
+//                        log.getLogger().info(SUS.toString(((HTTPResponseData)hrd).getData()));
 //                    }
 
                 }

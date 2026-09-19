@@ -16,7 +16,6 @@
 package org.zoxweb.shared.filters;
 
 import org.zoxweb.shared.util.SUS;
-import org.zoxweb.shared.util.SharedStringUtil;
 
 /**
  * The HTML content filter class validates HTML.
@@ -44,19 +43,19 @@ public class HTMLContentFilter
     {
 		if (!SUS.isEmpty(html))
 		{
-			if (!SharedStringUtil.contains(html, HTML_PRE_TAG, true))
+			if (!SUS.contains(html, HTML_PRE_TAG, true))
 			{
 				html = HTML_PRE_TAG + html;
 			}
 			
-			if (!SharedStringUtil.contains(html, HTML_POST_TAG, true))
+			if (!SUS.contains(html, HTML_POST_TAG, true))
 			{
 				html = html + HTML_POST_TAG;
 			}
 			
-			if (!SharedStringUtil.contains(html, HEAD_PRE_TAG, true))
+			if (!SUS.contains(html, HEAD_PRE_TAG, true))
 			{
-				String value = SharedStringUtil.valueAfterLeftToken(html, HTML_PRE_TAG);
+				String value = SUS.valueAfterLeftToken(html, HTML_PRE_TAG);
 				
 				if (value != null)
 				{
@@ -64,22 +63,22 @@ public class HTMLContentFilter
 				}
 			}
 			
-			if (!SharedStringUtil.contains(html, HEAD_POST_TAG, true))
+			if (!SUS.contains(html, HEAD_POST_TAG, true))
 			{
-				if (SharedStringUtil.contains(html, TITLE_POST_TAG, true))
+				if (SUS.contains(html, TITLE_POST_TAG, true))
 				{
-					String value1 = SharedStringUtil.valueBeforeLeftToken(html, TITLE_POST_TAG);
-					String value2 = SharedStringUtil.valueAfterLeftToken(html, TITLE_POST_TAG);
+					String value1 = SUS.valueBeforeLeftToken(html, TITLE_POST_TAG);
+					String value2 = SUS.valueAfterLeftToken(html, TITLE_POST_TAG);
 					
 					if (value1 != null && value2 != null)
 					{
 						html = value1 + TITLE_POST_TAG + HEAD_POST_TAG + value2;
 					}
 				}
-				else if (SharedStringUtil.contains(html, BODY_PRE_TAG, true))
+				else if (SUS.contains(html, BODY_PRE_TAG, true))
 				{
-					String value1 = SharedStringUtil.valueBeforeLeftToken(html, BODY_PRE_TAG);
-					String value2 = SharedStringUtil.valueAfterLeftToken(html, BODY_PRE_TAG);
+					String value1 = SUS.valueBeforeLeftToken(html, BODY_PRE_TAG);
+					String value2 = SUS.valueAfterLeftToken(html, BODY_PRE_TAG);
 					
 					if (value1 != null && value2 != null)
 					{
@@ -88,8 +87,8 @@ public class HTMLContentFilter
 				}
 				else
                 {
-					String value1 = SharedStringUtil.valueBeforeLeftToken(html, HEAD_PRE_TAG);
-					String value2 = SharedStringUtil.valueAfterLeftToken(html, HEAD_PRE_TAG);
+					String value1 = SUS.valueBeforeLeftToken(html, HEAD_PRE_TAG);
+					String value2 = SUS.valueAfterLeftToken(html, HEAD_PRE_TAG);
 					
 					if (value1 != null && value2 != null)
 					{
@@ -98,10 +97,10 @@ public class HTMLContentFilter
 				}
 			}
 			
-			if (!SharedStringUtil.contains(html, TITLE_PRE_TAG, true))
+			if (!SUS.contains(html, TITLE_PRE_TAG, true))
 			{
-				String value1 = SharedStringUtil.valueBeforeLeftToken(html, HEAD_PRE_TAG);
-				String value2 = SharedStringUtil.valueAfterLeftToken(html, HEAD_PRE_TAG);
+				String value1 = SUS.valueBeforeLeftToken(html, HEAD_PRE_TAG);
+				String value2 = SUS.valueAfterLeftToken(html, HEAD_PRE_TAG);
 				
 				if (value1 != null && value2 != null)
 				{
@@ -109,10 +108,10 @@ public class HTMLContentFilter
 				}
 			}
 			
-			if (!SharedStringUtil.contains(html, TITLE_POST_TAG, true))
+			if (!SUS.contains(html, TITLE_POST_TAG, true))
 			{
-				String value1 = SharedStringUtil.valueBeforeLeftToken(html, HEAD_POST_TAG);
-				String value2 = SharedStringUtil.valueAfterLeftToken(html, HEAD_POST_TAG);
+				String value1 = SUS.valueBeforeLeftToken(html, HEAD_POST_TAG);
+				String value2 = SUS.valueAfterLeftToken(html, HEAD_POST_TAG);
 				
 				if (value1 != null && value2 != null)
 				{
@@ -120,10 +119,10 @@ public class HTMLContentFilter
 				}
 			}
 			
-			if (!SharedStringUtil.contains(html, BODY_PRE_TAG, true))
+			if (!SUS.contains(html, BODY_PRE_TAG, true))
 			{
-				String value1 = SharedStringUtil.valueBeforeLeftToken(html, HEAD_POST_TAG);
-				String value2 = SharedStringUtil.valueAfterLeftToken(html, HEAD_POST_TAG);
+				String value1 = SUS.valueBeforeLeftToken(html, HEAD_POST_TAG);
+				String value2 = SUS.valueAfterLeftToken(html, HEAD_POST_TAG);
 				
 				if (value1 != null && value2 != null)
 				{
@@ -131,9 +130,9 @@ public class HTMLContentFilter
 				}
 			}
 			
-			if (!SharedStringUtil.contains(html, BODY_POST_TAG, true))
+			if (!SUS.contains(html, BODY_POST_TAG, true))
 			{
-				String value1 = SharedStringUtil.valueBeforeLeftToken(html, HTML_POST_TAG);
+				String value1 = SUS.valueBeforeLeftToken(html, HTML_POST_TAG);
 				
 				if (value1 != null)
 				{

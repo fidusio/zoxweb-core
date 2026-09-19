@@ -2,7 +2,7 @@ package org.zoxweb.shared.http;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.zoxweb.shared.util.SharedStringUtil;
+import org.zoxweb.shared.util.SUS;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -34,8 +34,8 @@ public class HTTPEndPointTest {
         String[] uris = {"/ping", "/ping/", "ping/", "ping", "/pings", "/ping/detailed", "/info/1/detailed", "/info", "/info/1"};
 
         for (String uri : uris) {
-            uri = SharedStringUtil.removeCharFromEnd('/', uri);
-            System.out.println(uri + ":" + hep.isPathSupported(uri) + ", ParseString:" + Arrays.toString(SharedStringUtil.parseString(uri, "/", true)));
+            uri = SUS.removeCharFromEnd('/', uri);
+            System.out.println(uri + ":" + hep.isPathSupported(uri) + ", ParseString:" + Arrays.toString(SUS.parseString(uri, "/", true)));
         }
     }
 
@@ -44,8 +44,8 @@ public class HTTPEndPointTest {
         String[] uris = {"/system/reboot", "/system/shutdown", "/system/reboot/", "system/reboot/", "/system//////////", "system/reboot/now"};
 
         for (String uri : uris) {
-            uri = SharedStringUtil.removeCharFromEnd('/', uri);
-            System.out.println(uri + ":" + sysHep.isPathSupported(uri) + ", ParseString:" + Arrays.toString(SharedStringUtil.parseString(uri, "/", true)));
+            uri = SUS.removeCharFromEnd('/', uri);
+            System.out.println(uri + ":" + sysHep.isPathSupported(uri) + ", ParseString:" + Arrays.toString(SUS.parseString(uri, "/", true)));
 
         }
     }

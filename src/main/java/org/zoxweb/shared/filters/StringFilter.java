@@ -1,8 +1,7 @@
 package org.zoxweb.shared.filters;
 
 import org.zoxweb.shared.util.NVGenericMap;
-import org.zoxweb.shared.util.SharedStringUtil;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.SUS;
 
 public class StringFilter extends
         DataFilter<String, String, Class<String>> {
@@ -24,13 +23,13 @@ public class StringFilter extends
      */
     @Override
     public String validate(String input) {
-        SFType type = SharedUtil.lookupEnum(config.getValue("type"), SFType.values());
+        SFType type = SUS.lookupEnum(config.getValue("type"), SFType.values());
         String ret = input;
         switch (type) {
             case BETWEEN:
-                ret = SharedStringUtil.valueAfterLeftToken(ret, config.getValue("prefix"));
-                ret = SharedStringUtil.valueBeforeLeftToken(ret, config.getValue("postfix"));
-//                StringToken strToken = SharedStringUtil.valueBetween(ret, config.getValue("prefix"), config.getValue("postfix"), false);
+                ret = SUS.valueAfterLeftToken(ret, config.getValue("prefix"));
+                ret = SUS.valueBeforeLeftToken(ret, config.getValue("postfix"));
+//                StringToken strToken = SUS.valueBetween(ret, config.getValue("prefix"), config.getValue("postfix"), false);
 //                if (strToken != null)
 //                    ret = strToken.getToken();
                 break;

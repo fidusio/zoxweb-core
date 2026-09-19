@@ -110,8 +110,8 @@ public class DatagramRelay
             throws IOException {
 
         SUS.checkIfNulls("null host", remoteHost);
-        SharedUtil.illegalCondition("Invalid port values", (localPort > 0 && localPort < 65535), (remotePort > 0 && remotePort < 65535));
-        SharedUtil.illegalCondition("Invalid packet size " + packetSize, (packetSize > 0 && packetSize < 65535));
+        SUS.illegalCondition("Invalid port values", (localPort > 0 && localPort < 65535), (remotePort > 0 && remotePort < 65535));
+        SUS.illegalCondition("Invalid packet size " + packetSize, (packetSize > 0 && packetSize < 65535));
 
         this.remoteHost = remoteHost;
         this.remotePort = remotePort;

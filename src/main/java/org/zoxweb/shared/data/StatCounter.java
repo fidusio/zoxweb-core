@@ -12,7 +12,7 @@ import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
 import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.NVConfigManager;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.SUS;
 
 
 @SuppressWarnings("serial")
@@ -52,7 +52,7 @@ public class StatCounter
 	        false,
 	        false,
 	        StatCounter.class,
-	        SharedUtil.extractNVConfigs(Param.values()),
+	        SUS.extractNVConfigs(Param.values()),
 	        null,
 	        false,
 	        TimeStampDAO.NVC_TIME_STAMP_DAO

@@ -23,7 +23,7 @@ import org.zoxweb.shared.util.NVConfigEntity;
 import org.zoxweb.shared.util.NVConfigEntity.ArrayType;
 import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.NVConfigManager;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.api.APIFileInfoMap;
 
 @SuppressWarnings("serial")
@@ -80,7 +80,7 @@ public class FileInfoDAO
             false,
             false,
             FileInfoDAO.class,
-            SharedUtil.extractNVConfigs(Param.values()),
+            SUS.extractNVConfigs(Param.values()),
             null,
             false,
             NVC_DOCUMENT_INFO_DAO);

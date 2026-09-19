@@ -61,7 +61,7 @@ public class APITokenDAO
             false,
             false,
             APITokenDAO.class,
-            SharedUtil.extractNVConfigs(Params.values()),
+            SUS.extractNVConfigs(Params.values()),
             null,
             false,
             APIAccessTokenDAO.NVC_API_ACCESS_TOKEN_DAO);

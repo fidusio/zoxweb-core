@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.zoxweb.server.net.NIOSocket;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.shared.io.SharedIOUtil;
-import org.zoxweb.shared.util.SharedStringUtil;
+import org.zoxweb.shared.util.SUS;
 
 import java.io.InputStream;
 import java.net.InetAddress;
@@ -56,13 +56,13 @@ public class PlainLoopbackTest {
             nioSocket.addClientSocket(validator);
             accepted = server.accept();
 
-            accepted.getOutputStream().write(SharedStringUtil.getBytes("220 ready\r\n"));
+            accepted.getOutputStream().write(SUS.getBytes("220 ready\r\n"));
             accepted.getOutputStream().flush();
 
             String request = readLine(accepted.getInputStream());
             assertEquals("HELLO probe\r\n", request, "send-time var resolution on the wire");
 
-            accepted.getOutputStream().write(SharedStringUtil.getBytes("250 ok\r\n"));
+            accepted.getOutputStream().write(SUS.getBytes("250 ok\r\n"));
             accepted.getOutputStream().flush();
 
             assertTrue(validator.waitForClose(TimeUnit.SECONDS.toMillis(WAIT_SEC)),
@@ -90,7 +90,7 @@ public class PlainLoopbackTest {
             nioSocket.addClientSocket(validator);
             accepted = server.accept();
 
-            accepted.getOutputStream().write(SharedStringUtil.getBytes("unmatched noise"));
+            accepted.getOutputStream().write(SUS.getBytes("unmatched noise"));
             accepted.getOutputStream().flush();
             accepted.close();
 

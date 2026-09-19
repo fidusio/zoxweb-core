@@ -16,7 +16,7 @@
 package org.zoxweb.shared.net;
 
 import org.zoxweb.shared.util.GetName;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.SUS;
 
 /**
  * Container class for network-related property enumerations.
@@ -136,7 +136,7 @@ public class InetProp {
          * @return the matching BondingMode, or NONE if not found
          */
         public static BondingMode lookup(String val) {
-            BondingMode ret = (BondingMode) SharedUtil.lookupEnum(val, values());
+            BondingMode ret = (BondingMode) SUS.lookupEnum(val, values());
 
             if (ret != null) {
                 ret = NONE;

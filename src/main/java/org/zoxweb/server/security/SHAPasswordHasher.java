@@ -6,7 +6,6 @@ import org.zoxweb.shared.crypto.CryptoConst;
 import org.zoxweb.shared.security.AccessSecurityException;
 import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SharedBase64;
-import org.zoxweb.shared.util.SharedStringUtil;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -46,7 +45,7 @@ public class SHAPasswordHasher
      */
     @Override
     public CIPassword fromCanonicalID(String passwordCanonicalID) {
-        String[] tokens = SharedStringUtil.parseString(passwordCanonicalID, "\\$", true);
+        String[] tokens = SUS.parseString(passwordCanonicalID, "\\$", true);
         CIPassword ret = new CIPassword();
 
         switch (tokens.length) {
@@ -94,7 +93,7 @@ public class SHAPasswordHasher
      */
     @Override
     public boolean validate(CIPassword ci, String password) {
-        return validate(ci, SharedStringUtil.getBytes(password));
+        return validate(ci, SUS.getBytes(password));
     }
 
     /**

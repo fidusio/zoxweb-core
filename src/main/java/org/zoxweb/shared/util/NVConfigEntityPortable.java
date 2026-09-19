@@ -115,7 +115,7 @@ public class NVConfigEntityPortable
         }
 
         if (superClass != null) {
-            attrList = SharedUtil.mergeMeta(attrList, superClass.getAttributes());
+            attrList = SUS.mergeMeta(attrList, superClass.getAttributes());
         }
 
         setAttributes(attrList);

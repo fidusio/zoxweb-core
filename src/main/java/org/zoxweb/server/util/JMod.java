@@ -1,7 +1,7 @@
 package org.zoxweb.server.util;
 
 import org.zoxweb.shared.util.GetName;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.SUS;
 
 import java.lang.reflect.Modifier;
 
@@ -40,7 +40,7 @@ public enum JMod
 
         int m = 0x0;
         for (String s : tokens) {
-            JMod jm = SharedUtil.lookupEnum(s, JMod.values());
+            JMod jm = SUS.lookupEnum(s, JMod.values());
             if (jm != null) {
                 m |= jm.MOD;
             }

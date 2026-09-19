@@ -178,7 +178,7 @@ public class RateController
 
 
     public RateController setRate(String rate) {
-        String[] tokens = SharedStringUtil.parseString(rate, "/", true);
+        String[] tokens = SUS.parseString(rate, "/", true);
         float rateValue = Float.parseFloat(tokens[0]);
         Const.TimeInMillis timValue = Const.TimeInMillis.toTimeInMillis(tokens[1]);
         return setRate(rateValue, timValue.UNIT);

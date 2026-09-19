@@ -254,7 +254,7 @@ public class NIOConfig
                             nioPPF.setOutgoingInetFilterRulesManager(outgoingIFRM);
                         }
 
-//						if(!SharedStringUtil.isEmpty(config.getProperties().getValue("log_file")))
+//						if(!SUS.isEmpty(config.getProperties().getValue("log_file")))
 //							nioPPF.setLogger(LoggerUtil.loggerToFile(NIOProxyProtocol.class.getName()+".proxy", config.getProperties().getValue("log_file")));
 
                     } catch (Exception e) {
@@ -278,7 +278,7 @@ public class NIOConfig
                         }
 
 
-//						if(!SharedStringUtil.isEmpty(config.getProperties().getValue("log_file")))
+//						if(!SUS.isEmpty(config.getProperties().getValue("log_file")))
 //							nioTF.setLogger(LoggerUtil.loggerToFile(NIOTunnel.class.getName()+".proxy", config.getProperties().getValue("log_file")));
 
 

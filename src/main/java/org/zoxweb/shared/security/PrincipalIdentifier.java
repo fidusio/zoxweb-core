@@ -41,7 +41,7 @@ public class PrincipalIdentifier
             true,
             false,
             PrincipalIdentifier.class,
-            SharedUtil.extractNVConfigs(Param.values()),
+            SUS.extractNVConfigs(Param.values()),
             null,
             false,
             AppIDDefault.NVC_APP_ID_DEFAULT);
@@ -104,7 +104,7 @@ public class PrincipalIdentifier
         if (obj instanceof PrincipalIdentifier) {
             PrincipalIdentifier principalIdentifier = (PrincipalIdentifier) obj;
 
-            return SharedStringUtil.equals(getPrincipalID(), principalIdentifier.getPrincipalID(), true);
+            return SUS.equals(getPrincipalID(), principalIdentifier.getPrincipalID(), true);
         }
         return false;
     }

@@ -60,7 +60,7 @@ public class APICredentialsDAO
             false,
             false,
             APICredentialsDAO.class,
-            SharedUtil.extractNVConfigs(Params.values()),
+            SUS.extractNVConfigs(Params.values()),
             null,
             false,
             SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO

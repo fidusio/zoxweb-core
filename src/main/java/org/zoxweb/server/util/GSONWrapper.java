@@ -6,7 +6,7 @@ import org.zoxweb.shared.util.NVConfigEntity;
 import org.zoxweb.shared.util.NVEntity;
 import org.zoxweb.shared.util.NVGenericMap;
 import org.zoxweb.shared.util.SharedBase64.Base64Type;
-import org.zoxweb.shared.util.SharedStringUtil;
+import org.zoxweb.shared.util.SUS;
 
 import java.io.IOException;
 import java.util.List;
@@ -36,12 +36,12 @@ public class GSONWrapper {
 
     public <V extends NVEntity> V fromJSON(byte[] json)
             throws APIException {
-        return fromJSON(SharedStringUtil.toString(json));
+        return fromJSON(SUS.toString(json));
     }
 
     public <V extends NVEntity> V fromJSON(byte[] json, Base64Type b64t)
             throws APIException {
-        return fromJSON(SharedStringUtil.toString(json), null, b64t);
+        return fromJSON(SUS.toString(json), null, b64t);
     }
 
     public List<NVEntity> fromJSONArray(String json) {

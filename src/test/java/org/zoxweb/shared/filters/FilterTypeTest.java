@@ -17,7 +17,7 @@ package org.zoxweb.shared.filters;
 
 
 import org.junit.jupiter.api.Test;
-import org.zoxweb.shared.util.SharedStringUtil;
+import org.zoxweb.shared.util.SUS;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -167,10 +167,10 @@ public class FilterTypeTest {
 		};
 
 		for (String mac: macs) {
-			String str = SharedStringUtil.filterString(mac, new String[]{"-", ":", "."});
+			String str = SUS.filterString(mac, new String[]{"-", ":", "."});
 			System.out.println(str);
-			byte[] address = SharedStringUtil.hexToBytes(str);
-			System.out.println(SharedStringUtil.bytesToHex(address));
+			byte[] address = SUS.hexToBytes(str);
+			System.out.println(SUS.bytesToHex(address));
 		}
     }
 

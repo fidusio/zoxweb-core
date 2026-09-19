@@ -19,8 +19,6 @@ import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.shared.app.AppVersionDAO;
 import org.zoxweb.shared.util.NVPair;
 import org.zoxweb.shared.util.SUS;
-import org.zoxweb.shared.util.SharedStringUtil;
-import org.zoxweb.shared.util.SharedUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -57,19 +55,19 @@ public class ReleaseManager {
         int minor = 0;
         int nano = 0;
 
-        List<CharSequence> tokens = SharedStringUtil.parseGroup(json, "{", "}", false);
+        List<CharSequence> tokens = SUS.parseGroup(json, "{", "}", false);
 
         String[] attributes = tokens.get(0).toString().split(",");
 
         for (String attribute : attributes) {
-            NVPair nvp = SharedUtil.toNVPair(attribute, ":", false);
-            nvp.setName(SharedStringUtil.filterString(nvp.getName(), "\""));
+            NVPair nvp = SUS.toNVPair(attribute, ":", false);
+            nvp.setName(SUS.filterString(nvp.getName(), "\""));
             switch (nvp.getName()) {
                 case "name":
-                    name = SharedStringUtil.filterString(nvp.getValue(), "\"");
+                    name = SUS.filterString(nvp.getValue(), "\"");
                     break;
                 case "description":
-                    description = SharedStringUtil.filterString(nvp.getValue(), "\"");
+                    description = SUS.filterString(nvp.getValue(), "\"");
                     break;
                 case "major":
                     major = Integer.parseInt(nvp.getValue());
@@ -100,7 +98,7 @@ public class ReleaseManager {
     }
 
     public AppVersionDAO lookup(String name) {
-        name = SharedStringUtil.toLowerCase(SUS.trimOrNull(name));
+        name = SUS.toLowerCase(SUS.trimOrNull(name));
         return map.get(name);
     }
 

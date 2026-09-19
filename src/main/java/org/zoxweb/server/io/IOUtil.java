@@ -22,7 +22,6 @@ import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.net.ProxyType;
 import org.zoxweb.shared.util.RegistrarMapDefault;
 import org.zoxweb.shared.util.SUS;
-import org.zoxweb.shared.util.SharedStringUtil;
 
 import java.io.*;
 import java.net.*;
@@ -422,7 +421,7 @@ public class IOUtil {
      */
     public static void writeToFile(File file, String toWrite)
             throws IOException {
-        writeToFile(file, SharedStringUtil.getBytes(toWrite));
+        writeToFile(file, SUS.getBytes(toWrite));
     }
 
     /**

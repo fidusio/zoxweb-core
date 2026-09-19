@@ -65,7 +65,7 @@ public class IOTAddress
             false,
             false,
             IOTAddress.class,
-            SharedUtil.extractNVConfigs(Param.values()),
+            SUS.extractNVConfigs(Param.values()),
             null,
             false,
             IOTBase.NVC_IOT_BASE);

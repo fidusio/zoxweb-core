@@ -21,7 +21,7 @@ import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
 import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.NVConfigManager;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.Const.ScanStatus;
 
 /**
@@ -64,7 +64,7 @@ public class ScanResult
 																					false, 
 																					false, 
 																					ScanResult.class,
-																					SharedUtil.extractNVConfigs(Params.values()), 
+																					SUS.extractNVConfigs(Params.values()), 
 																					null, 
 																					false, 
 																					CanonicalIDDAO.NVC_CANONICAL_ID_DAO

@@ -17,7 +17,6 @@ package org.zoxweb.shared.net;
 
 import org.zoxweb.shared.filters.ValueFilter;
 import org.zoxweb.shared.util.SUS;
-import org.zoxweb.shared.util.SharedStringUtil;
 
 /**
  * Filter for validating and converting MAC addresses.
@@ -97,7 +96,7 @@ public class MACAddressFilter
      * @return the MAC address as bytes
      */
     public static byte[] macAddressToBytes(String macAddress) {
-        return SharedStringUtil.hexToBytes(SharedStringUtil.filterString(macAddress, MAC_ADDRESS_SEPS));
+        return SUS.hexToBytes(SUS.filterString(macAddress, MAC_ADDRESS_SEPS));
     }
 
     /**
@@ -113,7 +112,7 @@ public class MACAddressFilter
         if (address.length != MAC_ADDRESS_LENGTH) {
             //throw new IllegalArgumentException("Invalid MAC Address length " + address.length);
         }
-        return SharedStringUtil.bytesToHex(null, address, 0, address.length, sep);
+        return SUS.bytesToHex(null, address, 0, address.length, sep);
     }
 
 }

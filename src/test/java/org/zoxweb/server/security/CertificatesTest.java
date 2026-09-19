@@ -27,7 +27,7 @@ public class CertificatesTest {
                         X509Certificate xCert = (X509Certificate) cert;
                         System.out.println(xCert.getSubjectX500Principal().getName());
                         //X500Name xname = new X500Name(xCert.getSubjectX500Principal().getName());
-//            NVGenericMap nvg = SharedUtil.toNVGenericMap(xCert.getSubjectX500Principal().getName(), "=",",", true);
+//            NVGenericMap nvg = SUS.toNVGenericMap(xCert.getSubjectX500Principal().getName(), "=",",", true);
                         NVGenericMap nvg = SecUtil.certificateToNVGM(xCert);
                         NVGenericMap nvg2 = SSLInfoUtil.extractCertInfo(xCert);
                         //System.out.println("CN: " + nvg.get("cn").getValue());
@@ -91,7 +91,7 @@ public class CertificatesTest {
             byte[] sig = SharedBase64.decode(Base64Type.URL, jwt.getHash());
 
             System.out.println("Singnature status: " + CryptoUtil
-                    .verify(SignatureAlgo.SHA256_RSA, jwtPubKey, SharedStringUtil
+                    .verify(SignatureAlgo.SHA256_RSA, jwtPubKey, SUS
                             .getBytes(tok), sig));
 
 

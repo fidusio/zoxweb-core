@@ -18,7 +18,7 @@ package org.zoxweb;
 import org.junit.jupiter.api.Test;
 import org.zoxweb.server.util.JarTool;
 import org.zoxweb.shared.util.QuickLZ;
-import org.zoxweb.shared.util.SharedStringUtil;
+import org.zoxweb.shared.util.SUS;
 
 import java.io.ByteArrayOutputStream;
 import java.util.zip.GZIPOutputStream;
@@ -55,7 +55,7 @@ public class QuickLZTest {
 
       // gzip test
       byte[] zipBuffer = JarTool.gzip(str);
-      String gunzipStr = SharedStringUtil.toString(JarTool.gunzip(zipBuffer));
+      String gunzipStr = SUS.toString(JarTool.gunzip(zipBuffer));
       System.out.println(str.equals(gunzipStr) + " zipBuffer " + zipBuffer.length);
     } catch (Exception e) {
       e.printStackTrace();

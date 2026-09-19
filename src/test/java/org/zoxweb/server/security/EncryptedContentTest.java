@@ -22,7 +22,7 @@ import org.zoxweb.shared.crypto.CryptoConst.SecureRandomType;
 import org.zoxweb.shared.crypto.EncryptedData;
 import org.zoxweb.shared.crypto.EncapsulatedKey;
 import org.zoxweb.shared.crypto.CIPassword;
-import org.zoxweb.shared.util.SharedStringUtil;
+import org.zoxweb.shared.util.SUS;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -49,7 +49,7 @@ public class EncryptedContentTest {
                     .getKeyFromKeyStore(new FileInputStream("/home/fidus-store/ssl/fidus-store-test.jck"),
                             CryptoConst.KSType.JCEKS.getName(), "changeit", "fidus-store-mk", "changeit");
 
-            System.out.println(k.getAlgorithm() + ":" + k.getFormat() + ":" + SharedStringUtil
+            System.out.println(k.getAlgorithm() + ":" + k.getFormat() + ":" + SUS
                     .bytesToHex(k.getEncoded()));
             File fNewStore = new File("d:/home/fidus-store/ssl/update-fidus-store.jck");
             fNewStore.createNewFile();
@@ -63,7 +63,7 @@ public class EncryptedContentTest {
             k = (SecretKeySpec) CryptoUtil
                     .getKeyFromKeyStore(new FileInputStream(fNewStore), CryptoConst.KSType.JCEKS.getName(), DEFAULT_PASSWORD,
                             "fidus-store-mk", DEFAULT_PASSWORD);
-            System.out.println(k.getAlgorithm() + ":" + k.getFormat() + ":" + SharedStringUtil
+            System.out.println(k.getAlgorithm() + ":" + k.getFormat() + ":" + SUS
                     .bytesToHex(k.getEncoded()));
 
             KeyStore ks = CryptoUtil
@@ -76,7 +76,7 @@ public class EncryptedContentTest {
                 long tempTS = System.nanoTime();
                 Key tempKey = ks.getKey("fidus-store-mk", aliasPassword);
                 tempTS = System.nanoTime() - tempTS;
-                System.out.println("[" + i + "] took " + tempTS + " nanos. " + SharedStringUtil
+                System.out.println("[" + i + "] took " + tempTS + " nanos. " + SUS
                         .bytesToHex(tempKey.getEncoded()));
             }
         }
@@ -151,20 +151,20 @@ public class EncryptedContentTest {
                 String ekdJSON = GSONUtil.toJSON(ekd, true, false, false);
                 System.out.println(ekdJSON);
                 byte[] key = CryptoUtil.unwrapKey(ekd, wrappingKey);
-                System.out.println(key.length + " " + SharedStringUtil.bytesToHex(key));
-                System.out.println(key.length + " " + SharedStringUtil.bytesToHex(ekd.getEncryptedData()));
+                System.out.println(key.length + " " + SUS.bytesToHex(key));
+                System.out.println(key.length + " " + SUS.bytesToHex(ekd.getEncryptedData()));
 
                 EncapsulatedKey ekdFromJSON = GSONUtil.fromJSON(ekdJSON, EncapsulatedKey.class);
 
                 key = CryptoUtil.unwrapKey(ekdFromJSON, wrappingKey);
-                System.out.println("from json       key:" + SharedStringUtil.bytesToHex(key));
+                System.out.println("from json       key:" + SUS.bytesToHex(key));
                 System.out.println(
-                        "from json encrypted:" + SharedStringUtil.bytesToHex(ekdFromJSON.getEncryptedData()));
+                        "from json encrypted:" + SUS.bytesToHex(ekdFromJSON.getEncryptedData()));
 
                 ekd = CryptoUtil.rekeyEncryptedKey(ekd, wrappingKey, newWrappingKey);
                 key = CryptoUtil.unwrapKey(ekd, newWrappingKey);
 
-                System.out.println("rekeyed         key:" + SharedStringUtil.bytesToHex(key));
+                System.out.println("rekeyed         key:" + SUS.bytesToHex(key));
 
                 MessageDigest digest = HashUtil.getMessageDigest(HashType.SHA_256);
 
@@ -173,7 +173,7 @@ public class EncryptedContentTest {
                     SecretKey sk = CryptoUtil.generateKey(CryptoConst.CryptoAlgo.AES, 256);
                     ts = System.nanoTime() - ts;
                     System.out.print("[" + ts + " ns]");
-                    System.out.println(sk.getAlgorithm() + "," + sk.getFormat() + "," + SharedStringUtil
+                    System.out.println(sk.getAlgorithm() + "," + sk.getFormat() + "," + SUS
                             .bytesToHex(sk.getEncoded()));
 
                     ts = System.nanoTime();
@@ -183,20 +183,20 @@ public class EncryptedContentTest {
                     ts = System.nanoTime() - ts;
                     System.out.print("[" + ts + " ns]");
                     System.out.println(
-                            "generateRandomHashedBytes" + "," + SharedStringUtil.bytesToHex(randomBytes));
+                            "generateRandomHashedBytes" + "," + SUS.bytesToHex(randomBytes));
 
                     ts = System.nanoTime();
                     EncapsulatedKey ekdTest = CryptoUtil.createEncryptedKey(wrappingKey);
                     ts = System.nanoTime() - ts;
                     System.out.print("[" + ts + " ns]");
-                    System.out.println(ekdTest.getName() + "\t,Encrypted data " + SharedStringUtil
+                    System.out.println(ekdTest.getName() + "\t,Encrypted data " + SUS
                             .bytesToHex(ekdTest.getEncryptedData()));
 
                     ts = System.nanoTime();
                     byte[] drecryptedKey = CryptoUtil.unwrapKey(ekdTest, wrappingKey);
                     ts = System.nanoTime() - ts;
                     System.out.print("[" + ts + " ns]");
-                    System.out.println(ekdTest.getName() + "\t,Decrypted data " + SharedStringUtil
+                    System.out.println(ekdTest.getName() + "\t,Decrypted data " + SUS
                             .bytesToHex(drecryptedKey));
                 }
 

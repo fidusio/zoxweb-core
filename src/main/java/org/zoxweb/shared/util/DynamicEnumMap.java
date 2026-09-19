@@ -256,7 +256,7 @@ public class DynamicEnumMap
 
         SUS.checkIfNulls("Null value", name);
 
-        name = SharedStringUtil.filterString(name, NAME_PREFIX + ":", NAME_PREFIX);
+        name = SUS.filterString(name, NAME_PREFIX + ":", NAME_PREFIX);
 
         name = SUS.trimOrNull(name);
 
@@ -330,7 +330,7 @@ public class DynamicEnumMap
      * @return display name
      */
     public String getDisplayName() {
-        return SharedStringUtil.filterString(getName(), NAME_PREFIX + ":", NAME_PREFIX);
+        return SUS.filterString(getName(), NAME_PREFIX + ":", NAME_PREFIX);
     }
 
 }

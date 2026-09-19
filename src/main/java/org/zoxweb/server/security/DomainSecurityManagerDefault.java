@@ -99,7 +99,7 @@ public class DomainSecurityManagerDefault
      */
     private static boolean appIDMatches(AuthzInfo info, String appID) {
         String owned = info.getAppIdDAO() != null ? info.getAppIdDAO().getAppID() : null;
-        return SharedStringUtil.equals(owned, appID, true);
+        return SUS.equals(owned, appID, true);
     }
 
     /**

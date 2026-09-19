@@ -42,7 +42,7 @@ public class APIDataOP
             false,
             false,
             APIDataOP.class,
-            SharedUtil.extractNVConfigs(Param.values()),
+            SUS.extractNVConfigs(Param.values()),
             null,
             false,
             SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO);

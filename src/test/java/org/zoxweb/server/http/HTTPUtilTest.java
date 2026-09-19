@@ -23,13 +23,13 @@ public class HTTPUtilTest {
         HTTPMessageConfigInterface hmci = HTTPUtil.buildResponse(address, HTTPStatusCode.OK);
         UByteArrayOutputStream data = HTTPUtil.formatResponse(hmci, null);
 
-        System.out.println(SharedStringUtil.toString(data.getInternalBuffer(), 0, data.size()));
+        System.out.println(SUS.toString(data.getInternalBuffer(), 0, data.size()));
 
         UUIDInfoDAO uuid = new UUIDInfoDAO();
         hmci = HTTPUtil.buildResponse(uuid, HTTPStatusCode.OK);
         data = HTTPUtil.formatResponse(hmci, null);
 
-        System.out.println(SharedStringUtil.toString(data.getInternalBuffer(), 0, data.size()));
+        System.out.println(SUS.toString(data.getInternalBuffer(), 0, data.size()));
 
     }
 
@@ -42,7 +42,7 @@ public class HTTPUtilTest {
         nvgm.add(new NVFloat("float", (float) 12.43534));
         HTTPMessageConfigInterface hmci = HTTPUtil.buildResponse(nvgm, HTTPStatusCode.OK);
         UByteArrayOutputStream data = HTTPUtil.formatResponse(hmci, null);
-        System.out.println(SharedStringUtil.toString(data.getInternalBuffer(), 0, data.size()));
+        System.out.println(SUS.toString(data.getInternalBuffer(), 0, data.size()));
 
     }
 

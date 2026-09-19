@@ -22,7 +22,7 @@ import org.zoxweb.shared.util.NVConfigEntityPortable;
 import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.NVEntity;
 import org.zoxweb.shared.util.SetName;
-import org.zoxweb.shared.util.SharedUtil;
+import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.NVConfigEntity.ArrayType;
 
 /**
@@ -62,11 +62,11 @@ public class FormInfoDAO
 																					false, 
 																					false, 
 																					FormInfoDAO.class, 
-																					SharedUtil.extractNVConfigs(Param.values()),
+																					SUS.extractNVConfigs(Param.values()),
 																					null, 
 																					false, 
 																					DocumentInfoDAO.NVC_DOCUMENT_INFO_DAO
-																				);	//,SharedUtil.extractNVConfigs( new Params[]{Params.REFERENCE_ID, Params.NAME, Params.LENGTH}));
+																				);	//,SUS.extractNVConfigs( new Params[]{Params.REFERENCE_ID, Params.NAME, Params.LENGTH}));
 
 	/**
 	 * The default constructor.
