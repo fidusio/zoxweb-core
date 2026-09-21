@@ -203,8 +203,8 @@ public class NIOSocket
      * is invoked synchronously before this method returns. Otherwise, the callback is
      * invoked asynchronously when the connection completes or times out.</p>
      *
-     * @param tsc           the callback to invoke with the connected SocketChannel on success,
-     *                     or with an exception on failure
+     * @param tsc the callback to invoke with the connected SocketChannel on success,
+     *            or with an exception on failure
      * @return the SocketChannel being connected (may not yet be connected when returned)
      * @throws IOException if the socket channel cannot be opened or connection initiation fails
      */
@@ -419,7 +419,7 @@ public class NIOSocket
             SharedIOUtil.close(dc);
             throw e;
         }
-        logger.getLogger().info(dc + " added");
+        if (logger.isEnabled()) logger.getLogger().info(dc + " added");
         return sk;
     }
 
@@ -905,6 +905,7 @@ public class NIOSocket
 
     /**
      * Finish the connect stage
+     *
      * @param key isConnectable() true
      * @throws IOException case of error
      */
@@ -923,7 +924,8 @@ public class NIOSocket
 
     /**
      * Finish the connect stage
-     * @param channel in connection pending stage
+     *
+     * @param channel        in connection pending stage
      * @param connectTimeout could be null, if not will be closed
      * @throws IOException case of error
      */
@@ -1012,7 +1014,7 @@ public class NIOSocket
      * Returns the executor used for I/O processing.
      *
      * @return the executor for offloading I/O handlers, or null if processing
-     *         occurs on the selector thread
+     * occurs on the selector thread
      */
     public Executor getExecutor() {
         return executor;
@@ -1047,7 +1049,7 @@ public class NIOSocket
      * Returns the statistics logging interval.
      *
      * @return the interval for logging statistics, in milliseconds or dispatch counts
-     *         (depending on which threshold is reached first); 0 disables stat logging
+     * (depending on which threshold is reached first); 0 disables stat logging
      * @see #setStatLogCounter(long)
      */
     public long getStatLogCounter() {

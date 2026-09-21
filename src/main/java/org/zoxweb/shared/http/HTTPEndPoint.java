@@ -31,7 +31,7 @@ import java.util.Arrays;
  */
 public class HTTPEndPoint
         extends SecurityProfile
-        implements ToNVProperties{
+        implements ToNVProperties {
     public enum Param
             implements GetNVConfig {
         BEAN_CLASS_NAME(NVConfigManager.createNVConfig("bean", "Bean class name", "Bean", false, true, String.class)),
@@ -198,12 +198,18 @@ public class HTTPEndPoint
 
     @Override
     public NVGenericMap toProperties(boolean detailed) {
-        return new NVGenericMap(getName())
-                .build("uri-path", getRawPath())
-                .build(lookup(Param.INPUT_CONTENT_TYPE))
+        NVGenericMap map = new NVGenericMap(getName());
+        map.build("uri-path", getRawPath());
+        if (detailed) {
+            if(SUS.isNotEmpty(roles())) map.build(new NVStringList("roles", roles()));
+            if(SUS.isNotEmpty(permissions()))map.build(new NVStringList("permissions", permissions()));
+        }
+        map.build(lookup(Param.INPUT_CONTENT_TYPE))
                 .build(lookup(Param.OUTPUT_CONTENT_TYPE))
                 .build(SUS.enumsToStringList("http_methods", getHTTPMethods()))
                 .build(lookup(Param.IS_PARTIAL_REQUEST_ENABLED));
+
+        return map;
 
     }
 
