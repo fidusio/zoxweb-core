@@ -433,7 +433,7 @@ public class SSLContextInfo
     public SSLEngine newInstance() {
         // Create SSLEngine with or without peer information based on mode
         SSLEngine ret = clientAddress != null
-                ? sslContext.createSSLEngine(clientAddress.getHostName(), clientAddress.getPort())
+                ? sslContext.createSSLEngine(clientAddress.getHostString(), clientAddress.getPort())
                 : sslContext.createSSLEngine();
 
         // Apply custom protocols if specified
