@@ -49,9 +49,6 @@ public final class SecUtil {
     }
 
 
-
-
-
     public static void loadProviders() {
 
         if (SecUtil.getProvider(BC_PROVIDER) == null) {
@@ -96,10 +93,8 @@ public final class SecUtil {
             log.getLogger().info("**Warning**: Provider " + providerName + " NOT Loaded ");
     }
 
-    public static void init()
-    {
-        if(initialized.compareAndSet(false, true))
-        {
+    public static void init() {
+        if (initialized.compareAndSet(false, true)) {
             java.util.logging.Logger bcLogger = java.util.logging.Logger.getLogger("org.bouncycastle");
             bcLogger.setLevel(java.util.logging.Level.SEVERE);
             bcLogger.setUseParentHandlers(false);  // Prevents parent loggers from handling
@@ -111,9 +106,10 @@ public final class SecUtil {
             SecTag.REGISTRAR.registerValue(new SecTag(SecTag.SUN_JSSE, SecTag.TagID.TLS));
         }
     }
+
     // DO NOT REMOVE FROM HERE
     static {
-       init();
+        init();
     }
 
     /**
@@ -601,14 +597,12 @@ public final class SecUtil {
         if (sizeInBytes < 1) {
             throw new IllegalArgumentException("invalid size " + sizeInBytes + " must be greater than zero.");
         }
-
         if (sr == null) {
             sr = defaultSecureRandom();
         }
 
         byte[] ret = new byte[sizeInBytes];
         sr.nextBytes(ret);
-
         return ret;
     }
 

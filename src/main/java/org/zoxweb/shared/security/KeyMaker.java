@@ -36,13 +36,13 @@ public interface KeyMaker
 		throws NullPointerException, IllegalArgumentException, AccessSecurityException;
 
 
-	EncapsulatedKey lookupEncryptedKeyDOA(APIDataStore<?, ?> dataStore, NVEntity nve)
+	EncapsulatedKey lookupEncapsulatedKey(APIDataStore<?, ?> dataStore, NVEntity nve)
 		throws NullPointerException, IllegalArgumentException, AccessSecurityException;
 
-	EncapsulatedKey lookupEncryptedKeyDOA(APIDataStore<?, ?> dataStore, String dataRefGUID)
+	EncapsulatedKey lookupEncapsulatedKey(APIDataStore<?, ?> dataStore, String dataRefGUID)
 			throws NullPointerException, IllegalArgumentException, AccessSecurityException;
 	
-	EncapsulatedKey lookupEncryptedKeyDOA(APIDataStore<?, ?> dataStore, String resourceRefGUID, String subjectGUID)
+	EncapsulatedKey lookupEncapsulatedKey(APIDataStore<?, ?> dataStore, String resourceRefGUID, String subjectGUID)
 		throws NullPointerException, IllegalArgumentException, AccessSecurityException;
 	
 }

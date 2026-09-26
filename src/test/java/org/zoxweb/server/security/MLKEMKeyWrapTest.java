@@ -16,6 +16,7 @@ import org.zoxweb.shared.crypto.CryptoConst;
 import org.zoxweb.shared.crypto.EncapsulatedKey;
 import org.zoxweb.shared.crypto.EncryptedData;
 import org.zoxweb.shared.crypto.KeyLockType;
+import org.zoxweb.shared.security.AccessSecurityException;
 import org.zoxweb.shared.util.SUS;
 
 import java.security.SecureRandom;
@@ -195,6 +196,23 @@ public class MLKEMKeyWrapTest {
                 }
             }
         }
+    }
+
+    @Test
+    public void expiredKEMWrappedKeyIsRefused() throws Exception {
+        CryptoUtil.MLKEMKeyPair kp = CryptoUtil.generateMLKEMKeyPair(CryptoConst.ML_KEM_768);
+        EncapsulatedKey row = keyRowFor("pk");
+        row.setExpiry(1_000L);
+        EncapsulatedKey ek = CryptoUtil.createEncryptedKeyMLKEM(row, CryptoConst.ML_KEM_768, kp.getPublicKey());
+        assertThrows(AccessSecurityException.class, () -> CryptoUtil.unwrapKeyMLKEM(ek, kp.getPrivateKey()));
+        // expiry is authenticated: clearing it breaks the tag rather than reviving the key
+        ek.setExpiry(0);
+        assertThrows(SignatureException.class, () -> CryptoUtil.unwrapKeyMLKEM(ek, kp.getPrivateKey()));
+
+        EncapsulatedKey liveRow = keyRowFor("pk");
+        liveRow.setExpiry(System.currentTimeMillis() + 60_000L);
+        EncapsulatedKey live = CryptoUtil.createEncryptedKeyMLKEM(liveRow, CryptoConst.ML_KEM_768, kp.getPublicKey());
+        assertEquals(32, CryptoUtil.unwrapKeyMLKEM(live, kp.getPrivateKey()).length);
     }
 
     @Test

@@ -15,23 +15,23 @@
  */
 package org.zoxweb.server.security;
 
-import org.zoxweb.server.http.HTTPUtil;
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.SecretWithEncapsulation;
-
+import org.bouncycastle.crypto.generators.MLKEMKeyPairGenerator;
 import org.bouncycastle.crypto.kems.MLKEMExtractor;
 import org.bouncycastle.crypto.kems.MLKEMGenerator;
 import org.bouncycastle.crypto.params.MLKEMKeyGenerationParameters;
-import org.bouncycastle.crypto.generators.MLKEMKeyPairGenerator;
 import org.bouncycastle.crypto.params.MLKEMParameters;
 import org.bouncycastle.crypto.params.MLKEMPrivateKeyParameters;
 import org.bouncycastle.crypto.params.MLKEMPublicKeyParameters;
+import org.zoxweb.server.http.HTTPUtil;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.crypto.CryptoConst;
 import org.zoxweb.shared.crypto.EncapsulatedKey;
 import org.zoxweb.shared.crypto.EncryptedData;
 import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.net.IPAddress;
+import org.zoxweb.shared.security.AccessSecurityException;
 import org.zoxweb.shared.security.JWT;
 import org.zoxweb.shared.security.KeyStoreInfo;
 import org.zoxweb.shared.util.*;
@@ -45,6 +45,7 @@ import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import java.io.*;
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.*;
@@ -53,18 +54,17 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.security.spec.*;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import org.zoxweb.shared.security.AccessSecurityException;
 
 public class CryptoUtil {
 
 
     private static final Lock LOCK = new ReentrantLock();
     //private static final Logger  log = Logger.getLogger(CryptoUtil.class.getName());
-    private static final Map cacheMap = new HashMap();
+    private static final Map<String, KeyGenerator> cacheMap = new ConcurrentHashMap<>();
 
 
     private static final String RSASSA_PSS = "RSASSA-PSS";
@@ -82,8 +82,32 @@ public class CryptoUtil {
 
     private static final String GCM_TRANSFORMATION = "AES/GCM/NoPadding";
     private static final String JDK_JCE_PROVIDER = "SunJCE";
-    /** HKDF label under which a record cipher key is derived from the wrapping key. */
+    /**
+     * HKDF label under which a record cipher key is derived from the wrapping key.
+     */
     private static final byte[] RECORD_KDF_LABEL = SUS.getBytes("enc");
+
+    /* ------------------------------------------- packed record helpers */
+
+    /** UTF-8 of a text attribute, empty for null, refused above {@code max} bytes. */
+    static byte[] packedText(String name, String value, int max) {
+        byte[] ret = value != null ? SUS.getBytes(value) : Const.EMPTY_BYTE_ARRAY;
+        if (ret.length > max) {
+            throw new IllegalArgumentException(name + " too long: " + ret.length + " bytes, max " + max);
+        }
+        return ret;
+    }
+
+    /** The next {@code length} bytes as text, null when the length is 0. */
+    static String packedText(ByteBuffer bb, int length) {
+        return length > 0 ? SUS.toString(packedBytes(bb, length)) : null;
+    }
+
+    static byte[] packedBytes(ByteBuffer bb, int length) {
+        byte[] ret = new byte[length];
+        bb.get(ret);
+        return ret;
+    }
 
 
     public static String base64URLHmacSHA256(String secret, String data)
@@ -246,6 +270,10 @@ public class CryptoUtil {
      * @throws SignatureException       if any authenticated attribute or the ciphertext was altered,
      *                                  or the key is wrong
      * @throws IllegalArgumentException if the record version, cipher or KDF is not supported
+     * @throws AccessSecurityException  if the record carries an expiry that has passed
+     *                                  ({@link EncryptedData#isExpired()}); a record without expiry
+     *                                  never expires. The check runs after the tag is verified, so
+     *                                  an altered expiry surfaces as tampering, not as expiry.
      */
     public static byte[] decryptEncryptedData(final EncryptedData record, final byte[] key)
             throws NoSuchAlgorithmException,
@@ -274,6 +302,8 @@ public class CryptoUtil {
      * Opens {@code cipherText} as the sealed payload of {@code record}: the associated data comes
      * from the record, the bytes to decrypt from the argument, so a caller can hand over a slice of
      * the stored ciphertext. {@code expectedAlgorithm} is what the record's {@code alg} must say.
+     * Every open path ends here, so the expiry refusal applies to plain records and to wrapped keys
+     * alike.
      */
     private static byte[] openRecord(final EncryptedData record, final byte[] key, byte[] extraAssociatedData, byte[] cipherText, String expectedAlgorithm)
             throws NoSuchAlgorithmException,
@@ -318,6 +348,11 @@ public class CryptoUtil {
         if (plain.length != record.getDataLength()) {
             Arrays.fill(plain, (byte) 0);
             throw new SignatureException("Data tampered with: length mismatch");
+        }
+        // exp is authenticated, so only a genuine expiry gets here; a forged one failed the tag above
+        if (record.isExpired()) {
+            Arrays.fill(plain, (byte) 0);
+            throw new AccessSecurityException("Record expired at " + record.getExpiry());
         }
         return plain;
     }
@@ -384,7 +419,8 @@ public class CryptoUtil {
     /**
      * Opens the key sealed in {@code ek}.
      *
-     * @throws SignatureException if the row was re-pointed, the record altered, or the wrapping key is wrong
+     * @throws SignatureException      if the row was re-pointed, the record altered, or the wrapping key is wrong
+     * @throws AccessSecurityException if the wrapped key carries an expiry that has passed
      */
     public static byte[] unwrapKey(final EncapsulatedKey ek, final byte[] wrappingKey)
             throws NullPointerException,
@@ -435,7 +471,9 @@ public class CryptoUtil {
             this.privateKey = privateKey;
         }
 
-        /** The parameter set name, {@code ML-KEM-512}, {@code ML-KEM-768} or {@code ML-KEM-1024}. */
+        /**
+         * The parameter set name, {@code ML-KEM-512}, {@code ML-KEM-768} or {@code ML-KEM-1024}.
+         */
         public String getAlgorithm() {
             return algorithm;
         }
@@ -563,6 +601,7 @@ public class CryptoUtil {
      *
      * @throws IllegalArgumentException if the row is not KEM-wrapped or names a KEM this library does not know
      * @throws SignatureException       if the row was re-pointed or altered, or the private key does not match
+     * @throws AccessSecurityException  if the wrapped key carries an expiry that has passed
      */
     public static byte[] unwrapKeyMLKEM(final EncapsulatedKey ek, final byte[] privateKey)
             throws NullPointerException,
@@ -1049,28 +1088,41 @@ public class CryptoUtil {
     }
 
 
-    public static SecretKey generateKey(CryptoConst.CryptoAlgo type, int keySizeInBits)
-            throws NoSuchAlgorithmException {
-        return generateKey(type.getName(), keySizeInBits);
+    /**
+     * Generates a fresh symmetric key of the given algorithm and size, drawn from
+     * {@link SecUtil#defaultSecureRandom()} so every key in the process comes from one source.
+     *
+     * @throws NoSuchAlgorithmException  if no provider supplies {@code type}
+     * @throws InvalidParameterException if {@code keySizeInBits} is not valid for {@code type}
+     */
+    public static SecretKey generateSecretKey(CryptoConst.CryptoAlgo type, int keySizeInBits)
+            throws NoSuchAlgorithmException, InvalidParameterException {
+        return generateSecretKey(type.getName(), keySizeInBits);
     }
 
 
-    public static SecretKey generateKey(String type, int keySizeInBits)
-            throws NoSuchAlgorithmException {
+    /**
+     * @see #generateSecretKey(CryptoConst.CryptoAlgo, int)
+     */
+    public static SecretKey generateSecretKey(String type, int keySizeInBits)
+            throws NoSuchAlgorithmException, InvalidParameterException {
         String key = type + "-" + keySizeInBits;
-        LOCK.lock();
-        try {
-            KeyGenerator kg = (KeyGenerator) cacheMap.get(key);
-            if (kg == null) {
-                kg = KeyGenerator.getInstance(type);
-                //kg.init(keySizeInBits, (SecureRandom)defaultSecureRandom());
-                kg.init(keySizeInBits);
-                cacheMap.put(key, kg);
+        KeyGenerator kg = cacheMap.get(key);
+        if (kg == null) {
+            LOCK.lock();
+            try {
+                kg = cacheMap.get(key);
+                if (kg == null) {
+                    kg = KeyGenerator.getInstance(type);
+                    kg.init(keySizeInBits, SecUtil.defaultSecureRandom());
+                    cacheMap.put(key, kg);
+                }
+            } finally {
+                LOCK.unlock();
             }
-
+        }
+        synchronized (kg) {
             return kg.generateKey();
-        } finally {
-            LOCK.unlock();
         }
     }
 
@@ -1229,11 +1281,11 @@ public class CryptoUtil {
         KeyStoreInfo ret = new KeyStoreInfo();
         ret.setKeyStore(keyStoreName);
         ret.setAlias(alias);
-        ret.setKeyStorePassword(generateKey(CryptoConst.CryptoAlgo.AES, CryptoConst.AES_256_KEY_SIZE * 8).getEncoded());
+        ret.setKeyStorePassword(generateSecretKey(CryptoConst.CryptoAlgo.AES, CryptoConst.AES_256_KEY_SIZE * 8).getEncoded());
         if (CryptoConst.KSType.PKCS12.getName().equalsIgnoreCase(keyStoreType)) {
             ret.setAliasPassword(ret.getKeyStorePassword());
         } else {
-            ret.setAliasPassword(generateKey(CryptoConst.CryptoAlgo.AES, CryptoConst.AES_256_KEY_SIZE * 8).getEncoded());
+            ret.setAliasPassword(generateSecretKey(CryptoConst.CryptoAlgo.AES, CryptoConst.AES_256_KEY_SIZE * 8).getEncoded());
         }
         ret.setKeyStoreType(keyStoreType);
         return ret;

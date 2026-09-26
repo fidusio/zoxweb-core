@@ -1,6 +1,7 @@
 package org.zoxweb.shared.security;
 
 import org.junit.jupiter.api.Test;
+import org.zoxweb.shared.util.AppID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -99,9 +100,9 @@ class PrincipalIdentifierTest {
     void setDomainIDRejectsInvalidValue() {
         PrincipalIdentifier pi = new PrincipalIdentifier();
 
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-                () -> pi.setDomainID("test"));
-        assertEquals("Invalid input: test", ex.getMessage());
+        // a single label is not a domain; the message belongs to the filter, not to this class
+        assertThrows(IllegalArgumentException.class, () -> pi.setDomainID("test"));
+        assertNull(pi.getDomainID());
     }
 
     @Test
@@ -152,12 +153,36 @@ class PrincipalIdentifierTest {
 
     @Test
     void getDomainAppIDReturnsCanonicalForm() {
-        PrincipalIdentifier pi = new PrincipalIdentifier("username", "test.com", "myApp");
-        String canonical = pi.getDomainAppID();
+        PrincipalIdentifier pi = new PrincipalIdentifier("username", "Test.COM", "myApp");
 
-        assertNotNull(canonical);
-        assertTrue(canonical.toLowerCase().contains("test.com"));
-        assertTrue(canonical.toLowerCase().contains("myapp"));
+        // domain and app, both lowercased, joined by the AppID separator
+        assertEquals("test.com" + AppID.CAN_ID_SEP + "myapp", pi.getDomainAppID());
+        assertEquals(pi.getDomainAppID(), pi.toCanonicalID());
+    }
+
+    // ---------- Status ----------
+
+    @Test
+    void statusIsNullByDefaultAndRoundTrips() {
+        PrincipalIdentifier pi = new PrincipalIdentifier("testuser");
+        assertNull(pi.getStatus());
+
+        pi.setStatus(SecConst.SecStatus.ACTIVE);
+        assertEquals(SecConst.SecStatus.ACTIVE, pi.getStatus());
+
+        pi.setStatus(SecConst.SecStatus.DEACTIVATED);
+        assertEquals(SecConst.SecStatus.DEACTIVATED, pi.getStatus());
+    }
+
+    @Test
+    void statusDoesNotAffectEquality() {
+        PrincipalIdentifier a = new PrincipalIdentifier("testuser");
+        PrincipalIdentifier b = new PrincipalIdentifier("testuser");
+        a.setStatus(SecConst.SecStatus.ACTIVE);
+        b.setStatus(SecConst.SecStatus.INACTIVE);
+
+        assertEquals(a, b);
+        assertEquals(a.hashCode(), b.hashCode());
     }
 
     // ---------- equals ----------
@@ -260,7 +285,7 @@ class PrincipalIdentifierTest {
         pi.setPrincipalID("test@gmail.com");
         assertNotEquals(empty, pi.hashCode());
 
-        // principal_id is mandatory: null is rejected and the hash is unchanged
+        // principal_id is mandatory, so its filter runs even on null and rejects it; the hash is unchanged
         assertThrows(NullPointerException.class, () -> pi.setPrincipalID(null));
         assertNotEquals(empty, pi.hashCode());
     }

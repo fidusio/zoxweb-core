@@ -1,9 +1,8 @@
 package org.zoxweb.server.util;
 
-import org.zoxweb.server.security.CryptoUtil;
+import org.zoxweb.server.security.SecUtil;
 import org.zoxweb.server.security.HashUtil;
 import org.zoxweb.shared.crypto.CryptoConst;
-import org.zoxweb.shared.util.Const;
 import org.zoxweb.shared.util.IDGenerator;
 import org.zoxweb.shared.util.SharedBase64;
 import org.zoxweb.shared.util.SharedBase64.Base64Type;
@@ -105,12 +104,7 @@ public class IDGs {
             String ret = null;
 
             do {
-                try {
-                    ret = SharedBase64.encodeAsString(Base64Type.URL, CryptoUtil.generateKey(CryptoConst.CryptoAlgo.AES, (Const.TypeInBytes.BYTE.sizeInBits(CryptoConst.AES_256_KEY_SIZE))).getEncoded());
-                } catch (NoSuchAlgorithmException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
+                ret = SharedBase64.encodeAsString(Base64Type.URL, SecUtil.randomBytes(CryptoConst.AES_256_KEY_SIZE));
             } while (!valide(ret));
 
             return ret;
@@ -127,12 +121,7 @@ public class IDGs {
             byte[] ret = null;
 
             do {
-                try {
-                    ret = SharedBase64.encode(Base64Type.URL, CryptoUtil.generateKey(CryptoConst.CryptoAlgo.AES, (Const.TypeInBytes.BYTE.sizeInBits(CryptoConst.AES_256_KEY_SIZE))).getEncoded());
-                } catch (NoSuchAlgorithmException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
+                ret = SharedBase64.encode(Base64Type.URL, SecUtil.randomBytes(CryptoConst.AES_256_KEY_SIZE));
             } while (!valide(ret));
 
             return ret;

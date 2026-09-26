@@ -29,34 +29,39 @@ import org.zoxweb.shared.util.SharedBase64.Base64Type;
  * {@code |ct} and is the GCM associated data, so every attribute except the ciphertext is
  * authenticated and a record cannot be re-pointed at another key without failing its tag.
  * <pre>
- * v            int     format version, 1
+ * v            int     format version, 2
  * alg          string  A256GCM
  * kdf          string  HKDF-SHA256; the cipher key is derived from the wrapping key with the label "enc"
  * iv           b64url  12-byte random nonce, fresh per encryption
  * data_length  long    plaintext length in bytes
  * mask         string  optional display fragment computed at encryption time (ENCRYPT_MASK fields)
- * exp          long    optional expiry, epoch millis
+ * exp          long    optional expiry, epoch millis; 0 or absent never expires, otherwise the
+ *                      open paths refuse the record once it has passed ({@link #isExpired()})
  * hint         string  optional
+ * data_type    string  what the plaintext is, by default the class name of its Java type; the
+ *                      storage codecs require it
  * cipher_data  b64url  ciphertext with the 16-byte GCM tag appended
  * </pre>
  * Text attributes may not contain {@code |}. The class stays a {@link PropertyDAO} so the meta-model
  * and JSON tooling can carry it, but the entity fields (GUID, subject GUID, name, timestamps) are
  * not part of the record and are not authenticated: only the attributes above are.
  * <p>
- * Set {@code mask}, {@code exp} and {@code hint} <em>before</em>
- * encrypting; changing any of them afterwards invalidates the record.
+ * Set {@code mask}, {@code exp}, {@code hint} and {@code data_type} <em>before</em>
+ * encrypting; changing any of them afterwards invalidates the record. {@code data_type} is a label
+ * the record carries and authenticates but never interprets: a reader that opens the record can
+ * trust it and pick the mapper from plaintext bytes to object accordingly.
  */
 @SuppressWarnings("serial")
 public class EncryptedData
         extends PropertyDAO
         implements CryptoBase {
 
-    public static final int VERSION = 1;
+    public static final int VERSION = 2;
     public static final int IV_SIZE = 12;
     public static final int TAG_SIZE = 16;
     /** Separator of the canonical form. */
     public static final char SEP = '|';
-    private static final int FIELD_COUNT = 9;
+    private static final int FIELD_COUNT = 10;
 
     protected enum Param
             implements GetNVConfig {
@@ -68,6 +73,7 @@ public class EncryptedData
         MASK(NVConfigManager.createNVConfig("mask", "Display fragment for masked fields", "Mask", false, true, String.class)),
         EXPIRY(NVConfigManager.createNVConfig("exp", "Expiry, epoch millis", "Expiry", false, true, Long.class)),
         HINT(NVConfigManager.createNVConfig("hint", "Hint", "Hint", false, true, String.class)),
+        DATA_TYPE(NVConfigManager.createNVConfig("data_type", "What the plaintext is, for the mapper back to an object", "DataType", false, true, String.class)),
         CIPHER_DATA(NVConfigManager.createNVConfig("cipher_data", "Cipher data with the GCM tag appended", "CipherData", true, true, byte[].class)),
         ;
 
@@ -157,7 +163,23 @@ public class EncryptedData
     }
 
     public void setExpiry(long expiry) {
-        setValue(Param.EXPIRY, expiry > 0 ? Long.valueOf(expiry) : null);
+        setValue(Param.EXPIRY, expiry > 0 ? expiry : 0);
+    }
+
+    /**
+     * @return true when an expiry is set and lies in the past; a record without expiry (0) never expires.
+     */
+    public boolean isExpired() {
+        return isExpired(System.currentTimeMillis());
+    }
+
+    /**
+     * @param now epoch millis to compare against
+     * @return true when an expiry is set and is at or before {@code now}; 0 means never expires.
+     */
+    public boolean isExpired(long now) {
+        long exp = getExpiry();
+        return exp > 0 && exp <= now;
     }
 
     public String getHint() {
@@ -166,6 +188,18 @@ public class EncryptedData
 
     public void setHint(String hint) {
         setValue(Param.HINT, checkText("hint", hint));
+    }
+
+    /**
+     * @return what the plaintext is, or null when the record does not say. Authenticated, so a
+     * reader that opened the record can trust it.
+     */
+    public String getDataType() {
+        return lookupValue(Param.DATA_TYPE);
+    }
+
+    public void setDataType(String dataType) {
+        setValue(Param.DATA_TYPE, checkText("data_type", dataType));
     }
 
     /**
@@ -208,7 +242,8 @@ public class EncryptedData
             sb.append(getExpiry());
         }
         sb.append(SEP);
-        append(sb, getHint());
+        append(sb, getHint()).append(SEP);
+        append(sb, getDataType());
         if (includeCipherText) {
             sb.append(SEP);
             append(sb, encode(getEncryptedData()));
@@ -235,7 +270,8 @@ public class EncryptedData
         ret.setMask(text(t[5]));
         ret.setExpiry(parseLong("exp", t[6]));
         ret.setHint(text(t[7]));
-        ret.setEncryptedData(decode(text(t[8])));
+        ret.setDataType(text(t[8]));
+        ret.setEncryptedData(decode(text(t[9])));
         return ret;
     }
 

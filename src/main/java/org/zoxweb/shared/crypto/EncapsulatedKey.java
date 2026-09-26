@@ -74,7 +74,7 @@ public class EncapsulatedKey
         }
     }
 
-    public final static NVConfigEntity NVCE_ENCAPSULATED_KEY = new NVConfigEntityPortable("encapsulated_key", null, "EncryptedKey", false, true, false, false, EncapsulatedKey.class, SUS.extractNVConfigs(Param.values()), null, false, EncryptedData.NVCE_ENCRYPTED_DATA);
+    public final static NVConfigEntity NVCE_ENCAPSULATED_KEY = new NVConfigEntityPortable("encapsulated_key", null, "EncapsulatedKey", false, true, false, false, EncapsulatedKey.class, SUS.extractNVConfigs(Param.values()), null, false, EncryptedData.NVCE_ENCRYPTED_DATA);
 
     public EncapsulatedKey() {
         super(NVCE_ENCAPSULATED_KEY);

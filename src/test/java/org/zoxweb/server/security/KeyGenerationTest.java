@@ -63,7 +63,7 @@ public class KeyGenerationTest {
           System.out.println("Encrypted by bob based64 [" + encrypted.length + "]:" + SharedBase64
               .encodeAsString(Base64Type.URL, encrypted));
 
-          Key aesKey = CryptoUtil.generateKey(CryptoConst.CryptoAlgo.AES, 256);
+          Key aesKey = CryptoUtil.generateSecretKey(CryptoConst.CryptoAlgo.AES, 256);
           System.out.println(CryptoUtil.toString(aesKey));
 
           encrypted = CryptoUtil.encrypt(aliceKey.getPublic(), SUS.getBytes(json));
@@ -85,7 +85,7 @@ public class KeyGenerationTest {
     try {
       long ts = System.currentTimeMillis();
       for (int i = 0; i < loopSize; i++) {
-        keys[i] = CryptoUtil.generateKey(CryptoConst.CryptoAlgo.AES, i % 2 == 0 ? 256 : 128);
+        keys[i] = CryptoUtil.generateSecretKey(CryptoConst.CryptoAlgo.AES, i % 2 == 0 ? 256 : 128);
       }
       ts = System.currentTimeMillis() - ts;
       for (Key k : keys) {

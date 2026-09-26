@@ -51,9 +51,9 @@ public class CryptoPerf {
                 case "aes":
                 case "des":
                     if (verify) {
-                        set.add(CryptoUtil.generateKey(keyName, keySizeInBits));
+                        set.add(CryptoUtil.generateSecretKey(keyName, keySizeInBits));
                     } else
-                        assert CryptoUtil.generateKey(keyName, keySizeInBits) != null;
+                        assert CryptoUtil.generateSecretKey(keyName, keySizeInBits) != null;
                     break;
                 case "ec":
                 case "rsa":

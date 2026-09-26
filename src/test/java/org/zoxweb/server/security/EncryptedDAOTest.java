@@ -6,6 +6,7 @@ import org.zoxweb.shared.crypto.CryptoConst;
 import org.zoxweb.shared.crypto.EncapsulatedKey;
 import org.zoxweb.shared.crypto.EncryptedData;
 import org.zoxweb.shared.crypto.KeyLockType;
+import org.zoxweb.shared.security.AccessSecurityException;
 import org.zoxweb.shared.util.SUS;
 
 import java.security.SignatureException;
@@ -27,13 +28,14 @@ public class EncryptedDAOTest {
     static final byte[] DATA = SUS.getBytes("The quick brown fox jumps over the lazy dog.");
 
     // field positions in the canonical form
-    static final int V = 0, ALG = 1, KDF = 2, IV = 3, LEN = 4, MASK = 5, EXP = 6, HINT = 7, CT = 8;
+    static final int V = 0, ALG = 1, KDF = 2, IV = 3, LEN = 4, MASK = 5, EXP = 6, HINT = 7, DT = 8, CT = 9;
 
     private static EncryptedData sealed(byte[] data) throws Exception {
         EncryptedData ed = new EncryptedData();
         ed.setHint("unit test");
         ed.setExpiry(1_900_000_000_000L);
         ed.setMask("****1234");
+        ed.setDataType("text");
         return CryptoUtil.encryptData(ed, KEY, data);
     }
 
@@ -62,6 +64,79 @@ public class EncryptedDAOTest {
         assertEquals(DATA.length, ed.getDataLength());
         assertEquals(DATA.length + EncryptedData.TAG_SIZE, ed.getEncryptedData().length);
         assertArrayEquals(DATA, CryptoUtil.decryptEncryptedData(ed, KEY));
+    }
+
+    @Test
+    public void expiry() throws Exception {
+        // no expiry (0) never expires
+        EncryptedData ed = new EncryptedData();
+        assertEquals(0, ed.getExpiry());
+        assertFalse(ed.isExpired());
+        assertFalse(ed.isExpired(Long.MAX_VALUE));
+        ed.setExpiry(0);
+        assertFalse(ed.isExpired(Long.MAX_VALUE));
+        ed.setExpiry(-5);
+        assertEquals(0, ed.getExpiry());
+        assertFalse(ed.isExpired(Long.MAX_VALUE));
+
+        // set expiry: not expired before, expired at and after
+        ed.setExpiry(1_000L);
+        assertFalse(ed.isExpired(999L));
+        assertTrue(ed.isExpired(1_000L));
+        assertTrue(ed.isExpired(1_001L));
+        assertTrue(ed.isExpired());
+        ed.setExpiry(System.currentTimeMillis() + 60_000L);
+        assertFalse(ed.isExpired());
+
+        // the verdict survives the storage codecs
+        ed.setExpiry(1_000L);
+        ed.setDataType("bytes");
+        CryptoUtil.encryptData(ed, KEY, DATA);
+        assertTrue(EncryptedData.fromCanonicalID(ed.toCanonicalID()).isExpired(1_000L));
+        assertTrue(CipherCodecs.EDDecoder.decode(CipherCodecs.EDEncoder.encode(ed)).isExpired(1_000L));
+        ed.setExpiry(0);
+        CryptoUtil.encryptData(ed, KEY, DATA);
+        assertFalse(EncryptedData.fromCanonicalID(ed.toCanonicalID()).isExpired(Long.MAX_VALUE));
+        assertFalse(CipherCodecs.EDDecoder.decode(CipherCodecs.EDEncoder.encode(ed)).isExpired(Long.MAX_VALUE));
+    }
+
+    @Test
+    public void expiredRecordIsRefused() throws Exception {
+        // sealed with an expiry in the past: authenticates, then refused
+        EncryptedData past = new EncryptedData();
+        past.setDataType("bytes");
+        past.setExpiry(1_000L);
+        CryptoUtil.encryptData(past, KEY, DATA);
+        assertThrows(AccessSecurityException.class, () -> CryptoUtil.decryptEncryptedData(past, KEY));
+        // ... through every storage form
+        assertThrows(AccessSecurityException.class, () -> CryptoUtil.decryptEncryptedData(EncryptedData.fromCanonicalID(past.toCanonicalID()), KEY));
+        assertThrows(AccessSecurityException.class, () -> CryptoUtil.decryptEncryptedData(CipherCodecs.EDDecoder.decode(CipherCodecs.EDEncoder.encode(past)), KEY));
+        assertThrows(AccessSecurityException.class, () -> CryptoUtil.decryptEncryptedData(GSONUtil.fromJSON(GSONUtil.toJSON(past, false, false, false), EncryptedData.class), KEY));
+
+        // the wrong key on an expired record is tampering, not expiry: the tag is checked first
+        assertThrows(SignatureException.class, () -> CryptoUtil.decryptEncryptedData(past, OTHER_KEY));
+
+        // a live record whose expiry is edited into the past fails its tag, it does not become "expired"
+        EncryptedData live = sealed(DATA);
+        assertArrayEquals(DATA, CryptoUtil.decryptEncryptedData(live, KEY));
+        live.setExpiry(1_000L);
+        assertThrows(SignatureException.class, () -> CryptoUtil.decryptEncryptedData(live, KEY));
+        // ... and an expired record cannot be revived by clearing or extending the expiry
+        past.setExpiry(0);
+        assertThrows(SignatureException.class, () -> CryptoUtil.decryptEncryptedData(past, KEY));
+        past.setExpiry(1_900_000_000_000L);
+        assertThrows(SignatureException.class, () -> CryptoUtil.decryptEncryptedData(past, KEY));
+
+        // no expiry and a future expiry both open
+        EncryptedData none = new EncryptedData();
+        none.setDataType("bytes");
+        CryptoUtil.encryptData(none, KEY, DATA);
+        assertArrayEquals(DATA, CryptoUtil.decryptEncryptedData(none, KEY));
+        EncryptedData future = new EncryptedData();
+        future.setDataType("bytes");
+        future.setExpiry(System.currentTimeMillis() + 60_000L);
+        CryptoUtil.encryptData(future, KEY, DATA);
+        assertArrayEquals(DATA, CryptoUtil.decryptEncryptedData(future, KEY));
     }
 
     @Test
@@ -98,14 +173,15 @@ public class EncryptedDAOTest {
         EncryptedData ed = sealed(DATA);
         String canonical = ed.toCanonicalID();
         String[] f = fields(canonical);
-        assertEquals(9, f.length);
-        assertEquals("1", f[V]);
+        assertEquals(10, f.length);
+        assertEquals("2", f[V]);
         assertEquals("A256GCM", f[ALG]);
         assertEquals("HKDF-SHA256", f[KDF]);
         assertEquals(String.valueOf(DATA.length), f[LEN]);
         assertEquals("****1234", f[MASK]);
         assertEquals("1900000000000", f[EXP]);
         assertEquals("unit test", f[HINT]);
+        assertEquals("text", f[DT]);
         // associated data is the canonical form without the trailing ciphertext
         assertEquals(canonical.substring(0, canonical.lastIndexOf('|')), ed.toAssociatedData());
 
@@ -120,6 +196,7 @@ public class EncryptedDAOTest {
         assertEquals("", b[MASK]);
         assertEquals("", b[EXP]);
         assertEquals("", b[HINT]);
+        assertEquals("", b[DT]);
         assertArrayEquals(DATA, CryptoUtil.decryptEncryptedData(EncryptedData.fromCanonicalID(bare.toCanonicalID()), KEY));
 
         // malformed input
@@ -127,10 +204,85 @@ public class EncryptedDAOTest {
         assertThrows(IllegalArgumentException.class, () -> EncryptedData.fromCanonicalID(canonical.substring(1)), "no version");
         assertThrows(IllegalArgumentException.class, () -> EncryptedData.fromCanonicalID(canonical + "|extra"));
         assertThrows(IllegalArgumentException.class, () -> EncryptedData.fromCanonicalID(canonical.substring(0, canonical.lastIndexOf('|'))));
-        assertThrows(IllegalArgumentException.class, () -> EncryptedData.fromCanonicalID("x|A256GCM|HKDF-SHA256||0||||"));
+        assertThrows(IllegalArgumentException.class, () -> EncryptedData.fromCanonicalID("x|A256GCM|HKDF-SHA256||0|||||"));
         // the separator is refused in text attributes
         assertThrows(IllegalArgumentException.class, () -> new EncryptedData().setHint("a|b"));
         assertThrows(IllegalArgumentException.class, () -> new EncryptedData().setMask("a|b"));
+        assertThrows(IllegalArgumentException.class, () -> new EncryptedData().setDataType("a|b"));
+    }
+
+    @Test
+    public void packedFormRoundTrip() throws Exception {
+        EncryptedData ed = sealed(DATA);
+        byte[] packed = CipherCodecs.EDEncoder.encode(ed);
+        // v | alg "A256GCM" | kdf "HKDF-SHA256" | iv | data_length | data_type "text"
+        // | mask "****1234" | exp | hint "unit test" | ciphertext
+        int expectedSize = 1 + (1 + 7) + (1 + 11) + (1 + 12) + 8 + (2 + 4) + (2 + 8) + 8 + (2 + 9) + ed.getEncryptedData().length;
+        assertEquals(expectedSize, packed.length);
+
+        EncryptedData back = CipherCodecs.EDDecoder.decode(packed);
+        assertEquals(ed.getVersion(), back.getVersion());
+        assertEquals(ed.getAlgorithm(), back.getAlgorithm());
+        assertEquals(ed.getKDF(), back.getKDF());
+        assertArrayEquals(ed.getIV(), back.getIV());
+        assertEquals(ed.getDataLength(), back.getDataLength());
+        assertEquals("text", back.getDataType());
+        assertEquals(ed.getMask(), back.getMask());
+        assertEquals(ed.getExpiry(), back.getExpiry());
+        assertEquals(ed.getHint(), back.getHint());
+        assertArrayEquals(ed.getEncryptedData(), back.getEncryptedData());
+        assertArrayEquals(DATA, CryptoUtil.decryptEncryptedData(back, KEY));
+
+        // optional attributes absent: zero-length fields, null after decoding, still opens
+        EncryptedData bare = new EncryptedData();
+        bare.setDataType("bytes");
+        CryptoUtil.encryptData(bare, KEY, DATA);
+        byte[] bareP = CipherCodecs.EDEncoder.encode(bare);
+        assertEquals(1 + (1 + 7) + (1 + 11) + (1 + 12) + 8 + (2 + 5) + 2 + 8 + 2 + bare.getEncryptedData().length, bareP.length);
+        EncryptedData bareBack = CipherCodecs.EDDecoder.decode(bareP);
+        assertNull(bareBack.getMask());
+        assertEquals(0, bareBack.getExpiry());
+        assertNull(bareBack.getHint());
+        assertArrayEquals(DATA, CryptoUtil.decryptEncryptedData(bareBack, KEY));
+
+        // data_type is a class name by default; a real one and a very long one both round-trip
+        EncryptedData typed = new EncryptedData();
+        typed.setDataType(org.zoxweb.shared.data.PropertyDAO.class.getName());
+        CryptoUtil.encryptData(typed, KEY, DATA);
+        assertEquals(typed.getDataType(), CipherCodecs.EDDecoder.decode(CipherCodecs.EDEncoder.encode(typed)).getDataType());
+        StringBuilder longName = new StringBuilder();
+        while (longName.length() < 1000) longName.append("org.zoxweb.Outer$Inner.");
+        typed.setDataType(longName.toString());
+        CryptoUtil.encryptData(typed, KEY, DATA);
+        assertEquals(longName.toString(), CipherCodecs.EDDecoder.decode(CipherCodecs.EDEncoder.encode(typed)).getDataType());
+
+        // null maps to null
+        assertNull(CipherCodecs.EDEncoder.encode(null));
+        assertNull(CipherCodecs.EDDecoder.decode(null));
+        // encoder refusals: not sealed, no data_type, a key row
+        assertThrows(IllegalArgumentException.class, () -> CipherCodecs.EDEncoder.encode(new EncryptedData()));
+        EncryptedData untyped = CryptoUtil.encryptData(new EncryptedData(), KEY, DATA);
+        assertThrows(IllegalArgumentException.class, () -> CipherCodecs.EDEncoder.encode(untyped));
+        assertThrows(IllegalArgumentException.class, () -> CipherCodecs.EDEncoder.encode(keyRow()));
+        // decoder refusals: wrong version, truncated, empty data_type, no ciphertext
+        byte[] wrongVersion = packed.clone();
+        wrongVersion[0] = (byte) (EncryptedData.VERSION + 1);
+        assertThrows(IllegalArgumentException.class, () -> CipherCodecs.EDDecoder.decode(wrongVersion));
+        assertThrows(IllegalArgumentException.class, () -> CipherCodecs.EDDecoder.decode(Arrays.copyOf(packed, 10)));
+        assertThrows(IllegalArgumentException.class, () -> CipherCodecs.EDDecoder.decode(new byte[0]));
+        int dataTypeAt = 1 + (1 + 7) + (1 + 11) + (1 + 12) + 8;   // offset of the two-byte data_type length
+        byte[] noType = packed.clone();
+        noType[dataTypeAt] = 0;
+        noType[dataTypeAt + 1] = 0;
+        assertThrows(IllegalArgumentException.class, () -> CipherCodecs.EDDecoder.decode(noType));
+        assertThrows(IllegalArgumentException.class, () -> CipherCodecs.EDDecoder.decode(Arrays.copyOf(bareP, bareP.length - bare.getEncryptedData().length)));
+
+        // a byte changed in storage decodes fine and is caught when the record is opened
+        byte[] tampered = packed.clone();
+        tampered[dataTypeAt + 2] = (byte) 'T';
+        EncryptedData decoded = CipherCodecs.EDDecoder.decode(tampered);
+        assertEquals("Text", decoded.getDataType());
+        assertThrows(SignatureException.class, () -> CryptoUtil.decryptEncryptedData(decoded, KEY));
     }
 
     @Test
@@ -153,6 +305,7 @@ public class EncryptedDAOTest {
         // change each attribute in turn, rebuild the record, expect refusal
         String[][] changes = {
                 {String.valueOf(HINT), "other hint"},
+                {String.valueOf(DT), "json"},
                 {String.valueOf(MASK), "****9999"},
                 {String.valueOf(EXP), "1900000000001"},
                 {String.valueOf(LEN), String.valueOf(DATA.length - 1)},
@@ -160,6 +313,7 @@ public class EncryptedDAOTest {
                 {String.valueOf(HINT), ""},
                 {String.valueOf(MASK), ""},
                 {String.valueOf(EXP), ""},
+                {String.valueOf(DT), ""},
         };
         for (String[] change : changes) {
             String[] f = base.clone();
@@ -179,9 +333,9 @@ public class EncryptedDAOTest {
         tagFlip.getEncryptedData()[tagFlip.getEncryptedData().length - 1] ^= 1;
         assertThrows(SignatureException.class, () -> CryptoUtil.decryptEncryptedData(tagFlip, KEY));
         // version, cipher and kdf are checked before any cryptography
-        EncryptedData v2 = EncryptedData.fromCanonicalID(canonical);
-        v2.setVersion(2);
-        assertThrows(IllegalArgumentException.class, () -> CryptoUtil.decryptEncryptedData(v2, KEY));
+        EncryptedData otherVersion = EncryptedData.fromCanonicalID(canonical);
+        otherVersion.setVersion(EncryptedData.VERSION + 1);
+        assertThrows(IllegalArgumentException.class, () -> CryptoUtil.decryptEncryptedData(otherVersion, KEY));
         EncryptedData alg = EncryptedData.fromCanonicalID(canonical);
         alg.setAlgorithm("A128GCM");
         assertThrows(IllegalArgumentException.class, () -> CryptoUtil.decryptEncryptedData(alg, KEY));
@@ -197,6 +351,27 @@ public class EncryptedDAOTest {
         ek.setKeyLockType(KeyLockType.NVENTITY);
         ek.setKeyGUID(UUID.randomUUID().toString());
         return CryptoUtil.createEncryptedKey(ek, KEY);
+    }
+
+    @Test
+    public void expiredWrappedKeyIsRefused() throws Exception {
+        EncapsulatedKey ek = new EncapsulatedKey();
+        ek.setSubjectGUID(UUID.randomUUID().toString());
+        ek.setReferenceGUID(UUID.randomUUID().toString());
+        ek.setReferenceType("org.zoxweb.shared.data.FileInfoDAO");
+        ek.setKeyLockType(KeyLockType.NVENTITY);
+        ek.setKeyGUID(UUID.randomUUID().toString());
+        ek.setExpiry(1_000L);
+        CryptoUtil.createEncryptedKey(ek, KEY);
+        assertThrows(AccessSecurityException.class, () -> CryptoUtil.unwrapKey(ek, KEY));
+        assertThrows(SignatureException.class, () -> CryptoUtil.unwrapKey(ek, OTHER_KEY), "wrong key is tampering, checked before expiry");
+        ek.setExpiry(0);
+        assertThrows(SignatureException.class, () -> CryptoUtil.unwrapKey(ek, KEY), "expiry is authenticated, clearing it breaks the tag");
+
+        EncapsulatedKey live = keyRow();
+        live.setExpiry(System.currentTimeMillis() + 60_000L);
+        CryptoUtil.createEncryptedKey(live, KEY);
+        assertEquals(32, CryptoUtil.unwrapKey(live, KEY).length);
     }
 
     /** Copies the sealed record attributes of one key into another, leaving the binding fields alone. */
@@ -220,7 +395,7 @@ public class EncryptedDAOTest {
         assertEquals(CryptoConst.ALG_A256GCM, ek.getAlgorithm());
         assertEquals(32, ek.getDataLength());
         assertEquals(32 + EncryptedData.TAG_SIZE, ek.getEncryptedData().length);
-        assertEquals(9, fields(ek.toCanonicalID()).length, "inherited canonical form");
+        assertEquals(10, fields(ek.toCanonicalID()).length, "inherited canonical form");
         assertEquals(32, ek.getKeySize(), "key_size is the outer key size in bytes");
         assertEquals(ek.getSubjectGUID() + "|" + ek.getReferenceGUID() + "|" + ek.getKeyGUID() + "|32", ek.toBindingData());
         assertFalse(ek.isKEMWrapped());

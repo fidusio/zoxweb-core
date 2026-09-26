@@ -170,7 +170,7 @@ public class EncryptedContentTest {
 
                 for (int i = 0; i < 10; i++) {
                     long ts = System.nanoTime();
-                    SecretKey sk = CryptoUtil.generateKey(CryptoConst.CryptoAlgo.AES, 256);
+                    SecretKey sk = CryptoUtil.generateSecretKey(CryptoConst.CryptoAlgo.AES, 256);
                     ts = System.nanoTime() - ts;
                     System.out.print("[" + ts + " ns]");
                     System.out.println(sk.getAlgorithm() + "," + sk.getFormat() + "," + SUS
@@ -252,7 +252,7 @@ public class EncryptedContentTest {
             }
 
             try {
-                SecretKey sk = CryptoUtil.generateKey(CryptoConst.CryptoAlgo.AES, 256);
+                SecretKey sk = CryptoUtil.generateSecretKey(CryptoConst.CryptoAlgo.AES, 256);
 
                 byte[] data = "Data To Test : the best of the west".getBytes(StandardCharsets.UTF_8);
 
