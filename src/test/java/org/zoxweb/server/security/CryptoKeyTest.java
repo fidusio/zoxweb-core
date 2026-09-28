@@ -1,6 +1,7 @@
 package org.zoxweb.server.security;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.zoxweb.shared.crypto.CryptoConst;
 import org.zoxweb.shared.util.SharedBase64;
@@ -16,6 +17,11 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class CryptoKeyTest {
+
+    @BeforeAll
+    public static void setup() {
+        SecUtil.init();
+    }
     @Test
     public void ECKey256() throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, NoSuchProviderException, InvalidKeySpecException {
         KeyPair kp = CryptoUtil.generateKeyPair(CryptoConst.PKInfo.EC_256);//"ec", 256);

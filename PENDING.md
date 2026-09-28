@@ -429,6 +429,15 @@ implementors will see it.
    server. When quoting numbers, use RAW for the server, ENDPOINT for the client-framework path —
    don't average them.
 
+4. **`EncapsulatedKey.toBindingData` joins unguarded GUIDs with `|`** — `EncapsulatedKey.java:185`
+   (spotted 2026-09-26 during the EncryptedData review, deferred by the maintainer). The binding
+   string (subject GUID `|` reference GUID `|` key GUID `|` key size) is GCM associated data, never
+   stored or parsed. `setKeyGUID` runs `checkText` (refuses `|`); `setReferenceGUID`
+   (`EncapsulatedKey.java:122`) and the inherited `setSubjectGUID` (`ReferenceIDDAO.java:101`) do
+   not. Two different GUID pairs could only collide if a GUID contained `|`, which UUIDs never do,
+   so this is defensive only. When convenient: apply `checkText` in `setReferenceGUID` and in a
+   `setSubjectGUID` override on EncapsulatedKey. No stored-format change.
+
 ---
 
 ## 5. Benchmark baseline — 2026-08-05/06, dbs.xlogistx.io

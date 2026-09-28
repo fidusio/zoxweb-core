@@ -561,21 +561,31 @@ public final class SecUtil {
         }
     }
 
+    /**
+     * The process-wide SecureRandom behind every nonce, key and KEM key pair. Created on first use:
+     * from {@link #SECURE_RANDOM_ALGO} when a caller preset it, otherwise the first
+     * {@link CryptoConst.SecureRandomType} the JVM supports. Never returns null.
+     */
     public static SecureRandom defaultSecureRandom() {
-        if (SECURE_RANDOM_ALGO == null && defaultSecureRandom == null) {
+        if (defaultSecureRandom == null) {
 
             SEC_LOCK.lock(true);
             try {
-                if (SECURE_RANDOM_ALGO == null && defaultSecureRandom == null) {
-                    for (CryptoConst.SecureRandomType srt : CryptoConst.SecureRandomType.values()) {
+                if (defaultSecureRandom == null) {
+                    CryptoConst.SecureRandomType[] candidates = SECURE_RANDOM_ALGO != null
+                            ? new CryptoConst.SecureRandomType[]{SECURE_RANDOM_ALGO}
+                            : CryptoConst.SecureRandomType.values();
+                    for (CryptoConst.SecureRandomType srt : candidates) {
                         try {
                             defaultSecureRandom = newSecureRandom(srt);
                             SECURE_RANDOM_ALGO = srt;
-                            //System.out.println("Default secure algorithm:"+srt);
                             break;
                         } catch (NoSuchAlgorithmException e) {
-                            //e.printStackTrace();
+                            // try the next candidate
                         }
+                    }
+                    if (defaultSecureRandom == null) {
+                        throw new IllegalStateException("No SecureRandom available for " + SECURE_RANDOM_ALGO);
                     }
                 }
             } finally {

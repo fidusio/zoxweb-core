@@ -80,7 +80,7 @@
         <angus.mail.version>2.0.5</angus.mail.version>
         <jsoup.version>RELEASE</jsoup.version>
         <junit.version>6.1.3</junit.version>
-        <okhttp.version>5.4.0</okhttp.version>
+        <okhttp.version>5.5.0</okhttp.version>
         <uuid.gen.version>RELEASE</uuid.gen.version>
     </properties>
 

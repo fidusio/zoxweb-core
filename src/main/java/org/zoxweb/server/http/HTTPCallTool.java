@@ -14,9 +14,6 @@
  * the License.
  */
 package org.zoxweb.server.http;
-
-//import okhttp3.OkHttpClient;
-
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.task.TaskUtil;

@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * every authenticated attribute, and refusal of a wrapped key re-pointed at another subject,
  * reference or wrapping key.
  */
-public class EncryptedDAOTest {
+public class EncryptedDataTest {
 
     static final byte[] KEY = SecUtil.randomBytes(32);
     static final byte[] OTHER_KEY = SecUtil.randomBytes(32);
@@ -32,6 +32,7 @@ public class EncryptedDAOTest {
 
     private static EncryptedData sealed(byte[] data) throws Exception {
         EncryptedData ed = new EncryptedData();
+        assert ed.getExpiry() == 0;
         ed.setHint("unit test");
         ed.setExpiry(1_900_000_000_000L);
         ed.setMask("****1234");

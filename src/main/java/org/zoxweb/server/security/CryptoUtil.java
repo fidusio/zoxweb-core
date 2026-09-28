@@ -375,9 +375,11 @@ public class CryptoUtil {
     }
 
     /**
-     * Wraps a fresh random 32-byte key into {@code ek} under {@code wrappingKey}. The subject GUID,
-     * reference GUID, reference type and key lock type must be set first: they are authenticated
-     * with the wrapped record. The entity GUID is the datastore's business and is never used.
+     * Wraps a fresh random 32-byte key into {@code ek} under {@code wrappingKey}. Set the subject
+     * GUID and reference GUID first: they are authenticated with the wrapped record through
+     * {@link EncapsulatedKey#toBindingData()}, along with the key GUID and key size. The reference
+     * type and key lock type are carried but not authenticated. The entity GUID is the datastore's
+     * business and is never used.
      */
     public static EncapsulatedKey createEncryptedKey(final EncapsulatedKey ek, final byte[] wrappingKey)
             throws NullPointerException,

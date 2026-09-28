@@ -158,8 +158,7 @@ public class EncryptedData
      * @return expiry as epoch millis, 0 when none.
      */
     public long getExpiry() {
-        Long l = lookupValue(Param.EXPIRY);
-        return l != null ? l : 0;
+        return lookupValue(Param.EXPIRY);
     }
 
     public void setExpiry(long expiry) {
@@ -235,7 +234,7 @@ public class EncryptedData
         sb.append(getVersion()).append(SEP);
         append(sb, getAlgorithm()).append(SEP);
         append(sb, getKDF()).append(SEP);
-        append(sb, encode(getIV())).append(SEP);
+        append(sb, SharedBase64.encodeAsString(Base64Type.URL, getIV())).append(SEP);
         sb.append(getDataLength()).append(SEP);
         append(sb, getMask()).append(SEP);
         if (getExpiry() > 0) {
@@ -246,7 +245,7 @@ public class EncryptedData
         append(sb, getDataType());
         if (includeCipherText) {
             sb.append(SEP);
-            append(sb, encode(getEncryptedData()));
+            append(sb, SharedBase64.encodeAsString(Base64Type.URL, getEncryptedData()));
         }
         return sb.toString();
     }
@@ -265,13 +264,13 @@ public class EncryptedData
         ret.setVersion(parseInt("v", t[0]));
         ret.setAlgorithm(text(t[1]));
         ret.setKDF(text(t[2]));
-        ret.setIV(decode(text(t[3])));
+        ret.setIV(SharedBase64.decode(text(t[3])));
         ret.setDataLength(parseLong("data_length", t[4]));
         ret.setMask(text(t[5]));
         ret.setExpiry(parseLong("exp", t[6]));
         ret.setHint(text(t[7]));
         ret.setDataType(text(t[8]));
-        ret.setEncryptedData(decode(text(t[9])));
+        ret.setEncryptedData(SharedBase64.decode(text(t[9])));
         return ret;
     }
 
@@ -340,13 +339,5 @@ public class EncryptedData
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("attribute " + name + " is not a number: " + token);
         }
-    }
-
-    static String encode(byte[] bytes) {
-        return bytes != null ? SUS.toString(SharedBase64.encode(Base64Type.URL, bytes, 0, bytes.length)) : null;
-    }
-
-    static byte[] decode(String text) {
-        return text != null ? SharedBase64.decode(Base64Type.URL, text) : null;
     }
 }
