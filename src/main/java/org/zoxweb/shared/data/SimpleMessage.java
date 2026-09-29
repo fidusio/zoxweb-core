@@ -94,7 +94,7 @@ public class SimpleMessage
 	}
 	
 	/**
-	 * This constructor instantiates SimpleDocumentDAO based on given NVConfigEntity parameter.
+	 * This constructor instantiates SimpleDocument based on given NVConfigEntity parameter.
 	 * @param nvce
 	 */
 	protected SimpleMessage(NVConfigEntity nvce) 

@@ -142,7 +142,7 @@ class PermissionGrantTest {
     @Test
     void permissionGrant_setOverwritesPrevious() {
         PermissionGrant pg = new PermissionGrant("perm-1", new ResourceMap("resource-1", "org.zoxweb.shared.data.DocumentDAO"));
-        ResourceMap rm2 = new ResourceMap("resource-2", "org.zoxweb.shared.data.FolderInfoDAO");
+        ResourceMap rm2 = new ResourceMap("resource-2", "org.zoxweb.shared.data.FolderInfo");
         pg.setPermissionGUID("perm-2");
         pg.setResourceMap(rm2);
         assertEquals("perm-2", pg.getPermissionGUID());

@@ -24,28 +24,27 @@ import org.zoxweb.shared.accounting.Currency;
 import org.zoxweb.shared.accounting.FinancialTransactionDAO;
 import org.zoxweb.shared.accounting.AmountDAO;
 import org.zoxweb.shared.data.CreditCardDAO;
-import org.zoxweb.shared.data.FormInfoDAO;
-import org.zoxweb.shared.util.NVEntityComparator;
+import org.zoxweb.shared.data.FormInfo;
 
 public class NVEntityComparatorTest {
 	
 	private static void testFormInfoDAO() {
 
-		List<FormInfoDAO> list = new ArrayList<FormInfoDAO>();
+		List<FormInfo> list = new ArrayList<FormInfo>();
 		
-		FormInfoDAO formInfo1 = new FormInfoDAO();
+		FormInfo formInfo1 = new FormInfo();
 		CreditCardDAO creditCard1 = new CreditCardDAO();
 		creditCard1.setName("Visa");
 		formInfo1.setFormReference(creditCard1);	
 		list.add(formInfo1);
 		
-		FormInfoDAO formInfo2 = new FormInfoDAO();
+		FormInfo formInfo2 = new FormInfo();
 		CreditCardDAO creditCard2= new CreditCardDAO();
 		creditCard2.setName("AMEX");
 		formInfo2.setFormReference(creditCard2);	
 		list.add(formInfo2);
 		
-		FormInfoDAO formInfo3 = new FormInfoDAO();
+		FormInfo formInfo3 = new FormInfo();
 		CreditCardDAO creditCard3 = new CreditCardDAO();
 		creditCard3.setName("Master Card");
 		formInfo3.setFormReference(creditCard3);	
@@ -53,15 +52,15 @@ public class NVEntityComparatorTest {
 		
 		System.out.println("UNSORTED LIST");
 
-		for (FormInfoDAO doc : list) {
+		for (FormInfo doc : list) {
 			System.out.println("Document: " + doc);
 		}
 		
-		Collections.sort(list, new NVEntityComparator("form_reference.name", FormInfoDAO.NVC_FORM_INFO_DAO));
+		Collections.sort(list, new NVEntityComparator("form_reference.name", FormInfo.NVC_FORM_INFO));
 		
 		System.out.println("SORTED LIST");
 
-		for (FormInfoDAO doc : list) {
+		for (FormInfo doc : list) {
 			System.out.println("Document: " + doc);
 		}
 	}

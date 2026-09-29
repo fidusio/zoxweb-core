@@ -16,7 +16,7 @@
 package org.zoxweb.shared.data;
 
 import org.zoxweb.shared.data.DataConst.PhoneType;
-import org.zoxweb.shared.data.FileInfoDAO.FileType;
+import org.zoxweb.shared.data.FileInfo.FileType;
 
 import org.zoxweb.shared.util.NVEntity;
 
@@ -54,49 +54,49 @@ public class CopyNVEntityTest {
 		
 		
 		
-		FolderInfoDAO folderInfoDAO = new FolderInfoDAO();
-		folderInfoDAO.setName("My Folder");
-		folderInfoDAO.setDescription("Personal folder.");
-		folderInfoDAO.setCreationTime(System.currentTimeMillis());
-		folderInfoDAO.setReferenceID("00000");
-		folderInfoDAO.setSubjectGUID("20000");
+		FolderInfo folderInfo = new FolderInfo();
+		folderInfo.setName("My Folder");
+		folderInfo.setDescription("Personal folder.");
+		folderInfo.setCreationTime(System.currentTimeMillis());
+		folderInfo.setReferenceID("00000");
+		folderInfo.setSubjectGUID("20000");
 		
-		FileInfoDAO fileInfoDAO1 = new FileInfoDAO();
-		fileInfoDAO1.setName("File 1");
-		fileInfoDAO1.setDescription("My file 1.");
-		fileInfoDAO1.setFileType(FileType.FILE);
-		fileInfoDAO1.setReferenceID("11111");
-		fileInfoDAO1.setSubjectGUID("20000");
+		FileInfo fileInfo1 = new FileInfo();
+		fileInfo1.setName("File 1");
+		fileInfo1.setDescription("My file 1.");
+		fileInfo1.setFileType(FileType.FILE);
+		fileInfo1.setReferenceID("11111");
+		fileInfo1.setSubjectGUID("20000");
 		
-		folderInfoDAO.getFolderContent().add(fileInfoDAO1);
+		folderInfo.getFolderContent().add(fileInfo1);
 		
-		FileInfoDAO fileInfoDAO2 = new FileInfoDAO();
-		fileInfoDAO2.setName("File 2");
-		fileInfoDAO2.setDescription("My file 2.");
-		fileInfoDAO2.setFileType(FileType.FILE);
-		fileInfoDAO2.setReferenceID("22222");
-		fileInfoDAO2.setSubjectGUID("20000");
-		FileInfoDAO remoteFileInfo = new FileInfoDAO();
+		FileInfo fileInfo2 = new FileInfo();
+		fileInfo2.setName("File 2");
+		fileInfo2.setDescription("My file 2.");
+		fileInfo2.setFileType(FileType.FILE);
+		fileInfo2.setReferenceID("22222");
+		fileInfo2.setSubjectGUID("20000");
+		FileInfo remoteFileInfo = new FileInfo();
 		remoteFileInfo.setReferenceID("99999");
 		remoteFileInfo.setDescription("Remote file.");
-		fileInfoDAO2.setRemoteFileInfo(remoteFileInfo);
+		fileInfo2.setRemoteFileInfo(remoteFileInfo);
 		
-		folderInfoDAO.getFolderContent().add(fileInfoDAO2);
+		folderInfo.getFolderContent().add(fileInfo2);
 		
-		ret = SharedDataUtil.copyNVEntity(ZWDataFactory.SINGLETON,folderInfoDAO, true, false, false);
+		ret = SharedDataUtil.copyNVEntity(ZWDataFactory.SINGLETON, folderInfo, true, false, false);
 		
 		System.out.println();
-		System.out.println("NVEntity to copy: " + folderInfoDAO);
+		System.out.println("NVEntity to copy: " + folderInfo);
 		System.out.println("Deep: " + true);
 		System.out.println("Omit Ref ID: " + false);
 		System.out.println("Omit User ID: " + false);
 		System.out.println("Copied NVEntity: " + ret);
-		System.out.println("Equal? " + ret.toString().equals(folderInfoDAO.toString()) + "\n");
+		System.out.println("Equal? " + ret.toString().equals(folderInfo.toString()) + "\n");
 		
-		ret = SharedDataUtil.copyNVEntity(ZWDataFactory.SINGLETON, folderInfoDAO, false, true, true);
+		ret = SharedDataUtil.copyNVEntity(ZWDataFactory.SINGLETON, folderInfo, false, true, true);
 		
 		System.out.println();
-		System.out.println("NVEntity to copy: " + folderInfoDAO);
+		System.out.println("NVEntity to copy: " + folderInfo);
 		System.out.println("Deep: " + false);
 		System.out.println("Omit Ref ID: " + true);
 		System.out.println("Omit User ID: " + true);

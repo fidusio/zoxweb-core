@@ -25,7 +25,7 @@ import org.zoxweb.shared.util.*;
  *
  * @author mnael
  * @see IOTBase
- * @see DeviceInfo
+ * @see IOTDeviceInfo
  */
 public class ProtocolInfo
 extends IOTBase

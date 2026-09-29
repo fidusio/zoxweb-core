@@ -16,7 +16,7 @@
 package org.zoxweb.shared.security;
 
 import org.zoxweb.shared.data.DataConst.DataParam;
-import org.zoxweb.shared.data.DataContentDAO.Param;
+import org.zoxweb.shared.data.DocumentContent.Param;
 import org.zoxweb.shared.data.SetNameDescriptionDAO;
 import org.zoxweb.shared.filters.FilterType;
 import org.zoxweb.shared.util.*;

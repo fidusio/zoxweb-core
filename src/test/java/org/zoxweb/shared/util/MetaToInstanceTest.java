@@ -2,7 +2,7 @@ package org.zoxweb.shared.util;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
-import org.zoxweb.shared.data.DeviceDAO;
+import org.zoxweb.shared.data.DeviceInfo;
 import org.zoxweb.shared.filters.FilterType;
 
 import java.math.BigDecimal;
@@ -242,7 +242,7 @@ public class MetaToInstanceTest {
 
     @Test
     public void testNVConfigEntityScalar() {
-        NVConfig config = NVConfigManager.createNVConfigEntity("device", null, null, false, false, DeviceDAO.NVC_DEVICE_DAO);
+        NVConfig config = NVConfigManager.createNVConfigEntity("device", null, null, false, false, DeviceInfo.NVC_DEVICE_INFO);
         NVBase<?> result = SharedMetaUtil.metaConfigToNVBase(config);
         assertInstanceOf(NVEntityReference.class, result);
         assertEquals("device", result.getName());
@@ -250,7 +250,7 @@ public class MetaToInstanceTest {
 
     @Test
     public void testNVConfigEntityArrayList() {
-        NVConfig config = NVConfigManager.createNVConfigEntity("devices", null, null, false, false, DeviceDAO.NVC_DEVICE_DAO, NVConfigEntity.ArrayType.LIST);
+        NVConfig config = NVConfigManager.createNVConfigEntity("devices", null, null, false, false, DeviceInfo.NVC_DEVICE_INFO, NVConfigEntity.ArrayType.LIST);
         NVBase<?> result = SharedMetaUtil.metaConfigToNVBase(config);
         assertInstanceOf(NVEntityReferenceList.class, result);
         assertEquals("devices", result.getName());
@@ -258,7 +258,7 @@ public class MetaToInstanceTest {
 
     @Test
     public void testNVConfigEntityArrayGetNameMap() {
-        NVConfig config = NVConfigManager.createNVConfigEntity("device_map", null, null, false, false, DeviceDAO.NVC_DEVICE_DAO, NVConfigEntity.ArrayType.GET_NAME_MAP);
+        NVConfig config = NVConfigManager.createNVConfigEntity("device_map", null, null, false, false, DeviceInfo.NVC_DEVICE_INFO, NVConfigEntity.ArrayType.GET_NAME_MAP);
         NVBase<?> result = SharedMetaUtil.metaConfigToNVBase(config);
         assertInstanceOf(NVEntityGetNameMap.class, result);
         assertEquals("device_map", result.getName());
@@ -266,7 +266,7 @@ public class MetaToInstanceTest {
 
     @Test
     public void testNVConfigEntityArrayReferenceIDMap() {
-        NVConfig config = NVConfigManager.createNVConfigEntity("device_ref_map", null, null, false, false, DeviceDAO.NVC_DEVICE_DAO, NVConfigEntity.ArrayType.REFERENCE_ID_MAP);
+        NVConfig config = NVConfigManager.createNVConfigEntity("device_ref_map", null, null, false, false, DeviceInfo.NVC_DEVICE_INFO, NVConfigEntity.ArrayType.REFERENCE_ID_MAP);
         NVBase<?> result = SharedMetaUtil.metaConfigToNVBase(config);
         assertInstanceOf(NVEntityReferenceIDMap.class, result);
         assertEquals("device_ref_map", result.getName());

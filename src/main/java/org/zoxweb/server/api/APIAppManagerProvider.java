@@ -51,14 +51,14 @@ public class APIAppManagerProvider
             {
                     UserIDCredentialsDAO.NVC_USER_ID_CREDENTIALS_DAO,
                     SubjectPreference.NVC_SUBJECT_PREFERENCE,
-                    AppDeviceDAO.NVC_APP_DEVICE_DAO,
+                    AppDeviceInfo.NVC_APP_DEVICE_INFO,
                     EncapsulatedKey.NVCE_ENCAPSULATED_KEY,
                     PermissionGrant.NVC_PERMISSION_GRANT,
                     RoleGrant.NVC_ROLE_GRANT,
                     RoleGroupGrant.NVC_ROLE_GROUP_GRANT,
                     AddressDAO.NVC_ADDRESS_DAO,
                     CreditCardDAO.NVC_CREDIT_CARD_DAO,
-                    DeviceDAO.NVC_DEVICE_DAO,
+                    DeviceInfo.NVC_DEVICE_INFO,
                     PhoneDAO.NVC_PHONE_DAO,
             };
 
@@ -185,19 +185,19 @@ public class APIAppManagerProvider
     }
 
 
-    public SubjectAPIKey createAppDeviceDAO(AppDeviceDAO appDeviceDAO)
+    public SubjectAPIKey createAppDeviceDAO(AppDeviceInfo appDeviceInfo)
             throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException {
-        SUS.checkIfNulls("AppDeviceDAO is null", appDeviceDAO);
+        SUS.checkIfNulls("AppDeviceInfo is null", appDeviceInfo);
 
-        if (appDeviceDAO.getAppID() == null || appDeviceDAO.getDomainID() == null) {
+        if (appDeviceInfo.getAppID() == null || appDeviceInfo.getDomainID() == null) {
             throw new IllegalArgumentException("AppID or DomainID null");
         }
 
-        if (appDeviceDAO.getDevice() == null) {
+        if (appDeviceInfo.getDevice() == null) {
             throw new IllegalArgumentException("Device null");
         }
 
-        return createSubjectAPIKey(appDeviceDAO);
+        return createSubjectAPIKey(appDeviceInfo);
     }
 
     public SubjectAPIKey createSubjectAPIKey(SubjectAPIKey subjectAPIKey)
@@ -229,9 +229,9 @@ public class APIAppManagerProvider
             subjectAPIKey.setExpiryDate(System.currentTimeMillis() + ttl);
 
 
-        if (subjectAPIKey instanceof AppDeviceDAO) {
-            AppDeviceDAO temp = (AppDeviceDAO) subjectAPIKey;
-            DeviceDAO device = lookupDeviceDAO(temp.getDevice().getSubjectID());
+        if (subjectAPIKey instanceof AppDeviceInfo) {
+            AppDeviceInfo temp = (AppDeviceInfo) subjectAPIKey;
+            DeviceInfo device = lookupDeviceDAO(temp.getDevice().getSubjectID());
             if (device != null) {
                 temp.getDevice().setReferenceID(device.getReferenceID());
                 temp.getDevice().setSubjectGUID(getAPISecurityManager().currentUserID());
@@ -264,9 +264,9 @@ public class APIAppManagerProvider
     }
 
 
-    public DeviceDAO lookupDeviceDAO(String deviceID) {
+    public DeviceInfo lookupDeviceDAO(String deviceID) {
         SUS.checkIfNulls("Null SubjectAPIKey", deviceID);
-        List<DeviceDAO> ret = getAPIDataStore().search(DeviceDAO.NVC_DEVICE_DAO, null, new QueryMatchString(RelationalOperator.EQUAL, deviceID, DeviceDAO.Param.SUBJECT_ID));
+        List<DeviceInfo> ret = getAPIDataStore().search(DeviceInfo.NVC_DEVICE_INFO, null, new QueryMatchString(RelationalOperator.EQUAL, deviceID, DeviceInfo.Param.SUBJECT_ID));
 
         if (ret != null && ret.size() == 1) {
             return ret.get(0);
@@ -423,7 +423,7 @@ public class APIAppManagerProvider
             getAPIDataStore().delete(nvce, new QueryMatch<String>(RelationalOperator.EQUAL, userID.getReferenceID(), MetaToken.SUBJECT_GUID));
         }
 //		getAPIDataStore().delete(UserIDCredentialsDAO.NVC_SUBJECT_GUID_CREDENTIALS_DAO,  new QueryMatch<String>(RelationalOperator.EQUAL, userID.getReferenceID(), MetaToken.REFERENCE_ID));
-//		getAPIDataStore().delete(AppDeviceDAO.NVC_APP_DEVICE_DAO, new QueryMatch<String>(RelationalOperator.EQUAL, userID.getReferenceID(), MetaToken.SUBJECT_GUID));
+//		getAPIDataStore().delete(AppDeviceInfo.NVC_APP_DEVICE_INFO, new QueryMatch<String>(RelationalOperator.EQUAL, userID.getReferenceID(), MetaToken.SUBJECT_GUID));
 //		getAPIDataStore().delete(EncryptedKeyDAO.NVCE_ENCRYPTED_KEY_DAO,  new QueryMatch<String>(RelationalOperator.EQUAL, userID.getReferenceID(), MetaToken.SUBJECT_GUID));
 
 
@@ -448,7 +448,7 @@ public class APIAppManagerProvider
         if (subjectAPIKey != null) {
 //            getAPISecurityManager().invalidateResource(subjectAPIKey.getSubjectID());
             if (log.isEnabled()) log.getLogger().info("" + subjectAPIKey.getClass().getName());
-            delete(subjectAPIKey, subjectAPIKey instanceof AppDeviceDAO);
+            delete(subjectAPIKey, subjectAPIKey instanceof AppDeviceInfo);
         }
     }
 
@@ -456,7 +456,7 @@ public class APIAppManagerProvider
 //    @SuppressWarnings("unchecked")
 //	public 	<V extends SubjectAPIKey> V  lookupSubjectAPIKey(String subjectID, boolean throwExceptionIfNotFound)
 //            throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException {
-//    	List<SubjectAPIKey> result = getAPIDataStore().search(AppDeviceDAO.NVC_APP_DEVICE_DAO,
+//    	List<SubjectAPIKey> result = getAPIDataStore().search(AppDeviceInfo.NVC_APP_DEVICE_INFO,
 //    			null,
 //    			new QueryMatchString(RelationalOperator.EQUAL, subjectID, SubjectAPIKey.Param.SUBJECT_ID));
 //
@@ -514,9 +514,9 @@ public class APIAppManagerProvider
 //            throw new AccessSecurityException("Invalid SubjectAPIKey: " + subjectAPIKey.getStatus());
 //        }
 //
-//        if (subjectAPIKey instanceof AppDeviceDAO) {
+//        if (subjectAPIKey instanceof AppDeviceInfo) {
 //            // validate domainID and AppID
-//            AppDeviceDAO add = (AppDeviceDAO) subjectAPIKey;
+//            AppDeviceInfo add = (AppDeviceInfo) subjectAPIKey;
 //            if (!SUS.equals(add.getDomainID(), jwt.getPayload().getDomainID(), true) ||
 //                    !SUS.equals(add.getAppID(), jwt.getPayload().getAppID(), true)) {
 //                throw new AccessSecurityException("Invalid AppID");
@@ -737,7 +737,7 @@ public class APIAppManagerProvider
         return result.get(0);
     }
 
-    public synchronized SubjectAPIKey registerSubjectAPIKey(UserInfoDAO userInfoDAO, AppDeviceDAO appDeviceDAO, String subjectID, String password)
+    public synchronized SubjectAPIKey registerSubjectAPIKey(UserInfoDAO userInfoDAO, AppDeviceInfo appDeviceInfo, String subjectID, String password)
             throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException {
 
         // Procedure
@@ -746,25 +746,25 @@ public class APIAppManagerProvider
         // 3. Lookup UserIDDAO based on username (if found, throw already found error)
         // 4. Create UserIDDAO with username and UserInfoDAO
         // 5. Create Credentials with password
-        // 6. Create AppDeviceDAO
+        // 6. Create AppDeviceInfo
         // 7. Create UserPreferenceDAO
 
 
         SUS.checkIfNulls("UserInfoDAO is null", userInfoDAO);
-        SUS.checkIfNulls("AppDeviceDAO is null", appDeviceDAO);
-        SUS.checkIfNulls("AppIDDAO is null", appDeviceDAO.getSubjectGUID());
+        SUS.checkIfNulls("AppDeviceInfo is null", appDeviceInfo);
+        SUS.checkIfNulls("AppIDDAO is null", appDeviceInfo.getSubjectGUID());
         if (SUS.isEmpty(subjectID) || SUS.isEmpty(password)) {
             throw new NullPointerException("Username and/or password is null");
         }
 
-        String domainID = appDeviceDAO.getDomainID();
-        String appID = appDeviceDAO.getAppID().getAppID();
+        String domainID = appDeviceInfo.getDomainID();
+        String appID = appDeviceInfo.getAppID().getAppID();
 
         // check and confirm that app already exist
         AppIDDefault appIDDAO = lookupAppIDDAO(domainID, appID);
 
 
-        appDeviceDAO.setSubjectGUID(appIDDAO.getGUID());
+        appDeviceInfo.setSubjectGUID(appIDDAO.getGUID());
 
         UserIDDAO userIDDAO = lookupUserIDDAO(subjectID);
         if (userIDDAO == null) {
@@ -792,11 +792,11 @@ public class APIAppManagerProvider
             getAPIDataStore().insert(subjectPreference);
         }
 
-        // Create AppDeviceDAO
-        appDeviceDAO.setSubjectGUID(userIDDAO.getReferenceID());
-        appDeviceDAO = (AppDeviceDAO) createAppDeviceDAO(appDeviceDAO);
+        // Create AppDeviceInfo
+        appDeviceInfo.setSubjectGUID(userIDDAO.getReferenceID());
+        appDeviceInfo = (AppDeviceInfo) createAppDeviceDAO(appDeviceInfo);
 
-        return appDeviceDAO;
+        return appDeviceInfo;
     }
 
     public synchronized UserInfoDAO registerSubject(String subjectID, String password)
@@ -913,7 +913,7 @@ public class APIAppManagerProvider
             }
 
             // Delelte the APP-DEVICES
-            getAPIDataStore().delete(AppDeviceDAO.NVC_APP_DEVICE_DAO, new QueryMatch<String>(RelationalOperator.EQUAL, ret.getReferenceID(), "app_id", "reference_id"));
+            getAPIDataStore().delete(AppDeviceInfo.NVC_APP_DEVICE_INFO, new QueryMatch<String>(RelationalOperator.EQUAL, ret.getReferenceID(), "app_id", "reference_id"));
 
         }
 
@@ -989,11 +989,11 @@ public class APIAppManagerProvider
 //			throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException {
 //		// TODO Auto-generated method stub
 //		SubjectAPIKey ret = null;
-//		if (sak instanceof AppDeviceDAO)
+//		if (sak instanceof AppDeviceInfo)
 //		{
-//			ret = new AppDeviceDAO();
-//			((AppDeviceDAO)ret).setSubjectGUID(((AppDeviceDAO) sak).getSubjectGUID());
-//			((AppDeviceDAO)ret).setDevice(((AppDeviceDAO) sak).getDevice());
+//			ret = new AppDeviceInfo();
+//			((AppDeviceInfo)ret).setSubjectGUID(((AppDeviceInfo) sak).getSubjectGUID());
+//			((AppDeviceInfo)ret).setDevice(((AppDeviceInfo) sak).getDevice());
 //		}
 //		else if (sak instanceof SubjectAPIKey)
 //		{

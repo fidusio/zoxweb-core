@@ -348,7 +348,7 @@ public class EncryptedDataTest {
         EncapsulatedKey ek = new EncapsulatedKey();
         ek.setSubjectGUID(UUID.randomUUID().toString());
         ek.setReferenceGUID(UUID.randomUUID().toString());
-        ek.setReferenceType("org.zoxweb.shared.data.FileInfoDAO");
+        ek.setReferenceType("org.zoxweb.shared.data.FileInfo");
         ek.setKeyLockType(KeyLockType.NVENTITY);
         ek.setKeyGUID(UUID.randomUUID().toString());
         return CryptoUtil.createEncryptedKey(ek, KEY);
@@ -359,7 +359,7 @@ public class EncryptedDataTest {
         EncapsulatedKey ek = new EncapsulatedKey();
         ek.setSubjectGUID(UUID.randomUUID().toString());
         ek.setReferenceGUID(UUID.randomUUID().toString());
-        ek.setReferenceType("org.zoxweb.shared.data.FileInfoDAO");
+        ek.setReferenceType("org.zoxweb.shared.data.FileInfo");
         ek.setKeyLockType(KeyLockType.NVENTITY);
         ek.setKeyGUID(UUID.randomUUID().toString());
         ek.setExpiry(1_000L);
@@ -457,7 +457,7 @@ public class EncryptedDataTest {
 
         // labels: a renamed class or a corrected lock type must not invalidate stored keys
         EncapsulatedKey type = GSONUtil.fromJSON(json, EncapsulatedKey.class);
-        type.setReferenceType("org.zoxweb.shared.data.RenamedFileInfoDAO");
+        type.setReferenceType("org.zoxweb.shared.data.RenamedFileInfo");
         assertArrayEquals(material, CryptoUtil.unwrapKey(type, KEY));
 
         EncapsulatedKey lock = GSONUtil.fromJSON(json, EncapsulatedKey.class);

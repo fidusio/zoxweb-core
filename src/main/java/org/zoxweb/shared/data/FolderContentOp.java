@@ -48,7 +48,7 @@ public class FolderContentOp
     }
 
 
-    public FolderContentOp(FolderInfoDAO fromFolder, FolderInfoDAO toFolder, List<NVEntity> list) {
+    public FolderContentOp(FolderInfo fromFolder, FolderInfo toFolder, List<NVEntity> list) {
         this();
         setFromFolder(fromFolder);
         setToFolder(toFolder);
@@ -58,7 +58,7 @@ public class FolderContentOp
         }
     }
 
-    public void setFromFolder(FolderInfoDAO folder) {
+    public void setFromFolder(FolderInfo folder) {
         setFromFolderRef(folder.getReferenceID());
     }
 
@@ -70,7 +70,7 @@ public class FolderContentOp
         return lookupValue(Param.FROM_FOLDER_REF);
     }
 
-    public void setToFolder(FolderInfoDAO folder) {
+    public void setToFolder(FolderInfo folder) {
         setToFolderRef(folder.getReferenceID());
     }
 

@@ -22,12 +22,12 @@ public class CRUDNVEntityDAOTest {
 	
 	public static void main(String[] args) {
 
-		CRUDNVEntityDAO crudNVE = new CRUDNVEntityDAO();
-		FolderInfoDAO folder = new FolderInfoDAO();
+		CRUDNVEntityInfo crudNVE = new CRUDNVEntityInfo();
+		FolderInfo folder = new FolderInfo();
 		folder.setName("My Folder");
 		//folder.setStateOrProvince("CA");
 
-		FileInfoDAO nve = new FileInfoDAO();
+		FileInfo nve = new FileInfo();
 		nve.setName("File");
 		nve.setReferenceID("bata");
 		folder.getFolderContent().add(nve);
@@ -43,7 +43,7 @@ public class CRUDNVEntityDAOTest {
 		try {
 			String json = GSONUtil.toJSON(crudNVE, true, true, true);
 			System.out.println("JSON: " + json);
-			crudNVE = GSONUtil.fromJSON(json, CRUDNVEntityDAO.class);
+			crudNVE = GSONUtil.fromJSON(json, CRUDNVEntityInfo.class);
 			System.out.println("CRUD NVE: " + crudNVE);
 		} catch (Exception e) {
 			e.printStackTrace();

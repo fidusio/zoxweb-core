@@ -15,16 +15,16 @@
  */
 package org.zoxweb.shared.api;
 
-import org.zoxweb.shared.data.FileInfoDAO;
+import org.zoxweb.shared.data.FileInfo;
 
 public interface APIFileInfoMap {
 
     /**
      * This method returns the original file information.
      *
-     * @return FileInfoDAO
+     * @return FileInfo
      */
-    FileInfoDAO getOriginalFileInfo();
+    FileInfo getOriginalFileInfo();
 
 
     /**
@@ -34,16 +34,16 @@ public interface APIFileInfoMap {
      * @throws NullPointerException
      * @throws IllegalArgumentException
      */
-    void setOriginalFileInfo(FileInfoDAO info)
+    void setOriginalFileInfo(FileInfo info)
             throws NullPointerException, IllegalArgumentException;
 
 
     /**
      * This method returns the remote file information.
      *
-     * @return FileInfoDAO
+     * @return FileInfo
      */
-    FileInfoDAO getRemoteFileInfo();
+    FileInfo getRemoteFileInfo();
 
 
     /**
@@ -53,7 +53,7 @@ public interface APIFileInfoMap {
      * @throws NullPointerException
      * @throws IllegalArgumentException
      */
-    void setRemoteFileInfo(FileInfoDAO info)
+    void setRemoteFileInfo(FileInfo info)
             throws NullPointerException, IllegalArgumentException;
 
 

@@ -15,7 +15,7 @@
  */
 package org.zoxweb.shared.util;
 
-import org.zoxweb.shared.data.FileInfoDAO;
+import org.zoxweb.shared.data.FileInfo;
 import org.zoxweb.shared.filters.FilterType;
 import org.zoxweb.shared.util.NVConfigEntity.ArrayType;
 
@@ -81,9 +81,9 @@ public class DynamicNVConfigEntityTest {
         nvConfigEntity.setEditable(false);
         nvConfigEntity.setMandatory(true);
 
-        //FileInfoDAO
-        NVConfigEntity nvcFileInfoDAO = new NVConfigEntityPortable("file_info", "File info data access object", "FileInfoDAO", true, false, false, false, FileInfoDAO.NVC_FILE_INFO_DAO, false, ArrayType.NOT_ARRAY);
-        nvConfigEntity.getAttributes().add(nvcFileInfoDAO);
+        //FileInfo
+        NVConfigEntity nvcFileInfo = new NVConfigEntityPortable("file_info", "File info", "FileInfo", true, false, false, false, FileInfo.NVC_FILE_INFO, false, ArrayType.NOT_ARRAY);
+        nvConfigEntity.getAttributes().add(nvcFileInfo);
 
         //String
         NVConfig nvconfigAttribute1 = new NVConfigPortable("string", "This is a string type.", "String", true, false, false, false, false, String.class, null);

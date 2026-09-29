@@ -38,7 +38,7 @@ public class MerchantDAO
 		implements GetNVConfig
 	{
 //		ACCOUNT_ID(NVConfigManager.createNVConfig(MetaToken.ACCOUNT_ID.getName(), "The account id","AccountID", true, false, false, true, true, String.class, null)),
-		LIST_OF_DOMAIN_IDS(NVConfigManager.createNVConfigEntity("domain_ids", "Domain ID", "DomainIDs", true, true, DomainInfoDAO.NVC_DOMAIN_INFO_DAO, ArrayType.LIST)),
+		LIST_OF_DOMAIN_IDS(NVConfigManager.createNVConfigEntity("domain_ids", "Domain ID", "DomainIDs", true, true, DomainInfo.NVC_DOMAIN_INFO, ArrayType.LIST)),
 		COMPANY_TYPE(NVConfigManager.createNVConfig("company_type", "Type of company", "CompanyType", false, true, String.class)),
 		LIST_OF_ADDRESSES(NVConfigManager.createNVConfigEntity("addresses", "List of addresses", "Addresses", false, true, AddressDAO.NVC_ADDRESS_DAO, ArrayType.LIST)),
 		LIST_OF_PHONES(NVConfigManager.createNVConfigEntity("phones", "List of phones", "ListOfPhones", false, true, PhoneDAO.NVC_PHONE_DAO, ArrayType.LIST)),

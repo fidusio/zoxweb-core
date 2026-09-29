@@ -26,7 +26,7 @@ import org.zoxweb.shared.util.*;
  *
  * @author mnael
  * @see PropertyDAO
- * @see DeviceInfo
+ * @see IOTDeviceInfo
  * @see PortInfo
  * @see ProtocolInfo
  */

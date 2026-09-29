@@ -47,7 +47,7 @@ import java.util.Date;
  * principal ID} - the two are the same value.</p>
  *
  * <p>This is a concrete DAO but also serves as a base for richer key types (e.g.
- * {@code AppDeviceDAO}) through the {@link #SubjectAPIKey(NVConfigEntity) protected
+ * {@code AppDeviceInfo}) through the {@link #SubjectAPIKey(NVConfigEntity) protected
  * constructor}.</p>
  *
  * Created on 7/13/17

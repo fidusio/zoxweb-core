@@ -150,7 +150,7 @@ public class MLKEMKeyWrapTest {
         EncapsulatedKey ek = new EncapsulatedKey();
         ek.setSubjectGUID(UUID.randomUUID().toString());
         ek.setReferenceGUID(UUID.randomUUID().toString());
-        ek.setReferenceType("org.zoxweb.shared.data.FileInfoDAO");
+        ek.setReferenceType("org.zoxweb.shared.data.FileInfo");
         ek.setKeyLockType(KeyLockType.NVENTITY);
         ek.setKeyGUID(publicKeyRegistryId);
         return ek;

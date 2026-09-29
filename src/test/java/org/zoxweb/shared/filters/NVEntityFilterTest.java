@@ -16,9 +16,9 @@
 package org.zoxweb.shared.filters;
 
 
-import org.zoxweb.shared.data.FileInfoDAO;
-import org.zoxweb.shared.data.FolderInfoDAO;
-import org.zoxweb.shared.data.FormInfoDAO;
+import org.zoxweb.shared.data.FileInfo;
+import org.zoxweb.shared.data.FolderInfo;
+import org.zoxweb.shared.data.FormInfo;
 import org.zoxweb.shared.data.PhoneDAO;
 
 import org.junit.jupiter.api.Test;
@@ -28,34 +28,34 @@ public class NVEntityFilterTest {
 
 	@Test
 	public void test1() {
-		NVEntityFilter filter = new NVEntityFilter(FormInfoDAO.NVC_FORM_INFO_DAO);
+		NVEntityFilter filter = new NVEntityFilter(FormInfo.NVC_FORM_INFO);
 
-		FolderInfoDAO folderInfo = new FolderInfoDAO();
+		FolderInfo folderInfo = new FolderInfo();
         boolean valid = filter.isValid(folderInfo);
         assertFalse(valid);
 
-		FileInfoDAO fileInfo = new FileInfoDAO();
+		FileInfo fileInfo = new FileInfo();
         valid = filter.isValid(fileInfo);
         assertFalse(valid);
 
-		FormInfoDAO formInfo = new FormInfoDAO();
+		FormInfo formInfo = new FormInfo();
         valid = filter.isValid(formInfo);
         assertTrue(valid);
 	}
 	
 	@Test
 	public void test2() {
-		NVEntityFilter filter = new NVEntityFilter(FolderInfoDAO.NVC_FOLDER_INFO_DAO, FileInfoDAO.NVC_FILE_INFO_DAO, FormInfoDAO.NVC_FORM_INFO_DAO);
+		NVEntityFilter filter = new NVEntityFilter(FolderInfo.NVC_FOLDER_INFO, FileInfo.NVC_FILE_INFO, FormInfo.NVC_FORM_INFO);
 
-		FolderInfoDAO folderInfo = new FolderInfoDAO();
+		FolderInfo folderInfo = new FolderInfo();
         boolean valid = filter.isValid(folderInfo);
         assertTrue(valid);
 
-		FileInfoDAO fileInfo = new FileInfoDAO();
+		FileInfo fileInfo = new FileInfo();
         valid = filter.isValid(fileInfo);
         assertTrue(valid);
 
-		FormInfoDAO formInfo = new FormInfoDAO();
+		FormInfo formInfo = new FormInfo();
         valid = filter.isValid(formInfo);
         assertTrue(valid);
 	}
@@ -64,15 +64,15 @@ public class NVEntityFilterTest {
 	public void test3() {
 		NVEntityFilter filter = new NVEntityFilter();
 
-		FolderInfoDAO folderInfo = new FolderInfoDAO();
+		FolderInfo folderInfo = new FolderInfo();
         boolean valid = filter.isValid(folderInfo);
         assertFalse(valid);
 
-		FileInfoDAO fileInfo = new FileInfoDAO();
+		FileInfo fileInfo = new FileInfo();
         valid = filter.isValid(fileInfo);
         assertFalse(valid);
 
-		FormInfoDAO formInfo = new FormInfoDAO();
+		FormInfo formInfo = new FormInfo();
         valid = filter.isValid(formInfo);
         assertFalse(valid);
 	}
@@ -81,15 +81,15 @@ public class NVEntityFilterTest {
 	public void test4() {
 		NVEntityFilter filter = new NVEntityFilter(PhoneDAO.NVC_PHONE_DAO);
 
-		FolderInfoDAO folderInfo = new FolderInfoDAO();
+		FolderInfo folderInfo = new FolderInfo();
         boolean valid = filter.isValid(folderInfo);
         assertFalse(valid);
 
-		FileInfoDAO fileInfo = new FileInfoDAO();
+		FileInfo fileInfo = new FileInfo();
         valid = filter.isValid(fileInfo);
         assertFalse(valid);
 
-		FormInfoDAO formInfo = new FormInfoDAO();
+		FormInfo formInfo = new FormInfo();
         valid = filter.isValid(formInfo);
         assertFalse(valid);
 

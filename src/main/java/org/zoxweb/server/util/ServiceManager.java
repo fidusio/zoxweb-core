@@ -6,8 +6,8 @@ import org.zoxweb.server.net.NIOConfig;
 import org.zoxweb.server.net.NIOSocket;
 import org.zoxweb.server.net.security.IPBlockerListener;
 import org.zoxweb.server.task.TaskUtil;
-import org.zoxweb.shared.data.ApplicationConfigDAO;
-import org.zoxweb.shared.data.ApplicationConfigDAO.ApplicationDefaultParam;
+import org.zoxweb.shared.data.ApplicationConfigInfo;
+import org.zoxweb.shared.data.ApplicationConfigInfo.ApplicationDefaultParam;
 import org.zoxweb.shared.data.ConfigDAO;
 import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.security.IPBlockerConfig;
@@ -35,7 +35,7 @@ public class ServiceManager
     }
 
 
-    public synchronized NIOSocket loadNIOSocket(ApplicationConfigDAO acd) {
+    public synchronized NIOSocket loadNIOSocket(ApplicationConfigInfo acd) {
         String filename = acd.lookupValue(ApplicationDefaultParam.NIO_CONFIG);
         if (filename != null) {
             log.info("creating NIO_CONFIG");
@@ -60,9 +60,9 @@ public class ServiceManager
     }
 
     public synchronized void loadServices() throws NullPointerException, IOException {
-        ApplicationConfigDAO acd = ApplicationConfigManager.SINGLETON.loadDefault();
+        ApplicationConfigInfo acd = ApplicationConfigManager.SINGLETON.loadDefault();
         if (acd != null) {
-            ResourceManager.SINGLETON.register(ApplicationConfigDAO.RESOURCE_NAME, acd);
+            ResourceManager.SINGLETON.register(ApplicationConfigInfo.RESOURCE_NAME, acd);
         }
 
         IPBlockerListener ipBlocker = null;

@@ -15,27 +15,27 @@
  */
 package org.zoxweb.server.io;
 
-import org.zoxweb.shared.data.FileInfoDAO;
+import org.zoxweb.shared.data.FileInfo;
 
 import java.io.InputStream;
 
 /**
- * Value holder that pairs a {@link FileInfoDAO} (the file's metadata) with the
+ * Value holder that pairs a {@link FileInfo} (the file's metadata) with the
  * InputStream supplying the file's content, so both can be handed around as a
  * single source object.
  */
 public class FileInfoStreamSource {
 
-    private FileInfoDAO fileInfoDAO;
+    private FileInfo fileInfo;
     private InputStream srcInputStream;
 
     /**
      *
-     * @param fileInfoDAO
+     * @param fileInfo
      * @param is
      */
-    public FileInfoStreamSource(FileInfoDAO fileInfoDAO, InputStream is) {
-        this.fileInfoDAO = fileInfoDAO;
+    public FileInfoStreamSource(FileInfo fileInfo, InputStream is) {
+        this.fileInfo = fileInfo;
         srcInputStream = is;
     }
 
@@ -48,11 +48,11 @@ public class FileInfoStreamSource {
     }
 
     /**
-     * Returns FileInfoDAO object.
-     * @return FileInfoDAO
+     * Returns FileInfo object.
+     * @return FileInfo
      */
-    public FileInfoDAO getFileInfoDAO() {
-        return fileInfoDAO;
+    public FileInfo getFileInfo() {
+        return fileInfo;
     }
 
 

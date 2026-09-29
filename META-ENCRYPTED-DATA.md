@@ -261,7 +261,7 @@ Symmetric wrap under a 32-byte parent, JSON view (entity fields omitted):
 v=2  alg=A256GCM  kdf=HKDF-SHA256  iv=<12 B>  data_length=32  data_type=<unset>
 cipher_data=<48 B: 32 sealed + 16 tag>
 subject_guid=S  reference_guid=R  key_guid=P  key_size=32
-reference_type=org.zoxweb.shared.data.FileInfoDAO  key_lock_type=NVENTITY
+reference_type=org.zoxweb.shared.data.FileInfo  key_lock_type=NVENTITY
 binding data = "S|R|P|32"
 ```
 

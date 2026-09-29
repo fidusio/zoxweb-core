@@ -48,8 +48,8 @@ public class DetailedCreditCardDAO
 		EXPIRATION_DATE(NVConfigManager.createNVConfig("expiration_date", "Card expiration date", "Expiration Date", true, true, Date.class)),
 		SECURITY_CODE(NVConfigManager.createNVConfig("security_code", "Card security code", "Security Code", true, true, String.class)),
 		
-		FRONTEND_IMAGE(NVConfigManager.createNVConfigEntity("frontend_image", "Frontend image of credit card.", "Frontend Image", false, true, FileInfoDAO.class, ArrayType.NOT_ARRAY)),		
-		BACKEND_IMAGE(NVConfigManager.createNVConfigEntity("backend_image", "Backend image of credit card.", "Backend Image", false, true, FileInfoDAO.class, ArrayType.NOT_ARRAY)),		
+		FRONTEND_IMAGE(NVConfigManager.createNVConfigEntity("frontend_image", "Frontend image of credit card.", "Frontend Image", false, true, FileInfo.class, ArrayType.NOT_ARRAY)),
+		BACKEND_IMAGE(NVConfigManager.createNVConfigEntity("backend_image", "Backend image of credit card.", "Backend Image", false, true, FileInfo.class, ArrayType.NOT_ARRAY)),
 		
 		BILLING_ADDRESS(NVConfigManager.createNVConfigEntity("billing_address", "The credit card billing address.", "Billing Address", true, true, AddressDAO.class, ArrayType.NOT_ARRAY)),		
 
@@ -167,23 +167,23 @@ public class DetailedCreditCardDAO
 	}
 
 
-	public FileInfoDAO getFrontEndImage() 
+	public FileInfo getFrontEndImage()
 	{
 		return lookupValue(Param.FRONTEND_IMAGE);
 	}
 	
-	public void setFrontEndImage(FileInfoDAO file) 
+	public void setFrontEndImage(FileInfo file)
 	{
 		setValue(Param.FRONTEND_IMAGE, file);
 	}
 
 	
-	public FileInfoDAO getBackEndImage() 
+	public FileInfo getBackEndImage()
 	{
 		return lookupValue(Param.BACKEND_IMAGE);
 	}
 	
-	public void setBackEndImage(FileInfoDAO file) 
+	public void setBackEndImage(FileInfo file)
 	{
 		setValue(Param.BACKEND_IMAGE, file);
 	}

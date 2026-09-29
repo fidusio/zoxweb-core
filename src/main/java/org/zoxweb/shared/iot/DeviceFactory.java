@@ -23,7 +23,7 @@ import org.zoxweb.shared.util.NVGenericMap;
  * based on configuration parameters.
  *
  * @author mnael
- * @see DeviceInfo
+ * @see IOTDeviceInfo
  */
 public interface DeviceFactory
 {
@@ -35,5 +35,5 @@ public interface DeviceFactory
      * @param param the specifications of the required device as a generic map
      * @return the device info object, or null depending on implementation
      */
-    DeviceInfo createDevice(NVGenericMap param);
+    IOTDeviceInfo createDevice(NVGenericMap param);
 }

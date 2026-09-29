@@ -1,7 +1,7 @@
 package org.zoxweb.shared.api;
 
 import org.zoxweb.shared.data.AppConfigDAO;
-import org.zoxweb.shared.data.AppDeviceDAO;
+import org.zoxweb.shared.data.AppDeviceInfo;
 import org.zoxweb.shared.app.AppIDDefault;
 import org.zoxweb.shared.data.UserIDDAO;
 import org.zoxweb.shared.data.UserInfoDAO;
@@ -67,7 +67,7 @@ public interface APIAppManager {
      * Register user.
      *
      * @param userInfoDAO
-     * @param appDeviceDAO
+     * @param appDeviceInfo
      * @param username
      * @param password
      * @return
@@ -76,7 +76,7 @@ public interface APIAppManager {
      * @throws AccessSecurityException
      * @throws APIException
      */
-    SubjectAPIKey registerSubjectAPIKey(UserInfoDAO userInfoDAO, AppDeviceDAO appDeviceDAO, String username, String password)
+    SubjectAPIKey registerSubjectAPIKey(UserInfoDAO userInfoDAO, AppDeviceInfo appDeviceInfo, String username, String password)
             throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException;
 
     UserInfoDAO registerSubject(String username, String password)
@@ -167,7 +167,7 @@ public interface APIAppManager {
             throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException;
 
     /**
-     * Create AppDeviceDAO.
+     * Create AppDeviceInfo.
      *
      * @param subjectAPIKey
      * @return
@@ -176,7 +176,7 @@ public interface APIAppManager {
      * @throws AccessSecurityException
      * @throws APIException
      */
-    SubjectAPIKey createAppDeviceDAO(AppDeviceDAO subjectAPIKey)
+    SubjectAPIKey createAppDeviceDAO(AppDeviceInfo subjectAPIKey)
             throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException;
 
     /**

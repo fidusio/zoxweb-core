@@ -17,7 +17,7 @@ package org.zoxweb.server.util;
 
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.io.UByteArrayOutputStream;
-import org.zoxweb.shared.data.DataDAO;
+import org.zoxweb.shared.data.DataContent;
 import org.zoxweb.shared.filters.MatchPatternFilter;
 import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.util.*;
@@ -218,12 +218,12 @@ public class JarTool {
         return ret.toArray(new String[0]);
     }
 
-    public static DataDAO[] loadContents(String zipFilename, String... patterns)
+    public static DataContent[] loadContents(String zipFilename, String... patterns)
             throws IOException {
         return loadContents(new File(zipFilename), patterns);
     }
 
-    public static DataDAO[] loadContents(File zipFile, String... patterns)
+    public static DataContent[] loadContents(File zipFile, String... patterns)
             throws IOException {
         FileInputStream fis = null;
         try {
@@ -259,9 +259,9 @@ public class JarTool {
     }
 
 
-    public static DataDAO[] loadContents(InputStream zipStream, String... patterns)
+    public static DataContent[] loadContents(InputStream zipStream, String... patterns)
             throws IOException {
-        List<DataDAO> ret = new ArrayList<>();
+        List<DataContent> ret = new ArrayList<>();
         try (ZipInputStream zipIs = zipStream instanceof ZipInputStream ? (ZipInputStream) zipStream : new ZipInputStream(zipStream)) {
             ZipEntry ze = null;
             MatchPatternFilter mpf = patterns != null && patterns.length > 0 && patterns[0] != null ? MatchPatternFilter.createMatchFilter(patterns) : null;
@@ -280,7 +280,7 @@ public class JarTool {
                     while ((read = zipIs.read(buffer)) > 0) {
                         ubaos.write(buffer, 0, read);
                     }
-                    DataDAO toAdd = new DataDAO();
+                    DataContent toAdd = new DataContent();
 
                     toAdd.setFullName(ze.getName());
                     toAdd.setName(SUS.valueAfterRightToken(ze.getName(), "/"));
@@ -292,7 +292,7 @@ public class JarTool {
                 }
             }
         }
-        return ret.toArray(new DataDAO[0]);
+        return ret.toArray(new DataContent[0]);
     }
 
     public static ZipInputStream convertToZipIS(InputStream is)
@@ -350,10 +350,10 @@ public class JarTool {
 
                 GetNameValue<String> load = paramMap.asNVPair("load");
                 if (load != null) {
-                    DataDAO[] matches = loadContents(zipFile, pattern);
+                    DataContent[] matches = loadContents(zipFile, pattern);
                     System.out.println("Zip File: " + zipFile + " matches found: " + matches.length);
 
-                    for (DataDAO matched : matches) {
+                    for (DataContent matched : matches) {
                         rc.inc();
                         System.out.println("\t\t" + SUS.toCanonicalID(':', matched.getName(), matched.getFullName(), matched.getData().length));
                         //System.out.println(SUS.toString(matched.getData()));

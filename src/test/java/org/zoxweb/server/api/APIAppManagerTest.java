@@ -2,9 +2,9 @@ package org.zoxweb.server.api;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.zoxweb.shared.api.APIAppManager;
-import org.zoxweb.shared.data.AppDeviceDAO;
+import org.zoxweb.shared.data.AppDeviceInfo;
 import org.zoxweb.shared.app.AppIDDefault;
-import org.zoxweb.shared.data.DeviceDAO;
+import org.zoxweb.shared.data.DeviceInfo;
 
 public class APIAppManagerTest {
 
@@ -15,10 +15,10 @@ public class APIAppManagerTest {
 	@BeforeAll
 	public static void init()
 	{
-		DeviceDAO dd = new DeviceDAO();
+		DeviceInfo dd = new DeviceInfo();
 		AppIDDefault aid = new AppIDDefault();
 		aid.setDomainAppID(domainID, appID);
-		AppDeviceDAO add = new AppDeviceDAO();
+		AppDeviceInfo add = new AppDeviceInfo();
 		add.setSubjectGUID(aid.getGUID());
 		add.setDevice(dd);
 		//add.setSubjectID(subjectID);

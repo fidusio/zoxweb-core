@@ -13,11 +13,11 @@ public class ScheduleConfigTest {
 		{
 			int index = 0;
 			String filename = args[index++];
-			ScheduleConfigDAO config = GSONUtil.fromJSON(IOUtil.inputStreamToString(filename), ScheduleConfigDAO.class);
+			ScheduleConfig config = GSONUtil.fromJSON(IOUtil.inputStreamToString(filename), ScheduleConfig.class);
 			System.out.println(config);
 			String json = GSONUtil.toJSON(config, true, false, false);
 			System.out.println(json);
-			config = GSONUtil.fromJSON(json, ScheduleConfigDAO.class);
+			config = GSONUtil.fromJSON(json, ScheduleConfig.class);
 			System.out.println(config.getSchedules());
 			System.out.println(config.getSchedules().getClass());
 			System.out.println(Arrays.toString(config.getOffCommands()) + "," +Arrays.toString(config.getOnCommands()));
