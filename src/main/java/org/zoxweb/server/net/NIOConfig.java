@@ -26,7 +26,7 @@ import org.zoxweb.server.security.SecUtil;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.app.AppCreatorDefault;
-import org.zoxweb.shared.data.ConfigDAO;
+import org.zoxweb.shared.data.GenConfig;
 import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.security.IPBlockerConfig;
 import org.zoxweb.shared.util.ArrayValues;
@@ -54,7 +54,7 @@ import static org.zoxweb.server.net.ssl.SSLContextInfo.Param.PROTOCOLS;
  * @author mnael
  */
 public class NIOConfig
-        extends AppCreatorDefault<NIOSocket, ConfigDAO> {
+        extends AppCreatorDefault<NIOSocket, GenConfig> {
     public static final String RESOURCE_NAME = "NIOConfig";
     private NIOSocket nioSocket;
 
@@ -72,8 +72,8 @@ public class NIOConfig
         this(GSONUtil.fromJSON(IOUtil.inputStreamToString(configDAOFile, true)));
     }
 
-    public NIOConfig(ConfigDAO configDAO) {
-        setAppConfig(configDAO);
+    public NIOConfig(GenConfig genConfig) {
+        setAppConfig(genConfig);
     }
 
     public NIOConfig() {
@@ -101,14 +101,14 @@ public class NIOConfig
         for (NVEntity nve : getAppConfig().getContent().values()) {
             // create the SSLEngine first
             // and attachments
-            if (nve instanceof ConfigDAO) {
-                ConfigDAO config = (ConfigDAO) nve;
+            if (nve instanceof GenConfig) {
+                GenConfig config = (GenConfig) nve;
 
                 if (config.attachment() instanceof ProtocolFactory) {
-                    int port = ((ConfigDAO) nve).getProperties().getValue("port");
+                    int port = ((GenConfig) nve).getProperties().getValue("port");
                     int backlog = 128;
                     try {
-                        backlog = ((ConfigDAO) nve).getProperties().getValue("backlog");
+                        backlog = ((GenConfig) nve).getProperties().getValue("backlog");
                     } catch (Exception e) {
 
                     }
@@ -116,7 +116,7 @@ public class NIOConfig
 
                     if (psf instanceof NIOTunnelFactory && psf.getProperties().getValue("ssl_engine") != null) {
 
-                        ConfigDAO sslContent = psf.getProperties().getValue("ssl_engine");
+                        GenConfig sslContent = psf.getProperties().getValue("ssl_engine");
                         SSLContext sslContext = (SSLContext) sslContent.attachment();
                         if (log.isEnabled())
                             log.getLogger().info("Creating secure network tunnel:" + port + "," + ((NIOTunnelFactory) psf).getRemoteAddress());
@@ -143,16 +143,16 @@ public class NIOConfig
     }
 
 
-    public static ConfigDAO parse(ConfigDAO configDAO) {
-        ArrayValues<NVEntity> content = configDAO.getContent();
+    public static GenConfig parse(GenConfig genConfig) {
+        ArrayValues<NVEntity> content = genConfig.getContent();
 
         if (log.isEnabled()) log.getLogger().info("Start Parsing");
         // first pass
         for (NVEntity nve : content.values()) {
             // create the SSLEngine first
             // and attachments
-            if (nve instanceof ConfigDAO) {
-                ConfigDAO config = (ConfigDAO) nve;
+            if (nve instanceof GenConfig) {
+                GenConfig config = (GenConfig) nve;
 
                 if (config.getBeanClassName() != null) {
                     try {
@@ -202,8 +202,8 @@ public class NIOConfig
 
 
         for (NVEntity nve : content.values()) {
-            if (nve instanceof ConfigDAO) {
-                ConfigDAO config = (ConfigDAO) nve;
+            if (nve instanceof GenConfig) {
+                GenConfig config = (GenConfig) nve;
 
                 if (config.attachment() instanceof NIOProxyProtocolFactory) {
                     NIOProxyProtocolFactory nioPPF = (NIOProxyProtocolFactory) config.attachment();
@@ -269,7 +269,7 @@ public class NIOConfig
                         if (rh != null)
                             nioTF.getProperties().add(rh);
                         if (ssl_engine != null) {
-                            ConfigDAO sslContent = (ConfigDAO) configDAO.getContent().get(ssl_engine);
+                            GenConfig sslContent = (GenConfig) genConfig.getContent().get(ssl_engine);
                             if (log.isEnabled()) log.getLogger().info("sslContent: " + sslContent);
                             if (sslContent != null) {
                                 if (log.isEnabled()) log.getLogger().info("" + sslContent);
@@ -290,7 +290,7 @@ public class NIOConfig
                 }
             }
         }
-        return configDAO;
+        return genConfig;
     }
 
 
@@ -304,7 +304,7 @@ public class NIOConfig
 
 
     @Override
-    public NIOConfig setAppConfig(ConfigDAO appConfig) {
+    public NIOConfig setAppConfig(GenConfig appConfig) {
         // TODO Auto-generated method stub
         return (NIOConfig) super.setAppConfig(parse(appConfig));
     }
@@ -314,9 +314,9 @@ public class NIOConfig
         try {
             int index = 0;
             log.getLogger().info("loading file " + args[index]);
-            ConfigDAO configDAO = GSONUtil.fromJSON(IOUtil.inputStreamToString(args[index++]));
-            log.getLogger().info(GSONUtil.toJSON(configDAO, true, false, false));
-            NIOConfig nioConfig = new NIOConfig(configDAO);
+            GenConfig genConfig = GSONUtil.fromJSON(IOUtil.inputStreamToString(args[index++]));
+            log.getLogger().info(GSONUtil.toJSON(genConfig, true, false, false));
+            NIOConfig nioConfig = new NIOConfig(genConfig);
             NIOSocket nioSocket = nioConfig.createApp();
             if (args.length > index) {
                 IPBlockerConfig ipBlockerConfig = GSONUtil.fromJSON(IOUtil.inputStreamToString(args[index++]), IPBlockerConfig.class);

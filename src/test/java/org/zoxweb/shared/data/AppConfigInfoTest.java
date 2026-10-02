@@ -15,7 +15,7 @@ import java.io.IOException;
 /**
  * Created on 8/11/17
  */
-public class AppConfigDAOTest {
+public class AppConfigInfoTest {
 
     public static final String url = "https://www.zipcodeapi.com";
     public static final String uri = "rest";
@@ -25,10 +25,10 @@ public class AppConfigDAOTest {
 
 
     @Test
-    public void testCreateAppConfigDAO() throws IOException {
+    public void testCreateAppConfigInfo() throws IOException {
         AppIDDefault appIDDAO = new AppIDDefault("zoxweb.org", "zoxweb");
 
-        AppConfigDAO appConfigDAO = new AppConfigDAO(appIDDAO);
+        AppConfigInfo appConfigInfo = new AppConfigInfo(appIDDAO);
 
         HTTPMessageConfig hmc = (HTTPMessageConfig) HTTPMessageConfig.createAndInit(url, uri, HTTPMethod.GET);
         hmc.setName("zipcode-api-config");
@@ -37,9 +37,9 @@ public class AppConfigDAOTest {
             .build(new NVPair("distance", distance))
             .build(new NVPair("units", units));
 
-        appConfigDAO.getProperties().build(hmc);
+        appConfigInfo.getProperties().build(hmc);
 
-        System.out.println(GSONUtil.toJSON(appConfigDAO, true, false, true));
+        System.out.println(GSONUtil.toJSON(appConfigInfo, true, false, true));
 
     }
 

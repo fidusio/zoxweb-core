@@ -3,7 +3,7 @@ package org.zoxweb.server.net.ssl;
 
 import org.zoxweb.server.net.BaseSessionCallback;
 import org.zoxweb.server.net.ProtocolFactoryBase;
-import org.zoxweb.shared.data.ConfigDAO;
+import org.zoxweb.shared.data.GenConfig;
 import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.util.InstanceFactory;
 
@@ -66,7 +66,7 @@ public class SSLNIOSocketHandlerFactory
     public void init() {
         if (getProperties().getValue("remote_host") != null)
             setRemoteConnection(new IPAddress(getProperties().getValue("remote_host")));
-        sslContext = (SSLContextInfo) ((ConfigDAO) getProperties().getValue("ssl_engine")).attachment();
+        sslContext = (SSLContextInfo) ((GenConfig) getProperties().getValue("ssl_engine")).attachment();
         try {
             if (getProperties().getValue("session_callback") != null) {
                 scClass = (Class<BaseSessionCallback<SSLSessionConfig>>) Class.forName(getProperties().getValue("session_callback"));

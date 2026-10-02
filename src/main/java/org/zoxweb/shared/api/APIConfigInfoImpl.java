@@ -31,7 +31,7 @@ import java.util.List;
  *
  */
 @SuppressWarnings("serial")
-public class APIConfigInfoDAO
+public class APIConfigInfoImpl
         extends PropertyDAO
         implements APIConfigInfo {
 
@@ -77,16 +77,16 @@ public class APIConfigInfoDAO
     /**
      * This NVConfigEntity type constant is set to an instantiation of a NVConfigEntityLocal object based on API ConfigInfoDAO.
      */
-    public static final NVConfigEntity NVC_API_CONFIG_INFO_DAO = new NVConfigEntityPortable
+    public static final NVConfigEntity NVC_API_CONFIG_INFO_IMPL = new NVConfigEntityPortable
             (
-                    "api_config_info_dao",
+                    "api_config_info_impl",
                     null,
-                    "APIConfigInfoDAO",
+                    "APIConfigInfoImpl",
                     true,
                     false,
                     false,
                     false,
-                    APIConfigInfoDAO.class,
+                    APIConfigInfoImpl.class,
                     SUS.extractNVConfigs(Params.values()),
                     null,
                     false,
@@ -97,8 +97,8 @@ public class APIConfigInfoDAO
     /**
      * This is the default constructor.
      */
-    public APIConfigInfoDAO() {
-        super(NVC_API_CONFIG_INFO_DAO);
+    public APIConfigInfoImpl() {
+        super(NVC_API_CONFIG_INFO_IMPL);
     }
 
 

@@ -18,39 +18,36 @@ package org.zoxweb.shared.util;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.zoxweb.shared.accounting.FinancialTransactionDAO;
-import org.zoxweb.shared.util.NVCEMap;
-import org.zoxweb.shared.util.NVCMap;
-import org.zoxweb.shared.util.NVEntity;
+import org.zoxweb.shared.accounting.FinancialTransaction;
 
 public class NVCEMapTest {
 
 	public static void main(String[] args) {
 		List<NVCMap> nvcMapList = new ArrayList<NVCMap>();
-		NVCMap nvcDate = new NVCMap(FinancialTransactionDAO.Params.CREATION_TS.getNVConfig(), "Date");
+		NVCMap nvcDate = new NVCMap(FinancialTransaction.Params.CREATION_TS.getNVConfig(), "Date");
 		nvcDate.setSeparator(", ");
 		nvcDate.setReadOnly(true);
 		nvcMapList.add(nvcDate);
-		NVCMap nvcDescription = new NVCMap(FinancialTransactionDAO.Params.TRANSACTION_DESCRIPTOR.getNVConfig(), "Description");
+		NVCMap nvcDescription = new NVCMap(FinancialTransaction.Params.TRANSACTION_DESCRIPTOR.getNVConfig(), "Description");
 		nvcDescription.setSeparator(", ");
 		nvcDescription.setReadOnly(true);
 		nvcMapList.add(nvcDescription);
-		NVCMap nvcType = new NVCMap(FinancialTransactionDAO.Params.TRANSACTION_TYPE.getNVConfig(), "Type");
+		NVCMap nvcType = new NVCMap(FinancialTransaction.Params.TRANSACTION_TYPE.getNVConfig(), "Type");
 		nvcType.setSeparator(", ");
 		nvcType.setReadOnly(true);
 		nvcMapList.add(nvcType);
-		NVCMap nvcAmount = new NVCMap(FinancialTransactionDAO.Params.TRANSACTION_AMOUNT.getNVConfig(), "Amount");
+		NVCMap nvcAmount = new NVCMap(FinancialTransaction.Params.TRANSACTION_AMOUNT.getNVConfig(), "Amount");
 		nvcAmount.setSeparator(", ");
 		nvcAmount.setReadOnly(true);
 		nvcMapList.add(nvcAmount);
 		
-		NVCEMap nvceMap = new NVCEMap(FinancialTransactionDAO.NVC_FINANCIAL_TRANSACTION_DAO, nvcMapList);
+		NVCEMap nvceMap = new NVCEMap(FinancialTransaction.NVC_FINANCIAL_TRANSACTION, nvcMapList);
 		
 		for (NVEntity map : nvceMap.getNVCMapList().values()) {
 			System.out.println("NVC map: " + map);
 		}
 		
-		System.out.println(nvcAmount.valueToString(new FinancialTransactionDAO()));
+		System.out.println(nvcAmount.valueToString(new FinancialTransaction()));
 	}
 
 }

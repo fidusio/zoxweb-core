@@ -11,7 +11,7 @@ public class AppIDURI {
 
     }
 
-    public AppIDDefault getAppIDDAO() {
+    public AppIDDefault getAppID() {
         return appID;
     }
 
@@ -25,7 +25,7 @@ public class AppIDURI {
             path = path.substring(1);
         }
 
-        String tokens[] = path.split("/");
+        String[] tokens = path.split("/");
 
         if (tokens.length < 2)
             throw new IllegalArgumentException("path too short");

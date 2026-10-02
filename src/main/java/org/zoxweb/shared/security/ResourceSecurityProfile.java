@@ -10,15 +10,12 @@ import java.util.List;
 import java.util.Set;
 
 
-public class SecurityProfile
-extends PropertyDAO
-implements ResourceSecurity
-{
-
+public class ResourceSecurityProfile
+        extends PropertyDAO
+        implements ResourceSecurity {
 
     public enum Param
-            implements GetNVConfig
-    {
+            implements GetNVConfig {
         AUTHENTICATIONS(NVConfigManager.createNVConfig("authentications", "Authentication types", "Authentications", false, true, AuthenticationType[].class)),
         PERMISSIONS(NVConfigManager.createNVConfig("permissions", "Permission tokens", "Permissions", false, true, NVStringSet.class)),
         ROLES(NVConfigManager.createNVConfig("roles", "Role tokens", "Roles", false, true, NVStringSet.class)),
@@ -29,104 +26,89 @@ implements ResourceSecurity
         ;
         private final NVConfig nvc;
 
-        Param(NVConfig nvc)
-        {
+        Param(NVConfig nvc) {
             this.nvc = nvc;
         }
 
-        public NVConfig getNVConfig()
-        {
+        public NVConfig getNVConfig() {
             return nvc;
         }
     }
 
     private String[] permissions = null;
     private String[] roles = null;
-    private String[] restrictions  = null;
+    private String[] restrictions = null;
     AuthenticationType[] authenticationTypes = null;
 
     /**
      * This NVConfigEntity type constant is set to an instantiation of a NVConfigEntityLocal object based on DataContentDAO.
      */
-    public static final NVConfigEntity NVC_SECURITY_PROFILE = new NVConfigEntityPortable("security_profile",
+    public static final NVConfigEntity NVC_RESOURCE_SECURITY_PROFILE = new NVConfigEntityPortable("resource_security_profile",
             null,
-            "SecurityProfile",
+            "ResourceSecurityProfile",
             true,
             false,
             false,
             false,
-            SecurityProfile.class,
+            ResourceSecurityProfile.class,
             SUS.extractNVConfigs(Param.values()),
             null,
             false,
             PropertyDAO.NVC_PROPERTY_DAO);
 
 
-    public SecurityProfile()
-    {
-        super(NVC_SECURITY_PROFILE);
+    public ResourceSecurityProfile() {
+        super(NVC_RESOURCE_SECURITY_PROFILE);
     }
 
-    protected SecurityProfile(NVConfigEntity nvce)
-    {
+    protected ResourceSecurityProfile(NVConfigEntity nvce) {
         super(nvce);
     }
 
-    public Set<String> getPermissions()
-    {
-        return ((NVStringSet)lookup(Param.PERMISSIONS)).getValue();
+    public Set<String> getPermissions() {
+        return ((NVStringSet) lookup(Param.PERMISSIONS)).getValue();
     }
 
-    public void setPermissions(String ...permissions)
-    {
+    public void setPermissions(String... permissions) {
         this.permissions = null;
-        ((NVStringSet)lookup(Param.PERMISSIONS)).setValues(permissions);
+        ((NVStringSet) lookup(Param.PERMISSIONS)).setValues(permissions);
     }
 
-    public Set<String> getRoles()
-    {
-        return ((NVStringSet)lookup(Param.ROLES)).getValue();
+    public Set<String> getRoles() {
+        return ((NVStringSet) lookup(Param.ROLES)).getValue();
     }
 
-    public void setRoles(String ...roles)
-    {
+    public void setRoles(String... roles) {
         this.roles = null;
-        ((NVStringSet)lookup(Param.ROLES)).setValues(roles);
+        ((NVStringSet) lookup(Param.ROLES)).setValues(roles);
 
     }
 
-    public Set<String> getRestrictions()
-    {
-        return ((NVStringSet)lookup(Param.RESTRICTIONS)).getValue();
+    public Set<String> getRestrictions() {
+        return ((NVStringSet) lookup(Param.RESTRICTIONS)).getValue();
     }
 
-    public void setRestrictions(String ...restrictions)
-    {
+    public void setRestrictions(String... restrictions) {
         this.restrictions = null;
-        ((NVStringSet)lookup(Param.RESTRICTIONS)).setValues(restrictions);
+        ((NVStringSet) lookup(Param.RESTRICTIONS)).setValues(restrictions);
 
     }
 
-    public AuthenticationType[] getAuthenticationTypes()
-    {
-        return ((List<Enum>)lookupValue(Param.AUTHENTICATIONS)).toArray(new AuthenticationType[0]);
+    public AuthenticationType[] getAuthenticationTypes() {
+        return ((List<Enum>) lookupValue(Param.AUTHENTICATIONS)).toArray(new AuthenticationType[0]);
     }
 
-    public void setAuthenticationTypes(AuthenticationType...authTypes)
-    {
+    public void setAuthenticationTypes(AuthenticationType... authTypes) {
         this.authenticationTypes = null;
         NVEnumList el = (NVEnumList) lookup(Param.AUTHENTICATIONS);
         el.setValues(authTypes);
     }
 
     @Override
-    public String[] permissions()
-    {
-        if (permissions == null)
-        {
-            synchronized (this)
-            {
-                if(permissions == null)
+    public String[] permissions() {
+        if (permissions == null) {
+            synchronized (this) {
+                if (permissions == null)
                     permissions = getPermissions().toArray(new String[0]);
             }
         }
@@ -136,11 +118,9 @@ implements ResourceSecurity
     @Override
     public String[] roles() {
 
-        if (roles == null)
-        {
-            synchronized (this)
-            {
-                if(roles == null)
+        if (roles == null) {
+            synchronized (this) {
+                if (roles == null)
                     roles = getRoles().toArray(new String[0]);
             }
         }
@@ -151,11 +131,9 @@ implements ResourceSecurity
 
     @Override
     public String[] restrictions() {
-        if (restrictions == null)
-        {
-            synchronized (this)
-            {
-                if(restrictions == null)
+        if (restrictions == null) {
+            synchronized (this) {
+                if (restrictions == null)
                     restrictions = getRestrictions().toArray(new String[0]);
             }
         }
@@ -165,12 +143,9 @@ implements ResourceSecurity
 
     @Override
     public AuthenticationType[] authenticationTypes() {
-        if (authenticationTypes == null)
-        {
-            synchronized (this)
-            {
-                if(authenticationTypes == null)
-                {
+        if (authenticationTypes == null) {
+            synchronized (this) {
+                if (authenticationTypes == null) {
                     authenticationTypes = getAuthenticationTypes();
                 }
             }
@@ -178,23 +153,20 @@ implements ResourceSecurity
         return authenticationTypes;
     }
 
-    public URIScheme[] getProtocols()
-    {
-        return ((NVEnumList)lookup(Param.PROTOCOLS)).getValues(new URIScheme[0]);
+    public URIScheme[] getProtocols() {
+        return ((NVEnumList) lookup(Param.PROTOCOLS)).getValues(new URIScheme[0]);
     }
 
-    public boolean isProtocolSupported(String protocol)
-    {
-        return isProtocolSupported((URIScheme)SUS.lookupEnum(protocol, URIScheme.values()));
+    public boolean isProtocolSupported(String protocol) {
+        return isProtocolSupported((URIScheme) SUS.lookupEnum(protocol, URIScheme.values()));
     }
-    public boolean isProtocolSupported(URIScheme protocol)
-    {
-        NVEnumList protocolList = (NVEnumList)lookup(Param.PROTOCOLS);
+
+    public boolean isProtocolSupported(URIScheme protocol) {
+        NVEnumList protocolList = (NVEnumList) lookup(Param.PROTOCOLS);
         return protocolList.getValue().size() > 0 ? protocolList.contains(protocol) : true;
     }
 
-    public void setProtocols(URIScheme ...protocols)
-    {
-        ((NVEnumList)lookup(Param.PROTOCOLS)).setValues(protocols);
+    public void setProtocols(URIScheme... protocols) {
+        ((NVEnumList) lookup(Param.PROTOCOLS)).setValues(protocols);
     }
 }

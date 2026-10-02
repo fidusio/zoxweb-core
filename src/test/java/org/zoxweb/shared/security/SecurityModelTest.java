@@ -46,10 +46,60 @@ class SecurityModelTest {
             assertTrue(parts.length >= 2, p.name());
             for (String part : parts) assertFalse(part.isEmpty(), p.name() + " has an empty part");
             assertTrue(targets.contains(parts[0]), p.name() + " target " + parts[0]);
-            assertTrue(actions.contains(parts[1]), p.name() + " action " + parts[1]);
             assertEquals(p.getTarget().getName(), parts[0]);
+            if (p.getTarget() == Target.RESOURCE) {
+                // resource grammar: resource:<res>:<subject>:<verbs> (verb LAST) or the namespace wildcard resource:*
+                if (p.getAction() == Action.ALL) {
+                    assertEquals(SecurityModel.RESOURCE + ":*", token, p.name());
+                } else {
+                    assertTrue(SecurityModel.isResourceToken(token), p.name() + " must be a 4-part resource token: " + token);
+                    assertEquals("*", parts[1], p.name() + " catalog resource part must be a wildcard");
+                    assertEquals("*", parts[2], p.name() + " catalog subject part must be a wildcard");
+                    assertEquals(p.getAction().getName(), parts[3], p.name());
+                }
+                continue;
+            }
+            assertTrue(actions.contains(parts[1]), p.name() + " action " + parts[1]);
             assertEquals(p.getAction().getName(), parts[1]);
         }
+    }
+
+    @Test
+    void resourceTokenGrammar() {
+        String s = "0199a2b4-1111-7000-8000-000000000001";
+        String e = "0199a2b4-2222-7000-8000-000000000002";
+        String g = "0199A2B4-3333-7000-8000-000000000003";
+        assertEquals("read,update,delete,share", SecurityModel.RESOURCE_SELF_VERBS);
+        // self permission of S: resource:S:S:read,update,delete,share
+        assertEquals("resource:" + s + ":" + s + ":read,update,delete,share",
+                SecurityModel.toResourceToken(s, s, SecurityModel.RESOURCE_SELF_VERBS));
+        // a grant of E to G, stored form resource:<verbs> -> composed 4-part token, lower-cased
+        assertEquals("resource:" + e + ":" + g.toLowerCase() + ":read,share",
+                SecurityModel.toResourceToken(e, g, SecurityModel.toResourceToken("Read", "share")));
+        assertEquals("resource:" + e + ":" + g.toLowerCase() + ":read", SecurityModel.toResourceToken(e, g, " READ "));
+        assertEquals("resource:*:*:read", SecurityModel.toResourceToken("*", "*", "read"));
+        assertThrows(IllegalArgumentException.class, () -> SecurityModel.toResourceToken(e, g, "subject:read"));
+        assertThrows(IllegalArgumentException.class, () -> SecurityModel.toResourceToken(e, g, "resource:read:x"));
+        assertThrows(IllegalArgumentException.class, () -> SecurityModel.toResourceToken(e, g, "resource:"));
+        assertThrows(NullPointerException.class, () -> SecurityModel.toResourceToken(null, g, "read"));
+        assertThrows(NullPointerException.class, () -> SecurityModel.toResourceToken(e, " ", "read"));
+        assertThrows(NullPointerException.class, () -> SecurityModel.toResourceToken(e, g, null));
+
+        assertTrue(SecurityModel.isResourceToken("resource:" + e + ":" + g + ":read"));
+        assertTrue(SecurityModel.isResourceToken("Resource:*:*:read"));
+        assertFalse(SecurityModel.isResourceToken("resource:*"));
+        assertFalse(SecurityModel.isResourceToken("resource:read"));
+        assertFalse(SecurityModel.isResourceToken("resource:" + e + "::read"));
+        assertFalse(SecurityModel.isResourceToken("subject:" + e + ":" + g + ":read"));
+        assertFalse(SecurityModel.isResourceToken(null));
+        assertFalse(SecurityModel.isResourceToken(""));
+
+        // stored form is 2-part and instance-scopable; composed form is not
+        assertTrue(SecurityModel.isInstanceScopable(SecurityModel.toResourceToken("read")));
+        assertFalse(SecurityModel.isInstanceScopable(SecurityModel.toResourceToken(e, g, "read")));
+        // no nventity anywhere in the catalog
+        for (Permission p : Permission.values()) assertFalse(p.getValue().contains("nventity"), p.name());
+        assertThrows(IllegalArgumentException.class, () -> Target.valueOf("NVENTITY"));
     }
 
     @Test
@@ -89,8 +139,11 @@ class SecurityModelTest {
         assertEquals(SecurityModel.PERM_CREATE_APP_ID, Permission.APP_CREATE.getValue());
         assertEquals(SecurityModel.PERM_UPDATE_APP_ID, Permission.APP_UPDATE.getValue());
         assertEquals(SecurityModel.PERM_DELETE_APP_ID, Permission.APP_DELETE.getValue());
-        assertEquals("nventity:*", Permission.NVE_ALL.getValue());
-        assertEquals("nventity:share:*", Permission.NVE_SHARE_ALL.getValue());
+        assertEquals("resource:*", Permission.NVE_ALL.getValue());
+        assertEquals("resource:*:*:share", Permission.NVE_SHARE_ALL.getValue());
+        assertEquals("resource:*:*:create", Permission.NVE_CREATE_ALL.getValue());
+        assertEquals(Target.RESOURCE, Permission.NVE_READ_ALL.getTarget());
+        assertEquals(Action.READ, Permission.NVE_READ_ALL.getAction());
         assertEquals("permission:assign:permission", Permission.PERMISSION_ASSIGN.getValue());
         assertEquals("permission:assign:role", Permission.ROLE_ASSIGN.getValue());
     }
@@ -139,8 +192,8 @@ class SecurityModelTest {
         assertTrue(SecurityModel.isWildcardToken("*:read"));
         assertTrue(SecurityModel.isWildcardToken("*:*:*"));
         assertFalse(SecurityModel.isWildcardToken("a:*"));
-        assertFalse(SecurityModel.isWildcardToken("nventity:*"));
-        assertFalse(SecurityModel.isWildcardToken("nventity:read:*"));
+        assertFalse(SecurityModel.isWildcardToken("resource:*"));
+        assertFalse(SecurityModel.isWildcardToken("resource:*:*:read"));
         assertFalse(SecurityModel.isWildcardToken(""));
         assertFalse(SecurityModel.isWildcardToken("   "));
         assertFalse(SecurityModel.isWildcardToken(null));
@@ -160,7 +213,7 @@ class SecurityModelTest {
         assertEquals("subject_create", pi.getName());
         assertEquals("subject:create", pi.getPermissionToken());
         assertNotNull(pi.getDescription());
-        assertNull(pi.getAppIdDAO());
+        assertNull(pi.getAppID());
         assertNull(pi.getGUID());
     }
 }

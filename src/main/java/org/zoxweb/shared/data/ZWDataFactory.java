@@ -33,6 +33,7 @@ import java.util.Set;
 
 /**
  * This NVEntity factory contains all NVEntity objects within this project.
+ *
  * @author mzebib
  *
  */
@@ -108,16 +109,16 @@ public class ZWDataFactory
             }
 
         },
-        API_CONFIG_INFO_DAO(APIConfigInfoDAO.class.getName()) {
+        API_CONFIG_INFO_IMPL(APIConfigInfoImpl.class.getName()) {
             @SuppressWarnings("unchecked")
             @Override
-            public APIConfigInfoDAO newInstance() {
-                return new APIConfigInfoDAO();
+            public APIConfigInfoImpl newInstance() {
+                return new APIConfigInfoImpl();
             }
 
             @Override
             public NVConfigEntity getNVConfigEntity() {
-                return APIConfigInfoDAO.NVC_API_CONFIG_INFO_DAO;
+                return APIConfigInfoImpl.NVC_API_CONFIG_INFO_IMPL;
             }
 
         } //	org.zoxweb.shared.api
@@ -195,7 +196,7 @@ public class ZWDataFactory
                 return AppDeviceInfo.NVC_APP_DEVICE_INFO;
             }
         },
-        APP_ID_DAO(AppIDDefault.class.getName()) {
+        APP_ID_DEFAULT(AppIDDefault.class.getName()) {
             @SuppressWarnings("unchecked")
             @Override
             public AppIDDefault newInstance() {
@@ -268,16 +269,16 @@ public class ZWDataFactory
                 return BillingItemDAO.NVC_BILLING_ITEM_DAO;
             }
         },
-        CONFIG_DAO(ConfigDAO.class.getName()) {
+        GEN_CONFIG(GenConfig.class.getName()) {
             @SuppressWarnings("unchecked")
             @Override
-            public ConfigDAO newInstance() {
-                return new ConfigDAO();
+            public GenConfig newInstance() {
+                return new GenConfig();
             }
 
             @Override
             public NVConfigEntity getNVConfigEntity() {
-                return ConfigDAO.NVC_CONFIG_DAO;
+                return GenConfig.NVC_GEN_CONFIG;
             }
         },
         CONNECTION_CONFIG(ConnectionConfig.class.getName()) {
@@ -412,16 +413,16 @@ public class ZWDataFactory
                 return FileInfo.NVC_FILE_INFO;
             }
         },
-        FINANCIAL_TRANSACTION_DAO(FinancialTransactionDAO.class.getName()) {
+        FINANCIAL_TRANSACTION(FinancialTransaction.class.getName()) {
             @SuppressWarnings("unchecked")
             @Override
-            public FinancialTransactionDAO newInstance() {
-                return new FinancialTransactionDAO();
+            public FinancialTransaction newInstance() {
+                return new FinancialTransaction();
             }
 
             @Override
             public NVConfigEntity getNVConfigEntity() {
-                return FinancialTransactionDAO.NVC_FINANCIAL_TRANSACTION_DAO;
+                return FinancialTransaction.NVC_FINANCIAL_TRANSACTION;
             }
         },
         FOLDER_CONTENT_OP(FolderContentOp.class.getName()) {
@@ -512,28 +513,28 @@ public class ZWDataFactory
                 return ImageMetaInfo.NVC_IMAGE_META_INFO;
             }
         },
-        INET_ADDRESS_DAO(InetAddressDAO.class.getName()) {
+        INET_ADDRESS_INFO(InetAddressInfo.class.getName()) {
             @SuppressWarnings("unchecked")
             @Override
-            public InetAddressDAO newInstance() {
-                return new InetAddressDAO();
+            public InetAddressInfo newInstance() {
+                return new InetAddressInfo();
             }
 
             @Override
             public NVConfigEntity getNVConfigEntity() {
-                return InetAddressDAO.NVC_INET_ADDRESS_DAO;
+                return InetAddressInfo.NVC_INET_ADDRESS_INFO;
             }
         },
-        INET_FILTER_DAO(InetFilterDAO.class.getName()) {
+        INET_FILTER_INFO(InetFilterInfo.class.getName()) {
             @SuppressWarnings("unchecked")
             @Override
-            public InetFilterDAO newInstance() {
-                return new InetFilterDAO();
+            public InetFilterInfo newInstance() {
+                return new InetFilterInfo();
             }
 
             @Override
             public NVConfigEntity getNVConfigEntity() {
-                return InetFilterDAO.NVC_INET_FILTER_DAO;
+                return InetFilterInfo.NVC_INET_FILTER_INFO;
             }
         },
         INET_SOCKET_ADDRESS_DAO(IPAddress.class.getName()) {
@@ -866,6 +867,18 @@ public class ZWDataFactory
                 return ResourceMap.NVC_RESOURCE_MAP;
             }
         },
+        RESOURCE_SECURITY_PROFILE(ResourceSecurityProfile.class.getName()) {
+            @SuppressWarnings("unchecked")
+            @Override
+            public ResourceSecurityProfile newInstance() {
+                return new ResourceSecurityProfile();
+            }
+
+            @Override
+            public NVConfigEntity getNVConfigEntity() {
+                return ResourceSecurityProfile.NVC_RESOURCE_SECURITY_PROFILE;
+            }
+        },
         ROLE_GRANT(RoleGrant.class.getName()) {
             @SuppressWarnings("unchecked")
             @Override
@@ -952,18 +965,7 @@ public class ZWDataFactory
                 return SecureDocument.NVC_SECURE_DOCUMENT;
             }
         },
-        SECURITY_PROFILE(SecurityProfile.class.getName()) {
-            @SuppressWarnings("unchecked")
-            @Override
-            public SecurityProfile newInstance() {
-                return new SecurityProfile();
-            }
 
-            @Override
-            public NVConfigEntity getNVConfigEntity() {
-                return SecurityProfile.NVC_SECURITY_PROFILE;
-            }
-        },
 
         SIMPLE_DOCUMENT(SimpleDocument.class.getName()) {
             @SuppressWarnings("unchecked")

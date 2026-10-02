@@ -29,13 +29,13 @@ import com.google.gson.Gson;
 
 public class JSONQuery {
 
-	private static String test = "{\"canonical_id\":\"org.zoxweb.shared.accounting.FinancialTransactionDAO\", \"batch_size\":250, \"query\":[{\"creation_ts\":1435647600354, \"relational_operator\":\"GT\"},{\"logical_operator\":\"AND\"},{\"creation_ts\":1435710917354, \"relational_operator\":\"LT\"}]}";
+	private static String test = "{\"canonical_id\":\"org.zoxweb.shared.accounting.FinancialTransaction\", \"batch_size\":250, \"query\":[{\"creation_ts\":1435647600354, \"relational_operator\":\"GT\"},{\"logical_operator\":\"AND\"},{\"creation_ts\":1435710917354, \"relational_operator\":\"LT\"}]}";
 
 	public static void main(String[] args) {
 		Gson gson = new Gson();
 		
 		QueryRequest qr = new QueryRequest();
-		qr.setCanonicalID("org.zoxweb.shared.accounting.FinancialTransactionDAO");
+		qr.setCanonicalID("org.zoxweb.shared.accounting.FinancialTransaction");
 		qr.setBatchSize(250);
 
 		ArrayList<QueryMarker> query = new ArrayList<QueryMarker>();

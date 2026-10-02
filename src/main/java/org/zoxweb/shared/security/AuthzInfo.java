@@ -15,7 +15,7 @@ public abstract class AuthzInfo extends PropertyDAO {
 
     public enum Param implements GetNVConfig {
         BROKER_GUID(NVConfigManager.createNVConfig("broker_guid", "the broker GUID, used for audit", "BrokerGUID", false, false, String.class)),
-        APP_ID_DAO(NVConfigManager.createNVConfigEntity("app_id", "the app id object, representing the domain and app ids", "AppID", false, false, AppIDDefault.NVC_APP_ID_DEFAULT)),
+        APP_ID(NVConfigManager.createNVConfigEntity("app_id", "the app id object, representing the domain and app ids", "AppID", false, false, AppIDDefault.NVC_APP_ID_DEFAULT)),
         ;
 
         private final NVConfig nvc;
@@ -38,7 +38,7 @@ public abstract class AuthzInfo extends PropertyDAO {
             false,
             false,
             AuthzInfo.class,
-            SUS.extractNVConfigs(DataConst.DataParam.MANDATORY_NAME, Param.BROKER_GUID, Param.APP_ID_DAO),
+            SUS.extractNVConfigs(DataConst.DataParam.MANDATORY_NAME, Param.BROKER_GUID, Param.APP_ID),
             null,
             false,
             PropertyDAO.NVC_PROPERTY_DAO
@@ -74,16 +74,16 @@ public abstract class AuthzInfo extends PropertyDAO {
      *
      * @param id an AppIdDao object
      */
-    public void setAppIdDAO(AppIDDefault id) {
-        setValue(Param.APP_ID_DAO, id);
+    public void setAppID(AppIDDefault id) {
+        setValue(Param.APP_ID, id);
     }
 
     /**
      *
      * @return an AppIdDao object
      */
-    public AppIDDefault getAppIdDAO() {
-        return lookupValue(Param.APP_ID_DAO);
+    public AppIDDefault getAppID() {
+        return lookupValue(Param.APP_ID);
     }
 
 

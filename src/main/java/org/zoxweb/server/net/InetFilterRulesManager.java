@@ -17,7 +17,7 @@ package org.zoxweb.server.net;
 
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.shared.data.SetNameDAO;
-import org.zoxweb.shared.net.InetFilterDAO;
+import org.zoxweb.shared.net.InetFilterInfo;
 import org.zoxweb.shared.net.SharedNetUtil;
 import org.zoxweb.shared.security.SecConst;
 import org.zoxweb.shared.util.*;
@@ -42,7 +42,7 @@ public class InetFilterRulesManager {
 
         public enum Params
                 implements GetNVConfig {
-            IP_FILTER(NVConfigManager.createNVConfigEntity("inet_filter_dao", null, "InetFilterDAO", false, true, InetFilterDAO.NVC_INET_FILTER_DAO)),
+            IP_FILTER(NVConfigManager.createNVConfigEntity("inet_filter_dao", null, "InetFilterDAO", false, true, InetFilterInfo.NVC_INET_FILTER_INFO)),
             STATUS(NVConfigManager.createNVConfig("security_status", null, "SecurityStatus", false, true, SecConst.SecAction.class));
 
             private final NVConfig cType;
@@ -66,7 +66,7 @@ public class InetFilterRulesManager {
             super(NVC_INET_FILTER_RULE);
         }
 
-        public InetFilterRule(InetFilterDAO filter, SecConst.SecAction ss) throws IOException {
+        public InetFilterRule(InetFilterInfo filter, SecConst.SecAction ss) throws IOException {
             super(NVC_INET_FILTER_RULE);
             setInetFilterDAO(filter);
             setSecurityStatus(ss);
@@ -75,7 +75,7 @@ public class InetFilterRulesManager {
         /**
          * @return the ipFilter
          */
-        public InetFilterDAO getInetFilterDAO() {
+        public InetFilterInfo getInetFilterDAO() {
             return lookupValue(Params.IP_FILTER);
         }
 
@@ -83,7 +83,7 @@ public class InetFilterRulesManager {
          * @param inetFilter the ipFilter to set
          * @throws IOException
          */
-        public synchronized void setInetFilterDAO(InetFilterDAO inetFilter) throws IOException {
+        public synchronized void setInetFilterDAO(InetFilterInfo inetFilter) throws IOException {
             setValue(Params.IP_FILTER, inetFilter);
             //maskBytes    = InetAddress.getByName(inetFilter.getNetworkMask()).getAddress();
             byte[] networkBytesTemp = InetAddress.getByName(NetUtil.getNetworkIPV4(inetFilter.getIP(), inetFilter.getNetworkMask())).getAddress();
@@ -182,13 +182,13 @@ public class InetFilterRulesManager {
                 sbIP.append('-');
         }
 
-        InetFilterDAO ifd = new InetFilterDAO(sbIP.toString(), netMask);
+        InetFilterInfo ifd = new InetFilterInfo(sbIP.toString(), netMask);
         addInetFilterProp(new InetFilterRule(ifd, ss));
 
     }
 
 
-    public void addInetFilterProp(InetFilterDAO ifd, SecConst.SecAction ss) throws IOException {
+    public void addInetFilterProp(InetFilterInfo ifd, SecConst.SecAction ss) throws IOException {
         addInetFilterProp(new InetFilterRule(ifd, ss));
     }
 

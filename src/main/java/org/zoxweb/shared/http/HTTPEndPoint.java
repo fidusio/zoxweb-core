@@ -16,7 +16,7 @@
 package org.zoxweb.shared.http;
 
 import org.zoxweb.shared.data.DataConst;
-import org.zoxweb.shared.security.SecurityProfile;
+import org.zoxweb.shared.security.ResourceSecurityProfile;
 import org.zoxweb.shared.util.*;
 
 import java.util.Arrays;
@@ -27,10 +27,10 @@ import java.util.Arrays;
  * handler bean supports.
  *
  * @author mnael
- * @see SecurityProfile
+ * @see ResourceSecurityProfile
  */
 public class HTTPEndPoint
-        extends SecurityProfile
+        extends ResourceSecurityProfile
         implements ToNVProperties {
     public enum Param
             implements GetNVConfig {
@@ -69,7 +69,7 @@ public class HTTPEndPoint
             SUS.extractNVConfigs(Param.values()),
             null,
             false,
-            SecurityProfile.NVC_SECURITY_PROFILE);
+            ResourceSecurityProfile.NVC_RESOURCE_SECURITY_PROFILE);
 
 
     public HTTPEndPoint() {

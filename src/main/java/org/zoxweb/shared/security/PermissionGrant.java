@@ -17,17 +17,19 @@ import org.zoxweb.shared.util.*;
  * permission, and the resource it names must belong to the grantor. The grantor is
  * recorded in the inherited {@code broker_guid}, the grantee in {@code subject_guid}.
  * <p>
- * An inlined token is normalized and limited by {@link SecurityModel.NVEPermissionTokenFilter}
- * on write: {@code nventity:<verbs>} with the verbs {@code read}, {@code update},
- * {@code share} and {@code delete} only. The resource is never part of the token; the
- * security manager appends {@code :<resource guid>} when it flattens the grant.
+ * An inlined token is normalized and limited by {@link SecurityModel.ResourcePermissionTokenFilter}
+ * on write: {@code resource:<verbs>} with the verbs {@code read}, {@code update},
+ * {@code share} and {@code delete} only. The resource and the grantee are never part of the
+ * stored token; the realm composes the standardized 4-part token
+ * {@code resource:<resource guid>:<grantee guid>:<verbs>} when it flattens the grant
+ * ({@code SecurityModel.toResourceToken}).
  */
 public class PermissionGrant extends GrantBase {
 
     public enum Param implements GetNVConfig {
         PERMISSION_GUID(NVConfigManager.createNVConfig("permission_guid", "A reference to a permission", "PermissionGUID", false, false, String.class)),
         RESOURCE_MAP(NVConfigManager.createNVConfigEntity("resource_map", "", "", false, false, ResourceMap.class, NVConfigEntity.ArrayType.NOT_ARRAY)),
-        PERMISSION_TOKEN(NVConfigManager.createNVConfig("permission_token", "the inlined permission token", "PermissionToken", false, false, false, String.class, SecurityModel.NVEPermissionTokenFilter.SINGLETON)),
+        PERMISSION_TOKEN(NVConfigManager.createNVConfig("permission_token", "the inlined permission token", "PermissionToken", false, false, false, String.class, SecurityModel.ResourcePermissionTokenFilter.SINGLETON)),
 
         ;
 
@@ -91,8 +93,8 @@ public class PermissionGrant extends GrantBase {
      *
      * @param resMap          the resource the grant is scoped to; mandatory for an inlined grant
      * @param permissionToken the inlined permission token, normalized by
-     *                        {@link SecurityModel.NVEPermissionTokenFilter}
-     * @throws IllegalArgumentException if the token is not {@code nventity:<verbs>} with allowed verbs
+     *                        {@link SecurityModel.ResourcePermissionTokenFilter}
+     * @throws IllegalArgumentException if the token is not {@code resource:<verbs>} with allowed verbs
      */
     public PermissionGrant(ResourceMap resMap, String permissionToken) {
         this();
@@ -137,7 +139,7 @@ public class PermissionGrant extends GrantBase {
     }
 
     /**
-     * @param permissionToken the inlined permission token, {@code nventity:<verbs>} with the
+     * @param permissionToken the inlined permission token, {@code resource:<verbs>} with the
      *                        verbs read, update, share and delete; normalized on write, null clears
      * @throws IllegalArgumentException if the token is not of that shape
      */

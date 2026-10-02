@@ -12,17 +12,17 @@ import java.util.UUID;
 public class SecurityProfileTest {
     @Test
     public void securityProp() throws IOException {
-        SecurityProfile sc = new SecurityProfile();
+        ResourceSecurityProfile sc = new ResourceSecurityProfile();
         sc.setAuthenticationTypes(SecConst.AuthenticationType.values());
         sc.setPermissions("perm1", "perm2", "perm1");
         sc.setRoles("role1", "role2");
         String json = GSONUtil.toJSON(sc, false, false, false);
         System.out.println(json);
-        sc = GSONUtil.fromJSON(json, SecurityProfile.class);
+        sc = GSONUtil.fromJSON(json, ResourceSecurityProfile.class);
         System.out.println(Arrays.toString(sc.getAuthenticationTypes()));
         assert sc.getPermissions().contains("perm1");
 
-        assert (sc.lookup(SecurityProfile.Param.PERMISSIONS) instanceof NVStringSet);
+        assert (sc.lookup(ResourceSecurityProfile.Param.PERMISSIONS) instanceof NVStringSet);
     }
 
     @Test

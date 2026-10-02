@@ -2,7 +2,7 @@ package org.zoxweb.server.net;
 
 import org.junit.jupiter.api.Test;
 import org.zoxweb.shared.net.IPAddress;
-import org.zoxweb.shared.net.InetAddressDAO;
+import org.zoxweb.shared.net.InetAddressInfo;
 import org.zoxweb.shared.net.InetProp.IPVersion;
 import org.zoxweb.shared.net.ProxyType;
 import org.zoxweb.shared.security.SecConst;
@@ -284,49 +284,49 @@ public class NetUtilTest {
         assertNull(addr);
     }
 
-    // ==================== toInetAddressDAO Tests ====================
+    // ==================== toInetAddressInfo Tests ====================
 
     @Test
-    public void testToInetAddressDAOFromStringIPv4() throws IOException {
-        InetAddressDAO dao = NetUtil.toInetAddressDAO("192.168.1.1");
+    public void testToInetAddressInfoFromStringIPv4() throws IOException {
+        InetAddressInfo dao = NetUtil.toInetAddressInfo("192.168.1.1");
         assertEquals("192.168.1.1", dao.getInetAddress());
         assertEquals(IPVersion.V4, dao.getIPVersion());
     }
 
     @Test
-    public void testToInetAddressDAOFromStringIPv6() throws IOException {
-        InetAddressDAO dao = NetUtil.toInetAddressDAO("::1");
+    public void testToInetAddressInfoFromStringIPv6() throws IOException {
+        InetAddressInfo dao = NetUtil.toInetAddressInfo("::1");
         // IPv6 loopback can be represented as "::1" or expanded form
         assertTrue(dao.getInetAddress().equals("::1") || dao.getInetAddress().equals("0:0:0:0:0:0:0:1"));
         assertEquals(IPVersion.V6, dao.getIPVersion());
     }
 
     @Test
-    public void testToInetAddressDAOFromStringNullThrows() {
+    public void testToInetAddressInfoFromStringNullThrows() {
         assertThrows(NullPointerException.class, () -> {
-            NetUtil.toInetAddressDAO((String) null);
+            NetUtil.toInetAddressInfo((String) null);
         });
     }
 
     @Test
-    public void testToInetAddressDAOFromInetAddressIPv4() throws IOException {
+    public void testToInetAddressInfoFromInetAddressIPv4() throws IOException {
         InetAddress addr = InetAddress.getByName("10.0.0.1");
-        InetAddressDAO dao = NetUtil.toInetAddressDAO(addr);
+        InetAddressInfo dao = NetUtil.toInetAddressInfo(addr);
         assertEquals("10.0.0.1", dao.getInetAddress());
         assertEquals(IPVersion.V4, dao.getIPVersion());
     }
 
     @Test
-    public void testToInetAddressDAOFromInetAddressIPv6() throws IOException {
+    public void testToInetAddressInfoFromInetAddressIPv6() throws IOException {
         InetAddress addr = InetAddress.getByName("::1");
-        InetAddressDAO dao = NetUtil.toInetAddressDAO(addr);
+        InetAddressInfo dao = NetUtil.toInetAddressInfo(addr);
         assertEquals(IPVersion.V6, dao.getIPVersion());
     }
 
     @Test
-    public void testToInetAddressDAOFromInetAddressNullThrows() {
+    public void testToInetAddressInfoFromInetAddressNullThrows() {
         assertThrows(NullPointerException.class, () -> {
-            NetUtil.toInetAddressDAO((InetAddress) null);
+            NetUtil.toInetAddressInfo((InetAddress) null);
         });
     }
 

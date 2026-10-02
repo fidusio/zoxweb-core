@@ -25,7 +25,7 @@ logic lives in session callbacks. Layering is strict: transport (`NIOSocket`), c
 | Write bridge | `BaseChannelOutputStream` / `CommonChannelOutputStream` | `OutputStream` API over the NIO channel; same object does plaintext and TLS (mode-switchable) |
 | TLS config | `SSLContextInfo` (engine factory), `SSLSessionConfig` (per-session state) | Server mode from keystore/`SSLContext`; client mode from target address (+SNI) |
 | ACLs | `InetFilterRulesManager` | CIDR allow/deny rules checked inline on every accept |
-| Bootstrap | `NIOConfig` | Assemble whole deployments (ports, TLS, ACLs) from a JSON `ConfigDAO` |
+| Bootstrap | `NIOConfig` | Assemble whole deployments (ports, TLS, ACLs) from a JSON `GenConfig` |
 
 ## Semantics contract (the rules the engine obeys)
 
@@ -219,7 +219,7 @@ IPv4-oriented. For fail2ban-style automatic blocking, wire
 
 ### JSON bootstrap (alternative to code)
 
-`NIOConfig` builds an entire deployment from a JSON `ConfigDAO`: per-port factories,
+`NIOConfig` builds an entire deployment from a JSON `GenConfig`: per-port factories,
 keystore-backed `SSLContext`s (`keystore_file/type/password`, `protocols`, `ciphers`),
 `remote_host` for tunnels, and `incoming/outgoing_inet_rule` lists. Use when ports and TLS
 material must be operator-configurable without code.

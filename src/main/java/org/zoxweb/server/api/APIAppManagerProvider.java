@@ -146,7 +146,7 @@ public class APIAppManagerProvider
      * @return true if the authorization info belongs to the same domain as the app id
      */
     private static boolean sameDomain(AuthzInfo info, AppIDDefault app) {
-        String owned = info.getAppIdDAO() != null ? info.getAppIdDAO().getDomainID() : null;
+        String owned = info.getAppID() != null ? info.getAppID().getDomainID() : null;
         return SUS.equals(owned, app.getDomainID(), true);
     }
 
@@ -169,7 +169,7 @@ public class APIAppManagerProvider
             perms.add(pi);
         }
         RoleInfo ret = new RoleInfo(role.getName(), role.getDescription(), perms.toArray(new PermissionInfo[0]));
-        ret.setAppIdDAO(app);
+        ret.setAppID(app);
         return dsm().createRole(ret);
     }
 
@@ -185,7 +185,7 @@ public class APIAppManagerProvider
     }
 
 
-    public SubjectAPIKey createAppDeviceDAO(AppDeviceInfo appDeviceInfo)
+    public SubjectAPIKey createAppDeviceInfo(AppDeviceInfo appDeviceInfo)
             throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException {
         SUS.checkIfNulls("AppDeviceInfo is null", appDeviceInfo);
 
@@ -238,7 +238,7 @@ public class APIAppManagerProvider
                 temp.getDevice().setGUID(device.getGUID());
             }
 
-            AppIDDefault appIDDAO = lookupAppIDDAO(temp.getDomainID(), temp.getAppID().getAppID());
+            AppIDDefault appIDDAO = lookupAppID(temp.getDomainID(), temp.getAppID().getAppID());
 
             if (appIDDAO != null) {
                 temp.setSubjectGUID(appIDDAO.getGUID());
@@ -598,17 +598,17 @@ public class APIAppManagerProvider
 //    }
 
 
-    public SubjectPreference lookupUserPreferenceDAO(AppIDDefault appIDDAO, String subjectID)
+    public SubjectPreference lookupSubjectPreference(AppIDDefault appIDDAO, String subjectID)
             throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException {
         UserIDDAO userIDDAO = lookupUserIDDAO(subjectID);
 
-        return lookupUserPreferenceDAO(appIDDAO, userIDDAO);
+        return lookupSubjectPreference(appIDDAO, userIDDAO);
     }
 
 
-    public SubjectPreference lookupUserPreferenceDAO(AppIDDefault appIDDAO, UserIDDAO userIDDAO)
+    public SubjectPreference lookupSubjectPreference(AppIDDefault appIDDAO, UserIDDAO userIDDAO)
             throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException {
-        SUS.checkIfNulls("AppIDDAO is null", appIDDAO);
+        SUS.checkIfNulls("AppIDDefault is null", appIDDAO);
         SUS.checkIfNulls("UserIDDAO is null", userIDDAO);
 
         SubjectPreference ret = null;
@@ -690,13 +690,13 @@ public class APIAppManagerProvider
     }
 
 
-    public AppIDDefault lookupAppIDDAO(String domainID, String appID)
+    public AppIDDefault lookupAppID(String domainID, String appID)
             throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException {
-        return lookupAppIDDAO(domainID, appID, true);
+        return lookupAppID(domainID, appID, true);
     }
 
 
-    public AppIDDefault lookupAppIDDAO(String domainID, String appID, boolean exceptionIfNotFound)
+    public AppIDDefault lookupAppID(String domainID, String appID, boolean exceptionIfNotFound)
             throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException {
 //        SUS.checkIfNulls("Domain ID is null", domainID);
 //        SUS.checkIfNulls("App ID is null", appID);
@@ -720,18 +720,18 @@ public class APIAppManagerProvider
         return result.get(0);
     }
 
-    public AppConfigDAO lookupAppConfigDAO(String domainID, String appID)
+    public AppConfigInfo lookupAppConfigInfo(String domainID, String appID)
             throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException {
         domainID = FilterType.DOMAIN.validate(domainID);
         appID = AppIDNameFilter.SINGLETON.validate(appID);
 
 
-        AppIDDefault appIDDAO = lookupAppIDDAO(domainID, appID);
+        AppIDDefault appIDDAO = lookupAppID(domainID, appID);
 
-        List<AppConfigDAO> result = search(AppConfigDAO.NVC_APP_CONFIG_DAO, new QueryMatchString(Const.RelationalOperator.EQUAL, appIDDAO.getReferenceID(), AppConfigDAO.Param.APP_ID.getNVConfig().getName(), MetaToken.GUID.getName()));
+        List<AppConfigInfo> result = search(AppConfigInfo.NVC_APP_CONFIG_INFO, new QueryMatchString(Const.RelationalOperator.EQUAL, appIDDAO.getReferenceID(), AppConfigInfo.Param.APP_ID.getNVConfig().getName(), MetaToken.GUID.getName()));
 
         if (result == null || result.size() != 1) {
-            throw new APIException("AppConfigDAO not found", Reason.NOT_FOUND);
+            throw new APIException("AppConfigInfo not found", Reason.NOT_FOUND);
         }
 
         return result.get(0);
@@ -742,17 +742,17 @@ public class APIAppManagerProvider
 
         // Procedure
         // 1. Validation (Check null, validate password, etc.)
-        // 2. Lookup AppIDDAO based on domain ID and app ID (if not found, throw error)
+        // 2. Lookup AppIDDefault based on domain ID and app ID (if not found, throw error)
         // 3. Lookup UserIDDAO based on username (if found, throw already found error)
         // 4. Create UserIDDAO with username and UserInfoDAO
         // 5. Create Credentials with password
         // 6. Create AppDeviceInfo
-        // 7. Create UserPreferenceDAO
+        // 7. Create SubjectPreference
 
 
         SUS.checkIfNulls("UserInfoDAO is null", userInfoDAO);
         SUS.checkIfNulls("AppDeviceInfo is null", appDeviceInfo);
-        SUS.checkIfNulls("AppIDDAO is null", appDeviceInfo.getSubjectGUID());
+        SUS.checkIfNulls("AppIDDefault is null", appDeviceInfo.getSubjectGUID());
         if (SUS.isEmpty(subjectID) || SUS.isEmpty(password)) {
             throw new NullPointerException("Username and/or password is null");
         }
@@ -761,7 +761,7 @@ public class APIAppManagerProvider
         String appID = appDeviceInfo.getAppID().getAppID();
 
         // check and confirm that app already exist
-        AppIDDefault appIDDAO = lookupAppIDDAO(domainID, appID);
+        AppIDDefault appIDDAO = lookupAppID(domainID, appID);
 
 
         appDeviceInfo.setSubjectGUID(appIDDAO.getGUID());
@@ -781,10 +781,10 @@ public class APIAppManagerProvider
         getAPISecurityManager().login(subjectID, password, appIDDAO.getDomainID(), appIDDAO.getAppID(), false);
 
 
-        // Lookup UserPreferenceDAO based on AppIDDAO and UserIDDAO
-        SubjectPreference subjectPreference = lookupUserPreferenceDAO(appIDDAO, userIDDAO);
+        // Lookup SubjectPreference based on AppIDDefault and UserIDDAO
+        SubjectPreference subjectPreference = lookupSubjectPreference(appIDDAO, userIDDAO);
         if (subjectPreference == null) {
-            // Does not exist, create UserPreferenceDAO
+            // Does not exist, create SubjectPreference
             subjectPreference = new SubjectPreference();
             subjectPreference.setSubjectGUID(userIDDAO.getReferenceID());
             subjectPreference.setSubjectGUID(appIDDAO.getGUID());
@@ -794,7 +794,7 @@ public class APIAppManagerProvider
 
         // Create AppDeviceInfo
         appDeviceInfo.setSubjectGUID(userIDDAO.getReferenceID());
-        appDeviceInfo = (AppDeviceInfo) createAppDeviceDAO(appDeviceInfo);
+        appDeviceInfo = (AppDeviceInfo) createAppDeviceInfo(appDeviceInfo);
 
         return appDeviceInfo;
     }
@@ -823,12 +823,12 @@ public class APIAppManagerProvider
     }
 
 
-    public synchronized AppIDDefault createAppIDDAO(String domainID, String appID)
+    public synchronized AppIDDefault createAppID(String domainID, String appID)
             throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException {
 
         getAPISecurityManager().checkPermissions(SecurityModel.Permission.APP_CREATE.getValue());
         // permission super admin only
-        AppIDDefault ret = lookupAppIDDAO(domainID, appID, false);
+        AppIDDefault ret = lookupAppID(domainID, appID, false);
         if (ret == null) {
             ret = new AppIDDefault(domainID, appID);
 
@@ -839,7 +839,7 @@ public class APIAppManagerProvider
             Map<String, PermissionInfo> permissions = new HashMap<>();
             for (AppPermission ap : AppPermission.values()) {
                 PermissionInfo permission = SecurityModel.toPermission(ap, appIDNVP);
-                permission.setAppIdDAO(ret);
+                permission.setAppID(ret);
                 permission = dsm().createPermission(permission);
                 permissions.put(ap.getName(), permission);
             }
@@ -874,22 +874,22 @@ public class APIAppManagerProvider
 
             getAPIDataStore().createSequence(ret.toCanonicalID());
 
-            AppConfigDAO appConfigDAO = new AppConfigDAO();
-            appConfigDAO.setAppIDDAO(ret);
-            appConfigDAO = create(appConfigDAO);
+            AppConfigInfo appConfigInfo = new AppConfigInfo();
+            appConfigInfo.setAppID(ret);
+            appConfigInfo = create(appConfigInfo);
         }
 
         return ret;
     }
 
 
-    public synchronized AppIDDefault deleteAppIDDAO(String domainID, String appID)
+    public synchronized AppIDDefault deleteAppID(String domainID, String appID)
             throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException {
         SUS.checkIfNulls("Null domain or app id", domainID, appID);
         getAPISecurityManager().checkPermissions(SecurityModel.Permission.APP_DELETE.getValue());
-        AppIDDefault ret = lookupAppIDDAO(domainID, appID, true);
+        AppIDDefault ret = lookupAppID(domainID, appID, true);
 //
-//        List<AppConfigDAO> list = search(AppConfigDAO.NVC_APP_CONFIG_DAO, new QueryMatchString(Const.RelationalOperator.EQUAL, ret.getReferenceID(), AppConfigDAO.Param.APP_ID.getNVConfig().getName(), MetaToken.REFERENCE_ID.getName()));
+//        List<AppConfigInfo> list = search(AppConfigInfo.NVC_APP_CONFIG_INFO, new QueryMatchString(Const.RelationalOperator.EQUAL, ret.getReferenceID(), AppConfigInfo.Param.APP_ID.getNVConfig().getName(), MetaToken.REFERENCE_ID.getName()));
 //
 //        if (list != null && list.size() == 1) {
 //            delete(list.get(0));

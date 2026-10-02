@@ -98,7 +98,7 @@ public class DomainSecurityManagerDefault
      * only a {@code null} appID.
      */
     private static boolean appIDMatches(AuthzInfo info, String appID) {
-        String owned = info.getAppIdDAO() != null ? info.getAppIdDAO().getAppID() : null;
+        String owned = info.getAppID() != null ? info.getAppID().getAppID() : null;
         return SUS.equals(owned, appID, true);
     }
 
@@ -924,8 +924,8 @@ public class DomainSecurityManagerDefault
     }
 
     /**
-     * Grants an inlined {@code nventity:<verbs>} permission to a subject on one resource
-     * instance. The token is validated by {@link SecurityModel.NVEPermissionTokenFilter}
+     * Grants an inlined {@code resource:<verbs>} permission to a subject on one resource
+     * instance. The token is validated by {@link SecurityModel.ResourcePermissionTokenFilter}
      * and the resource must exist. No permission enforcement here; the grantor is not recorded.
      *
      * @param subject         the subject receiving the grant

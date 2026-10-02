@@ -27,7 +27,7 @@ import java.util.List;
  * and associated IP addresses.
  *
  * @author mnael
- * @see InetAddressDAO
+ * @see InetAddressInfo
  */
 @SuppressWarnings("serial")
 public class NetworkInterfaceDAO
@@ -35,7 +35,7 @@ public class NetworkInterfaceDAO
 
     private static final NVConfig DISPLAY_NAME = NVConfigManager.createNVConfig("display_name", "The network interface display name", "DisplayName", true, false, String.class);
     private static final NVConfig MAC_ADDRESS = NVConfigManager.createNVConfig("mac_address", "The network interface mac address", "MACAddress", true, false, String.class);
-    private static final NVConfig INET_ADDRESSES = NVConfigManager.createNVConfigEntity("inet_addresses", "The inet address associated with the network interface", "InetAddresses", true, false, InetAddressDAO[].class, ArrayType.LIST);
+    private static final NVConfig INET_ADDRESSES = NVConfigManager.createNVConfigEntity("inet_addresses", "The inet address associated with the network interface", "InetAddresses", true, false, InetAddressInfo[].class, ArrayType.LIST);
 
     /** NVConfigEntity definition for NetworkInterfaceDAO */
     public static final NVConfigEntity NVC_NETWORK_INTERFACE_DAO = new NVConfigEntityPortable(
@@ -63,9 +63,9 @@ public class NetworkInterfaceDAO
     /**
      * Returns the list of IP addresses associated with this interface.
      *
-     * @return list of InetAddressDAO objects
+     * @return list of InetAddressInfo objects
      */
-    public List<InetAddressDAO> getInetAddresses() {
+    public List<InetAddressInfo> getInetAddresses() {
         return lookupValue(INET_ADDRESSES);
     }
 
@@ -74,7 +74,7 @@ public class NetworkInterfaceDAO
      *
      * @param inetAddresses the list of IP addresses to set
      */
-    public void setInetAddresses(List<InetAddressDAO> inetAddresses) {
+    public void setInetAddresses(List<InetAddressInfo> inetAddresses) {
         setValue(INET_ADDRESSES, inetAddresses);
     }
 

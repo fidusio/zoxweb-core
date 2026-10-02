@@ -16,7 +16,15 @@ public interface SecurityController
     Object decryptValue(APIDataStore<?, ?> dataStore, NVEntity container, NVBase<?> nvb, Object value, byte[] msKey)
             throws NullPointerException, IllegalArgumentException, AccessSecurityException;
 
-    String decryptValue(APIDataStore<?, ?> dataStore, NVEntity container, NVPair nvp, byte[] msKey)
+    /**
+     * Opens a sealed value in its storage form: the packed record written by
+     * {@code CipherCodecs.EDEncoder}.
+     *
+     * @param value the packed record, null returns null
+     * @return the clear text
+     * @throws IllegalArgumentException when {@code value} is not a packed record
+     */
+    String decryptValue(APIDataStore<?, ?> dataStore, NVEntity container, byte[] value, byte[] msKey)
             throws NullPointerException, IllegalArgumentException, AccessSecurityException;
 
     Object decryptValue(String userID, APIDataStore<?,?> dataStore, NVEntity container, Object value, byte[] msKey)

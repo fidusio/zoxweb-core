@@ -21,7 +21,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.zoxweb.shared.accounting.Currency;
-import org.zoxweb.shared.accounting.FinancialTransactionDAO;
+import org.zoxweb.shared.accounting.FinancialTransaction;
 import org.zoxweb.shared.accounting.AmountDAO;
 import org.zoxweb.shared.data.CreditCardDAO;
 import org.zoxweb.shared.data.FormInfo;
@@ -65,39 +65,39 @@ public class NVEntityComparatorTest {
 		}
 	}
 	
-	private static void testFinancialTransactionDAO() {
-		List<FinancialTransactionDAO> list = new ArrayList<FinancialTransactionDAO>();
+	private static void testFinancialTransaction() {
+		List<FinancialTransaction> list = new ArrayList<FinancialTransaction>();
 		
-		FinancialTransactionDAO transaction1 = new FinancialTransactionDAO();
+		FinancialTransaction transaction1 = new FinancialTransaction();
 		transaction1.setAmount(new AmountDAO(new BigDecimal("100.00"), Currency.USD));
 		list.add(transaction1);
 		
-		FinancialTransactionDAO transaction2 = new FinancialTransactionDAO();
+		FinancialTransaction transaction2 = new FinancialTransaction();
 		transaction2.setAmount(new AmountDAO(new BigDecimal("10.00"), Currency.USD));
 		list.add(transaction2);
 		
-		FinancialTransactionDAO transaction3 = new FinancialTransactionDAO();
+		FinancialTransaction transaction3 = new FinancialTransaction();
 		transaction3.setAmount(new AmountDAO(new BigDecimal("1000.00"), Currency.USD));
 		list.add(transaction3);
 		
 		System.out.println("UNSORTED LIST");
 
-		for (FinancialTransactionDAO trans : list) {
+		for (FinancialTransaction trans : list) {
 			System.out.println("Transaction: " + trans);
 		}
 		
-		Collections.sort(list, new NVEntityComparator("transaction_amount.money_value", FinancialTransactionDAO.NVC_FINANCIAL_TRANSACTION_DAO));
+		Collections.sort(list, new NVEntityComparator("transaction_amount.money_value", FinancialTransaction.NVC_FINANCIAL_TRANSACTION));
 		
 		System.out.println("SORTED LIST");
 
-		for (FinancialTransactionDAO trans : list) {
+		for (FinancialTransaction trans : list) {
 			System.out.println("Transaction: " + trans);
 		}
 	}
 	
 	public static void main(String[] args) {
 		testFormInfoDAO();
-		testFinancialTransactionDAO();		
+		testFinancialTransaction();		
 	}
 	
 	

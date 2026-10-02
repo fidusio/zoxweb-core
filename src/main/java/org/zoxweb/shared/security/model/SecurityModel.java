@@ -97,14 +97,25 @@ public final class SecurityModel {
 
     //
     public final static String DOMAIN = "domain";
+    /**
+     * Namespace of resource (NVEntity instance) permissions. The standardized token is
+     * {@code resource:<resource guid>:<acting subject guid>:<verb[,verb]*>} (user decision
+     * 2026-09-29): the second part names the resource, or the owner's subject GUID for the
+     * owner's implicit rights; the third part is the subject exercising the permission; the
+     * verbs come last. Every subject {@code S} implicitly holds
+     * {@code resource:S:S:read,update,delete,share} (the realm synthesizes it at login), so the
+     * owner of an entity {@code E} owned by {@code S} passes {@code resource:E.subject_guid:S:<verb>};
+     * a grant of {@code E} to {@code G} is stored as {@code resource:<verbs>} plus a resource map and
+     * flattens to {@code resource:E:G:<verbs>}. Catalog wildcards are {@code resource:*:*:<verb>}
+     * and {@code resource:*}. See {@link #toResourceToken(String, String, String)}.
+     */
     public final static String RESOURCE = "resource";
     public final static String APP = "app";
     public final static String SUBJECT = "subject";
     /**
-     * Namespace of entity-instance permissions: {@code nventity:<verbs>[:<entity guid>]}.
-     * The security controller checks {@code nventity:<verb>:<guid>} for every entity access.
+     * The verbs every subject implicitly holds on its own resources, in canonical order.
      */
-    public final static String NVENTITY = "nventity";
+    public final static String RESOURCE_SELF_VERBS = READ + SUBPART_SEP + UPDATE + SUBPART_SEP + DELETE + SUBPART_SEP + SHARE;
 
 
     public final static String PERM_ADD_PERMISSION = PERMISSION + PART_SEP + CREATE;//;PERMISSION + SEP + CREATE;//"permission:create";
@@ -174,21 +185,80 @@ public final class SecurityModel {
     }
 
     /**
-     * Builds and validates an inlined entity permission token, {@code nventity:<verbs>}, from
-     * the given verbs. Verbs are normalized by {@link NVEPermissionTokenFilter}: lower-cased,
-     * de-duplicated, and limited to {@code read}, {@code update}, {@code share} and {@code delete}.
+     * Builds and validates the stored (2-part) resource permission token, {@code resource:<verbs>},
+     * from the given verbs. Verbs are normalized by {@link ResourcePermissionTokenFilter}:
+     * lower-cased, de-duplicated, and limited to {@code read}, {@code update}, {@code share} and
+     * {@code delete}. This is the form kept on a grant row or a scopable catalog row; the realm
+     * expands it with {@link #toResourceToken(String, String, String)} when it flattens grants.
      *
      * @param verbs one or more verbs
-     * @return the normalized token, for example {@code nventity:read,share}
+     * @return the normalized token, for example {@code resource:read,share}
      * @throws NullPointerException     if no verb is given
      * @throws IllegalArgumentException if a verb is not allowed
      */
-    public static String toNVEToken(String... verbs) {
+    public static String toResourceToken(String... verbs) {
         SUS.checkIfNulls("verbs null", (Object) verbs);
         if (verbs.length == 0) {
             throw new IllegalArgumentException("at least one verb is required");
         }
-        return NVEPermissionTokenFilter.SINGLETON.validate(NVENTITY + PART_SEP + String.join(SUBPART_SEP, verbs));
+        return ResourcePermissionTokenFilter.SINGLETON.validate(RESOURCE + PART_SEP + String.join(SUBPART_SEP, verbs));
+    }
+
+    /**
+     * Composes the standardized 4-part resource permission token
+     * {@code resource:<resourceGUID>:<subjectGUID>:<verbs>} — the single place that knows the
+     * order. {@code verbs} may be a stored 2-part token ({@code resource:<verbs>}), a bare verb
+     * list ({@code read,share}) or a wildcard; the result is lower-cased and trimmed. The self
+     * permission of subject {@code S} is {@code toResourceToken(S, S, RESOURCE_SELF_VERBS)}.
+     *
+     * @param resourceGUID the resource GUID, the owner's subject GUID for the owner rights, or {@code *}
+     * @param subjectGUID  the acting subject GUID or {@code *}
+     * @param verbs        {@code resource:<verbs>}, {@code <verbs>} or {@code *}
+     * @return the composed token
+     * @throws NullPointerException     if any argument is null or blank
+     * @throws IllegalArgumentException if {@code verbs} carries a namespace other than {@code resource}
+     *                                  or more than one {@code :} part after it
+     */
+    public static String toResourceToken(String resourceGUID, String subjectGUID, String verbs) {
+        resourceGUID = SUS.trimOrNull(resourceGUID);
+        subjectGUID = SUS.trimOrNull(subjectGUID);
+        verbs = SUS.trimOrNull(verbs);
+        SUS.checkIfNulls("resourceGUID, subjectGUID and verbs are required", resourceGUID, subjectGUID, verbs);
+        String[] parts = verbs.split(PART_SEP, -1);
+        if (parts.length == 2) {
+            if (!RESOURCE.equalsIgnoreCase(parts[0].trim())) {
+                throw new IllegalArgumentException("namespace must be " + RESOURCE + ": " + verbs);
+            }
+            verbs = parts[1].trim();
+        } else if (parts.length != 1) {
+            throw new IllegalArgumentException("verbs must be <verbs> or " + RESOURCE + PART_SEP + "<verbs>: " + verbs);
+        }
+        if (verbs.isEmpty()) {
+            throw new IllegalArgumentException("empty verbs");
+        }
+        return DataEncoder.StringLower.encode(RESOURCE + PART_SEP + resourceGUID + PART_SEP + subjectGUID + PART_SEP + verbs);
+    }
+
+    /**
+     * @param token a permission token
+     * @return true if the token is a composed 4-part resource token, {@code resource:<res>:<subject>:<verbs>},
+     * with no blank part
+     */
+    public static boolean isResourceToken(String token) {
+        token = SUS.trimOrNull(token);
+        if (token == null) {
+            return false;
+        }
+        String[] parts = token.split(PART_SEP, -1);
+        if (parts.length != 4 || !RESOURCE.equalsIgnoreCase(parts[0].trim())) {
+            return false;
+        }
+        for (int i = 1; i < parts.length; i++) {
+            if (SUS.isEmpty(parts[i].trim())) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -210,15 +280,17 @@ public final class SecurityModel {
 
     /**
      * Validates and normalizes the permission token inlined on a {@code PermissionGrant} for
-     * subject-to-subject sharing: {@code nventity:<verb>[,<verb>]*} with every verb drawn from
-     * {@link #VERBS} ({@code read}, {@code update}, {@code share}, {@code delete}). No other
-     * namespace, no {@code create}, no wildcard, and no instance part: the resource comes from
-     * the grant's resource map, never from the token. The returned value is lower-cased,
-     * trimmed and de-duplicated, and is the form that must be stored and compared.
+     * subject-to-subject sharing, or carried by a catalog row that may be scoped to a resource:
+     * {@code resource:<verb>[,<verb>]*} with every verb drawn from {@link #VERBS} ({@code read},
+     * {@code update}, {@code share}, {@code delete}). No other namespace, no {@code create}, no
+     * wildcard, and no instance part: the resource and the grantee come from the grant row and are
+     * composed into the 4-part token by {@link SecurityModel#toResourceToken(String, String, String)}
+     * when the realm flattens the grant. The returned value is lower-cased, trimmed and
+     * de-duplicated, and is the form that must be stored and compared.
      */
-    public final static class NVEPermissionTokenFilter
+    public final static class ResourcePermissionTokenFilter
             implements ValueFilter<String, String> {
-        public static final NVEPermissionTokenFilter SINGLETON = new NVEPermissionTokenFilter();
+        public static final ResourcePermissionTokenFilter SINGLETON = new ResourcePermissionTokenFilter();
 
         /**
          * The verbs an inlined token may carry, in canonical order.
@@ -226,16 +298,16 @@ public final class SecurityModel {
         public static final Set<String> VERBS = Collections.unmodifiableSet(
                 new LinkedHashSet<>(Arrays.asList(READ, UPDATE, SHARE, DELETE)));
 
-        private NVEPermissionTokenFilter() {
+        private ResourcePermissionTokenFilter() {
         }
 
         /**
          * Validate and normalize the token.
          *
          * @param in value to be validated
-         * @return the normalized token {@code nventity:<verbs>}
+         * @return the normalized token {@code resource:<verbs>}
          * @throws NullPointerException     if in is null or blank
-         * @throws IllegalArgumentException if the namespace is not {@code nventity}, a verb is
+         * @throws IllegalArgumentException if the namespace is not {@code resource}, a verb is
          *                                  empty or not in {@link #VERBS}, or the token carries an
          *                                  instance part
          */
@@ -246,10 +318,10 @@ public final class SecurityModel {
             String lower = DataEncoder.StringLower.encode(in);
             String[] parts = lower.split(PART_SEP, -1);
             if (parts.length != 2) {
-                throw new IllegalArgumentException("token must be " + NVENTITY + PART_SEP + "<verbs>: " + in);
+                throw new IllegalArgumentException("token must be " + RESOURCE + PART_SEP + "<verbs>: " + in);
             }
-            if (!NVENTITY.equals(parts[0].trim())) {
-                throw new IllegalArgumentException("namespace must be " + NVENTITY + ": " + in);
+            if (!RESOURCE.equals(parts[0].trim())) {
+                throw new IllegalArgumentException("namespace must be " + RESOURCE + ": " + in);
             }
             Set<String> verbs = new LinkedHashSet<>();
             for (String verb : parts[1].split(SUBPART_SEP, -1)) {
@@ -262,7 +334,7 @@ public final class SecurityModel {
                 }
                 verbs.add(verb);
             }
-            return NVENTITY + PART_SEP + String.join(SUBPART_SEP, verbs);
+            return RESOURCE + PART_SEP + String.join(SUBPART_SEP, verbs);
         }
 
         /**
@@ -272,7 +344,7 @@ public final class SecurityModel {
          */
         @Override
         public String toCanonicalID() {
-            return "NVE_PERMISSION_TOKEN_FILTER";
+            return "RESOURCE_PERMISSION_TOKEN_FILTER";
         }
     }
 
@@ -310,7 +382,8 @@ public final class SecurityModel {
         ROLE(SecurityModel.ROLE),
         ROLE_GROUP(SecurityModel.ROLE_GROUP),
         APP(SecurityModel.APP),
-        NVENTITY(SecurityModel.NVENTITY),
+        /** An NVEntity instance; its tokens follow the {@code resource:<res>:<subject>:<verbs>} grammar. */
+        RESOURCE(SecurityModel.RESOURCE),
         ;
 
         private final String name;
@@ -381,12 +454,21 @@ public final class SecurityModel {
         APP_UPDATE("app_update", "Update an app", Target.APP, Action.UPDATE),
         APP_DELETE("app_delete", "Delete an app", Target.APP, Action.DELETE),
 
-        NVE_ALL("nve_all", "Every action on every entity", Target.NVENTITY, Action.ALL),
-        NVE_CREATE_ALL("nve_create_all", "Create any entity", Target.NVENTITY, Action.CREATE, WILDCARD),
-        NVE_READ_ALL("nve_read_all", "Read every entity", Target.NVENTITY, Action.READ, WILDCARD),
-        NVE_UPDATE_ALL("nve_update_all", "Update every entity", Target.NVENTITY, Action.UPDATE, WILDCARD),
-        NVE_DELETE_ALL("nve_delete_all", "Delete every entity", Target.NVENTITY, Action.DELETE, WILDCARD),
-        NVE_SHARE_ALL("nve_share_all", "Share every entity", Target.NVENTITY, Action.SHARE, WILDCARD),
+        // resource grammar: resource:<resource>:<subject>:<verbs> — the verb is the LAST part, so these
+        // carry literal tokens instead of the <target>:<action>:<parts> encoding used above.
+        // Names stay nve_* (NVEntity) so existing catalog rows are repaired in place by the seeder.
+        NVE_ALL("nve_all", "Every action on every entity",
+                RESOURCE + PART_SEP + WILDCARD, Target.RESOURCE, Action.ALL),
+        NVE_CREATE_ALL("nve_create_all", "Create any entity",
+                toResourceToken(WILDCARD, WILDCARD, CREATE), Target.RESOURCE, Action.CREATE),
+        NVE_READ_ALL("nve_read_all", "Read every entity",
+                toResourceToken(WILDCARD, WILDCARD, READ), Target.RESOURCE, Action.READ),
+        NVE_UPDATE_ALL("nve_update_all", "Update every entity",
+                toResourceToken(WILDCARD, WILDCARD, UPDATE), Target.RESOURCE, Action.UPDATE),
+        NVE_DELETE_ALL("nve_delete_all", "Delete every entity",
+                toResourceToken(WILDCARD, WILDCARD, DELETE), Target.RESOURCE, Action.DELETE),
+        NVE_SHARE_ALL("nve_share_all", "Share every entity",
+                toResourceToken(WILDCARD, WILDCARD, SHARE), Target.RESOURCE, Action.SHARE),
 
         /**
          * Reserved: implies every permission. Only the bootstrap super-admin subject may hold it.
@@ -415,10 +497,20 @@ public final class SecurityModel {
         }
 
         Permission(String name, String description, String literalToken) {
+            this(name, description, literalToken, null, null);
+        }
+
+        /**
+         * A literal token that still declares its target and action — used by the resource
+         * grammar, whose part order ({@code resource:<res>:<subject>:<verbs>}) differs from the
+         * {@code <target>:<action>:<parts>} encoding. The token comes BEFORE target/action so this
+         * overload can never be confused with the varargs encoder above for a one-part call.
+         */
+        Permission(String name, String description, String literalToken, Target target, Action action) {
             this.name = name;
             this.description = description;
-            this.target = null;
-            this.action = null;
+            this.target = target;
+            this.action = action;
             this.pattern = literalToken;
         }
 
@@ -598,7 +690,7 @@ public final class SecurityModel {
 //    }
 
     /**
-     * @deprecated app-scoped catalog seeded only by {@code APIAppManagerProvider.createAppIDDAO},
+     * @deprecated app-scoped catalog seeded only by {@code APIAppManagerProvider.createAppID},
      * which has no production caller; the {@code $$resource_guid$$} / {@code $$subject_guid$$}
      * placeholders are never substituted. Superseded by {@link Permission} + {@link Role} and the
      * shiro-ds catalog seeder; to be deleted with {@code APIAppManagerProvider}.
@@ -685,7 +777,7 @@ public final class SecurityModel {
         PermissionInfo ret = new PermissionInfo();
         ret.setName(name);
         ret.setDescription(description);
-        ret.setAppIdDAO(appIDDefault);
+        ret.setAppID(appIDDefault);
         //ret.setEmbedAppIDEnabled(embedAppID);
         //ret.setDomainAppID(domainID, appID);
 

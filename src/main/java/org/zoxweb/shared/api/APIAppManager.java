@@ -1,6 +1,6 @@
 package org.zoxweb.shared.api;
 
-import org.zoxweb.shared.data.AppConfigDAO;
+import org.zoxweb.shared.data.AppConfigInfo;
 import org.zoxweb.shared.data.AppDeviceInfo;
 import org.zoxweb.shared.app.AppIDDefault;
 import org.zoxweb.shared.data.UserIDDAO;
@@ -88,7 +88,7 @@ public interface APIAppManager {
      * <li> UserIDDAO the user id
      * <li> UserInfoDAO the user data addresses, cc etc
      * <li> UserIDCredentialsDAO the password info
-     * <li> UserPreferenceDAO his/her preferences
+     * <li> SubjectPreference his/her preferences
      * </ol>
      *
      * @param userIDDAO
@@ -150,7 +150,7 @@ public interface APIAppManager {
 
 
     /**
-     * Look up UserPreferenceDAO based on subject ID.
+     * Look up SubjectPreference based on subject ID.
      *
      * @param subjectID
      * @return
@@ -159,11 +159,11 @@ public interface APIAppManager {
      * @throws AccessSecurityException
      * @throws APIException
      */
-    SubjectPreference lookupUserPreferenceDAO(AppIDDefault appIDDAO, String subjectID)
+    SubjectPreference lookupSubjectPreference(AppIDDefault appIDDAO, String subjectID)
             throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException;
 
 
-    SubjectPreference lookupUserPreferenceDAO(AppIDDefault appIDDAO, UserIDDAO userIDDAO)
+    SubjectPreference lookupSubjectPreference(AppIDDefault appIDDAO, UserIDDAO userIDDAO)
             throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException;
 
     /**
@@ -176,7 +176,7 @@ public interface APIAppManager {
      * @throws AccessSecurityException
      * @throws APIException
      */
-    SubjectAPIKey createAppDeviceDAO(AppDeviceInfo subjectAPIKey)
+    SubjectAPIKey createAppDeviceInfo(AppDeviceInfo subjectAPIKey)
             throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException;
 
     /**
@@ -264,7 +264,7 @@ public interface APIAppManager {
 
 
     /**
-     * Look up AppIDDAO based on domain ID and app ID.
+     * Look up AppIDDefault based on domain ID and app ID.
      *
      * @param domainID
      * @param appID
@@ -274,11 +274,11 @@ public interface APIAppManager {
      * @throws AccessSecurityException
      * @throws APIException
      */
-    AppIDDefault lookupAppIDDAO(String domainID, String appID)
+    AppIDDefault lookupAppID(String domainID, String appID)
             throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException;
 
     /**
-     * Look up AppIDDAO based on domain ID and app ID.
+     * Look up AppIDDefault based on domain ID and app ID.
      *
      * @param domainID
      * @param appID
@@ -289,12 +289,12 @@ public interface APIAppManager {
      * @throws AccessSecurityException
      * @throws APIException
      */
-    AppIDDefault lookupAppIDDAO(String domainID, String appID, boolean exceptionIfNotFound)
+    AppIDDefault lookupAppID(String domainID, String appID, boolean exceptionIfNotFound)
             throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException;
 
 
     /**
-     * Look up AppConfigDAO based on domain ID and app ID.
+     * Look up AppConfigInfo based on domain ID and app ID.
      *
      * @param domainID
      * @param appID
@@ -304,7 +304,7 @@ public interface APIAppManager {
      * @throws AccessSecurityException
      * @throws APIException
      */
-    AppConfigDAO lookupAppConfigDAO(String domainID, String appID)
+    AppConfigInfo lookupAppConfigInfo(String domainID, String appID)
             throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException;
 
     /**
@@ -417,9 +417,9 @@ public interface APIAppManager {
             throws NullPointerException, IllegalArgumentException, AccessSecurityException, APIException;
 
 
-    AppIDDefault createAppIDDAO(String domainID, String appID);
+    AppIDDefault createAppID(String domainID, String appID);
 
-    AppIDDefault deleteAppIDDAO(String domainID, String appID);
+    AppIDDefault deleteAppID(String domainID, String appID);
 
 
     <V extends NVEntity> List<V> search(NVConfigEntity nvce, QueryMarker... queryCriteria)

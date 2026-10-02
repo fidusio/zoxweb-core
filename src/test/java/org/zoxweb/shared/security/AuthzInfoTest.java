@@ -27,7 +27,7 @@ class AuthzInfoTest {
         assertNull(info.getBrokerGUID());
         assertNull(info.getName());
         assertNull(info.getDescription());
-        assertNull(info.getAppIdDAO());
+        assertNull(info.getAppID());
     }
 
     @Test
@@ -67,36 +67,36 @@ class AuthzInfoTest {
     void setAndGetAppIdDAO() {
         TestAuthzInfo info = new TestAuthzInfo();
         AppIDDefault ref = new AppIDDefault("acme.com", "billing");
-        info.setAppIdDAO(ref);
+        info.setAppID(ref);
 
-        assertSame(ref, info.getAppIdDAO());
+        assertSame(ref, info.getAppID());
     }
 
     @Test
     void appIdCarriesDomainAndAppStrings() {
         TestAuthzInfo info = new TestAuthzInfo();
-        info.setAppIdDAO(new AppIDDefault("acme.com", "billing"));
+        info.setAppID(new AppIDDefault("acme.com", "billing"));
 
-        assertEquals("acme.com", info.getAppIdDAO().getDomainID());
-        assertEquals("billing", info.getAppIdDAO().getAppID());
+        assertEquals("acme.com", info.getAppID().getDomainID());
+        assertEquals("billing", info.getAppID().getAppID());
     }
 
     @Test
     void setAppIdDAOOverwritesPreviousValue() {
         TestAuthzInfo info = new TestAuthzInfo();
-        info.setAppIdDAO(new AppIDDefault("first.com", "app1"));
-        info.setAppIdDAO(new AppIDDefault("second.com", "app2"));
+        info.setAppID(new AppIDDefault("first.com", "app1"));
+        info.setAppID(new AppIDDefault("second.com", "app2"));
 
-        assertEquals("second.com", info.getAppIdDAO().getDomainID());
-        assertEquals("app2", info.getAppIdDAO().getAppID());
+        assertEquals("second.com", info.getAppID().getDomainID());
+        assertEquals("app2", info.getAppID().getAppID());
     }
 
     @Test
     void setAppIdDAOToNullClearsValue() {
         TestAuthzInfo info = new TestAuthzInfo();
-        info.setAppIdDAO(new AppIDDefault("acme.com", "billing"));
-        info.setAppIdDAO(null);
-        assertNull(info.getAppIdDAO());
+        info.setAppID(new AppIDDefault("acme.com", "billing"));
+        info.setAppID(null);
+        assertNull(info.getAppID());
     }
 
     // ---------- Inherited: GUID (ReferenceIDDAO) ----------
@@ -162,15 +162,15 @@ class AuthzInfoTest {
         info.setBrokerGUID("broker-1");
         info.setName("perm.read");
         info.setDescription("Read permission");
-        info.setAppIdDAO(new AppIDDefault("acme.com", "billing"));
+        info.setAppID(new AppIDDefault("acme.com", "billing"));
 
         assertEquals("guid-1", info.getGUID());
         assertEquals("subject-1", info.getSubjectGUID());
         assertEquals("broker-1", info.getBrokerGUID());
         assertEquals("perm.read", info.getName());
         assertEquals("Read permission", info.getDescription());
-        assertEquals("acme.com", info.getAppIdDAO().getDomainID());
-        assertEquals("billing", info.getAppIdDAO().getAppID());
+        assertEquals("acme.com", info.getAppID().getDomainID());
+        assertEquals("billing", info.getAppID().getAppID());
     }
 
     // ---------- Concrete subclasses inherit AuthzInfo behavior ----------
@@ -217,33 +217,33 @@ class AuthzInfoTest {
     void permissionInfoInheritsBrokerGUIDAndAppId() {
         PermissionInfo p = new PermissionInfo("perm.read", "read:files");
         p.setBrokerGUID("broker-p");
-        p.setAppIdDAO(new AppIDDefault("acme.com", "billing"));
+        p.setAppID(new AppIDDefault("acme.com", "billing"));
 
         assertEquals("broker-p", p.getBrokerGUID());
-        assertEquals("acme.com", p.getAppIdDAO().getDomainID());
-        assertEquals("billing", p.getAppIdDAO().getAppID());
+        assertEquals("acme.com", p.getAppID().getDomainID());
+        assertEquals("billing", p.getAppID().getAppID());
     }
 
     @Test
     void roleInfoInheritsBrokerGUIDAndAppId() {
         RoleInfo r = new RoleInfo();
         r.setBrokerGUID("broker-r");
-        r.setAppIdDAO(new AppIDDefault("acme.com", "billing"));
+        r.setAppID(new AppIDDefault("acme.com", "billing"));
 
         assertEquals("broker-r", r.getBrokerGUID());
-        assertEquals("acme.com", r.getAppIdDAO().getDomainID());
-        assertEquals("billing", r.getAppIdDAO().getAppID());
+        assertEquals("acme.com", r.getAppID().getDomainID());
+        assertEquals("billing", r.getAppID().getAppID());
     }
 
     @Test
     void roleGroupInfoInheritsBrokerGUIDAndAppId() {
         RoleGroupInfo g = new RoleGroupInfo();
         g.setBrokerGUID("broker-g");
-        g.setAppIdDAO(new AppIDDefault("acme.com", "billing"));
+        g.setAppID(new AppIDDefault("acme.com", "billing"));
 
         assertEquals("broker-g", g.getBrokerGUID());
-        assertEquals("acme.com", g.getAppIdDAO().getDomainID());
-        assertEquals("billing", g.getAppIdDAO().getAppID());
+        assertEquals("acme.com", g.getAppID().getDomainID());
+        assertEquals("billing", g.getAppID().getAppID());
     }
 
     @Test

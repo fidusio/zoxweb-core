@@ -25,64 +25,58 @@ import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.SUS;
 
 
-
 /**
  * Created on 8/11/17
  */
 @SuppressWarnings("serial")
-public class AppConfigDAO
+public class AppConfigInfo
         extends PropertyDAO {
 
     public enum Param
-        implements GetNVConfig
-    {
+            implements GetNVConfig {
         APP_ID(NVConfigManager.createNVConfigEntity("app_id", "App ID", "AppID", true, false, AppIDDefault.NVC_APP_ID_DEFAULT, NVConfigEntity.ArrayType.NOT_ARRAY)),
         ;
 
         private final NVConfig nvc;
 
-        Param(NVConfig nvc)
-        {
+        Param(NVConfig nvc) {
             this.nvc = nvc;
         }
 
-        public NVConfig getNVConfig()
-        {
+        public NVConfig getNVConfig() {
             return nvc;
         }
     }
 
-    public static final NVConfigEntity NVC_APP_CONFIG_DAO = new NVConfigEntityPortable(
-            "app_config_dao",
+    public static final NVConfigEntity NVC_APP_CONFIG_INFO = new NVConfigEntityPortable(
+            "app_config_info",
             null,
-            "AppConfigDAO",
+            "AppConfigInfo",
             true,
             false,
             false,
             false,
-            AppConfigDAO.class,
+            AppConfigInfo.class,
             SUS.extractNVConfigs(Param.values()),
             null,
             false,
             PropertyDAO.NVC_PROPERTY_DAO
     );
 
-    public AppConfigDAO()
-    {
-        super(NVC_APP_CONFIG_DAO);
+    public AppConfigInfo() {
+        super(NVC_APP_CONFIG_INFO);
     }
 
-    public AppConfigDAO(AppIDDefault appIDDAO)
-    {
+    public AppConfigInfo(AppIDDefault appID) {
         this();
-        setAppIDDAO(appIDDAO);
+        setAppID(appID);
     }
 
-    public AppIDDefault getAppIDDAO() {
+    public AppIDDefault getAppID() {
         return lookupValue(Param.APP_ID);
     }
 
-    public void setAppIDDAO(AppIDDefault appID) {
+    public void setAppID(AppIDDefault appID) {
         setValue(Param.APP_ID, appID);
     }
 }

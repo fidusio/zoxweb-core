@@ -85,7 +85,7 @@ public class SMTPCreator
      */
     @SuppressWarnings("unchecked")
     public APIConfigInfo createEmptyConfigInfo() {
-        APIConfigInfoDAO configInfo = new APIConfigInfoDAO();
+        APIConfigInfoImpl configInfo = new APIConfigInfoImpl();
         List<NVPair> list = (List<NVPair>) SUS.toNVPairs(Param.values());
         configInfo.setAPITypeName(API_NAME);
         configInfo.setDescription("SMTP (Simple Mail Transfer Protocol) configuration is used for email set up to send and receive emails.");
@@ -96,7 +96,7 @@ public class SMTPCreator
         //APIServiceType.SMS_NOTIFICATION, APIServiceType.VOICE_NOTIFCATION
         configInfo.setServiceTypes(types);
 
-        NVPairList nvpl = (NVPairList) configInfo.lookup(APIConfigInfoDAO.Params.CONFIGURATION_PARAMETERS.getNVConfig().getName());
+        NVPairList nvpl = (NVPairList) configInfo.lookup(APIConfigInfoImpl.Params.CONFIGURATION_PARAMETERS.getNVConfig().getName());
         nvpl.setFixed(true);
 
         return configInfo;

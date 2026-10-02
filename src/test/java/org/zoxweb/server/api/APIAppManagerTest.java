@@ -22,7 +22,7 @@ public class APIAppManagerTest {
 		add.setSubjectGUID(aid.getGUID());
 		add.setDevice(dd);
 		//add.setSubjectID(subjectID);
-		aam.createAppDeviceDAO(add);
+		aam.createAppDeviceInfo(add);
 		
 		
 	}

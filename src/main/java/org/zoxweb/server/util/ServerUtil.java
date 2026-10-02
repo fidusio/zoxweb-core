@@ -292,7 +292,7 @@ public final class ServerUtil {
                         Enumeration<InetAddress> addresses = ni.getInetAddresses();
 
                         while (addresses.hasMoreElements()) {
-                            niDAO.getInetAddresses().add(NetUtil.toInetAddressDAO(addresses.nextElement()));
+                            niDAO.getInetAddresses().add(NetUtil.toInetAddressInfo(addresses.nextElement()));
                         }
 
                         ret.getNetworkInterfaces().add(niDAO);

@@ -8,7 +8,7 @@ import org.zoxweb.server.net.security.IPBlockerListener;
 import org.zoxweb.server.task.TaskUtil;
 import org.zoxweb.shared.data.ApplicationConfigInfo;
 import org.zoxweb.shared.data.ApplicationConfigInfo.ApplicationDefaultParam;
-import org.zoxweb.shared.data.ConfigDAO;
+import org.zoxweb.shared.data.GenConfig;
 import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.security.IPBlockerConfig;
 import org.zoxweb.shared.util.ResourceManager;
@@ -44,9 +44,9 @@ public class ServiceManager
             }
             try {
                 String fullFileName = ApplicationConfigManager.SINGLETON.concatWithEnvVar("conf", filename);
-                ConfigDAO configDAO = GSONUtil.fromJSON(IOUtil.inputStreamToString(fullFileName));
-                log.info("" + configDAO);
-                NIOConfig nioConfig = new NIOConfig(configDAO);
+                GenConfig genConfig = GSONUtil.fromJSON(IOUtil.inputStreamToString(fullFileName));
+                log.info("" + genConfig);
+                NIOConfig nioConfig = new NIOConfig(genConfig);
                 NIOSocket nioSocket = nioConfig.createApp();
                 ResourceManager.SINGLETON.register(NIOConfig.RESOURCE_NAME, nioConfig);
 
@@ -99,9 +99,9 @@ public class ServiceManager
             try {
                 File file = ApplicationConfigManager.SINGLETON.locateFile(acd, filename);
                 String configDAOContent = IOUtil.inputStreamToString(file);
-                ConfigDAO configDAO = GSONUtil.fromJSON(configDAOContent);
+                GenConfig genConfig = GSONUtil.fromJSON(configDAOContent);
                 log.info("NIO_CONFIG:\n" + configDAOContent);
-                NIOConfig nioConfig = new NIOConfig(configDAO);
+                NIOConfig nioConfig = new NIOConfig(genConfig);
                 NIOSocket nioSocket = nioConfig.createApp();
                 if (ipBlocker != null)
                     nioSocket.setEventManager(TaskUtil.defaultEventManager());

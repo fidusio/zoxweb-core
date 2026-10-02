@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.zoxweb.shared.accounting.Currency;
-import org.zoxweb.shared.accounting.FinancialTransactionDAO;
+import org.zoxweb.shared.accounting.FinancialTransaction;
 import org.zoxweb.shared.accounting.AmountDAO;
 import org.zoxweb.shared.accounting.TransactionDescriptor;
 import org.zoxweb.shared.accounting.TransactionType;
@@ -35,11 +35,11 @@ import org.zoxweb.shared.accounting.TransactionType;
 
 public class TransactionDAOTest {
 	
-	private FinancialTransactionDAO transaction;
+	private FinancialTransaction transaction;
 
 	@BeforeEach
 	public void setUp() throws Exception {
-		transaction = new FinancialTransactionDAO(new AmountDAO("100.00"));
+		transaction = new FinancialTransaction(new AmountDAO("100.00"));
 	}
 
 	@AfterEach

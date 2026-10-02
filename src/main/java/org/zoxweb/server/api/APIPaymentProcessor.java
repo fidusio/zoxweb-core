@@ -1,6 +1,6 @@
 package org.zoxweb.server.api;
 
-import org.zoxweb.shared.accounting.FinancialTransactionDAO;
+import org.zoxweb.shared.accounting.FinancialTransaction;
 import org.zoxweb.shared.api.APIServiceProvider;
 import org.zoxweb.shared.util.AppID;
 
@@ -9,45 +9,45 @@ public interface APIPaymentProcessor<P, S>
 
     /**
      * Create transaction.
-     * @param financialTransactionDAO
+     * @param financialTransaction
      * @return
      */
-    FinancialTransactionDAO createTransaction(FinancialTransactionDAO financialTransactionDAO);
+    FinancialTransaction createTransaction(FinancialTransaction financialTransaction);
 
     /**
      * Lookup transaction.
-     * @param financialTransactionDAO
+     * @param financialTransaction
      * @return
      */
-    FinancialTransactionDAO lookupTransaction(FinancialTransactionDAO financialTransactionDAO);
+    FinancialTransaction lookupTransaction(FinancialTransaction financialTransaction);
 
     /**
      * Update transaction.
-     * @param financialTransactionDAO
+     * @param financialTransaction
      * @return
      */
-    FinancialTransactionDAO updateTransaction(FinancialTransactionDAO financialTransactionDAO);
+    FinancialTransaction updateTransaction(FinancialTransaction financialTransaction);
 
     /**
      * Cancel transaction.
-     * @param financialTransactionDAO
+     * @param financialTransaction
      * @return
      */
-    FinancialTransactionDAO cancelTransaction(FinancialTransactionDAO financialTransactionDAO);
+    FinancialTransaction cancelTransaction(FinancialTransaction financialTransaction);
 
     /**
      * Capture transaction (e.g. authorize $100.00 at beginning of transaction
      * then deduct total amount and release remaining amount).
-     * @param financialTransactionDAO
+     * @param financialTransaction
      * @return
      */
-    FinancialTransactionDAO captureTransaction(FinancialTransactionDAO financialTransactionDAO);
+    FinancialTransaction captureTransaction(FinancialTransaction financialTransaction);
 
     /**
      * Refund transaction (after cancel transaction is no longer permitted).
-     * @param financialTransactionDAO
+     * @param financialTransaction
      * @return
      */
-    FinancialTransactionDAO refundTransaction(FinancialTransactionDAO financialTransactionDAO);
+    FinancialTransaction refundTransaction(FinancialTransaction financialTransaction);
 
 }

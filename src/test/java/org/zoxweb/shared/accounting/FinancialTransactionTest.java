@@ -25,13 +25,13 @@ import java.math.BigDecimal;
 //import static org.junit.Assert.assertEquals;
 //import static org.junit.Assert.assertNotNull;
 
-public class FinancialTransactionDAOTest
+public class FinancialTransactionTest
 {
 
 	@Test
-    public void testFinancialTransactionDAO()
+    public void testFinancialTransaction()
     {
-        FinancialTransactionDAO transaction = new FinancialTransactionDAO();
+        FinancialTransaction transaction = new FinancialTransaction();
         transaction.setAmount(new AmountDAO(new BigDecimal("100"), Currency.USD));
         transaction.setType(TransactionType.CREDIT);
         transaction.setDescriptor(TransactionDescriptor.MONTHLY_PAYMENT.name());
@@ -52,10 +52,10 @@ public class FinancialTransactionDAOTest
         Assertions.assertNotNull(account.getCurrentBalance());
         Assertions.assertEquals(new AmountDAO(new BigDecimal("300.00"), Currency.USD), account.getCurrentBalance());
 
-        account.applyTransaction(new FinancialTransactionDAO(new AmountDAO(10)));
+        account.applyTransaction(new FinancialTransaction(new AmountDAO(10)));
         Assertions.assertEquals(new AmountDAO(new BigDecimal("310.00"), Currency.USD), account.getCurrentBalance());
 
-        account.applyTransaction(new FinancialTransactionDAO(new AmountDAO(20)));
+        account.applyTransaction(new FinancialTransaction(new AmountDAO(20)));
         Assertions.assertEquals(new AmountDAO(new BigDecimal("330.00"), Currency.USD), account.getCurrentBalance());
     }
 

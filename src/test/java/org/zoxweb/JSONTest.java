@@ -20,7 +20,7 @@ import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.server.util.ServerUtil;
 import org.zoxweb.shared.data.AddressDAO;
 import org.zoxweb.shared.data.SystemInfoDAO;
-import org.zoxweb.shared.net.InetAddressDAO;
+import org.zoxweb.shared.net.InetAddressInfo;
 import org.zoxweb.shared.net.NetworkInterfaceDAO;
 import org.zoxweb.shared.util.Const.TimeInMillis;
 import org.zoxweb.shared.util.*;
@@ -56,10 +56,10 @@ public class JSONTest {
 			for (NVEntity nve : sysDAO.getNetworkInterfaces().values()) {
 				NetworkInterfaceDAO niDAO = (NetworkInterfaceDAO) nve;
 
-				for (InetAddressDAO iaDAO : niDAO.getInetAddresses()) {
+				for (InetAddressInfo iaDAO : niDAO.getInetAddresses()) {
 					String json = GSONUtil.toJSON( iaDAO, false);
 					System.out.println(json);
-					System.out.println("" + GSONUtil.fromJSON(json, InetAddressDAO.class));
+					System.out.println("" + GSONUtil.fromJSON(json, InetAddressInfo.class));
 				}
 
 				long ts1 = System.nanoTime();

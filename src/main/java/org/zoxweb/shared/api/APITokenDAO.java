@@ -32,7 +32,7 @@ public class APITokenDAO
     public enum Params
             implements GetNVConfig {
         API_CREDENTIALS_DAO(NVConfigManager.createNVConfigEntity("api_credentials_dao", "The Crendentials.", "APICredentialsDAO", true, true, APICredentialsDAO.class, ArrayType.NOT_ARRAY)),
-        API_CONFIG_INFO_DAO(NVConfigManager.createNVConfigEntity("api_config_info_dao", "The API config info", "APIConfigInfoDAO", true, true, APIConfigInfoDAO.class, ArrayType.NOT_ARRAY)),
+        API_CONFIG_INFO_DAO(NVConfigManager.createNVConfigEntity("api_config_info_dao", "The API config info", "APIConfigInfoDAO", true, true, APIConfigInfoImpl.class, ArrayType.NOT_ARRAY)),
         API_TOKEN(NVConfigManager.createNVConfig("api_token", "The api token", "APIToken", false, false, String.class)),
         //API_TOKEN_EXPIRATION(NVConfigManager.createNVConfig("api_token_expiration", "The api token expiration in real time","APITokenExpiration", false, false, Long.class)),
         EXTRA_PARAMETERS(NVConfigManager.createNVConfig("extra_parameters", "Extra configuration parameters", "ExtraParameters", false, true, true, String[].class, null)),

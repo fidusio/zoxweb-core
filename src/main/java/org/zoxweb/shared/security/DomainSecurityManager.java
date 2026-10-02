@@ -436,7 +436,7 @@ public interface DomainSecurityManager {
 
     /**
      * Grants an inlined permission to a subject on one resource instance, the form of a
-     * subject-to-subject share. The token is {@code nventity:<verbs>} with the verbs
+     * subject-to-subject share. The token is {@code resource:<verbs>} with the verbs
      * {@code read}, {@code update}, {@code share} and {@code delete} only; no catalog row is
      * involved. The resource must exist and, under enforcement, belong to the caller. The
      * caller is recorded as the grantor in {@code broker_guid}.

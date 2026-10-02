@@ -124,7 +124,7 @@ public class BillingAccountDAO
      * @param transaction
      * @return the updated value after applying the transaction
      */
-    public synchronized BigDecimal applyTransaction(FinancialTransactionDAO transaction) {
+    public synchronized BigDecimal applyTransaction(FinancialTransaction transaction) {
         if (getCurrentBalance().getCurrency() != transaction.getAmount().getCurrency()) {
             throw new IllegalArgumentException("Currency mismatch: " + transaction.getAmount().getCurrency());
         }

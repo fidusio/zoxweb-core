@@ -29,7 +29,7 @@ import java.util.Date;
  * @author mzebib
  */
 @SuppressWarnings("serial")
-public class FinancialTransactionDAO
+public class FinancialTransaction
         extends TimeStampDAO {
     /**
      * Sets the default transaction type to credit.
@@ -61,15 +61,15 @@ public class FinancialTransactionDAO
 
     }
 
-    public static final NVConfigEntity NVC_FINANCIAL_TRANSACTION_DAO = new NVConfigEntityPortable(
-            "financial_transaction_dao",
+    public static final NVConfigEntity NVC_FINANCIAL_TRANSACTION = new NVConfigEntityPortable(
+            "financial_transaction",
             null,
-            "FinancialTransactionDAO",
+            "FinancialTransaction",
             true,
             false,
             false,
             false,
-            FinancialTransactionDAO.class,
+            FinancialTransaction.class,
             SUS.extractNVConfigs(Params.values()),
             null,
             true,
@@ -79,38 +79,38 @@ public class FinancialTransactionDAO
     /**
      * The default constructor.
      */
-    public FinancialTransactionDAO() {
-        super(NVC_FINANCIAL_TRANSACTION_DAO);
+    public FinancialTransaction() {
+        super(NVC_FINANCIAL_TRANSACTION);
     }
 
     /**
-     * This constructor instantiates FinancialTransactionDAO based on given MoneyValueDAO.
+     * This constructor instantiates FinancialTransaction based on given MoneyValueDAO.
      *
      * @param amount
      */
-    public FinancialTransactionDAO(AmountDAO amount) {
+    public FinancialTransaction(AmountDAO amount) {
         this(amount, DEFAULT_TT);
     }
 
     /**
-     * This constructor instantiates FinancialTransactionDAO based on given transaction amount (MoneyValueDAO) and transaction type (TransactionType).
+     * This constructor instantiates FinancialTransaction based on given transaction amount (MoneyValueDAO) and transaction type (TransactionType).
      * and type.
      *
      * @param amount
      * @param type
      */
-    public FinancialTransactionDAO(AmountDAO amount, TransactionType type) {
+    public FinancialTransaction(AmountDAO amount, TransactionType type) {
         this(amount, type, null);
     }
 
     /**
-     * This constructor instantiates FinancialTransactionDAO based on given transaction amount (MoneyValueDAO), transaction type (TransactionType), and descriptor.
+     * This constructor instantiates FinancialTransaction based on given transaction amount (MoneyValueDAO), transaction type (TransactionType), and descriptor.
      *
      * @param amount
      * @param type
      * @param descriptor
      */
-    public FinancialTransactionDAO(AmountDAO amount, TransactionType type, String descriptor) {
+    public FinancialTransaction(AmountDAO amount, TransactionType type, String descriptor) {
         this();
         setAmount(amount);
         setType(type);
@@ -122,7 +122,7 @@ public class FinancialTransactionDAO
      *
      * @return
      */
-    public AppIDDefault getAppIDDAO() {
+    public AppIDDefault getAppID() {
         return lookupValue(Params.APP_ID);
     }
 
@@ -131,7 +131,7 @@ public class FinancialTransactionDAO
      *
      * @param appID
      */
-    public void setAppIDDAO(AppIDDefault appID) {
+    public void setAppID(AppIDDefault appID) {
         setValue(Params.APP_ID, appID);
     }
 

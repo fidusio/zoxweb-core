@@ -316,13 +316,13 @@ public final class SecUtil {
      * @param securityProfile if null SecurityProfile will be created
      * @return ResourceSecurity if applicable or null
      */
-    public static ResourceSecurity applyAndCacheSecurityProfile(Method method, SecurityProfile securityProfile) {
+    public static ResourceSecurity applyAndCacheSecurityProfile(Method method, ResourceSecurityProfile securityProfile) {
         SEC_LOCK.lock(true);
         try {
             SUS.checkIfNulls("Method null", method);
             SecurityProp sp = ReflectionUtil.getAnnotationFromMethod(method, SecurityProp.class);
             if (sp != null) {
-                ResourceSecurity ret = applySecurityProp(securityProfile != null ? securityProfile : new SecurityProfile(), sp);
+                ResourceSecurity ret = applySecurityProp(securityProfile != null ? securityProfile : new ResourceSecurityProfile(), sp);
                 methodResourceSecurityMap.put(method, ret);
                 return ret;
             }
@@ -394,7 +394,7 @@ public final class SecUtil {
      * @param securityProp    to be applied
      * @return ResourceSecurity or null
      */
-    public static ResourceSecurity applySecurityProp(SecurityProfile securityProfile, SecurityProp securityProp) {
+    public static ResourceSecurity applySecurityProp(ResourceSecurityProfile securityProfile, SecurityProp securityProp) {
         if (securityProfile != null && securityProp != null) {
             String[] roles = SUS.isEmpty(securityProp.roles()) ? null : SUS.parseString(securityProp.roles(), ",", " ", "\t");
             String[] permissions = SUS.isEmpty(securityProp.permissions()) ? null : SUS.parseString(securityProp.permissions(), ",", " ", "\t");

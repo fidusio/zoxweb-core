@@ -176,7 +176,7 @@ public class NetUtil {
     }
 
 
-    public static boolean belongsToNetwork(InetFilterDAO ipf, String ipAddress)
+    public static boolean belongsToNetwork(InetFilterInfo ipf, String ipAddress)
             throws IOException {
         String tempNetwork = getNetworkIPV4(ipAddress, ipf.getNetworkMask());
         return tempNetwork.equals(ipf.getNetwork());
@@ -564,18 +564,18 @@ public class NetUtil {
     }
 
 
-    public static InetAddressDAO toInetAddressDAO(String str) throws IOException {
+    public static InetAddressInfo toInetAddressInfo(String str) throws IOException {
         SUS.checkIfNulls("Null address", str);
-        InetAddressDAO ret = new InetAddressDAO();
+        InetAddressInfo ret = new InetAddressInfo();
         ret.setInetAddress(str);
         ret.setIPVersion(InetAddress.getByName(str) instanceof Inet4Address ? IPVersion.V4 : IPVersion.V6);
 
         return ret;
     }
 
-    public static InetAddressDAO toInetAddressDAO(InetAddress addr) throws IOException {
+    public static InetAddressInfo toInetAddressInfo(InetAddress addr) throws IOException {
         SUS.checkIfNulls("Null address", addr);
-        InetAddressDAO ret = new InetAddressDAO();
+        InetAddressInfo ret = new InetAddressInfo();
         ret.setInetAddress(addr.getHostAddress());
         ret.setIPVersion(addr instanceof Inet4Address ? IPVersion.V4 : IPVersion.V6);
 

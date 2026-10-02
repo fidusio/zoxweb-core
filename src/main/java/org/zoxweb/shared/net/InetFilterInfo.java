@@ -32,7 +32,7 @@ import org.zoxweb.shared.util.SUS;
  * @author mnael
  */
 @SuppressWarnings("serial")
-public class InetFilterDAO
+public class InetFilterInfo
         extends SetNameDescriptionDAO {
 
     /**
@@ -61,13 +61,13 @@ public class InetFilterDAO
     }
 
     /** NVConfigEntity definition for InetFilterDAO */
-    public static final NVConfigEntity NVC_INET_FILTER_DAO = new NVConfigEntityPortable("inet_filter_dao", null, "InetFilterDAO", true, false, false, false, InetFilterDAO.class, SUS.extractNVConfigs(Params.values()), null, false, SetNameDescriptionDAO.NVC_NAME_DAO);
+    public static final NVConfigEntity NVC_INET_FILTER_INFO = new NVConfigEntityPortable("inet_filter_info", null, "InetFilterInfo", true, false, false, false, InetFilterInfo.class, SUS.extractNVConfigs(Params.values()), null, false, SetNameDescriptionDAO.NVC_NAME_DAO);
 
     /**
      * Default constructor.
      */
-    public InetFilterDAO() {
-        super(NVC_INET_FILTER_DAO);
+    public InetFilterInfo() {
+        super(NVC_INET_FILTER_INFO);
     }
 
     /**
@@ -76,7 +76,7 @@ public class InetFilterDAO
      * @param ip the IP address
      * @param mask the network mask
      */
-    public InetFilterDAO(String ip, String mask) {
+    public InetFilterInfo(String ip, String mask) {
         this();
         setIP(ip);
         setNetworkMask(mask);
