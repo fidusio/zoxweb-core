@@ -1207,6 +1207,28 @@ public class DomainSecurityManagerDefault
         return this;
     }
 
+    @Override
+    public boolean isSuperAdminSubject(String subjectGUID) {
+        return false;
+    }
+
+
+
+    @Override
+    public RoleGroupInfo lookupRoleGroupByGUID(String roleGroupGUID) {
+        return null;
+    }
+
+    @Override
+    public RoleInfo lookupRoleByGUID(String roleGUID) {
+        return null;
+    }
+
+    @Override
+    public PermissionInfo lookupPermissionByGUID(String permissionGUID) {
+        return null;
+    }
+
 
     // ------------------------------------------------------------------
     // password verification and reset (no enforcement in the default manager)

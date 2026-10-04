@@ -59,8 +59,14 @@ public class AppIDDefault
     }
 
 
+    /**
+     * Parses the canonical id {@code <domain>-<app>}. The split is at the <b>last</b> separator: an
+     * app name is letters and digits only ({@code AppIDNameFilter}) and can never contain one,
+     * while a domain such as {@code my-site.com} can.
+     */
     public static AppIDDefault create(String domainAppID) {
-        int index = domainAppID.indexOf(AppID.CAN_ID_SEP);
+        SUS.checkIfNulls("domainAppID can't be null", domainAppID);
+        int index = domainAppID.lastIndexOf(AppID.CAN_ID_SEP);
         if (index == -1) {
             throw new IllegalArgumentException(AppID.CAN_ID_SEP + " separator " + domainAppID + " missing");
         }

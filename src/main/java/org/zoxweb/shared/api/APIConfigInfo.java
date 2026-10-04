@@ -27,7 +27,7 @@ import org.zoxweb.shared.util.*;
  */
 public interface APIConfigInfo
         extends ReferenceID<String>,
-        AccountID<String>,
+//        AccountID<String>,
 //        SubjectGUID<String>,
         SetName,
         SetDescription,
@@ -36,7 +36,7 @@ public interface APIConfigInfo
         CanonicalID,
         SecurityControllerHolder {
 
-    public enum OAuthVersion {
+     enum OAuthVersion {
         NONE,
         OAUTH_1,
         OAUTH_2

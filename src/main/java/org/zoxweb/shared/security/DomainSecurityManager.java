@@ -27,7 +27,12 @@ public interface DomainSecurityManager {
      * @param key the API key to log in with
      * @return the subject that owns the API key upon successful authentication
      * @throws AccessSecurityException if authentication fails
+     * @deprecated since 2026-10-03 an API key does not log anyone in: it is a subject's credential
+     * for a third-party API, read by its logged-in owner. {@code ShiroDSDomainSecurityManager}
+     * refuses every call; a system login is a password or a JWT signed with a signing key
+     * ({@link SubjectAPIKey#isSigningKey()}).
      */
+    @Deprecated
     SubjectIdentifier loginApiKey(String key) throws AccessSecurityException;
 
     /**
@@ -549,4 +554,12 @@ public interface DomainSecurityManager {
      * @return this manager, for call chaining
      */
     DomainSecurityManager addCredentialType(Class<? extends CredentialInfo> clazz);
+
+    boolean isSuperAdminSubject(String subjectGUID);
+
+
+    RoleGroupInfo lookupRoleGroupByGUID(String roleGroupGUID);
+    RoleInfo lookupRoleByGUID(String roleGUID);
+
+    PermissionInfo lookupPermissionByGUID(String permissionGUID);
 }

@@ -30,8 +30,8 @@ import java.util.List;
 public class DynamicEnumMap
         extends NVPairList
         implements ValueFilter<String, String>,
-        AccountID<String>,
-        //SubjectGUID<String>, // replaced by AccountID which extends SubjectGUID
+        //AccountID<String>,
+        SubjectGUID<String>, // replaced by AccountID which extends SubjectGUID
         SetDescription {
 
     private boolean ignoreCase = true;

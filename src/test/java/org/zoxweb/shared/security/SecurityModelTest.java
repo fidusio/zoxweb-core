@@ -69,9 +69,9 @@ class SecurityModelTest {
         String s = "0199a2b4-1111-7000-8000-000000000001";
         String e = "0199a2b4-2222-7000-8000-000000000002";
         String g = "0199A2B4-3333-7000-8000-000000000003";
-        assertEquals("read,update,delete,share", SecurityModel.RESOURCE_SELF_VERBS);
-        // self permission of S: resource:S:S:read,update,delete,share
-        assertEquals("resource:" + s + ":" + s + ":read,update,delete,share",
+        assertEquals("create,read,update,delete,share", SecurityModel.RESOURCE_SELF_VERBS);
+        // self permission of S: resource:S:S:create,read,update,delete,share
+        assertEquals("resource:" + s + ":" + s + ":create,read,update,delete,share",
                 SecurityModel.toResourceToken(s, s, SecurityModel.RESOURCE_SELF_VERBS));
         // a grant of E to G, stored form resource:<verbs> -> composed 4-part token, lower-cased
         assertEquals("resource:" + e + ":" + g.toLowerCase() + ":read,share",
@@ -164,6 +164,18 @@ class SecurityModelTest {
         assertArrayEquals(new Permission[]{Permission.SUPER_ADMIN_ALL}, Role.SUPER_ADMIN.getPermissions());
         assertEquals(0, Role.USER.getPermissions().length);
         assertEquals(0, Role.APP_USER.getPermissions().length);
+        // the app model: registrar = subject:create only; app_admin manages its app's catalog; two platform-only roles
+        assertArrayEquals(new Permission[]{Permission.SUBJECT_CREATE}, Role.APP_REGISTRAR.getPermissions());
+        for (Permission p : new Permission[]{Permission.PERMISSION_CREATE, Permission.ROLE_CREATE, Permission.ROLE_ASSIGN, Permission.APP_UPDATE}) {
+            assertTrue(java.util.Arrays.asList(Role.APP_ADMIN.getPermissions()).contains(p), p.name());
+        }
+        assertFalse(java.util.Arrays.asList(Role.APP_ADMIN.getPermissions()).contains(Permission.APP_CREATE));
+        for (Role r : Role.values()) {
+            assertEquals(r == Role.SUPER_ADMIN || r == Role.DOMAIN_ADMIN, r.isPlatformOnly(), r.name());
+        }
+        for (RoleGroup g : RoleGroup.values()) {
+            assertEquals(g == RoleGroup.DOMAIN_ADMINS, g.isPlatformOnly(), g.name());
+        }
         for (Role r : Role.values()) {
             assertThrows(IllegalArgumentException.class, () -> Role.valueOf("RESOURCE"));
         }

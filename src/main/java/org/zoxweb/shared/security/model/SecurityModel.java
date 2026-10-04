@@ -103,7 +103,7 @@ public final class SecurityModel {
      * 2026-09-29): the second part names the resource, or the owner's subject GUID for the
      * owner's implicit rights; the third part is the subject exercising the permission; the
      * verbs come last. Every subject {@code S} implicitly holds
-     * {@code resource:S:S:read,update,delete,share} (the realm synthesizes it at login), so the
+     * {@code resource:S:S:create,read,update,delete,share} (the realm synthesizes it at login), so the
      * owner of an entity {@code E} owned by {@code S} passes {@code resource:E.subject_guid:S:<verb>};
      * a grant of {@code E} to {@code G} is stored as {@code resource:<verbs>} plus a resource map and
      * flattens to {@code resource:E:G:<verbs>}. Catalog wildcards are {@code resource:*:*:<verb>}
@@ -114,8 +114,11 @@ public final class SecurityModel {
     public final static String SUBJECT = "subject";
     /**
      * The verbs every subject implicitly holds on its own resources, in canonical order.
+     * {@code create} is the right to create a resource one owns: creating a row owned by {@code O}
+     * needs {@code resource:O:<caller>:create}, so a subject creates its own rows and only a holder
+     * of {@code resource:*:*:create} creates on behalf of others.
      */
-    public final static String RESOURCE_SELF_VERBS = READ + SUBPART_SEP + UPDATE + SUBPART_SEP + DELETE + SUBPART_SEP + SHARE;
+    public final static String RESOURCE_SELF_VERBS = CREATE + SUBPART_SEP + READ + SUBPART_SEP + UPDATE + SUBPART_SEP + DELETE + SUBPART_SEP + SHARE;
 
 
     public final static String PERM_ADD_PERMISSION = PERMISSION + PART_SEP + CREATE;//;PERMISSION + SEP + CREATE;//"permission:create";
@@ -572,6 +575,11 @@ public final class SecurityModel {
      * Built-in roles with their declared permissions. Seeded and kept in sync by the security
      * manager's catalog seeder; {@link #SUPER_ADMIN} is reserved for the bootstrap super-admin.
      * Ownership of an entity is implicit and needs no role.
+     * <p>App model (2026-10-01): every app owns its own copy of its roles and permissions.
+     * {@link #SUPER_ADMIN} and {@link #DOMAIN_ADMIN} exist only in the platform's own app; the
+     * other roles are the starter set every new app gets. {@link #APP_ADMIN} manages the app: it
+     * creates and changes the app's own permissions and roles. {@link #APP_REGISTRAR} is the app's
+     * service subject that creates the app's subjects at sign-up and holds nothing else.
      */
     public enum Role
             implements GetName, GetDescription {
@@ -584,11 +592,15 @@ public final class SecurityModel {
                 Permission.ROLE_ASSIGN, Permission.ROLE_REMOVE,
                 Permission.APP_CREATE, Permission.APP_UPDATE, Permission.APP_DELETE,
                 Permission.NVE_ALL),
-        APP_ADMIN("app_admin", "App admin role",
+        APP_ADMIN("app_admin", "App admin role: manages the app, its subjects, roles and permissions",
                 Permission.SUBJECT_CREATE, Permission.SUBJECT_READ, Permission.SUBJECT_UPDATE,
+                Permission.PERMISSION_CREATE, Permission.PERMISSION_UPDATE, Permission.PERMISSION_DELETE,
+                Permission.ROLE_CREATE, Permission.ROLE_UPDATE, Permission.ROLE_DELETE,
                 Permission.ROLE_ASSIGN, Permission.ROLE_REMOVE,
                 Permission.PERMISSION_ASSIGN, Permission.PERMISSION_REMOVE,
                 Permission.APP_UPDATE),
+        APP_REGISTRAR("app_registrar", "App registrar role: the app's service subject that creates its subjects at sign-up",
+                Permission.SUBJECT_CREATE),
         APP_USER("app_user", "App user role"),
         APP_SERVICE_PROVIDER("app_service_provider", "App service provider role", Permission.SUBJECT_READ),
         USER("user", "This role is granted to all users"),
@@ -629,6 +641,14 @@ public final class SecurityModel {
             return this == SUPER_ADMIN;
         }
 
+        /**
+         * @return true for a role that exists only in the platform's own app ({@link #SUPER_ADMIN},
+         * {@link #DOMAIN_ADMIN}); every other role is part of the starter set of each new app
+         */
+        public boolean isPlatformOnly() {
+            return this == SUPER_ADMIN || this == DOMAIN_ADMIN;
+        }
+
         public static RoleInfo toRole(String name, String description) {
             return new RoleInfo(name, description);
         }
@@ -640,7 +660,8 @@ public final class SecurityModel {
     }
 
     /**
-     * Built-in role groups. {@link Role#SUPER_ADMIN} belongs to no group by design.
+     * Built-in role groups. {@link Role#SUPER_ADMIN} belongs to no group by design. A group that
+     * embeds a platform-only role is itself platform-only ({@link #isPlatformOnly()}).
      */
     public enum RoleGroup
             implements GetName, GetDescription {
@@ -676,6 +697,19 @@ public final class SecurityModel {
         /** The enum's own array, not a copy: read only, never write into it. */
         public Role[] getRoles() {
             return roles;
+        }
+
+        /**
+         * @return true when the group embeds a platform-only role and therefore exists only in the
+         * platform's own app
+         */
+        public boolean isPlatformOnly() {
+            for (Role r : roles) {
+                if (r.isPlatformOnly()) {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 

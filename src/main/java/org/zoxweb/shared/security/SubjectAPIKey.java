@@ -40,7 +40,21 @@ import java.util.Date;
  * URL-safe Base64 string; use {@link #setAPIKeyAsBytes(byte[])} / {@link #getAPIKeyAsBytes()}
  * to write and read the raw bytes.</p>
  *
- * <p>It is a {@link CredentialInfo} of type {@link CredentialInfo.Type#API_KEY}, so it
+ * <p><b>Purpose (2026-10-03).</b> A key serves exactly one of two purposes, carried by
+ * {@link #getCredentialType()}:</p>
+ * <ul>
+ * <li>{@link CredentialInfo.Type#API_KEY} (the default) - a subject's credential for a
+ * <b>third-party</b> API (an AI provider, a cloud service, ...). It never authenticates
+ * anyone to this system: the owning subject logs in by other means, reads the key from
+ * the datastore, which serves it in clear to its owner, and presents it to the third
+ * party.</li>
+ * <li>{@link CredentialInfo.Type#SYMMETRIC_KEY} - a <b>signing key</b>: the HMAC secret of
+ * the JWT bearer tokens that log a subject in to this system. Only such a key may verify
+ * a JWT ({@link #isSigningKey()}).</li>
+ * </ul>
+ * <p>A raw key is never a login credential and is never looked up by its secret.</p>
+ *
+ * <p>It is a {@link CredentialInfo}, so it
  * can be stored and resolved through the same credential machinery as passwords and
  * other credential kinds (see {@link DomainSecurityManager}). Its
  * {@link #getSubjectID() subject ID} is an alias of its {@link #getPrincipalID()
@@ -74,6 +88,7 @@ public class SubjectAPIKey
         EXPIRY_DATE(NVConfigManager.createNVConfig("expiry_date", "The expiry timestamp", "Expired", false, false, false, true, Date.class, null)),
         CI_STATUS(NVConfigManager.createNVConfig("api_key_status", "API key status", "APIKeyStatus", true, true, SecConst.SecStatus.class)),
         APP_ID(NVConfigManager.createNVConfigEntity("app_id", "App ID", "AppID", true, false, AppIDDefault.NVC_APP_ID_DEFAULT, NVConfigEntity.ArrayType.NOT_ARRAY)),
+        CREDENTIAL_TYPE(NVConfigManager.createNVConfig("credential_type", "What the key is for: API_KEY (third-party API) or SYMMETRIC_KEY (JWT signing)", "CredentialType", false, true, CredentialInfo.Type.class)),
         ;
 
         private final NVConfig nvc;
@@ -160,11 +175,37 @@ public class SubjectAPIKey
     }
 
     /**
-     * @return always {@link CredentialInfo.Type#API_KEY}
+     * @return what the key is for: {@link CredentialInfo.Type#SYMMETRIC_KEY} for a JWT signing
+     * key, otherwise {@link CredentialInfo.Type#API_KEY} - a third-party API key, which is also
+     * what a key with no stored purpose is, so that only a key explicitly made a signing key can
+     * ever verify a login
      */
     @Override
     public Type getCredentialType() {
-        return Type.API_KEY;
+        Type ret = lookupValue(Param.CREDENTIAL_TYPE);
+        return ret != null ? ret : Type.API_KEY;
+    }
+
+    /**
+     * Sets what the key is for.
+     *
+     * @param type {@link CredentialInfo.Type#API_KEY} (third-party API key) or
+     *             {@link CredentialInfo.Type#SYMMETRIC_KEY} (JWT signing key)
+     * @throws IllegalArgumentException for any other type
+     */
+    public void setCredentialType(Type type) {
+        if (type != Type.API_KEY && type != Type.SYMMETRIC_KEY) {
+            throw new IllegalArgumentException("A SubjectAPIKey is an API_KEY or a SYMMETRIC_KEY, not " + type);
+        }
+        setValue(Param.CREDENTIAL_TYPE, type);
+    }
+
+    /**
+     * @return true when this key is a JWT signing key ({@link CredentialInfo.Type#SYMMETRIC_KEY}),
+     * the only kind that may verify a login to this system
+     */
+    public boolean isSigningKey() {
+        return getCredentialType() == Type.SYMMETRIC_KEY;
     }
 
     /**
