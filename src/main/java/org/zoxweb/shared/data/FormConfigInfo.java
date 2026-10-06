@@ -21,7 +21,7 @@ import java.util.List;
 
 @SuppressWarnings("serial")
 public class FormConfigInfo
-        extends CanonicalIDDAO
+        extends CanonicalIDImpl
         implements DomainID<String> {
     public enum Param
             implements GetNVConfig {
@@ -59,7 +59,7 @@ public class FormConfigInfo
                     SUS.extractNVConfigs(Param.values()),
                     null,
                     false,
-                    CanonicalIDDAO.NVC_CANONICAL_ID_DAO
+                    CanonicalIDImpl.NVC_CANONICAL_ID_IMPL
             );
 
 

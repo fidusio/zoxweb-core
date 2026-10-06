@@ -31,7 +31,7 @@ import org.zoxweb.shared.util.NVConfigEntity.ArrayType;
 
 @SuppressWarnings("serial")
 public class DetailedCreditCardDAO
-	extends CanonicalIDDAO
+	extends CanonicalIDImpl
 	implements EmailID
 {
 	
@@ -81,7 +81,7 @@ public class DetailedCreditCardDAO
 																								SUS.extractNVConfigs(Param.values()),
 																								null, 
 																								false, 
-																								CanonicalIDDAO.NVC_CANONICAL_ID_DAO
+																								CanonicalIDImpl.NVC_CANONICAL_ID_IMPL
 																							);
 
 	public DetailedCreditCardDAO()

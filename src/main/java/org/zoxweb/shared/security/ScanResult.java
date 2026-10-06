@@ -15,7 +15,7 @@
  */
 package org.zoxweb.shared.security;
 
-import org.zoxweb.shared.data.CanonicalIDDAO;
+import org.zoxweb.shared.data.CanonicalIDImpl;
 import org.zoxweb.shared.util.GetNVConfig;
 import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
@@ -31,7 +31,7 @@ import org.zoxweb.shared.util.Const.ScanStatus;
  */
 @SuppressWarnings("serial")
 public class ScanResult
-	extends CanonicalIDDAO
+	extends CanonicalIDImpl
 {
 	public enum Params
 	    implements GetNVConfig
@@ -67,7 +67,7 @@ public class ScanResult
 																					SUS.extractNVConfigs(Params.values()), 
 																					null, 
 																					false, 
-																					CanonicalIDDAO.NVC_CANONICAL_ID_DAO
+																					CanonicalIDImpl.NVC_CANONICAL_ID_IMPL
 																				);
 	
 	public ScanResult()

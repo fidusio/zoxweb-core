@@ -15,7 +15,7 @@
  */
 package org.zoxweb.shared.accounting;
 
-import org.zoxweb.shared.data.CanonicalIDDAO;
+import org.zoxweb.shared.data.CanonicalIDImpl;
 import org.zoxweb.shared.util.*;
 import org.zoxweb.shared.util.NVConfigEntity.ArrayType;
 
@@ -24,7 +24,7 @@ import java.util.List;
 
 @SuppressWarnings("serial")
 public class BillingItemsContainerDAO
-        extends CanonicalIDDAO {
+        extends CanonicalIDImpl {
 
     public enum Params
             implements GetNVConfig {
@@ -58,7 +58,7 @@ public class BillingItemsContainerDAO
             SUS.extractNVConfigs(Params.values()),
             null,
             false,
-            CanonicalIDDAO.NVC_CANONICAL_ID_DAO
+            CanonicalIDImpl.NVC_CANONICAL_ID_IMPL
     );
 
     /**

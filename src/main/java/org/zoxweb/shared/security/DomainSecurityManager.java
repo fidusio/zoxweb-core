@@ -562,4 +562,36 @@ public interface DomainSecurityManager {
     RoleInfo lookupRoleByGUID(String roleGUID);
 
     PermissionInfo lookupPermissionByGUID(String permissionGUID);
+
+    /**
+     * Looks a subject up by its GUID.
+     *
+     * @param subjectGUID the subject's GUID
+     * @return the subject, or null when the GUID is null, empty or unknown
+     */
+    SubjectIdentifier lookupSubjectByGUID(String subjectGUID);
+
+    /**
+     * Looks an API key up by its key ID ({@link SubjectAPIKey#getSubjectID()}, the {@code sub} claim
+     * of a JWT signed with the key) - never by its secret.
+     *
+     * @param keyID the key ID
+     * @return the key, or null when the ID is null, empty or unknown
+     */
+    SubjectAPIKey lookupSubjectAPIKeyByID(String keyID);
+
+    /**
+     * @param subjectGUID the subject's GUID
+     * @return true while the subject has a password reset token that is still active and unexpired
+     */
+    boolean hasOutstandingResetToken(String subjectGUID);
+
+    /**
+     * Puts a subject back to {@code ACTIVE} when it is in {@code PENDING_RESET_PASSWORD} and its
+     * reset token has run out, so an unclaimed reset locks an account for the token's lifetime
+     * only. Any other status is left alone.
+     *
+     * @param subject the subject; null is ignored
+     */
+    void restoreActiveAfterExpiredReset(SubjectIdentifier subject);
 }

@@ -18,7 +18,7 @@ package org.zoxweb.server.net;
 
 
 import org.zoxweb.server.util.RuntimeUtil;
-import org.zoxweb.shared.data.RuntimeResultDAO;
+import org.zoxweb.shared.data.RuntimeResultData;
 import org.zoxweb.shared.net.InetProp.IPVersion;
 import org.zoxweb.shared.net.NIConfigDAO;
 import org.zoxweb.shared.net.SharedNetUtil;
@@ -165,7 +165,7 @@ public class IPInfo {
             case V4:
 
                 try {
-                    RuntimeResultDAO rrd = RuntimeUtil.runAndFinish("netstat -rn");
+                    RuntimeResultData rrd = RuntimeUtil.runAndFinish("netstat -rn");
                     BufferedReader br = new BufferedReader(new StringReader(rrd.getOutputData()));
                     String line;
                     int len = 8;

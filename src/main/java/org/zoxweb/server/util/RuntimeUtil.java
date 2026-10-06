@@ -18,8 +18,8 @@ package org.zoxweb.server.util;
 
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.io.UByteArrayOutputStream;
-import org.zoxweb.shared.data.RuntimeResultDAO;
-import org.zoxweb.shared.data.RuntimeResultDAO.ResultAttribute;
+import org.zoxweb.shared.data.RuntimeResultData;
+import org.zoxweb.shared.data.RuntimeResultData.ResultAttribute;
 import org.zoxweb.shared.data.VMInfoDAO;
 import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.util.Const;
@@ -71,7 +71,7 @@ public class RuntimeUtil {
 
 
     public static class ProcessExec
-            implements Callable<RuntimeResultDAO> {
+            implements Callable<RuntimeResultData> {
         private final ProcessBuilder pb;
         private final UByteArrayOutputStream outStream;
 
@@ -105,7 +105,7 @@ public class RuntimeUtil {
          * Runs this operation.
          */
         @Override
-        public RuntimeResultDAO call() {
+        public RuntimeResultData call() {
 
             Process p = null;
             int exitCode = -1;
@@ -125,7 +125,7 @@ public class RuntimeUtil {
                 }
             }
             ts = System.currentTimeMillis() - ts;
-            return new RuntimeResultDAO(exitCode, outStream.toString()).setDurationBuilder(ts);
+            return new RuntimeResultData(exitCode, outStream.toString()).setDurationBuilder(ts);
         }
     }
 
@@ -262,7 +262,7 @@ public class RuntimeUtil {
      * @throws IOException          in case an io exception occurs
      * @throws InterruptedException if the process got interrupted
      */
-    public static RuntimeResultDAO runAndFinish(String command, String... params)
+    public static RuntimeResultData runAndFinish(String command, String... params)
             throws InterruptedException, IOException {
         if (params.length > 0) {
             String parameters = SUS.toCanonicalID(' ', (Object[]) params);
@@ -282,12 +282,12 @@ public class RuntimeUtil {
      * @throws IOException          in case an io exception occurs
      * @throws InterruptedException if the process got interrupted
      */
-    public static RuntimeResultDAO runAndFinish(String command, ResultAttribute ra)
+    public static RuntimeResultData runAndFinish(String command, ResultAttribute ra)
             throws InterruptedException, IOException {
         Process p = Runtime.getRuntime().exec(command);
         String ret = getRuntimeResponse(p, ra);
 
-        return new RuntimeResultDAO(p.exitValue(), ret);
+        return new RuntimeResultData(p.exitValue(), ret);
     }
 
 
@@ -301,7 +301,7 @@ public class RuntimeUtil {
      * @throws IOException          in case an io exception occurs
      * @throws InterruptedException if the process got interrupted
      */
-    public static RuntimeResultDAO runAndFinish(String script, File f)
+    public static RuntimeResultData runAndFinish(String script, File f)
             throws InterruptedException, IOException {
         if (f.createNewFile() && f.setExecutable(true)) {
             IOUtil.writeToFile(f, script);

@@ -88,7 +88,7 @@ Design philosophy (confirmed by the maintainer — check before flagging "defect
 
 ### Security (`org.zoxweb.shared.security` + `org.zoxweb.server.security`)
 
-Identity model: `PrincipalIdentifier` (login handle — username/email) resolves to a `SubjectIdentifier` (the subject, keyed by GUID). Linkage is by `subject_guid` across principals, credentials (`CredentialInfo`/`CIPassword`), and RBAC grants (`PermissionGrant`, `RoleGrant`, `RoleGroupGrant` referencing `PermissionInfo`/`RoleInfo`/`RoleGroupInfo` catalogs). `DomainSecurityManagerDefault` (server) implements the `DomainSecurityManager` contract on top of any `APIDataStore`; `SecUtil` is the crypto facade (password hashing, JWT). A subject's last `PrincipalIdentifier` can never be deleted.
+Identity model: `PrincipalIdentifier` (login handle — username/email) resolves to a `SubjectIdentifier` (the subject, keyed by GUID). Linkage is by `subject_guid` across principals, credentials (`CredentialInfo`/`CIPassword`), and RBAC grants (`PermissionGrant`, `RoleGrant`, `RoleGroupGrant` referencing `PermissionInfo`/`RoleInfo`/`RoleGroupInfo` catalogs). The `DomainSecurityManager` contract is implemented outside this repo, by io-xlogistx's `ShiroDSDomainSecurityManager` on any `APIDataStore` (the in-repo `DomainSecurityManagerDefault` and its test were deleted by the user on 2026-10-05); `SecUtil` is the crypto facade (password hashing, JWT). A subject's last `PrincipalIdentifier` can never be deleted. `AuthorizationInfoLookup<I, O>` (input type first since 2026-10-05; it extends `DataDecoder<I, O>` and its default `decode` calls `lookupAuthorizationInfo`) is the lookup hook a realm implements; its implementers are in io-xlogistx `shiro`.
 
 ### HTTP
 

@@ -27,7 +27,7 @@ import org.zoxweb.shared.util.SUS;
  * its exit code, output and error stream data, and execution duration in millis.
  */
 @SuppressWarnings("serial")
-public class RuntimeResultDAO
+public class RuntimeResultData
         extends SetNameDescriptionDAO {
 
     public enum ResultAttribute
@@ -50,15 +50,15 @@ public class RuntimeResultDAO
         }
     }
 
-    public static final NVConfigEntity RUNTIME_RESULT_DAO = new NVConfigEntityPortable(
-            "runtime_result_dao",
+    public static final NVConfigEntity RUNTIME_RESULT_DATA = new NVConfigEntityPortable(
+            "runtime_result_data",
             null,
-            "RuntimeResultDAO",
+            "RuntimeResultData",
             true,
             false,
             false,
             false,
-            RuntimeResultDAO.class,
+            RuntimeResultData.class,
             SUS.extractNVConfigs(ResultAttribute.values()),
             null,
             false,
@@ -68,8 +68,8 @@ public class RuntimeResultDAO
     /**
      * The default constructor.
      */
-    public RuntimeResultDAO() {
-        super(RUNTIME_RESULT_DAO);
+    public RuntimeResultData() {
+        super(RUNTIME_RESULT_DATA);
     }
 
     /**
@@ -78,7 +78,7 @@ public class RuntimeResultDAO
      * @param exitCode
      * @param outputData
      */
-    public RuntimeResultDAO(int exitCode, String outputData) {
+    public RuntimeResultData(int exitCode, String outputData) {
         this();
         setExitCode(exitCode);
         setOutputData(outputData);
@@ -144,7 +144,7 @@ public class RuntimeResultDAO
         setValue(ResultAttribute.DURATION, durationMillis);
     }
 
-    public RuntimeResultDAO setDurationBuilder(long durationMillis) {
+    public RuntimeResultData setDurationBuilder(long durationMillis) {
         setDuration(durationMillis);
         return this;
     }

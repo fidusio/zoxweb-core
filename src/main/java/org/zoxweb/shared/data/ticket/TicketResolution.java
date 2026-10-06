@@ -15,7 +15,7 @@
  */
 package org.zoxweb.shared.data.ticket;
 
-import org.zoxweb.shared.data.CanonicalIDDAO;
+import org.zoxweb.shared.data.CanonicalIDImpl;
 import org.zoxweb.shared.util.*;
 
 import java.math.BigDecimal;
@@ -26,7 +26,7 @@ import java.math.BigDecimal;
  */
 @SuppressWarnings("serial")
 public class TicketResolution
-        extends CanonicalIDDAO {
+        extends CanonicalIDImpl {
 
     public enum Param
             implements GetNVConfig {
@@ -59,7 +59,7 @@ public class TicketResolution
             SUS.extractNVConfigs(Param.values()),
             null,
             false,
-            CanonicalIDDAO.NVC_CANONICAL_ID_DAO
+            CanonicalIDImpl.NVC_CANONICAL_ID_IMPL
     );
 
     /**

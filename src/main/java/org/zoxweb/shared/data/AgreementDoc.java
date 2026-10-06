@@ -23,11 +23,11 @@ import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.SUS;
 
 /**
- * The AgreementDAO class defines agreement data access object used to create agreements.
+ * The AgreementDoc class defines agreement data access object used to create agreements.
  * @author mzebib
  */
 @SuppressWarnings("serial")
-public class AgreementDAO 
+public class AgreementDoc
 	extends SetNameDescriptionDAO
 {
 
@@ -60,15 +60,15 @@ public class AgreementDAO
 	
 	}
 	
-	public static final NVConfigEntity NVC_AGREEMENT_DAO = new NVConfigEntityPortable(
-        "agreement_dao",
+	public static final NVConfigEntity NVC_AGREEMENT_DOC = new NVConfigEntityPortable(
+        "agreement_doc",
         null,
-        "Agreement",
+        "AgreementDoc",
         true,
         false,
         false,
         false,
-        AgreementDAO.class,
+        AgreementDoc.class,
         SUS.extractNVConfigs(Param.values()),
         null,
         false,
@@ -79,9 +79,9 @@ public class AgreementDAO
 	/**
 	 * The default constructor.
 	 */
-	public AgreementDAO()
+	public AgreementDoc()
 	{
-		super(NVC_AGREEMENT_DAO);
+		super(NVC_AGREEMENT_DOC);
 	}
 	
 	/**
@@ -91,7 +91,7 @@ public class AgreementDAO
 	 * @param agreementTitle
 	 * @param content
 	 */
-	public AgreementDAO(String language, String checkTitle, String agreementTitle, String content)
+	public AgreementDoc(String language, String checkTitle, String agreementTitle, String content)
 	{
 		this();
 		setLanguage(language);

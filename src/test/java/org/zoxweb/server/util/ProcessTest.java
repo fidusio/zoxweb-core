@@ -2,7 +2,7 @@ package org.zoxweb.server.util;
 
 import org.junit.jupiter.api.Test;
 import org.zoxweb.server.task.TaskUtil;
-import org.zoxweb.shared.data.RuntimeResultDAO;
+import org.zoxweb.shared.data.RuntimeResultData;
 import org.zoxweb.shared.task.CallableConsumerTask;
 
 import java.io.IOException;
@@ -38,7 +38,7 @@ public class ProcessTest {
     public void syncTest()
     {
         RuntimeUtil.ProcessExec pe = new RuntimeUtil.ProcessExec("dir");
-        RuntimeResultDAO rr = pe.call();
+        RuntimeResultData rr = pe.call();
         System.out.println(rr);
 
 
@@ -50,7 +50,7 @@ public class ProcessTest {
     @Test
     public void asyncTest()
     {
-        CallableConsumerTask<RuntimeResultDAO> cct = new CallableConsumerTask<RuntimeResultDAO>()
+        CallableConsumerTask<RuntimeResultData> cct = new CallableConsumerTask<RuntimeResultData>()
                 .setCallable(RuntimeUtil.ProcessExec.create(RuntimeUtil.ShellType.CMD, "dir /s"))
                 .setConsumer((rr)->{System.out.println(rr);});
 

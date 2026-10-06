@@ -45,7 +45,7 @@ public class SystemInfoDAOTest {
 				System.out.println( nid.getName() + " " + nid.getMACAddress());
 			}
 			
-			sys.getApplicationDAOs().add( new AgreementDAO("english", "I agree to", "Terms and Conditions" ,"I agree to term and condition"));
+			sys.getApplicationDAOs().add( new AgreementDoc("english", "I agree to", "Terms and Conditions" ,"I agree to term and condition"));
 			String zwJson = GSONUtil.toJSON(sys, true);
 			System.out.println( zwJson);
 			

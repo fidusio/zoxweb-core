@@ -16,7 +16,7 @@
 package org.zoxweb.shared.data.ticket;
 
 import org.zoxweb.shared.data.AddressDAO;
-import org.zoxweb.shared.data.CanonicalIDDAO;
+import org.zoxweb.shared.data.CanonicalIDImpl;
 import org.zoxweb.shared.data.PhoneDAO;
 import org.zoxweb.shared.filters.FilterType;
 import org.zoxweb.shared.util.*;
@@ -30,7 +30,7 @@ import java.util.Date;
  */
 @SuppressWarnings("serial")
 public class TicketIssuer
-        extends CanonicalIDDAO
+        extends CanonicalIDImpl
         implements EmailID {
 
     public enum Param
@@ -77,7 +77,7 @@ public class TicketIssuer
                     SUS.extractNVConfigs(Param.values()),
                     null,
                     false,
-                    CanonicalIDDAO.NVC_CANONICAL_ID_DAO
+                    CanonicalIDImpl.NVC_CANONICAL_ID_IMPL
             );
 
     /**

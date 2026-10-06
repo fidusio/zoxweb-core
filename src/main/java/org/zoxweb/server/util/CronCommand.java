@@ -2,7 +2,7 @@ package org.zoxweb.server.util;
 
 import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.server.task.TaskUtil;
-import org.zoxweb.shared.data.RuntimeResultDAO;
+import org.zoxweb.shared.data.RuntimeResultData;
 import org.zoxweb.shared.util.Const.TimeInMillis;
 import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.TaskListener;
@@ -64,7 +64,7 @@ public class CronCommand
         executionCounter++;
         try {
             log.getLogger().info("Executing command:" + command);
-            RuntimeResultDAO rr = RuntimeUtil.runAndFinish(command);
+            RuntimeResultData rr = RuntimeUtil.runAndFinish(command);
             taskListener.executionResult(rr.getExitCode(), executionCounter, System.currentTimeMillis(), rr.getOutputData());
 
         } catch (InterruptedException | IOException e) {

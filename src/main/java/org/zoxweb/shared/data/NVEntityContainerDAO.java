@@ -27,7 +27,7 @@ import java.util.List;
  */
 @SuppressWarnings("serial")
 public class NVEntityContainerDAO
-        extends CanonicalIDDAO
+        extends CanonicalIDImpl
         implements NVEntityContainer {
 
     public enum Param
@@ -60,7 +60,7 @@ public class NVEntityContainerDAO
             SUS.extractNVConfigs(Param.values()),
             null,
             false,
-            CanonicalIDDAO.NVC_CANONICAL_ID_DAO
+            CanonicalIDImpl.NVC_CANONICAL_ID_IMPL
     );
 
     /**

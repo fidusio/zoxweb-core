@@ -20,7 +20,7 @@ import org.zoxweb.shared.util.*;
  */
 @SuppressWarnings("serial")
 public class Range<T extends Comparable<T>>
-        extends CanonicalIDDAO
+        extends CanonicalIDImpl
         implements ValueFilter<T, T> {
 
     /**
@@ -137,7 +137,7 @@ public class Range<T extends Comparable<T>>
             SUS.extractNVConfigs(Range.Param.values()),
             null,
             false,
-            CanonicalIDDAO.NVC_CANONICAL_ID_DAO
+            CanonicalIDImpl.NVC_CANONICAL_ID_IMPL
     );
 
 

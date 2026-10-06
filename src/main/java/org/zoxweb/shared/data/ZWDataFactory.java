@@ -70,16 +70,16 @@ public class ZWDataFactory
         } //	org.zoxweb.shared.data
         ,
 
-        AGREEMENT_DAO(AgreementDAO.class.getName()) {
+        AGREEMENT_DAO(AgreementDoc.class.getName()) {
             @SuppressWarnings("unchecked")
             @Override
-            public AgreementDAO newInstance() {
-                return new AgreementDAO();
+            public AgreementDoc newInstance() {
+                return new AgreementDoc();
             }
 
             @Override
             public NVConfigEntity getNVConfigEntity() {
-                return AgreementDAO.NVC_AGREEMENT_DAO;
+                return AgreementDoc.NVC_AGREEMENT_DOC;
             }
         },
         AMOUNT_DAO(AmountDAO.class.getName()) {
@@ -208,16 +208,16 @@ public class ZWDataFactory
                 return AppIDDefault.NVC_APP_ID_DEFAULT;
             }
         },
-        ASSOCIATION_DAO(AssociationDAO.class.getName()) {
+        ASSOCIATION_DAO(AssociationInfo.class.getName()) {
             @SuppressWarnings("unchecked")
             @Override
-            public AssociationDAO newInstance() {
-                return new AssociationDAO();
+            public AssociationInfo newInstance() {
+                return new AssociationInfo();
             }
 
             @Override
             public NVConfigEntity getNVConfigEntity() {
-                return AssociationDAO.NVC_ASSOCIATION_DAO;
+                return AssociationInfo.NVC_ASSOCIATION_INFO;
             }
         },
         BASIC_AUTH_TOKEN(BasicAuthToken.class.getName()) {
@@ -928,16 +928,16 @@ public class ZWDataFactory
                 return RoleInfo.NVC_ROLE_INFO;
             }
         },
-        RUNTIME_RESULT_DAO(RuntimeResultDAO.class.getName()) {
+        RUNTIME_RESULT_DAO(RuntimeResultData.class.getName()) {
             @SuppressWarnings("unchecked")
             @Override
-            public RuntimeResultDAO newInstance() {
-                return new RuntimeResultDAO();
+            public RuntimeResultData newInstance() {
+                return new RuntimeResultData();
             }
 
             @Override
             public NVConfigEntity getNVConfigEntity() {
-                return RuntimeResultDAO.RUNTIME_RESULT_DAO;
+                return RuntimeResultData.RUNTIME_RESULT_DATA;
             }
         },
         SCAN_RESULT_DAO(ScanResult.class.getName()) {
