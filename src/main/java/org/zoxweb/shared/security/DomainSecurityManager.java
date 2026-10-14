@@ -456,6 +456,21 @@ public interface DomainSecurityManager {
     PermissionGrant addPermissionGrant(SubjectIdentifier subject, ResourceMap resource, String permissionToken);
 
     /**
+     * Changes an inlined share in place: the grant keeps its GUID, grantee, resource and grantor,
+     * only its {@code resource:<verbs>} token changes. Under enforcement only the owner of the
+     * resource may change a share; a grantee's {@code share} does not qualify. When the new token
+     * drops {@code share}, every share the grantee issued on that resource is revoked, recursively,
+     * in the same transaction. Catalog-scoped grants are not shares and are refused.
+     *
+     * @param permissionGrant the share to change, identified by its GUID
+     * @param permissionToken the new inlined permission token
+     * @return the updated grant
+     * @throws IllegalArgumentException if the grant is unknown, is not an inlined share, or the token is invalid
+     * @throws AccessSecurityException  if the caller does not own the resource
+     */
+    PermissionGrant updatePermissionGrant(PermissionGrant permissionGrant, String permissionToken);
+
+    /**
      * Returns every permission grant scoped to the resource with the given GUID, whatever
      * its grantee.
      *

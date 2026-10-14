@@ -292,6 +292,15 @@ public final class SUS {
     }
 
     /**
+     *
+     * @param array to be checked
+     * @return true if array is null or array.length == 0
+     */
+    public static boolean isEmpty(char[] array) {
+        return array == null || array.length == 0;
+    }
+
+    /**
      * @param nvb to be checked
      * @return true is gnv is primitive type
      */

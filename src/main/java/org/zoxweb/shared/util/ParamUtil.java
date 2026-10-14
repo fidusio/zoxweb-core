@@ -318,9 +318,33 @@ public class ParamUtil {
             throw new IllegalArgumentException(name + " value not found or no valid");
         }
 
+        public char[] charsValue(int index) {
+            String str = stringValue(index);
+            return str == null ? null : str.toCharArray();
+        }
+
+        public char[] charsValue(String name) {
+            return charsValue(name, false);
+        }
+
+        public char[] charsValue(String name, boolean nullOK) {
+            String str = stringValue(name, nullOK);
+            return str == null ? null : str.toCharArray();
+        }
+
+        public char[] charsValue(GetName gn) {
+            String str = stringValue(gn);
+            return str == null ? null : str.toCharArray();
+        }
+
+
         public String stringValue(int index) {
             return stringValue("" + index);
         }
+
+
+
+
 
         public String stringValue(GetName name) {
             return stringValue(name.getName());
