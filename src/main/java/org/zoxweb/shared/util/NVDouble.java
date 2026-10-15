@@ -17,6 +17,7 @@ package org.zoxweb.shared.util;
 
 /**
  * This class declares NVBase of double type.
+ *
  * @author mzebib
  */
 @SuppressWarnings("serial")
@@ -28,8 +29,13 @@ public class NVDouble
     public NVDouble() {
     }
 
+    public NVDouble(String name) {
+        setName(name);
+    }
+
     /**
      * This constructor instantiates NVDouble based on name and value.
+     *
      * @param name
      * @param value
      */

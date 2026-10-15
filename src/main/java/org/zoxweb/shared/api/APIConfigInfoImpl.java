@@ -52,7 +52,7 @@ public class APIConfigInfoImpl
         SERVICE_TYPE(NVConfigManager.createNVConfig("service_type", "Type of service", "ServiceType", true, false, APIServiceType[].class)),
         VERSION(NVConfigManager.createNVConfig("api_version", "API version", "CurrentVersion", false, false, String.class)),
         DEFAULT_LOCATION(NVConfigManager.createNVConfig("default_location", "Default storage location", "DefaultLocation", false, true, String.class)),
-        CONFIGURATION_PARAMETERS(NVConfigManager.createNVConfig("configuration_parameters", "API configuration parameters", "APIConfigurationParameters", true, true, false, String[].class, null)),
+//        CONFIGURATION_PARAMETERS(NVConfigManager.createNVConfig("configuration_parameters", "API configuration parameters", "APIConfigurationParameters", true, true, false, String[].class, null)),
 //		PROPERTIES(NVConfigManager.createNVConfig("properties", "Configuration properties", "Properties", false, true, NVGenericMap.class)),
         //API_KEY_REF_ID(NVConfigManager.createNVConfig("api_key_ref_id", "API key reference id", "APIKeyRefID", true, true, false, true, String.class, null)),
         ;
@@ -137,7 +137,7 @@ public class APIConfigInfoImpl
      */
     @Override
     public void setServiceTypes(APIServiceType[] serviceTypes) {
-        List<APIServiceType> list = new ArrayList<APIServiceType>();
+        List<APIServiceType> list = new ArrayList<>();
 
         if (serviceTypes != null) {
             for (APIServiceType serviceType : serviceTypes) {
@@ -151,26 +151,22 @@ public class APIConfigInfoImpl
     /**
      * @return The configuration parameters
      */
-    @SuppressWarnings("unchecked")
-    public ArrayValues<NVPair> getConfigParameters() {
-        return lookup(Params.CONFIGURATION_PARAMETERS);
-    }
+//    @SuppressWarnings("unchecked")
+//    public ArrayValues<?> getConfigParameters() {
+//        return getProperties();//lookup(Params.CONFIGURATION_PARAMETERS);
+//    }
 
-    /**
-     * This method sets the service configuration parameters.
-     *
-     * @param configParams
-     */
-    public void setConfigParameters(List<NVPair> configParams) {
-        getConfigParameters().add(configParams.toArray(new NVPair[0]), true);
-    }
+
 
     /**
      *
      */
     @Override
     public void setConfigParameters(ArrayValues<NVPair> configParams) {
-        getConfigParameters().add(configParams.values(), true);
+        getProperties().clear();
+        for(NVPair pair : configParams.values()) {
+            getProperties().add(pair);
+        }
     }
 
 
@@ -206,7 +202,7 @@ public class APIConfigInfoImpl
     /**
      * This method checks if the service type is supported.
      *
-     * @param type
+     * @param type to be checked
      * @return true if type is supported
      */
     @Override

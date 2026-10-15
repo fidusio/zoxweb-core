@@ -21,8 +21,6 @@ import org.zoxweb.shared.filters.GetValueFilter;
 import org.zoxweb.shared.filters.ValueFilter;
 import org.zoxweb.shared.util.*;
 
-import java.util.List;
-
 /**
  * The Simple Mail Transfer Protocol (SMTP) creator class is used to set up the 
  * SMTP service provider.
@@ -86,18 +84,21 @@ public class SMTPCreator
     @SuppressWarnings("unchecked")
     public APIConfigInfo createEmptyConfigInfo() {
         APIConfigInfoImpl configInfo = new APIConfigInfoImpl();
-        List<NVPair> list = (List<NVPair>) SUS.toNVPairs(Param.values());
+        //List<NVPair> list = (List<NVPair>) SUS.toNVPairs(Param.values());
+        NVGenericMap defaultParams = SUS.toNVGenericMap(Param.values());
         configInfo.setAPITypeName(API_NAME);
         configInfo.setDescription("SMTP (Simple Mail Transfer Protocol) configuration is used for email set up to send and receive emails.");
-        configInfo.setVersion("2020");
-        configInfo.setConfigParameters(list);
+        configInfo.setVersion("2026");
+        NVGenericMap.copy(defaultParams, configInfo.getProperties(), false);
+//        configInfo.getProperties()
+//        configInfo.setConfigParameters(defaultParams.);
 
         APIServiceType[] types = {APIServiceType.EMAIL_NOTIFICATION};
         //APIServiceType.SMS_NOTIFICATION, APIServiceType.VOICE_NOTIFCATION
         configInfo.setServiceTypes(types);
 
-        NVPairList nvpl = (NVPairList) configInfo.lookup(APIConfigInfoImpl.Params.CONFIGURATION_PARAMETERS.getNVConfig().getName());
-        nvpl.setFixed(true);
+//        NVPairList nvpl = (NVPairList) configInfo.lookup(APIConfigInfoImpl.Params.CONFIGURATION_PARAMETERS.getNVConfig().getName());
+//        nvpl.setFixed(true);
 
         return configInfo;
     }

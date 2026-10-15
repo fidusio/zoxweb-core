@@ -7,10 +7,6 @@ import java.util.function.Supplier;
 
 public interface SecurityController
 {
-    void validateCredential(CredentialInfo ci, String input)
-            throws AccessSecurityException;
-    void validateCredential(CredentialInfo ci, byte[] input)
-            throws AccessSecurityException;
 
     Object encryptValue(APIDataStore<?, ?> dataStore, NVEntity container, NVConfig nvc, NVBase<?> nvb, byte[] msKey)
             throws NullPointerException, IllegalArgumentException, AccessSecurityException;
@@ -35,9 +31,14 @@ public interface SecurityController
     NVEntity decryptValues(APIDataStore<?, ?> dataStore, NVEntity container, byte[] msKey)
             throws NullPointerException, IllegalArgumentException, AccessSecurityException;
 
-    void associateNVEntityToSubjectGUID(NVEntity nve, String subjectGUID);
+    /**
+     *
+     * @param nve as resource to be associated
+     * @param subjectGUID the unique identifier of the subject
+     */
+    void associateResourceToSubject(NVEntity nve, String subjectGUID);
 
-    String currentSubjectID()
+    String currentPrincipalID()
             throws AccessSecurityException;
     String currentSubjectGUID()
             throws AccessSecurityException;
@@ -49,7 +50,7 @@ public interface SecurityController
      * owner) or a grant on the resource itself. All requested verbs must be held. Always true in the
      * system context ({@link #isSystemContext()}); false when nobody is authenticated.
      */
-    boolean isNVEntityAccessible(String nveRefID, String nveUserID, CRUD... permissions);
+    boolean isResourceAccessible(String nveRefID, String nveUserID, CRUD... permissions);
 
     /**
      * Runs {@code work} in the system context of the calling thread: the datastore access checks

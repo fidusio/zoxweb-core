@@ -16,6 +16,7 @@
 package org.zoxweb.shared.util;
 
 import org.zoxweb.shared.data.ReferenceIDDAO;
+import org.zoxweb.shared.filters.FilterType;
 import org.zoxweb.shared.filters.GetValueFilter;
 import org.zoxweb.shared.filters.ValueFilter;
 import org.zoxweb.shared.util.Const.GNVType;
@@ -489,10 +490,10 @@ public final class SUS {
     /**
      * Compares two byte arrays
      *
-     * @param a the first byte array
-     * @param b the second byte array
+     * @param a      the first byte array
+     * @param b      the second byte array
+     * @param length the length to be compared
      * @return true if both byte arrays are the same, false if not
-     * @param    length    the length to be compared
      */
     public static boolean equals(byte[] a, byte[] b, int length) {
         checkIfNulls("one of the byte array is null", a, b);
@@ -532,6 +533,7 @@ public final class SUS {
 
     /**
      * Convert [o.toString()]
+     *
      * @param o to be square bracketed
      * @return [o.toString()]
      */
@@ -541,7 +543,8 @@ public final class SUS {
 
     /**
      * Convert [o.toString()] or  '[o.toString()] '
-     * @param o to be square bracketed
+     *
+     * @param o        to be square bracketed
      * @param addSpace if true add space at the end
      * @return [o.toString()] or  '[o.toString()] '
      */
@@ -632,6 +635,7 @@ public final class SUS {
 
         return -1;
     }
+
     /**
      * @param buffer
      * @param str
@@ -640,6 +644,7 @@ public final class SUS {
     public static int indexOf(byte[] buffer, String str) {
         return indexOf(buffer, 0, buffer.length, str, 0, str.length(), false);
     }
+
     /**
      * @param buffer
      * @param str
@@ -652,7 +657,6 @@ public final class SUS {
     // =====================================================================================
     // Section 2: NV / meta-model / enum / collection helpers (formerly SharedUtil)
     // =====================================================================================
-
 
 
     public static void illegalCondition(String message, boolean... conditions)
@@ -1181,7 +1185,7 @@ public final class SUS {
      *
      * @param list the list to search
      * @param name the name to look for
-     * @param <V> the value type
+     * @param <V>  the value type
      * @return GetNameValue matching name
      */
     public static <V> GetNameValue<V> lookupNV(List<? extends GetNameValue<V>> list, String name) {
@@ -1191,10 +1195,10 @@ public final class SUS {
     /**
      * Looks up NV based on name and canonical separator.
      *
-     * @param list the list to search
-     * @param name the name to look for
+     * @param list         the list to search
+     * @param name         the name to look for
      * @param canonicalSep the canonical separator
-     * @param <V> the value type
+     * @param <V>          the value type
      * @return GetNameValue matching name
      */
     public static <V> GetNameValue<V> lookupNV(List<? extends GetNameValue<V>> list, String name, String canonicalSep) {
@@ -1439,8 +1443,8 @@ public final class SUS {
      * Looks up NV list that extends GetNameValue based on enum.
      *
      * @param arrayList the list to search
-     * @param e the enum to match
-     * @param <V> the value type
+     * @param e         the enum to match
+     * @param <V>       the value type
      * @return matching GetNameValue
      */
     public static <V> GetNameValue<V> lookupNV(List<? extends GetNameValue<V>> arrayList, Enum<?> e) {
@@ -1777,6 +1781,146 @@ public final class SUS {
             }
 
             ret.add(nvp);
+        }
+
+        return ret;
+    }
+
+
+    public static SetNameValue<?> toNameValue(String name, ValueFilter<String,String> vf) {
+        checkIfNull("name can't be null.", name);
+        if(vf instanceof FilterType) {
+            FilterType filterType = (FilterType) vf;
+
+            switch (filterType) {
+                case BINARY:
+                    return new NVBlob(name);
+                case BIG_DECIMAL:
+                    return new NVBigDecimal(name);
+                case BOOLEAN:
+                    return new NVBoolean(name);
+                case DOUBLE:
+                    return new NVDouble(name);
+
+//            case FILE:
+//                break;
+                case FLOAT:
+                    return new NVFloat(name);
+
+                case INTEGER:
+
+                    return new NVInt(name);
+                case LONG:
+                    return new NVLong(name);
+
+//            case PRIME:
+//                break;
+                case TEXT_NOT_EMPTY:
+
+                case UPPERCASE:
+
+                case URL:
+
+                case CLEAR:
+
+                case DOMAIN:
+
+                case EMAIL:
+
+                case ENCRYPT:
+
+                case ENCRYPT_MASK:
+
+                case LOWERCASE:
+
+                case PASSWORD:
+
+                case HASHED:
+
+                case HIDDEN:
+                default:
+            }
+        }
+
+
+        return new NVPair(name, null, vf);
+
+    }
+
+    /**
+     * Sets a value on a name/value holder whose value type is not known statically. A value of the
+     * holder's own type is stored as is; a String handed to a typed primitive NV (enum defaults are
+     * strings) is parsed into that type; a non-String handed to an {@link NVPair} is stored as text.
+     *
+     * @param nv    the holder
+     * @param value the value, may be null
+     * @throws IllegalArgumentException if a String can't be converted to the holder's value type
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private static void setValue(SetNameValue<?> nv, Object value) {
+        if (value instanceof String) {
+            String str = (String) value;
+            if (nv instanceof NVPair) {
+                ((NVPair) nv).setValue(str);
+            } else if (nv instanceof NVInt) {
+                ((NVInt) nv).setValue(parseInt(str));
+            } else if (nv instanceof NVLong) {
+                ((NVLong) nv).setValue(parseLong(str));
+            } else if (nv instanceof NVFloat) {
+                ((NVFloat) nv).setValue(Float.parseFloat(str));
+            } else if (nv instanceof NVDouble) {
+                ((NVDouble) nv).setValue(Double.parseDouble(str));
+            } else if (nv instanceof NVBoolean) {
+                ((NVBoolean) nv).setValue(Const.Bool.lookupValue(str));
+            } else if (nv instanceof NVBigDecimal) {
+                ((NVBigDecimal) nv).setValue(new BigDecimal(str));
+            } else {
+                throw new IllegalArgumentException(nv.getName() + ": can't convert a String to " + nv.getClass().getSimpleName());
+            }
+        } else if (nv instanceof NVPair) {
+            ((NVPair) nv).setValue(value != null ? "" + value : null);
+        } else {
+            ((SetValue) nv).setValue(value);
+        }
+    }
+
+    /**
+     * @param enums
+     * @return convert enum to list nvpairs
+     */
+    @SuppressWarnings("unchecked")
+    public static NVGenericMap toNVGenericMap(Enum<?>... enums) {
+        NVGenericMap ret = new NVGenericMap();
+
+        for (Enum<?> e : enums) {
+            SetNameValue<?> toAdd = null;
+            String name = null;
+            if (e instanceof GetName) {
+                name = ((GetName) e).getName();
+            } else {
+                name = e.name();
+            }
+
+            if (e instanceof GetValueFilter) {
+                ValueFilter<String, String> vf = ((GetValueFilter<String, String>) e).getValueFilter();
+                // resolve the registered instance before it is bound to the NV
+                if (vf instanceof DynamicEnumMap) {
+                    DynamicEnumMap lookupResult = DynamicEnumMapManager.SINGLETON.lookup(((DynamicEnumMap) vf).getName());
+                    if (lookupResult != null) {
+                        vf = lookupResult;
+                    }
+                }
+                toAdd = toNameValue(name, vf);
+            }
+
+            if (toAdd == null)
+                toAdd = new NVPair(name, (String) null);
+
+            if (e instanceof GetValue) {
+                setValue(toAdd, ((GetValue<?>) e).getValue());
+            }
+
+            ret.add(toAdd);
         }
 
         return ret;
@@ -2156,6 +2300,7 @@ public final class SUS {
 
     /**
      * Converts NVPair list to GetNameValue list.
+     *
      * @param list the list to convert
      * @return converted list of GetNameValue
      */
@@ -2176,7 +2321,7 @@ public final class SUS {
     /**
      * Parse a line that contains a list of name=value separated by ampersand, carriage return or newline.
      *
-     * @param str the string to parse
+     * @param str    the string to parse
      * @param nvpSep the name nvpSep value
      * @param regExp the separator nvp1 rexExp nvp2
      * @return list nvpair (name sep value regExp)+
@@ -2251,7 +2396,6 @@ public final class SUS {
     }
 
 
-
     /**
      * @param gnv
      * @return value
@@ -2263,12 +2407,6 @@ public final class SUS {
 
         return null;
     }
-
-
-
-
-
-
 
 
     /**
@@ -2305,9 +2443,9 @@ public final class SUS {
      * This method will check if value is null then return defaultValue otherwise it will return value.
      * The value and defaultValue can not be null simultaneously.
      *
-     * @param value the value to check
+     * @param value        the value to check
      * @param defaultValue the default value if value is null
-     * @param <V> the value type
+     * @param <V>          the value type
      * @return override null with default value
      * @throws NullPointerException if both defaultValue and value are null
      */
@@ -3307,7 +3445,7 @@ public final class SUS {
      * Format a list of NPairs.
      *
      * @param list the list of name-value pairs
-     * @param <V> the value type
+     * @param <V>  the value type
      * @return formatted string like n1=v1&amp;n2=v2...
      */
     public static <V> String format(ArrayValues<GetNameValue<V>> list) {

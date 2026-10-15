@@ -19,33 +19,34 @@ import java.math.BigDecimal;
 
 /**
  * This class declares NVBase of BigDecimal type.
+ *
  * @author mzebib
  */
 @SuppressWarnings("serial")
 public class NVBigDecimal
-    extends NVBase<BigDecimal>
-{
+        extends NVBase<BigDecimal> {
 
-	/**
-	 * The default constructor.
-	 */
-	public NVBigDecimal()
-    {
-		super();
-	}
-	
-	/**
-	 * This constructor instantiates NVBigDecimal based on name and value. 
-	 * @param name
-	 * @param value
-	 */
-	public NVBigDecimal(String name, BigDecimal value)
-    {
-		super(name, value);
-	}
-	public NVBigDecimal(GetName name, BigDecimal value)
-	{
-		super(name, value);
-	}
+    /**
+     * The default constructor.
+     */
+    public NVBigDecimal() {
+    }
+    public NVBigDecimal(String name) {
+        setName(name);
+    }
+
+    /**
+     * This constructor instantiates NVBigDecimal based on name and value.
+     *
+     * @param name
+     * @param value
+     */
+    public NVBigDecimal(String name, BigDecimal value) {
+        super(name, value);
+    }
+
+    public NVBigDecimal(GetName name, BigDecimal value) {
+        super(name, value);
+    }
 
 }

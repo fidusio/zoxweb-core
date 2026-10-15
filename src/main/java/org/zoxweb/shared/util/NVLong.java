@@ -26,8 +26,10 @@ public class NVLong
     /**
      * The default constructor (Java Bean compliant).
      */
-    public NVLong() {
+    public NVLong() {}
 
+    public NVLong(String name) {
+        setName(name);
     }
 
     /**

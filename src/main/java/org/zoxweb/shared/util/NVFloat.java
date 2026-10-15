@@ -28,6 +28,9 @@ public class NVFloat
      */
     public NVFloat() {
     }
+    public NVFloat(String name) {
+        setName(name);
+    }
 
     /**
      * This constructor instantiates NVFloat based on name and value.

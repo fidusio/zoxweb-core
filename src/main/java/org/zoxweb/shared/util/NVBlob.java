@@ -19,40 +19,41 @@ import org.zoxweb.shared.util.SharedBase64.Base64Type;
 
 /**
  * This class declares NVBase of byte array type.
+ *
  * @author mzebib
  *
  */
 @SuppressWarnings("serial")
 public class NVBlob
-    extends NVBase<byte[]>
-{
-	
-	/**
-	 * The default constructor.
-	 */
-	public NVBlob() 
-	{
+        extends NVBase<byte[]> {
 
-	}
-	
-	/**
-	 * This constructor instantiates NVBlob based on name and byte array.
-	 * @param name
-	 * @param value
-	 */
-	public NVBlob(String name, byte[] value)
-    {
-		super(name, value);
-	}
-	public NVBlob(GetName name, byte[] value)
-	{
-		super(name, value);
-	}
+    /**
+     * The default constructor.
+     */
+    public NVBlob() {
+    }
 
-	
-	
-	public String toString()
-    {
-		return "{" + (guid != null ? guid + "," : "") + name + ":" + SharedBase64.encodeAsString(Base64Type.URL,value) + "}";
-	}
+
+    public NVBlob(String name) {
+        setName(name);
+    }
+
+    /**
+     * This constructor instantiates NVBlob based on name and byte array.
+     *
+     * @param name
+     * @param value
+     */
+    public NVBlob(String name, byte[] value) {
+        super(name, value);
+    }
+
+    public NVBlob(GetName name, byte[] value) {
+        super(name, value);
+    }
+
+
+    public String toString() {
+        return "{" + (guid != null ? guid + "," : "") + name + ":" + SharedBase64.encodeAsString(Base64Type.URL, value) + "}";
+    }
 }

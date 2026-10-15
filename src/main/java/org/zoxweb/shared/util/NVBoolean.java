@@ -17,34 +17,42 @@ package org.zoxweb.shared.util;
 
 /**
  * This class declares NVBase of boolean type.
+ *
  * @author mzebib
  *
  */
 @SuppressWarnings("serial")
 public class NVBoolean
-    extends NVBase<Boolean>
-{
+        extends NVBase<Boolean> {
 
-	/**
-	 * The default constructor.
-	 */
-	public NVBoolean()
-    {
-		super();
-	}
-	
-	/**
-	 * This constructor instantiates NVBoolean based on name and boolean value.
-	 * @param name
-	 * @param value
-	 */
-	public NVBoolean(String name, boolean value)
-    {
-		super(name, value);
-	}
-	public NVBoolean(GetName name, boolean value)
-	{
-		super(name, value);
-	}
+    /**
+     * The default constructor.
+     */
+    public NVBoolean() {
+    }
+
+    public NVBoolean(String name) {
+        setName(name);
+    }
+
+    /**
+     * This constructor instantiates NVBoolean based on name and boolean value.
+     *
+     * @param name of the parameter
+     * @param value of the parameter
+     */
+    public NVBoolean(String name, boolean value) {
+        super(name, value);
+    }
+
+    /**
+     * This constructor instantiates NVBoolean based on name and boolean value.
+     *
+     * @param name of the parameter via getName()
+     * @param value of the parameter
+     */
+    public NVBoolean(GetName name, boolean value) {
+        super(name, value);
+    }
 
 }

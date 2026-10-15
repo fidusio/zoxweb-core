@@ -92,7 +92,8 @@ public class SMTPProvider
 
             Session session = smtpProvider.createSession(
                     smtpProvider.createProperties(true, true, getAPIConfigInfo().getProperties().getValue(SMTPCreator.Param.HOST.getName()),
-                            getAPIConfigInfo().getProperties().getValue(SMTPCreator.Param.PORT.getName())),
+                            // Port is an NVInt since the config moved to typed properties; legacy configs may still hold it as text
+                            getAPIConfigInfo().getProperties().getValueAsInt(SMTPCreator.Param.PORT.getName())),
                     USER_NAME, PASSWORD);
 
             try {
@@ -395,12 +396,12 @@ public class SMTPProvider
      * @param host
      * @param port
      */
-    private Properties createProperties(boolean authentication, boolean encrypt, String host, String port) {
+    private Properties createProperties(boolean authentication, boolean encrypt, String host, int port) {
         Properties properties = new Properties();
         properties.put("mail.smtp.auth", "" + authentication);
         properties.put("mail.smtp.ssl.enable", "" + encrypt);
         properties.put("mail.smtp.host", host);
-        properties.put("mail.smtp.port", port);
+        properties.put("mail.smtp.port", ""+ port);
 
         return properties;
     }

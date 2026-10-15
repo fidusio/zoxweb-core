@@ -30,6 +30,10 @@ public class NVInt
 
     }
 
+    public NVInt(String name) {
+        setName(name);
+    }
+
     /**
      * This constructor instantiates NVInt based on name and value.
      *

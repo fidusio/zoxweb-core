@@ -207,6 +207,35 @@ public class NVGenericMap
         return getValueAsLong(name.getName(), defaultValue);
     }
 
+    public int getValueAsInt(GetName name, int defaultValue)
+            throws RuntimeException {
+        return getValueAsInt(name.getName(), defaultValue);
+    }
+    public int getValueAsInt(String name, int defaultValue)
+            throws RuntimeException {
+        Object value = getValue(name);
+        if (value == null) {
+            return defaultValue;
+        }
+        if (value instanceof Number)
+            return ((Number) value).intValue();
+
+        return Integer.parseInt((String) value);
+    }
+
+    public int getValueAsInt(GetName name)
+            throws RuntimeException {
+        return getValueAsInt(name.getName());
+    }
+    public int getValueAsInt(String name)
+            throws RuntimeException {
+        Object value = getValue(name);
+        if (value instanceof Number)
+            return ((Number) value).intValue();
+
+        return Integer.parseInt((String) value);
+    }
+
 
 
     /**

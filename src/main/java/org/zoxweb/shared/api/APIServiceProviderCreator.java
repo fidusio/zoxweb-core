@@ -90,16 +90,4 @@ public interface APIServiceProviderCreator
      * @return the API token manager, or {@code null} if this provider does not use one
      */
     APITokenManager getAPITokenManager();
-
-    /**
-     * Get the APISecurityManager
-     * @return
-     */
-    //APISecurityManager<?> getAPISecurityManager();
-
-    /**
-     *
-     * @param apiSecurityManager
-     */
-    //void setAPISecurityManager(APISecurityManager<?> apiSecurityManager);
 }

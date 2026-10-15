@@ -27,8 +27,6 @@ import org.zoxweb.shared.util.*;
  */
 public interface APIConfigInfo
         extends ReferenceID<String>,
-//        AccountID<String>,
-//        SubjectGUID<String>,
         SetName,
         SetDescription,
         TimeStampInterface,
@@ -80,30 +78,18 @@ public interface APIConfigInfo
      */
     void setVersion(String version);
 
-//	/**
-//	 * @return the configuration parameters.
-//	 * @deprecated
-//	 */
-//	ArrayValues<NVPair> getConfigParameters();
-//
-//	/**
-//	 * This method sets the configuration parameters.
-//	 * @param configParams
-//	 * @deprecated
-//	 */
-//	void setConfigParameters(List<NVPair> configParams);
 
     /**
      * This method sets the configuration parameters.
      *
-     * @param configParams
-     * @deprecated
+     * @param configParams the parameters as NVPair
      */
+    @Deprecated
     void setConfigParameters(ArrayValues<NVPair> configParams);
 
+
     /**
-     * The default location where to store or get information, this parameter is optional and depend on the
-     * the API
+     * The default location where to store or get information, this parameter is optional and depend on the API
      *
      * @return the default location
      */
@@ -112,7 +98,7 @@ public interface APIConfigInfo
     /**
      * Set the default location
      *
-     * @param location
+     * @param location where the api exists
      */
     void setDefaultLocation(String location);
 
@@ -151,17 +137,6 @@ public interface APIConfigInfo
     void setKeyMaker(KeyMaker keyMaker);
 
     KeyMaker getKeyMaker();
-
-//	void setAPISecurityManager(APISecurityManager<?, ?, ?> apiSM);
-//	APISecurityManager<?, ?, ?> getAPISecurityManager();
-
-
-    /**
-     * Get the native configuration parameters
-     *
-     * @return
-     */
-    NVGenericMap getProperties();
 
 
 }

@@ -20,7 +20,7 @@ import java.io.Serializable;
 /**
  * Created by mnael on 3/31/2017.
  * This interface is mainly used to associate a global id like a uuid with an object.
- * The global id is unique globally across APPS and systems it can be used as a uniqueexchange identifier
+ * The global id is unique globally across APPS and systems it can be used as a unique exchange identifier
  * @param <T> the global identifier type, typically a uuid in string format
  */
 public interface GlobalID<T>

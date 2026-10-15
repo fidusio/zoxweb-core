@@ -22,22 +22,29 @@ package org.zoxweb.shared.util;
  * <li> As a unique identifier within a set
  * <li> As a cross-platform object identifier as processes or systems
  * </ol>
- * @author mnael
+ * </>By default it extends GlobalID it is kept for backward compatibility
  *
  * @param <T> the reference identifier type, backed by the global ID
+ * @author mnael
  */
 public interface ReferenceID<T>
         extends GlobalID<T> {
     /**
      * Get reference unique ID.
+     *
      * @return the object reference unique identifier
      */
-    default T getReferenceID(){return getGUID();};
+    default T getReferenceID() {
+        return getGUID();
+    }
 
     /**
      * Set reference unique ID.
-     * @param id
+     *
+     * @param id the unique identifier
      */
-    default void setReferenceID(T id){setGUID(id);};
+    default void setReferenceID(T id) {
+        setGUID(id);
+    }
 
 }
