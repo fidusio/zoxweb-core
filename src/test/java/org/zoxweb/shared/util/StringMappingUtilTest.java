@@ -21,7 +21,7 @@ import java.text.SimpleDateFormat;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.zoxweb.shared.data.CreditCardDAO;
+import org.zoxweb.shared.data.CreditCardInfo;
 import org.zoxweb.shared.data.CreditCardType;
 
 
@@ -31,7 +31,7 @@ public class StringMappingUtilTest {
 
 	@Test
 	public void testA1() throws ParseException {
-		CreditCardDAO card = new CreditCardDAO();
+		CreditCardInfo card = new CreditCardInfo();
 		card.setCardType(CreditCardType.MASTER);
         card.setFirstName("John");
         card.setLastName("Smith");
@@ -41,7 +41,7 @@ public class StringMappingUtilTest {
 	
 		Assertions.assertNotNull(card);
 
-		card = new CreditCardDAO();
+		card = new CreditCardInfo();
 		Assertions.assertEquals("0", NVConfigMapUtil.toString(card, null));
 
 		Assertions.assertNull(NVConfigMapUtil.toString(null, null));

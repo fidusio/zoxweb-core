@@ -22,8 +22,8 @@ import java.util.List;
 
 import org.zoxweb.shared.accounting.Currency;
 import org.zoxweb.shared.accounting.FinancialTransaction;
-import org.zoxweb.shared.accounting.AmountDAO;
-import org.zoxweb.shared.data.CreditCardDAO;
+import org.zoxweb.shared.accounting.AmountInfo;
+import org.zoxweb.shared.data.CreditCardInfo;
 import org.zoxweb.shared.data.FormInfo;
 
 public class NVEntityComparatorTest {
@@ -33,19 +33,19 @@ public class NVEntityComparatorTest {
 		List<FormInfo> list = new ArrayList<FormInfo>();
 		
 		FormInfo formInfo1 = new FormInfo();
-		CreditCardDAO creditCard1 = new CreditCardDAO();
+		CreditCardInfo creditCard1 = new CreditCardInfo();
 		creditCard1.setName("Visa");
 		formInfo1.setFormReference(creditCard1);	
 		list.add(formInfo1);
 		
 		FormInfo formInfo2 = new FormInfo();
-		CreditCardDAO creditCard2= new CreditCardDAO();
+		CreditCardInfo creditCard2= new CreditCardInfo();
 		creditCard2.setName("AMEX");
 		formInfo2.setFormReference(creditCard2);	
 		list.add(formInfo2);
 		
 		FormInfo formInfo3 = new FormInfo();
-		CreditCardDAO creditCard3 = new CreditCardDAO();
+		CreditCardInfo creditCard3 = new CreditCardInfo();
 		creditCard3.setName("Master Card");
 		formInfo3.setFormReference(creditCard3);	
 		list.add(formInfo3);
@@ -69,15 +69,15 @@ public class NVEntityComparatorTest {
 		List<FinancialTransaction> list = new ArrayList<FinancialTransaction>();
 		
 		FinancialTransaction transaction1 = new FinancialTransaction();
-		transaction1.setAmount(new AmountDAO(new BigDecimal("100.00"), Currency.USD));
+		transaction1.setAmount(new AmountInfo(new BigDecimal("100.00"), Currency.USD));
 		list.add(transaction1);
 		
 		FinancialTransaction transaction2 = new FinancialTransaction();
-		transaction2.setAmount(new AmountDAO(new BigDecimal("10.00"), Currency.USD));
+		transaction2.setAmount(new AmountInfo(new BigDecimal("10.00"), Currency.USD));
 		list.add(transaction2);
 		
 		FinancialTransaction transaction3 = new FinancialTransaction();
-		transaction3.setAmount(new AmountDAO(new BigDecimal("1000.00"), Currency.USD));
+		transaction3.setAmount(new AmountInfo(new BigDecimal("1000.00"), Currency.USD));
 		list.add(transaction3);
 		
 		System.out.println("UNSORTED LIST");

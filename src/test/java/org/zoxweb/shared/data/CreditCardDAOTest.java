@@ -39,7 +39,7 @@ public class CreditCardDAOTest {
 			}
 			
 			//MasterCard
-			CreditCardDAO card1 = new CreditCardDAO();
+			CreditCardInfo card1 = new CreditCardInfo();
 			card1.setCardType(CreditCardType.MASTER);
 			
 			card1.setCardHolderName("John      Adam Smith ");
@@ -50,7 +50,7 @@ public class CreditCardDAOTest {
 			card1.setExpirationDate(DEFAULT_DATE_FORMAT.parse("06-2015").getTime());
 			String json1 = GSONUtil.toJSON(card1, true);
 			System.out.println(json1);
-			card1 = GSONUtil.fromJSON(json1, CreditCardDAO.class);
+			card1 = GSONUtil.fromJSON(json1, CreditCardInfo.class);
 			System.out.println(card1.getCardType());
 			System.out.println(card1.getCardHolderName());
 			System.out.println(card1.getCardNumber());
@@ -59,7 +59,7 @@ public class CreditCardDAOTest {
 			System.out.println(GSONUtil.toJSON(card1, true));
 			
 			//VISA
-			CreditCardDAO card2 = new CreditCardDAO();
+			CreditCardInfo card2 = new CreditCardInfo();
 			card2.setCardType(CreditCardType.VISA);
             card2.setFirstName("John");
             card2.setLastName("Smith");
@@ -68,7 +68,7 @@ public class CreditCardDAOTest {
 			card2.setExpirationDate(DEFAULT_DATE_FORMAT.parse("06-2015").getTime());
 			String json2 = GSONUtil.toJSON(card2, true);
 			System.out.println(json2);
-			card2 = GSONUtil.fromJSON(json2, CreditCardDAO.class);
+			card2 = GSONUtil.fromJSON(json2, CreditCardInfo.class);
 			System.out.println(card2.getCardType());
 			System.out.println(card2.getCardHolderName());
 			System.out.println(card2.getCardNumber());
@@ -77,7 +77,7 @@ public class CreditCardDAOTest {
 			System.out.println(GSONUtil.toJSON(card2, true));
 			
 			//AMEX
-			CreditCardDAO card3 = new CreditCardDAO();
+			CreditCardInfo card3 = new CreditCardInfo();
 			card3.setCardType(CreditCardType.AMEX);
             card3.setFirstName("John");
             card3.setLastName("Smith");
@@ -86,7 +86,7 @@ public class CreditCardDAOTest {
 			card3.setExpirationDate(DEFAULT_DATE_FORMAT.parse("06-2015").getTime());
 			String json3 = GSONUtil.toJSON(card3, true);
 			System.out.println(json3);
-			card3 = GSONUtil.fromJSON(json3, CreditCardDAO.class);
+			card3 = GSONUtil.fromJSON(json3, CreditCardInfo.class);
 			System.out.println(card3.getCardType());
 			System.out.println(card3.getCardHolderName());
 			System.out.println(card3.getCardNumber());

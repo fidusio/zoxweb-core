@@ -31,11 +31,11 @@ public class BillingItemContainerDAOTest
     @Test
     public void testBillingItemsContainerDAO()
     {
-        BillingItemsContainerDAO container = new BillingItemsContainerDAO();
+        BillingItemsContainer container = new BillingItemsContainer();
 
         for (int i = 0; i < 10; i++)
         {
-            BillingItemDAO item = new BillingItemDAO();
+            BillingItem item = new BillingItem();
             item.setUnitCost(new BigDecimal(10));
             item.setQuantity(new BigDecimal(1));
 
@@ -49,7 +49,7 @@ public class BillingItemContainerDAOTest
 
         // Add item
         // Items: 11  Total: 120
-        BillingItemDAO item1 = new BillingItemDAO();
+        BillingItem item1 = new BillingItem();
         item1.setUnitCost(new BigDecimal(10));
         item1.setQuantity(new BigDecimal(2));
         container.addBillingItem(item1);
@@ -64,7 +64,7 @@ public class BillingItemContainerDAOTest
 
         // Add item
         // Items: 11  Total: 260
-        BillingItemDAO item2 = new BillingItemDAO();
+        BillingItem item2 = new BillingItem();
         item2.setUnitCost(new BigDecimal(80));
         item2.setQuantity(new BigDecimal(2));
         container.addBillingItem(item2);
@@ -73,7 +73,7 @@ public class BillingItemContainerDAOTest
 
         // Add item
         // Items: 12  Total: 260
-        BillingItemDAO item3 = new BillingItemDAO();
+        BillingItem item3 = new BillingItem();
         item3.setUnitCost(new BigDecimal(20));
         item3.setQuantity(new BigDecimal(2));
         container.addBillingItem(item3);
@@ -82,7 +82,7 @@ public class BillingItemContainerDAOTest
 
         // Add item
         // Items: 13  Total: 500
-        BillingItemDAO item4 = new BillingItemDAO();
+        BillingItem item4 = new BillingItem();
         item4.setReferenceID("4");
         item4.setUnitCost(new BigDecimal(50));
         item4.setQuantity(new BigDecimal(4));
@@ -98,7 +98,7 @@ public class BillingItemContainerDAOTest
 
         // Add existing item
         // Items: 14  Total: 900
-        BillingItemDAO item5 = new BillingItemDAO();
+        BillingItem item5 = new BillingItem();
         item5.setUnitCost(new BigDecimal(100));
         item5.setQuantity(new BigDecimal(4));
         container.addBillingItem(item5);

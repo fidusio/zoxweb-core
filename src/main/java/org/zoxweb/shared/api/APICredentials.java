@@ -48,7 +48,7 @@ public class APICredentials
     }
 
     /**
-     * This NVConfigEntity type constant is set to an instantiation of a NVConfigEntityLocal object based on API ConfigInfoDAO.
+     * This NVConfigEntity type constant is set to an instantiation of a NVConfigEntityPortable object based on APICredentials.
      */
     public static final NVConfigEntity NVC_API_CREDENTIALS = new NVConfigEntityPortable("api_credentials",
             "API Key and Secret",

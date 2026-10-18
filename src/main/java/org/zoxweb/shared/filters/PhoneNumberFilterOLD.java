@@ -15,7 +15,7 @@
  */
 package org.zoxweb.shared.filters;
 
-import org.zoxweb.shared.data.PhoneDAO;
+import org.zoxweb.shared.data.PhoneInfo;
 import org.zoxweb.shared.util.SUS;
 
 /**
@@ -25,7 +25,7 @@ import org.zoxweb.shared.util.SUS;
  */
 @SuppressWarnings("serial")
 public class PhoneNumberFilterOLD
-	implements ValueFilter<String, PhoneDAO>
+	implements ValueFilter<String, PhoneInfo>
 {
 	
 	private static final  String PATTERN = "[+]*[1][0-9-()]*[ext x 0-9]+";
@@ -49,7 +49,7 @@ public class PhoneNumberFilterOLD
 	 * @throws NullPointerException
 	 * @throws IllegalArgumentException
 	 */
-	public PhoneDAO validate(String num)
+	public PhoneInfo validate(String num)
         throws NullPointerException, IllegalArgumentException
     {
 		num = SUS.trimOrNull(num);
@@ -68,7 +68,7 @@ public class PhoneNumberFilterOLD
 			numberArray = code[0].split("[ext x]+");
 		}
 		
-		PhoneDAO phone = new PhoneDAO();
+		PhoneInfo phone = new PhoneInfo();
 		
 		if (number.matches(PATTERN))
 		{

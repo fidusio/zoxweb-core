@@ -23,8 +23,8 @@ import java.util.List;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.zoxweb.shared.data.AddressDAO;
-import org.zoxweb.shared.data.PhoneDAO;
+import org.zoxweb.shared.data.AddressInfo;
+import org.zoxweb.shared.data.PhoneInfo;
 import org.zoxweb.shared.util.NVEntity;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -35,15 +35,15 @@ public class ServerUtilTest {
 	@Test
 	public void test() {
 		List<NVEntity> list1 = new ArrayList<NVEntity>();
-		list1.add(new PhoneDAO());
-		list1.add(new AddressDAO());
+		list1.add(new PhoneInfo());
+		list1.add(new AddressInfo());
 
 		Assertions.assertTrue(ServerUtil.areAllInstancesMatchingType(list1, NVEntity.class));
-		Assertions.assertFalse(ServerUtil.areAllInstancesMatchingType(list1, AddressDAO.class));
+		Assertions.assertFalse(ServerUtil.areAllInstancesMatchingType(list1, AddressInfo.class));
 
 		List<Object> list2 = new ArrayList<Object>();
-		list2.add(new PhoneDAO());
-		list2.add(new AddressDAO());
+		list2.add(new PhoneInfo());
+		list2.add(new AddressInfo());
 		list2.add("Hello");
 
 		Assertions.assertFalse(ServerUtil.areAllInstancesMatchingType(list2, NVEntity.class));
@@ -62,12 +62,12 @@ public class ServerUtilTest {
 		list4.add("1");
 		list4.add("2");
 		list4.add("3");
-		list4.add(new PhoneDAO());
+		list4.add(new PhoneInfo());
 
 		Assertions.assertFalse(ServerUtil.areAllInstancesMatchingType(list4, NVEntity.class));
 		Assertions.assertTrue(ServerUtil.areAllInstancesMatchingType(list4, Object.class));
 		Assertions.assertFalse(ServerUtil.areAllInstancesMatchingType(list4, String.class));
-		Assertions.assertFalse(ServerUtil.areAllInstancesMatchingType(list4, PhoneDAO.class));
+		Assertions.assertFalse(ServerUtil.areAllInstancesMatchingType(list4, PhoneInfo.class));
 	}
 
     @Test

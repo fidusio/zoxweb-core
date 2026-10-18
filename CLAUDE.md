@@ -12,8 +12,8 @@ zoxweb-core is an enterprise Java utility library (Maven artifact `org.zoxweb:zo
 mvn compile                            # compile
 mvn package                            # jar + sources + javadoc (gpg sign runs at verify)
 mvn test -DskipTests=false             # run tests — REQUIRED flag, see below
-mvn test -DskipTests=false -Dtest=UserInfoDAOTest             # single test class
-mvn test -DskipTests=false -Dtest=UserInfoDAOTest#methodName  # single test method
+mvn test -DskipTests=false -Dtest=AddressDAOTest             # single test class
+mvn test -DskipTests=false -Dtest=AddressDAOTest#methodName  # single test method
 ```
 
 **Tests are skipped by default**: the pom sets `<skipTests>true</skipTests>` as a property. `mvn test` alone does nothing; always pass `-DskipTests=false`.

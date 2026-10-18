@@ -23,7 +23,7 @@ import org.zoxweb.shared.filters.PhoneNumberFilterOLD;
 public class PhoneDAOTest {
 
 	public static void main(String[] args) throws IOException {
-		PhoneDAO phone = new PhoneDAO();
+		PhoneInfo phone = new PhoneInfo();
 		
 		phone.setPhoneType("Mobile");
 		phone.setCountryCode("+1");
@@ -48,7 +48,7 @@ public class PhoneDAOTest {
 		
 		String[] numbers = {"+1-212-5551234xt55", "+650-444-1234", "1-444-4441234x22", null, "", "+1-44489", ""};
 		PhoneNumberFilterOLD filter = new PhoneNumberFilterOLD();
-		PhoneDAO phone2 = new PhoneDAO();
+		PhoneInfo phone2 = new PhoneInfo();
 
 		for (int i = 0; i < numbers.length; i++ ) {
 			try {

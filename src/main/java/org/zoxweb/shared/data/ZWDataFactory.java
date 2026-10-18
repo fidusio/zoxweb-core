@@ -56,16 +56,16 @@ public class ZWDataFactory
             }
 
         },
-        ADDRESS_DAO(AddressDAO.class.getName()) {
+        ADDRESS_INFO(AddressInfo.class.getName()) {
             @SuppressWarnings("unchecked")
             @Override
-            public AddressDAO newInstance() {
-                return new AddressDAO();
+            public AddressInfo newInstance() {
+                return new AddressInfo();
             }
 
             @Override
             public NVConfigEntity getNVConfigEntity() {
-                return AddressDAO.NVC_ADDRESS_DAO;
+                return AddressInfo.NVC_ADDRESS_INFO;
             }
         } //	org.zoxweb.shared.data
         ,
@@ -82,16 +82,16 @@ public class ZWDataFactory
                 return AgreementDoc.NVC_AGREEMENT_DOC;
             }
         },
-        AMOUNT_DAO(AmountDAO.class.getName()) {
+        AMOUNT_INFO(AmountInfo.class.getName()) {
             @SuppressWarnings("unchecked")
             @Override
-            public AmountDAO newInstance() {
-                return new AmountDAO();
+            public AmountInfo newInstance() {
+                return new AmountInfo();
             }
 
             @Override
             public NVConfigEntity getNVConfigEntity() {
-                return AmountDAO.NVC_AMOUNT_DAO;
+                return AmountInfo.NVC_AMOUNT_INFO;
             }
         } //	org.zoxweb.shared.accounting
         ,
@@ -232,41 +232,41 @@ public class ZWDataFactory
                 return BasicAuthToken.NVC_BASIC_AUTH_TOKEN;
             }
         },
-        BILLING_ACCOUNT_DAO(BillingAccountDAO.class.getName()) {
+        BILLING_ACCOUNT(BillingAccount.class.getName()) {
             @SuppressWarnings("unchecked")
             @Override
-            public BillingAccountDAO newInstance() {
-                return new BillingAccountDAO();
+            public BillingAccount newInstance() {
+                return new BillingAccount();
             }
 
             @Override
             public NVConfigEntity getNVConfigEntity() {
-                return BillingAccountDAO.NVC_BILLING_ACCOUNT_DAO;
+                return BillingAccount.NVC_BILLING_ACCOUNT;
             }
         },
-        BILLING_ITEMS_CONTAINER_DAO(BillingItemsContainerDAO.class.getName()) {
+        BILLING_ITEMS_CONTAINER(BillingItemsContainer.class.getName()) {
             @SuppressWarnings("unchecked")
             @Override
-            public BillingItemsContainerDAO newInstance() {
-                return new BillingItemsContainerDAO();
+            public BillingItemsContainer newInstance() {
+                return new BillingItemsContainer();
             }
 
             @Override
             public NVConfigEntity getNVConfigEntity() {
-                return BillingItemsContainerDAO.NVC_BILLING_ITEMS_CONTAINER_DAO;
+                return BillingItemsContainer.NVC_BILLING_ITEMS_CONTAINER;
             }
         },
 
-        BILLING_ITEM_DAO(BillingItemDAO.class.getName()) {
+        BILLING_ITEM(BillingItem.class.getName()) {
             @SuppressWarnings("unchecked")
             @Override
-            public BillingItemDAO newInstance() {
-                return new BillingItemDAO();
+            public BillingItem newInstance() {
+                return new BillingItem();
             }
 
             @Override
             public NVConfigEntity getNVConfigEntity() {
-                return BillingItemDAO.NVC_BILLING_ITEM_DAO;
+                return BillingItem.NVC_BILLING_ITEM;
             }
         },
         GEN_CONFIG(GenConfig.class.getName()) {
@@ -293,16 +293,16 @@ public class ZWDataFactory
                 return ConnectionConfig.NVC_CONNECTION_CONFIG_DAO;
             }
         },
-        CREDIT_CARD_DAO(CreditCardDAO.class.getName()) {
+        CREDIT_CARD_INFO(CreditCardInfo.class.getName()) {
             @SuppressWarnings("unchecked")
             @Override
-            public CreditCardDAO newInstance() {
-                return new CreditCardDAO();
+            public CreditCardInfo newInstance() {
+                return new CreditCardInfo();
             }
 
             @Override
             public NVConfigEntity getNVConfigEntity() {
-                return CreditCardDAO.NVC_CREDIT_CARD_DAO;
+                return CreditCardInfo.NVC_CREDIT_CARD_INFO;
             }
         },
         CRUD_NVENTITY_DAO(CRUDNVEntityInfo.class.getName()) {
@@ -353,16 +353,16 @@ public class ZWDataFactory
                 return DataContent.NVC_DATA_CONTENT;
             }
         },
-        DETAILED_CREDIT_CARD_DAO(DetailedCreditCardDAO.class.getName()) {
+        DETAILED_CREDIT_CARD_INFO(DetailedCreditCardInfo.class.getName()) {
             @SuppressWarnings("unchecked")
             @Override
-            public DetailedCreditCardDAO newInstance() {
-                return new DetailedCreditCardDAO();
+            public DetailedCreditCardInfo newInstance() {
+                return new DetailedCreditCardInfo();
             }
 
             @Override
             public NVConfigEntity getNVConfigEntity() {
-                return DetailedCreditCardDAO.NVC_DETAILED_CREDIT_CARD_DAO;
+                return DetailedCreditCardInfo.NVC_DETAILED_CREDIT_CARD_INFO;
             }
         },
         DEVICE_INFO(DeviceInfo.class.getName()) {
@@ -673,16 +673,16 @@ public class ZWDataFactory
         ,
 
 
-        MERCHANT_DAO(MerchantDAO.class.getName()) {
+        MERCHANT_INFO(MerchantInfo.class.getName()) {
             @SuppressWarnings("unchecked")
             @Override
-            public MerchantDAO newInstance() {
-                return new MerchantDAO();
+            public MerchantInfo newInstance() {
+                return new MerchantInfo();
             }
 
             @Override
             public NVConfigEntity getNVConfigEntity() {
-                return MerchantDAO.NVC_MERCHANT_DAO;
+                return MerchantInfo.NVC_MERCHANT_INFO;
             }
         },
         MESSAGE_TEMPLATE(MessageTemplate.class.getName()) {
@@ -758,16 +758,16 @@ public class ZWDataFactory
             }
 
         },
-        PAYMENT_INFO_DAO(PaymentInfoDAO.class.getName()) {
+        PAYMENT_INFO(PaymentInfo.class.getName()) {
             @SuppressWarnings("unchecked")
             @Override
-            public PaymentInfoDAO newInstance() {
-                return new PaymentInfoDAO();
+            public PaymentInfo newInstance() {
+                return new PaymentInfo();
             }
 
             @Override
             public NVConfigEntity getNVConfigEntity() {
-                return PaymentInfoDAO.NVC_PAYMENT_INFO_DAO;
+                return PaymentInfo.NVC_PAYMENT_INFO;
             }
         },
         PERMISSION_GRANT(PermissionGrant.class.getName()) {
@@ -794,16 +794,16 @@ public class ZWDataFactory
                 return PermissionInfo.NVC_PERMISSION_INFO;
             }
         },
-        PHONE_DAO(PhoneDAO.class.getName()) {
+        PHONE_INFO(PhoneInfo.class.getName()) {
             @SuppressWarnings("unchecked")
             @Override
-            public PhoneDAO newInstance() {
-                return new PhoneDAO();
+            public PhoneInfo newInstance() {
+                return new PhoneInfo();
             }
 
             @Override
             public NVConfigEntity getNVConfigEntity() {
-                return PhoneDAO.NVC_PHONE_DAO;
+                return PhoneInfo.NVC_PHONE_INFO;
             }
         },
         PRINCIPAL_IDENTIFIER(PrincipalIdentifier.class.getName()) {
@@ -1115,16 +1115,16 @@ public class ZWDataFactory
                 return UUIDInfo.NVC_UUID_INFO;
             }
         },
-        VM_INFO_DAO(VMInfoDAO.class.getName()) {
+        VM_INFO(VMInfo.class.getName()) {
             @SuppressWarnings("unchecked")
             @Override
-            public VMInfoDAO newInstance() {
-                return new VMInfoDAO();
+            public VMInfo newInstance() {
+                return new VMInfo();
             }
 
             @Override
             public NVConfigEntity getNVConfigEntity() {
-                return VMInfoDAO.NVC_VMINFO_DAO;
+                return VMInfo.NVC_VM_INFO;
             }
         },
 

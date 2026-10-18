@@ -22,8 +22,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This class defines the APINotificationMessage data access object used to
- * create messages.
+ * NVEntity implementation of APINotificationMessage: a notification message with
+ * sender ID, recipient IDs, title, message body, token tags, tags, message type
+ * and extra attributes.
  *
  * @author mzebib
  *
@@ -313,7 +314,7 @@ public class APINotificationMessageImpl
 
 //    @Override
 //    public String getAccountID() {
-//        return lookupValue(MerchantDAO.Param.ACCOUNT_ID);
+//        return lookupValue(MerchantInfo.Param.ACCOUNT_ID);
 //    }
 //
 //    /**
@@ -323,7 +324,7 @@ public class APINotificationMessageImpl
 //     */
 //    @Override
 //    public void setAccountID(String accountID) {
-//        setValue(MerchantDAO.Param.ACCOUNT_ID, accountID);
+//        setValue(MerchantInfo.Param.ACCOUNT_ID, accountID);
 //    }
 
 }

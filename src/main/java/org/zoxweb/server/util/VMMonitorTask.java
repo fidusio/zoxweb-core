@@ -18,7 +18,7 @@ package org.zoxweb.server.util;
 import org.zoxweb.server.task.TaskEvent;
 import org.zoxweb.server.task.TaskExecutor;
 import org.zoxweb.server.task.TaskSchedulerProcessor;
-import org.zoxweb.shared.data.VMInfoDAO;
+import org.zoxweb.shared.data.VMInfo;
 import org.zoxweb.shared.util.Appointment;
 import org.zoxweb.shared.util.AppointmentDefault;
 import org.zoxweb.shared.util.Const;
@@ -65,7 +65,7 @@ public class VMMonitorTask
         }
 
         if (log != null) {
-            VMInfoDAO vmid = RuntimeUtil.vmSnapshot(sizeInBytes);
+            VMInfo vmid = RuntimeUtil.vmSnapshot(sizeInBytes);
 
             log.info("Values in:" + sizeInBytes +
                     ", Used mem:" + sizeInBytes.convertBytes(vmid.getUsedMemory()) +

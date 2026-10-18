@@ -26,7 +26,7 @@ import java.math.BigDecimal;
  * with an optional NVEntity reference to the billed object.
  */
 @SuppressWarnings("serial")
-public class BillingItemDAO
+public class BillingItem
         extends CanonicalIDImpl {
 
     public enum Params
@@ -50,15 +50,15 @@ public class BillingItemDAO
         }
     }
 
-    public static final NVConfigEntity NVC_BILLING_ITEM_DAO = new NVConfigEntityPortable(
-            "billing_item_dao",
+    public static final NVConfigEntity NVC_BILLING_ITEM = new NVConfigEntityPortable(
+            "billing_item",
             null,
-            "Billing Item",
+            "BillingItem",
             true,
             false,
             false,
             false,
-            BillingItemDAO.class,
+            BillingItem.class,
             SUS.extractNVConfigs(Params.values()),
             null,
             false,
@@ -68,16 +68,16 @@ public class BillingItemDAO
     /**
      * The default constructor.
      */
-    public BillingItemDAO() {
-        super(NVC_BILLING_ITEM_DAO);
+    public BillingItem() {
+        super(NVC_BILLING_ITEM);
     }
 
     /**
-     * This constructor instantiates BillingItemDAO object based on given NVConfigEntity.
+     * This constructor instantiates BillingItem object based on given NVConfigEntity.
      *
      * @param nvce
      */
-    protected BillingItemDAO(NVConfigEntity nvce) {
+    protected BillingItem(NVConfigEntity nvce) {
         super(nvce);
     }
 

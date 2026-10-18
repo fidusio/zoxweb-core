@@ -23,14 +23,14 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @SuppressWarnings("serial")
-public class BillingItemsContainerDAO
+public class BillingItemsContainer
         extends CanonicalIDImpl {
 
     public enum Params
             implements GetNVConfig {
 
         STATUS(NVConfigManager.createNVConfig("status", "Billing status", "Status", false, true, String.class)),
-        BILLING_ITEMS(NVConfigManager.createNVConfigEntity("billing_items", "List of BillingItemDAO objects.", "BillingItems", false, true, BillingItemDAO[].class, ArrayType.LIST)),
+        BILLING_ITEMS(NVConfigManager.createNVConfigEntity("billing_items", "List of BillingItem objects.", "BillingItems", false, true, BillingItem[].class, ArrayType.LIST)),
         TOTAL(NVConfigManager.createNVConfig("total", "The sum of billable items unit.", "Total", false, true, BigDecimal.class)),
 
         ;
@@ -46,15 +46,15 @@ public class BillingItemsContainerDAO
         }
     }
 
-    public static final NVConfigEntity NVC_BILLING_ITEMS_CONTAINER_DAO = new NVConfigEntityPortable(
-            "billing_items_container_dao",
+    public static final NVConfigEntity NVC_BILLING_ITEMS_CONTAINER = new NVConfigEntityPortable(
+            "billing_items_container",
             null,
-            "Billing Items Container",
+            "BillingItemsContainer",
             true,
             false,
             false,
             false,
-            BillingItemsContainerDAO.class,
+            BillingItemsContainer.class,
             SUS.extractNVConfigs(Params.values()),
             null,
             false,
@@ -64,16 +64,16 @@ public class BillingItemsContainerDAO
     /**
      * The default constructor.
      */
-    public BillingItemsContainerDAO() {
-        super(NVC_BILLING_ITEMS_CONTAINER_DAO);
+    public BillingItemsContainer() {
+        super(NVC_BILLING_ITEMS_CONTAINER);
     }
 
     /**
-     * This constructor instantiates BillingItemsContainerDAO object based on given NVConfigEntity.
+     * This constructor instantiates BillingItemsContainer object based on given NVConfigEntity.
      *
      * @param nvce
      */
-    protected BillingItemsContainerDAO(NVConfigEntity nvce) {
+    protected BillingItemsContainer(NVConfigEntity nvce) {
         super(nvce);
     }
 
@@ -96,7 +96,7 @@ public class BillingItemsContainerDAO
     }
 
     /**
-     * Returns billing items as an array values of BillingItemDAO.
+     * Returns billing items as an array values of BillingItem.
      *
      * @return list of items
      */
@@ -106,7 +106,7 @@ public class BillingItemsContainerDAO
     }
 
     /**
-     * Sets billing items given an array values of BillingItemDAO.
+     * Sets billing items given an array values of BillingItem.
      *
      * @param values
      */
@@ -115,7 +115,7 @@ public class BillingItemsContainerDAO
     }
 
     /**
-     * Sets billing items given a list of BillingItemDAO.
+     * Sets billing items given a list of BillingItem.
      *
      * @param values
      */
@@ -141,8 +141,8 @@ public class BillingItemsContainerDAO
         BigDecimal total = new BigDecimal(0);
 
         for (NVEntity nve : getBillingItems().values()) {
-            if (nve instanceof BillingItemDAO) {
-                BillingItemDAO item = (BillingItemDAO) nve;
+            if (nve instanceof BillingItem) {
+                BillingItem item = (BillingItem) nve;
 
                 if (item.getTotal() != null) {
                     total = total.add(item.getTotal());
@@ -156,17 +156,17 @@ public class BillingItemsContainerDAO
     }
 
     /**
-     * Adds BillingItemDAO.
+     * Adds BillingItem.
      *
      * @param billingItem
      * @return the added item
      */
-    public synchronized BillingItemDAO addBillingItem(BillingItemDAO billingItem) {
-        BillingItemDAO ret = null;
+    public synchronized BillingItem addBillingItem(BillingItem billingItem) {
+        BillingItem ret = null;
 
         if (billingItem != null && !contains(billingItem.getReferenceID())) {
             billingItem.setCanonicalID(getCanonicalID());
-            ret = (BillingItemDAO) getBillingItems().add(billingItem);
+            ret = (BillingItem) getBillingItems().add(billingItem);
             calculateTotal();
         }
 
@@ -174,16 +174,16 @@ public class BillingItemsContainerDAO
     }
 
     /**
-     * Removes BillingItemDAO.
+     * Removes BillingItem.
      *
      * @param billingItem
      * @return the removed item
      */
-    public BillingItemDAO removeBillingItem(BillingItemDAO billingItem) {
-        BillingItemDAO ret = null;
+    public BillingItem removeBillingItem(BillingItem billingItem) {
+        BillingItem ret = null;
 
         if (billingItem != null) {
-            ret = (BillingItemDAO) getBillingItems().remove(billingItem);
+            ret = (BillingItem) getBillingItems().remove(billingItem);
             calculateTotal();
         }
 
@@ -193,8 +193,8 @@ public class BillingItemsContainerDAO
     private boolean contains(String refID) {
         if (refID != null) {
             for (NVEntity nve : getBillingItems().values()) {
-                if (nve instanceof BillingItemDAO) {
-                    BillingItemDAO item = (BillingItemDAO) nve;
+                if (nve instanceof BillingItem) {
+                    BillingItem item = (BillingItem) nve;
 
                     if (item.getReferenceID() != null && refID.equals(item.getReferenceID())) {
                         return true;

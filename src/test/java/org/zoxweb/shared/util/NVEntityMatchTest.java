@@ -19,29 +19,29 @@ package org.zoxweb.shared.util;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.zoxweb.shared.data.AddressDAO;
+import org.zoxweb.shared.data.AddressInfo;
 
 
 public class NVEntityMatchTest {
 
 	@Test
 	public void test() {
-		AddressDAO user1 = new AddressDAO();
+		AddressInfo user1 = new AddressInfo();
 		user1.setReferenceID("123456789");
 		user1.setName("John");
 		user1.setDescription("Smith");
 		
-		AddressDAO user2 = new AddressDAO();
+		AddressInfo user2 = new AddressInfo();
 		user2.setReferenceID("123456789");
 		user2.setName("John");
 		user2.setDescription("Smith");
 
-		AddressDAO user3 = new AddressDAO();
+		AddressInfo user3 = new AddressInfo();
 		user3.setReferenceID("OZ309");
 		user3.setName("Wiliam");
 		user3.setDescription("Brown");
 
-		AddressDAO user4 = null;
+		AddressInfo user4 = null;
 
 		Assertions.assertTrue(SUS.equals(user1, user2));
 		Assertions.assertFalse(SUS.equals(user1, user3));

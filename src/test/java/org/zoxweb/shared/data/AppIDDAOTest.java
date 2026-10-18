@@ -31,14 +31,14 @@ public class AppIDDAOTest {
 	@Test //(expected = UnsupportedOperationException.class)
     public void testInvalidSetAppID() {
         AppIDDefault appIDDAO1 = new AppIDDefault();
-        Assertions.assertThrows(UnsupportedOperationException.class, ()->appIDDAO1.setAppID("zoxweb.org"));
+        Assertions.assertThrows(IllegalArgumentException.class, ()->appIDDAO1.setAppID("zoxweb.org"));
     }
 
     @SuppressWarnings("deprecation")
     @Test //(expected = UnsupportedOperationException.class)
     public void testInvalidSetDomainID() {
         AppIDDefault appIDDAO1 = new AppIDDefault();
-        Assertions.assertThrows(UnsupportedOperationException.class, ()->appIDDAO1.setDomainID("zoxweb"));
+        Assertions.assertThrows(IllegalArgumentException.class, ()->appIDDAO1.setDomainID("zoxweb"));
     }
 
 

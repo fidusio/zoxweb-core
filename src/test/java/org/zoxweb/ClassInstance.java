@@ -2,7 +2,7 @@ package org.zoxweb;
 
 //import org.junit.Test;
 import org.junit.jupiter.api.Test;
-import org.zoxweb.shared.data.AddressDAO;
+import org.zoxweb.shared.data.AddressInfo;
 import org.zoxweb.shared.util.Const;
 import org.zoxweb.shared.util.NVEntity;
 
@@ -12,13 +12,13 @@ public class ClassInstance {
     public void testAssignableFrom()
     {
         assert(Enum.class.isAssignableFrom(Const.TimeInMillis.class));
-        assert(NVEntity.class.isAssignableFrom(AddressDAO.class));
+        assert(NVEntity.class.isAssignableFrom(AddressInfo.class));
     }
 
     @Test
     public void testInstanceOf()
     {
-        assert(new AddressDAO() instanceof NVEntity);
+        assert(new AddressInfo() instanceof NVEntity);
     }
 
 

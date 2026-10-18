@@ -18,7 +18,7 @@ package org.zoxweb;
 import com.google.gson.Gson;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.server.util.ServerUtil;
-import org.zoxweb.shared.data.AddressDAO;
+import org.zoxweb.shared.data.AddressInfo;
 import org.zoxweb.shared.data.SystemInfo;
 import org.zoxweb.shared.net.InetAddressInfo;
 import org.zoxweb.shared.net.NetworkInterfaceInfo;
@@ -95,7 +95,7 @@ public class JSONTest {
 			System.out.println( sysDAO);
 			log.info("java logger"+ newSysDAO);
 			
-			AddressDAO address = new AddressDAO();
+			AddressInfo address = new AddressInfo();
 			address.setStreet("P.O Box 251906");
 			address.setCity("Los Angeles");
 			address.setStateOrProvince("CA");

@@ -2,7 +2,7 @@ package org.zoxweb.server.http;
 
 import org.junit.jupiter.api.Test;
 import org.zoxweb.server.io.UByteArrayOutputStream;
-import org.zoxweb.shared.data.AddressDAO;
+import org.zoxweb.shared.data.AddressInfo;
 import org.zoxweb.shared.data.UUIDInfo;
 import org.zoxweb.shared.http.HTTPMessageConfigInterface;
 import org.zoxweb.shared.http.HTTPStatusCode;
@@ -14,7 +14,7 @@ import java.io.IOException;
 public class HTTPUtilTest {
     @Test
     public void nveHTTPMessageConfig() throws IOException {
-        AddressDAO address = new AddressDAO();
+        AddressInfo address = new AddressInfo();
         address.setCountry("usa");
         address.setCity("Los Angeles");
         address.setStreet("100 main street");

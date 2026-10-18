@@ -20,7 +20,7 @@ import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.io.UByteArrayOutputStream;
 import org.zoxweb.shared.data.RuntimeResultData;
 import org.zoxweb.shared.data.RuntimeResultData.ResultAttribute;
-import org.zoxweb.shared.data.VMInfoDAO;
+import org.zoxweb.shared.data.VMInfo;
 import org.zoxweb.shared.io.SharedIOUtil;
 import org.zoxweb.shared.util.Const;
 import org.zoxweb.shared.util.Const.JavaClassVersion;
@@ -311,13 +311,13 @@ public class RuntimeUtil {
     }
 
 
-    public static VMInfoDAO vmSnapshot() {
+    public static VMInfo vmSnapshot() {
         return vmSnapshot(null);
     }
 
-    public static VMInfoDAO vmSnapshot(Const.SizeInBytes sib) {
+    public static VMInfo vmSnapshot(Const.SizeInBytes sib) {
         Runtime rt = Runtime.getRuntime();
-        VMInfoDAO ret = new VMInfoDAO();
+        VMInfo ret = new VMInfo();
         if (sib == null)
             sib = Const.SizeInBytes.B;
         ret.setName("VMSnapshot");

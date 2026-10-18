@@ -17,14 +17,14 @@ public class HTTPEndPointTest {
     public static void setup() {
         hep = new HTTPEndPoint();
         hep.setName("test");
-        hep.setBeanClassName("org.zoxweb.shared.data.AddressDAO");
+        hep.setBeanClassName("org.zoxweb.shared.data.AddressInfo");
         hep.setHTTPMethods(HTTPMethod.GET, HTTPMethod.POST);
         hep.setPaths("/ping/{detailed}", "/info/{level}/{detailed}");
 
 
         sysHep = new HTTPEndPoint();
         sysHep.setName("system");
-        sysHep.setBeanClassName("org.zoxweb.shared.data.AddressDAO");
+        sysHep.setBeanClassName("org.zoxweb.shared.data.AddressInfo");
         sysHep.setHTTPMethods(HTTPMethod.GET, HTTPMethod.POST);
         sysHep.setPaths("/system/reboot", "/system/shutdown");
     }
@@ -55,7 +55,7 @@ public class HTTPEndPointTest {
     public void preFilterTest() throws IOException {
         HTTPEndPoint localHep = new HTTPEndPoint();
         localHep.setName("test");
-        localHep.setBeanClassName("org.zoxweb.shared.data.AddressDAO");
+        localHep.setBeanClassName("org.zoxweb.shared.data.AddressInfo");
         localHep.setHTTPMethods(HTTPMethod.GET, HTTPMethod.POST);
         localHep.setPaths("/ping/{detailed}", "/info/{level}/{detailed}");
 

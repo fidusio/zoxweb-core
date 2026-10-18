@@ -1,7 +1,7 @@
 package org.zoxweb.shared.security;
 
-import org.zoxweb.shared.data.AddressDAO;
-import org.zoxweb.shared.data.CreditCardDAO;
+import org.zoxweb.shared.data.AddressInfo;
+import org.zoxweb.shared.data.CreditCardInfo;
 import org.zoxweb.shared.data.DataConst.Language;
 import org.zoxweb.shared.data.SetNameDescriptionDAO;
 import org.zoxweb.shared.util.*;
@@ -22,9 +22,9 @@ public class SubjectPreference
 
         APP_GUID(NVConfigManager.createNVConfig("app_guid", "App GUID","AddGUID", true, false, String.class)),
         DEFAULT_LANGUAGE(NVConfigManager.createNVConfig("language", "Default language", "DefaultLanguage", false, true, Language.class)),
-        DEFAULT_DELIVERY_ADDRESS(NVConfigManager.createNVConfigEntity("delivery_address", "Default delivery address", "DefaultDeliveryAddress", false, true, AddressDAO.NVC_ADDRESS_DAO, ArrayType.NOT_ARRAY)),
-        DEFAULT_BILLING_ADDRESS(NVConfigManager.createNVConfigEntity("billing_address", "Default billing address", "DefaultBillingAddress", false, true, AddressDAO.NVC_ADDRESS_DAO, ArrayType.NOT_ARRAY)),
-        DEFAULT_CREDIT_CARD(NVConfigManager.createNVConfigEntity("credit_card", "Default credit card", "DefaultCreditCard", false, true, CreditCardDAO.NVC_CREDIT_CARD_DAO, ArrayType.NOT_ARRAY)),
+        DEFAULT_DELIVERY_ADDRESS(NVConfigManager.createNVConfigEntity("delivery_address", "Default delivery address", "DefaultDeliveryAddress", false, true, AddressInfo.NVC_ADDRESS_INFO, ArrayType.NOT_ARRAY)),
+        DEFAULT_BILLING_ADDRESS(NVConfigManager.createNVConfigEntity("billing_address", "Default billing address", "DefaultBillingAddress", false, true, AddressInfo.NVC_ADDRESS_INFO, ArrayType.NOT_ARRAY)),
+        DEFAULT_CREDIT_CARD(NVConfigManager.createNVConfigEntity("credit_card", "Default credit card", "DefaultCreditCard", false, true, CreditCardInfo.NVC_CREDIT_CARD_INFO, ArrayType.NOT_ARRAY)),
 
         ;
 
@@ -70,32 +70,32 @@ public class SubjectPreference
         setValue(Param.DEFAULT_LANGUAGE, language);
     }
 
-    public AddressDAO getDefaultDeliveryAddress()
+    public AddressInfo getDefaultDeliveryAddress()
     {
         return lookupValue(Param.DEFAULT_DELIVERY_ADDRESS);
     }
 
-    public void setDefaultDeliveryAddress(AddressDAO address)
+    public void setDefaultDeliveryAddress(AddressInfo address)
     {
         setValue(Param.DEFAULT_DELIVERY_ADDRESS, address);
     }
 
-    public AddressDAO getDefaultBillingAddress()
+    public AddressInfo getDefaultBillingAddress()
     {
         return lookupValue(Param.DEFAULT_BILLING_ADDRESS);
     }
 
-    public void setDefaultBillingAddress(AddressDAO address)
+    public void setDefaultBillingAddress(AddressInfo address)
     {
         setValue(Param.DEFAULT_BILLING_ADDRESS, address);
     }
 
-    public CreditCardDAO getDefaultCreditCard()
+    public CreditCardInfo getDefaultCreditCard()
     {
         return lookupValue(Param.DEFAULT_CREDIT_CARD);
     }
 
-    public void setDefaultCreditCard(CreditCardDAO creditCard)
+    public void setDefaultCreditCard(CreditCardInfo creditCard)
     {
         setValue(Param.DEFAULT_CREDIT_CARD, creditCard);
     }

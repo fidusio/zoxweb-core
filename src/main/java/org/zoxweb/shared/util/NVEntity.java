@@ -30,6 +30,7 @@ import java.util.Map;
 public abstract class NVEntity
         implements ReferenceID<String>,
         SubjectGUID<String>,
+        AppGUID<String>,
         GetNVConfig,
         GetName {
 

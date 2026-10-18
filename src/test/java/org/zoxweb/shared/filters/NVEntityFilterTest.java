@@ -19,7 +19,7 @@ package org.zoxweb.shared.filters;
 import org.zoxweb.shared.data.FileInfo;
 import org.zoxweb.shared.data.FolderInfo;
 import org.zoxweb.shared.data.FormInfo;
-import org.zoxweb.shared.data.PhoneDAO;
+import org.zoxweb.shared.data.PhoneInfo;
 
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
@@ -79,7 +79,7 @@ public class NVEntityFilterTest {
 	
 	@Test
 	public void test4() {
-		NVEntityFilter filter = new NVEntityFilter(PhoneDAO.NVC_PHONE_DAO);
+		NVEntityFilter filter = new NVEntityFilter(PhoneInfo.NVC_PHONE_INFO);
 
 		FolderInfo folderInfo = new FolderInfo();
         boolean valid = filter.isValid(folderInfo);
@@ -93,7 +93,7 @@ public class NVEntityFilterTest {
         valid = filter.isValid(formInfo);
         assertFalse(valid);
 
-		PhoneDAO phone = new PhoneDAO();
+		PhoneInfo phone = new PhoneInfo();
         valid = filter.isValid(phone);
         assertTrue(valid);
 	}

@@ -15,22 +15,17 @@
  */
 package org.zoxweb.shared.data;
 
+import org.zoxweb.shared.util.*;
+
 import java.util.Date;
 
-import org.zoxweb.shared.util.GetNVConfig;
-import org.zoxweb.shared.util.NVConfig;
-import org.zoxweb.shared.util.NVConfigEntity;
-import org.zoxweb.shared.util.NVConfigEntityPortable;
-import org.zoxweb.shared.util.NVConfigManager;
-import org.zoxweb.shared.util.SUS;
-
 /**
- * The VMInfoDAO class defines a snapshot of the Java virtual machine runtime
+ * The VMInfo class defines a snapshot of the Java virtual machine runtime
  * status: core count, free, total, used, and maximum memory, and the time stamp
  * when the snapshot was taken.
  */
 @SuppressWarnings("serial")
-public class VMInfoDAO
+public class VMInfo
     extends SetNameDescriptionDAO
 {
 
@@ -59,15 +54,15 @@ public class VMInfoDAO
         }
 	}
 	
-	public static final NVConfigEntity NVC_VMINFO_DAO = new NVConfigEntityPortable(
-            "vm_info_dao",
+	public static final NVConfigEntity NVC_VM_INFO = new NVConfigEntityPortable(
+            "vm_info",
             null,
-            VMInfoDAO.class.getSimpleName(),
+            VMInfo.class.getSimpleName(),
             true,
             false,
             false,
             false,
-            VMInfoDAO.class,
+            VMInfo.class,
             SUS.extractNVConfigs(Param.values()),
             null,
             false,
@@ -77,9 +72,9 @@ public class VMInfoDAO
 	/**
 	 * The default constructor.
 	 */
-	public VMInfoDAO()
+	public VMInfo()
 	{
-		super(NVC_VMINFO_DAO);
+		super(NVC_VM_INFO);
 	}
 	
 	/**

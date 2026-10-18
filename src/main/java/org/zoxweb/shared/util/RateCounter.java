@@ -1,7 +1,7 @@
 package org.zoxweb.shared.util;
 
 
-import org.zoxweb.shared.data.AddressDAO;
+import org.zoxweb.shared.data.AddressInfo;
 import org.zoxweb.shared.data.SetNameDescriptionDAO;
 
 public class RateCounter
@@ -31,7 +31,7 @@ public class RateCounter
             false,
             false,
             false,
-            AddressDAO.class,
+            AddressInfo.class,
             SUS.extractNVConfigs(Param.values()),
             null,
             false,

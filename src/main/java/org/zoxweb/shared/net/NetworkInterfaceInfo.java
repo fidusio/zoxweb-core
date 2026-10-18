@@ -22,7 +22,7 @@ import org.zoxweb.shared.util.NVConfigEntity.ArrayType;
 import java.util.List;
 
 /**
- * Data access object for network interface information.
+ * Network interface information.
  * Stores network interface details including display name, MAC address,
  * and associated IP addresses.
  *

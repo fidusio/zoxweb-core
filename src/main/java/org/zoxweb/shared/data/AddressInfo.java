@@ -24,12 +24,12 @@ import org.zoxweb.shared.util.SUS;
 
 
 /**
- * The AddressDAO class defines the address data access object used to create an address object.
+ * The AddressInfo class defines a postal address.
  * @author mzebib
  *
  */
 @SuppressWarnings("serial")
-public class  AddressDAO
+public class AddressInfo
 	extends SetNameDescriptionDAO {
 
 	public enum Param
@@ -56,15 +56,15 @@ public class  AddressDAO
 		}
 	}
 	
-	public static final NVConfigEntity NVC_ADDRESS_DAO = new NVConfigEntityPortable(
-            "address_dao",
+	public static final NVConfigEntity NVC_ADDRESS_INFO = new NVConfigEntityPortable(
+            "address_info",
             null ,
-            "Address",
+            "AddressInfo",
             true,
             false,
             false,
             false,
-            AddressDAO.class,
+            AddressInfo.class,
             SUS.extractNVConfigs(Param.values()),
             null,
             false,
@@ -72,10 +72,10 @@ public class  AddressDAO
     );
 	
 	/**
-	 * The default constructor creates an AddressDAO instance.
+	 * The default constructor creates an AddressInfo instance.
 	 */
-	public AddressDAO() {
-		super(NVC_ADDRESS_DAO);
+	public AddressInfo() {
+		super(NVC_ADDRESS_INFO);
 	}
 	
 	/**

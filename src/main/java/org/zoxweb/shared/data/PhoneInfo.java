@@ -26,12 +26,11 @@ import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.SUS;
 
 /**
- * This class defines the phone data access object used to create phone numbers 
- * associated with an account.
+ * This class defines a phone number associated with an account.
  * @author mzebib
  */
 @SuppressWarnings("serial")
-public class PhoneDAO 
+public class PhoneInfo
 	extends SetNameDescriptionDAO 
 	implements CanonicalID
 {
@@ -68,15 +67,15 @@ public class PhoneDAO
 
 	}
 	
-	public static final NVConfigEntity NVC_PHONE_DAO = new NVConfigEntityPortable(
-            "phone_dao",
+	public static final NVConfigEntity NVC_PHONE_INFO = new NVConfigEntityPortable(
+            "phone_info",
             null,
-            "Phone",
+            "PhoneInfo",
             true,
             false,
             false,
             false,
-            PhoneDAO.class,
+            PhoneInfo.class,
             SUS.extractNVConfigs(Param.values()),
             null,
             false,
@@ -86,9 +85,9 @@ public class PhoneDAO
 	/**
 	 * The default constructor.
 	 */
-	public PhoneDAO()
+	public PhoneInfo()
 	{
-		super(NVC_PHONE_DAO);
+		super(NVC_PHONE_INFO);
 	}
 	
 	/**

@@ -29,13 +29,13 @@ import java.math.BigDecimal;
  *
  */
 @SuppressWarnings("serial")
-public class BillingAccountDAO
+public class BillingAccount
         extends TimeStampDAO {
 
     public enum Params
             implements GetNVConfig {
-        CURRENT_BALANCE(NVConfigManager.createNVConfigEntity("current_balance", "Current balance", "CurrentBalance", true, true, AmountDAO.class, ArrayType.NOT_ARRAY)),
-        PAYMENT_INFO(NVConfigManager.createNVConfigEntity("payment_info", "Payment info", "PaymentInfo", false, true, PaymentInfoDAO.class, ArrayType.NOT_ARRAY)),
+        CURRENT_BALANCE(NVConfigManager.createNVConfigEntity("current_balance", "Current balance", "CurrentBalance", true, true, AmountInfo.class, ArrayType.NOT_ARRAY)),
+        PAYMENT_INFO(NVConfigManager.createNVConfigEntity("payment_info", "Payment info", "PaymentInfo", false, true, PaymentInfo.class, ArrayType.NOT_ARRAY)),
 
         ;
 
@@ -50,15 +50,15 @@ public class BillingAccountDAO
         }
     }
 
-    public static final NVConfigEntity NVC_BILLING_ACCOUNT_DAO = new NVConfigEntityPortable(
-            "billing_account_dao",
+    public static final NVConfigEntity NVC_BILLING_ACCOUNT = new NVConfigEntityPortable(
+            "billing_account",
             null,
-            "BillingAccountDAO",
+            "BillingAccount",
             true,
             false,
             false,
             false,
-            BillingAccountDAO.class,
+            BillingAccount.class,
             SUS.extractNVConfigs(Params.values()),
             null,
             false,
@@ -69,16 +69,16 @@ public class BillingAccountDAO
     /**
      * The default constructor.
      */
-    public BillingAccountDAO() {
-        super(NVC_BILLING_ACCOUNT_DAO);
+    public BillingAccount() {
+        super(NVC_BILLING_ACCOUNT);
     }
 
     /**
-     * This constructor instantiates BillingAccountDAO based given NVConfigEntity.
+     * This constructor instantiates BillingAccount based given NVConfigEntity.
      *
      * @param nvce
      */
-    protected BillingAccountDAO(NVConfigEntity nvce) {
+    protected BillingAccount(NVConfigEntity nvce) {
         super(nvce);
     }
 
@@ -87,7 +87,7 @@ public class BillingAccountDAO
      *
      * @return MoneyValueDAO
      */
-    public AmountDAO getCurrentBalance() {
+    public AmountInfo getCurrentBalance() {
         return lookupValue(Params.CURRENT_BALANCE);
     }
 
@@ -96,16 +96,16 @@ public class BillingAccountDAO
      *
      * @param balance
      */
-    public synchronized void setCurrentBalance(AmountDAO balance) {
+    public synchronized void setCurrentBalance(AmountInfo balance) {
         setValue(Params.CURRENT_BALANCE, balance);
     }
 
     /**
      * Returns the payment information.
      *
-     * @return PaymentInfoDAO
+     * @return PaymentInfo
      */
-    public PaymentInfoDAO getPaymentInfo() {
+    public PaymentInfo getPaymentInfo() {
         return lookupValue(Params.PAYMENT_INFO);
     }
 
@@ -114,7 +114,7 @@ public class BillingAccountDAO
      *
      * @param info
      */
-    public void setPaymentInfo(PaymentInfoDAO info) {
+    public void setPaymentInfo(PaymentInfo info) {
         setValue(Params.PAYMENT_INFO, info);
     }
 

@@ -84,7 +84,7 @@ public class HTTPMessageConfig
     private volatile InputStream contentAsIS = null;
 
     /**
-     * This NVConfigEntity type constant is set to an instantiation of a NVConfigEntityLocal object based on AddressDAO.
+     * This NVConfigEntity type constant is set to an instantiation of a NVConfigEntityPortable object based on HTTPMessageConfig.
      */
     public static final NVConfigEntity NVC_HTTP_MESSAGE_CONFIG = new NVConfigEntityPortable("http_message_config",
             null,

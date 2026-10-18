@@ -24,7 +24,7 @@ import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.SUS;
 
 /**
- * Data access object representing an IP address range.
+ * Describes an IP address range.
  * Contains information about a network interface, starting IP address,
  * network mask, and count of addresses in the range.
  *

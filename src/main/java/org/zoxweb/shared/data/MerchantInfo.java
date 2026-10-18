@@ -15,7 +15,7 @@
  */
 package org.zoxweb.shared.data;
 
-import org.zoxweb.shared.accounting.PaymentInfoDAO;
+import org.zoxweb.shared.accounting.PaymentInfo;
 import org.zoxweb.shared.data.DataConst.DataParam;
 import org.zoxweb.shared.util.*;
 import org.zoxweb.shared.util.NVConfigEntity.ArrayType;
@@ -24,12 +24,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The MerchantDAO class defines a merchant account including its domain IDs,
+ * The MerchantInfo class defines a merchant account including its domain IDs,
  * company type, addresses, phones, domain emails, payment information, and
  * additional information entries.
  */
 @SuppressWarnings("serial")
-public class MerchantDAO
+public class MerchantInfo
         extends SetNameDescriptionDAO {
 
     public enum Param
@@ -37,10 +37,10 @@ public class MerchantDAO
         //		ACCOUNT_ID(NVConfigManager.createNVConfig(MetaToken.ACCOUNT_ID.getName(), "The account id","AccountID", true, false, false, true, true, String.class, null)),
         LIST_OF_DOMAIN_IDS(NVConfigManager.createNVConfigEntity("domain_ids", "Domain ID", "DomainIDs", true, true, DomainInfo.NVC_DOMAIN_INFO, ArrayType.LIST)),
         COMPANY_TYPE(NVConfigManager.createNVConfig("company_type", "Type of company", "CompanyType", false, true, String.class)),
-        LIST_OF_ADDRESSES(NVConfigManager.createNVConfigEntity("addresses", "List of addresses", "Addresses", false, true, AddressDAO.NVC_ADDRESS_DAO, ArrayType.LIST)),
-        LIST_OF_PHONES(NVConfigManager.createNVConfigEntity("phones", "List of phones", "ListOfPhones", false, true, PhoneDAO.NVC_PHONE_DAO, ArrayType.LIST)),
+        LIST_OF_ADDRESSES(NVConfigManager.createNVConfigEntity("addresses", "List of addresses", "Addresses", false, true, AddressInfo.NVC_ADDRESS_INFO, ArrayType.LIST)),
+        LIST_OF_PHONES(NVConfigManager.createNVConfigEntity("phones", "List of phones", "ListOfPhones", false, true, PhoneInfo.NVC_PHONE_INFO, ArrayType.LIST)),
         LIST_OF_DOMAIN_EMAILS(NVConfigManager.createNVConfig("domain_emails", "List of domain emails", "DomainEmails", false, true, String[].class)),
-        LIST_OF_PAYMENT_INFOS(NVConfigManager.createNVConfigEntity("payment_infos", "List of payment info", "PaymentInfos", false, true, PaymentInfoDAO.NVC_PAYMENT_INFO_DAO, ArrayType.LIST)),
+        LIST_OF_PAYMENT_INFOS(NVConfigManager.createNVConfigEntity("payment_infos", "List of payment info", "PaymentInfos", false, true, PaymentInfo.NVC_PAYMENT_INFO, ArrayType.LIST)),
         ADDITIONAL_INFOS(NVConfigManager.createNVConfig("additional_info", "Additional information", "AdditionalInfos", false, true, String[].class)),
 
         ;
@@ -56,15 +56,15 @@ public class MerchantDAO
         }
     }
 
-    public static final NVConfigEntity NVC_MERCHANT_DAO = new NVConfigEntityPortable(
-            "merchant_dao",
+    public static final NVConfigEntity NVC_MERCHANT_INFO = new NVConfigEntityPortable(
+            "merchant_info",
             null,
-            "MerchantDAO",
+            "MerchantInfo",
             true,
             false,
             false,
             false,
-            MerchantDAO.class,
+            MerchantInfo.class,
             SUS.extractNVConfigs(Param.values()),
             null,
             true,
@@ -74,8 +74,8 @@ public class MerchantDAO
     /**
      * The default constructor.
      */
-    public MerchantDAO() {
-        super(NVC_MERCHANT_DAO);
+    public MerchantInfo() {
+        super(NVC_MERCHANT_INFO);
     }
 
     /**
@@ -119,7 +119,7 @@ public class MerchantDAO
      *
      * @return list of addresses
      */
-    public ArrayList<AddressDAO> getListOfAddresses() {
+    public ArrayList<AddressInfo> getListOfAddresses() {
         return lookupValue(Param.LIST_OF_ADDRESSES);
     }
 
@@ -128,7 +128,7 @@ public class MerchantDAO
      *
      * @param list
      */
-    public void setListOfAddresses(ArrayList<AddressDAO> list) {
+    public void setListOfAddresses(ArrayList<AddressInfo> list) {
         setValue(Param.LIST_OF_ADDRESSES, list);
     }
 
@@ -137,7 +137,7 @@ public class MerchantDAO
      *
      * @return list of phones
      */
-    public ArrayList<PhoneDAO> getListOfPhones() {
+    public ArrayList<PhoneInfo> getListOfPhones() {
         return lookupValue(Param.LIST_OF_PHONES);
     }
 
@@ -146,7 +146,7 @@ public class MerchantDAO
      *
      * @param list
      */
-    public void setListOfPhones(ArrayList<PhoneDAO> list) {
+    public void setListOfPhones(ArrayList<PhoneInfo> list) {
         setValue(Param.LIST_OF_PHONES, list);
     }
 
@@ -173,7 +173,7 @@ public class MerchantDAO
      *
      * @return list of payment infos
      */
-    public ArrayList<PaymentInfoDAO> getListOfPaymentInfos() {
+    public ArrayList<PaymentInfo> getListOfPaymentInfos() {
         return lookupValue(Param.LIST_OF_PAYMENT_INFOS);
     }
 
@@ -182,7 +182,7 @@ public class MerchantDAO
      *
      * @param list
      */
-    public void setListOfPaymentInfos(ArrayList<PaymentInfoDAO> list) {
+    public void setListOfPaymentInfos(ArrayList<PaymentInfo> list) {
         setValue(Param.LIST_OF_PAYMENT_INFOS, list);
     }
 

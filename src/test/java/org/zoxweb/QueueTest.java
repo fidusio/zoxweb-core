@@ -19,7 +19,7 @@ package org.zoxweb;
 import org.junit.jupiter.api.Test;
 import org.zoxweb.server.util.RuntimeUtil;
 import org.zoxweb.server.util.ThresholdQueue;
-import org.zoxweb.shared.data.VMInfoDAO;
+import org.zoxweb.shared.data.VMInfo;
 import org.zoxweb.shared.util.ArrayQueue;
 import org.zoxweb.shared.util.SUS;
 import org.zoxweb.shared.util.SimpleQueueInterface;
@@ -83,7 +83,7 @@ public class QueueTest {
         ArrayBlockingQueue<Object> abQueue = new ArrayBlockingQueue<Object>(limit);
         ArrayQueue<Object> aq = new ArrayQueue<Object>(limit);
 
-        VMInfoDAO startVMID = RuntimeUtil.vmSnapshot();
+        VMInfo startVMID = RuntimeUtil.vmSnapshot();
         Object o = new Object();
 
         for (int j = 0; j < 10; j++) {

@@ -15,8 +15,8 @@
  */
 package org.zoxweb.shared.accounting;
 
-import org.zoxweb.shared.data.AddressDAO;
-import org.zoxweb.shared.data.CreditCardDAO;
+import org.zoxweb.shared.data.AddressInfo;
+import org.zoxweb.shared.data.CreditCardInfo;
 import org.zoxweb.shared.data.SetNameDescriptionDAO;
 import org.zoxweb.shared.util.GetNVConfig;
 import org.zoxweb.shared.util.NVConfig;
@@ -34,14 +34,14 @@ import org.zoxweb.shared.util.NVConfigEntity.ArrayType;
  *
  */
 @SuppressWarnings("serial")
-public class PaymentInfoDAO
+public class PaymentInfo
         extends SetNameDescriptionDAO {
 
     public enum Params
             implements GetNVConfig {
 
-        CREDIT_CARD(NVConfigManager.createNVConfigEntity("credit_card", "Credit card information includes: card type, card holder name, card number, expiration date, and security code", "CreditCard", true, true, CreditCardDAO.NVC_CREDIT_CARD_DAO, ArrayType.NOT_ARRAY)),
-        BILLING_ADDRESS(NVConfigManager.createNVConfigEntity("billing_address", "Billing address includes: street, city, state/province, zip/postal code, and country", "BillingAddress", true, true, AddressDAO.NVC_ADDRESS_DAO, ArrayType.NOT_ARRAY)),
+        CREDIT_CARD(NVConfigManager.createNVConfigEntity("credit_card", "Credit card information includes: card type, card holder name, card number, expiration date, and security code", "CreditCard", true, true, CreditCardInfo.NVC_CREDIT_CARD_INFO, ArrayType.NOT_ARRAY)),
+        BILLING_ADDRESS(NVConfigManager.createNVConfigEntity("billing_address", "Billing address includes: street, city, state/province, zip/postal code, and country", "BillingAddress", true, true, AddressInfo.NVC_ADDRESS_INFO, ArrayType.NOT_ARRAY)),
 
         ;
 
@@ -56,15 +56,15 @@ public class PaymentInfoDAO
         }
     }
 
-    public static final NVConfigEntity NVC_PAYMENT_INFO_DAO = new NVConfigEntityPortable(
-            "payment_info_dao",
+    public static final NVConfigEntity NVC_PAYMENT_INFO = new NVConfigEntityPortable(
+            "payment_info",
             null,
-            "PaymentInfoDAO",
+            "PaymentInfo",
             true,
             false,
             false,
             false,
-            PaymentInfoDAO.class,
+            PaymentInfo.class,
             SUS.extractNVConfigs(Params.values()),
             null,
             false,
@@ -75,8 +75,8 @@ public class PaymentInfoDAO
     /**
      * The default constructor.
      */
-    public PaymentInfoDAO() {
-        super(NVC_PAYMENT_INFO_DAO);
+    public PaymentInfo() {
+        super(NVC_PAYMENT_INFO);
     }
 
     /**
@@ -84,7 +84,7 @@ public class PaymentInfoDAO
      *
      * @return Credit card
      */
-    public CreditCardDAO getCreditCard() {
+    public CreditCardInfo getCreditCard() {
         return lookupValue(Params.CREDIT_CARD);
     }
 
@@ -93,7 +93,7 @@ public class PaymentInfoDAO
      *
      * @param card
      */
-    public void setCreditCard(CreditCardDAO card) {
+    public void setCreditCard(CreditCardInfo card) {
         setValue(Params.CREDIT_CARD, card);
     }
 
@@ -102,7 +102,7 @@ public class PaymentInfoDAO
      *
      * @return billing address
      */
-    public AddressDAO getBillingAddress() {
+    public AddressInfo getBillingAddress() {
         return lookupValue(Params.BILLING_ADDRESS);
     }
 
@@ -111,7 +111,7 @@ public class PaymentInfoDAO
      *
      * @param address
      */
-    public void setBillingAddress(AddressDAO address) {
+    public void setBillingAddress(AddressInfo address) {
         setValue(Params.BILLING_ADDRESS, address);
     }
 

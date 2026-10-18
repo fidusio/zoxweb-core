@@ -24,13 +24,13 @@ import org.zoxweb.shared.util.NVConfigManager;
 import org.zoxweb.shared.util.SUS;
 
 /**
- * This class extends the API transaction information interface to create
- * the API transaction information data access object.
+ * NVEntity implementation of the APITransactionInfo interface: the record of a
+ * single API transaction.
  *
  * @author mzebib
  */
 @SuppressWarnings("serial")
-public class APITransactionInfoDAO
+public class APITransactionInfoImpl
         extends SetNameDescriptionDAO
         implements APITransactionInfo {
 
@@ -57,18 +57,18 @@ public class APITransactionInfoDAO
     }
 
     /**
-     * This NVConfigEntity type constant is set to an instantiation of a NVConfigEntityLocal object based on APITransactionInfoDAO.
+     * This NVConfigEntity type constant is set to an instantiation of a NVConfigEntityPortable object based on APITransactionInfoImpl.
      */
-    public static final NVConfigEntity NVC_API_TRANSACTION_INFO_DAO = new NVConfigEntityPortable
+    public static final NVConfigEntity NVC_API_TRANSACTION_INFO_IMPL = new NVConfigEntityPortable
             (
-                    "api_transaction_info_dao",
+                    "api_transaction_info_impl",
                     null,
-                    "APITransactionInfoDAO",
+                    APITransactionInfoImpl.class.getSimpleName(),
                     true,
                     false,
                     false,
                     false,
-                    APITransactionInfoDAO.class,
+                    APITransactionInfoImpl.class,
                     SUS.extractNVConfigs(Params.values()),
                     null,
                     false,
@@ -78,17 +78,16 @@ public class APITransactionInfoDAO
     /**
      * This is the default constructor.
      */
-    public APITransactionInfoDAO() {
-        super(NVC_API_TRANSACTION_INFO_DAO);
+    public APITransactionInfoImpl() {
+        super(NVC_API_TRANSACTION_INFO_IMPL);
     }
 
     /**
-     * This constructor instantiates APITransactionInfoDAO based on list of NVConfigEntity type.
+     * This constructor instantiates APITransactionInfoImpl based on list of NVConfigEntity type.
      * @param list
      */
-//	protected APITransactionInfoDAO(List<NVConfigEntity> list)
+//	protected APITransactionInfoImpl(List<NVConfigEntity> list)
 //	{
-//		super(SUS.merge(list, NVC_API_TRANSACTION_INFO_DAO));
 //	}
 
     /**

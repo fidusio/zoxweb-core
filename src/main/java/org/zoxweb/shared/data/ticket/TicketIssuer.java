@@ -15,9 +15,9 @@
  */
 package org.zoxweb.shared.data.ticket;
 
-import org.zoxweb.shared.data.AddressDAO;
+import org.zoxweb.shared.data.AddressInfo;
 import org.zoxweb.shared.data.CanonicalIDImpl;
-import org.zoxweb.shared.data.PhoneDAO;
+import org.zoxweb.shared.data.PhoneInfo;
 import org.zoxweb.shared.filters.FilterType;
 import org.zoxweb.shared.util.*;
 import org.zoxweb.shared.util.NVConfigEntity.ArrayType;
@@ -38,12 +38,12 @@ public class TicketIssuer
         FIRST_NAME(NVConfigManager.createNVConfig("first_name", "The issuer's first name.", "First Name", false, true, String.class)),
         LAST_NAME(NVConfigManager.createNVConfig("last_name", "The issuer's last name.", "Last Name", false, true, String.class)),
         EMAIL(NVConfigManager.createNVConfig("email", "The issuer's email address.", "Email", true, true, false, String.class, FilterType.EMAIL)),
-        PHONE_NUMBER(NVConfigManager.createNVConfigEntity("phone_number", "The issuer's phone number.", "Phone", false, true, PhoneDAO.class, ArrayType.NOT_ARRAY)),
+        PHONE_NUMBER(NVConfigManager.createNVConfigEntity("phone_number", "The issuer's phone number.", "Phone", false, true, PhoneInfo.class, ArrayType.NOT_ARRAY)),
         POSITION(NVConfigManager.createNVConfig("position", "The issuer's position at associated company.", "Position", false, true, String.class)),
 
         COMPANY(NVConfigManager.createNVConfig("company", "Name of associated company.", "Company", false, true, String.class)),
         INCIDENT_LOCATION(NVConfigManager.createNVConfig("incident_location", "The location of the incident.", "Incident Location", true, true, String.class)),
-        INCIDENT_ADDRESS(NVConfigManager.createNVConfigEntity("incident_address", "The address of the incident.", "Address", false, true, AddressDAO.class, ArrayType.NOT_ARRAY)),
+        INCIDENT_ADDRESS(NVConfigManager.createNVConfigEntity("incident_address", "The address of the incident.", "Address", false, true, AddressInfo.class, ArrayType.NOT_ARRAY)),
         DUE_DATE(NVConfigManager.createNVConfig("due_date", "Date when the issue should be completed.", "DueDate", false, false, Date.class)),
 
         ASSIGNEE(NVConfigManager.createNVConfig("assignee", "The assignee's email address.", "Assignee", true, true, false, String.class, FilterType.EMAIL)),
@@ -155,7 +155,7 @@ public class TicketIssuer
      *
      * @return phone number
      */
-    public PhoneDAO getPhoneNumber() {
+    public PhoneInfo getPhoneNumber() {
         return lookupValue(Param.PHONE_NUMBER);
     }
 
@@ -164,7 +164,7 @@ public class TicketIssuer
      *
      * @param phone
      */
-    public void setPhoneNumber(PhoneDAO phone) {
+    public void setPhoneNumber(PhoneInfo phone) {
         setValue(Param.PHONE_NUMBER, phone);
     }
 
@@ -227,7 +227,7 @@ public class TicketIssuer
      *
      * @return incident address.
      */
-    public AddressDAO getIncidentAddress() {
+    public AddressInfo getIncidentAddress() {
         return lookupValue(Param.INCIDENT_ADDRESS);
     }
 
@@ -236,7 +236,7 @@ public class TicketIssuer
      *
      * @param address
      */
-    public void setIncidentAddress(AddressDAO address) {
+    public void setIncidentAddress(AddressInfo address) {
         setValue(Param.INCIDENT_ADDRESS, address);
     }
 

@@ -59,7 +59,7 @@ public class APIAccessToken
     }
 
     /**
-     * This NVConfigEntity type constant is set to an instantiation of a NVConfigEntityLocal object based on BoxTokenDAO.
+     * This NVConfigEntity type constant is set to an instantiation of a NVConfigEntityPortable object based on APIAccessToken.
      */
     public static final NVConfigEntity NVC_API_ACCESS_TOKEN = new NVConfigEntityPortable("api_access_token",
             null,

@@ -26,13 +26,13 @@ import java.util.ArrayList;
 
 
 
-public class MerchantDAOTest {
+public class MerchantInfoTest {
 
-	private MerchantDAO merchant;
+	private MerchantInfo merchant;
 
 	@BeforeEach
 	public void setUp() throws Exception {
-		merchant = new MerchantDAO();
+		merchant = new MerchantInfo();
 	}
 
 	@AfterEach
@@ -42,7 +42,7 @@ public class MerchantDAOTest {
 
 	@Test
 	public void testMerchantDAO() {
-		MerchantDAO merchant1 = new MerchantDAO();
+		MerchantInfo merchant1 = new MerchantInfo();
 		Assertions.assertFalse(merchant.equals(merchant1));
 	}
 
@@ -83,8 +83,8 @@ public class MerchantDAOTest {
 
 	@Test
 	public void testListOfAddresses() {
-		ArrayList<AddressDAO> addresslist= new ArrayList<AddressDAO>();
-		AddressDAO address = new AddressDAO();
+		ArrayList<AddressInfo> addresslist= new ArrayList<AddressInfo>();
+		AddressInfo address = new AddressInfo();
 		address.setStreet("123 Main St.");
 		address.setCity("Los Angeles");
 		address.setStateOrProvince("CA");
@@ -98,8 +98,8 @@ public class MerchantDAOTest {
 
 	@Test
 	public void testListOfPhones() {
-		ArrayList<PhoneDAO> phonelist = new ArrayList<PhoneDAO>();
-		PhoneDAO phone = new PhoneDAO();
+		ArrayList<PhoneInfo> phonelist = new ArrayList<PhoneInfo>();
+		PhoneInfo phone = new PhoneInfo();
 		phone.setPhoneType("MOBILE");
 		phone.setCountryCode("+1");
 		phone.setAreaCode("212");

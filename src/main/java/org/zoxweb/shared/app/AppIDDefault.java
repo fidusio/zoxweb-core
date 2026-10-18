@@ -74,5 +74,17 @@ public class AppIDDefault
 
     }
 
+    @Override
+    public void setGUID(String guid) {
+        super.setGUID(guid);
+        super.setAppGUID(guid);
+    }
+
+    @Override
+    public void setAppGUID(String appGUID) {
+        this.setGUID(appGUID);
+    }
+
+
 
 }

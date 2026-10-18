@@ -23,16 +23,15 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.api.APIException;
-//import org.zoxweb.shared.data.AddressDAO;
 import org.zoxweb.shared.security.AccessSecurityException;
 import org.zoxweb.shared.util.SUS;
 
-public class AddressDAOTest {
+public class AddressInfoTest {
 
 	@Test
 	public void testA1()
             throws IOException, InstantiationException, IllegalAccessException, ClassNotFoundException {
-		AddressDAO address = new AddressDAO();
+		AddressInfo address = new AddressInfo();
 		
 		address.setStreet("123 Main St.");
 		address.setCity("Los Angeles");
@@ -44,43 +43,43 @@ public class AddressDAOTest {
 		System.out.println(address);
 		String json = GSONUtil.toJSON(address, true);
 		System.out.println( json);
-		AddressDAO newAddress = GSONUtil.fromJSON(json, AddressDAO.class);
+		AddressInfo newAddress = GSONUtil.fromJSON(json, AddressInfo.class);
 		System.out.println("new address from json:" + newAddress);
 	}
 		
 	@Test
 	public void testA2() {
-		AddressDAO address = new AddressDAO();
+		AddressInfo address = new AddressInfo();
 		address.setCountry("USA");
 
 		System.out.println(address);
 	}
 
 	public void testA3() {
-		AddressDAO address = new AddressDAO();
+		AddressInfo address = new AddressInfo();
 		address.setCountry("Canada");
 	}
 
 	@Test //(expected = IllegalArgumentException.class)
 	public void testA4() {
-		AddressDAO address = new AddressDAO();
+		AddressInfo address = new AddressInfo();
 		Assertions.assertThrows(IllegalArgumentException.class, ()->address.setCountry("UK"));
 	}
 	
 	public void testA5() {
-		AddressDAO address = new AddressDAO();
+		AddressInfo address = new AddressInfo();
 		address.setCountry("France");
 	}
 	
 	
 	public void testA6() {
-		AddressDAO address = new AddressDAO();
+		AddressInfo address = new AddressInfo();
 		address.setCountry("China");
 	}
 
 	@Test
 	public void testA7() {
-		AddressDAO address = new AddressDAO();
+		AddressInfo address = new AddressInfo();
 		address.setCountry("India");
 
 		System.out.println(address);
@@ -89,7 +88,7 @@ public class AddressDAOTest {
 	@Test
     public void testA8() {
         try {
-            AddressDAO address = new AddressDAO();
+            AddressInfo address = new AddressInfo();
 
             address.setStreet("123 Main Street");
             address.setCity("Los Angeles");
@@ -102,7 +101,7 @@ public class AddressDAOTest {
             System.out.println( json);
 
             try {
-                AddressDAO addressFromJSON = GSONUtil.fromJSON( json, AddressDAO.class);
+                AddressInfo addressFromJSON = GSONUtil.fromJSON( json, AddressInfo.class);
                 System.out.println( addressFromJSON);
 
                 System.out.println(SUS.toDebugString(addressFromJSON));

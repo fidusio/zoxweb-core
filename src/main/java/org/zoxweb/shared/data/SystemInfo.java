@@ -20,8 +20,9 @@ import org.zoxweb.shared.util.*;
 import org.zoxweb.shared.util.NVConfigEntity.ArrayType;
 
 /**
- * This class defines the system information data access object used 
- * to set up systems.
+ * Snapshot of a running system: canonical system ID, domain ID, JVM system
+ * properties, network interfaces, application properties and contained entities. Loaded by ServerUtil.loadSystemInfo
+ * and used to register a system.
  * @author mnael
  * @version $Revision: 1.25 $
  * {@code @lastModifiedBy} $Author: mnael $

@@ -58,7 +58,7 @@ public class InetFilterRulesManager {
         }
 
         /**
-         * This NVConfigEntity type constant is set to an instantiation of a NVConfigEntityLocal object based on AddressDAO.
+         * This NVConfigEntity type constant is set to an instantiation of a NVConfigEntityPortable object based on InetFilterRule.
          */
         public static final NVConfigEntity NVC_INET_FILTER_RULE = new NVConfigEntityPortable("inet_filter_prop", null, "InetFilterProp", true, false, false, false, InetFilterRule.class, SUS.extractNVConfigs(Params.values()), null, false, SetNameDAO.NVC_NAME_DAO);
 

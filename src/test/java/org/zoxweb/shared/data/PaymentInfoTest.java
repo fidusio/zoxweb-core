@@ -23,17 +23,17 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.zoxweb.shared.accounting.PaymentInfoDAO;
+import org.zoxweb.shared.accounting.PaymentInfo;
 
-public class PaymentInfoDAOTest {
+public class PaymentInfoTest {
 
-	private PaymentInfoDAO paymentInfo;
+	private PaymentInfo paymentInfo;
 
 	public static final SimpleDateFormat DEFAULT_DATE_FORMAT = new SimpleDateFormat("MM-yyyy");
 
 	@BeforeEach
 	public void setUp() throws Exception {
-		paymentInfo = new PaymentInfoDAO();
+		paymentInfo = new PaymentInfo();
 	}
 
 	@AfterEach
@@ -43,7 +43,7 @@ public class PaymentInfoDAOTest {
 
 	@Test
 	public void testGetCreditCard() throws ParseException {
-		CreditCardDAO card = new CreditCardDAO();
+		CreditCardInfo card = new CreditCardInfo();
 		card.setCardType(CreditCardType.VISA);
 		card.setFirstName("John");
 		card.setLastName("Smith");
@@ -59,7 +59,7 @@ public class PaymentInfoDAOTest {
 
 	@Test//(expected = IllegalArgumentException.class)
 	public void testSetCreditCard() throws ParseException {
-		CreditCardDAO card = new CreditCardDAO();
+		CreditCardInfo card = new CreditCardInfo();
 		card.setCardType(CreditCardType.VISA);
         card.setFirstName("John");
         card.setLastName("Smith");
@@ -75,7 +75,7 @@ public class PaymentInfoDAOTest {
 	@Test
 	public void testGetAddress() 
 	{
-		AddressDAO address = new AddressDAO();
+		AddressInfo address = new AddressInfo();
 		address.setStreet("123 Main St.");
 		address.setCity("Los Angeles");
 		address.setStateOrProvince("CA");
@@ -89,7 +89,7 @@ public class PaymentInfoDAOTest {
 	
 	@Test
 	public void testSetAddress() {
-		AddressDAO address = new AddressDAO();
+		AddressInfo address = new AddressInfo();
 		address.setStreet("123 Main St.");
 		address.setCity("Los Angeles");
 		address.setStateOrProvince("CA");

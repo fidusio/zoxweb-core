@@ -15,7 +15,7 @@
  */
 package org.zoxweb.shared.data.ticket;
 
-import org.zoxweb.shared.accounting.BillingItemsContainerDAO;
+import org.zoxweb.shared.accounting.BillingItemsContainer;
 import org.zoxweb.shared.data.NVEntityContainerDAO;
 import org.zoxweb.shared.data.ResolutionStatus;
 import org.zoxweb.shared.util.GetNVConfig;
@@ -38,7 +38,7 @@ public class TicketContainer
             implements GetNVConfig {
         STATUS(NVConfigManager.createNVConfig("status", "The status of the ticket.", "Status", false, true, ResolutionStatus.class)),
         ISSUER(NVConfigManager.createNVConfigEntity("issuer", "The ticket issuer.", "Issuer", true, true, TicketIssuer.NVC_TICKET_ISSUER, ArrayType.NOT_ARRAY)),
-        BILLING_ITEMS_CONTAINER(NVConfigManager.createNVConfigEntity("billing_items_container", "The billing items container.", "BillingItemsContainer", false, true, BillingItemsContainerDAO.class, ArrayType.NOT_ARRAY)),
+        BILLING_ITEMS_CONTAINER(NVConfigManager.createNVConfigEntity("billing_items_container", "The billing items container.", "BillingItemsContainer", false, true, BillingItemsContainer.class, ArrayType.NOT_ARRAY)),
 
         ;
 
@@ -116,11 +116,11 @@ public class TicketContainer
     }
 
 
-    public BillingItemsContainerDAO getBillingItemsContainerDAO() {
+    public BillingItemsContainer getBillingItemsContainerDAO() {
         return lookupValue(Param.BILLING_ITEMS_CONTAINER);
     }
 
-    public void setBillingItemsContainerDAO(BillingItemsContainerDAO container) {
+    public void setBillingItemsContainerDAO(BillingItemsContainer container) {
         if (container != null) {
             container.setCanonicalID(getCanonicalID());
         }

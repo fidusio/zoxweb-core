@@ -323,8 +323,8 @@ public class SharedDataUtil {
         String ret = null;
 
         if (nve != null) {
-            if (nve instanceof AddressDAO) {
-                AddressDAO address = (AddressDAO) nve;
+            if (nve instanceof AddressInfo) {
+                AddressInfo address = (AddressInfo) nve;
                 StringBuilder sb = new StringBuilder();
 
                 if (!SUS.isEmpty(address.getName()) && !SUS.isEmpty(address.getStreet())) {
@@ -369,8 +369,8 @@ public class SharedDataUtil {
                 }
 
                 ret = sb.toString();
-            } else if (nve instanceof PhoneDAO) {
-                PhoneDAO phone = (PhoneDAO) nve;
+            } else if (nve instanceof PhoneInfo) {
+                PhoneInfo phone = (PhoneInfo) nve;
                 StringBuilder sb = new StringBuilder();
 
                 if (!SUS.isEmpty(phone.getName())) {
@@ -395,8 +395,8 @@ public class SharedDataUtil {
                 }
 
                 ret = sb.toString();
-            } else if (nve instanceof CreditCardDAO) {
-                CreditCardDAO card = (CreditCardDAO) nve;
+            } else if (nve instanceof CreditCardInfo) {
+                CreditCardInfo card = (CreditCardInfo) nve;
 
                 if (!SUS.isEmpty(card.getName()) && card.getCardType() != null && card.getCardNumber() != null) {
                     ret = card.getName() + ", " + card.getCardType().getDisplay() + " ending in " + getCreditCardLastFourDigits(card.getCardNumber());

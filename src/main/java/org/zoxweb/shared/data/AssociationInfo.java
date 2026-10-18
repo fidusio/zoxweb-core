@@ -55,7 +55,7 @@ public class AssociationInfo
     }
 
     /**
-     * This NVConfigEntity type constant is set to an instantiation of a NVConfigEntityLocal object based on AddressDAO.
+     * This NVConfigEntity type constant is set to an instantiation of a NVConfigEntityPortable object based on AssociationInfo.
      */
     public static final NVConfigEntity NVC_ASSOCIATION_INFO = new NVConfigEntityPortable("association_info", null, "AssociationInfo", true, false, false, false, AssociationInfo.class, SUS.extractNVConfigs(Param.values()), null, false, SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO);//,SUS.extractNVConfigs( new Params[]{Params.REFERENCE_ID, Params.NAME, Params.LENGTH}));
 

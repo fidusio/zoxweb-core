@@ -24,29 +24,29 @@ public class CopyNVEntityTest {
 
 	public static void main(String[] args) {
 		
-		PhoneDAO phoneDAO = new PhoneDAO();
-		phoneDAO.setReferenceID("12345");
-		phoneDAO.setSubjectGUID("20000");
-		phoneDAO.setName("My Phone");
-		phoneDAO.setDescription("My mobile number.");
-		phoneDAO.setNumber("5551234");
-		phoneDAO.setAreaCode("310");
-		phoneDAO.setCountryCode("+1");
-		phoneDAO.setPhoneType(PhoneType.MOBILE.name());
+		PhoneInfo phoneInfo = new PhoneInfo();
+		phoneInfo.setReferenceID("12345");
+		phoneInfo.setSubjectGUID("20000");
+		phoneInfo.setName("My Phone");
+		phoneInfo.setDescription("My mobile number.");
+		phoneInfo.setNumber("5551234");
+		phoneInfo.setAreaCode("310");
+		phoneInfo.setCountryCode("+1");
+		phoneInfo.setPhoneType(PhoneType.MOBILE.name());
 		
-		NVEntity ret = SharedDataUtil.copyNVEntity(ZWDataFactory.SINGLETON, phoneDAO, true, false, false);
+		NVEntity ret = SharedDataUtil.copyNVEntity(ZWDataFactory.SINGLETON, phoneInfo, true, false, false);
 		
-		System.out.println("NVEntity to copy: " + phoneDAO);
+		System.out.println("NVEntity to copy: " + phoneInfo);
 		System.out.println("Deep: " + true);
 		System.out.println("Omit Ref ID: " + false);
 		System.out.println("Omit User ID: " + false);
 		System.out.println("Copied NVEntity: " + ret);
-		System.out.println("Equal? " + ret.toString().equals(phoneDAO.toString()));
+		System.out.println("Equal? " + ret.toString().equals(phoneInfo.toString()));
 		
-		ret = SharedDataUtil.copyNVEntity(ZWDataFactory.SINGLETON, phoneDAO, true, true, true);
+		ret = SharedDataUtil.copyNVEntity(ZWDataFactory.SINGLETON, phoneInfo, true, true, true);
 		
 		System.out.println();
-		System.out.println("NVEntity to copy: " + phoneDAO);
+		System.out.println("NVEntity to copy: " + phoneInfo);
 		System.out.println("Deep: " + true);
 		System.out.println("Omit Ref ID: " + true);
 		System.out.println("Omit User ID: " + true);

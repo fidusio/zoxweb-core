@@ -12,7 +12,7 @@ public class FolderContentOpTest
 		{
 			
 			
-			AddressDAO address = new AddressDAO();
+			AddressInfo address = new AddressInfo();
 			address.setName("tizi");
 			address.setStreet("123 Main St.");
 			address.setCity("Los Angeles");

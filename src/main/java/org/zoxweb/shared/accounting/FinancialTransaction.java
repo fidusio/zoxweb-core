@@ -42,7 +42,7 @@ public class FinancialTransaction
         CREATION_TS(NVConfigManager.createNVConfig("creation_ts", "Time in millis when the transaction was created", "CreationTS", true, false, false, false, Date.class, null)),
         EXTERNAL_REFERENCE(NVConfigManager.createNVConfig("external_reference", "External reference", "ExternalReference", false, true, String.class)),
         REFERENCED_NVE(NVConfigManager.createNVConfigEntity("referenced_nve", "Referenced NVEntity", "ReferencedNVEntity", false, false, NVEntity.class, ArrayType.NOT_ARRAY)),
-        TRANSACTION_AMOUNT(NVConfigManager.createNVConfigEntity("transaction_amount", "Transaction amount", "TransactionAmount", true, true, AmountDAO.NVC_AMOUNT_DAO)),
+        TRANSACTION_AMOUNT(NVConfigManager.createNVConfigEntity("transaction_amount", "Transaction amount", "TransactionAmount", true, true, AmountInfo.NVC_AMOUNT_INFO)),
         TRANSACTION_TYPE(NVConfigManager.createNVConfig("transaction_type", "Type of transaction either credit or debit", "TransactionType", false, true, TransactionType.class)),
         TRANSACTION_DESCRIPTOR(NVConfigManager.createNVConfig("transaction_descriptor", "Description of transaction", "TransactionDescriptor", false, true, String.class)),
 
@@ -88,7 +88,7 @@ public class FinancialTransaction
      *
      * @param amount
      */
-    public FinancialTransaction(AmountDAO amount) {
+    public FinancialTransaction(AmountInfo amount) {
         this(amount, DEFAULT_TT);
     }
 
@@ -99,7 +99,7 @@ public class FinancialTransaction
      * @param amount
      * @param type
      */
-    public FinancialTransaction(AmountDAO amount, TransactionType type) {
+    public FinancialTransaction(AmountInfo amount, TransactionType type) {
         this(amount, type, null);
     }
 
@@ -110,7 +110,7 @@ public class FinancialTransaction
      * @param type
      * @param descriptor
      */
-    public FinancialTransaction(AmountDAO amount, TransactionType type, String descriptor) {
+    public FinancialTransaction(AmountInfo amount, TransactionType type, String descriptor) {
         this();
         setAmount(amount);
         setType(type);
@@ -176,7 +176,7 @@ public class FinancialTransaction
      *
      * @return money value
      */
-    public AmountDAO getAmount() {
+    public AmountInfo getAmount() {
         return lookupValue(Params.TRANSACTION_AMOUNT);
     }
 
@@ -185,7 +185,7 @@ public class FinancialTransaction
      *
      * @param amount
      */
-    public void setAmount(AmountDAO amount) {
+    public void setAmount(AmountInfo amount) {
         setValue(Params.TRANSACTION_AMOUNT, amount);
     }
 

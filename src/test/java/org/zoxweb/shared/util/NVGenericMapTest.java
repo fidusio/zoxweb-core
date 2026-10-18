@@ -3,7 +3,7 @@ package org.zoxweb.shared.util;
 import org.junit.jupiter.api.Test;
 import org.zoxweb.server.io.IOUtil;
 import org.zoxweb.server.util.GSONUtil;
-import org.zoxweb.shared.data.AddressDAO;
+import org.zoxweb.shared.data.AddressInfo;
 import org.zoxweb.shared.http.HTTPEndPoint;
 import org.zoxweb.shared.util.SharedBase64.Base64Type;
 
@@ -136,7 +136,7 @@ public class NVGenericMapTest
 			nvgm.build(uvw);
 			
 			
-			AddressDAO address = new AddressDAO();
+			AddressInfo address = new AddressInfo();
 			address.setName("tizi");
 			address.setStreet("123 Main St.");
 			address.setCity("Los Angeles");
@@ -335,14 +335,14 @@ public class NVGenericMapTest
 
 	@Test
 	public void testAreEquals_WithNVEntity() {
-		AddressDAO address1 = new AddressDAO();
+		AddressInfo address1 = new AddressInfo();
 		address1.setStreet("123 Main St");
 		address1.setCity("Los Angeles");
 
 		NVGenericMap one = new NVGenericMap();
 		one.add(address1);
 
-		AddressDAO address2 = new AddressDAO();
+		AddressInfo address2 = new AddressInfo();
 		address2.setStreet("123 Main St");
 		address2.setCity("Los Angeles");
 

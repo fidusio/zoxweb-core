@@ -27,7 +27,7 @@ import java.math.BigDecimal;
  *
  */
 @SuppressWarnings("serial")
-public class AmountDAO
+public class AmountInfo
         extends SetNameDescriptionDAO
         implements RenderableValue<String> {
 
@@ -56,15 +56,15 @@ public class AmountDAO
 
     }
 
-    public static final NVConfigEntity NVC_AMOUNT_DAO = new NVConfigEntityPortable(
-            "amount_dao",
+    public static final NVConfigEntity NVC_AMOUNT_INFO = new NVConfigEntityPortable(
+            "amount_info",
             null,
-            "AmountDAO",
+            "AmountInfo",
             true,
             false,
             false,
             false,
-            AmountDAO.class,
+            AmountInfo.class,
             SUS.extractNVConfigs(Params.values()),
             null,
             true,
@@ -75,18 +75,18 @@ public class AmountDAO
     /**
      * The default constructor.
      */
-    public AmountDAO() {
-        super(NVC_AMOUNT_DAO);
+    public AmountInfo() {
+        super(NVC_AMOUNT_INFO);
         setCurrency(DEFAULT_CURRENCY);
     }
 
     /**
-     * This constructor instantiates MoneyValueDAO based on given amount (BigDecimal) and currency (Currency).
+     * This constructor instantiates AmountInfo based on given amount (BigDecimal) and currency (Currency).
      *
      * @param amount
      * @param currency
      */
-    public AmountDAO(BigDecimal amount, Currency currency) {
+    public AmountInfo(BigDecimal amount, Currency currency) {
         this();
         setAmount(amount);
         if (currency != null) {
@@ -94,7 +94,7 @@ public class AmountDAO
         }
     }
 
-    public AmountDAO(BigDecimal amount) {
+    public AmountInfo(BigDecimal amount) {
         this(amount, null);
     }
 
@@ -104,7 +104,7 @@ public class AmountDAO
      *
      * @param amount
      */
-    public AmountDAO(String amount) {
+    public AmountInfo(String amount) {
         this(new BigDecimal(amount), null);
     }
 
@@ -114,7 +114,7 @@ public class AmountDAO
      *
      * @param amount
      */
-    public AmountDAO(long amount) {
+    public AmountInfo(long amount) {
         this(new BigDecimal(amount), null);
     }
 
@@ -124,16 +124,16 @@ public class AmountDAO
      *
      * @param amount
      */
-    public AmountDAO(float amount) {
+    public AmountInfo(float amount) {
         this(BigDecimal.valueOf(amount), null);
     }
 
     /**
-     * This constructor instantiates MoneyValueDAO based on given currency (Currency).
+     * This constructor instantiates AmountInfo based on given currency (Currency).
      *
      * @param currency
      */
-    public AmountDAO(Currency currency) {
+    public AmountInfo(Currency currency) {
         this(null, currency);
     }
 
@@ -150,8 +150,8 @@ public class AmountDAO
     public boolean equals(Object obj) {
         if (obj != null) {
 
-            if (obj instanceof AmountDAO) {
-                AmountDAO mvd = (AmountDAO) obj;
+            if (obj instanceof AmountInfo) {
+                AmountInfo mvd = (AmountInfo) obj;
                 if (mvd.getCurrency() == getCurrency() && mvd.getAmount().equals(getAmount())) {
                     return true;
                 }

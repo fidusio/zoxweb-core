@@ -49,7 +49,7 @@ public class APIToken
     }
 
     /**
-     * This NVConfigEntity type constant is set to an instantiation of a NVConfigEntityLocal object based on API ConfigInfoDAO.
+     * This NVConfigEntity type constant is set to an instantiation of a NVConfigEntityPortable object based on APIToken.
      */
     public static final NVConfigEntity NVC_API_TOKEN = new NVConfigEntityPortable("api_token",
             "APIToken",
