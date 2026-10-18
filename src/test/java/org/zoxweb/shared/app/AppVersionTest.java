@@ -22,11 +22,11 @@ import org.zoxweb.shared.util.GetNameValue;
 
 import java.util.Date;
 
-public class AppVersionDAOTest {
+public class AppVersionTest {
 
     @Test
     public void testDefaultConstructor() {
-        AppVersionDAO appVersion = new AppVersionDAO();
+        AppVersion appVersion = new AppVersion();
         Assertions.assertNotNull(appVersion);
         Assertions.assertEquals(0, appVersion.getMajor());
         Assertions.assertEquals(0, appVersion.getMinor());
@@ -35,7 +35,7 @@ public class AppVersionDAOTest {
 
     @Test
     public void testStringConstructorVersionOnly() {
-        AppVersionDAO appVersion = new AppVersionDAO("1.2.3");
+        AppVersion appVersion = new AppVersion("1.2.3");
         Assertions.assertEquals(1, appVersion.getMajor());
         Assertions.assertEquals(2, appVersion.getMinor());
         Assertions.assertEquals(3, appVersion.getNano());
@@ -43,7 +43,7 @@ public class AppVersionDAOTest {
 
     @Test
     public void testStringConstructorNameAndVersion() {
-        AppVersionDAO appVersion = new AppVersionDAO("MyApp::1.2.3");
+        AppVersion appVersion = new AppVersion("MyApp::1.2.3");
         Assertions.assertEquals("MyApp", appVersion.getName());
         Assertions.assertEquals(1, appVersion.getMajor());
         Assertions.assertEquals(2, appVersion.getMinor());
@@ -52,7 +52,7 @@ public class AppVersionDAOTest {
 
     @Test
     public void testStringConstructorNameDescriptionAndVersion() {
-        AppVersionDAO appVersion = new AppVersionDAO("MyApp::A test application::2.5.10");
+        AppVersion appVersion = new AppVersion("MyApp::A test application::2.5.10");
         Assertions.assertEquals("MyApp", appVersion.getName());
         Assertions.assertEquals("A test application", appVersion.getDescription());
         Assertions.assertEquals(2, appVersion.getMajor());
@@ -62,7 +62,7 @@ public class AppVersionDAOTest {
 
     @Test
     public void testSetAndGetMajor() {
-        AppVersionDAO appVersion = new AppVersionDAO();
+        AppVersion appVersion = new AppVersion();
         appVersion.setMajor(5);
         Assertions.assertEquals(5, appVersion.getMajor());
 
@@ -72,7 +72,7 @@ public class AppVersionDAOTest {
 
     @Test
     public void testSetAndGetMinor() {
-        AppVersionDAO appVersion = new AppVersionDAO();
+        AppVersion appVersion = new AppVersion();
         appVersion.setMinor(0);
         Assertions.assertEquals(0, appVersion.getMinor());
 
@@ -82,19 +82,19 @@ public class AppVersionDAOTest {
 
     @Test
     public void testMinorValidationBelowRange() {
-        AppVersionDAO appVersion = new AppVersionDAO();
+        AppVersion appVersion = new AppVersion();
         Assertions.assertThrows(IllegalArgumentException.class, () -> appVersion.setMinor(-1));
     }
 
     @Test
     public void testMinorValidationAboveRange() {
-        AppVersionDAO appVersion = new AppVersionDAO();
+        AppVersion appVersion = new AppVersion();
         Assertions.assertThrows(IllegalArgumentException.class, () -> appVersion.setMinor(10));
     }
 
     @Test
     public void testSetAndGetNano() {
-        AppVersionDAO appVersion = new AppVersionDAO();
+        AppVersion appVersion = new AppVersion();
         appVersion.setNano(0);
         Assertions.assertEquals(0, appVersion.getNano());
 
@@ -107,19 +107,19 @@ public class AppVersionDAOTest {
 
     @Test
     public void testNanoValidationBelowRange() {
-        AppVersionDAO appVersion = new AppVersionDAO();
+        AppVersion appVersion = new AppVersion();
         Assertions.assertThrows(IllegalArgumentException.class, () -> appVersion.setNano(-1));
     }
 
     @Test
     public void testNanoValidationAboveRange() {
-        AppVersionDAO appVersion = new AppVersionDAO();
+        AppVersion appVersion = new AppVersion();
         Assertions.assertThrows(IllegalArgumentException.class, () -> appVersion.setNano(100));
     }
 
     @Test
     public void testToCanonicalID() {
-        AppVersionDAO appVersion = new AppVersionDAO();
+        AppVersion appVersion = new AppVersion();
         appVersion.setName("TestApp");
         appVersion.setMajor(1);
         appVersion.setMinor(2);
@@ -130,7 +130,7 @@ public class AppVersionDAOTest {
 
     @Test
     public void testToString() {
-        AppVersionDAO appVersion = new AppVersionDAO();
+        AppVersion appVersion = new AppVersion();
         appVersion.setName("TestApp");
         appVersion.setMajor(2);
         appVersion.setMinor(0);
@@ -141,7 +141,7 @@ public class AppVersionDAOTest {
 
     @Test
     public void testSetAndGetReleaseDate() {
-        AppVersionDAO appVersion = new AppVersionDAO();
+        AppVersion appVersion = new AppVersion();
         Date now = new Date();
         appVersion.setReleaseDate(now);
 
@@ -152,22 +152,22 @@ public class AppVersionDAOTest {
 
     @Test
     public void testInvalidVersionFormat() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> new AppVersionDAO("1.2"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> new AppVersion("1.2"));
     }
 
     @Test
     public void testInvalidVersionFormatTooMany() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> new AppVersionDAO("1.2.3.4"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> new AppVersion("1.2.3.4"));
     }
 
     @Test
     public void testInvalidVersionFormatNonNumeric() {
-        Assertions.assertThrows(NumberFormatException.class, () -> new AppVersionDAO("a.b.c"));
+        Assertions.assertThrows(NumberFormatException.class, () -> new AppVersion("a.b.c"));
     }
 
     @Test
     public void testJsonSerialization() {
-        AppVersionDAO appVersion = new AppVersionDAO();
+        AppVersion appVersion = new AppVersion();
         appVersion.setName("SerialApp");
         appVersion.setDescription("Test serialization");
         appVersion.setMajor(3);
@@ -179,7 +179,7 @@ public class AppVersionDAOTest {
         Assertions.assertNotNull(json);
         System.out.println("JSON: " + json);
 
-        AppVersionDAO deserialized = GSONUtil.fromJSON(json, AppVersionDAO.class);
+        AppVersion deserialized = GSONUtil.fromJSON(json, AppVersion.class);
         Assertions.assertNotNull(deserialized);
         Assertions.assertEquals(appVersion.getName(), deserialized.getName());
         Assertions.assertEquals(appVersion.getDescription(), deserialized.getDescription());
@@ -190,7 +190,7 @@ public class AppVersionDAOTest {
 
     @Test
     public void testMinorBoundaryValues() {
-        AppVersionDAO appVersion = new AppVersionDAO();
+        AppVersion appVersion = new AppVersion();
 
         // Test boundary value 0
         appVersion.setMinor(0);
@@ -203,7 +203,7 @@ public class AppVersionDAOTest {
 
     @Test
     public void testNanoBoundaryValues() {
-        AppVersionDAO appVersion = new AppVersionDAO();
+        AppVersion appVersion = new AppVersion();
 
         // Test boundary value 0
         appVersion.setNano(0);
@@ -216,7 +216,7 @@ public class AppVersionDAOTest {
 
     @Test
     public void testCanonicalIDWithNullName() {
-        AppVersionDAO appVersion = new AppVersionDAO();
+        AppVersion appVersion = new AppVersion();
         appVersion.setMajor(1);
         appVersion.setMinor(0);
         appVersion.setNano(0);
@@ -227,7 +227,7 @@ public class AppVersionDAOTest {
 
     @Test
     public void testStringConstructorWithZeroVersion() {
-        AppVersionDAO appVersion = new AppVersionDAO("0.0.0");
+        AppVersion appVersion = new AppVersion("0.0.0");
         Assertions.assertEquals(0, appVersion.getMajor());
         Assertions.assertEquals(0, appVersion.getMinor());
         Assertions.assertEquals(0, appVersion.getNano());
@@ -235,7 +235,7 @@ public class AppVersionDAOTest {
 
     @Test
     public void testStringConstructorWithMaxValidValues() {
-        AppVersionDAO appVersion = new AppVersionDAO("TestApp::999.9.99");
+        AppVersion appVersion = new AppVersion("TestApp::999.9.99");
         Assertions.assertEquals("TestApp", appVersion.getName());
         Assertions.assertEquals(999, appVersion.getMajor());
         Assertions.assertEquals(9, appVersion.getMinor());
@@ -244,7 +244,7 @@ public class AppVersionDAOTest {
 
     @Test
     public void testToNameValue() {
-        AppVersionDAO appVersion = new AppVersionDAO();
+        AppVersion appVersion = new AppVersion();
         appVersion.setName("MyApp");
         appVersion.setMajor(1);
         appVersion.setMinor(2);
@@ -258,7 +258,7 @@ public class AppVersionDAOTest {
 
     @Test
     public void testToNameValueFromStringConstructor() {
-        AppVersionDAO appVersion = new AppVersionDAO("TestApp::Description::2.5.10");
+        AppVersion appVersion = new AppVersion("TestApp::Description::2.5.10");
 
         GetNameValue<String> nameValue = appVersion.toNVVersion();
         Assertions.assertNotNull(nameValue);

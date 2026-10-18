@@ -18,9 +18,9 @@ package org.zoxweb.server.util;
 import org.zoxweb.server.io.ByteBufferUtil;
 import org.zoxweb.server.io.UByteArrayOutputStream;
 import org.zoxweb.server.net.NetUtil;
-import org.zoxweb.shared.data.SystemInfoDAO;
+import org.zoxweb.shared.data.SystemInfo;
 import org.zoxweb.shared.io.SharedIOUtil;
-import org.zoxweb.shared.net.NetworkInterfaceDAO;
+import org.zoxweb.shared.net.NetworkInterfaceInfo;
 import org.zoxweb.shared.util.*;
 
 import java.beans.XMLDecoder;
@@ -38,7 +38,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * Server-side (full JVM) static helpers that do not fit a more specific utility class:
  * a shared {@link SecureRandom} and global {@link Lock}, monitor wait and sub-millisecond
  * delay helpers, throwable-to-string conversion, text file/stream to line list readers,
- * JavaBeans XML (de)serialization, {@link SystemInfoDAO} population from system properties
+ * JavaBeans XML (de)serialization, {@link SystemInfo} population from system properties
  * and network interfaces, and a few OS/JVM level conveniences.
  * <p>
  * Everything here is stateless except the lazily computed {@link #isMacOS()} flag; the
@@ -259,15 +259,15 @@ public final class ServerUtil {
 
     /**
      * Load the systeminfo: every JVM system property as an {@link NVPair}, and optionally
-     * one {@link NetworkInterfaceDAO} (name, display name, MAC, addresses) per physical
+     * one {@link NetworkInterfaceInfo} (name, display name, MAC, addresses) per physical
      * network interface. Loopback, point-to-point, virtual and MAC-less interfaces are
      * skipped. Interface enumeration errors are swallowed and simply leave the network
      * list empty.
      * @param includeNetworkDetails true add networking info
-     * @return SystemInfoDAO
+     * @return SystemInfo
      */
-    public static SystemInfoDAO loadSystemInfoDAO(boolean includeNetworkDetails) {
-        SystemInfoDAO ret = new SystemInfoDAO();
+    public static SystemInfo loadSystemInfo(boolean includeNetworkDetails) {
+        SystemInfo ret = new SystemInfo();
 
         Map.Entry<?, ?>[] all = System.getProperties().entrySet().toArray(new Map.Entry[0]);
 
@@ -283,7 +283,7 @@ public final class ServerUtil {
                     NetworkInterface ni = interfaces.nextElement();
 
                     if (!ni.isPointToPoint() && !ni.isLoopback() && !ni.isVirtual() && ni.getHardwareAddress() != null) {
-                        NetworkInterfaceDAO niDAO = new NetworkInterfaceDAO();
+                        NetworkInterfaceInfo niDAO = new NetworkInterfaceInfo();
                         niDAO.setMACAddress(SUS.bytesToHex(ni.getHardwareAddress(), ":"));
                         niDAO.setName(ni.getName());
                         niDAO.setDisplayName(ni.getDisplayName());
@@ -309,11 +309,11 @@ public final class ServerUtil {
 
     /**
      * Load the systeminfo including network details; equivalent to
-     * {@code loadSystemInfoDAO(true)}.
-     * @return SystemInfoDAO
+     * {@code loadSystemInfo(true)}.
+     * @return SystemInfo
      */
-    public static SystemInfoDAO loadSystemInfoDAO() {
-        return loadSystemInfoDAO(true);
+    public static SystemInfo loadSystemInfo() {
+        return loadSystemInfo(true);
     }
 
 
@@ -405,19 +405,19 @@ public final class ServerUtil {
 
 
     /**
-     * Diagnostic entry point: loads {@link #loadSystemInfoDAO()} and prints the system
+     * Diagnostic entry point: loads {@link #loadSystemInfo()} and prints the system
      * properties, network interfaces and the JSON rendering to stdout.
      * @param args ignored
      */
     public static void main(String... args) {
         try {
-            SystemInfoDAO siDAO = loadSystemInfoDAO();
+            SystemInfo siDAO = loadSystemInfo();
             System.out.println(SUS.toCanonicalID(':', siDAO.getName(), siDAO.getDescription()));
             System.out.println(siDAO.getSystemProperties());
             NVEntity[] allInterfaces = siDAO.getNetworkInterfaces().values();
-            //Iterator<NetworkInterfaceDAO> it = (Iterator<NetworkInterfaceDAO> )allInterfaces.iterator();
+            //Iterator<NetworkInterfaceInfo> it = (Iterator<NetworkInterfaceInfo> )allInterfaces.iterator();
             for (int i = 0; i < allInterfaces.length; i++) {
-                NetworkInterfaceDAO niDAO = (NetworkInterfaceDAO) allInterfaces[i];
+                NetworkInterfaceInfo niDAO = (NetworkInterfaceInfo) allInterfaces[i];
                 System.out.println(SUS.toCanonicalID(',', i, niDAO.getName(), niDAO.getMACAddress()));
                 System.out.println(niDAO.getInetAddresses());
             }

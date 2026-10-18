@@ -72,7 +72,6 @@ public class APIConfigInfoImpl
     // This variable should not be part of the NVConfig definition;
     private APIConfigStatus status = APIConfigStatus.INACTIVE;
     private volatile KeyMaker keyMaker = null;
-    //private volatile APISecurityManager<?, ?, ?> apiSecurityManager = null;
     private volatile SecurityController securityController = null;
     /**
      * This NVConfigEntity type constant is set to an instantiation of a NVConfigEntityLocal object based on API ConfigInfoDAO.
@@ -276,18 +275,6 @@ public class APIConfigInfoImpl
     public KeyMaker getKeyMaker() {
         return keyMaker;
     }
-
-//	@Override
-//	public void setAPISecurityManager(APISecurityManager<?, ?, ?> apiSM)
-//	{
-//		apiSecurityManager = apiSM;
-//	}
-//
-//	@Override
-//	public APISecurityManager<?, ?, ?> getAPISecurityManager()
-//	{
-//		return apiSecurityManager;
-//	}
 
     /**
      * Returns the account ID.

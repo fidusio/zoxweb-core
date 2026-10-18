@@ -15,26 +15,24 @@
  */
 package org.zoxweb.shared.api;
 
-import org.zoxweb.shared.data.SetNameDescriptionDAO;
+import org.zoxweb.shared.data.PropertyDAO;
 import org.zoxweb.shared.filters.FilterType;
 import org.zoxweb.shared.util.*;
-
-import java.util.List;
 
 /**
  * This class represents API access credentials composed of an API key and an encrypted
  * API secret, with optional extra configuration parameters.
  */
 @SuppressWarnings("serial")
-public class APICredentialsDAO
-        extends SetNameDescriptionDAO {
+public class APICredentials
+        extends PropertyDAO {
 
     public enum Params
             implements GetNVConfig {
         NVC_NAME(NVConfigManager.createNVConfig("name", "The reference id of the Object", "Name", true, true, true, false, String.class, null)),
         API_KEY(NVConfigManager.createNVConfig("api_key", "The API key.", "APIKey", true, true, String.class)),
-        API_SECRET(NVConfigManager.createNVConfig("api_secret", "The API secret", "APISercret", true, true, false, String.class, FilterType.ENCRYPT)),
-        EXTRA_PARAMETERS(NVConfigManager.createNVConfig("extra_parameters", "Extra configuration parameters", "ExtraParameters", false, true, true, String[].class, null)),
+        API_SECRET(NVConfigManager.createNVConfig("api_secret", "The API secret", "APISecret", true, true, false, String.class, FilterType.ENCRYPT)),
+        //EXTRA_PARAMETERS(NVConfigManager.createNVConfig("extra_parameters", "Extra configuration parameters", "ExtraParameters", false, true, true, String[].class, null)),
         ;
 
         private final NVConfig cType;
@@ -52,26 +50,26 @@ public class APICredentialsDAO
     /**
      * This NVConfigEntity type constant is set to an instantiation of a NVConfigEntityLocal object based on API ConfigInfoDAO.
      */
-    public static final NVConfigEntity NVC_CREDENTIALS_DAO = new NVConfigEntityPortable("api_credentials_dao",
+    public static final NVConfigEntity NVC_API_CREDENTIALS = new NVConfigEntityPortable("api_credentials",
             "API Key and Secret",
-            "APICredentialsDAO",
+            "APICredentials",
             true,
             false,
             false,
             false,
-            APICredentialsDAO.class,
+            APICredentials.class,
             SUS.extractNVConfigs(Params.values()),
             null,
             false,
-            SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO
+            PropertyDAO.NVC_PROPERTY_DAO
     );
 
     /**
      * default constructor
      *
      */
-    public APICredentialsDAO() {
-        super(NVC_CREDENTIALS_DAO);
+    public APICredentials() {
+        super(NVC_API_CREDENTIALS);
         // TODO Auto-generated constructor stub
     }
 
@@ -94,24 +92,24 @@ public class APICredentialsDAO
     }
 
 
-    @SuppressWarnings("unchecked")
-    public ArrayValues<NVPair> getExtraParameters() {
-        return (ArrayValues<NVPair>) lookup(Params.EXTRA_PARAMETERS);
-    }
-
-    /**
-     * This method sets the service configuration parameters.
-     *
-     * @param configParams
-     */
-    public void setExtraParameters(List<NVPair> configParams) {
-        getExtraParameters().add(configParams.toArray(new NVPair[0]), true);
-    }
-
-
-    public void setExtraParameters(ArrayValues<NVPair> configParams) {
-        // TODO Auto-generated method stub
-        getExtraParameters().add(configParams.values(), true);
-    }
+//    @SuppressWarnings("unchecked")
+//    public ArrayValues<NVPair> getExtraParameters() {
+//        return (ArrayValues<NVPair>) lookup(Params.EXTRA_PARAMETERS);
+//    }
+//
+//    /**
+//     * This method sets the service configuration parameters.
+//     *
+//     * @param configParams
+//     */
+//    public void setExtraParameters(List<NVPair> configParams) {
+//        getExtraParameters().add(configParams.toArray(new NVPair[0]), true);
+//    }
+//
+//
+//    public void setExtraParameters(ArrayValues<NVPair> configParams) {
+//        // TODO Auto-generated method stub
+//        getExtraParameters().add(configParams.values(), true);
+//    }
 
 }

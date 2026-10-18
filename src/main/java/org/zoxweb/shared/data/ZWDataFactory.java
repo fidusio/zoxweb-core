@@ -18,7 +18,7 @@ package org.zoxweb.shared.data;
 import org.zoxweb.shared.accounting.*;
 import org.zoxweb.shared.api.*;
 import org.zoxweb.shared.app.AppIDDefault;
-import org.zoxweb.shared.app.AppVersionDAO;
+import org.zoxweb.shared.app.AppVersion;
 import org.zoxweb.shared.data.ticket.TicketContainer;
 import org.zoxweb.shared.data.ticket.TicketIssuer;
 import org.zoxweb.shared.data.ticket.TicketResolution;
@@ -123,16 +123,16 @@ public class ZWDataFactory
 
         } //	org.zoxweb.shared.api
         ,
-        API_CREDENTIALS_DAO(APICredentialsDAO.class.getName()) {
+        API_CREDENTIALS(APICredentials.class.getName()) {
             @SuppressWarnings("unchecked")
             @Override
-            public APICredentialsDAO newInstance() {
-                return new APICredentialsDAO();
+            public APICredentials newInstance() {
+                return new APICredentials();
             }
 
             @Override
             public NVConfigEntity getNVConfigEntity() {
-                return APICredentialsDAO.NVC_CREDENTIALS_DAO;
+                return APICredentials.NVC_API_CREDENTIALS;
             }
 
         },
@@ -161,16 +161,16 @@ public class ZWDataFactory
                 return APIError.API_ERROR;
             }
         },
-        APPLICATION_VERSION_DAO(AppVersionDAO.class.getName()) {
+        APP_VERSION(AppVersion.class.getName()) {
             @SuppressWarnings("unchecked")
             @Override
-            public AppVersionDAO newInstance() {
-                return new AppVersionDAO();
+            public AppVersion newInstance() {
+                return new AppVersion();
             }
 
             @Override
             public NVConfigEntity getNVConfigEntity() {
-                return AppVersionDAO.NVC_APPLICATION_VERSION_DAO;
+                return AppVersion.NVC_APP_VERSION;
             }
         },
         APP_ACCESS_MODE(AppAccessMode.class.getName()) {
@@ -561,16 +561,16 @@ public class ZWDataFactory
                 return IPBlockerConfig.NVC_IP_BLOCKER;
             }
         },
-        IP_RANGE_DAO(IPRangeDAO.class.getName()) {
+        IP_RANGE_INFO(IPRangeInfo.class.getName()) {
             @SuppressWarnings("unchecked")
             @Override
-            public IPRangeDAO newInstance() {
-                return new IPRangeDAO();
+            public IPRangeInfo newInstance() {
+                return new IPRangeInfo();
             }
 
             @Override
             public NVConfigEntity getNVConfigEntity() {
-                return IPRangeDAO.IP_RANGE_DAO;
+                return IPRangeInfo.NVC_IP_RANGE_INFO;
             }
         },
         JWT(JWT.class.getName()) {
@@ -697,16 +697,16 @@ public class ZWDataFactory
                 return MessageTemplate.NVC_MESSAGE_TEMPLATE;
             }
         },
-        NETWORK_INTERFACE_DAO(NetworkInterfaceDAO.class.getName()) {
+        NETWORK_INTERFACE_INFO(NetworkInterfaceInfo.class.getName()) {
             @SuppressWarnings("unchecked")
             @Override
-            public NetworkInterfaceDAO newInstance() {
-                return new NetworkInterfaceDAO();
+            public NetworkInterfaceInfo newInstance() {
+                return new NetworkInterfaceInfo();
             }
 
             @Override
             public NVConfigEntity getNVConfigEntity() {
-                return NetworkInterfaceDAO.NVC_NETWORK_INTERFACE_DAO;
+                return NetworkInterfaceInfo.NVC_NETWORK_INTERFACE_INFO;
             }
         },
         NI_CONFIG_DAO(NIConfigDAO.class.getName()) {
@@ -1041,16 +1041,16 @@ public class ZWDataFactory
                 return SubjectIdentifier.NVC_SUBJECT_IDENTIFIER;
             }
         },
-        SYSTEM_INFO_DAO(SystemInfoDAO.class.getName()) {
+        SYSTEM_INFO(SystemInfo.class.getName()) {
             @SuppressWarnings("unchecked")
             @Override
-            public SystemInfoDAO newInstance() {
-                return new SystemInfoDAO();
+            public SystemInfo newInstance() {
+                return new SystemInfo();
             }
 
             @Override
             public NVConfigEntity getNVConfigEntity() {
-                return SystemInfoDAO.NVC_SYSTEM_INFO_DAO;
+                return SystemInfo.NVC_SYSTEM_INFO;
             }
         },
         TICKET_CONTAINER_DAO(TicketContainer.class.getName()) {
@@ -1091,30 +1091,6 @@ public class ZWDataFactory
                 return TicketResolution.NVC_TICKET_RESOLUTION;
             }
         },
-        USER_ID_DAO(UserIDDAO.class.getName()) {
-            @SuppressWarnings("unchecked")
-            @Override
-            public UserIDDAO newInstance() {
-                return new UserIDDAO();
-            }
-
-            @Override
-            public NVConfigEntity getNVConfigEntity() {
-                return UserIDDAO.NVC_USER_ID_DAO;
-            }
-        },
-        USER_INFO_DAO(UserInfoDAO.class.getName()) {
-            @SuppressWarnings("unchecked")
-            @Override
-            public UserInfoDAO newInstance() {
-                return new UserInfoDAO();
-            }
-
-            @Override
-            public NVConfigEntity getNVConfigEntity() {
-                return UserInfoDAO.NVC_USER_INFO_DAO;
-            }
-        },
         USER_PREFERENCE_DAO(SubjectPreference.class.getName()) {
             @SuppressWarnings("unchecked")
             @Override
@@ -1127,16 +1103,16 @@ public class ZWDataFactory
                 return SubjectPreference.NVC_SUBJECT_PREFERENCE;
             }
         },
-        UUID_INFO_DAO(UUIDInfoDAO.class.getName()) {
+        UUID_INFO(UUIDInfo.class.getName()) {
             @SuppressWarnings("unchecked")
             @Override
-            public UUIDInfoDAO newInstance() {
-                return new UUIDInfoDAO();
+            public UUIDInfo newInstance() {
+                return new UUIDInfo();
             }
 
             @Override
             public NVConfigEntity getNVConfigEntity() {
-                return UUIDInfoDAO.NVC_UUID_INFO_DAO;
+                return UUIDInfo.NVC_UUID_INFO;
             }
         },
         VM_INFO_DAO(VMInfoDAO.class.getName()) {

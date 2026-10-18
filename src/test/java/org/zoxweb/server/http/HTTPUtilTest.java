@@ -3,7 +3,7 @@ package org.zoxweb.server.http;
 import org.junit.jupiter.api.Test;
 import org.zoxweb.server.io.UByteArrayOutputStream;
 import org.zoxweb.shared.data.AddressDAO;
-import org.zoxweb.shared.data.UUIDInfoDAO;
+import org.zoxweb.shared.data.UUIDInfo;
 import org.zoxweb.shared.http.HTTPMessageConfigInterface;
 import org.zoxweb.shared.http.HTTPStatusCode;
 import org.zoxweb.shared.protocol.Delimiter;
@@ -25,7 +25,7 @@ public class HTTPUtilTest {
 
         System.out.println(SUS.toString(data.getInternalBuffer(), 0, data.size()));
 
-        UUIDInfoDAO uuid = new UUIDInfoDAO();
+        UUIDInfo uuid = new UUIDInfo();
         hmci = HTTPUtil.buildResponse(uuid, HTTPStatusCode.OK);
         data = HTTPUtil.formatResponse(hmci, null);
 

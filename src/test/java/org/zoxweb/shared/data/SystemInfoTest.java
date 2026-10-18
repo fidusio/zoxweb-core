@@ -18,7 +18,7 @@ package org.zoxweb.shared.data;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.server.util.ServerUtil;
 import org.zoxweb.shared.net.IPAddress;
-import org.zoxweb.shared.net.NetworkInterfaceDAO;
+import org.zoxweb.shared.net.NetworkInterfaceInfo;
 import org.zoxweb.shared.util.ArrayValues;
 import org.zoxweb.shared.util.NVEntity;
 
@@ -26,11 +26,11 @@ import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-public class SystemInfoDAOTest {
+public class SystemInfoTest {
 
 	public static void main(String[] args) {
 		try {
-			SystemInfoDAO sys = ServerUtil.loadSystemInfoDAO();
+			SystemInfo sys = ServerUtil.loadSystemInfo();
 			GsonBuilder builder = new GsonBuilder();
 			builder.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES);
 			builder.setPrettyPrinting();
@@ -41,7 +41,7 @@ public class SystemInfoDAOTest {
 			
 			
 			for (NVEntity nve : sys.getNetworkInterfaces().values()) {
-				NetworkInterfaceDAO nid = (NetworkInterfaceDAO) nve;
+				NetworkInterfaceInfo nid = (NetworkInterfaceInfo) nve;
 				System.out.println( nid.getName() + " " + nid.getMACAddress());
 			}
 			
@@ -49,7 +49,7 @@ public class SystemInfoDAOTest {
 			String zwJson = GSONUtil.toJSON(sys, true);
 			System.out.println( zwJson);
 			
-			SystemInfoDAO sysFromJson = GSONUtil.fromJSON(zwJson, SystemInfoDAO.class);
+			SystemInfo sysFromJson = GSONUtil.fromJSON(zwJson, SystemInfo.class);
 			
 			String zwJson1 = GSONUtil.toJSON(sysFromJson, true);
 			System.out.println("Equals:" + zwJson1.equals(zwJson));
@@ -58,11 +58,11 @@ public class SystemInfoDAOTest {
 			System.out.println(zwJson1);
 			System.out.println(sys.getNetworkInterfaces().size() + "," +sysFromJson.getNetworkInterfaces().size() );
 
-//			Iterator<NetworkInterfaceDAO> it = sys.getNetworkInterfaces().values().iterator();
+//			Iterator<NetworkInterfaceInfo> it = sys.getNetworkInterfaces().values().iterator();
 			
 //			while(it.hasNext())
 //			{
-//				NetworkInterfaceDAO niDAO = it.next();
+//				NetworkInterfaceInfo niDAO = it.next();
 //				
 //				NetworkInterface ni = NetworkInterface.getByName( niDAO.getName());
 //				byte address[] =  ni.getHardwareAddress();
@@ -100,10 +100,10 @@ public class SystemInfoDAOTest {
 //			}
 			
 //			
-//		List<NetworkInterfaceDAO> nis = sysFromJson.getNetworkInterfaces();
+//		List<NetworkInterfaceInfo> nis = sysFromJson.getNetworkInterfaces();
 //		NVEntityMap nvem = new NVEntityMap();
 //		
-//		for (NetworkInterfaceDAO nid : nis)
+//		for (NetworkInterfaceInfo nid : nis)
 //		{
 //			nvem.add(nid);
 //			
@@ -111,13 +111,13 @@ public class SystemInfoDAOTest {
 
 		//sysFromJson = 	sys;	
 		System.out.println("size of nvem:" + sysFromJson.getNetworkInterfaces().size());
-		ArrayValues<NVEntity> nvem = (ArrayValues<NVEntity>) sysFromJson.getNetworkInterfaces();//lookup(SystemInfoDAO.NVC_NETWORK_INTERFACES.getName());
+		ArrayValues<NVEntity> nvem = (ArrayValues<NVEntity>) sysFromJson.getNetworkInterfaces();
 		int counter = 0;
 		
 		System.out.println("Eth4:" + nvem.get("eth4"));
-		//NetworkInterfaceDAO array[] = sysFromJson.getNetworkInterfaces().values();
+		//NetworkInterfaceInfo array[] = sysFromJson.getNetworkInterfaces().values();
 		for (NVEntity nve : sys.getNetworkInterfaces().values()) {
-			NetworkInterfaceDAO nid = (NetworkInterfaceDAO) nve;
+			NetworkInterfaceInfo nid = (NetworkInterfaceInfo) nve;
 			System.out.println(nvem.get(nid.getName()));
 			if (counter %2 == 0)
 				nvem.remove( nvem.get(nid.getName()));

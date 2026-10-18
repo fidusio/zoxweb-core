@@ -30,23 +30,23 @@ import java.util.List;
  * @see InetAddressInfo
  */
 @SuppressWarnings("serial")
-public class NetworkInterfaceDAO
+public class NetworkInterfaceInfo
         extends SetNameDAO {
 
     private static final NVConfig DISPLAY_NAME = NVConfigManager.createNVConfig("display_name", "The network interface display name", "DisplayName", true, false, String.class);
     private static final NVConfig MAC_ADDRESS = NVConfigManager.createNVConfig("mac_address", "The network interface mac address", "MACAddress", true, false, String.class);
     private static final NVConfig INET_ADDRESSES = NVConfigManager.createNVConfigEntity("inet_addresses", "The inet address associated with the network interface", "InetAddresses", true, false, InetAddressInfo[].class, ArrayType.LIST);
 
-    /** NVConfigEntity definition for NetworkInterfaceDAO */
-    public static final NVConfigEntity NVC_NETWORK_INTERFACE_DAO = new NVConfigEntityPortable(
-            "network_interface_dao",
+    /** NVConfigEntity definition for NetworkInterfaceInfo */
+    public static final NVConfigEntity NVC_NETWORK_INTERFACE_INFO = new NVConfigEntityPortable(
+            "network_interface_info",
             null,
-            "NetworkInterfaceDAO",
+            "NetworkInterfaceInfo",
             true,
             false,
             false,
             false,
-            NetworkInterfaceDAO.class,
+            NetworkInterfaceInfo.class,
             SUS.toNVConfigList(DISPLAY_NAME, MAC_ADDRESS, INET_ADDRESSES),
             null,
             false,
@@ -56,8 +56,8 @@ public class NetworkInterfaceDAO
     /**
      * Default constructor.
      */
-    public NetworkInterfaceDAO() {
-        super(NVC_NETWORK_INTERFACE_DAO);
+    public NetworkInterfaceInfo() {
+        super(NVC_NETWORK_INTERFACE_INFO);
     }
 
     /**

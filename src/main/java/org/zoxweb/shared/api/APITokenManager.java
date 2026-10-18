@@ -27,15 +27,15 @@ import java.io.IOException;
  */
 public interface APITokenManager {
 
-    APITokenDAO activateToken(APIDataStore<?, ?> dataStore, String userID, APIConfigInfo apiToken, NVPair... params)
+    APIToken activateToken(APIDataStore<?, ?> dataStore, String userID, APIConfigInfo apiToken, NVPair... params)
             throws NullPointerException, IllegalArgumentException, IOException, AccessSecurityException, APIException;
 
 
-    APITokenDAO activateToken(APIDataStore<?, ?> dataStore, ArrayValues<GetNameValue<String>> params)
+    APIToken activateToken(APIDataStore<?, ?> dataStore, ArrayValues<GetNameValue<String>> params)
             throws NullPointerException, IllegalArgumentException, IOException, AccessSecurityException, APIException;
 
 
-    APITokenDAO refreshToken(APIDataStore<?, ?> dataStore, String userID, APITokenDAO apiToken)
+    APIToken refreshToken(APIDataStore<?, ?> dataStore, String userID, APIToken apiToken)
             throws NullPointerException, IllegalArgumentException, IOException, AccessSecurityException, APIException;
 
 

@@ -40,14 +40,14 @@ public interface APINotificationMessage
      * @throws NullPointerException
      * @throws IllegalArgumentException
      */
-    public void setSenderID(String senderID)
+    void setSenderID(String senderID)
             throws NullPointerException, IllegalArgumentException;
 
 
     /**
      * @return the recipient IDs.
      */
-    public String[] getRecipientIDs();
+    String[] getRecipientIDs();
 
     /**
      * This method sets the recipient IDs.
@@ -56,14 +56,14 @@ public interface APINotificationMessage
      * @throws NullPointerException
      * @throws IllegalArgumentException
      */
-    public void setRecipientIDs(String... recipients)
+    void setRecipientIDs(String... recipients)
             throws NullPointerException, IllegalArgumentException;
 
 
     /**
      * @return the title/subject of the message.
      */
-    public String getTitle();
+    String getTitle();
 
     /**
      * This method sets the subject of the message.
@@ -72,14 +72,14 @@ public interface APINotificationMessage
      * @throws NullPointerException
      * @throws IllegalArgumentException
      */
-    public void setTitle(String title)
+    void setTitle(String title)
             throws NullPointerException, IllegalArgumentException;
 
 
     /**
      * @return the message body.
      */
-    public String getBodyTemplate();
+    String getBodyTemplate();
 
     /**
      * This method sets the message body.
@@ -88,73 +88,73 @@ public interface APINotificationMessage
      * @throws NullPointerException
      * @throws IllegalArgumentException
      */
-    public void setBodyTemplate(String messageBody)
+    void setBodyTemplate(String messageBody)
             throws NullPointerException, IllegalArgumentException;
 
 
     /**
      * @return the message body tags.
      */
-    public ArrayValues<NVPair> getBodyTags();
+    ArrayValues<NVPair> getBodyTags();
 
     /**
      * This method sets the message body tags.
      *
      * @param tags
      */
-    public void setBodyTags(ArrayValues<NVPair> tags);
+    void setBodyTags(ArrayValues<NVPair> tags);
 
     /**
      * This method sets the message body tags.
      *
      * @param tags
      */
-    public void setBodyTags(List<NVPair> tags);
+    void setBodyTags(List<NVPair> tags);
 
 
     /**
      * @return the extra attributes.
      */
-    public ArrayValues<NVPair> getExtraAttribues();
+    ArrayValues<NVPair> getExtraAttribues();
 
     /**
      * This method sets extra attributes.
      *
      * @param attributes
      */
-    public void setExtraAttributes(ArrayValues<NVPair> attributes);
+    void setExtraAttributes(ArrayValues<NVPair> attributes);
 
     /**
      * This method sets extra attributes.
      *
      * @param attributes
      */
-    public void setExtraAttributes(List<NVPair> attributes);
+    void setExtraAttributes(List<NVPair> attributes);
 
 
     /**
      * @return the pre-token tag.
      */
-    public String getPreTag();
+    String getPreTag();
 
     /**
      * This method sets the pre-token tag.
      *
      * @param preTokenTag
      */
-    public void setPreTag(String preTokenTag);
+    void setPreTag(String preTokenTag);
 
 
     /**
      * @return the post-token tag.
      */
-    public String getPostTag();
+    String getPostTag();
 
     /**
      * This method sets the post-token tag.
      *
      * @param postTokenTag
      */
-    public void setPostTag(String postTokenTag);
+    void setPostTag(String postTokenTag);
 
 }

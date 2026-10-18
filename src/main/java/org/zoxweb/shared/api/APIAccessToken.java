@@ -16,7 +16,7 @@
 package org.zoxweb.shared.api;
 
 import org.zoxweb.shared.crypto.CryptoConst;
-import org.zoxweb.shared.data.TimeStampDAO;
+import org.zoxweb.shared.data.PropertyDAO;
 import org.zoxweb.shared.util.*;
 import org.zoxweb.shared.util.Const.TimeInMillis;
 
@@ -29,8 +29,8 @@ import java.util.Date;
  * @author mzebib
  */
 @SuppressWarnings("serial")
-public class APIAccessTokenDAO
-        extends TimeStampDAO {
+public class APIAccessToken
+        extends PropertyDAO {
 
     public enum Token
             implements GetNVConfig {
@@ -61,29 +61,29 @@ public class APIAccessTokenDAO
     /**
      * This NVConfigEntity type constant is set to an instantiation of a NVConfigEntityLocal object based on BoxTokenDAO.
      */
-    public static final NVConfigEntity NVC_API_ACCESS_TOKEN_DAO = new NVConfigEntityPortable("api_access_token_dao",
+    public static final NVConfigEntity NVC_API_ACCESS_TOKEN = new NVConfigEntityPortable("api_access_token",
             null,
-            "APIAccessTokenDAO",
+            "APIAccessToken",
             true,
             false,
             false,
             false,
-            APIAccessTokenDAO.class,
+            APIAccessToken.class,
             SUS.extractNVConfigs(Token.values()),
             null,
             false,
-            TimeStampDAO.NVC_TIME_STAMP_DAO
+            PropertyDAO.NVC_PROPERTY_DAO
     );
 
 
     /**
      * This is the default constructor.
      */
-    public APIAccessTokenDAO() {
-        super(NVC_API_ACCESS_TOKEN_DAO);
+    public APIAccessToken() {
+        super(NVC_API_ACCESS_TOKEN);
     }
 
-    protected APIAccessTokenDAO(NVConfigEntity nvce) {
+    protected APIAccessToken(NVConfigEntity nvce) {
         super(nvce);
     }
 

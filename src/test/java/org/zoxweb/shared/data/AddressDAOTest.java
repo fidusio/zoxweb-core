@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.shared.api.APIException;
 //import org.zoxweb.shared.data.AddressDAO;
-//import org.zoxweb.shared.data.UserInfoDAO;
 import org.zoxweb.shared.security.AccessSecurityException;
 import org.zoxweb.shared.util.SUS;
 
@@ -107,9 +106,6 @@ public class AddressDAOTest {
                 System.out.println( addressFromJSON);
 
                 System.out.println(SUS.toDebugString(addressFromJSON));
-                UserInfoDAO uid = new UserInfoDAO();
-                uid.getListOfAddresses().add( address);
-                System.out.println(SUS.toDebugString(uid));
             } catch (APIException | AccessSecurityException e) {
                 e.printStackTrace();
             }

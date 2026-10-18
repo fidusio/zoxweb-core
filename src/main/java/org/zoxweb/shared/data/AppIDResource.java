@@ -10,6 +10,7 @@ public class AppIDResource
         extends PropertyDAO
         implements AppID<String>,
         CanonicalID {
+
     public enum Param
             implements GetNVConfig {
         APP_ID(NVConfigManager.createNVConfig("app_id", "App ID", "AppID", false, false, false, String.class, AppIDNameFilter.SINGLETON)),
@@ -94,11 +95,11 @@ public class AppIDResource
 
     /**
      * @param domainID to be set
-     * @param appID to be set
+     * @param appID    to be set
      * @throws IllegalArgumentException if the domain value or app value are invalid
      */
     public synchronized void setDomainAppID(String domainID, String appID) {
-       // setValue(Param.DOMAIN_APP_ID, toDomainAppID(domainID, appID));
+        // setValue(Param.DOMAIN_APP_ID, toDomainAppID(domainID, appID));
         setDomainID(domainID);
         setAppID(appID);
 //        setValue(Param.DOMAIN_ID, domainID);
@@ -150,8 +151,6 @@ public class AppIDResource
 //
 //        return super.hashCode();
     }
-
-
 
 
     public static AppIDResource toAppID(String domainID, String appID) {

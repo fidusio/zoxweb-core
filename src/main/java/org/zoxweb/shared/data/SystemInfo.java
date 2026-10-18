@@ -15,7 +15,7 @@
  */
 package org.zoxweb.shared.data;
 
-import org.zoxweb.shared.net.NetworkInterfaceDAO;
+import org.zoxweb.shared.net.NetworkInterfaceInfo;
 import org.zoxweb.shared.util.*;
 import org.zoxweb.shared.util.NVConfigEntity.ArrayType;
 
@@ -28,24 +28,23 @@ import org.zoxweb.shared.util.NVConfigEntity.ArrayType;
  * {@code @lastModifiedAt} $Date: 2025/4/5 17:18:30 $
  */
 @SuppressWarnings("serial")
-public class SystemInfoDAO
+public class SystemInfo
         extends NVEntityContainerDAO
         implements SystemID<String>, DomainID<String> {
 
     public static final NVConfig SYSTEM_ID = NVConfigManager.createNVConfig("canonical_id", "The system identifier", "SystemID", true, false, true, String.class, null);
     public static final NVConfig DOMAIN_ID = NVConfigManager.createNVConfig("domain_id", "The domain identifier", "DomainID", false, true, String.class);
     public static final NVConfig SYSTEM_PROPS = NVConfigManager.createNVConfig("system_properties", "The system properties", "SystemProperties", false, true, true, String[].class, null);
-    public static final NVConfig NETWORK_INTERFACES = NVConfigManager.createNVConfigEntity("network_interfaces", "The network interfaces", "NetworkInterfaces", false, true, true, false, NetworkInterfaceDAO.NVC_NETWORK_INTERFACE_DAO, ArrayType.GET_NAME_MAP);
+    public static final NVConfig NETWORK_INTERFACES = NVConfigManager.createNVConfigEntity("network_interfaces", "The network interfaces", "NetworkInterfaces", false, true, true, false, NetworkInterfaceInfo.NVC_NETWORK_INTERFACE_INFO, ArrayType.GET_NAME_MAP);
     public static final NVConfig APPLICATION_PROPS = NVConfigManager.createNVConfig("application_properties", "The application properties", "ApplicationProperties", false, true, true, String[].class, null);
     //public static final NVConfig APPLICATION_DAOS =  NVConfigManager.createNVConfigEntity("content", "The application DAOs","ApplicationDAOs", false, true, NVEntity[].class, ArrayType.GET_NAME_MAP);
-    public static final NVConfigEntity NVC_SYSTEM_INFO_DAO = new NVConfigEntityPortable("system_info_dao", null, "SystemInfoDAO", true, false, false, false, SystemInfoDAO.class, SUS.toNVConfigList(SYSTEM_ID, DOMAIN_ID, SYSTEM_PROPS, NETWORK_INTERFACES, APPLICATION_PROPS), null, false, NVEntityContainerDAO.NVC_NVENTITY_CONTAINER_DAO);
+    public static final NVConfigEntity NVC_SYSTEM_INFO = new NVConfigEntityPortable("system_info", null, "SystemInfo", true, false, false, false, SystemInfo.class, SUS.toNVConfigList(SYSTEM_ID, DOMAIN_ID, SYSTEM_PROPS, NETWORK_INTERFACES, APPLICATION_PROPS), null, false, NVEntityContainerDAO.NVC_NVENTITY_CONTAINER_DAO);
 
     /**
      * The default constructor.
      */
-    public SystemInfoDAO() {
-        //super(SUS.merge( null, NVC_SYSTEM_INFO_DAO));
-        super(NVC_SYSTEM_INFO_DAO);
+    public SystemInfo() {
+        super(NVC_SYSTEM_INFO);
     }
 
     /**
@@ -94,7 +93,7 @@ public class SystemInfoDAO
      * Sets the network interfaces.
      * @param networkInterfaces
      */
-//	public void setNetworkInterfaces(ArrayValues<NetworkInterfaceDAO>)
+//	public void setNetworkInterfaces(ArrayValues<NetworkInterfaceInfo>)
 //	{
 //		setValue(NVC_NETWORK_INTERFACES, nvem);
 //	}

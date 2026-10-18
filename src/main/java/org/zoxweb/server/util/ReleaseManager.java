@@ -16,7 +16,7 @@
 package org.zoxweb.server.util;
 
 import org.zoxweb.server.io.IOUtil;
-import org.zoxweb.shared.app.AppVersionDAO;
+import org.zoxweb.shared.app.AppVersion;
 import org.zoxweb.shared.util.NVPair;
 import org.zoxweb.shared.util.SUS;
 
@@ -32,23 +32,23 @@ public class ReleaseManager {
 
     public static final ReleaseManager SINGLETON = new ReleaseManager();
 
-    private HashMap<String, AppVersionDAO> map = new HashMap<String, AppVersionDAO>();
+    private HashMap<String, AppVersion> map = new HashMap<String, AppVersion>();
 
     private ReleaseManager() {
 
     }
 
-    public AppVersionDAO load(String dir, String appName)
+    public AppVersion load(String dir, String appName)
             throws IOException {
         return load(ReleaseManager.class.getResourceAsStream(dir + appName + ".json"));
     }
 
-    public AppVersionDAO load(InputStream is)
+    public AppVersion load(InputStream is)
             throws IOException {
         return load(IOUtil.inputStreamToString(is, true));
     }
 
-    public synchronized AppVersionDAO load(String json) {
+    public synchronized AppVersion load(String json) {
         String name = null;
         String description = null;
         int major = 0;
@@ -82,7 +82,7 @@ public class ReleaseManager {
         }
 
         if (!SUS.isEmpty(name)) {
-            AppVersionDAO ret = new AppVersionDAO();
+            AppVersion ret = new AppVersion();
 
             ret.setName(name);
             ret.setDescription(description);
@@ -97,7 +97,7 @@ public class ReleaseManager {
         return null;
     }
 
-    public AppVersionDAO lookup(String name) {
+    public AppVersion lookup(String name) {
         name = SUS.toLowerCase(SUS.trimOrNull(name));
         return map.get(name);
     }

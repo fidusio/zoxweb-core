@@ -21,13 +21,13 @@ import org.zoxweb.shared.util.*;
 import java.util.Date;
 
 /**
- * The ApplicationInfoDAO class defines information about a system application.
+ * The AppVersion class defines information about a system application.
  *
  * @author mzebib
  *
  */
 @SuppressWarnings("serial")
-public class AppVersionDAO
+public class AppVersion
         extends SetNameDescriptionDAO
         implements CanonicalID {
 
@@ -49,15 +49,15 @@ public class AppVersionDAO
         }
     }
 
-    public static final NVConfigEntity NVC_APPLICATION_VERSION_DAO = new NVConfigEntityPortable(
-            "application_version_dao",
+    public static final NVConfigEntity NVC_APP_VERSION = new NVConfigEntityPortable(
+            "app_version",
             null,
-            "ApplicationVersionDAO",
+            "AppVersion",
             true,
             false,
             false,
             false,
-            AppVersionDAO.class,
+            AppVersion.class,
             SUS.extractNVConfigs(Param.values()),
             null,
             false,
@@ -65,7 +65,7 @@ public class AppVersionDAO
     );
 
 
-    public AppVersionDAO(String nameDescriptionVersion) {
+    public AppVersion(String nameDescriptionVersion) {
         this();
         String[] parsed = nameDescriptionVersion.split("::");
         int index = 0;
@@ -102,8 +102,8 @@ public class AppVersionDAO
     /**
      * The default constructor.
      */
-    public AppVersionDAO() {
-        super(NVC_APPLICATION_VERSION_DAO);
+    public AppVersion() {
+        super(NVC_APP_VERSION);
     }
 
 

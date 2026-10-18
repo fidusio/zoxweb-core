@@ -136,16 +136,4 @@ public class SMTPCreator
         return null;
     }
 
-//	@Override
-//	public APISecurityManager<?> getAPISecurityManager() {
-//		// TODO Auto-generated method stub
-//		return null;
-//	}
-//
-//	@Override
-//	public void setAPISecurityManager(APISecurityManager<?> apiSecurityManager) {
-//		// TODO Auto-generated method stub
-//		
-//	}
-
 }

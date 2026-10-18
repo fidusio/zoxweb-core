@@ -19,9 +19,9 @@ import com.google.gson.Gson;
 import org.zoxweb.server.util.GSONUtil;
 import org.zoxweb.server.util.ServerUtil;
 import org.zoxweb.shared.data.AddressDAO;
-import org.zoxweb.shared.data.SystemInfoDAO;
+import org.zoxweb.shared.data.SystemInfo;
 import org.zoxweb.shared.net.InetAddressInfo;
-import org.zoxweb.shared.net.NetworkInterfaceDAO;
+import org.zoxweb.shared.net.NetworkInterfaceInfo;
 import org.zoxweb.shared.util.Const.TimeInMillis;
 import org.zoxweb.shared.util.*;
 import org.zoxweb.shared.util.SharedBase64.Base64Type;
@@ -41,7 +41,7 @@ public class JSONTest {
 	static class Toto
 	{
 		Date date;
-		SystemInfoDAO sys_dao;
+		SystemInfo sys_dao;
 		NVGenericMap nvgm;
 		
 	}
@@ -50,11 +50,11 @@ public class JSONTest {
 	public static void main (String[] args) {
 
 	    try {
-			SystemInfoDAO sysDAO = ServerUtil.loadSystemInfoDAO();
+			SystemInfo sysDAO = ServerUtil.loadSystemInfo();
 			sysDAO.setGUID(UUID.randomUUID().toString());
 			
 			for (NVEntity nve : sysDAO.getNetworkInterfaces().values()) {
-				NetworkInterfaceDAO niDAO = (NetworkInterfaceDAO) nve;
+				NetworkInterfaceInfo niDAO = (NetworkInterfaceInfo) nve;
 
 				for (InetAddressInfo iaDAO : niDAO.getInetAddresses()) {
 					String json = GSONUtil.toJSON( iaDAO, false);
@@ -76,11 +76,11 @@ public class JSONTest {
 				System.out.println( "******* json conversion Gson:" + ts1 + " it took zoxweb json:" + ts + " delta " +((ts1-ts)) + " zoxweb is "  + ((float)ts1/(float)ts) + " faster");
 				
 				ts1 = System.nanoTime();
-				NetworkInterfaceDAO niTemp = new Gson().fromJson(json1, NetworkInterfaceDAO.class);
+				NetworkInterfaceInfo niTemp = new Gson().fromJson(json1, NetworkInterfaceInfo.class);
 				ts1 = System.nanoTime() - ts1;
 
 				ts = System.nanoTime();
-				NetworkInterfaceDAO zbNI = GSONUtil.fromJSON(json, NetworkInterfaceDAO.class);
+				NetworkInterfaceInfo zbNI = GSONUtil.fromJSON(json, NetworkInterfaceInfo.class);
 				ts = System.nanoTime() -ts;
 				System.out.println( "Gson obj:"+niTemp);
 				System.out.println( "ZW   obj:"+zbNI);
@@ -90,7 +90,7 @@ public class JSONTest {
 
 			String temp =  GSONUtil.toJSON(sysDAO, true);
 			System.out.println(temp);
-			SystemInfoDAO newSysDAO =  GSONUtil.fromJSON(temp, SystemInfoDAO.class);
+			SystemInfo newSysDAO =  GSONUtil.fromJSON(temp, SystemInfo.class);
 			System.out.println( "Json Equals : " + temp.equals(GSONUtil.toJSON( newSysDAO, true)));
 			System.out.println( sysDAO);
 			log.info("java logger"+ newSysDAO);

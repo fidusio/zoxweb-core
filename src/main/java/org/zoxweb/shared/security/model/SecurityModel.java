@@ -724,10 +724,9 @@ public final class SecurityModel {
 //    }
 
     /**
-     * @deprecated app-scoped catalog seeded only by {@code APIAppManagerProvider.createAppID},
-     * which has no production caller; the {@code $$resource_guid$$} / {@code $$subject_guid$$}
-     * placeholders are never substituted. Superseded by {@link Permission} + {@link Role} and the
-     * shiro-ds catalog seeder; to be deleted with {@code APIAppManagerProvider}.
+     * @deprecated app-scoped catalog with no caller since {@code APIAppManagerProvider} was
+     * deleted; the {@code $$resource_guid$$} / {@code $$subject_guid$$} placeholders are never
+     * substituted. Superseded by {@link Permission} + {@link Role} and the shiro-ds catalog seeder.
      */
     @Deprecated
     public enum AppPermission

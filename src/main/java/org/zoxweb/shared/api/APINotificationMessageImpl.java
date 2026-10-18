@@ -29,7 +29,7 @@ import java.util.List;
  *
  */
 @SuppressWarnings("serial")
-public class APINotificationMessageDAO
+public class APINotificationMessageImpl
         extends SetNameDescriptionDAO
         implements APINotificationMessage {
     /**
@@ -66,18 +66,18 @@ public class APINotificationMessageDAO
     }
 
     /**
-     * This NVConfigEntity type constant is set to an instantiation of a NVConfigEntityLocal object based on APINotificationMessageDAO.
+     * This NVConfigEntity type constant is set to an instantiation of a NVConfigEntityLocal object based on APINotificationMessageImpl.
      */
-    public static final NVConfigEntity NVC_API_NOTIFICATION_MESSAGE_DAO = new NVConfigEntityPortable
+    public static final NVConfigEntity NVC_API_NOTIFICATION_MESSAGE_IMPL = new NVConfigEntityPortable
             (
-                    "api_notification_message_dao",
+                    "api_notification_message_impl",
                     null,
-                    "APINotificationMessageDAO",
+                    "APINotificationMessageImpl",
                     true,
                     false,
                     false,
                     false,
-                    APINotificationMessageDAO.class,
+                    APINotificationMessageImpl.class,
                     SUS.extractNVConfigs(Params.values()),
                     null,
                     false,
@@ -88,8 +88,8 @@ public class APINotificationMessageDAO
     /**
      * This is the default constructor.
      */
-    public APINotificationMessageDAO() {
-        super(NVC_API_NOTIFICATION_MESSAGE_DAO);
+    public APINotificationMessageImpl() {
+        super(NVC_API_NOTIFICATION_MESSAGE_IMPL);
     }
 
 

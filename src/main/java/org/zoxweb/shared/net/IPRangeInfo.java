@@ -31,21 +31,29 @@ import org.zoxweb.shared.util.SUS;
  * @author mnael
  */
 @SuppressWarnings("serial")
-public class IPRangeDAO
+public class IPRangeInfo
         extends SetNameDescriptionDAO {
 
     /**
-     * Configuration parameters for IPRangeDAO.
+     * Configuration parameters for IPRangeInfo.
      */
     public enum Params
             implements GetNVConfig {
-        /** The system network interface name */
+        /**
+         * The system network interface name
+         */
         IFACE(NVConfigManager.createNVConfig("interface", "The system interface name", "Interface", true, true, String.class)),
-        /** The starting IP address of the range */
-        NET_ADDRESS(NVConfigManager.createNVConfig("address", "Thge ip address", "InetAddress", true, true, String.class)),
-        /** The network mask for the IP range */
+        /**
+         * The starting IP address of the range
+         */
+        NET_ADDRESS(NVConfigManager.createNVConfig("address", "The ip address", "InetAddress", true, true, String.class)),
+        /**
+         * The network mask for the IP range
+         */
         NET_MASK(NVConfigManager.createNVConfig("netmask", "The network mask", "NetworkMask", true, true, String.class)),
-        /** The count of IP addresses in the range */
+        /**
+         * The count of IP addresses in the range
+         */
         COUNT(NVConfigManager.createNVConfig("count", "Count", "count", false, true, Integer.class)),
 
         ;
@@ -62,25 +70,27 @@ public class IPRangeDAO
 
     }
 
-    /** NVConfigEntity definition for IPRangeDAO */
-    public static final NVConfigEntity IP_RANGE_DAO = new NVConfigEntityPortable("ip_range_dao", null, "IPRangeDAO", true, false, false, false, IPRangeDAO.class, SUS.extractNVConfigs(Params.values()), null, false, SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO);
+    /**
+     * NVConfigEntity definition for IPRangeInfo
+     */
+    public static final NVConfigEntity NVC_IP_RANGE_INFO = new NVConfigEntityPortable("ip_range_info", null, "IPRangeInfo", true, false, false, false, IPRangeInfo.class, SUS.extractNVConfigs(Params.values()), null, false, SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO);
 
     /**
      * Default constructor.
      */
-    public IPRangeDAO() {
-        super(IP_RANGE_DAO);
+    public IPRangeInfo() {
+        super(NVC_IP_RANGE_INFO);
     }
 
     /**
      * Constructor with all parameters.
      *
-     * @param inet the network interface name
+     * @param inet    the network interface name
      * @param startIP the starting IP address
-     * @param mask the network mask
-     * @param count the number of IP addresses in the range
+     * @param mask    the network mask
+     * @param count   the number of IP addresses in the range
      */
-    public IPRangeDAO(String inet, String startIP, String mask, int count) {
+    public IPRangeInfo(String inet, String startIP, String mask, int count) {
         this();
         setNetworkInterface(inet);
         setStartingIP(startIP);
