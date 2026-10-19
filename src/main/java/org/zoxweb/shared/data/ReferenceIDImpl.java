@@ -25,7 +25,6 @@ import org.zoxweb.shared.util.*;
 public abstract class ReferenceIDImpl
         extends NVEntity {
 
-    //public static final NVConfig NVC_REFERENCE_ID = NVConfigManager.createNVConfig(MetaToken.REFERENCE_ID.getName(), "The reference id of the Object", "ReferenceID", true, false, true, true, true, String.class, null);
     public static final NVConfig NVC_SUBJECT_GUID = NVConfigManager.createNVConfig(MetaToken.SUBJECT_GUID.getName(), "The user id or Subject GUID", "SubjectGUID", true, false, false, true, false, String.class, null);
     public static final NVConfig NVC_GUID = NVConfigManager.createNVConfig(MetaToken.GUID.getName(), "The global id of the Object", "GlobalUID", false, false, false, true, false, String.class, null);
     public static final NVConfig NVC_APP_GUID = NVConfigManager.createNVConfig(MetaToken.GUID.getName(), "The global id of the Object", "GlobalUID", true, false, true, true, false, String.class, null);
