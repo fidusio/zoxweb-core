@@ -18,7 +18,7 @@ package org.zoxweb.shared.util;
 import java.io.Serializable;
 import java.util.List;
 
-import org.zoxweb.shared.data.SetNameDescriptionDAO;
+import org.zoxweb.shared.data.SetNameDescriptionImpl;
 
 /**
  * Display mapping for a single NVConfig attribute: holds the associated
@@ -30,7 +30,7 @@ import org.zoxweb.shared.data.SetNameDescriptionDAO;
  */
 @SuppressWarnings("serial")
 public class NVCMap
-	extends SetNameDescriptionDAO
+	extends SetNameDescriptionImpl
 	implements Serializable
 {
 	
@@ -78,7 +78,7 @@ public class NVCMap
 																			NVCMap.class, 
 																			SUS.extractNVConfigs(Params.values()), 
 																			null, false, 
-																			SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO
+																			SetNameDescriptionImpl.NVC_NAME_DESCRIPTION_IMPL
 																		);
 	
 	/**

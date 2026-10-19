@@ -16,7 +16,7 @@
 package org.zoxweb.shared.net;
 
 import org.zoxweb.shared.data.Range;
-import org.zoxweb.shared.data.SetNameDAO;
+import org.zoxweb.shared.data.SetNameImpl;
 import org.zoxweb.shared.http.URLInfo;
 import org.zoxweb.shared.util.*;
 
@@ -34,7 +34,7 @@ import java.util.List;
  */
 @SuppressWarnings("serial")
 public class IPAddress
-        extends SetNameDAO {
+        extends SetNameImpl {
 
     private static final NVConfig INET_ADDRESS = NVConfigManager.createNVConfig("inet_address", "The ip address", "InetAddress", true, false, String.class);
     private static final NVConfig PORT = NVConfigManager.createNVConfig("port", "The port number", "Port", true, false, int.class);
@@ -42,7 +42,7 @@ public class IPAddress
     private static final NVConfig PROXY_TYPE = NVConfigManager.createNVConfig("proxy_type", "proxy type", "ProxyType", false, false, ProxyType.class);
 
     /** NVConfigEntity definition for IPAddress */
-    public static final NVConfigEntity NVC_IP_ADDRESS = new NVConfigEntityPortable("ip_address", null, "IPAddress", true, false, false, false, IPAddress.class, SUS.toNVConfigList(INET_ADDRESS, PORT, BACKLOG, PROXY_TYPE), null, false, SetNameDAO.NVC_NAME_DAO);
+    public static final NVConfigEntity NVC_IP_ADDRESS = new NVConfigEntityPortable("ip_address", null, "IPAddress", true, false, false, false, IPAddress.class, SUS.toNVConfigList(INET_ADDRESS, PORT, BACKLOG, PROXY_TYPE), null, false, SetNameImpl.NVC_NAME_IMPL);
 
 
     /**

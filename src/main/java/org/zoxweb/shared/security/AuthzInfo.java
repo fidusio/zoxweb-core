@@ -2,7 +2,7 @@ package org.zoxweb.shared.security;
 
 import org.zoxweb.shared.app.AppIDDefault;
 import org.zoxweb.shared.data.DataConst;
-import org.zoxweb.shared.data.PropertyDAO;
+import org.zoxweb.shared.data.PropertyImpl;
 import org.zoxweb.shared.util.*;
 
 /**
@@ -11,7 +11,7 @@ import org.zoxweb.shared.util.*;
  * an AppIdDao object - and properties metadata. Note: this class forces child
  * classes to have mandatory naming.
  */
-public abstract class AuthzInfo extends PropertyDAO {
+public abstract class AuthzInfo extends PropertyImpl {
 
     public enum Param implements GetNVConfig {
         BROKER_GUID(NVConfigManager.createNVConfig("broker_guid", "the broker GUID, used for audit", "BrokerGUID", false, false, String.class)),
@@ -41,7 +41,7 @@ public abstract class AuthzInfo extends PropertyDAO {
             SUS.extractNVConfigs(DataConst.DataParam.MANDATORY_NAME, Param.BROKER_GUID, Param.APP_ID),
             null,
             false,
-            PropertyDAO.NVC_PROPERTY_DAO
+            PropertyImpl.NVC_PROPERTY_IMPL
     );
 
     /**

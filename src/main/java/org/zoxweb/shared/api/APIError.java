@@ -17,7 +17,7 @@ package org.zoxweb.shared.api;
 
 import org.zoxweb.shared.api.APIException.Category;
 import org.zoxweb.shared.api.APIException.Code;
-import org.zoxweb.shared.data.SetNameDescriptionDAO;
+import org.zoxweb.shared.data.SetNameDescriptionImpl;
 import org.zoxweb.shared.security.AccessSecurityException;
 import org.zoxweb.shared.util.GetNVConfig;
 import org.zoxweb.shared.util.NVConfig;
@@ -28,7 +28,7 @@ import org.zoxweb.shared.util.SUS;
 
 @SuppressWarnings("serial")
 public class APIError
-        extends SetNameDescriptionDAO {
+        extends SetNameDescriptionImpl {
 
     public enum Params
             implements GetNVConfig {
@@ -65,7 +65,7 @@ public class APIError
             SUS.extractNVConfigs(Params.values()),
             null,
             false,
-            SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO);
+            SetNameDescriptionImpl.NVC_NAME_DESCRIPTION_IMPL);
 
 
     public APIError(String message) {

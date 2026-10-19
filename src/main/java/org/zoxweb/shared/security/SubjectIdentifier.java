@@ -15,7 +15,7 @@
  */
 package org.zoxweb.shared.security;
 
-import org.zoxweb.shared.data.PropertyDAO;
+import org.zoxweb.shared.data.PropertyImpl;
 import org.zoxweb.shared.util.*;
 
 /**
@@ -26,7 +26,7 @@ import org.zoxweb.shared.util.*;
  */
 @SuppressWarnings("serial")
 public class SubjectIdentifier
-        extends PropertyDAO
+        extends PropertyImpl
         implements SubjectID<String> {
 
     /**
@@ -64,7 +64,7 @@ public class SubjectIdentifier
             SUS.extractNVConfigs(Param.values()),
             null,
             false,
-            PropertyDAO.NVC_PROPERTY_DAO
+            PropertyImpl.NVC_PROPERTY_IMPL
     );
 
 

@@ -15,7 +15,7 @@
  */
 package org.zoxweb.shared.http;
 
-import org.zoxweb.shared.data.SetNameDescriptionDAO;
+import org.zoxweb.shared.data.SetNameDescriptionImpl;
 import org.zoxweb.shared.net.IPAddress;
 import org.zoxweb.shared.util.*;
 import org.zoxweb.shared.util.NVConfigEntity.ArrayType;
@@ -39,7 +39,7 @@ import java.util.List;
 
 @SuppressWarnings("serial")
 public class HTTPMessageConfig
-        extends SetNameDescriptionDAO
+        extends SetNameDescriptionImpl
         implements HTTPMessageConfigInterface {
 
 
@@ -94,7 +94,7 @@ public class HTTPMessageConfig
             false,
             false,
             HTTPMessageConfig.class,
-            SUS.extractNVConfigs(Params.values()), null, false, SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO);
+            SUS.extractNVConfigs(Params.values()), null, false, SetNameDescriptionImpl.NVC_NAME_DESCRIPTION_IMPL);
 
     private volatile transient NVGenericMap attachment;
 

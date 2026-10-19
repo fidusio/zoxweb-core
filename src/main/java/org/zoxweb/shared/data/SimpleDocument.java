@@ -32,7 +32,7 @@ import org.zoxweb.shared.util.SUS;
  */
 @SuppressWarnings("serial")
 public class SimpleDocument
-        extends TimeStampDAO {
+        extends TimeStampImpl {
 
     public enum Param
             implements GetNVConfig {
@@ -63,7 +63,7 @@ public class SimpleDocument
             SUS.extractNVConfigs(Param.values()),
             null,
             false,
-            TimeStampDAO.NVC_TIME_STAMP_DAO
+            TimeStampImpl.NVC_TIME_STAMP_IMPL
     );
 
     /**

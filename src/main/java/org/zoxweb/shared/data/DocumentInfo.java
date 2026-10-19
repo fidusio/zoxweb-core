@@ -22,7 +22,7 @@ import java.util.List;
 
 @SuppressWarnings("serial")
 abstract public class DocumentInfo
-        extends PropertyDAO {
+        extends PropertyImpl {
 
     public enum Param
             implements GetNVConfig {
@@ -54,11 +54,11 @@ abstract public class DocumentInfo
             false,
             false,
             false,
-            PropertyDAO.class,
+            PropertyImpl.class,
             SUS.extractNVConfigs(Param.values()),
             null,
             false,
-            TimeStampDAO.NVC_TIME_STAMP_DAO
+            TimeStampImpl.NVC_TIME_STAMP_IMPL
     );//,SUS.extractNVConfigs( new Params[]{Params.REFERENCE_ID, Params.NAME, Params.LENGTH}));
 
 

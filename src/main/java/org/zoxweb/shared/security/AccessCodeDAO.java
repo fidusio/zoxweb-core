@@ -17,7 +17,7 @@ package org.zoxweb.shared.security;
 
 import org.zoxweb.shared.data.DataConst.DataParam;
 import org.zoxweb.shared.data.DocumentContent.Param;
-import org.zoxweb.shared.data.SetNameDescriptionDAO;
+import org.zoxweb.shared.data.SetNameDescriptionImpl;
 import org.zoxweb.shared.filters.FilterType;
 import org.zoxweb.shared.util.*;
 
@@ -29,7 +29,7 @@ import org.zoxweb.shared.util.*;
  */
 @SuppressWarnings("serial")
 public class AccessCodeDAO
-    extends SetNameDescriptionDAO
+    extends SetNameDescriptionImpl
     implements SetCanonicalID
 {
 	/**
@@ -73,7 +73,7 @@ public class AccessCodeDAO
 																					SUS.extractNVConfigs(Params.values()), 
 																					null, 
 																					false, 
-																					SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO
+																					SetNameDescriptionImpl.NVC_NAME_DESCRIPTION_IMPL
 																				);
 	
 	public AccessCodeDAO()

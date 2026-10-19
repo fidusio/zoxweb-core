@@ -15,7 +15,7 @@
  */
 package org.zoxweb.shared.net;
 
-import org.zoxweb.shared.data.SetNameDAO;
+import org.zoxweb.shared.data.SetNameImpl;
 import org.zoxweb.shared.util.*;
 import org.zoxweb.shared.util.NVConfigEntity.ArrayType;
 
@@ -31,7 +31,7 @@ import java.util.List;
  */
 @SuppressWarnings("serial")
 public class NetworkInterfaceInfo
-        extends SetNameDAO {
+        extends SetNameImpl {
 
     private static final NVConfig DISPLAY_NAME = NVConfigManager.createNVConfig("display_name", "The network interface display name", "DisplayName", true, false, String.class);
     private static final NVConfig MAC_ADDRESS = NVConfigManager.createNVConfig("mac_address", "The network interface mac address", "MACAddress", true, false, String.class);
@@ -50,7 +50,7 @@ public class NetworkInterfaceInfo
             SUS.toNVConfigList(DISPLAY_NAME, MAC_ADDRESS, INET_ADDRESSES),
             null,
             false,
-            SetNameDAO.NVC_NAME_DAO
+            SetNameImpl.NVC_NAME_IMPL
     );
 
     /**

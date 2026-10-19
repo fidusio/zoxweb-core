@@ -15,7 +15,7 @@
  */
 package org.zoxweb.shared.api;
 
-import org.zoxweb.shared.data.SetNameDescriptionDAO;
+import org.zoxweb.shared.data.SetNameDescriptionImpl;
 import org.zoxweb.shared.util.*;
 
 import java.util.ArrayList;
@@ -31,7 +31,7 @@ import java.util.List;
  */
 @SuppressWarnings("serial")
 public class APINotificationMessageImpl
-        extends SetNameDescriptionDAO
+        extends SetNameDescriptionImpl
         implements APINotificationMessage {
     /**
      * This enum contains message notification parameters.
@@ -82,7 +82,7 @@ public class APINotificationMessageImpl
                     SUS.extractNVConfigs(Params.values()),
                     null,
                     false,
-                    SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO
+                    SetNameDescriptionImpl.NVC_NAME_DESCRIPTION_IMPL
             );
 
 

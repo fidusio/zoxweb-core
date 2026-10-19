@@ -15,7 +15,7 @@
  */
 package org.zoxweb.shared.net;
 
-import org.zoxweb.shared.data.SetNameDescriptionDAO;
+import org.zoxweb.shared.data.SetNameDescriptionImpl;
 import org.zoxweb.shared.util.GetNVConfig;
 import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
@@ -35,7 +35,7 @@ import org.zoxweb.shared.util.SUS;
  */
 @SuppressWarnings("serial")
 public class ConnectionConfig
-        extends SetNameDescriptionDAO {
+        extends SetNameDescriptionImpl {
 
     /**
      * Configuration parameters for ConnectionConfig.
@@ -67,7 +67,7 @@ public class ConnectionConfig
 
     /** NVConfigEntity definition for ConnectionConfig */
     public final static NVConfigEntity NVC_CONNECTION_CONFIG_DAO = new NVConfigEntityPortable("connection_config", null, "ConnectionConfig", false, true, false, false, ConnectionConfig.class, SUS
-            .extractNVConfigs(Param.values()), null, false, SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO);
+            .extractNVConfigs(Param.values()), null, false, SetNameDescriptionImpl.NVC_NAME_DESCRIPTION_IMPL);
 
     /**
      * Default constructor.

@@ -26,7 +26,7 @@ import org.zoxweb.shared.util.*;
  */
 @SuppressWarnings("serial")
 public class DataContent
-    extends PropertyDAO
+    extends PropertyImpl
 {
 	
 
@@ -36,7 +36,7 @@ public class DataContent
 	
 		
 	
-	public static final NVConfigEntity NVC_DATA_CONTENT = new NVConfigEntityPortable("data_content", null , "DataContent", true, false, false, false, DataContent.class, SUS.toNVConfigList(NVC_DATA, NVC_SOURCE_ID, NVC_FULL_NAME), null, false, PropertyDAO.NVC_PROPERTY_DAO);
+	public static final NVConfigEntity NVC_DATA_CONTENT = new NVConfigEntityPortable("data_content", null , "DataContent", true, false, false, false, DataContent.class, SUS.toNVConfigList(NVC_DATA, NVC_SOURCE_ID, NVC_FULL_NAME), null, false, PropertyImpl.NVC_PROPERTY_IMPL);
 	
 	/**
 	 * This constructor creates a MessageBase object

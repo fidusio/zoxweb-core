@@ -7,7 +7,7 @@ import org.zoxweb.shared.util.*;
 import java.util.Objects;
 
 public class AppIDResource
-        extends PropertyDAO
+        extends PropertyImpl
         implements AppID<String>,
         CanonicalID {
 
@@ -40,7 +40,7 @@ public class AppIDResource
             SUS.extractNVConfigs(Param.values()),
             null,
             false,
-            PropertyDAO.NVC_PROPERTY_DAO
+            PropertyImpl.NVC_PROPERTY_IMPL
     );
 
 

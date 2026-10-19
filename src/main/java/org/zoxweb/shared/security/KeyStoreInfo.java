@@ -15,14 +15,14 @@
  */
 package org.zoxweb.shared.security;
 
-import org.zoxweb.shared.data.SetNameDescriptionDAO;
+import org.zoxweb.shared.data.SetNameDescriptionImpl;
 import org.zoxweb.shared.util.*;
 
 import java.util.List;
 
 @SuppressWarnings("serial")
 public class KeyStoreInfo
-    extends SetNameDescriptionDAO {
+    extends SetNameDescriptionImpl {
 
     public enum Param
         implements GetNVConfig
@@ -63,7 +63,7 @@ public class KeyStoreInfo
             SUS.extractNVConfigs(Param.values()),
             null,
             false,
-            SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO
+            SetNameDescriptionImpl.NVC_NAME_DESCRIPTION_IMPL
     );
 
     public KeyStoreInfo()

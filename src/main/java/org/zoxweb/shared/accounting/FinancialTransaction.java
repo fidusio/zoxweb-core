@@ -16,7 +16,7 @@
 package org.zoxweb.shared.accounting;
 
 import org.zoxweb.shared.app.AppIDDefault;
-import org.zoxweb.shared.data.TimeStampDAO;
+import org.zoxweb.shared.data.TimeStampImpl;
 import org.zoxweb.shared.util.*;
 import org.zoxweb.shared.util.NVConfigEntity.ArrayType;
 
@@ -30,7 +30,7 @@ import java.util.Date;
  */
 @SuppressWarnings("serial")
 public class FinancialTransaction
-        extends TimeStampDAO {
+        extends TimeStampImpl {
     /**
      * Sets the default transaction type to credit.
      */
@@ -73,7 +73,7 @@ public class FinancialTransaction
             SUS.extractNVConfigs(Params.values()),
             null,
             true,
-            TimeStampDAO.NVC_TIME_STAMP_DAO
+            TimeStampImpl.NVC_TIME_STAMP_IMPL
     );
 
     /**

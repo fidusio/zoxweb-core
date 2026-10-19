@@ -18,7 +18,7 @@ package org.zoxweb.shared.security;
 
 
 import org.zoxweb.shared.app.AppIDDefault;
-import org.zoxweb.shared.data.PropertyDAO;
+import org.zoxweb.shared.data.PropertyImpl;
 import org.zoxweb.shared.filters.FilterType;
 import org.zoxweb.shared.util.Const.Status;
 import org.zoxweb.shared.util.*;
@@ -68,7 +68,7 @@ import java.util.Date;
  */
 @SuppressWarnings("serial")
 public class SubjectAPIKey
-        extends PropertyDAO
+        extends PropertyImpl
         implements SubjectID<String>, APIKey<String>,
         SystemID<String>, PrincipalID<String>, CredentialInfo {
 
@@ -116,7 +116,7 @@ public class SubjectAPIKey
             SUS.extractNVConfigs(Param.values()),
             null,
             false,
-            PropertyDAO.NVC_PROPERTY_DAO
+            PropertyImpl.NVC_PROPERTY_IMPL
     );
 
     /** Creates an empty API key backed by {@link #NVC_SUBJECT_API_KEY}. */

@@ -4,7 +4,7 @@ import org.zoxweb.shared.util.*;
 
 @SuppressWarnings("serial")
 public class StatInfo
-    extends PropertyDAO
+    extends PropertyImpl
 {
 
     public enum Param
@@ -38,7 +38,7 @@ public class StatInfo
             SUS.extractNVConfigs(Param.values()),
             null,
             false,
-            PropertyDAO.NVC_PROPERTY_DAO);
+            PropertyImpl.NVC_PROPERTY_IMPL);
 
     public StatInfo()
     {

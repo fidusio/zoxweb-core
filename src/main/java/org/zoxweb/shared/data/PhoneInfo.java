@@ -31,7 +31,7 @@ import org.zoxweb.shared.util.SUS;
  */
 @SuppressWarnings("serial")
 public class PhoneInfo
-	extends SetNameDescriptionDAO 
+	extends SetNameDescriptionImpl
 	implements CanonicalID
 {
 	
@@ -79,7 +79,7 @@ public class PhoneInfo
             SUS.extractNVConfigs(Param.values()),
             null,
             false,
-            SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO
+            SetNameDescriptionImpl.NVC_NAME_DESCRIPTION_IMPL
     );
 	
 	/**

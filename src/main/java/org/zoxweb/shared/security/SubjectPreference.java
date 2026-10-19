@@ -3,7 +3,7 @@ package org.zoxweb.shared.security;
 import org.zoxweb.shared.data.AddressInfo;
 import org.zoxweb.shared.data.CreditCardInfo;
 import org.zoxweb.shared.data.DataConst.Language;
-import org.zoxweb.shared.data.SetNameDescriptionDAO;
+import org.zoxweb.shared.data.SetNameDescriptionImpl;
 import org.zoxweb.shared.util.*;
 import org.zoxweb.shared.util.NVConfigEntity.ArrayType;
 
@@ -14,7 +14,7 @@ import org.zoxweb.shared.util.NVConfigEntity.ArrayType;
  */
 @SuppressWarnings("serial")
 public class SubjectPreference
-	extends SetNameDescriptionDAO
+	extends SetNameDescriptionImpl
 {
 
     public enum Param
@@ -51,7 +51,7 @@ public class SubjectPreference
             SUS.extractNVConfigs(Param.values()),
             null,
             false,
-            SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO
+            SetNameDescriptionImpl.NVC_NAME_DESCRIPTION_IMPL
     );
 
     public SubjectPreference()

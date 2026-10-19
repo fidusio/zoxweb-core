@@ -34,7 +34,7 @@ import org.zoxweb.shared.util.NVConfigEntity.ArrayType;
  */
 @SuppressWarnings("serial")
 public class AssociationInfo
-        extends SetNameDescriptionDAO {
+        extends SetNameDescriptionImpl {
     public enum Param
             implements GetNVConfig {
         ASSOCIATED(NVConfigManager.createNVConfigEntity("associated", "The mapped reference", "Mapped", false, true, NVEntity.class, ArrayType.NOT_ARRAY)),
@@ -57,7 +57,7 @@ public class AssociationInfo
     /**
      * This NVConfigEntity type constant is set to an instantiation of a NVConfigEntityPortable object based on AssociationInfo.
      */
-    public static final NVConfigEntity NVC_ASSOCIATION_INFO = new NVConfigEntityPortable("association_info", null, "AssociationInfo", true, false, false, false, AssociationInfo.class, SUS.extractNVConfigs(Param.values()), null, false, SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO);//,SUS.extractNVConfigs( new Params[]{Params.REFERENCE_ID, Params.NAME, Params.LENGTH}));
+    public static final NVConfigEntity NVC_ASSOCIATION_INFO = new NVConfigEntityPortable("association_info", null, "AssociationInfo", true, false, false, false, AssociationInfo.class, SUS.extractNVConfigs(Param.values()), null, false, SetNameDescriptionImpl.NVC_NAME_DESCRIPTION_IMPL);//,SUS.extractNVConfigs( new Params[]{Params.REFERENCE_ID, Params.NAME, Params.LENGTH}));
 
 
     public AssociationInfo() {

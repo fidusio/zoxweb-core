@@ -15,7 +15,7 @@
  */
 package org.zoxweb.shared.net;
 
-import org.zoxweb.shared.data.SetNameDAO;
+import org.zoxweb.shared.data.SetNameImpl;
 import org.zoxweb.shared.net.InetProp.IPVersion;
 import org.zoxweb.shared.util.*;
 
@@ -28,13 +28,13 @@ import org.zoxweb.shared.util.*;
  */
 @SuppressWarnings("serial")
 public class InetAddressInfo
-        extends SetNameDAO {
+        extends SetNameImpl {
 
     private static final NVConfig INET_ADDRESS = NVConfigManager.createNVConfig("inet_address", "The ip address", "InetAddress", true, false, String.class);
     private static final NVConfig IP_VERSION = NVConfigManager.createNVConfig("ip_version", "The ip version V4 or V6", "IPVersion", true, false, IPVersion.class);
 
     /** NVConfigEntity definition for InetAddressInfo */
-    public static final NVConfigEntity NVC_INET_ADDRESS_INFO = new NVConfigEntityPortable("inet_address_info", null, "InetAddressInfo", true, false, false, false, InetAddressInfo.class, SUS.toNVConfigList(INET_ADDRESS, IP_VERSION), null, false, SetNameDAO.NVC_NAME_DAO);
+    public static final NVConfigEntity NVC_INET_ADDRESS_INFO = new NVConfigEntityPortable("inet_address_info", null, "InetAddressInfo", true, false, false, false, InetAddressInfo.class, SUS.toNVConfigList(INET_ADDRESS, IP_VERSION), null, false, SetNameImpl.NVC_NAME_IMPL);
 
     /**
      * Default constructor.

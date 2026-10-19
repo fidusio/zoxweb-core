@@ -28,7 +28,7 @@ import org.zoxweb.shared.util.SUS;
  */
 @SuppressWarnings("serial")
 public class AgreementDoc
-	extends SetNameDescriptionDAO
+	extends SetNameDescriptionImpl
 {
 
 	/**
@@ -72,7 +72,7 @@ public class AgreementDoc
         SUS.extractNVConfigs(Param.values()),
         null,
         false,
-        SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO
+        SetNameDescriptionImpl.NVC_NAME_DESCRIPTION_IMPL
     );
 	
 	

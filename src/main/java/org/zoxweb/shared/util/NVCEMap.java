@@ -18,7 +18,7 @@ package org.zoxweb.shared.util;
 import java.io.Serializable;
 import java.util.List;
 
-import org.zoxweb.shared.data.SetNameDescriptionDAO;
+import org.zoxweb.shared.data.SetNameDescriptionImpl;
 import org.zoxweb.shared.util.Const.Bidi;
 import org.zoxweb.shared.util.NVConfigEntity.ArrayType;
 
@@ -29,7 +29,7 @@ import org.zoxweb.shared.util.NVConfigEntity.ArrayType;
  */
 @SuppressWarnings("serial")
 public class NVCEMap
-	extends SetNameDescriptionDAO
+	extends SetNameDescriptionImpl
 	implements Serializable
 {
 	
@@ -78,7 +78,7 @@ public class NVCEMap
 																			NVCEMap.class, 
 																			SUS.extractNVConfigs(Params.values()), 
 																			null, false, 
-																			SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO
+																			SetNameDescriptionImpl.NVC_NAME_DESCRIPTION_IMPL
 																		);
 
 	/**

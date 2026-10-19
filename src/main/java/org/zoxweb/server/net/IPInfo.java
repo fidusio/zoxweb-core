@@ -20,7 +20,7 @@ package org.zoxweb.server.net;
 import org.zoxweb.server.util.RuntimeUtil;
 import org.zoxweb.shared.data.RuntimeResultData;
 import org.zoxweb.shared.net.InetProp.IPVersion;
-import org.zoxweb.shared.net.NIConfigDAO;
+import org.zoxweb.shared.net.NIConfigInfo;
 import org.zoxweb.shared.net.SharedNetUtil;
 import org.zoxweb.shared.util.SUS;
 
@@ -207,7 +207,7 @@ public class IPInfo {
         return new IPInfo(NetworkInterface.getByName(niName), IPVersion.V4);
     }
 
-    public static NIConfigDAO getNIConfigInfo(NIConfigDAO nicd) throws IOException {
+    public static NIConfigInfo getNIConfigInfo(NIConfigInfo nicd) throws IOException {
         IPInfo ipi = getV4IPInfo(nicd.getNIName());
         nicd.setAddress(SharedNetUtil.toV4Address(ipi.getIPAddress().getAddress()));
         nicd.setNetmask(SharedNetUtil.toV4Address(ipi.getNetworkMask().getAddress()));

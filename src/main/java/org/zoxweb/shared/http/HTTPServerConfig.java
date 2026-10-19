@@ -16,7 +16,7 @@
 package org.zoxweb.shared.http;
 
 
-import org.zoxweb.shared.data.PropertyDAO;
+import org.zoxweb.shared.data.PropertyImpl;
 import org.zoxweb.shared.net.ConnectionConfig;
 import org.zoxweb.shared.util.*;
 import org.zoxweb.shared.util.NVConfigEntity.ArrayType;
@@ -27,12 +27,12 @@ import org.zoxweb.shared.util.NVConfigEntity.ArrayType;
  * server-related parameters.
  *
  * @author mnael
- * @see PropertyDAO
+ * @see PropertyImpl
  * @see AppConfig
  */
 @SuppressWarnings("serial")
 public class HTTPServerConfig
-extends PropertyDAO
+extends PropertyImpl
 implements AppConfig
 {
   public enum Param
@@ -70,7 +70,7 @@ implements AppConfig
       SUS.extractNVConfigs(Param.values()),
       null,
       false,
-      PropertyDAO.NVC_PROPERTY_DAO);
+      PropertyImpl.NVC_PROPERTY_IMPL);
 
   public HTTPServerConfig()
   {

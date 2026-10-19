@@ -40,7 +40,7 @@ What the subsystem deliberately is **not**:
 
 ### 2.1 Shape
 
-`EncryptedData` is a `PropertyDAO` (so the meta-model, `GSONUtil` and `APIDataStore` can carry
+`EncryptedData` is a `PropertyImpl` (so the meta-model, `GSONUtil` and `APIDataStore` can carry
 it) whose ten `Param` fields are the record. The entity fields it inherits (GUID, subject GUID,
 name, description, timestamps, properties) are **not part of the record and are not
 authenticated**; only the ten below are.

@@ -8,7 +8,7 @@ import java.util.List;
 
 @SuppressWarnings("serial")
 public class FolderContentOp
-        extends SetNameDescriptionDAO {
+        extends SetNameDescriptionImpl {
     public enum Param
             implements GetNVConfig {
         FROM_FOLDER_REF(NVConfigManager.createNVConfig("from_folder_ref", "From folder reference id", "FromFolderRef", true, false, String.class)),
@@ -39,7 +39,7 @@ public class FolderContentOp
             SUS.extractNVConfigs(Param.values()),
             null,
             false,
-            SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO
+            SetNameDescriptionImpl.NVC_NAME_DESCRIPTION_IMPL
     );
 
 

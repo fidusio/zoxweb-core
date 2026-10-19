@@ -16,7 +16,7 @@ import org.zoxweb.shared.util.SubjectID;
 
 @SuppressWarnings("serial")
 public class AppAccessMode
-	extends SetNameDescriptionDAO
+	extends SetNameDescriptionImpl
 	implements SubjectID<String>
 {
 	
@@ -52,7 +52,7 @@ public class AppAccessMode
 	         SUS.extractNVConfigs(Param.values()),
 	         null,
 	         false,
-	         SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO
+	         SetNameDescriptionImpl.NVC_NAME_DESCRIPTION_IMPL
 	 );
 
 

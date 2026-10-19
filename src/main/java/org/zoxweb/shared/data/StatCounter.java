@@ -17,7 +17,7 @@ import org.zoxweb.shared.util.SUS;
 
 @SuppressWarnings("serial")
 public class StatCounter
-	extends TimeStampDAO
+	extends TimeStampImpl
 {
 
 	
@@ -55,7 +55,7 @@ public class StatCounter
 	        SUS.extractNVConfigs(Param.values()),
 	        null,
 	        false,
-	        TimeStampDAO.NVC_TIME_STAMP_DAO
+	        TimeStampImpl.NVC_TIME_STAMP_IMPL
 	);
 
 	public StatCounter()

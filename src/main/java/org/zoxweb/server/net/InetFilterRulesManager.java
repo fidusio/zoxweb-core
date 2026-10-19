@@ -16,7 +16,7 @@
 package org.zoxweb.server.net;
 
 import org.zoxweb.server.logging.LogWrapper;
-import org.zoxweb.shared.data.SetNameDAO;
+import org.zoxweb.shared.data.SetNameImpl;
 import org.zoxweb.shared.net.InetFilterInfo;
 import org.zoxweb.shared.net.SharedNetUtil;
 import org.zoxweb.shared.security.SecConst;
@@ -35,7 +35,7 @@ public class InetFilterRulesManager {
 
     @SuppressWarnings("serial")
     public static class InetFilterRule
-            extends SetNameDAO
+            extends SetNameImpl
             implements Comparable<InetFilterRule> {
         private volatile byte[] networkBytes = null;
         private volatile byte[] maskBytes = null;
@@ -60,7 +60,7 @@ public class InetFilterRulesManager {
         /**
          * This NVConfigEntity type constant is set to an instantiation of a NVConfigEntityPortable object based on InetFilterRule.
          */
-        public static final NVConfigEntity NVC_INET_FILTER_RULE = new NVConfigEntityPortable("inet_filter_prop", null, "InetFilterProp", true, false, false, false, InetFilterRule.class, SUS.extractNVConfigs(Params.values()), null, false, SetNameDAO.NVC_NAME_DAO);
+        public static final NVConfigEntity NVC_INET_FILTER_RULE = new NVConfigEntityPortable("inet_filter_prop", null, "InetFilterProp", true, false, false, false, InetFilterRule.class, SUS.extractNVConfigs(Params.values()), null, false, SetNameImpl.NVC_NAME_IMPL);
 
         public InetFilterRule() {
             super(NVC_INET_FILTER_RULE);

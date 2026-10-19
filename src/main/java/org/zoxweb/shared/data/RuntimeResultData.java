@@ -28,7 +28,7 @@ import org.zoxweb.shared.util.SUS;
  */
 @SuppressWarnings("serial")
 public class RuntimeResultData
-        extends SetNameDescriptionDAO {
+        extends SetNameDescriptionImpl {
 
     public enum ResultAttribute
             implements GetNVConfig {
@@ -62,7 +62,7 @@ public class RuntimeResultData
             SUS.extractNVConfigs(ResultAttribute.values()),
             null,
             false,
-            SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO
+            SetNameDescriptionImpl.NVC_NAME_DESCRIPTION_IMPL
     );
 
     /**

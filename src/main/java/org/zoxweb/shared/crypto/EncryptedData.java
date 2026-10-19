@@ -15,7 +15,7 @@
  */
 package org.zoxweb.shared.crypto;
 
-import org.zoxweb.shared.data.PropertyDAO;
+import org.zoxweb.shared.data.PropertyImpl;
 import org.zoxweb.shared.util.*;
 import org.zoxweb.shared.util.SharedBase64.Base64Type;
 
@@ -42,7 +42,7 @@ import org.zoxweb.shared.util.SharedBase64.Base64Type;
  *                      storage codecs require it
  * cipher_data  b64url  ciphertext with the 16-byte GCM tag appended
  * </pre>
- * Text attributes may not contain {@code |}. The class stays a {@link PropertyDAO} so the meta-model
+ * Text attributes may not contain {@code |}. The class stays a {@link PropertyImpl} so the meta-model
  * and JSON tooling can carry it, but the entity fields (GUID, subject GUID, name, timestamps) are
  * not part of the record and are not authenticated: only the attributes above are.
  * <p>
@@ -53,7 +53,7 @@ import org.zoxweb.shared.util.SharedBase64.Base64Type;
  */
 @SuppressWarnings("serial")
 public class EncryptedData
-        extends PropertyDAO
+        extends PropertyImpl
         implements CryptoBase {
 
     public static final int VERSION = 2;
@@ -89,7 +89,7 @@ public class EncryptedData
         }
     }
 
-    public final static NVConfigEntity NVCE_ENCRYPTED_DATA = new NVConfigEntityPortable("encrypted_data", null, "EncryptedData", false, true, false, false, EncryptedData.class, SUS.extractNVConfigs(Param.values()), null, false, PropertyDAO.NVC_PROPERTY_DAO);
+    public final static NVConfigEntity NVCE_ENCRYPTED_DATA = new NVConfigEntityPortable("encrypted_data", null, "EncryptedData", false, true, false, false, EncryptedData.class, SUS.extractNVConfigs(Param.values()), null, false, PropertyImpl.NVC_PROPERTY_IMPL);
 
     public EncryptedData() {
         super(NVCE_ENCRYPTED_DATA);

@@ -16,7 +16,7 @@
 package org.zoxweb.shared.api;
 
 import org.zoxweb.shared.crypto.CryptoConst;
-import org.zoxweb.shared.data.PropertyDAO;
+import org.zoxweb.shared.data.PropertyImpl;
 import org.zoxweb.shared.util.*;
 import org.zoxweb.shared.util.Const.TimeInMillis;
 
@@ -30,7 +30,7 @@ import java.util.Date;
  */
 @SuppressWarnings("serial")
 public class APIAccessToken
-        extends PropertyDAO {
+        extends PropertyImpl {
 
     public enum Token
             implements GetNVConfig {
@@ -72,7 +72,7 @@ public class APIAccessToken
             SUS.extractNVConfigs(Token.values()),
             null,
             false,
-            PropertyDAO.NVC_PROPERTY_DAO
+            PropertyImpl.NVC_PROPERTY_IMPL
     );
 
 

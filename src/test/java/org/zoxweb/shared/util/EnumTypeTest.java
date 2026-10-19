@@ -3,7 +3,7 @@ package org.zoxweb.shared.util;
 
 import org.junit.jupiter.api.Test;
 import org.zoxweb.server.util.GSONUtil;
-import org.zoxweb.shared.data.PropertyDAO;
+import org.zoxweb.shared.data.PropertyImpl;
 import org.zoxweb.shared.filters.FilterType;
 import org.zoxweb.shared.security.SecConst;
 import org.zoxweb.shared.util.Const.TimeInMillis;
@@ -13,7 +13,7 @@ import java.util.List;
 public class EnumTypeTest {
 
     public static class EnumTester
-            extends PropertyDAO {
+            extends PropertyImpl {
         public enum Param
                 implements GetNVConfig {
             SUBJECT_GUID(NVConfigManager.createNVConfig(MetaToken.SUBJECT_GUID.getName(), "The subject global identifier.", "SubjectGUID", true, false, true, String.class, null)),
@@ -43,7 +43,7 @@ public class EnumTypeTest {
                 SUS.extractNVConfigs(Param.values()),
                 null,
                 false,
-                PropertyDAO.NVC_PROPERTY_DAO
+                PropertyImpl.NVC_PROPERTY_IMPL
         );
 
         public EnumTester() {

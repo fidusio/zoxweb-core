@@ -1,8 +1,8 @@
 package org.zoxweb.shared.security;
 
 
+import org.zoxweb.shared.data.PropertyImpl;
 import org.zoxweb.shared.security.SecConst.AuthenticationType;
-import org.zoxweb.shared.data.PropertyDAO;
 import org.zoxweb.shared.http.URIScheme;
 import org.zoxweb.shared.util.*;
 
@@ -11,7 +11,7 @@ import java.util.Set;
 
 
 public class ResourceSecurityProfile
-        extends PropertyDAO
+        extends PropertyImpl
         implements ResourceSecurity {
 
     public enum Param
@@ -54,7 +54,7 @@ public class ResourceSecurityProfile
             SUS.extractNVConfigs(Param.values()),
             null,
             false,
-            PropertyDAO.NVC_PROPERTY_DAO);
+            PropertyImpl.NVC_PROPERTY_IMPL);
 
 
     public ResourceSecurityProfile() {

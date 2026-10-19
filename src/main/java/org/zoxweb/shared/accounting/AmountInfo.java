@@ -15,7 +15,7 @@
  */
 package org.zoxweb.shared.accounting;
 
-import org.zoxweb.shared.data.SetNameDescriptionDAO;
+import org.zoxweb.shared.data.SetNameDescriptionImpl;
 import org.zoxweb.shared.util.*;
 
 import java.math.BigDecimal;
@@ -28,7 +28,7 @@ import java.math.BigDecimal;
  */
 @SuppressWarnings("serial")
 public class AmountInfo
-        extends SetNameDescriptionDAO
+        extends SetNameDescriptionImpl
         implements RenderableValue<String> {
 
     /**
@@ -68,7 +68,7 @@ public class AmountInfo
             SUS.extractNVConfigs(Params.values()),
             null,
             true,
-            SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO
+            SetNameDescriptionImpl.NVC_NAME_DESCRIPTION_IMPL
     );
 
 

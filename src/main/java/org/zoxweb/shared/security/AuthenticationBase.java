@@ -15,7 +15,7 @@
  */
 package org.zoxweb.shared.security;
 
-import org.zoxweb.shared.data.SetNameDAO;
+import org.zoxweb.shared.data.SetNameImpl;
 import org.zoxweb.shared.util.GetNVConfig;
 import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
@@ -38,7 +38,7 @@ import org.zoxweb.shared.util.SystemID;
  */
 @SuppressWarnings("serial")
 public class AuthenticationBase
-	extends SetNameDAO
+	extends SetNameImpl
 	implements SystemID<String>
 {
 	
@@ -73,7 +73,7 @@ public class AuthenticationBase
 																						   SUS.extractNVConfigs(Params.values()), 
 																						   null, 
 																						   false, 
-																						   SetNameDAO.NVC_NAME_DAO);
+																						   SetNameImpl.NVC_NAME_IMPL);
 	
 	
 	

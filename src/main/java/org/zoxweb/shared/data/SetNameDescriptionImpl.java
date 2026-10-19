@@ -26,56 +26,55 @@ import org.zoxweb.shared.util.SUS;
 
 /**
  * This class defines set name description data access object
- * which extends SetNameDAO.
+ * which extends SetNameImpl.
+ *
  * @author mnael
  */
 //@MappedSuperclass
 @SuppressWarnings("serial")
-public abstract class SetNameDescriptionDAO
-    extends SetNameDAO
-    implements SetDescription
-{
+public abstract class SetNameDescriptionImpl
+        extends SetNameImpl
+        implements SetDescription {
 
-	public static final NVConfigEntity NVC_NAME_DESCRIPTION_DAO = new NVConfigEntityPortable(
+    public static final NVConfigEntity NVC_NAME_DESCRIPTION_IMPL = new NVConfigEntityPortable(
             null,
-            null ,
+            null,
             null,
             true,
             false,
             false,
             false,
-            SetNameDescriptionDAO.class,
+            SetNameDescriptionImpl.class,
             SUS.toNVConfigList(DataParam.DESCRIPTION.getNVConfig()),
             null,
             false,
-            SetNameDAO.NVC_NAME_DAO
+            SetNameImpl.NVC_NAME_IMPL
     );
 
-	protected SetNameDescriptionDAO(NVConfigEntity nvce)
-    {
-		super(nvce);
-	}
+    protected SetNameDescriptionImpl(NVConfigEntity nvce) {
+        super(nvce);
+    }
 
-	/**
-	 * Returns the description.
-	 * @return description
-	 */
-	//@Column(name = "description")
-	@Override
-	public String getDescription()
-    {
-		return lookupValue(DataParam.DESCRIPTION);
-	}
+    /**
+     * Returns the description.
+     *
+     * @return description
+     */
+    //@Column(name = "description")
+    @Override
+    public String getDescription() {
+        return lookupValue(DataParam.DESCRIPTION);
+    }
 
-	/**
-	 * Sets the description.
-	 * @param description
-	 */
-	@Override
-	public void setDescription(String description) 
-			throws NullPointerException, IllegalArgumentException
-    {
-		setValue(DataParam.DESCRIPTION, description);
-	}
+    /**
+     * Sets the description.
+     *
+     * @param description
+     */
+    @Override
+    public void setDescription(String description)
+            throws NullPointerException, IllegalArgumentException {
+        setValue(DataParam.DESCRIPTION, description);
+    }
 
 }

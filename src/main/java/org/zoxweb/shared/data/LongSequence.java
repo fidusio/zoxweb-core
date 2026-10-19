@@ -10,7 +10,7 @@ import  org.zoxweb.shared.filters.LowerCaseFilter;
 
 @SuppressWarnings("serial")
 public class LongSequence
-	extends SetNameDescriptionDAO
+	extends SetNameDescriptionImpl
 {
 	public enum Param
 		implements GetNVConfig
@@ -49,7 +49,7 @@ public class LongSequence
 	        SUS.extractNVConfigs(Param.values()),
 	        null,
 	        false,
-	        SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO
+	        SetNameDescriptionImpl.NVC_NAME_DESCRIPTION_IMPL
 	);
 
 	public LongSequence()

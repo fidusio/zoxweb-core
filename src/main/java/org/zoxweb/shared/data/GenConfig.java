@@ -34,7 +34,7 @@ import org.zoxweb.shared.util.NVConfigEntity.ArrayType;
  */
 @SuppressWarnings("serial")
 public class GenConfig
-        extends PropertyDAO
+        extends PropertyImpl
         implements AppConfig {
     /**
      * This enum contains data content variables which include:
@@ -79,7 +79,7 @@ public class GenConfig
             SUS.extractNVConfigs(Param.values()),
             null,
             false,
-            PropertyDAO.NVC_PROPERTY_DAO);
+            PropertyImpl.NVC_PROPERTY_IMPL);
 
 
     /**

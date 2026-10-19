@@ -30,7 +30,7 @@ import org.zoxweb.shared.util.NVConfigEntity.ArrayType;
  */
 @SuppressWarnings("serial")
 public class DataMessage
-        extends TimeStampDAO {
+        extends TimeStampImpl {
     // sender id in this case user id
     // timestamp
     // message id ie refid
@@ -65,7 +65,7 @@ public class DataMessage
             SUS.extractNVConfigs(Param.values()),
             null,
             false,
-            TimeStampDAO.NVC_TIME_STAMP_DAO
+            TimeStampImpl.NVC_TIME_STAMP_IMPL
     );
 
 

@@ -29,56 +29,55 @@ import org.zoxweb.shared.util.SUS;
 
 /**
  * This class defines set name data access object.
+ *
  * @author mzebib
  *
  */
 //@MappedSuperclass
 @SuppressWarnings("serial")
-public abstract class SetNameDAO
-	extends ReferenceIDDAO
-	implements SetName
-{
+public abstract class SetNameImpl
+        extends ReferenceIDImpl
+        implements SetName {
 
-	public static final NVConfigEntity NVC_NAME_DAO = new NVConfigEntityPortable(
+    public static final NVConfigEntity NVC_NAME_IMPL = new NVConfigEntityPortable(
             null,
-            null ,
+            null,
             null,
             true,
             false,
             false,
             false,
-            SetNameDAO.class,
+            SetNameImpl.class,
             SUS.toNVConfigList(DataParam.NAME.getNVConfig()),
             null,
             false,
-            ReferenceIDDAO.NVC_REFERENCE_ID_DAO
+            ReferenceIDImpl.NVC_REFERENCE_ID_IMPL
     );
 
-	protected SetNameDAO(NVConfigEntity nvce)
-    {
-		super(nvce);
-	}
-	
-	/**
-	 * Returns the name.
-	 * @return name
-	 */
-	//@Column(name = "name")
-	@Override
-	public String getName()
-    {
-		return lookupValue(DataParam.NAME);
-	}
+    protected SetNameImpl(NVConfigEntity nvce) {
+        super(nvce);
+    }
 
-	/**
-	 * Sets the name.
-	 * @param name
-	 */
-	@Override
-	public void setName(String name) 
-        throws NullPointerException, IllegalArgumentException
-    {
-		setValue(DataParam.NAME, name);
-	}
+    /**
+     * Returns the name.
+     *
+     * @return name
+     */
+    //@Column(name = "name")
+    @Override
+    public String getName() {
+        return lookupValue(DataParam.NAME);
+    }
+
+    /**
+     * Sets the name.
+     *
+     * @param name
+     */
+    @Override
+    public void setName(String name)
+            throws NullPointerException, IllegalArgumentException {
+        setValue(DataParam.NAME, name);
+    }
 
 }

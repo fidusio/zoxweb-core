@@ -15,7 +15,7 @@
  */
 package org.zoxweb.shared.app;
 
-import org.zoxweb.shared.data.SetNameDescriptionDAO;
+import org.zoxweb.shared.data.SetNameDescriptionImpl;
 import org.zoxweb.shared.util.*;
 
 import java.util.Date;
@@ -28,7 +28,7 @@ import java.util.Date;
  */
 @SuppressWarnings("serial")
 public class AppVersion
-        extends SetNameDescriptionDAO
+        extends SetNameDescriptionImpl
         implements CanonicalID {
 
     public enum Param
@@ -61,7 +61,7 @@ public class AppVersion
             SUS.extractNVConfigs(Param.values()),
             null,
             false,
-            SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO
+            SetNameDescriptionImpl.NVC_NAME_DESCRIPTION_IMPL
     );
 
 

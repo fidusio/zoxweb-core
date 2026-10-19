@@ -15,7 +15,7 @@
  */
 package org.zoxweb.shared.api;
 
-import org.zoxweb.shared.data.SetNameDescriptionDAO;
+import org.zoxweb.shared.data.SetNameDescriptionImpl;
 import org.zoxweb.shared.util.GetNVConfig;
 import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
@@ -31,7 +31,7 @@ import org.zoxweb.shared.util.SUS;
  */
 @SuppressWarnings("serial")
 public class APITransactionInfoImpl
-        extends SetNameDescriptionDAO
+        extends SetNameDescriptionImpl
         implements APITransactionInfo {
 
     public enum Params
@@ -72,7 +72,7 @@ public class APITransactionInfoImpl
                     SUS.extractNVConfigs(Params.values()),
                     null,
                     false,
-                    SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO
+                    SetNameDescriptionImpl.NVC_NAME_DESCRIPTION_IMPL
             );
 
     /**

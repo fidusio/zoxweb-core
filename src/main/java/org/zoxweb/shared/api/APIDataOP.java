@@ -4,14 +4,14 @@ package org.zoxweb.shared.api;
 import org.zoxweb.shared.data.DataConst;
 
 
-import org.zoxweb.shared.data.SetNameDescriptionDAO;
+import org.zoxweb.shared.data.SetNameDescriptionImpl;
 import org.zoxweb.shared.util.*;
 
 import java.util.List;
 
 @SuppressWarnings("serial")
 public class APIDataOP
-        extends SetNameDescriptionDAO {
+        extends SetNameDescriptionImpl {
     public enum Param
             implements GetNVConfig {
         DATA_OP(NVConfigManager.createNVConfig("data_op", "Data Operation", "DataOP", true, true, DataConst.DataOP.class)),
@@ -45,7 +45,7 @@ public class APIDataOP
             SUS.extractNVConfigs(Param.values()),
             null,
             false,
-            SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO);
+            SetNameDescriptionImpl.NVC_NAME_DESCRIPTION_IMPL);
 
     public APIDataOP() {
         super(NVC_API_DATA_OP);

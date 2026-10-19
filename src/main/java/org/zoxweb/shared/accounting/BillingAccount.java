@@ -15,7 +15,7 @@
  */
 package org.zoxweb.shared.accounting;
 
-import org.zoxweb.shared.data.TimeStampDAO;
+import org.zoxweb.shared.data.TimeStampImpl;
 import org.zoxweb.shared.util.*;
 import org.zoxweb.shared.util.NVConfigEntity.ArrayType;
 
@@ -30,7 +30,7 @@ import java.math.BigDecimal;
  */
 @SuppressWarnings("serial")
 public class BillingAccount
-        extends TimeStampDAO {
+        extends TimeStampImpl {
 
     public enum Params
             implements GetNVConfig {
@@ -62,7 +62,7 @@ public class BillingAccount
             SUS.extractNVConfigs(Params.values()),
             null,
             false,
-            TimeStampDAO.NVC_TIME_STAMP_DAO
+            TimeStampImpl.NVC_TIME_STAMP_IMPL
     );
 
 

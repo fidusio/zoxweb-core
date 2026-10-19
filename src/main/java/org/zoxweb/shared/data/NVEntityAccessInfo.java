@@ -33,7 +33,7 @@ import org.zoxweb.shared.util.SUS;
  */
 @SuppressWarnings("serial")
 public class NVEntityAccessInfo
-	extends TimeStampDAO 
+	extends TimeStampImpl
 {
 
 	public enum Param
@@ -70,7 +70,7 @@ public class NVEntityAccessInfo
             SUS.extractNVConfigs(Param.values()),
             null,
             false,
-            TimeStampDAO.NVC_TIME_STAMP_DAO
+            TimeStampImpl.NVC_TIME_STAMP_IMPL
     );
 	
 	/**

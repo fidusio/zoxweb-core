@@ -1,11 +1,11 @@
 package org.zoxweb.shared.security;
 
-import org.zoxweb.shared.data.PropertyDAO;
+import org.zoxweb.shared.data.PropertyImpl;
 import org.zoxweb.shared.util.*;
 
 @SuppressWarnings("serial")
 public class JWTToken
-        extends PropertyDAO
+        extends PropertyImpl
         implements CredentialInfo {
 
 
@@ -40,7 +40,7 @@ public class JWTToken
             SUS.extractNVConfigs(Param.values()),
             null,
             false,
-            PropertyDAO.NVC_PROPERTY_DAO);
+            PropertyImpl.NVC_PROPERTY_IMPL);
 
 
     public JWTToken() {

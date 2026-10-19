@@ -15,7 +15,7 @@
  */
 package org.zoxweb.shared.net;
 
-import org.zoxweb.shared.data.PropertyDAO;
+import org.zoxweb.shared.data.PropertyImpl;
 import org.zoxweb.shared.net.InetProp.InetProto;
 import org.zoxweb.shared.util.*;
 
@@ -24,7 +24,7 @@ import java.io.IOException;
 ;
 
 /**
- * Data access object for network interface configuration.
+ * Network interface configuration.
  * Stores network interface settings including address, netmask, gateway,
  * DNS servers, and protocol-specific configurations like PPPoE and WPA.
  *
@@ -33,10 +33,10 @@ import java.io.IOException;
  * @see SharedNetUtil
  */
 @SuppressWarnings("serial")
-public class NIConfigDAO
-        extends PropertyDAO {
+public class NIConfigInfo
+        extends PropertyImpl {
     /**
-     * Configuration parameters for NIConfigDAO.
+     * Configuration parameters for NIConfigInfo.
      */
     public enum Param
             implements GetNVConfig, GetName {
@@ -80,14 +80,14 @@ public class NIConfigDAO
 
     }
 
-    /** NVConfigEntity definition for NIConfigDAO */
-    public static final NVConfigEntity NVC_NI_CONFIG_DAO = new NVConfigEntityPortable("ni_config_dao", null, "NIConfigDAO", true, false, false, false, NIConfigDAO.class, SUS.extractNVConfigs(Param.NI_NAME, Param.INET_PROTO), null, false, PropertyDAO.NVC_PROPERTY_DAO);
+    /** NVConfigEntity definition for NIConfigInfo */
+    public static final NVConfigEntity NVC_NI_CONFIG_INFO = new NVConfigEntityPortable("ni_config_info", null, "NIConfigInfo", true, false, false, false, NIConfigInfo.class, SUS.extractNVConfigs(Param.NI_NAME, Param.INET_PROTO), null, false, PropertyImpl.NVC_PROPERTY_IMPL);
 
     /**
      * Default constructor.
      */
-    public NIConfigDAO() {
-        super(NVC_NI_CONFIG_DAO);
+    public NIConfigInfo() {
+        super(NVC_NI_CONFIG_INFO);
     }
 
     /**

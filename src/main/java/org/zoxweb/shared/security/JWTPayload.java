@@ -15,7 +15,7 @@
  */
 package org.zoxweb.shared.security;
 
-import org.zoxweb.shared.data.SetNameDescriptionDAO;
+import org.zoxweb.shared.data.SetNameDescriptionImpl;
 import org.zoxweb.shared.filters.FilterType;
 import org.zoxweb.shared.util.*;
 
@@ -75,7 +75,7 @@ public class JWTPayload
             SUS.extractNVConfigs(Param.values()),
             null,
             true,
-            SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO
+            SetNameDescriptionImpl.NVC_NAME_DESCRIPTION_IMPL
     );
 
 

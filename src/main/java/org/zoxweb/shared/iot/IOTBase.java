@@ -16,7 +16,7 @@
 package org.zoxweb.shared.iot;
 
 import org.zoxweb.shared.data.DataConst;
-import org.zoxweb.shared.data.PropertyDAO;
+import org.zoxweb.shared.data.PropertyImpl;
 import org.zoxweb.shared.util.*;
 
 /**
@@ -25,13 +25,13 @@ import org.zoxweb.shared.util.*;
  * that are shared across all IoT-related data objects.
  *
  * @author mnael
- * @see PropertyDAO
+ * @see PropertyImpl
  * @see IOTDeviceInfo
  * @see PortInfo
  * @see ProtocolInfo
  */
 public abstract class IOTBase
-extends PropertyDAO
+extends PropertyImpl
 {
 
     /** Configuration for the user-defined alias property */
@@ -49,7 +49,7 @@ extends PropertyDAO
             SUS.toNVConfigList(DataConst.DataParam.UNIQUE_CANONICAL_ID.getNVConfig(), ALIAS),
             null,
             false,
-            PropertyDAO.NVC_PROPERTY_DAO);
+            PropertyImpl.NVC_PROPERTY_IMPL);
 
 
 

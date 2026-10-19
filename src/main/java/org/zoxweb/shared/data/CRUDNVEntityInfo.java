@@ -34,7 +34,7 @@ import org.zoxweb.shared.util.NVConfigEntity.ArrayType;
  */
 @SuppressWarnings("serial")
 public class CRUDNVEntityInfo
-	extends SetNameDAO
+	extends SetNameImpl
 	implements CRUDNVEntity
 {
 
@@ -60,7 +60,7 @@ public class CRUDNVEntityInfo
         }
 	}
 	
-	public static final NVConfigEntity NVC_CRUD_NVENTITY_INFO = new NVConfigEntityPortable("crud_nventity_info", null , "CRUDNVEntityInfo", true, false, false, false, CRUDNVEntityInfo.class, SUS.extractNVConfigs(Param.values()), null, false, SetNameDAO.NVC_NAME_DAO);
+	public static final NVConfigEntity NVC_CRUD_NVENTITY_INFO = new NVConfigEntityPortable("crud_nventity_info", null , "CRUDNVEntityInfo", true, false, false, false, CRUDNVEntityInfo.class, SUS.extractNVConfigs(Param.values()), null, false, SetNameImpl.NVC_NAME_IMPL);
 
 	public CRUDNVEntityInfo()
 	{

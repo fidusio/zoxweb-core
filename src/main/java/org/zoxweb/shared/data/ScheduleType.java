@@ -12,7 +12,7 @@ import org.zoxweb.shared.util.Const.TimeInMillis;
 
 @SuppressWarnings("serial")
 public class ScheduleType
-        extends SetNameDescriptionDAO {
+        extends SetNameDescriptionImpl {
 
     public enum Param
             implements GetNVConfig {
@@ -45,7 +45,7 @@ public class ScheduleType
             SUS.extractNVConfigs(Param.values()),
             null,
             false,
-            SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO
+            SetNameDescriptionImpl.NVC_NAME_DESCRIPTION_IMPL
     );
 
     private transient long relativeStartMillis;

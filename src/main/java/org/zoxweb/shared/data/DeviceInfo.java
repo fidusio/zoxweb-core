@@ -4,7 +4,7 @@ import org.zoxweb.shared.util.*;
 
 @SuppressWarnings("serial")
 public class DeviceInfo
-        extends PropertyDAO
+        extends PropertyImpl
         implements DeviceID<String>, SubjectID<String> {
 
     public enum Param
@@ -43,7 +43,7 @@ public class DeviceInfo
             SUS.extractNVConfigs(Param.values()),
             null,
             false,
-            PropertyDAO.NVC_PROPERTY_DAO);
+            PropertyImpl.NVC_PROPERTY_IMPL);
 
 
     public DeviceInfo() {

@@ -15,7 +15,7 @@
  */
 package org.zoxweb.shared.api;
 
-import org.zoxweb.shared.data.PropertyDAO;
+import org.zoxweb.shared.data.PropertyImpl;
 import org.zoxweb.shared.security.KeyMaker;
 import org.zoxweb.shared.security.SecurityController;
 import org.zoxweb.shared.util.*;
@@ -32,7 +32,7 @@ import java.util.List;
  */
 @SuppressWarnings("serial")
 public class APIConfigInfoImpl
-        extends PropertyDAO
+        extends PropertyImpl
         implements APIConfigInfo {
 
 
@@ -89,7 +89,7 @@ public class APIConfigInfoImpl
                     SUS.extractNVConfigs(Params.values()),
                     null,
                     false,
-                    PropertyDAO.NVC_PROPERTY_DAO
+                    PropertyImpl.NVC_PROPERTY_IMPL
             );
 
 

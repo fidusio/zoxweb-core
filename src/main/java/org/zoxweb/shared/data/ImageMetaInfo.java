@@ -14,7 +14,7 @@ import org.zoxweb.shared.filters.FilterType;
  */
 @SuppressWarnings("serial")
 public class ImageMetaInfo
-        extends TimeStampDAO {
+        extends TimeStampImpl {
 
     public enum ImageFormat
             implements GetValue<String> {
@@ -70,7 +70,7 @@ public class ImageMetaInfo
             SUS.extractNVConfigs(Param.values()),
             null,
             false,
-            TimeStampDAO.NVC_TIME_STAMP_DAO
+            TimeStampImpl.NVC_TIME_STAMP_IMPL
     );
 
     public ImageMetaInfo() {

@@ -15,7 +15,7 @@
  */
 package org.zoxweb.shared.net;
 
-import org.zoxweb.shared.data.SetNameDescriptionDAO;
+import org.zoxweb.shared.data.SetNameDescriptionImpl;
 import org.zoxweb.shared.util.GetNVConfig;
 import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
@@ -32,7 +32,7 @@ import org.zoxweb.shared.util.SUS;
  */
 @SuppressWarnings("serial")
 public class IPRangeInfo
-        extends SetNameDescriptionDAO {
+        extends SetNameDescriptionImpl {
 
     /**
      * Configuration parameters for IPRangeInfo.
@@ -73,7 +73,7 @@ public class IPRangeInfo
     /**
      * NVConfigEntity definition for IPRangeInfo
      */
-    public static final NVConfigEntity NVC_IP_RANGE_INFO = new NVConfigEntityPortable("ip_range_info", null, "IPRangeInfo", true, false, false, false, IPRangeInfo.class, SUS.extractNVConfigs(Params.values()), null, false, SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO);
+    public static final NVConfigEntity NVC_IP_RANGE_INFO = new NVConfigEntityPortable("ip_range_info", null, "IPRangeInfo", true, false, false, false, IPRangeInfo.class, SUS.extractNVConfigs(Params.values()), null, false, SetNameDescriptionImpl.NVC_NAME_DESCRIPTION_IMPL);
 
     /**
      * Default constructor.

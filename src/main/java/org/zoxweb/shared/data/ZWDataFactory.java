@@ -584,51 +584,8 @@ public class ZWDataFactory
             public NVConfigEntity getNVConfigEntity() {
                 return org.zoxweb.shared.security.JWT.NVC_JWT;
             }
-        } //        {
-        //            @SuppressWarnings("unchecked")
-        //            @Override
-        //            public HTTPDefaultResponseDAO newInstance()
-        //            {
-        //                return new HTTPDefaultResponseDAO();
-        //            }
-        //
-        //            @Override
-        //            public NVConfigEntity getNVConfigEntity()
-        //            {
-        //                return HTTPDefaultResponseDAO.NVC_HTTP_DEFAULT_RESPONSE_DAO;
-        //            }
-        //        },
-        //        JWT_HEADER(JWTHeader.class.getName())
-        //        {
-        //            @SuppressWarnings("unchecked")
-        //            @Override
-        //            public JWTHeader newInstance()
-        //            {
-        //                return new JWTHeader();
-        //            }
-        //
-        //            @Override
-        //            public NVConfigEntity getNVConfigEntity()
-        //            {
-        //                return JWTHeader.NVC_JWT_HEADER;
-        //            }
-        //        },
-        //        JWT_PAYLOAD(JWTPayload.class.getName())
-        //        {
-        //            @SuppressWarnings("unchecked")
-        //            @Override
-        //            public JWTPayload newInstance()
-        //            {
-        //                return new JWTPayload();
-        //            }
-        //
-        //            @Override
-        //            public NVConfigEntity getNVConfigEntity()
-        //            {
-        //                return JWTPayload.NVC_JWT_PAYLOAD;
-        //            }
-        //        },
-        //        HTTP_DEFAULT_RESPONSE_DAO(HTTPDefaultResponseDAO.class.getName())
+        }
+
         ,
 
 
@@ -655,21 +612,7 @@ public class ZWDataFactory
             public NVConfigEntity getNVConfigEntity() {
                 return LongSequence.NVC_LONG_SEQUENCE;
             }
-        } //		{
-        //			@SuppressWarnings("unchecked")
-        //			@Override
-        //			public LoginTokenDAO newInstance()
-        //			{
-        //				return new LoginTokenDAO();
-        //			}
-        //
-        //			@Override
-        //			public NVConfigEntity getNVConfigEntity()
-        //			{
-        //				return LoginTokenDAO.NVC_LOGIN_IN_DAO;
-        //			}
-        //		},
-        //		LOGIN_TOKEN_DAO(LoginTokenDAO.class.getName())
+        }
         ,
 
 
@@ -709,16 +652,16 @@ public class ZWDataFactory
                 return NetworkInterfaceInfo.NVC_NETWORK_INTERFACE_INFO;
             }
         },
-        NI_CONFIG_DAO(NIConfigDAO.class.getName()) {
+        NI_CONFIG_INFO(NIConfigInfo.class.getName()) {
             @SuppressWarnings("unchecked")
             @Override
-            public NIConfigDAO newInstance() {
-                return new NIConfigDAO();
+            public NIConfigInfo newInstance() {
+                return new NIConfigInfo();
             }
 
             @Override
             public NVConfigEntity getNVConfigEntity() {
-                return NIConfigDAO.NVC_NI_CONFIG_DAO;
+                return NIConfigInfo.NVC_NI_CONFIG_INFO;
             }
         },
         NVENTITY_ACCESS_INFO(NVEntityAccessInfo.class.getName()) {
@@ -818,16 +761,16 @@ public class ZWDataFactory
                 return PrincipalIdentifier.NVC_PRINCIPAL_IDENTIFIER;
             }
         },
-        PROPERTY_DAO(PropertyDAO.class.getName()) {
+        PROPERTY_IMPL(PropertyImpl.class.getName()) {
             @SuppressWarnings("unchecked")
             @Override
-            public PropertyDAO newInstance() {
-                return new PropertyDAO();
+            public PropertyImpl newInstance() {
+                return new PropertyImpl();
             }
 
             @Override
             public NVConfigEntity getNVConfigEntity() {
-                return PropertyDAO.NVC_PROPERTY_DAO;
+                return PropertyImpl.NVC_PROPERTY_IMPL;
             }
         },
         RANGE(Range.class.getName()) {

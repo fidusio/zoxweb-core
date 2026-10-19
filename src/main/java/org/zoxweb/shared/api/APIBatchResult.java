@@ -15,7 +15,7 @@
  */
 package org.zoxweb.shared.api;
 
-import org.zoxweb.shared.data.SetNameDescriptionDAO;
+import org.zoxweb.shared.data.SetNameDescriptionImpl;
 import org.zoxweb.shared.util.*;
 import org.zoxweb.shared.util.NVConfigEntity.ArrayType;
 
@@ -23,7 +23,7 @@ import java.util.List;
 
 @SuppressWarnings("serial")
 public class APIBatchResult<V extends NVEntity>
-        extends SetNameDescriptionDAO {
+        extends SetNameDescriptionImpl {
 
     public enum Params
             implements GetNVConfig {
@@ -58,7 +58,7 @@ public class APIBatchResult<V extends NVEntity>
             SUS.extractNVConfigs(Params.values()),
             null,
             false,
-            SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO);
+            SetNameDescriptionImpl.NVC_NAME_DESCRIPTION_IMPL);
 
     /**
      * The default constructor.

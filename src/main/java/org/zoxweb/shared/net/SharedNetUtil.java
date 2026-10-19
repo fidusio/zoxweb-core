@@ -238,8 +238,8 @@ public class SharedNetUtil {
      * @throws NullPointerException if nicd or protocol is null
      * @throws IllegalArgumentException if interface name is invalid
      */
-    public static boolean validateNIConfig(NIConfigDAO nicd) throws IOException {
-        SUS.checkIfNulls("NIConfigDAO null", nicd, nicd.getInetProtocol());
+    public static boolean validateNIConfig(NIConfigInfo nicd) throws IOException {
+        SUS.checkIfNulls("NIConfigInfo null", nicd, nicd.getInetProtocol());
         if (SUS.isEmpty(nicd.getNIName())) {
             throw new IllegalArgumentException("Network Interface name invalid:" + nicd.getNIName());
         }

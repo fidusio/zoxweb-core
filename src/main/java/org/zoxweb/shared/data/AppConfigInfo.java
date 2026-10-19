@@ -30,7 +30,7 @@ import org.zoxweb.shared.util.SUS;
  */
 @SuppressWarnings("serial")
 public class AppConfigInfo
-        extends PropertyDAO {
+        extends PropertyImpl {
 
     public enum Param
             implements GetNVConfig {
@@ -60,7 +60,7 @@ public class AppConfigInfo
             SUS.extractNVConfigs(Param.values()),
             null,
             false,
-            PropertyDAO.NVC_PROPERTY_DAO
+            PropertyImpl.NVC_PROPERTY_IMPL
     );
 
     public AppConfigInfo() {

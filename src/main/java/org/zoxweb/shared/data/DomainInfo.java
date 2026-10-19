@@ -31,11 +31,11 @@ import org.zoxweb.shared.util.SUS;
  */
 @SuppressWarnings("serial")
 public class DomainInfo
-        extends SetNameDescriptionDAO
+        extends SetNameDescriptionImpl
         implements DomainID<String> {
 
     public static final NVConfig NVC_DOMAIN_ID = NVConfigManager.createNVConfig("domain_id", "The domain url identifier", "Domain/AccountID", true, true, true, String.class, FilterType.DOMAIN);
-    public static final NVConfigEntity NVC_DOMAIN_INFO = new NVConfigEntityPortable("domain_info", "DomainInfo Object", "DomainInfo", true, false, false, false, DomainInfo.class, SUS.toNVConfigList(NVC_DOMAIN_ID), null, false, SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO);
+    public static final NVConfigEntity NVC_DOMAIN_INFO = new NVConfigEntityPortable("domain_info", "DomainInfo Object", "DomainInfo", true, false, false, false, DomainInfo.class, SUS.toNVConfigList(NVC_DOMAIN_ID), null, false, SetNameDescriptionImpl.NVC_NAME_DESCRIPTION_IMPL);
 
     /**
      * The default constructor.

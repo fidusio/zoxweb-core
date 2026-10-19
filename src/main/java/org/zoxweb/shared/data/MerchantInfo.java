@@ -30,7 +30,7 @@ import java.util.List;
  */
 @SuppressWarnings("serial")
 public class MerchantInfo
-        extends SetNameDescriptionDAO {
+        extends SetNameDescriptionImpl {
 
     public enum Param
             implements GetNVConfig {
@@ -68,7 +68,7 @@ public class MerchantInfo
             SUS.extractNVConfigs(Param.values()),
             null,
             true,
-            SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO
+            SetNameDescriptionImpl.NVC_NAME_DESCRIPTION_IMPL
     );
 
     /**

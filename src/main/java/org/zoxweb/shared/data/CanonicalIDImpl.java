@@ -22,7 +22,7 @@ import org.zoxweb.shared.util.SetCanonicalID;
 import org.zoxweb.shared.util.SUS;
 
 /**
- * The CanonicalIDImpl class extends TimeStampDAO with a canonical ID property,
+ * The CanonicalIDImpl class extends TimeStampImpl with a canonical ID property,
  * serving as the base class for entities identified by a canonical ID.
  *
  * @author mzebib
@@ -30,7 +30,7 @@ import org.zoxweb.shared.util.SUS;
  */
 @SuppressWarnings("serial")
 public class CanonicalIDImpl
-        extends TimeStampDAO
+        extends TimeStampImpl
         implements SetCanonicalID {
 
     public static final NVConfigEntity NVC_CANONICAL_ID_IMPL = new NVConfigEntityPortable
@@ -46,7 +46,7 @@ public class CanonicalIDImpl
                     SUS.toNVConfigList(DataParam.CANONICAL_ID.getNVConfig()),
                     null,
                     false,
-                    TimeStampDAO.NVC_TIME_STAMP_DAO
+                    TimeStampImpl.NVC_TIME_STAMP_IMPL
             );
 
 

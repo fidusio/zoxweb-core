@@ -23,7 +23,7 @@ public class CipherCodecsPerfTest {
 
     private static EncryptedData sealed(int size) throws Exception {
         EncryptedData ed = new EncryptedData();
-        ed.setDataType("org.zoxweb.shared.data.PropertyDAO");
+        ed.setDataType("org.zoxweb.shared.data.PropertyImpl");
         ed.setMask("****1234");
         ed.setExpiry(1_900_000_000_000L);
         ed.setHint("perf");

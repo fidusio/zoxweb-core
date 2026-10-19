@@ -29,7 +29,7 @@ import java.util.Date;
  */
 @SuppressWarnings("serial")
 public class CreditCardInfo
-        extends SetNameDescriptionDAO {
+        extends SetNameDescriptionImpl {
 
 
     public enum Param
@@ -70,7 +70,7 @@ public class CreditCardInfo
             SUS.extractNVConfigs(Param.values()),
             null,
             false,
-            SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO
+            SetNameDescriptionImpl.NVC_NAME_DESCRIPTION_IMPL
     );
 
 

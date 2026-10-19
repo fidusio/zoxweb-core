@@ -15,7 +15,7 @@
  */
 package org.zoxweb.shared.http;
 
-import org.zoxweb.shared.data.SetNameDAO;
+import org.zoxweb.shared.data.SetNameImpl;
 import org.zoxweb.shared.util.GetNVConfig;
 import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
@@ -29,7 +29,7 @@ import org.zoxweb.shared.util.SUS;
  */
 @SuppressWarnings("serial")
 public class HATEOASLink
-extends SetNameDAO
+extends SetNameImpl
 {
 	public enum Params
 	implements GetNVConfig
@@ -55,7 +55,7 @@ extends SetNameDAO
 	
 	}
 
-	public static final NVConfigEntity NVC_HATEOAS_LINK = new NVConfigEntityPortable("hateos_link", null , "HATEOASLink", true, false, false, false, HATEOASLink.class, SUS.extractNVConfigs(Params.values()), null, false, SetNameDAO.NVC_NAME_DAO);
+	public static final NVConfigEntity NVC_HATEOAS_LINK = new NVConfigEntityPortable("hateos_link", null , "HATEOASLink", true, false, false, false, HATEOASLink.class, SUS.extractNVConfigs(Params.values()), null, false, SetNameImpl.NVC_NAME_IMPL);
 	
 	
 	public HATEOASLink()

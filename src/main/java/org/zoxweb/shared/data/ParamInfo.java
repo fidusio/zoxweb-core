@@ -10,7 +10,7 @@ import org.zoxweb.shared.util.SUS;
 
 @SuppressWarnings("serial")
 public class ParamInfo
-extends SetNameDescriptionDAO
+extends SetNameDescriptionImpl
 {
     public enum ValueType
     {
@@ -62,7 +62,7 @@ extends SetNameDescriptionDAO
             SUS.extractNVConfigs(Param.values()),
             null,
             false,
-            SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO
+            SetNameDescriptionImpl.NVC_NAME_DESCRIPTION_IMPL
     );
     public ParamInfo() {
         super(NVC_PARAM_INFO);

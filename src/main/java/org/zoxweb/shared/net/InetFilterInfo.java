@@ -15,7 +15,7 @@
  */
 package org.zoxweb.shared.net;
 
-import org.zoxweb.shared.data.SetNameDescriptionDAO;
+import org.zoxweb.shared.data.SetNameDescriptionImpl;
 
 import org.zoxweb.shared.util.GetNVConfig;
 import org.zoxweb.shared.util.NVConfig;
@@ -33,7 +33,7 @@ import org.zoxweb.shared.util.SUS;
  */
 @SuppressWarnings("serial")
 public class InetFilterInfo
-        extends SetNameDescriptionDAO {
+        extends SetNameDescriptionImpl {
 
     /**
      * Configuration parameters for InetFilterDAO.
@@ -61,7 +61,7 @@ public class InetFilterInfo
     }
 
     /** NVConfigEntity definition for InetFilterDAO */
-    public static final NVConfigEntity NVC_INET_FILTER_INFO = new NVConfigEntityPortable("inet_filter_info", null, "InetFilterInfo", true, false, false, false, InetFilterInfo.class, SUS.extractNVConfigs(Params.values()), null, false, SetNameDescriptionDAO.NVC_NAME_DAO);
+    public static final NVConfigEntity NVC_INET_FILTER_INFO = new NVConfigEntityPortable("inet_filter_info", null, "InetFilterInfo", true, false, false, false, InetFilterInfo.class, SUS.extractNVConfigs(Params.values()), null, false, SetNameDescriptionImpl.NVC_NAME_IMPL);
 
     /**
      * Default constructor.

@@ -28,7 +28,7 @@ import java.util.Date;
  */
 @SuppressWarnings("serial")
 public class UUIDInfo
-        extends TimeStampDAO {
+        extends TimeStampImpl {
 
     public enum Param
             implements GetNVConfig {
@@ -69,7 +69,7 @@ public class UUIDInfo
             SUS.extractNVConfigs(Param.values()),
             null,
             false,
-            TimeStampDAO.NVC_TIME_STAMP_DAO
+            TimeStampImpl.NVC_TIME_STAMP_IMPL
     );
 
 

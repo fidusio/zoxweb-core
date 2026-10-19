@@ -15,7 +15,7 @@
  */
 package org.zoxweb.shared.http;
 
-import org.zoxweb.shared.data.SetNameDAO;
+import org.zoxweb.shared.data.SetNameImpl;
 import org.zoxweb.shared.util.*;
 
 /**
@@ -31,13 +31,13 @@ import org.zoxweb.shared.util.*;
  */
 @SuppressWarnings("serial")
 public class HTTPAuthorization
-        extends SetNameDAO {
+        extends SetNameImpl {
 
 
     public static final NVConfig NVC_AUTH_SCHEME = NVConfigManager.createNVConfig("auth_scheme", null, "HTTPAuthScheme", false, true, String.class);
     public static final NVConfig NVC_TOKEN = NVConfigManager.createNVConfig("token", null, "Token", false, true, NamedValue.class);
     //public static final NVConfig NVC_TYPE_IS_HEADER = NVConfigManager.createNVConfig("type_is_header", null, "TypeIsHeader", false, true, boolean.class);
-    public static final NVConfigEntity NVC_HTTP_AUTHORIZATION = new NVConfigEntityPortable("http_authorization", null, null, true, false, false, false, HTTPAuthorization.class, SUS.toNVConfigList(NVC_AUTH_SCHEME, NVC_TOKEN), null, false, SetNameDAO.NVC_NAME_DAO);
+    public static final NVConfigEntity NVC_HTTP_AUTHORIZATION = new NVConfigEntityPortable("http_authorization", null, null, true, false, false, false, HTTPAuthorization.class, SUS.toNVConfigList(NVC_AUTH_SCHEME, NVC_TOKEN), null, false, SetNameImpl.NVC_NAME_IMPL);
 
 
     /**

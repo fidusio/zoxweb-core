@@ -2,10 +2,10 @@ package org.zoxweb.shared.util;
 
 
 import org.zoxweb.shared.data.AddressInfo;
-import org.zoxweb.shared.data.SetNameDescriptionDAO;
+import org.zoxweb.shared.data.SetNameDescriptionImpl;
 
 public class RateCounter
-        extends SetNameDescriptionDAO {
+        extends SetNameDescriptionImpl {
     public enum Param
             implements GetNVConfig {
         COUNTS(NVConfigManager.createNVConfig("counts", "Counted values", "Counts", true, false, long.class)),
@@ -35,7 +35,7 @@ public class RateCounter
             SUS.extractNVConfigs(Param.values()),
             null,
             false,
-            SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO
+            SetNameDescriptionImpl.NVC_NAME_DESCRIPTION_IMPL
     );
 
 

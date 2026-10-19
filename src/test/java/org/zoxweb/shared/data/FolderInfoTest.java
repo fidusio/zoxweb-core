@@ -23,7 +23,7 @@ public class FolderInfoTest {
 	public static void main(String[] args) {
 		try {
 			FolderInfo fid = new FolderInfo();
-			SetNameDescriptionDAO nve = new FolderInfo();
+			SetNameDescriptionImpl nve = new FolderInfo();
 			nve.setName("Folder");
 			fid.getFolderContent().add(nve);
 			nve = new FileInfo();

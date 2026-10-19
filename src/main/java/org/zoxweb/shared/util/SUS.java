@@ -15,7 +15,7 @@
  */
 package org.zoxweb.shared.util;
 
-import org.zoxweb.shared.data.ReferenceIDDAO;
+import org.zoxweb.shared.data.ReferenceIDImpl;
 import org.zoxweb.shared.filters.FilterType;
 import org.zoxweb.shared.filters.GetValueFilter;
 import org.zoxweb.shared.filters.ValueFilter;
@@ -2513,7 +2513,7 @@ public final class SUS {
 
         for (NVConfig nvc : nvce.getAttributes()) {
             //Logic needs to be changed, NVEntiy must have reference ID implementation.
-            if (nvc != ReferenceIDDAO.NVC_GUID && nvc != ReferenceIDDAO.NVC_SUBJECT_GUID) {
+            if (nvc != ReferenceIDImpl.NVC_GUID && nvc != ReferenceIDImpl.NVC_SUBJECT_GUID) {
 
                 if (validateRecursive && nvc instanceof NVConfigEntity) {
                     NVConfigEntity nvcetemp = (NVConfigEntity) nvc;

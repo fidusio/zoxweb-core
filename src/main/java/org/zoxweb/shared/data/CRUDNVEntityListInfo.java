@@ -28,7 +28,7 @@ import java.util.List;
  */
 @SuppressWarnings("serial")
 public class CRUDNVEntityListInfo
-        extends SetNameDAO
+        extends SetNameImpl
         implements CRUDNVEntityList {
 
     public enum Param
@@ -48,7 +48,7 @@ public class CRUDNVEntityListInfo
         }
     }
 
-    public static final NVConfigEntity NVC_CRUD_NVENTITY_LIST_INFO = new NVConfigEntityPortable("crud_nventity_list_info", null, "CRUDNVEntityListInfo", true, false, false, false, CRUDNVEntityListInfo.class, SUS.extractNVConfigs(Param.values()), null, false, SetNameDAO.NVC_NAME_DAO);
+    public static final NVConfigEntity NVC_CRUD_NVENTITY_LIST_INFO = new NVConfigEntityPortable("crud_nventity_list_info", null, "CRUDNVEntityListInfo", true, false, false, false, CRUDNVEntityListInfo.class, SUS.extractNVConfigs(Param.values()), null, false, SetNameImpl.NVC_NAME_IMPL);
 
     public CRUDNVEntityListInfo() {
         super(NVC_CRUD_NVENTITY_LIST_INFO);

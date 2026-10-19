@@ -6,6 +6,7 @@ import org.zoxweb.shared.crypto.CryptoConst;
 import org.zoxweb.shared.crypto.EncapsulatedKey;
 import org.zoxweb.shared.crypto.EncryptedData;
 import org.zoxweb.shared.crypto.KeyLockType;
+import org.zoxweb.shared.data.PropertyImpl;
 import org.zoxweb.shared.security.AccessSecurityException;
 import org.zoxweb.shared.util.SUS;
 
@@ -248,7 +249,7 @@ public class EncryptedDataTest {
 
         // data_type is a class name by default; a real one and a very long one both round-trip
         EncryptedData typed = new EncryptedData();
-        typed.setDataType(org.zoxweb.shared.data.PropertyDAO.class.getName());
+        typed.setDataType(PropertyImpl.class.getName());
         CryptoUtil.encryptData(typed, KEY, DATA);
         assertEquals(typed.getDataType(), CipherCodecs.EDDecoder.decode(CipherCodecs.EDEncoder.encode(typed)).getDataType());
         StringBuilder longName = new StringBuilder();

@@ -32,7 +32,7 @@ import org.zoxweb.shared.util.SUS;
  */
 @SuppressWarnings("serial")
 public class SimpleMessage
-	extends PropertyDAO
+	extends PropertyImpl
 {
 	public enum Param
 		implements GetNVConfig
@@ -66,10 +66,10 @@ public class SimpleMessage
             false,
             false,
             SimpleMessage.class,
-            SUS.extractNVConfigs(Param.MESSAGE,Param.ERROR,Param.CATEGORY,Param.TYPE, Param.STATUS, PropertyDAO.Param.PROPERTIES),
+            SUS.extractNVConfigs(Param.MESSAGE,Param.ERROR,Param.CATEGORY,Param.TYPE, Param.STATUS, PropertyImpl.Param.PROPERTIES),
             null,
             false,
-            PropertyDAO.NVC_PROPERTY_DAO
+            PropertyImpl.NVC_PROPERTY_IMPL
     );
 	
 	/**

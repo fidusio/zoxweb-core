@@ -16,13 +16,13 @@
 package org.zoxweb.shared.security;
 
 import org.zoxweb.shared.data.Range;
-import org.zoxweb.shared.data.SetNameDescriptionDAO;
+import org.zoxweb.shared.data.SetNameDescriptionImpl;
 import org.zoxweb.shared.util.*;
 import org.zoxweb.shared.util.Const.TimeInMillis;
 
 @SuppressWarnings("serial")
 public class IPBlockerConfig
-extends SetNameDescriptionDAO
+extends SetNameDescriptionImpl
 implements AppConfig
 {
 	public enum Param
@@ -65,7 +65,7 @@ implements AppConfig
 																				SUS.extractNVConfigs(Param.values()), 
 																				null, 
 																				false, 
-																				SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO
+																				SetNameDescriptionImpl.NVC_NAME_DESCRIPTION_IMPL
 																				);
 	
 	

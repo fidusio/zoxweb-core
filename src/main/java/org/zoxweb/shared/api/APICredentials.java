@@ -15,7 +15,7 @@
  */
 package org.zoxweb.shared.api;
 
-import org.zoxweb.shared.data.PropertyDAO;
+import org.zoxweb.shared.data.PropertyImpl;
 import org.zoxweb.shared.filters.FilterType;
 import org.zoxweb.shared.util.*;
 
@@ -25,7 +25,7 @@ import org.zoxweb.shared.util.*;
  */
 @SuppressWarnings("serial")
 public class APICredentials
-        extends PropertyDAO {
+        extends PropertyImpl {
 
     public enum Params
             implements GetNVConfig {
@@ -61,7 +61,7 @@ public class APICredentials
             SUS.extractNVConfigs(Params.values()),
             null,
             false,
-            PropertyDAO.NVC_PROPERTY_DAO
+            PropertyImpl.NVC_PROPERTY_IMPL
     );
 
     /**

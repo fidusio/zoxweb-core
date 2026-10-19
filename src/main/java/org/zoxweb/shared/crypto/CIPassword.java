@@ -16,7 +16,7 @@
 package org.zoxweb.shared.crypto;
 
 import org.zoxweb.shared.crypto.CryptoConst.HashType;
-import org.zoxweb.shared.data.PropertyDAO;
+import org.zoxweb.shared.data.PropertyImpl;
 import org.zoxweb.shared.security.CredentialInfo;
 import org.zoxweb.shared.security.SecConst;
 import org.zoxweb.shared.util.*;
@@ -29,7 +29,7 @@ import org.zoxweb.shared.util.*;
  */
 @SuppressWarnings("serial")
 public class CIPassword
-        extends PropertyDAO
+        extends PropertyImpl
         implements CryptoBase, CredentialInfo {
 
 
@@ -76,7 +76,7 @@ public class CIPassword
         }
     }
 
-    public final static NVConfigEntity NVCE_CI_PASSWORD = new NVConfigEntityPortable("ci_password", null, "Password", false, true, false, false, CIPassword.class, SUS.extractNVConfigs(Param.values()), null, false, PropertyDAO.NVC_PROPERTY_DAO);
+    public final static NVConfigEntity NVCE_CI_PASSWORD = new NVConfigEntityPortable("ci_password", null, "Password", false, true, false, false, CIPassword.class, SUS.extractNVConfigs(Param.values()), null, false, PropertyImpl.NVC_PROPERTY_IMPL);
 
     /**
      * The default constructor.

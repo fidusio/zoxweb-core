@@ -102,7 +102,7 @@ public class IPV4Test {
     
      for (String json : data)
      {
-       NIConfigDAO nicd = GSONUtil.fromJSON(json, NIConfigDAO.class);
+       NIConfigInfo nicd = GSONUtil.fromJSON(json, NIConfigInfo.class);
        System.out.println(GSONUtil.toJSON(nicd, false, false, false));
        //System.out.println(nicd.getAddress());
        assert(SharedNetUtil.validateNIConfig(nicd));
@@ -123,7 +123,7 @@ public class IPV4Test {
     
      for (String json : data)
      {
-       NIConfigDAO nicd = GSONUtil.fromJSON(json, NIConfigDAO.class);
+       NIConfigInfo nicd = GSONUtil.fromJSON(json, NIConfigInfo.class);
        System.out.println("Fail:" +GSONUtil.toJSON(nicd, false, false, false));
        System.out.println(nicd.getNetmask());
        try

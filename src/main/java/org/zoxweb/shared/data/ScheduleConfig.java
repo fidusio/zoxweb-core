@@ -10,7 +10,7 @@ import java.util.List;
 
 @SuppressWarnings("serial")
 public class ScheduleConfig
-	extends TimeStampDAO 
+	extends TimeStampImpl
 {
 	
 	 public enum PropParam
@@ -66,7 +66,7 @@ public class ScheduleConfig
 	         SUS.extractNVConfigs(Param.values()),
 	         null,
 	         false,
-	         TimeStampDAO.NVC_TIME_STAMP_DAO
+	         TimeStampImpl.NVC_TIME_STAMP_IMPL
 	 );
 	
 	public ScheduleConfig()

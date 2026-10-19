@@ -99,7 +99,7 @@ class AuthzInfoTest {
         assertNull(info.getAppID());
     }
 
-    // ---------- Inherited: GUID (ReferenceIDDAO) ----------
+    // ---------- Inherited: GUID (ReferenceIDImpl) ----------
 
     @Test
     void setAndGetGUID() {
@@ -116,7 +116,7 @@ class AuthzInfoTest {
         assertNull(info.getGUID());
     }
 
-    // ---------- Inherited: SubjectGUID (ReferenceIDDAO) ----------
+    // ---------- Inherited: SubjectGUID (ReferenceIDImpl) ----------
 
     @Test
     void setAndGetSubjectGUID() {

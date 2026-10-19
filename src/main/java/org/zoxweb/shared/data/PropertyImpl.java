@@ -4,8 +4,8 @@ import org.zoxweb.shared.util.*;
 
 
 @SuppressWarnings("serial")
-public class PropertyDAO
-        extends TimeStampDAO
+public class PropertyImpl
+        extends TimeStampImpl
         implements SetCanonicalID, GetNVProperties {
     public enum Param
             implements GetNVConfig {
@@ -25,33 +25,33 @@ public class PropertyDAO
 
 
     /**
-     * This NVConfigEntity type constant is set to an instantiation of a NVConfigEntityLocal object based on DataContentDAO.
+     * This NVConfigEntity type constant is set to an instantiation of a NVConfigEntityLocal object based on PropertyImpl.
      */
-    public static final NVConfigEntity NVC_PROPERTY_DAO = new NVConfigEntityPortable("property_dao",
+    public static final NVConfigEntity NVC_PROPERTY_IMPL = new NVConfigEntityPortable("property_impl",
             null,
-            "PropertyDAO",
+            "PropertyImpl",
             true,
             false,
             false,
             false,
-            PropertyDAO.class,
+            PropertyImpl.class,
             SUS.extractNVConfigs(Param.values()),
             null,
             false,
-            TimeStampDAO.NVC_TIME_STAMP_DAO);
+            TimeStampImpl.NVC_TIME_STAMP_IMPL);
     private final CanonicalIDSetter cids;
 
-    public PropertyDAO() {
-        super(NVC_PROPERTY_DAO);
+    public PropertyImpl() {
+        super(NVC_PROPERTY_IMPL);
         this.cids = null;
     }
 
-    protected PropertyDAO(NVConfigEntity nvce, CanonicalIDSetter cids) {
+    protected PropertyImpl(NVConfigEntity nvce, CanonicalIDSetter cids) {
         super(nvce);
         this.cids = cids;
     }
 
-    protected PropertyDAO(NVConfigEntity nvce) {
+    protected PropertyImpl(NVConfigEntity nvce) {
         super(nvce);
         this.cids = null;
     }

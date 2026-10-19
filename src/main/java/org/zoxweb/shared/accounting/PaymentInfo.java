@@ -17,7 +17,7 @@ package org.zoxweb.shared.accounting;
 
 import org.zoxweb.shared.data.AddressInfo;
 import org.zoxweb.shared.data.CreditCardInfo;
-import org.zoxweb.shared.data.SetNameDescriptionDAO;
+import org.zoxweb.shared.data.SetNameDescriptionImpl;
 import org.zoxweb.shared.util.GetNVConfig;
 import org.zoxweb.shared.util.NVConfig;
 import org.zoxweb.shared.util.NVConfigEntity;
@@ -35,7 +35,7 @@ import org.zoxweb.shared.util.NVConfigEntity.ArrayType;
  */
 @SuppressWarnings("serial")
 public class PaymentInfo
-        extends SetNameDescriptionDAO {
+        extends SetNameDescriptionImpl {
 
     public enum Params
             implements GetNVConfig {
@@ -68,7 +68,7 @@ public class PaymentInfo
             SUS.extractNVConfigs(Params.values()),
             null,
             false,
-            SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO
+            SetNameDescriptionImpl.NVC_NAME_DESCRIPTION_IMPL
     );
 
 

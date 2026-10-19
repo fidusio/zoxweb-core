@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings("serial")
 public class CurrentTimestamp
-	extends SetNameDescriptionDAO
+	extends SetNameDescriptionImpl
 {
 	
 
@@ -49,7 +49,7 @@ public class CurrentTimestamp
 	        SUS.extractNVConfigs(Param.values()),
 	        null,
 	        false,
-	        SetNameDescriptionDAO.NVC_NAME_DESCRIPTION_DAO
+	        SetNameDescriptionImpl.NVC_NAME_DESCRIPTION_IMPL
 	);
 	
 	public CurrentTimestamp()

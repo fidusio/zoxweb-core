@@ -1,6 +1,6 @@
 package org.zoxweb.shared.security;
 
-import org.zoxweb.shared.data.PropertyDAO;
+import org.zoxweb.shared.data.PropertyImpl;
 import org.zoxweb.shared.util.*;
 
 /**
@@ -13,7 +13,7 @@ import org.zoxweb.shared.util.*;
  * credential collections the realm and {@code verifyPassword} read. {@code subject_guid} comes
  * from the entity base; {@code broker_guid} is the issuing admin for an ADMIN-channel token.
  */
-public class PasswordResetToken extends PropertyDAO {
+public class PasswordResetToken extends PropertyImpl {
 
     /** How the token reaches its holder. */
     public enum Channel {
@@ -57,7 +57,7 @@ public class PasswordResetToken extends PropertyDAO {
             SUS.extractNVConfigs(Param.values()),
             null,
             false,
-            PropertyDAO.NVC_PROPERTY_DAO
+            PropertyImpl.NVC_PROPERTY_IMPL
     );
 
     public PasswordResetToken() {
