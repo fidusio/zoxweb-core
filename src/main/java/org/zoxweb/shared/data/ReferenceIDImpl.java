@@ -29,7 +29,7 @@ public abstract class ReferenceIDImpl
     public static final NVConfig NVC_SUBJECT_GUID = NVConfigManager.createNVConfig(MetaToken.SUBJECT_GUID.getName(), "The user id or Subject GUID", "SubjectGUID", true, false, false, true, false, String.class, null);
     public static final NVConfig NVC_GUID = NVConfigManager.createNVConfig(MetaToken.GUID.getName(), "The global id of the Object", "GlobalUID", false, false, false, true, false, String.class, null);
     public static final NVConfig NVC_APP_GUID = NVConfigManager.createNVConfig(MetaToken.GUID.getName(), "The global id of the Object", "GlobalUID", true, false, true, true, false, String.class, null);
-    public static final NVConfigEntity NVC_REFERENCE_ID_IMPL = new NVConfigEntityPortable("reference_id_impl", null, "ReferenceIDImpl", true, false, false, false, ReferenceIDImpl.class, SUS.toNVConfigList(/*NVC_REFERENCE_ID,*/ NVC_SUBJECT_GUID, NVC_GUID, NVC_APP_GUID), null, false, null);
+    public static final NVConfigEntity NVC_REFERENCE_ID_IMPL = new NVConfigEntityPortable("reference_id_impl", null, "ReferenceIDImpl", true, false, false, false, ReferenceIDImpl.class, SUS.toNVConfigList(NVC_SUBJECT_GUID, NVC_GUID, NVC_APP_GUID), null, false, null);
 
     protected ReferenceIDImpl(NVConfigEntity nvConfigEntity) {
         super(nvConfigEntity);
@@ -78,11 +78,11 @@ public abstract class ReferenceIDImpl
 
     @Override
     public String getAppGUID() {
-        return lookupValue(NVC_GUID);
+        return lookupValue(NVC_APP_GUID);
     }
 
     @Override
     public void setAppGUID(String appGUID) {
-        setValue(NVC_GUID, appGUID);
+        setValue(NVC_APP_GUID, appGUID);
     }
 }
