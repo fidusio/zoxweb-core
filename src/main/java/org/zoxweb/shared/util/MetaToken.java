@@ -22,6 +22,7 @@ package org.zoxweb.shared.util;
  *
  */
 public enum MetaToken implements GetName {
+    APP_GUID("app_guid"), // the APP GUID
 
     ATTRIBUTES("attributes") // 	Attributes list or collection.
     ,
