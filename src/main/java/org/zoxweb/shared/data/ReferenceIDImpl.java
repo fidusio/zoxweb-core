@@ -26,8 +26,8 @@ public abstract class ReferenceIDImpl
         extends NVEntity {
 
     public static final NVConfig NVC_SUBJECT_GUID = NVConfigManager.createNVConfig(MetaToken.SUBJECT_GUID.getName(), "The user id or Subject GUID", "SubjectGUID", true, false, false, true, false, String.class, null);
-    public static final NVConfig NVC_GUID = NVConfigManager.createNVConfig(MetaToken.GUID.getName(), "The global id of the Object", "GlobalUID", false, false, false, true, false, String.class, null);
-    public static final NVConfig NVC_APP_GUID = NVConfigManager.createNVConfig(MetaToken.APP_GUID.getName(), "The global id of the Object", "GlobalUID", true, false, true, true, false, String.class, null);
+    public static final NVConfig NVC_GUID = NVConfigManager.createNVConfig(MetaToken.GUID.getName(), "The global id of the Object", "GlobalUID", true, false, true, true, false, String.class, null);
+    public static final NVConfig NVC_APP_GUID = NVConfigManager.createNVConfig(MetaToken.APP_GUID.getName(), "The app guid, if the object belongs to an app-id", "AppGUID", false, false, false, true, false, String.class, null);
     public static final NVConfigEntity NVC_REFERENCE_ID_IMPL = new NVConfigEntityPortable("reference_id_impl", null, "ReferenceIDImpl", true, false, false, false, ReferenceIDImpl.class, SUS.toNVConfigList(NVC_SUBJECT_GUID, NVC_GUID, NVC_APP_GUID), null, false, null);
 
     protected ReferenceIDImpl(NVConfigEntity nvConfigEntity) {
