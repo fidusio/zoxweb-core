@@ -103,17 +103,29 @@ public final class KeyMakerProvider
     public EncapsulatedKey createNVEntityKey(APIDataStore<?, ?> dataStore, NVEntity nve, final byte[] key)
             throws NullPointerException, IllegalArgumentException, AccessSecurityException {
         SUS.checkIfNulls("User ID is null.", nve, key);
-        if (nve.getSubjectGUID() == null || nve.getGUID() == null) {
-            throw new IllegalArgumentException("NVE SubjectGUID or GUID is null.");
+        return createNVEntityKey(dataStore, nve, nve.getSubjectGUID(), key);
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>The key row carries {@code subject_guid = ownerGUID} and {@code reference_guid = nve.getGUID()};
+     * an existing row for that pair is returned as is.
+     */
+    @Override
+    public EncapsulatedKey createNVEntityKey(APIDataStore<?, ?> dataStore, NVEntity nve, String ownerGUID, final byte[] key)
+            throws NullPointerException, IllegalArgumentException, AccessSecurityException {
+        SUS.checkIfNulls("User ID is null.", nve, key);
+        if (ownerGUID == null || nve.getGUID() == null) {
+            throw new IllegalArgumentException("NVE owner GUID or GUID is null.");
         }
 
-        EncapsulatedKey ekd = lookupEncapsulatedKey(dataStore, nve);
+        EncapsulatedKey ekd = lookupEncapsulatedKey(dataStore, nve.getGUID(), ownerGUID);
         try {
             if (ekd == null) {
                 // binding fields first: they are authenticated with the wrapped key
                 ekd = new EncapsulatedKey();
                 ekd.setGUID(nve.getGUID());
-                ekd.setSubjectGUID(nve.getSubjectGUID());
+                ekd.setSubjectGUID(ownerGUID);
                 ekd.setObjectReference(nve);
                 ekd.setKeyLockType(KeyLockType.SUBJECT_ID);
                 CryptoUtil.createEncryptedKey(ekd, key);

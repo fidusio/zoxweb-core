@@ -89,6 +89,8 @@ public final class SecurityModel {
 
     public final static String ASSIGN = "assign";
     public final static String REMOVE = "remove";
+    /** The action of {@link #PERM_APP_LOGIN}: log into an app (2026-10-20). */
+    public final static String LOGIN = "login";
 
     // permissions
     public final static String PERMISSION = "permission";
@@ -110,6 +112,27 @@ public final class SecurityModel {
      * and {@code resource:*}. See {@link #toResourceToken(String, String, String)}.
      */
     public final static String RESOURCE = "resource";
+    /**
+     * Namespace of the rights on the rows an app owns (dual ownership, user decision 2026-10-20).
+     * A row whose class is registered on the app ({@link AppIDDefault#getResourceTypes()}) carries
+     * the app record's GUID in {@code app_guid} and is owned by the app, not by the subject that
+     * created it. Two forms:
+     * <ul>
+     * <li>the catalog form, a row of the app's catalog granted through roles:
+     * {@code app_resource:<fqcn>:<verbs>} — {@code <fqcn>} a registered class name or {@code *},
+     * {@code <verbs>} drawn from {@link ResourcePermissionTokenFilter#VERBS} or {@code *}
+     * ({@link #toAppResourceCatalogToken(String, String...)}, {@link AppResourcePermissionTokenFilter});</li>
+     * <li>the checked form the realm composes for a login into the app:
+     * {@code app_resource:<app guid>:<fqcn>:<acting subject guid>:<verbs>}
+     * ({@link #toAppResourceToken(String, String, String, String)}); the access check on an
+     * app-owned row asks {@code app_resource:<app_guid>:<class>:<caller>:<verb>} in place of the
+     * owner token, then the share token as for any row.</li>
+     * </ul>
+     * The owner of an app-owned row, for the owner-only sharing rules, is whoever holds every verb on
+     * its class in the app ({@code app_resource:<app>:<class>:<caller>:*}): the {@code app_admin}
+     * role through {@link Permission#APP_RESOURCE_ALL}, the super-admin through {@code *}.
+     */
+    public final static String APP_RESOURCE = "app_resource";
     public final static String APP = "app";
     public final static String SUBJECT = "subject";
     /**
@@ -130,6 +153,8 @@ public final class SecurityModel {
     public final static String PERM_CREATE_APP_ID = APP + PART_SEP + CREATE;//APP + SEP + CREATE;//"app:create";
     public final static String PERM_DELETE_APP_ID = APP + PART_SEP + DELETE;//APP + SEP + DELETE;//"app:delete";
     public final static String PERM_UPDATE_APP_ID = APP + PART_SEP + UPDATE;//APP + SEP + UPDATE;//"app:update";
+    /** {@code app:login}: may log into the app (user rule 2026-10-20); checked by the realm on every app-scoped login, a global login is exempt. */
+    public final static String PERM_APP_LOGIN = APP + PART_SEP + LOGIN;
     public final static String PERM_ADD_SUBJECT = SUBJECT + PART_SEP + CREATE;
     public final static String PERM_DELETE_SUBJECT = SUBJECT + PART_SEP + DELETE;
     public final static String PERM_READ_SUBJECT = SUBJECT + PART_SEP + READ;
@@ -351,6 +376,196 @@ public final class SecurityModel {
         }
     }
 
+    // ------------------------------------------------------------------
+    // app-owned rows (dual ownership, 2026-10-20): app_resource:<fqcn>:<verbs> in an app's catalog,
+    // app_resource:<app guid>:<fqcn>:<subject guid>:<verbs> once flattened for a login into the app
+    // ------------------------------------------------------------------
+
+    /**
+     * Validates and normalizes the catalog form of an app-resource permission,
+     * {@code app_resource:<fqcn>:<verbs>}: the class part is a fully qualified class name
+     * ({@link org.zoxweb.shared.filters.FQCNFilter}) or {@code *}; the verbs are drawn from
+     * {@link ResourcePermissionTokenFilter#VERBS} ({@code read}, {@code update}, {@code share},
+     * {@code delete}) or are the single {@code *}. No {@code create}: creation is judged on the owner.
+     * The result is lower-cased (Shiro compares case-insensitively; a class name keeps its meaning),
+     * trimmed and de-duplicated: the form stored on a catalog row.
+     */
+    public final static class AppResourcePermissionTokenFilter
+            implements ValueFilter<String, String> {
+        public static final AppResourcePermissionTokenFilter SINGLETON = new AppResourcePermissionTokenFilter();
+
+        private AppResourcePermissionTokenFilter() {
+        }
+
+        @Override
+        public String validate(String in) throws NullPointerException, IllegalArgumentException {
+            in = SUS.trimOrNull(in);
+            SUS.checkIfNull("value null", in);
+            String[] parts = in.split(PART_SEP, -1);
+            if (parts.length != 3) {
+                throw new IllegalArgumentException("token must be " + APP_RESOURCE + PART_SEP + "<fqcn>" + PART_SEP + "<verbs>: " + in);
+            }
+            if (!APP_RESOURCE.equalsIgnoreCase(parts[0].trim())) {
+                throw new IllegalArgumentException("namespace must be " + APP_RESOURCE + ": " + in);
+            }
+            String fqcn = parts[1].trim();
+            if (!WILDCARD.equals(fqcn)) {
+                fqcn = org.zoxweb.shared.filters.FQCNFilter.SINGLETON.validate(fqcn);
+            }
+            String verbs = appResourceVerbs(parts[2], in);
+            return DataEncoder.StringLower.encode(APP_RESOURCE + PART_SEP + fqcn + PART_SEP + verbs);
+        }
+
+        @Override
+        public boolean isValid(String in) {
+            try {
+                validate(in);
+                return true;
+            } catch (NullPointerException | IllegalArgumentException e) {
+                return false;
+            }
+        }
+
+        @Override
+        public String toCanonicalID() {
+            return "APP_RESOURCE_PERMISSION_TOKEN_FILTER";
+        }
+    }
+
+    /** The verbs part of an app-resource token: {@code *} or a de-duplicated list from {@link ResourcePermissionTokenFilter#VERBS}. */
+    private static String appResourceVerbs(String verbsPart, String token) {
+        String part = DataEncoder.StringLower.encode(verbsPart.trim());
+        if (WILDCARD.equals(part)) {
+            return WILDCARD;
+        }
+        Set<String> verbs = new LinkedHashSet<>();
+        for (String verb : part.split(SUBPART_SEP, -1)) {
+            verb = verb.trim();
+            if (verb.isEmpty()) {
+                throw new IllegalArgumentException("empty verb in token: " + token);
+            }
+            if (!ResourcePermissionTokenFilter.VERBS.contains(verb)) {
+                throw new IllegalArgumentException("verb not allowed: " + verb + " in token: " + token);
+            }
+            verbs.add(verb);
+        }
+        return String.join(SUBPART_SEP, verbs);
+    }
+
+    /**
+     * Builds and validates the catalog form {@code app_resource:<fqcn>:<verbs>} of an app-resource
+     * permission, the token of a catalog row an app admin grants through roles.
+     *
+     * @param fqcn  a fully qualified class name or {@code *}
+     * @param verbs one or more of {@code read}, {@code update}, {@code share}, {@code delete}, or {@code *}
+     * @return the normalized token, for example {@code app_resource:com.acme.order:read,update}
+     * @throws NullPointerException     if no class or no verb is given
+     * @throws IllegalArgumentException if the class name or a verb is invalid
+     */
+    public static String toAppResourceCatalogToken(String fqcn, String... verbs) {
+        SUS.checkIfNulls("fqcn and verbs are required", fqcn, (Object) verbs);
+        if (verbs.length == 0) {
+            throw new IllegalArgumentException("at least one verb is required");
+        }
+        return AppResourcePermissionTokenFilter.SINGLETON.validate(APP_RESOURCE + PART_SEP + fqcn + PART_SEP + String.join(SUBPART_SEP, verbs));
+    }
+
+    /**
+     * Composes the checked 5-part app-resource token
+     * {@code app_resource:<appGUID>:<fqcn>:<subjectGUID>:<verbs>} — the single place that knows the
+     * order. The realm composes it from a catalog row for a login into the app; the access check on
+     * an app-owned row asks it with the row's {@code app_guid}, its class and the caller.
+     *
+     * @param appGUID     the app record's GUID ({@code app_guid} of the row) or {@code *}
+     * @param fqcn        the row's class ({@link #resourceTypeOf(NVEntity)}) or {@code *}
+     * @param subjectGUID the acting subject GUID or {@code *}
+     * @param verbs       {@code <verbs>}, a catalog token {@code app_resource:<fqcn>:<verbs>} (its verbs are taken) or {@code *}
+     * @return the composed token, lower-cased
+     * @throws NullPointerException     if any argument is null or blank
+     * @throws IllegalArgumentException if {@code verbs} is a token of another shape
+     */
+    public static String toAppResourceToken(String appGUID, String fqcn, String subjectGUID, String verbs) {
+        appGUID = SUS.trimOrNull(appGUID);
+        fqcn = SUS.trimOrNull(fqcn);
+        subjectGUID = SUS.trimOrNull(subjectGUID);
+        verbs = SUS.trimOrNull(verbs);
+        SUS.checkIfNulls("appGUID, fqcn, subjectGUID and verbs are required", appGUID, fqcn, subjectGUID, verbs);
+        String[] parts = verbs.split(PART_SEP, -1);
+        if (parts.length == 3) {
+            if (!APP_RESOURCE.equalsIgnoreCase(parts[0].trim())) {
+                throw new IllegalArgumentException("namespace must be " + APP_RESOURCE + ": " + verbs);
+            }
+            verbs = parts[2].trim();
+        } else if (parts.length != 1) {
+            throw new IllegalArgumentException("verbs must be <verbs> or " + APP_RESOURCE + PART_SEP + "<fqcn>" + PART_SEP + "<verbs>: " + verbs);
+        }
+        if (verbs.isEmpty()) {
+            throw new IllegalArgumentException("empty verbs");
+        }
+        return DataEncoder.StringLower.encode(APP_RESOURCE + PART_SEP + appGUID + PART_SEP + fqcn + PART_SEP + subjectGUID + PART_SEP + verbs);
+    }
+
+    /**
+     * @param token a permission token
+     * @return true if the token is the catalog form {@code app_resource:<fqcn>:<verbs>} (three parts,
+     * none blank) — the shape the realm composes into the checked form for a login into the app
+     */
+    public static boolean isAppResourceCatalogToken(String token) {
+        return isAppResourceShape(token, 3);
+    }
+
+    /**
+     * @param token a permission token
+     * @return true if the token is the checked form {@code app_resource:<app>:<fqcn>:<subject>:<verbs>}
+     */
+    public static boolean isAppResourceToken(String token) {
+        return isAppResourceShape(token, 5);
+    }
+
+    private static boolean isAppResourceShape(String token, int parts) {
+        token = SUS.trimOrNull(token);
+        if (token == null) {
+            return false;
+        }
+        String[] split = token.split(PART_SEP, -1);
+        if (split.length != parts || !APP_RESOURCE.equalsIgnoreCase(split[0].trim())) {
+            return false;
+        }
+        for (int i = 1; i < split.length; i++) {
+            if (SUS.isEmpty(split[i].trim())) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * The resource type of an entity for the app-ownership rules: the fully qualified name of the
+     * meta type's class ({@link NVConfigEntity#getMetaTypeBase()}), else the instance's class name.
+     * The store side ({@link #resourceTypeOf(NVConfigEntity)}) must agree with this, or a stamped row
+     * is never matched: both read the meta type first.
+     */
+    public static String resourceTypeOf(NVEntity nve) {
+        if (nve == null) {
+            return null;
+        }
+        NVConfig nvc = nve.getNVConfig();
+        String ret = nvc instanceof NVConfigEntity ? resourceTypeOf((NVConfigEntity) nvc) : null;
+        return ret != null ? ret : nve.getClass().getName();
+    }
+
+    /**
+     * The resource type of a stored type: the fully qualified name of its meta type's class, or its
+     * name when the meta type is not bound to a class.
+     */
+    public static String resourceTypeOf(NVConfigEntity nvce) {
+        if (nvce == null) {
+            return null;
+        }
+        Class<?> c = nvce.getMetaTypeBase();
+        return c != null ? c.getName() : nvce.getName();
+    }
+
 
     /**
      * True when a permission token is the reserved wildcard: the whole token is {@code *}, or its
@@ -387,6 +602,8 @@ public final class SecurityModel {
         APP(SecurityModel.APP),
         /** An NVEntity instance; its tokens follow the {@code resource:<res>:<subject>:<verbs>} grammar. */
         RESOURCE(SecurityModel.RESOURCE),
+        /** The rows an app owns; tokens follow the {@code app_resource:<fqcn>:<verbs>} grammar ({@link SecurityModel#APP_RESOURCE}). */
+        APP_RESOURCE(SecurityModel.APP_RESOURCE),
         ;
 
         private final String name;
@@ -413,6 +630,8 @@ public final class SecurityModel {
         SHARE(SecurityModel.SHARE),
         ASSIGN(SecurityModel.ASSIGN),
         REMOVE(SecurityModel.REMOVE),
+        /** Log into (an app): the gate of an app-scoped login, 2026-10-20. */
+        LOGIN(SecurityModel.LOGIN),
         ALL(WILDCARD),
         ;
 
@@ -456,6 +675,15 @@ public final class SecurityModel {
         APP_CREATE("app_create", "Create an app", Target.APP, Action.CREATE),
         APP_UPDATE("app_update", "Update an app", Target.APP, Action.UPDATE),
         APP_DELETE("app_delete", "Delete an app", Target.APP, Action.DELETE),
+        /**
+         * {@code app:login}: may log into the app (user rule 2026-10-20). A login carrying a domain and
+         * an app succeeds only when the subject's grants in that app imply it, directly or through a
+         * role; a login without domain/app is not gated. Every app carries its own copy, like every
+         * catalog row; the starter roles {@link Role#APP_USER}, {@link Role#APP_ADMIN},
+         * {@link Role#APP_REGISTRAR} and {@link Role#APP_SERVICE_PROVIDER} hold it, {@link Role#DOMAIN_ADMIN}
+         * in the common app, the super-admin through {@code *}.
+         */
+        APP_LOGIN("app_login", "Log into the app", Target.APP, Action.LOGIN),
 
         // resource grammar: resource:<resource>:<subject>:<verbs> — the verb is the LAST part, so these
         // carry literal tokens instead of the <target>:<action>:<parts> encoding used above.
@@ -472,6 +700,16 @@ public final class SecurityModel {
                 toResourceToken(WILDCARD, WILDCARD, DELETE), Target.RESOURCE, Action.DELETE),
         NVE_SHARE_ALL("nve_share_all", "Share every entity",
                 toResourceToken(WILDCARD, WILDCARD, SHARE), Target.RESOURCE, Action.SHARE),
+
+        /**
+         * {@code app_resource:*:*}: every verb on every row the app owns (dual ownership, 2026-10-20).
+         * Flattened for a login into app {@code A} as {@code app_resource:A:*:<subject>:*}, it makes
+         * the holder the owner of every app-owned row of {@code A} for the owner-only sharing rules.
+         * Carried by {@link Role#APP_ADMIN}; an app admin grants narrower rights by creating catalog
+         * rows {@code app_resource:<fqcn>:<verbs>} and roles that carry them.
+         */
+        APP_RESOURCE_ALL("app_resource_all", "Every verb on every row the app owns",
+                APP_RESOURCE + PART_SEP + WILDCARD + PART_SEP + WILDCARD, Target.APP_RESOURCE, Action.ALL),
 
         /**
          * Reserved: implies every permission. Only the bootstrap super-admin subject may hold it.
@@ -578,8 +816,13 @@ public final class SecurityModel {
      * <p>App model (2026-10-01): every app owns its own copy of its roles and permissions.
      * {@link #SUPER_ADMIN} and {@link #DOMAIN_ADMIN} exist only in the platform's own app; the
      * other roles are the starter set every new app gets. {@link #APP_ADMIN} manages the app: it
-     * creates and changes the app's own permissions and roles. {@link #APP_REGISTRAR} is the app's
-     * service subject that creates the app's subjects at sign-up and holds nothing else.
+     * creates and changes the app's own permissions and roles. {@link #APP_REGISTRAR} is the role of
+     * the app's registrar, the service subject that creates the app's subjects at sign-up (since the
+     * merge of 2026-10-20 the registrar is also the app's owner subject and holds {@link #APP_ADMIN}).
+     * <p>App login (user rule 2026-10-20): {@link #APP_USER}, {@link #APP_ADMIN}, {@link #APP_REGISTRAR}
+     * and {@link #APP_SERVICE_PROVIDER} carry {@link Permission#APP_LOGIN}, as does {@link #DOMAIN_ADMIN}
+     * in the common app; a subject logs into an app only through one of them or a direct grant.
+     * {@link #USER} does not: it marks membership, it opens no app.</p>
      */
     public enum Role
             implements GetName, GetDescription {
@@ -590,7 +833,7 @@ public final class SecurityModel {
                 Permission.PERMISSION_ASSIGN, Permission.PERMISSION_REMOVE,
                 Permission.ROLE_CREATE, Permission.ROLE_UPDATE, Permission.ROLE_DELETE,
                 Permission.ROLE_ASSIGN, Permission.ROLE_REMOVE,
-                Permission.APP_CREATE, Permission.APP_UPDATE, Permission.APP_DELETE,
+                Permission.APP_CREATE, Permission.APP_UPDATE, Permission.APP_DELETE, Permission.APP_LOGIN,
                 Permission.NVE_ALL),
         APP_ADMIN("app_admin", "App admin role: manages the app, its subjects, roles and permissions",
                 Permission.SUBJECT_CREATE, Permission.SUBJECT_READ, Permission.SUBJECT_UPDATE,
@@ -598,11 +841,11 @@ public final class SecurityModel {
                 Permission.ROLE_CREATE, Permission.ROLE_UPDATE, Permission.ROLE_DELETE,
                 Permission.ROLE_ASSIGN, Permission.ROLE_REMOVE,
                 Permission.PERMISSION_ASSIGN, Permission.PERMISSION_REMOVE,
-                Permission.APP_UPDATE),
+                Permission.APP_UPDATE, Permission.APP_LOGIN, Permission.APP_RESOURCE_ALL),
         APP_REGISTRAR("app_registrar", "App registrar role: the app's service subject that creates its subjects at sign-up",
-                Permission.SUBJECT_CREATE),
-        APP_USER("app_user", "App user role"),
-        APP_SERVICE_PROVIDER("app_service_provider", "App service provider role", Permission.SUBJECT_READ),
+                Permission.SUBJECT_CREATE, Permission.APP_LOGIN),
+        APP_USER("app_user", "App user role", Permission.APP_LOGIN),
+        APP_SERVICE_PROVIDER("app_service_provider", "App service provider role", Permission.SUBJECT_READ, Permission.APP_LOGIN),
         USER("user", "This role is granted to all users"),
         ;
 

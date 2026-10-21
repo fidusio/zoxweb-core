@@ -1,6 +1,7 @@
 package org.zoxweb.shared.security;
 
 import org.zoxweb.shared.api.APIDataStore;
+import org.zoxweb.shared.app.AppIDDefault;
 import org.zoxweb.shared.crypto.CryptoConst;
 
 /**
@@ -609,4 +610,20 @@ public interface DomainSecurityManager {
      * @param subject the subject; null is ignored
      */
     void restoreActiveAfterExpiredReset(SubjectIdentifier subject);
+
+
+    /**
+     * Create app-id and default registrar.domainid-appid
+     * @param domainID of the app
+     * @param appID of the app
+     * @return a new registered app-id if it is created for the first time, otherwise return the already created one
+     */
+    AppIDDefault createApp(String domainID, String appID);
+
+    void addFQCNToApp(String domainAppID, String ...classNames);
+    void removeFQCNFromApp(String domainAppID, String ...classNames);
+
+    AppIDDefault lookupApp(String domainID, String appID);
+
+    AppIDDefault lookupApp(String domainAppID);
 }

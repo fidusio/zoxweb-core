@@ -20,7 +20,8 @@ public class SubjectPreference
     public enum Param
         implements GetNVConfig {
 
-        APP_GUID(NVConfigManager.createNVConfig("app_guid", "App GUID","AddGUID", true, false, String.class)),
+        // app_guid is the inherited ReferenceIDImpl.NVC_APP_GUID since 2026-10-19 (dual ownership): no redeclaration,
+        // which would override the inherited attribute (NVConfigEntityPortable.setAttributes on a repeated name)
         DEFAULT_LANGUAGE(NVConfigManager.createNVConfig("language", "Default language", "DefaultLanguage", false, true, Language.class)),
         DEFAULT_DELIVERY_ADDRESS(NVConfigManager.createNVConfigEntity("delivery_address", "Default delivery address", "DefaultDeliveryAddress", false, true, AddressInfo.NVC_ADDRESS_INFO, ArrayType.NOT_ARRAY)),
         DEFAULT_BILLING_ADDRESS(NVConfigManager.createNVConfigEntity("billing_address", "Default billing address", "DefaultBillingAddress", false, true, AddressInfo.NVC_ADDRESS_INFO, ArrayType.NOT_ARRAY)),
@@ -100,14 +101,6 @@ public class SubjectPreference
         setValue(Param.DEFAULT_CREDIT_CARD, creditCard);
     }
 
-    public void setAppGUID(String appGUID)
-    {
-        setValue(Param.APP_GUID, appGUID);
-    }
-    public String getAppGUID()
-    {
-        return lookupValue(Param.APP_GUID);
-    }
-
+    // getAppGUID / setAppGUID: inherited from ReferenceIDImpl (app_guid), the app this preference belongs to
 
 }

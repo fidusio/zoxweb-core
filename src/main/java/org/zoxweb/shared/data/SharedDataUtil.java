@@ -534,8 +534,8 @@ public class SharedDataUtil {
                 //	If reference ID should be omitted, ref ID is left null.
                 //ret.setReferenceID(nveToCopy.getReferenceID());
                 continue;
-            } else if (nvc.getName().equals(MetaToken.SUBJECT_GUID.getName()) && omitUserID) {
-                // If user ID should be not be omitted, user ID is left null.
+            } else if ((nvc.getName().equals(MetaToken.SUBJECT_GUID.getName()) || nvc.getName().equals(MetaToken.APP_GUID.getName())) && omitUserID) {
+                // the owners (subject and, since 2026-10-20, app) are left null when the user ID is omitted
                 //ret.setUserID(nveToCopy.getUserID());
                 continue;
             } else if (nvc instanceof NVConfigEntity && deep) {

@@ -162,10 +162,10 @@ class SecurityModelTest {
             assertEquals(r == Role.SUPER_ADMIN, r.isReserved());
         }
         assertArrayEquals(new Permission[]{Permission.SUPER_ADMIN_ALL}, Role.SUPER_ADMIN.getPermissions());
-        assertEquals(0, Role.USER.getPermissions().length);
-        assertEquals(0, Role.APP_USER.getPermissions().length);
-        // the app model: registrar = subject:create only; app_admin manages its app's catalog; two platform-only roles
-        assertArrayEquals(new Permission[]{Permission.SUBJECT_CREATE}, Role.APP_REGISTRAR.getPermissions());
+        assertEquals(0, Role.USER.getPermissions().length, "user marks membership, it opens no app (2026-10-20)");
+        assertArrayEquals(new Permission[]{Permission.APP_LOGIN}, Role.APP_USER.getPermissions(), "app_user: the login gate only");
+        // the app model: registrar = subject:create + app:login; app_admin manages its app's catalog and owns its rows; two platform-only roles
+        assertArrayEquals(new Permission[]{Permission.SUBJECT_CREATE, Permission.APP_LOGIN}, Role.APP_REGISTRAR.getPermissions());
         for (Permission p : new Permission[]{Permission.PERMISSION_CREATE, Permission.ROLE_CREATE, Permission.ROLE_ASSIGN, Permission.APP_UPDATE}) {
             assertTrue(java.util.Arrays.asList(Role.APP_ADMIN.getPermissions()).contains(p), p.name());
         }
@@ -217,6 +217,62 @@ class SecurityModelTest {
         for (Permission p : Permission.values()) assertFalse(SUS.isEmpty(p.getDescription()), p.name());
         for (Role r : Role.values()) assertFalse(SUS.isEmpty(r.getDescription()), r.name());
         for (RoleGroup g : RoleGroup.values()) assertFalse(SUS.isEmpty(g.getDescription()), g.name());
+    }
+
+    @Test
+    void appResourceTokens_catalogForm_checkedForm_filter() {
+        // catalog form: app_resource:<fqcn>:<verbs>, lower-cased, de-duplicated, class name validated
+        assertEquals("app_resource:com.acme.order:read,update", SecurityModel.toAppResourceCatalogToken("com.acme.Order", "read", "update", "READ"));
+        assertEquals("app_resource:*:*", SecurityModel.toAppResourceCatalogToken("*", "*"));
+        assertEquals("app_resource:com.acme.order:share", SecurityModel.AppResourcePermissionTokenFilter.SINGLETON.validate(" App_Resource : com.acme.Order : Share "));
+        assertEquals(Permission.APP_RESOURCE_ALL.getValue(), SecurityModel.toAppResourceCatalogToken("*", "*"));
+        assertEquals(Target.APP_RESOURCE, Permission.APP_RESOURCE_ALL.getTarget());
+        assertThrows(IllegalArgumentException.class, () -> SecurityModel.toAppResourceCatalogToken("com.acme.Order", "create"), "creation is judged on the owner");
+        assertThrows(IllegalArgumentException.class, () -> SecurityModel.toAppResourceCatalogToken("com.acme.Order", "fly"));
+        assertThrows(IllegalArgumentException.class, () -> SecurityModel.toAppResourceCatalogToken("not a class", "read"));
+        assertThrows(IllegalArgumentException.class, () -> SecurityModel.toAppResourceCatalogToken("com.acme.Order", ""));
+        assertThrows(IllegalArgumentException.class, () -> SecurityModel.toAppResourceCatalogToken("com.acme.Order"));
+        assertThrows(IllegalArgumentException.class, () -> SecurityModel.AppResourcePermissionTokenFilter.SINGLETON.validate("resource:read"));
+        assertThrows(IllegalArgumentException.class, () -> SecurityModel.AppResourcePermissionTokenFilter.SINGLETON.validate("app_resource:read"));
+        assertThrows(IllegalArgumentException.class, () -> SecurityModel.AppResourcePermissionTokenFilter.SINGLETON.validate("app_resource:a:b:read"));
+        assertThrows(NullPointerException.class, () -> SecurityModel.AppResourcePermissionTokenFilter.SINGLETON.validate(null));
+        assertFalse(SecurityModel.AppResourcePermissionTokenFilter.SINGLETON.isValid("app_resource::read"));
+        assertTrue(SecurityModel.isAppResourceCatalogToken("app_resource:com.acme.Order:read"));
+        assertFalse(SecurityModel.isAppResourceCatalogToken("app_resource::read"));
+        assertFalse(SecurityModel.isAppResourceCatalogToken("resource:read"));
+        assertFalse(SecurityModel.isAppResourceCatalogToken(null));
+        assertFalse(SecurityModel.isWildcardToken(Permission.APP_RESOURCE_ALL.getValue()), "not the reserved wildcard");
+        assertFalse(SecurityModel.isInstanceScopable(Permission.APP_RESOURCE_ALL.getValue()), "not a share token");
+
+        // checked form: app_resource:<app>:<fqcn>:<subject>:<verbs>; the verbs may come from a catalog token
+        String app = "a1b2", subject = "s9";
+        assertEquals("app_resource:a1b2:com.acme.order:s9:read", SecurityModel.toAppResourceToken(app, "com.acme.Order", subject, "read"));
+        assertEquals("app_resource:a1b2:com.acme.order:s9:read,update", SecurityModel.toAppResourceToken(app, "com.acme.Order", subject, "app_resource:com.acme.Order:read,update"));
+        assertEquals("app_resource:a1b2:*:s9:*", SecurityModel.toAppResourceToken(app, "*", subject, "app_resource:*:*"));
+        assertTrue(SecurityModel.isAppResourceToken("app_resource:a1b2:com.acme.order:s9:read"));
+        assertFalse(SecurityModel.isAppResourceToken("app_resource:com.acme.order:read"));
+        assertThrows(IllegalArgumentException.class, () -> SecurityModel.toAppResourceToken(app, "x", subject, "resource:read"));
+        assertThrows(IllegalArgumentException.class, () -> SecurityModel.toAppResourceToken(app, "x", subject, "a:b"));
+        assertThrows(NullPointerException.class, () -> SecurityModel.toAppResourceToken(app, "x", subject, " "));
+        assertThrows(NullPointerException.class, () -> SecurityModel.toAppResourceToken(null, "x", subject, "read"));
+
+        // the app admin owns the app's rows through app_resource:*:*; no other starter role carries an app-resource right
+        assertTrue(java.util.Arrays.asList(Role.APP_ADMIN.getPermissions()).contains(Permission.APP_RESOURCE_ALL));
+        for (Role r : Role.values()) {
+            if (r != Role.APP_ADMIN) {
+                assertFalse(java.util.Arrays.asList(r.getPermissions()).contains(Permission.APP_RESOURCE_ALL), r.name());
+            }
+        }
+    }
+
+    @Test
+    void resourceTypeOf_metaTypeClassName_storeAndControllerAgree() {
+        PermissionInfo pi = new PermissionInfo();
+        assertEquals(PermissionInfo.class.getName(), SecurityModel.resourceTypeOf(pi));
+        assertEquals(PermissionInfo.class.getName(), SecurityModel.resourceTypeOf(PermissionInfo.NVC_PERMISSION_INFO));
+        assertEquals(SecurityModel.resourceTypeOf(pi), SecurityModel.resourceTypeOf((org.zoxweb.shared.util.NVConfigEntity) pi.getNVConfig()));
+        assertNull(SecurityModel.resourceTypeOf((org.zoxweb.shared.util.NVEntity) null));
+        assertNull(SecurityModel.resourceTypeOf((org.zoxweb.shared.util.NVConfigEntity) null));
     }
 
     @Test

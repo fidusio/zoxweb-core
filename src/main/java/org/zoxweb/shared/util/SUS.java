@@ -2513,7 +2513,7 @@ public final class SUS {
 
         for (NVConfig nvc : nvce.getAttributes()) {
             //Logic needs to be changed, NVEntiy must have reference ID implementation.
-            if (nvc != ReferenceIDImpl.NVC_GUID && nvc != ReferenceIDImpl.NVC_SUBJECT_GUID) {
+            if (nvc != ReferenceIDImpl.NVC_GUID && nvc != ReferenceIDImpl.NVC_SUBJECT_GUID && nvc != ReferenceIDImpl.NVC_APP_GUID) {
 
                 if (validateRecursive && nvc instanceof NVConfigEntity) {
                     NVConfigEntity nvcetemp = (NVConfigEntity) nvc;
