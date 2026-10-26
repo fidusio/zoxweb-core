@@ -5,7 +5,6 @@ import org.zoxweb.server.io.UByteArrayInputStream;
 import org.zoxweb.shared.http.HTTPMessageConfig;
 import org.zoxweb.shared.http.HTTPMessageConfigInterface;
 import org.zoxweb.shared.http.HTTPMethod;
-import org.zoxweb.shared.http.HTTPResponseData;
 import org.zoxweb.shared.net.MACAddressFilter;
 import org.zoxweb.shared.net.OUIVendor;
 import org.zoxweb.shared.util.SUS;
@@ -15,13 +14,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.NavigableMap;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * In-memory MAC vendor (OUI) lookup table.
@@ -72,10 +65,14 @@ public final class OUIDB {
      * @throws IOException if the request fails or returns an error status
      */
     public OUIDB load(String url) throws IOException {
+        return load(new UByteArrayInputStream(getRawContent(url)));
+    }
+
+
+    public static byte[] getRawContent(String url) throws IOException {
         HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit(url, null, HTTPMethod.GET);
         hmci.getHeaders().build("User-Agent", "OuiDB/1.0");
-        HTTPResponseData hrd = OkHTTPCall.send(hmci);
-        return load(new UByteArrayInputStream(hrd.getData()));
+        return OkHTTPCall.send(hmci).getData();
     }
 
     /**
@@ -96,6 +93,11 @@ public final class OUIDB {
             in.close();
         }
     }
+
+    public OUIDB load(byte[] data) throws IOException {
+        return load(new UByteArrayInputStream(data));
+    }
+
 
     /**
      * Parses manuf-format data and indexes one {@link OUIVendor} per usable line.
