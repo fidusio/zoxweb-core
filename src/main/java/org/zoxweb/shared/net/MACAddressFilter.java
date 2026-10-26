@@ -16,6 +16,7 @@
 package org.zoxweb.shared.net;
 
 import org.zoxweb.shared.filters.ValueFilter;
+import org.zoxweb.shared.util.DataEncoder;
 import org.zoxweb.shared.util.SUS;
 
 /**
@@ -96,7 +97,41 @@ public class MACAddressFilter
      * @return the MAC address as bytes
      */
     public static byte[] macAddressToBytes(String macAddress) {
-        return SUS.hexToBytes(SUS.filterString(macAddress, MAC_ADDRESS_SEPS));
+        return SUS.hexToBytes(normalize(macAddress));
+    }
+
+
+    /**
+     * Normalizes a MAC address string to bare upper-case hex digits.
+     * <p>
+     * Three transformations are applied, in order:
+     * <ol>
+     *   <li>every whitespace character is removed (regex {@code \s}: space, tab, CR, LF,
+     *       form feed and vertical tab), so leading, trailing and embedded whitespace all
+     *       disappear;</li>
+     *   <li>every separator listed in {@link #MAC_ADDRESS_SEPS} ({@code -}, {@code :} and
+     *       {@code .}) is removed, by literal replacement;</li>
+     *   <li>the remainder is upper-cased.</li>
+     * </ol>
+     * Any separator style is therefore accepted: {@code 00:1b:c5:00:1f:01},
+     * {@code 00-1B-C5-00-1F-01}, {@code 001b.c500.1f01}, {@code 001bc5001f01} and
+     * {@code " 00 1b c5 00 1f 01 "} all normalize to {@code 001BC5001F01}.
+     * <p>
+     * No validation is performed: the input may be a partial prefix (e.g. {@code 00:1B:C5}
+     * gives {@code 001BC5}) and characters that are neither whitespace, separators nor hex
+     * digits are passed through unchanged. Callers that need a valid address convert the
+     * result with {@link #macAddressToBytes(String)} or check it with {@link #isValid(String)}.
+     *
+     * @param macAddress the MAC address, or prefix, in any separator style; may be null
+     * @return the normalized hex string, possibly empty, or null if the input is null
+     */
+    public static String normalize(String macAddress) {
+        if (macAddress == null) {
+            return null;
+        }
+        return DataEncoder.StringUpper.encode(
+                SUS.filterString(macAddress.replaceAll("\\s", ""), MAC_ADDRESS_SEPS)
+        );
     }
 
     /**

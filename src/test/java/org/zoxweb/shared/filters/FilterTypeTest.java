@@ -17,6 +17,7 @@ package org.zoxweb.shared.filters;
 
 
 import org.junit.jupiter.api.Test;
+import org.zoxweb.shared.net.MACAddressFilter;
 import org.zoxweb.shared.util.SUS;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -160,7 +161,7 @@ public class FilterTypeTest {
 			System.out.println(ft.toCanonicalID() + " " + ft.isValid(test));
 		}
 
-		String macs[] = {
+		String[] macs = {
 			"00:11:22:33:44:55",
 			"01-23-45-67-89-0A",
 			"AA.BB.CC.DD.EE.FF"
@@ -171,6 +172,8 @@ public class FilterTypeTest {
 			System.out.println(str);
 			byte[] address = SUS.hexToBytes(str);
 			System.out.println(SUS.bytesToHex(address));
+
+            System.out.println(SUS.bytesToHex(MACAddressFilter.macAddressToBytes(mac)));
 		}
     }
 
