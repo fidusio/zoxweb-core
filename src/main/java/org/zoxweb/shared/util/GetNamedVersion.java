@@ -1,7 +1,6 @@
 package org.zoxweb.shared.util;
 
 public interface GetNamedVersion
-    extends GetName
-{
+        extends GetName {
     String getVersion();
 }
