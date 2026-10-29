@@ -34,9 +34,10 @@ import java.util.*;
  * {@link #getVendors()} returns the indexed entries, so a file-built table can be handed to a
  * datastore and later rebuilt from it.
  * <p>
- * Usage model: build the table first, then share it for lookups. {@link #add(OUIVendor)} and
- * {@link #getVendors()} are synchronized; {@link #lookup(String)} is lock-free and must not run
- * concurrently with adds.
+ * Usage model: build the table first, then share it for lookups. {@link #add(OUIVendor)},
+ * {@link #clear()} and {@link #getVendors()} are synchronized; {@link #lookup(String)} is lock-free
+ * and must not run concurrently with adds or clears. To reload, stop lookups, then
+ * {@code clear()} and {@code load(...)} again.
  * Java 8 compatible.
  */
 public final class OUIDB {
@@ -45,11 +46,15 @@ public final class OUIDB {
     public static final String WIRESHARK_MANUF_URL =
             "https://www.wireshark.org/download/automated/data/manuf";
 
+    /** Download location of the XlogistX mirror of the manuf file. */
+    public static final String XLOG_MANUF_URL =
+            "https://api.xlogistx.io/apps/ouidb.txt";
+
     // mask bits (descending) -> hex prefix (bits/4 chars) -> vendor
     private final NavigableMap<Integer, Map<String, OUIVendor>> byMask =
             new TreeMap<Integer, Map<String, OUIVendor>>(Collections.<Integer>reverseOrder());
 
-    private int entries;
+    private volatile int entries;
 
     /** Creates an empty table; fill it with one of the {@code load} methods or {@link #add(OUIVendor)}. */
     public OUIDB() {
@@ -60,7 +65,7 @@ public final class OUIDB {
     /**
      * Downloads a manuf file over HTTP(S) and indexes its entries.
      *
-     * @param url the file location, e.g. {@link #WIRESHARK_MANUF_URL}
+     * @param url the file location, e.g. {@link #XLOG_MANUF_URL}
      * @return this table, for chaining
      * @throws IOException if the request fails or returns an error status
      */
@@ -182,11 +187,7 @@ public final class OUIDB {
         if (bits <= 0 || hex == null || hex.length() < bits / 4) return false;
         hex = hex.substring(0, bits / 4);
 
-        Map<String, OUIVendor> m = byMask.get(bits);
-        if (m == null) {
-            m = new HashMap<String, OUIVendor>();
-            byMask.put(bits, m);
-        }
+        Map<String, OUIVendor> m = byMask.computeIfAbsent(bits, k -> new HashMap<String, OUIVendor>());
         if (m.put(hex, vendor) == null) entries++;
         return true;
     }
@@ -205,6 +206,19 @@ public final class OUIDB {
             ret.addAll(m.values());
         }
         return ret;
+    }
+
+    /**
+     * Removes every indexed entry and resets {@link #size()} to zero, leaving the table as a
+     * fresh {@link #OUIDB()}. Lists previously returned by {@link #getVendors()} are unaffected.
+     * Like {@link #add(OUIVendor)}, this must not run concurrently with {@link #lookup(String)}.
+     *
+     * @return this table, for chaining, e.g. {@code db.clear().load(url)}
+     */
+    public synchronized OUIDB clear() {
+        byMask.clear();
+        entries = 0;
+        return this;
     }
 
     // ---------------------------------------------------------------- lookup
@@ -297,7 +311,7 @@ public final class OUIDB {
      * @throws IOException if the download fails
      */
     public static void main(String[] args) throws IOException {
-        OUIDB db = new OUIDB().load(WIRESHARK_MANUF_URL);
+        OUIDB db = new OUIDB().load(XLOG_MANUF_URL);
         System.out.println("Loaded " + db.size() + " prefixes");
 
         String[] macAddresses = {
