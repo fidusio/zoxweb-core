@@ -132,42 +132,72 @@ public final class SSLUtil {
                             log.getLogger().info("SSLCHANNEL-CLOSED-NOT_HANDSHAKING: " + config.getHandshakeStatus() + " bytesRead: " + bytesRead);
                         config.close();
                     } else {
-                        SSLEngineResult result;
-                        // even if we have read zero it will trigger BUFFER_UNDERFLOW then we wait for incoming
-                        // data
-                        do {
-                            result = smartSSLUnwrap(config.getSSLEngine(), config.getSSLIOBuffers().getInBuffer(), config.getInDecryptedBuffer(), true, true);
+                        ByteBuffer inBuffer = config.getSSLIOBuffers().getInBuffer();
+                        // inBuffer is in write mode here and after every smartSSLUnwrap(..., compact=true):
+                        // position() == ciphertext bytes still pending; 0 means nothing left to unwrap.
+                        while (inBuffer.position() > 0 && !config.isClosed()) {
+                            SSLEngineResult result = smartSSLUnwrap(config.getSSLEngine(), inBuffer, config.getInDecryptedBuffer(), true, true);
                             if (log.isEnabled())
                                 log.getLogger().info("AFTER-NOT_HANDSHAKING-PROCESSING: " + result + " bytesRead: " + bytesRead + " callback: " + callback);
                             switch (result.getStatus()) {
                                 case BUFFER_UNDERFLOW:
-                                    // no incoming data available we need to wait for more socket data
-                                    // return and let the NIOSocket or the data handler call back
-                                    if (log.isEnabled())
+//                                    if (log.isEnabled())
                                         log.getLogger().info("AFTER-NOT_HANDSHAKING-PROCESSING: " + result + " bytesRead: " + bytesRead + " callback: " + callback);
-
+                                    // partial record pending, wait for more socket data
                                     return System.currentTimeMillis() - ts;
 
                                 case BUFFER_OVERFLOW:
                                     throw new IllegalStateException("NOT_HANDSHAKING should never be " + result.getStatus());
-                                    // this should never happen
+
                                 case OK:
-                                    // check if we have data to process
                                     if (callback != null && bytesRead >= 0 && result.bytesProduced() > 0) {
-                                        // we have decrypted data to process
-                                        //config.inSSLNetData.flip();
                                         callback.accept(config.getInDecryptedBuffer());
                                     }
                                     break;
+
                                 case CLOSED:
-                                    // closed result here
                                     if (log.isEnabled())
                                         log.getLogger().info("CLOSED-DURING-NOT_HANDSHAKING: " + result + " bytesRead: " + bytesRead);
                                     config.close();
                                     break;
                             }
-                        }// check if we still have encrypted data to process
-                        while (config.getSSLIOBuffers().getInBuffer().hasRemaining() && !config.isClosed());
+                        }
+//                        SSLEngineResult result;
+//                        // even if we have read zero it will trigger BUFFER_UNDERFLOW then we wait for incoming
+//                        // data
+//                        do {
+//                            result = smartSSLUnwrap(config.getSSLEngine(), config.getSSLIOBuffers().getInBuffer(), config.getInDecryptedBuffer(), true, true);
+//                            if (log.isEnabled())
+//                                log.getLogger().info("AFTER-NOT_HANDSHAKING-PROCESSING: " + result + " bytesRead: " + bytesRead + " callback: " + callback);
+//                            switch (result.getStatus()) {
+//                                case BUFFER_UNDERFLOW:
+//                                    // no incoming data available we need to wait for more socket data
+//                                    // return and let the NIOSocket or the data handler call back
+//                                    if (log.isEnabled())
+//                                        log.getLogger().info("AFTER-NOT_HANDSHAKING-PROCESSING: " + result + " bytesRead: " + bytesRead + " callback: " + callback);
+//
+//                                    return System.currentTimeMillis() - ts;
+//
+//                                case BUFFER_OVERFLOW:
+//                                    throw new IllegalStateException("NOT_HANDSHAKING should never be " + result.getStatus());
+//                                    // this should never happen
+//                                case OK:
+//                                    // check if we have data to process
+//                                    if (callback != null && bytesRead >= 0 && result.bytesProduced() > 0) {
+//                                        // we have decrypted data to process
+//                                        //config.inSSLNetData.flip();
+//                                        callback.accept(config.getInDecryptedBuffer());
+//                                    }
+//                                    break;
+//                                case CLOSED:
+//                                    // closed result here
+//                                    if (log.isEnabled())
+//                                        log.getLogger().info("CLOSED-DURING-NOT_HANDSHAKING: " + result + " bytesRead: " + bytesRead);
+//                                    config.close();
+//                                    break;
+//                            }
+//                        }// check if we still have encrypted data to process
+//                        while (config.getSSLIOBuffers().getInBuffer().hasRemaining() && !config.isClosed());
 
 
                     }
