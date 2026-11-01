@@ -144,12 +144,13 @@ public final class SSLUtil {
                                 case BUFFER_UNDERFLOW:
                                     // no incoming data available we need to wait for more socket data
                                     // return and let the NIOSocket or the data handler call back
-                                    if (log.isEnabled())
+                                    //if (log.isEnabled())
                                         log.getLogger().info("AFTER-NOT_HANDSHAKING-PROCESSING: " + result + " bytesRead: " + bytesRead + " callback: " + callback);
 
                                     return System.currentTimeMillis() - ts;
 
                                 case BUFFER_OVERFLOW:
+                                    log.getLogger().info("NOT_HANDSHAKING should never be: " + result + " bytesRead: " + bytesRead + " callback: " + callback);
                                     throw new IllegalStateException("NOT_HANDSHAKING should never be " + result.getStatus());
                                     // this should never happen
                                 case OK:
