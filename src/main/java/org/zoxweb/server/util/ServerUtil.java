@@ -46,7 +46,9 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public final class ServerUtil {
 
-    /** Lazily computed, lock-guarded cache for {@link #isMacOS()}; {@code null} until first call. */
+    /**
+     * Lazily computed, lock-guarded cache for {@link #isMacOS()}; {@code null} until first call.
+     */
     private static AtomicBoolean isMac = null;
 
     private ServerUtil() {
@@ -64,14 +66,15 @@ public final class ServerUtil {
     public final static Lock LOCK = new ReentrantLock();
 
     /**
-     * Utility method to wait on a object.
+     * Utility method to wait on an object.
      * <p>
      * Synchronizes on {@code obj} and calls {@link Object#wait(long, int)}. An
      * {@link InterruptedException} is printed to stderr and swallowed; the interrupt
      * flag of the calling thread is not restored.
-     * @param obj to be synchronized and wait on
+     *
+     * @param obj    to be synchronized and wait on
      * @param millis to wait
-     * @param nanos to wait
+     * @param nanos  to wait
      */
     public static void waitNano(Object obj, long millis, int nanos) {
         synchronized (obj) {
@@ -84,12 +87,13 @@ public final class ServerUtil {
     }
 
     /**
-     * Utility method to wait on a object.
+     * Utility method to wait on an object.
      * <p>
      * Synchronizes on {@code obj} and calls {@link Object#wait(long)}. An
      * {@link InterruptedException} is printed to stderr and swallowed; the interrupt
      * flag of the calling thread is not restored.
-     * @param obj to be synchronized and wait on
+     *
+     * @param obj    to be synchronized and wait on
      * @param millis to wait
      */
     public static void waitNano(Object obj, long millis) {
@@ -112,18 +116,18 @@ public final class ServerUtil {
      * and would otherwise yield an empty string) and the buffer is returned to the pool.
      * Bytes are decoded with the platform default charset, matching the encoding used by
      * the writer.
+     *
      * @param e throwable to render
      * @return the stack trace text, as printed by {@code printStackTrace}
      * @throws NullPointerException if {@code e} is null
      */
-    public static String throwableToString(Throwable e)
-    {
-        UByteArrayOutputStream baos = ByteBufferUtil.allocateUBAOS(1024);
-        PrintWriter pw = new PrintWriter(baos);
+    public static String throwableToString(Throwable e) {
+        UByteArrayOutputStream ubaos = ByteBufferUtil.allocateUBAOS(1024);
+        PrintWriter pw = new PrintWriter(ubaos);
         e.printStackTrace(pw);
         pw.flush();
-        String ret = baos.toString();
-        ByteBufferUtil.cache(baos);
+        String ret = ubaos.toString();
+        ByteBufferUtil.cache(ubaos);
         return ret;
     }
 
@@ -133,7 +137,8 @@ public final class ServerUtil {
      * When both arrays are non-null a new array of the same component type is returned.
      * When exactly one is null the other array is returned <b>as is</b> (not copied);
      * when both are null the result is null.
-     * @param <T> component type
+     *
+     * @param <T>    component type
      * @param array1 first array, may be null
      * @param array2 second array, may be null
      * @return concatenated type array
@@ -156,23 +161,21 @@ public final class ServerUtil {
      * This method reads files based on the file name/location
      * on the computer and stores the data in an array list of
      * strings, one entry per line. The file is always closed.
+     *
      * @param fileName to be read
      * @return string list
      * @throws IOException in case of IO error
      */
     public static List<String> toStringList(String fileName)
             throws IOException {
-        List<String> ret = null;
         FileInputStream fis = null;
 
         try {
             fis = new FileInputStream(fileName);
-            ret = toStringList(fis);
+            return toStringList(fis);
         } finally {
             SharedIOUtil.close(fis);
         }
-
-        return ret;
     }
 
     /**
@@ -180,6 +183,7 @@ public final class ServerUtil {
      * array list of strings, one entry per line (line terminators stripped).
      * The stream is decoded with the platform default charset and is
      * <b>always closed</b> on return, including on error.
+     *
      * @param is to be read
      * @return string list
      * @throws IOException in case of IO error
@@ -214,6 +218,7 @@ public final class ServerUtil {
      * Objects are read until the decoder throws, which is how {@link XMLDecoder} signals
      * the end of the document, so any decoding error also silently ends the read with the
      * objects decoded so far. The stream is always closed.
+     *
      * @param is XML stream produced by {@link XMLEncoder}
      * @return the decoded objects in document order, never null
      */
@@ -241,7 +246,8 @@ public final class ServerUtil {
     /**
      * Write beans to XML using {@link XMLEncoder} (JavaBeans long-term persistence
      * format). The encoder is flushed and both the encoder and {@code os} are closed.
-     * @param os destination stream, closed on return
+     *
+     * @param os   destination stream, closed on return
      * @param objs beans to encode, in order
      */
     public static void writeBeansToXML(OutputStream os, Object... objs) {
@@ -258,11 +264,12 @@ public final class ServerUtil {
     }
 
     /**
-     * Load the systeminfo: every JVM system property as an {@link NVPair}, and optionally
+     * Load the SystemInfo: every JVM system property as an {@link NVPair}, and optionally
      * one {@link NetworkInterfaceInfo} (name, display name, MAC, addresses) per physical
      * network interface. Loopback, point-to-point, virtual and MAC-less interfaces are
      * skipped. Interface enumeration errors are swallowed and simply leave the network
      * list empty.
+     *
      * @param includeNetworkDetails true add networking info
      * @return SystemInfo
      */
@@ -308,8 +315,9 @@ public final class ServerUtil {
     }
 
     /**
-     * Load the systeminfo including network details; equivalent to
+     * Load the SystemInfo including network details; equivalent to
      * {@code loadSystemInfo(true)}.
+     *
      * @return SystemInfo
      */
     public static SystemInfo loadSystemInfo() {
@@ -320,7 +328,8 @@ public final class ServerUtil {
     /**
      * This method will print statements to the error stream and invoke system exit with existCode.
      * WARNING: after the invocation of this method the JVM will cease to exist
-     * @param exitCode the application exist code
+     *
+     * @param exitCode   the application exist code
      * @param statements to be printed
      */
     public static void exitWithError(int exitCode, String... statements) {
@@ -331,6 +340,7 @@ public final class ServerUtil {
 
     /**
      * Create delay in nanos by busy-spinning on {@link System#nanoTime()}.
+     *
      * @param nanos to delay
      * @return the difference between the actual and requested end time (overshoot in nanos)
      */
@@ -352,6 +362,7 @@ public final class ServerUtil {
      * <p>
      * On the sleep path an {@link InterruptedException} is printed and swallowed;
      * the interrupt flag is not restored.
+     *
      * @param timeToSleepNanos delay length in nanoseconds
      * @return delay overshoot in nanos: actual end time minus requested end time
      */
@@ -384,7 +395,8 @@ public final class ServerUtil {
     /**
      * Check if the list of all object are derived from Clazz.
      * Null elements are ignored, and an empty list matches.
-     * @param list of objects
+     *
+     * @param list  of objects
      * @param clazz to be matched with
      * @return true if all the list object are matching
      * @throws NullPointerException if {@code list} or {@code clazz} is null
@@ -407,6 +419,7 @@ public final class ServerUtil {
     /**
      * Diagnostic entry point: loads {@link #loadSystemInfo()} and prints the system
      * properties, network interfaces and the JSON rendering to stdout.
+     *
      * @param args ignored
      */
     public static void main(String... args) {
@@ -436,6 +449,7 @@ public final class ServerUtil {
 
     /**
      * Null-tolerant {@link Lock#lock()}: does nothing when {@code lock} is null.
+     *
      * @param lock to acquire, may be null
      */
     public static void lock(Lock lock) {
@@ -445,6 +459,7 @@ public final class ServerUtil {
 
     /**
      * Null-tolerant {@link Lock#unlock()}: does nothing when {@code lock} is null.
+     *
      * @param lock to release, may be null
      */
     public static void unlock(Lock lock) {
@@ -454,7 +469,8 @@ public final class ServerUtil {
 
     /**
      * Whether the JVM is running on macOS, decided once from the {@code os.name}
-     * system property (case-insensitive contains "mac") and cached under {@link #LOCK}.
+     * system property (case-insensitive contains "Mac") and cached under {@link #LOCK}.
+     *
      * @return true on macOS
      */
     public static boolean isMacOS() {

@@ -2,6 +2,7 @@ package org.zoxweb.server.net;
 
 import org.zoxweb.server.http.OkHTTPCall;
 import org.zoxweb.server.io.UByteArrayInputStream;
+import org.zoxweb.server.logging.LogWrapper;
 import org.zoxweb.shared.http.HTTPMessageConfig;
 import org.zoxweb.shared.http.HTTPMessageConfigInterface;
 import org.zoxweb.shared.http.HTTPMethod;
@@ -13,6 +14,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.ConnectException;
+import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
@@ -25,7 +28,7 @@ import java.util.*;
  * <p>
  * The table can be built from two sources:
  * <ul>
- *   <li>the Wireshark manuf file, through {@link #load(String)} (download),
+ *   <li>the Wireshark manuf file, through {@link #load(String[])} (download),
  *       {@link #load(InputStream)} or {@link #loadResource(String)}; the file is tab-separated:
  *       {@code prefix[/mask] <tab> short name <tab> long name};</li>
  *   <li>entries already persisted in a datastore, through {@link #load(Iterable)} or
@@ -42,13 +45,20 @@ import java.util.*;
  */
 public final class OUIDB {
 
-    /** Download location of the Wireshark manuf file. */
-    public static final String WIRESHARK_MANUF_URL =
+    public static final LogWrapper log = new LogWrapper(OUIDB.class);
+
+    /**
+     * Download location of the Wireshark manuf file.
+     */
+    public static final String BACKUP_URL =
             "https://www.wireshark.org/download/automated/data/manuf";
 
-    /** Download location of the XlogistX mirror of the manuf file. */
-    public static final String XLOG_MANUF_URL =
+    /**
+     * Download location of the XlogistX mirror of the manuf file.
+     */
+    public static final String MAIN_URL =
             "https://api.xlogistx.io/apps/ouidb.txt";
+
 
     // mask bits (descending) -> hex prefix (bits/4 chars) -> vendor
     private final NavigableMap<Integer, Map<String, OUIVendor>> byMask =
@@ -56,7 +66,9 @@ public final class OUIDB {
 
     private volatile int entries;
 
-    /** Creates an empty table; fill it with one of the {@code load} methods or {@link #add(OUIVendor)}. */
+    /**
+     * Creates an empty table; fill it with one of the {@code load} methods or {@link #add(OUIVendor)}.
+     */
     public OUIDB() {
     }
 
@@ -65,19 +77,30 @@ public final class OUIDB {
     /**
      * Downloads a manuf file over HTTP(S) and indexes its entries.
      *
-     * @param url the file location, e.g. {@link #XLOG_MANUF_URL}
+     * @param urls array of urls compatible with WIRE SHARK format e.g. {@link #MAIN_URL}
      * @return this table, for chaining
      * @throws IOException if the request fails or returns an error status
      */
-    public OUIDB load(String url) throws IOException {
-        return load(new UByteArrayInputStream(getRawContent(url)));
+    public OUIDB load(String... urls) throws IOException {
+        return load(new UByteArrayInputStream(getRawContent(urls)));
     }
 
 
-    public static byte[] getRawContent(String url) throws IOException {
-        HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit(url, null, HTTPMethod.GET);
-        hmci.getHeaders().build("User-Agent", "OuiDB/1.0");
-        return OkHTTPCall.send(hmci).getData();
+    public static byte[] getRawContent(String... urls) throws IOException {
+        for (String url : urls) {
+            try {
+                HTTPMessageConfigInterface hmci = HTTPMessageConfig.createAndInit(url, null, HTTPMethod.GET);
+                hmci.getHeaders().build("User-Agent", "OuiDB/1.0");
+                return OkHTTPCall.send(hmci).getData();
+            } catch (IOException e) {
+                if (e instanceof SocketTimeoutException || e instanceof ConnectException ||
+                    e.getCause() instanceof SocketTimeoutException || e.getCause() instanceof ConnectException)
+                    log.getLogger().info(""+e);
+                else
+                    e.printStackTrace();
+            }
+        }
+        throw new IOException("Failed to load OUIDB content via: " + Arrays.toString(urls));
     }
 
     /**
@@ -234,7 +257,7 @@ public final class OUIDB {
      *
      * @param mac the MAC address, or a hex prefix of at least six digits
      * @return the matching entry (shared with the index), a locally administered entry, or null
-     *         if the address is null, too short, not hex, or not registered
+     * if the address is null, too short, not hex, or not registered
      */
     public OUIVendor lookup(String mac) {
         if (mac == null) return null;
@@ -311,7 +334,7 @@ public final class OUIDB {
      * @throws IOException if the download fails
      */
     public static void main(String[] args) throws IOException {
-        OUIDB db = new OUIDB().load(XLOG_MANUF_URL);
+        OUIDB db = new OUIDB().load(MAIN_URL);
         System.out.println("Loaded " + db.size() + " prefixes");
 
         String[] macAddresses = {

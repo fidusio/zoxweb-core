@@ -113,6 +113,14 @@ public class NetUtilTest {
         assertEquals("0.0.0.0", mask.getHostAddress());
     }
 
+    @Test
+    public void testToNetmaskIPV4OutOfRangeThrows() {
+        assertThrows(IllegalArgumentException.class, () -> NetUtil.toNetmaskIPV4((short) -1));
+        assertThrows(IllegalArgumentException.class, () -> NetUtil.toNetmaskIPV4((short) -32));
+        assertThrows(IllegalArgumentException.class, () -> NetUtil.toNetmaskIPV4((short) -40));
+        assertThrows(IllegalArgumentException.class, () -> NetUtil.toNetmaskIPV4((short) 33));
+    }
+
     // ==================== getNetwork Tests ====================
 
     @Test
@@ -336,45 +344,45 @@ public class NetUtilTest {
     public void testAreInetSocketAddressDAOEqualsTrue() throws UnknownHostException {
         IPAddress ip1 = new IPAddress("127.0.0.1", 8080);
         IPAddress ip2 = new IPAddress("127.0.0.1", 8080);
-        assertTrue(NetUtil.areInetSocketAddressDAOEquals(ip1, ip2));
+        assertTrue(NetUtil.areIPAddressEquals(ip1, ip2));
     }
 
     @Test
     public void testAreInetSocketAddressDAOEqualsSameHostDifferentPort() throws UnknownHostException {
         IPAddress ip1 = new IPAddress("localhost", 8080);
         IPAddress ip2 = new IPAddress("localhost", 9090);
-        assertFalse(NetUtil.areInetSocketAddressDAOEquals(ip1, ip2));
+        assertFalse(NetUtil.areIPAddressEquals(ip1, ip2));
     }
 
     @Test
     public void testAreInetSocketAddressDAOEqualsDifferentHost() throws UnknownHostException {
         IPAddress ip1 = new IPAddress("192.168.1.1", 8080);
         IPAddress ip2 = new IPAddress("192.168.1.2", 8080);
-        assertFalse(NetUtil.areInetSocketAddressDAOEquals(ip1, ip2));
+        assertFalse(NetUtil.areIPAddressEquals(ip1, ip2));
     }
 
     @Test
     public void testAreInetSocketAddressDAOEqualsFirstNull() throws UnknownHostException {
         IPAddress ip2 = new IPAddress("localhost", 8080);
-        assertFalse(NetUtil.areInetSocketAddressDAOEquals(null, ip2));
+        assertFalse(NetUtil.areIPAddressEquals(null, ip2));
     }
 
     @Test
     public void testAreInetSocketAddressDAOEqualsSecondNull() throws UnknownHostException {
         IPAddress ip1 = new IPAddress("localhost", 8080);
-        assertFalse(NetUtil.areInetSocketAddressDAOEquals(ip1, null));
+        assertFalse(NetUtil.areIPAddressEquals(ip1, null));
     }
 
     @Test
     public void testAreInetSocketAddressDAOEqualsBothNull() throws UnknownHostException {
-        assertFalse(NetUtil.areInetSocketAddressDAOEquals(null, null));
+        assertFalse(NetUtil.areIPAddressEquals(null, null));
     }
 
     @Test
     public void testAreInetSocketAddressDAOEqualsWithHostname() throws UnknownHostException {
         IPAddress ip1 = new IPAddress("localhost", 80);
         IPAddress ip2 = new IPAddress("127.0.0.1", 80);
-        assertTrue(NetUtil.areInetSocketAddressDAOEquals(ip1, ip2));
+        assertTrue(NetUtil.areIPAddressEquals(ip1, ip2));
     }
 
     // ==================== isActive Tests ====================
@@ -426,6 +434,18 @@ public class NetUtilTest {
         System.out.println("Ping localhost result: " + result);
     }
 
+    @Test
+    public void testPingLogsBothOutcomes() throws IOException {
+        // logToOS = true: a reachable host logs "it took", an unreachable one logs "ping timed out"
+        boolean reachable = NetUtil.ping(InetAddress.getLoopbackAddress(), null, 255, 1000, true);
+        System.out.println("Ping localhost (logged) result: " + reachable);
+
+        // 192.0.2.1 is TEST-NET-1 (RFC 5737), reserved for documentation and never routed
+        boolean unreachable = NetUtil.ping(InetAddress.getByName("192.0.2.1"), null, 255, 500, true);
+        System.out.println("Ping 192.0.2.1 (logged) result: " + unreachable);
+        assertFalse(unreachable);
+    }
+
 
     @Test
     public void testPingHosts() throws IOException {
@@ -458,5 +478,46 @@ public class NetUtilTest {
         assertThrows(NullPointerException.class, () -> {
             NetUtil.getIPV4AllAddresses((NetworkInterface) null);
         });
+    }
+
+    // ==================== toCIDRBlocks Tests (System Dependent) ====================
+
+    @Test
+    public void testToCIDRBlocksNullThrows() {
+        assertThrows(NullPointerException.class, () -> NetUtil.toV4CIDRBlocks(null));
+    }
+
+    @Test
+    public void testToCIDRBlocksAllInterfaces() throws IOException {
+        for (NetworkInterface nif : NetUtil.allInterfaces()) {
+            if (!nif.isUp() || nif.isLoopback()) {
+                // down and loopback interfaces are rejected
+                assertThrows(IOException.class, () -> NetUtil.toV4CIDRBlocks(nif), nif.getName());
+                continue;
+            }
+
+            String[] blocks = NetUtil.toV4CIDRBlocks(nif);
+            System.out.println(nif.getName() + " [" + nif.getDisplayName() + "] CIDR blocks: " + java.util.Arrays.toString(blocks));
+
+            // blocks computed independently from the interface addresses,
+            // addresses of the same subnet yield one block
+            java.util.Set<String> expected = new java.util.LinkedHashSet<>();
+            for (InterfaceAddress ia : nif.getInterfaceAddresses()) {
+                if (!(ia.getAddress() instanceof Inet4Address)) continue;
+
+                short prefix = ia.getNetworkPrefixLength();
+                System.out.println("    " + ia.getAddress().getHostAddress() + " prefix " + prefix);
+
+                InetAddress network = NetUtil.getNetworkIPV4(ia.getAddress(), NetUtil.toNetmaskIPV4(prefix));
+                expected.add(network.getHostAddress() + "/" + prefix);
+            }
+
+            if (expected.isEmpty()) {
+                // null states there is nothing on the network interface
+                assertNull(blocks);
+            } else {
+                assertArrayEquals(expected.toArray(new String[0]), blocks);
+            }
+        }
     }
 }

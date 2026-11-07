@@ -51,7 +51,7 @@ public class SharedNetUtil {
      */
     public static byte[] getV4Address(String ipV4)
             throws IOException {
-        String bytes[] = ipV4.split("\\.");
+        String[] bytes = ipV4.split("\\.");
         if (bytes.length != 4) {
             throw new IllegalArgumentException("Invalid ip address:" + ipV4 + " length:" + bytes.length);
         }
@@ -111,16 +111,76 @@ public class SharedNetUtil {
      * @param address the IP address bytes
      * @param netmask the netmask bytes
      * @return the network address bytes
-     * @throws IOException if calculation fails
      */
-    public static byte[] getNetwork(byte[] address, byte[] netmask)
-            throws IOException {
+    public static byte[] getNetwork(byte[] address, byte[] netmask) {
         byte[] networkBytes = new byte[address.length];
 
         for (int i = 0; i < networkBytes.length; i++) {
             networkBytes[i] = (byte) (address[i] & netmask[i]);
         }
         return networkBytes;
+    }
+
+
+    /**
+     * Converts an IPv4 address and its netmask to the CIDR block they belong to,
+     * formatted as <code>network/prefix</code>.
+     * <p>
+     * The host bits of the address are cleared, so any address inside the block
+     * yields the same result:
+     * <pre>
+     * 192.168.1.100 + 255.255.255.0   -&gt; "192.168.1.0/24"
+     * 172.16.200.9  + 255.255.128.0   -&gt; "172.16.128.0/17"
+     * 192.168.1.77  + 255.255.255.255 -&gt; "192.168.1.77/32"
+     * 8.8.8.8       + 0.0.0.0         -&gt; "0.0.0.0/0"
+     * </pre>
+     * The parameters are not modified.
+     *
+     * @param ipAddress the IPv4 address bytes (4 bytes, network order), any address of the block
+     * @param netmask   the IPv4 netmask bytes (4 bytes, contiguous, e.g. 255.255.255.0)
+     * @return the CIDR block, the network address followed by '/' and the prefix length (0-32)
+     * @throws IOException              if the address is not 4 bytes long or the netmask is not a valid contiguous mask
+     * @throws NullPointerException     if ipAddress or netmask is null
+     * @throws IllegalArgumentException if the netmask is not 4 bytes long
+     * @see #getNetwork(byte[], byte[])
+     * @see #toNetmaskIPV4(byte[])
+     */
+    public static String toCIDRBlock(byte[] ipAddress, byte[] netmask) throws IOException {
+        SUS.checkIfNulls("Null address or netmask", ipAddress, netmask);
+        if (ipAddress.length != 4)
+            throw new IOException("Invalid address length:" + ipAddress.length);
+
+        // validates the netmask length and contiguity before it is applied to the address
+        short netPrefix = toNetmaskIPV4(netmask);
+
+        return toV4Address(getNetwork(ipAddress, netmask)) + "/" + netPrefix;
+    }
+
+    /**
+     * Converts an IPv4 address and a prefix length to the CIDR block they belong to,
+     * formatted as <code>network/prefix</code>.
+     * <p>
+     * The host bits of the address are cleared, so any address inside the block
+     * yields the same result:
+     * <pre>
+     * 192.168.1.100 + 24 -&gt; "192.168.1.0/24"
+     * 172.16.200.9  + 17 -&gt; "172.16.128.0/17"
+     * 192.168.1.77  + 32 -&gt; "192.168.1.77/32"
+     * 8.8.8.8       + 0  -&gt; "0.0.0.0/0"
+     * </pre>
+     * The address is not modified.
+     *
+     * @param ipAddress the IPv4 address bytes (4 bytes, network order), any address of the block
+     * @param netPrefix the prefix length (0-32), the number of leading network bits
+     * @return the CIDR block, the network address followed by '/' and the prefix length
+     * @throws IOException              if the address is not 4 bytes long
+     * @throws NullPointerException     if ipAddress is null
+     * @throws IllegalArgumentException if netPrefix is negative or greater than 32
+     * @see #toCIDRBlock(byte[], byte[])
+     * @see #toNetmaskIPV4(short)
+     */
+    public static String toCIDRBlock(byte[] ipAddress, short netPrefix) throws IOException {
+        return toCIDRBlock(ipAddress, toNetmaskIPV4(netPrefix));
     }
 
     /**
@@ -178,12 +238,14 @@ public class SharedNetUtil {
      *
      * @param netPrefix the CIDR prefix (0-32)
      * @return the netmask as a byte array
-     * @throws IllegalArgumentException if prefix is greater than 32
+     * @throws IllegalArgumentException if prefix is negative or greater than 32
      */
     public static byte[] toNetmaskIPV4(short netPrefix) {
 
-        if (netPrefix > 32) {
-            throw new IllegalArgumentException("Invalid mask " + netPrefix + " > 32");
+        // a negative prefix must be rejected: the shift below would wrap around
+        // and silently produce a valid looking netmask
+        if (netPrefix < 0 || netPrefix > 32) {
+            throw new IllegalArgumentException("Invalid mask " + netPrefix + " not in [0,32]");
         }
 
         long maskLong = 0xffffffffL;

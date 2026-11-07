@@ -345,7 +345,7 @@ public class NIOProxyProtocol
                     return;
                     // we must reply with an error
                 }
-                if (remoteChannel != null && !NetUtil.areInetSocketAddressDAOEquals(requestInfo.remoteAddress, lastRemoteAddress)) {
+                if (remoteChannel != null && !NetUtil.areIPAddressEquals(requestInfo.remoteAddress, lastRemoteAddress)) {
                     log.getLogger().info("NOT supposed to happen");
                     //IOUtil.close(remoteChannel);
                     if (channelRelay != null) {
@@ -410,7 +410,7 @@ public class NIOProxyProtocol
                     // we must reply with an error
                 }
 
-                if (!NetUtil.areInetSocketAddressDAOEquals(requestInfo.remoteAddress, lastRemoteAddress)) {
+                if (!NetUtil.areIPAddressEquals(requestInfo.remoteAddress, lastRemoteAddress)) {
 
                     //IOUtil.close(remoteChannel);
                     if (channelRelay != null) {
