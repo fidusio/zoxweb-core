@@ -23,8 +23,8 @@ import java.io.Serializable;
  * The global id is unique globally across APPS and systems it can be used as a unique exchange identifier
  * @param <T> the global identifier type, typically a uuid in string format
  */
-public interface GlobalID<T>
-    extends GlobalIDBase<T>, Serializable
+public interface SetGlobalID<T>
+    extends GetGlobalID<T>, Serializable
 {
     /**
      * @param gid the global identifier of the object uuid is string format.

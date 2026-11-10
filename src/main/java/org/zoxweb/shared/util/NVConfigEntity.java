@@ -26,7 +26,7 @@ import java.util.List;
  * @author mzebib
  */
     public interface NVConfigEntity
-        extends NVConfig, ReferenceID<String>, DomainID<String>, GlobalID<String>, CanonicalID {
+        extends NVConfig, ReferenceID<String>, DomainID<String>, SetGlobalID<String>, CanonicalID {
 
     enum ArrayType {
         NOT_ARRAY,

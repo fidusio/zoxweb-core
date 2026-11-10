@@ -15,6 +15,7 @@
  */
 package org.zoxweb.shared.util;
 
+
 import org.zoxweb.shared.db.QueryMarker;
 
 import java.util.Date;
@@ -1072,9 +1073,18 @@ public final class Const {
             return null;
         }
 
-        public static GNVType toGNVType(Number number) {
+        public static GNVType toGNVType(Object obj) {
 
-            if (number != null) {
+            if (obj instanceof Boolean) {
+                return GNVType.NVBOOLEAN;
+            }
+            if (obj instanceof byte[]) {
+                return GNVType.NVBLOB;
+            }
+            if (obj instanceof Number) {
+                Number number = (Number) obj;
+
+
                 if (number instanceof Float) {
                     return NVFLOAT;
                 }
@@ -1121,6 +1131,7 @@ public final class Const {
                     }
                 }
                 // long or int
+
             }
 
             return null;

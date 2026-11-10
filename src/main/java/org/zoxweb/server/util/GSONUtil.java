@@ -29,6 +29,7 @@ import org.zoxweb.shared.security.AccessSecurityException;
 import org.zoxweb.shared.util.*;
 import org.zoxweb.shared.util.Const.GNVType;
 import org.zoxweb.shared.util.Const.LogicalOperator;
+import org.zoxweb.shared.util.EntityCodec.EntityID;
 import org.zoxweb.shared.util.ExceptionReason.Reason;
 import org.zoxweb.shared.util.SharedBase64.Base64Type;
 
@@ -56,14 +57,6 @@ import java.util.logging.Level;
  */
 public final class GSONUtil {
 
-//	public static final DataDecoder<byte[], NVGenericMap> NVGenericMapDecoder = new DataDecoder<byte[], NVGenericMap>() {
-//		@Override
-//		public NVGenericMap decode(byte[] input)
-//		{
-//
-//		}
-//	};
-
 
     public static boolean SIMPLE_FORMAT = false;
     public static final LogWrapper log = new LogWrapper(GSONUtil.class).setEnabled(false);
@@ -71,16 +64,6 @@ public final class GSONUtil {
     private static final AtomicLong counter = new AtomicLong();
 
     private final static GSONUtil SINGLETON = new GSONUtil();
-
-    private final static Gson DEFAULT_GSON = new GsonBuilder()
-            .registerTypeAdapter(NVGenericMap.class, new NVGenericMapSerDeserializer())
-            //.registerTypeAdapter(NVGenericMapList.class, new NVGenericMapListSerDeserializer())
-            .registerTypeHierarchyAdapter(NVEntity.class, new NVEntitySerDeserializer())
-            .registerTypeAdapter(NVStringList.class, new NVStringListSerDeserializer())
-            .registerTypeAdapter(Date.class, new DateSerDeserializer())
-            .disableHtmlEscaping()
-            //.registerTypeAdapter(Enum.class, new EnumSerDeserializer()
-            .create();
 
 
     private final static Gson DEFAULT_GSON_NVGM_PRIMITIVE_AS_STRING = new GsonBuilder()
@@ -108,7 +91,40 @@ public final class GSONUtil {
     private GsonBuilder builder = null;
 
 
+    public static Gson createDefaultGson(EntityCodec entityCodec) {
+        return new GsonBuilder()
+                .registerTypeAdapter(NVGenericMap.class, new NVGenericMapSerDeserializer(entityCodec))
+                //.registerTypeAdapter(NVGenericMapList.class, new NVGenericMapListSerDeserializer())
+                .registerTypeHierarchyAdapter(NVEntity.class, new NVEntitySerDeserializer())
+                .registerTypeAdapter(NVStringList.class, new NVStringListSerDeserializer())
+                .registerTypeAdapter(Date.class, new DateSerDeserializer())
+                .disableHtmlEscaping()
+                //.registerTypeAdapter(Enum.class, new EnumSerDeserializer()
+                .create();
+    }
+
+
+    private final static Gson DEFAULT_GSON = createDefaultGson(null);
+//            new GsonBuilder()
+//            .registerTypeAdapter(NVGenericMap.class, new NVGenericMapSerDeserializer())
+//            //.registerTypeAdapter(NVGenericMapList.class, new NVGenericMapListSerDeserializer())
+//            .registerTypeHierarchyAdapter(NVEntity.class, new NVEntitySerDeserializer())
+//            .registerTypeAdapter(NVStringList.class, new NVStringListSerDeserializer())
+//            .registerTypeAdapter(Date.class, new DateSerDeserializer())
+//            .disableHtmlEscaping()
+//            //.registerTypeAdapter(Enum.class, new EnumSerDeserializer()
+//            .create();
+
     public static class NVGenericMapSerDeserializer implements JsonSerializer<NVGenericMap>, JsonDeserializer<NVGenericMap> {
+        private final EntityCodec entityCodec;
+
+        public NVGenericMapSerDeserializer() {
+            this(null);
+        }
+
+        public NVGenericMapSerDeserializer(EntityCodec entityCodec) {
+            this.entityCodec = entityCodec;
+        }
 
         @Override
         public JsonElement serialize(NVGenericMap src, Type typeOfSrc,
@@ -119,7 +135,7 @@ public final class GSONUtil {
             // JsonTreeWriter jtw = new JsonTreeWriter();
             try (JsonTreeWriter jtw = new JsonTreeWriter()) {
 //                jtw.setHtmlSafe(false);
-                toJSONGenericMap(jtw, src, false, false);
+                toJSONGenericMap(jtw, src, false, false, entityCodec);
                 return jtw.get();
             } catch (IOException e) {
                 // TODO Auto-generated catch block
@@ -132,7 +148,7 @@ public final class GSONUtil {
         public NVGenericMap deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
                 throws JsonParseException {
             // TODO Auto-generated method stub
-            return fromJSONGenericMap((JsonObject) json, null, Base64Type.DEFAULT, false);
+            return fromJSONGenericMap((JsonObject) json, null, Base64Type.DEFAULT, false, entityCodec);
         }
 
     }
@@ -206,7 +222,7 @@ public final class GSONUtil {
 
             JsonTreeWriter jtw = new JsonTreeWriter();
             try {
-                toJSONGenericMapArray(jtw, src, false, false);
+                toJSONGenericMapArray(jtw, src, false, false, null);
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -252,7 +268,7 @@ public final class GSONUtil {
 
             JsonTreeWriter jtw = new JsonTreeWriter();
             try {
-                toJSONGenericMap(jtw, src, false, false);
+                toJSONGenericMap(jtw, src, false, false, null);
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -267,7 +283,7 @@ public final class GSONUtil {
         public NVGenericMap deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
                 throws JsonParseException {
             // TODO Auto-generated method stub
-            return fromJSONGenericMap((JsonObject) json, null, Base64Type.DEFAULT, true);
+            return fromJSONGenericMap((JsonObject) json, null, Base64Type.DEFAULT, true, null);
         }
 
     }
@@ -341,18 +357,26 @@ public final class GSONUtil {
     }
 
     public static <T> T fromJSONDefault(byte[] json, Class<T> classOfT) {
-        counter.incrementAndGet();
-        return DEFAULT_GSON.fromJson(SUS.toString(json), classOfT);
+        return fromJSONDefault(DEFAULT_GSON, SUS.toString(json), classOfT);
+//        counter.incrementAndGet();
+//        return DEFAULT_GSON.fromJson(SUS.toString(json), classOfT);
     }
 
     public static <T> T fromJSONDefault(String json, Class<T> classOfT) {
-        return fromJSONDefault(json, classOfT, false);
+        return fromJSONDefault(DEFAULT_GSON, json, classOfT);
     }
 
     public static <T> T fromJSONDefault(String json, Class<T> classOfT, boolean primitiveAsString) {
+        return primitiveAsString ? fromJSONDefault(DEFAULT_GSON_NVGM_PRIMITIVE_AS_STRING, json, classOfT) : fromJSONDefault(DEFAULT_GSON, json, classOfT);
+//        counter.incrementAndGet();
+//        T ret = primitiveAsString ? DEFAULT_GSON_NVGM_PRIMITIVE_AS_STRING.fromJson(json, classOfT) : DEFAULT_GSON.fromJson(json, classOfT);
+//        return ret;
+    }
+
+
+    public static <T> T fromJSONDefault(Gson gson, String json, Class<T> classOfT) {
         counter.incrementAndGet();
-        T ret = primitiveAsString ? DEFAULT_GSON_NVGM_PRIMITIVE_AS_STRING.fromJson(json, classOfT) : DEFAULT_GSON.fromJson(json, classOfT);
-        return ret;
+        return gson.fromJson(json, classOfT);
     }
 
 
@@ -361,11 +385,12 @@ public final class GSONUtil {
     }
 
     public static String toJSONDefault(Object o, boolean pretty) {
-        counter.incrementAndGet();
-        if (pretty)
-            return DEFAULT_GSON_PRETTY.toJson(o);
+        return pretty ? toJSONDefault(DEFAULT_GSON_PRETTY, o) : toJSONDefault(DEFAULT_GSON, o);
+    }
 
-        return DEFAULT_GSON.toJson(o);
+    public static String toJSONDefault(Gson gson, Object obj) {
+        counter.incrementAndGet();
+        return gson.toJson(obj);
     }
 
 
@@ -482,7 +507,7 @@ public final class GSONUtil {
             JsonArray ja = (JsonArray) je;
             for (int i = 0; i < ja.size(); i++) {
                 JsonObject jo = (JsonObject) ja.get(i);
-                ret.add(fromJSONGenericMap(jo, null, b64Type, false));
+                ret.add(fromJSONGenericMap(jo, null, b64Type, false, null));
             }
         }
         return ret;
@@ -494,7 +519,7 @@ public final class GSONUtil {
             JsonArray ja = (JsonArray) je;
             for (int i = 0; i < ja.size(); i++) {
                 JsonObject jo = (JsonObject) ja.get(i);
-                ret.add(fromJSONGenericMap(jo, null, b64Type, false));
+                ret.add(fromJSONGenericMap(jo, null, b64Type, false, null));
             }
         }
         return ret;
@@ -882,7 +907,7 @@ public final class GSONUtil {
                 } else if (nvc.getMetaTypeBase() == Date.class) {
 
                     if (nve.lookupValue(nvc) instanceof Date) {
-                        writer.name(nvc.getName()).value(DateUtil.DEFAULT_GMT_MILLIS.format((Date)nve.lookupValue(nvc)));
+                        writer.name(nvc.getName()).value(DateUtil.DEFAULT_GMT_MILLIS.format((Date) nve.lookupValue(nvc)));
                     } else if ((long) nve.lookupValue(nvc) != 0) {
                         //writer.name( nvc.getName()).value((long)nve.lookupValue(nvc));
                         writer.name(nvc.getName()).value(DateUtil.DEFAULT_GMT_MILLIS.format((long) nve.lookupValue(nvc)));
@@ -896,7 +921,7 @@ public final class GSONUtil {
                         writer.name(nvc.getName()).value((Number) nve.lookupValue(nvc));
                     }
                 } else if (nvc.getMetaTypeBase() == NamedValue.class) {
-                    toJSONNamedValue(writer, nve.lookup(nvc));
+                    toJSONNamedValue(writer, nve.lookup(nvc), null);
                 } else if (nvc instanceof NVConfigEntity) {
                     NVEntity tempNVE = nve.lookupValue(nvc);
                     // we need to write the class type if the current object is derived from nvc.getClass()
@@ -916,7 +941,7 @@ public final class GSONUtil {
                     }
                 } else if (NVGenericMap.class.equals(nvc.getMetaTypeBase())) {
                     writer.name(nvc.getName());
-                    toJSONGenericMap(writer, (NVGenericMap) nve.lookup(nvc), printNull, printClassType);
+                    toJSONGenericMap(writer, (NVGenericMap) nve.lookup(nvc), printNull, printClassType, null);
                 } else if (NVStringList.class.equals(nvc.getMetaTypeBase())) {
                     writer.name(nvc.getName());
                     writer.beginArray();
@@ -951,27 +976,26 @@ public final class GSONUtil {
             writer.setIndent("  ");
         else
             writer.setIndent("");
-        toJSONGenericMap(writer, nvgm, printNull, printClassType);
+        toJSONGenericMap(writer, nvgm, printNull, printClassType, null);
         writer.close();
         return sw.toString();
     }
 
-    private static JsonWriter toJSONGenericMapArray(JsonWriter writer, NVGenericMapList nvgmList, boolean printNull, boolean printClassType) throws IOException {
+    private static JsonWriter toJSONGenericMapArray(JsonWriter writer, NVGenericMapList nvgmList, boolean printNull, boolean printClassType, EntityCodec entityCodec) throws IOException {
         writer.beginArray();
         for (NVGenericMap nvgm : nvgmList.getValue()) {
-            toJSONGenericMap(writer, nvgm, printNull, printClassType);
+            toJSONGenericMap(writer, nvgm, printNull, printClassType, entityCodec);
         }
 
         writer.endArray();
         return writer;
     }
 
-    private static JsonWriter toJSONGenericMap(JsonWriter writer, NVGenericMap nvgm, boolean printNull, boolean printClassType) throws IOException {
-//        writer.setHtmlSafe(false);
+    private static JsonWriter toJSONGenericMap(JsonWriter writer, NVGenericMap nvgm, boolean printNull, boolean printClassType, EntityCodec entityCodec) throws IOException {
         writer.beginObject();
         GetNameValue<?>[] values = nvgm.values();
         for (GetNameValue<?> gnv : values) {
-            toJSONGenericMap(writer, gnv, printNull, printClassType);
+            toJSONGenericMap(writer, gnv, printNull, printClassType, entityCodec);
         }
         writer.endObject();
         return writer;
@@ -979,7 +1003,7 @@ public final class GSONUtil {
 
 
     @SuppressWarnings({"rawtypes", "unchecked"})
-    private static JsonWriter toJSONGenericMap(JsonWriter writer, GetNameValue<?> gnv, boolean printNull, boolean printClassType) throws IOException {
+    private static JsonWriter toJSONGenericMap(JsonWriter writer, GetNameValue<?> gnv, boolean printNull, boolean printClassType, EntityCodec entityCodec) throws IOException {
         if (gnv instanceof NVPair &&
                 ((NVPair) gnv).getValueFilter() != null &&
                 ((NVPair) gnv).getValueFilter() != FilterType.CLEAR)
@@ -1027,18 +1051,31 @@ public final class GSONUtil {
         } else if (gnv.getValue() instanceof String) {
             writer.name(name).value((String) gnv.getValue());
         } else if (gnv instanceof NamedValue) {
-            toJSONNamedValue(writer, (NamedValue<?>) gnv);
+            toJSONNamedValue(writer, (NamedValue<?>) gnv, entityCodec);
         } else if (gnv instanceof NVBlob) {
 //            writer.name(GNVType.toName(gnv, ':')).value(SharedBase64.encodeAsString(Base64Type.DEFAULT, (byte[]) gnv.getValue()));
             DataCodec<byte[], String> codec = DataCodecRegistrar.SINGLETON.lookup(byte[].class);
 
             writer.name(GNVType.toName(gnv, ':')).value(codec.encode((byte[]) gnv.getValue()));
         } else if (gnv instanceof NVEntityReference) {
+
             writer.name(name);
-            toJSON(writer, ((NVEntity) gnv.getValue()).getClass(), (NVEntity) gnv.getValue(), printNull, printClassType, Base64Type.DEFAULT);
+            // here is the fix
+
+            if (entityCodec != null) {
+                EntityID entityID = entityCodec.encode((NVEntity) gnv.getValue());
+                if (entityID != null) {
+                    writer.beginObject()
+                            .name(MetaToken.CLASS_TYPE.getName()).value(entityID.getMetaType().getName())
+                            .name(MetaToken.GUID.getName()).value(entityID.getGUID())
+                            .endObject();
+                } else
+                    toJSON(writer, ((NVEntity) gnv.getValue()).getClass(), (NVEntity) gnv.getValue(), printNull, printClassType, Base64Type.DEFAULT);
+            } else
+                toJSON(writer, ((NVEntity) gnv.getValue()).getClass(), (NVEntity) gnv.getValue(), printNull, printClassType, Base64Type.DEFAULT);
         } else if (gnv instanceof NVGenericMap) {
             writer.name(name);
-            toJSONGenericMap(writer, (NVGenericMap) gnv, printNull, printClassType);
+            toJSONGenericMap(writer, (NVGenericMap) gnv, printNull, printClassType, entityCodec);
         } else if (gnv instanceof ArrayValues) {
             writer.name(gnv.getName());
             writer.beginArray();
@@ -1050,7 +1087,7 @@ public final class GSONUtil {
                         toJSON(writer, (GetNameValue<String>) localGNV, true, printNull);
                     } else {
                         writer.beginObject();
-                        toJSONGenericMap(writer, (GetNameValue<?>) localGNV, printNull, printClassType);
+                        toJSONGenericMap(writer, (GetNameValue<?>) localGNV, printNull, printClassType, entityCodec);
                         writer.endObject();
                     }
                 }
@@ -1115,7 +1152,7 @@ public final class GSONUtil {
             List<NVGenericMap> values = (List<NVGenericMap>) gnv.getValue();
 
             for (NVGenericMap val : values) {
-                toJSONGenericMap(writer, val, printNull, printClassType);
+                toJSONGenericMap(writer, val, printNull, printClassType, entityCodec);
             }
 
             writer.endArray();
@@ -1135,26 +1172,26 @@ public final class GSONUtil {
     }
 
     public static NVGenericMap fromJSONGenericMap(byte[] data, NVConfigEntity nvce, Base64Type btype, boolean nvgPrimitiveAsString) {
-        return fromJSONGenericMap(SUS.toString(data), nvce, btype, nvgPrimitiveAsString);
+        return fromJSONGenericMap(SUS.toString(data), nvce, btype, nvgPrimitiveAsString, null);
     }
 
 
     public static NVGenericMap fromJSONGenericMap(String json, NVConfigEntity nvce, Base64Type btype) {
-        return fromJSONGenericMap(json, nvce, btype, false);
+        return fromJSONGenericMap(json, nvce, btype, false, null);
     }
 
 
-    public static NVGenericMap fromJSONGenericMap(String json, NVConfigEntity nvce, Base64Type btype, boolean nvgPrimitiveAsString) {
+    public static NVGenericMap fromJSONGenericMap(String json, NVConfigEntity nvce, Base64Type btype, boolean nvgPrimitiveAsString, EntityCodec entityCodec) {
         JsonElement je = JsonParser.parseString(json);
 
         if (je instanceof JsonObject) {
-            return fromJSONGenericMap((JsonObject) je, nvce, btype, nvgPrimitiveAsString);
+            return fromJSONGenericMap((JsonObject) je, nvce, btype, nvgPrimitiveAsString, entityCodec);
         }
 
         return null;
     }
 
-    private static NVGenericMap fromJSONGenericMap(JsonObject je, NVConfigEntity nvce, Base64Type b64Type, boolean nvgmPrimitiveAsString)
+    private static NVGenericMap fromJSONGenericMap(JsonObject je, NVConfigEntity nvce, Base64Type b64Type, boolean nvgmPrimitiveAsString, EntityCodec entityCodec)
             throws APIException, AccessSecurityException {
         NVGenericMap ret = new NVGenericMap();
 
@@ -1186,11 +1223,12 @@ public final class GSONUtil {
                         } else if (nvb instanceof NVStringSet) {
                             ((NVStringSet) nvb).getValue().add(ja.get(i).getAsString());
                         } else if (nvb instanceof NVGenericMapList) {
-                            ((NVGenericMapList) nvb).add(fromJSONGenericMap((JsonObject) ja.get(i), null, b64Type, nvgmPrimitiveAsString));
+                            ((NVGenericMapList) nvb).add(fromJSONGenericMap((JsonObject) ja.get(i), null, b64Type, nvgmPrimitiveAsString, entityCodec));
                         }
                     }
                 } else {
-                    if(log.isEnabled()) log.getLogger().info("Array guess failed " + jne + " for  " + element.getKey());
+                    if (log.isEnabled())
+                        log.getLogger().info("Array guess failed " + jne + " for  " + element.getKey());
                     ret.add(new NVStringList(element.getKey()));
                 }
 
@@ -1203,10 +1241,22 @@ public final class GSONUtil {
                     ret.add(nvpMaybe);
                 } else {
                     try {
+                        if (entityCodec != null) {
+                            String name = element.getKey();
+                            JsonObject jsonObject = jne.getAsJsonObject();
+                            String metaTypeName = jsonObject.has(MetaToken.CLASS_TYPE.getName()) ? jsonObject.get(MetaToken.CLASS_TYPE.getName()).getAsString() : null;
+                            String guid = jsonObject.has(MetaToken.GUID.getName()) ? jsonObject.get(MetaToken.GUID.getName()).getAsString() : null;
+                            if (metaTypeName != null && guid != null) {
+                                Class<?> clazz = Class.forName(metaTypeName);
+                                NVEntity toAdd = entityCodec.decode(new EntityID((Class<? extends NVEntity>) clazz, guid));
+                                ret.add(new NVEntityReference(name, toAdd));
+                                continue;
+                            }
+                        }
                         ret.add(new NVEntityReference(element.getKey(),
                                 (NVEntity) fromJSON(jne.getAsJsonObject(), null, b64Type, nvgmPrimitiveAsString)));
                     } catch (Exception e) {
-                        NVGenericMap toAdd = fromJSONGenericMap(jne.getAsJsonObject(), null, b64Type, nvgmPrimitiveAsString);
+                        NVGenericMap toAdd = fromJSONGenericMap(jne.getAsJsonObject(), null, b64Type, nvgmPrimitiveAsString, entityCodec);
                         toAdd.setName(element.getKey());
                         ret.add(toAdd);
                     }
@@ -1247,8 +1297,9 @@ public final class GSONUtil {
                     //break;
                     return new NVStringList();
                 }
+                JsonPrimitive jp = je.getAsJsonPrimitive();
 
-                GNVType gnv = GNVType.toGNVType(je.getAsNumber());
+                GNVType gnv = GNVType.toGNVType(jp.isBoolean() ? jp.getAsBoolean() : jp.getAsNumber());
                 if (gnv != null) {
                     if (guess == null) {
                         guess = gnv;
@@ -1840,7 +1891,7 @@ public final class GSONUtil {
                     } else if (NVGenericMap.class.equals(metaType)) {
 
                         if (!(je instanceof JsonNull)) {
-                            NVGenericMap nvgm = fromJSONGenericMap(je.getAsJsonObject(), null, b64Type, nvgmPrimitiveAsString);
+                            NVGenericMap nvgm = fromJSONGenericMap(je.getAsJsonObject(), null, b64Type, nvgmPrimitiveAsString, null);
                             ((NVGenericMap) nve.lookup(nvc)).add(nvgm.values(), true);
 
                         }
@@ -1901,7 +1952,7 @@ public final class GSONUtil {
                     } else if (Number.class.equals(metaType)) {
                         ((NVBase<Number>) nvb).setValue(SUS.parseNumber(je.getAsString()));
                     } else if (NamedValue.class.equals(metaType)) {
-                        fromJSONNamedValue(nvb, je);
+                        fromJSONNamedValue(nvb, je, null);
 
                     }
                 }
@@ -1917,7 +1968,7 @@ public final class GSONUtil {
     }
 
 
-    private static void fromJSONNamedValue(NVBase<?> nvb, JsonElement je) {
+    private static void fromJSONNamedValue(NVBase<?> nvb, JsonElement je, EntityCodec entityCodec) {
 
         if (je.isJsonPrimitive()) {
             JsonPrimitive jp = je.getAsJsonPrimitive();
@@ -1952,18 +2003,18 @@ public final class GSONUtil {
                         nv.setValue(jp.getAsNumber());
                     }
                 } else if (jeValue.isJsonObject()) {
-                    nv.setValue(fromJSONGenericMap(jeValue.getAsJsonObject(), null, Base64Type.DEFAULT, false));
+                    nv.setValue(fromJSONGenericMap(jeValue.getAsJsonObject(), null, Base64Type.DEFAULT, false, entityCodec));
                 }
             }
 
             if (joProperties != null && joProperties.isJsonObject()) {
-                NVGenericMap properties = fromJSONGenericMap(joProperties.getAsJsonObject(), null, Base64Type.DEFAULT, false);
+                NVGenericMap properties = fromJSONGenericMap(joProperties.getAsJsonObject(), null, Base64Type.DEFAULT, false, entityCodec);
                 NVGenericMap.copy(properties, nv.getProperties(), false);
             }
         }
     }
 
-    private static void toJSONNamedValue(JsonWriter writer, NamedValue<?> namedValue) throws IOException {
+    private static void toJSONNamedValue(JsonWriter writer, NamedValue<?> namedValue, EntityCodec entityCodec) throws IOException {
 
         Object value = namedValue.getValue();
         if (value instanceof Number ||
@@ -1986,13 +2037,13 @@ public final class GSONUtil {
             else if (value instanceof String)
                 writer.value((String) value);
             else if (value instanceof NVGenericMap) {
-                toJSONGenericMap(writer, (NVGenericMap) value, false, false);
+                toJSONGenericMap(writer, (NVGenericMap) value, false, false, entityCodec);
             }
 
             if (namedValue.getProperties().size() > 0) {
                 // write nvgeneric map
                 writer.name(namedValue.getProperties().getName());
-                toJSONGenericMap(writer, namedValue.getProperties(), false, false);
+                toJSONGenericMap(writer, namedValue.getProperties(), false, false, entityCodec);
             }
 
 
@@ -2183,7 +2234,7 @@ public final class GSONUtil {
 
             if (jo.get(MetaToken.IGNORE_CASE.getName()) != null
                     && !jo.get(MetaToken.IGNORE_CASE.getName()).isJsonNull()) {
-                ret.setStatic(jo.get(MetaToken.IGNORE_CASE.getName()).getAsBoolean());
+                ret.setIgnoreCase(jo.get(MetaToken.IGNORE_CASE.getName()).getAsBoolean());
             }
 
             if (jo.get(MetaToken.VALUE.getName()) != null && !jo.get(MetaToken.VALUE.getName()).isJsonNull()) {

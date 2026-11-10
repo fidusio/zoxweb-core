@@ -28,7 +28,7 @@ package org.zoxweb.shared.util;
  * @author mnael
  */
 public interface ReferenceID<T>
-        extends GlobalID<T> {
+        extends SetGlobalID<T> {
     /**
      * Get reference unique ID.
      *

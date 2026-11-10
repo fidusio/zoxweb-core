@@ -1,6 +1,6 @@
 package org.zoxweb.shared.util;
 
-public interface GlobalIDBase<T>
+public interface GetGlobalID<T>
 {
     /**
      * @return the global identifier of the object
