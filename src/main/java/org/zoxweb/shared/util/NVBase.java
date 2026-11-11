@@ -22,7 +22,7 @@ import java.io.Serializable;
  * subclasses within the package. It holds a name, a value of the
  * generic type, and a GUID, with getters and setters for each.
  * NVBase instances are the typed field holders that back the
- * NVEntity meta-model.
+ * NVEntity metamodel.
  *
  * @param <V> the value type held by this name value pair
  * @author mzebib
@@ -55,6 +55,7 @@ public abstract class NVBase<V>
         this(gn.getName(), v);
     }
 
+
     /**
      * This constructor instantiates NVBase based
      * on name and generic type value.
@@ -62,7 +63,24 @@ public abstract class NVBase<V>
      * @param name of the object
      * @param value of the object
      */
-    protected NVBase(String name, V value) {
+    protected NVBase(String name, V value)
+    {
+        this(name, value, false);
+    }
+
+    /**
+     * This constructor instantiates NVBase based
+     * on name and generic type value.
+     *
+     * @param name of the object
+     * @param value of the object
+     * @param nullValueChek if true check value if null
+     * @exception NullPointerException if nullValueCheck is true and value is null
+     */
+    protected NVBase(String name, V value, boolean nullValueChek) throws NullPointerException
+    {
+        if(nullValueChek)
+            SUS.checkIfNull("Value can't be null", value);
         // Note value must be set first
         setValue(value);
         // name set next NOT FIRST
@@ -106,7 +124,7 @@ public abstract class NVBase<V>
 
     /**
      * Returns the global identifier.
-     * @return the guid, null if never set
+     * @return the GUID, null if never set
      */
     @Override
     public String getGUID() {

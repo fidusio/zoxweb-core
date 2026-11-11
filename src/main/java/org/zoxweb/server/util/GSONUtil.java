@@ -1249,7 +1249,8 @@ public final class GSONUtil {
                             if (metaTypeName != null && guid != null) {
                                 Class<?> clazz = Class.forName(metaTypeName);
                                 NVEntity toAdd = entityCodec.decode(new EntityID((Class<? extends NVEntity>) clazz, guid));
-                                ret.add(new NVEntityReference(name, toAdd));
+                                if (toAdd != null)
+                                    ret.add(new NVEntityReference(name, toAdd));
                                 continue;
                             }
                         }
