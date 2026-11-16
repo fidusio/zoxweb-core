@@ -1,6 +1,6 @@
 # zoxweb-core :: Enterprise Java Utility Library
 
-[![Maven Central](https://img.shields.io/badge/Maven%20Central-2.3.9-blue)](https://mvnrepository.com/artifact/org.zoxweb/zoxweb-core)
+[![Maven Central](https://img.shields.io/badge/Maven%20Central-2.4.0-blue)](https://mvnrepository.com/artifact/org.zoxweb/zoxweb-core)
 
 ## Overview
 
@@ -52,13 +52,13 @@
 <dependency>
     <groupId>org.zoxweb</groupId>
     <artifactId>zoxweb-core</artifactId>
-    <version>2.3.9</version>
+    <version>2.4.0</version>
 </dependency>
 ```
 
 ### Gradle
 ```groovy
-implementation 'org.zoxweb:zoxweb-core:2.3.9'
+implementation 'org.zoxweb:zoxweb-core:2.4.0'
 ```
 
 ## Requirements
@@ -83,11 +83,12 @@ Unless required by applicable law or agreed to in writing, software distributed 
 ## Release History
 
 ### Latest Version
-- **2.3.9** - Current release
+- **2.4.0** - Current release
 
 ### Previous Versions
 | Version | Release Date |
 |---------|--------------|
+| 2.4.0   | 2026-11-15   |
 | 2.3.9   | 2026-01-11   |
 | 2.3.8   | 2025-12-03   |
 | 2.3.7   | 2025-12-03   |
