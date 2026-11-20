@@ -69,8 +69,10 @@
 
 
         <!-- dependency jars -->
-        <bc.version>1.85</bc.version>
-        <bcprov.version>1.85.2</bcprov.version>
+<!--        <bc.version>1.85</bc.version>-->
+<!--        <bcprov.version>1.85.2</bcprov.version>-->
+        <bc.version>1.87</bc.version>
+        <bcprov.version>1.87</bcprov.version>
         <!-- BC to be changed in the future -->
 
 
